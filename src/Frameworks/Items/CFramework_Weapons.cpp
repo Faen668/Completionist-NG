@@ -115,7 +115,6 @@ namespace CFramework_Weapons {
 			}
 
 			EntriesFound = std::ranges::count(BoolArray, true);
-			INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 		}
 	}
 

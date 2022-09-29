@@ -134,7 +134,6 @@ namespace CFramework_Locations_AG {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -152,13 +151,7 @@ namespace CFramework_Locations_AG {
 		}
 
 		Data.CompileFormArray(CFramework_Locations_AG::SkyrimForms, "Skyrim.esm");
-		CFramework_Locations_AG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
+		CFramework_Locations_AG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -287,7 +280,6 @@ namespace CFramework_Locations_HR {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -304,13 +296,7 @@ namespace CFramework_Locations_HR {
 		}
 
 		Data.CompileFormArray(CFramework_Locations_HR::SkyrimForms, "Skyrim.esm");
-		CFramework_Locations_HR::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
+		CFramework_Locations_HR::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -437,7 +423,6 @@ namespace CFramework_Locations_SZ {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -450,13 +435,7 @@ namespace CFramework_Locations_SZ {
 		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
 
 		Data.CompileFormArray(CFramework_Locations_SZ::SkyrimForms, "Skyrim.esm");
-		CFramework_Locations_SZ::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
+		CFramework_Locations_SZ::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -571,7 +550,6 @@ namespace CFramework_Locations_DG {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -584,13 +562,7 @@ namespace CFramework_Locations_DG {
 		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
 
 		Data.CompileFormArray(CFramework_Locations_DG::DawnguardForms, "Dawnguard.esm");
-		CFramework_Locations_DG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
+		CFramework_Locations_DG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -711,7 +683,6 @@ namespace CFramework_Locations_DB {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -724,13 +695,7 @@ namespace CFramework_Locations_DB {
 		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
 
 		Data.CompileFormArray(CFramework_Locations_DB::DragonbornForms, "Dragonborn.esm");
-		CFramework_Locations_DB::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
+		CFramework_Locations_DB::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}

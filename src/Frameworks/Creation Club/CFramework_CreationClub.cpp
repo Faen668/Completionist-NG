@@ -127,7 +127,6 @@ namespace CFramework_CreationClub_L {
 		}
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -198,7 +197,7 @@ namespace CFramework_CreationClub_L {
 		}
 
 		Data.CompileFormArray(CFramework_CreationClub_L::Locations, "");
-		CFramework_CreationClub_L::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
+		CFramework_CreationClub_L::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 2);
 
 		TextArray.clear();
 		for (auto& name : NameArray) {
@@ -340,7 +339,6 @@ namespace CFramework_CreationClub_B {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -422,18 +420,7 @@ namespace CFramework_CreationClub_B {
 
 		//Finish Adding Forms
 		Data.MergeAsCollectable();
-		CFramework_CreationClub_B::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_CreationClub_B::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -625,7 +612,6 @@ namespace CFramework_CreationClub_S {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -704,18 +690,7 @@ namespace CFramework_CreationClub_S {
 		Data.CompileFormArray(CFramework_CreationClub_S::Books, "");
 		Data.MergeAsCollectable();
 
-		CFramework_CreationClub_S::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_CreationClub_S::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -860,7 +835,6 @@ namespace CFramework_CreationClub_A {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1117,7 +1091,6 @@ namespace CFramework_CreationClub_I {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1305,7 +1278,6 @@ namespace CFramework_CreationClub_W {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------

@@ -1,19 +1,18 @@
-#include "Serialization.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-
+#include "Serialization.hpp"
+#include "Variables.hpp"
 #include "mainHUD.hpp"
-#include "ScriptObject.hpp"
-#include "InventoryMode.hpp"
 
-using namespace ScriptObject;
-using namespace Inv_vars;
+inline RE::FormID a_form;
+inline RE::TESForm* a_base;
 
-static RE::FormID a_form;
-static RE::TESForm* a_base;
-
-static std::string replacename;
+inline std::string replacename;
+inline std::vector<std::string*> garbageDump{};
 
 namespace Completionist_MainHUD {
+	using namespace CFramework_Master;
+	using namespace Serialization;
+	using namespace CVariables;
 
 	//---------------------------------------------------
 	//-- Crosshair Hook For HUD Tagging -----------------
@@ -23,13 +22,81 @@ namespace Completionist_MainHUD {
 
 		auto& trampoline = SKSE::GetTrampoline();
 		_OnUpdateCrosshairText = trampoline.write_call<5>(RELOCATION_ID(39535, 40621).address() + REL::Relocate(0x289, 0x280), OnUpdateCrosshairText);
+		_OnUpdateInventoryText = trampoline.write_branch<5>(RELOCATION_ID(50926, 51803).address() + REL::Relocate(0x4, 0x4), OnUpdateInventoryText);
+
+		auto UserInterface = RE::UI::GetSingleton();
+		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(FunctionHolder::GetSingleton()));
+	}
+
+	//---------------------------------------------------
+	//-- Events ( Clear Garbage On Menu Close ) ---------
+	//---------------------------------------------------
+
+	EventResult FunctionHolder::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
+
+		if (!a_event || a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
+
+		garbageDump.clear();
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Inventory Hook For Name Tagging ----------------
+	//---------------------------------------------------
+
+	const char* FunctionHolder::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
+
+		auto baseform = a_this->object;
+		if (!baseform || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
+
+		auto basename = baseform->GetName();
+		if (!basename) { return _OnUpdateInventoryText(a_this); }
+
+		if (ItemIsCollectable(baseform->GetFormID())) {
+
+			std::string* myString = new std::string(_OnUpdateInventoryText(a_this));
+
+			switch (V_TextChoice) {
+			
+			case 0: {
+
+				myString->append(std::string(" ***"));
+				garbageDump.push_back(myString);
+				return myString->c_str();
+			}
+
+			case 1: {
+
+				std::string* str = new std::string("*** ");
+				str->append(myString->c_str());
+				garbageDump.push_back(str);
+				return str->c_str();
+			}
+
+			case 2: {
+
+				std::string* pr = new std::string("*** ");
+				std::string* ap = new std::string(" ***");
+
+				myString->append(ap->c_str());
+				pr->append(myString->c_str());
+
+				garbageDump.push_back(pr);
+				return pr->c_str();
+			}
+
+			default:
+				return _OnUpdateInventoryText(a_this);
+			}
+		}
+		return _OnUpdateInventoryText(a_this);
 	}
 
 	//---------------------------------------------------
 	//-- Crosshair Hook For HUD Tagging -----------------
 	//---------------------------------------------------
 
-	void FunctionHolder::OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data) {
+	void FunctionHolder::OnUpdateCrosshairText(RE::UIMessageQueue * a_this, const RE::BSFixedString & a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData * a_data) {
 
 		_OnUpdateCrosshairText(a_this, a_menuName, a_type, a_data);
 
@@ -37,8 +104,12 @@ namespace Completionist_MainHUD {
 		const auto crossHairRef = data ? data->crossHairRef.get() : RE::TESObjectREFRPtr();
 
 		if (!data) { return; }
-		Completionist_MainHUD::FunctionHolder::ProcessCrosshairReference(data);
+		ProcessCrosshairReference(data);
 	}
+
+	//---------------------------------------------------
+	//-- Crosshair Hook For HUD Tagging -----------------
+	//---------------------------------------------------
 
 	void FunctionHolder::ProcessCrosshairReference(RE::HUDData* data) {
 
@@ -49,91 +120,103 @@ namespace Completionist_MainHUD {
 			}
 		}
 
-		if (!a_base || !a_form || !Completionist_Inventory::FunctionHolder::IsReady()) { return; }
+		if (!a_base || !a_form) { return; }
 
 		replacename = data->text.c_str();
 
 		switch (a_base->GetFormType()) {
 		case RE::FormType::AlchemyItem:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Alchemy_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Alchemy_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Alchemy_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Alchemy_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Alchemy_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Alchemy_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		case RE::FormType::Ammo:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Ammo_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Ammo_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Ammo_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Ammo_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Ammo_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Ammo_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Ammo_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Ammo_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		case RE::FormType::Armor:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Armor_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Armor_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Armor_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Armor_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Armor_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Armor_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Armor_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Armor_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		case RE::FormType::Book:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Books_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Books_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Books_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Books_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Books_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Books_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_New, V_CrosshairTag_New);
+				return;
+			}
+			return;
+		}
+		case RE::FormType::Note:
+		{
+			if (ItemIsCollected(a_form) && V_Books_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_Found, V_CrosshairTag_Found);
+				return;
+			}
+			else if (ItemIsCollectable(a_form) && V_Books_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		case RE::FormType::Ingredient:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Alchemy_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Alchemy_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Alchemy_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Alchemy_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Alchemy_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Alchemy_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		case RE::FormType::Weapon:
 		{
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Weapons_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Weapons_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Weapons_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Weapons_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Weapons_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Weapons_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Weapons_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Weapons_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
 		}
 		default:
 
-			if (ItemIsCollected(a_form) && Inv_vars::Inv_Other_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Other_ColourString_Found, Inv_vars::Inv_CrosshairTag_Found);
+			if (ItemIsCollected(a_form) && V_Other_Enabled_Found) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Other_ColourString_Found, V_CrosshairTag_Found);
 				return;
 			}
-			else if (ItemIsCollectable(a_form) && Inv_vars::Inv_Other_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, Inv_vars::Inv_Other_ColourString_New, Inv_vars::Inv_CrosshairTag_New);
+			else if (ItemIsCollectable(a_form) && V_Other_Enabled_New) {
+				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Other_ColourString_New, V_CrosshairTag_New);
 				return;
 			}
 			return;
@@ -141,14 +224,9 @@ namespace Completionist_MainHUD {
 	}
 
 	bool FunctionHolder::ItemIsCollectable(RE::FormID a_formID) {
-
-		return 
-			Serialization::CompletionistData::CheckIsCollectable(a_formID) &&
-			!CFramework_Master::FoundItemData.HasForm(a_formID);
+		return CompletionistData::CheckIsCollectable(a_formID) && !FoundItemData.HasForm(a_formID) && !FoundItemData_NoShow.HasForm(a_formID);
 	}
 
-	bool FunctionHolder::ItemIsCollected(RE::FormID a_formID) {
-
-		return CFramework_Master::FoundItemData.HasForm(a_formID);
-	}
+	bool FunctionHolder::ItemIsCollected(RE::FormID a_formID) { return FoundItemData.HasForm(a_formID); }
+	bool FunctionHolder::ItemIsCollected(RE::TESForm* a_form) { return FoundItemData.HasForm(a_form->GetFormID()); }
 }

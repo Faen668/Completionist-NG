@@ -93,7 +93,6 @@ namespace CFramework_Shrines_V {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 	}
 
 	//---------------------------------------------------
@@ -270,7 +269,6 @@ namespace CFramework_Shrines_P {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 	}
 
 	//---------------------------------------------------

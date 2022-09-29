@@ -85,7 +85,6 @@ namespace CFramework_DragonClaws_V {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -246,7 +245,6 @@ namespace CFramework_DragonClaws_P {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------

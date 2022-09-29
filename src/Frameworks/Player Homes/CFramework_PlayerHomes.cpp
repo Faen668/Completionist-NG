@@ -107,7 +107,6 @@ namespace CFramework_PlayerHomes_V {
 			BoolArray[b_pos] = true;
 
 			EntriesFound = std::ranges::count(BoolArray, true);
-			INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 		}
 	}
 
@@ -338,7 +337,6 @@ namespace CFramework_PlayerHomes_C {
 			BoolArray[b_pos] = true;
 
 			EntriesFound = std::ranges::count(BoolArray, true);
-			INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 		}
 	}
 
@@ -581,8 +579,6 @@ namespace CFramework_PlayerHomes_P {
 
 	void CHandler::ProcessFoundForm(std::string a_editorID) {
 
-		INFO("Processing {}", a_editorID);
-
 		if (auto t_pos = std::ranges::find(Identifier, a_editorID); t_pos != Identifier.end()) {
 			auto b_pos = std::distance(Identifier.begin(), t_pos);
 
@@ -595,7 +591,6 @@ namespace CFramework_PlayerHomes_P {
 			BoolArray[b_pos] = true;
 
 			EntriesFound = std::ranges::count(BoolArray, true);
-			INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 		}
 	}
 
@@ -610,8 +605,6 @@ namespace CFramework_PlayerHomes_P {
 		TextArray.clear();
 		BoolArray.clear();
 		Identifier.clear();
-
-		INFO("Patch Homes - Arrays Cleared");
 
 		auto handler = RE::TESDataHandler::GetSingleton();
 		if (const auto* Mod = handler->LookupLoadedModByName("Clockwork.esp"); Mod) {

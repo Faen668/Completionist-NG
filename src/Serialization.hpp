@@ -319,22 +319,84 @@ namespace Serialization
 			return false;
 		}
 
-		void Populate(std::vector<std::string>& a_names, std::vector<RE::TESForm*>& a_forms, std::vector<bool>& a_bools, std::vector<std::string>& a_texts, bool a_isMarker = false, bool a_nosort = false)
+		[[nodiscard]] auto GetBookSkill(RE::ActorValue a_val) noexcept {
+
+			switch (a_val) {
+
+			case RE::ActorValue::kOneHanded:
+				return "One-Handed";
+
+			case RE::ActorValue::kTwoHanded:
+				return "Two-Handed";
+
+			case RE::ActorValue::kArchery:
+				return "Marksman";
+
+			case RE::ActorValue::kBlock:
+				return "Block";
+
+			case RE::ActorValue::kSmithing:
+				return "Smithing";
+
+			case RE::ActorValue::kHeavyArmor:
+				return "Heavy Armor";
+
+			case RE::ActorValue::kLightArmor:
+				return "Light Armor";
+
+			case RE::ActorValue::kPickpocket:
+				return "Pickpocket";
+
+			case RE::ActorValue::kLockpicking:
+				return "LockPicking";
+
+			case RE::ActorValue::kSneak:
+				return "Sneak";
+
+			case RE::ActorValue::kAlchemy:
+				return "Alchemy";
+
+			case RE::ActorValue::kSpeech:
+				return "SpeechCraft";
+
+			case RE::ActorValue::kAlteration:
+				return "Alteration";
+
+			case RE::ActorValue::kConjuration:
+				return "Conjuration";
+
+			case RE::ActorValue::kDestruction:
+				return "Destruction";
+
+			case RE::ActorValue::kIllusion:
+				return "Illusion";
+
+			case RE::ActorValue::kRestoration:
+				return "Restoration";
+
+			case RE::ActorValue::kEnchanting:
+				return "Enchanting";
+
+			default:
+				return "";
+			}
+		}
+
+		void Populate(std::vector<std::string>& a_names, std::vector<RE::TESForm*>& a_forms, std::vector<bool>& a_bools, std::vector<std::string>& a_texts, bool a_nosort = false, int a_opttype = -1) // a_opttype - book = 1, Loc = 2*/
 		{
 			a_names.clear();
 			a_forms.clear();
 			a_bools.clear();
 			a_texts.clear();
 			
-			// zip for parallel sorting by name, alphabetical
 			using zipped_t = std::pair<std::string, std::pair<RE::TESForm*, bool>>;
-			// construct zip view from formID;
+
 			auto bases = GetAllBases() |
 				std::views::filter([&](auto f) { return GetForm(f) && GetForm(f)->GetName(); }) |
 				std::views::transform([&](auto f) {
 				std::string name = GetForm(f)->GetName();
 
-				if (auto marker = GetForm<RE::TESObjectREFR>(f); marker && a_isMarker) {
+				if (auto marker = GetForm<RE::TESObjectREFR>(f); marker && a_opttype == 2) {
 					if (auto extraMapMarker = GetMapMarkerInternal(GetForm<RE::TESObjectREFR>(f)); extraMapMarker && extraMapMarker->mapData) {
 						name = extraMapMarker->mapData->locationName.fullName.c_str();
 					}
@@ -344,13 +406,9 @@ namespace Serialization
 				return std::make_pair(std::move(name), std::make_pair(GetForm(f), false));
 					});
 
-			// instantiate the zipped view for sorting
 			std::vector<zipped_t> zipped = { std::ranges::begin(bases), std::ranges::end(bases) };
-			if (!a_nosort) {
-				std::ranges::sort(zipped);
-			}
+			if (!a_nosort) { std::ranges::sort(zipped); }
 
-			// unzip
 			for (auto& [name, data] : zipped) {
 				auto& [form, status] = data;
 				a_names.emplace_back(name);
@@ -364,6 +422,29 @@ namespace Serialization
 			assert(a_bools.size() == a_forms.size());
 
 			a_texts = std::vector<std::string>(a_names.size(), "NO_HIGHLIGHT");
+
+			if (a_opttype == 1) {
+				a_texts.clear();
+				for (auto form : a_forms) {
+					auto* book = static_cast<RE::TESObjectBOOK*>(form);
+					if (book->GetSpell()) {
+						a_texts.push_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + book->GetSpell()->GetName() + "}");
+					}
+					else if (book->TeachesSkill()) {
+						a_texts.push_back("$AddSkillBookHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSkill()) + "}");
+					}
+					else {
+						a_texts.push_back("NO_HIGHLIGHT");
+					}
+				}
+			}
+
+			if (a_opttype == 2) {
+				a_texts.clear();
+				for (auto& name : a_names) {
+					a_texts.push_back("$AddLocationHighlight{" + name + "}");
+				}
+			}
 		}
 
 		// members

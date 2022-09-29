@@ -1,79 +1,127 @@
 #include "Serialization.hpp"
 #include "CFramework_Fishing.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
 #undef GetObject
 
-namespace CPatchManager_Fishing {
-
-	RE::Actor* Player;
-
-	const char* pname = "ccbgssse001-fish.esm";
-
-	void CHandler::InstallFramework() {
-
-		if (const auto* Mod = RE::TESDataHandler::GetSingleton()->LookupLoadedModByName(pname); !Mod) {
-			if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingEnabled"); global) {
-				global->value = 0;
-			}
-			return;
-		}
-
-		Player = static_cast<RE::Actor*>(RE::TESForm::LookupByID(0x00000014));
-		CPatch_FishingFood::CHandler::InstallFramework();
-		CPatch_FishingItems::CHandler::InstallFramework();
-		CPatch_FishingBooks::BHandler::InstallFramework();
-		CPatch_FishingSpots_A::CHandler::InstallFramework();
-		CPatch_FishingSpots_C::CHandler::InstallFramework();
-		CPatch_FishingSpots_L::CHandler::InstallFramework();
-		CPatch_FishingSpots_S::CHandler::InstallFramework();
-	}
-
-	void CHandler::UpdateFoundForms() {
-
-		if (const auto* Mod = RE::TESDataHandler::GetSingleton()->LookupLoadedModByName(pname); !Mod) {
-			if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingEnabled"); global) {
-				global->value = 0;
-			}
-			return;
-		}
-
-		Player = static_cast<RE::Actor*>(RE::TESForm::LookupByID(0x00000014));
-
-		CPatch_FishingFood::CHandler::UpdateFoundForms();
-		CPatch_FishingItems::CHandler::UpdateFoundForms();
-		CPatch_FishingBooks::BHandler::UpdateFoundForms();
-		CPatch_FishingSpots_A::CHandler::UpdateFoundForms();
-		CPatch_FishingSpots_C::CHandler::UpdateFoundForms();
-		CPatch_FishingSpots_L::CHandler::UpdateFoundForms();
-		CPatch_FishingSpots_S::CHandler::UpdateFoundForms();
-	}
+namespace CPatch_Fishing_F {
+	Serialization::CompletionistData Data;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Fishies
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
+namespace CPatch_Fishing_I {
+	Serialization::CompletionistData Data;
+}
 
-namespace CPatch_FishingFood {
+namespace CPatch_Fishing_B {
+	Serialization::CompletionistData Data;
+}
 
+namespace CPatch_Fishing_A {
+	Serialization::CompletionistData Data;
+}
+
+namespace CPatch_Fishing_C {
+	Serialization::CompletionistData Data;
+}
+
+namespace CPatch_Fishing_L {
+	Serialization::CompletionistData Data;
+}
+
+namespace CPatch_Fishing_S {
+	Serialization::CompletionistData Data;
+}
+
+namespace CPatch_Fishing {
 	using namespace CFramework_Master;
 
-	Serialization::CompletionistData Data;
+	constexpr Serialization::FormArray I_Forms = {
+	0x000ED3,0x000A6F,0x000C66,0x000B2B,0x000B29,0x000B94,0x0EA5CC,
+	0x0008E3,0x000BC0,0x000BA0,0x000C07,0x000F07,0x000B2A,
+	};
 
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
+	constexpr Serialization::Variation I_Varia[] = {
+	{ 0x07AED6, { 0x0009D9,0x04D05E } },
+	};
+
+	constexpr Serialization::FormArray B_Forms = {
+	0x000E7F,0x0009AE,0x0009AF,0x000ABA,0x000ABC,0x070CCC,0x070CCD,
+	0x070CCE,0x070CCF,0x070CD0,0x070CD1,0x070CD2,0x070CD3,0x070CD4,
+	0x070CD5,0x0008E5,
+	};
+
+	constexpr Serialization::FormArray A_Forms = {
+	0x000956,0x00093C,0x000964,0x000951,0x00095A,0x000961,0x00095F,0x000962,
+	0x000963,0x000959,0x000958,0x000965,0x000950,0x000957,0x000966,0x00095B,
+	0x000953,0x000967,0x000955,0x000954,0x000952,
+	};
+
+	constexpr Serialization::FormArray C_Forms = {
+	0x00095E,0x000960,
+	};
+
+	constexpr Serialization::FormArray L_Forms = {
+	0x000932,0x000937,0x00092F,0x000936,0x000939,0x000935,0x000930,0x000931,
+	0x000938,0x000933,
+	};
+
+	constexpr Serialization::FormArray S_Forms = {
+	0x000934,0x000945,0x00094C,0x000944,0x000948,0x000943,0x00094A,0x00093A,
+	0x00093E,0x00094F,0x000941,0x00093F,0x000946,0x00095D,0x000949,0x000940,
+	0x00093D,0x00093B,0x00095C,0x00094E,0x00094D,0x000942,0x00094B,0x000947,
+	};
+
+	inline std::vector<std::string>		F_NameArray;
+	inline std::vector<std::string>		F_TextArray;
+	inline std::vector<RE::TESForm*>	F_FormArray;
+	inline std::vector<bool>			F_BoolArray;
+	inline std::int32_t					F_EntriesTotal;
+	inline std::int32_t					F_EntriesFound;
+
+	inline std::vector<std::string>		I_NameArray;
+	inline std::vector<std::string>		I_TextArray;
+	inline std::vector<RE::TESForm*>	I_FormArray;
+	inline std::vector<bool>			I_BoolArray;
+	inline std::int32_t					I_EntriesTotal;
+	inline std::int32_t					I_EntriesFound;
+
+	inline std::vector<std::string>		B_NameArray;
+	inline std::vector<std::string>		B_TextArray;
+	inline std::vector<RE::TESForm*>	B_FormArray;
+	inline std::vector<bool>			B_BoolArray;
+	inline std::int32_t					B_EntriesTotal;
+	inline std::int32_t					B_EntriesFound;
+
+	inline std::vector<std::string>		A_NameArray;
+	inline std::vector<std::string>		A_TextArray;
+	inline std::vector<RE::TESForm*>	A_FormArray;
+	inline std::vector<bool>			A_BoolArray;
+	inline std::int32_t					A_EntriesTotal;
+	inline std::int32_t					A_EntriesFound;
+	inline
+	inline std::vector<std::string>		C_NameArray;
+	inline std::vector<std::string>		C_TextArray;
+	inline std::vector<RE::TESForm*>	C_FormArray;
+	inline std::vector<bool>			C_BoolArray;
+	inline std::int32_t					C_EntriesTotal;
+	inline std::int32_t					C_EntriesFound;
+
+	inline std::vector<std::string>		L_NameArray;
+	inline std::vector<std::string>		L_TextArray;
+	inline std::vector<RE::TESForm*>	L_FormArray;
+	inline std::vector<bool>			L_BoolArray;
+	inline std::int32_t					L_EntriesTotal;
+	inline std::int32_t					L_EntriesFound;
+
+	inline std::vector<std::string>		S_NameArray;
+	inline std::vector<std::string>		S_TextArray;
+	inline std::vector<RE::TESForm*>	S_FormArray;
+	inline std::vector<bool>			S_BoolArray;
+	inline std::int32_t					S_EntriesTotal;
+	inline std::int32_t					S_EntriesFound;
 
 	inline ScriptObjectPtr MCMScript;
-	inline ScriptObjectPtr FSHScript;
-
-	uint32_t EntriesFound;
-	uint32_t EntriesTotal;
 
 	std::vector<std::string> temploc{};
 	std::vector<std::string> temprod{};
@@ -89,12 +137,31 @@ namespace CPatch_FishingFood {
 
 	void CHandler::InstallFramework() {
 
+		if (auto installed = Serialization::CompletionistData::IsModInstalled("ccbgssse001-fish.esm"); !installed) {
+			return;
+		}
+
 		RodList = RE::TESForm::LookupByEditorID<RE::BGSListForm>("ccBGSSSE001_FishingRods");
 		GlobalV = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingRods");
 		ContMap = RE::ControlMap::GetSingleton();
 
-		CHandler::RegisterEvents();
+		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Sink Event ) -------------
+	//---------------------------------------------------
+
+	void CHandler::SinkEvents() {
+		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
+
+		auto UserInterface = RE::UI::GetSingleton();
+		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESEquipEvent>*>(CHandler::GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -104,12 +171,59 @@ namespace CPatch_FishingFood {
 	void CHandler::InjectAndCompileData() {
 
 		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x000800, "Completionist.esp")), "Completionist_MCMScript");
-		FSHScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x033A57, "ccbgssse001-fish.esm")), "ccBGSSSE001_FishingSystemScript");
 
-		if (!MCMScript || !FSHScript) {
-			ERROR("Unable To Load Script Pointers");
-		}
+		// Items ---
+
+		CPatch_Fishing_I::Data.CompileFormArray(CPatch_Fishing::I_Forms, "ccbgssse001-fish.esm");
+		CPatch_Fishing_I::Data.CompileVariation(CPatch_Fishing::I_Varia, "ccbgssse001-fish.esm");
+		CPatch_Fishing_I::Data.MergeAsCollectable();
+
+		CPatch_Fishing_I::Data.Populate(I_NameArray, I_FormArray, I_BoolArray, I_TextArray);
+		I_EntriesTotal = I_FormArray.size();
+		I_EntriesFound = std::ranges::count(I_BoolArray, true);
+
+		// Books ---
+
+		CPatch_Fishing_B::Data.CompileFormArray(CPatch_Fishing::B_Forms, "ccbgssse001-fish.esm");
+		CPatch_Fishing_B::Data.MergeAsCollectable();
+
+		CPatch_Fishing_B::Data.Populate(B_NameArray, B_FormArray, B_BoolArray, B_TextArray, false, 1);
+		B_EntriesTotal = B_FormArray.size();
+		B_EntriesFound = std::ranges::count(B_BoolArray, true);
+
+		// Arctic Markers ---
+
+		CPatch_Fishing_A::Data.CompileFormArray(CPatch_Fishing::A_Forms, "Completionist_ITP.esp");
+		CPatch_Fishing_A::Data.Populate(A_NameArray, A_FormArray, A_BoolArray, A_TextArray, false, 2);
+
+		A_EntriesTotal = A_FormArray.size();
+		A_EntriesFound = std::ranges::count(A_BoolArray, true);
+
+		// Caves Markers ---
+
+		CPatch_Fishing_C::Data.CompileFormArray(CPatch_Fishing::C_Forms, "Completionist_ITP.esp");
+		CPatch_Fishing_C::Data.Populate(C_NameArray, C_FormArray, C_BoolArray, C_TextArray, false, 2);
+
+		C_EntriesTotal = C_FormArray.size();
+		C_EntriesFound = std::ranges::count(C_BoolArray, true);
+
+		// Lakes Markers ---
+
+		CPatch_Fishing_L::Data.CompileFormArray(CPatch_Fishing::L_Forms, "Completionist_ITP.esp");
+		CPatch_Fishing_L::Data.Populate(L_NameArray, L_FormArray, L_BoolArray, L_TextArray, false, 2);
+
+		L_EntriesTotal = L_FormArray.size();
+		L_EntriesFound = std::ranges::count(L_BoolArray, true);
+
+		// Streams Markers ---
+
+		CPatch_Fishing_S::Data.CompileFormArray(CPatch_Fishing::S_Forms, "Completionist_ITP.esp");
+		CPatch_Fishing_S::Data.Populate(S_NameArray, S_FormArray, S_BoolArray, S_TextArray, false, 2);
+
+		S_EntriesTotal = S_FormArray.size();
+		S_EntriesFound = std::ranges::count(S_BoolArray, true);
+
+		// Fish ---
 
 		std::string pName = "ccbgssse001-fish.esm";
 		std::string sName = "Skyrim.esm";
@@ -151,36 +265,36 @@ namespace CPatch_FishingFood {
 		BuildFishArrays(handler->LookupForm(0x000891, pName), Rod0, "streams during any weather");
 		BuildFishArrays(handler->LookupForm(0x00088B, pName), Rod0, "caves during any weather");
 
-		FormArray.clear();
-		NameArray.clear();
-		BoolArray.clear();
-		TextArray.clear();
+		F_FormArray.clear();
+		F_NameArray.clear();
+		F_BoolArray.clear();
+		F_TextArray.clear();
 
 		for (auto i = 0; i < tempfsh.size(); i++) {
 
-			Data.AddForm(tempfsh[i]->GetFormID());
+			CPatch_Fishing_F::Data.AddForm(tempfsh[i]->GetFormID());
 
-			FormArray.push_back(tempfsh[i]);
-			NameArray.push_back(tempfsh[i]->GetName());
+			F_FormArray.push_back(tempfsh[i]);
+			F_NameArray.push_back(tempfsh[i]->GetName());
 			
 			if (temprod[i] != Rod0) {
-				TextArray.push_back("$AddFishingDataRod{" + NameArray[i] + "}{" + NameArray[i] + "}{" + temploc[i] + "}{" + temprod[i] + "}");
+				F_TextArray.push_back("$AddFishingDataRod{" + F_NameArray[i] + "}{" + F_NameArray[i] + "}{" + temploc[i] + "}{" + temprod[i] + "}");
 			}
 			else {
-				TextArray.push_back("$AddFishingData{" + NameArray[i] + "}{" + NameArray[i] + "}{" + temploc[i] + "}");
+				F_TextArray.push_back("$AddFishingData{" + F_NameArray[i] + "}{" + F_NameArray[i] + "}{" + temploc[i] + "}");
 			}
 		}
 
-		NameArray.resize(FormArray.size());
-		TextArray.resize(FormArray.size());
-		BoolArray.resize(FormArray.size());
+		F_NameArray.resize(F_FormArray.size());
+		F_TextArray.resize(F_FormArray.size());
+		F_BoolArray.resize(F_FormArray.size());
 
 		tempfsh.clear();
 		temploc.clear();
 		temprod.clear();
 
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
+		F_EntriesTotal = F_FormArray.size();
+		F_EntriesFound = std::ranges::count(F_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -219,374 +333,90 @@ namespace CPatch_FishingFood {
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 
-		if (!a_event || a_event->newContainer != 0x00014 || !Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
-
-		if (GlobalV->value > 0 && !ContMap->IsLookingControlsEnabled()) {
-			auto base = Data.GetBase(a_event->baseObj) ? Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj);
-			return EventResult::kContinue;
-		}
-		return EventResult::kContinue; 
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events (Fishing Rod Equipped ) -------
-	//---------------------------------------------------
-	
-	bool CHandler::IsFishingRodEquipped() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		
-
-		auto var = ScriptObject::GetVariable(MCMScript, "bRefreshPage");
-		if (var) {
-			INFO("Got Variable with a value of {}", var->GetBool());
-		}
-
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Found Form ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID) {
-
-		if (!FoundItemData_NoShow.HasForm(a_eventID)) {
-			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Data.GetForm(a_eventID)->GetName());
-			FrameworkAPI::SendNotification(msg, "NotifySpecial");
-		}
-
-		FoundItemData_NoShow.AddForm(a_baseID);
-
-		auto t_pos = std::find(FormArray.begin(), FormArray.end(), Data.GetForm(a_baseID));
-		auto b_pos = std::distance(FormArray.begin(), t_pos);
-		BoolArray[b_pos] = true;
-
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
-			}
-		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Items
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CPatch_FishingItems {
-
-	using namespace CFramework_Master;
-
-	// clang-format off
-	constexpr Serialization::FormArray FishingForms = {
-	0x000ED3,0x000A6F,0x000C66,0x000B2B,0x000B29,0x000B94,0x0EA5CC,
-	0x0008E3,0x000BC0,0x000BA0,0x000C07,0x000F07,0x000B2A,
-	};
-
-	constexpr Serialization::Variation FishingVariations[] = {
-	{ 0x07AED6, { 0x0009D9,0x04D05E } },
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	uint32_t EntriesFound;
-	uint32_t EntriesTotal;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		CHandler::RegisterEvents();
-		CHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
-
-	void CHandler::InjectAndCompileData() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-
-		Data.CompileFormArray(CPatch_FishingItems::FishingForms, CPatchManager_Fishing::pname);
-		Data.CompileVariation(CPatch_FishingItems::FishingVariations, CPatchManager_Fishing::pname);
-		Data.MergeAsCollectable();
-
-		CPatch_FishingItems::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
-
-		if (!a_event || a_event->newContainer != 0x00014 || !Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
-
-		auto base = Data.GetBase(a_event->baseObj) ? Data.GetBase(a_event->baseObj) : a_event->baseObj;
-		CHandler::ProcessFoundForm(base, a_event->baseObj);
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Found Form ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID) {
-
-		if (!FoundItemData.HasForm(a_eventID)) {
-			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Data.GetForm(a_eventID)->GetName());
-			FrameworkAPI::SendNotification(msg, "NotifyItems");
-		}
-
-		FoundItemData.AddForm(a_baseID);
-		for (auto var : Data.GetAllVariations()) {
-			if (Data.GetBase(var) == a_baseID) {
-				FoundItemData.AddForm(var);
-			}
-		}
-
-		auto t_pos = std::find(FormArray.begin(), FormArray.end(), Data.GetForm(a_baseID));
-		auto b_pos = std::distance(FormArray.begin(), t_pos);
-		BoolArray[b_pos] = true;
-
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
-			}
-		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Books
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CPatch_FishingBooks {
-
-	using namespace CFramework_Master;
-
-	// clang-format off
-
-	constexpr Serialization::FormArray FishingForms = {
-	0x000E7F,0x0009AE,0x0009AF,0x000ABA,0x000ABC,0x070CCC,0x070CCD,
-	0x070CCE,0x070CCF,0x070CD0,0x070CD1,0x070CD2,0x070CD3,0x070CD4,
-	0x070CD5,0x0008E5,
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void BHandler::InstallFramework() {
-
-		BHandler::Sink();
-		MHandler::Sink();
-
-		BHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Singleton ) ----------
-	//---------------------------------------------------
-
-	auto BHandler::GetSingleton() -> BHandler* {
-		static BHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	auto MHandler::GetSingleton() -> MHandler* {
-		static MHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void BHandler::Sink() {
-		RE::BooksRead::GetEventSource()->AddEventSink(BHandler::GetSingleton());
-	}
-
-	void MHandler::Sink() {
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(MHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	auto BHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (a_event == nullptr || !Data.HasForm(a_event->book->GetFormID())) { return RE::BSEventNotifyControl::kContinue; }
-
-		auto base = Data.GetBase(a_event->book->GetFormID()) ? Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-		BHandler::ProcessFoundForm(base, a_event->book->GetFormID(), false);
-		return EventResult::kContinue;
-	}
-
-	auto MHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
-
-		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening && Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
-			if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-				auto base = Data.GetBase(target) ? Data.GetBase(target) : target;
-				BHandler::ProcessFoundForm(base, target, false);
+		if (!a_event || a_event->newContainer != 0x00014) { return EventResult::kContinue; }
+
+		if (CPatch_Fishing_F::Data.HasForm(a_event->baseObj)) {
+			if (GlobalV->value > 0 && !ContMap->IsLookingControlsEnabled()) {
+				auto base = CPatch_Fishing_F::Data.GetBase(a_event->baseObj) ? CPatch_Fishing_F::Data.GetBase(a_event->baseObj) : a_event->baseObj;
+				CHandler::ProcessFoundForm(base, a_event->baseObj, ksection_F);
 				return EventResult::kContinue;
 			}
 			return EventResult::kContinue;
 		}
+
+		if (CPatch_Fishing_I::Data.HasForm(a_event->baseObj)) {
+			auto base = CPatch_Fishing_I::Data.GetBase(a_event->baseObj) ? CPatch_Fishing_I::Data.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ksection_I);
+			return EventResult::kContinue;
+		}
+
+		return EventResult::kContinue; 
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Book Read ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(const RE::BooksRead::Event* a_event, RE::BSTEventSource<RE::BooksRead::Event>*) {
+
+		if (!a_event || !CPatch_Fishing_B::Data.HasForm(a_event->book->GetFormID())) { return RE::BSEventNotifyControl::kContinue; }
+
+		auto base = CPatch_Fishing_B::Data.GetBase(a_event->book->GetFormID()) ? CPatch_Fishing_B::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), ksection_B);
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Menu Open ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) {
+
+		if (!a_event || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
+
+		if (a_event->menuName == RE::BookMenu::MENU_NAME && CPatch_Fishing_B::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
+				auto base = CPatch_Fishing_B::Data.GetBase(target) ? CPatch_Fishing_B::Data.GetBase(target) : target;
+				CHandler::ProcessFoundForm(base, target, ksection_B);
+				return EventResult::kContinue;
+			}
+			return EventResult::kContinue;
+		}
+
+		if (a_event->menuName == RE::MapMenu::MENU_NAME) {
+
+			for (auto i = 0; i < A_FormArray.size(); i++) {
+				if (CHandler::ProcessMapMarker(A_FormArray[i])) {
+					A_BoolArray[i] = true;
+					FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(A_FormArray[i]));
+				}
+			}
+
+			for (auto i = 0; i < C_FormArray.size(); i++) {
+				if (CHandler::ProcessMapMarker(C_FormArray[i])) {
+					C_BoolArray[i] = true;
+					FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(C_FormArray[i]));
+				}
+			}
+
+			for (auto i = 0; i < L_FormArray.size(); i++) {
+				if (CHandler::ProcessMapMarker(L_FormArray[i])) {
+					L_BoolArray[i] = true;
+					FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(L_FormArray[i]));
+				}
+			}
+
+			for (auto i = 0; i < S_FormArray.size(); i++) {
+				if (CHandler::ProcessMapMarker(S_FormArray[i])) {
+					S_BoolArray[i] = true;
+					FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(S_FormArray[i]));
+				}
+			}
+		}
+		A_EntriesFound = std::ranges::count(A_BoolArray, true);
+		C_EntriesFound = std::ranges::count(C_BoolArray, true);
+		L_EntriesFound = std::ranges::count(L_BoolArray, true);
+		S_EntriesFound = std::ranges::count(S_BoolArray, true);
 		return EventResult::kContinue;
 	}
 
@@ -594,236 +424,78 @@ namespace CPatch_FishingBooks {
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	void BHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, bool a_supress) {
-
-		if (!FoundItemData.HasForm(a_eventID)) {
-			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Data.GetForm(a_eventID)->GetName());
-			FrameworkAPI::SendNotification(msg, "NotifyItems");
-		}
-
-		FoundItemData.AddForm(a_baseID);
-		for (auto var : Data.GetAllVariations()) {
-			if (Data.GetBase(var) == a_baseID) {
-				FoundItemData.AddForm(var);
-			}
-		}
-
-		auto t_pos = std::find(FormArray.begin(), FormArray.end(), Data.GetForm(a_baseID));
-		auto b_pos = std::distance(FormArray.begin(), t_pos);
-		BoolArray.at(b_pos) = true;
-
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
-
-	void BHandler::InjectAndCompileData() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-		Data.CompileFormArray(CPatch_FishingBooks::FishingForms, CPatchManager_Fishing::pname);
-		Data.MergeAsCollectable();
-
-		CPatch_FishingBooks::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void BHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]); book) {
-				if (book->IsRead() || (book->GetSpell() && CPatchManager_Fishing::Player->HasSpell(book->GetSpell())) || FoundItemData.HasForm(book->GetFormID())) {
-					auto base = Data.GetBase(book->GetFormID()) ? Data.GetBase(book->GetFormID()) : book->GetFormID();
-					BHandler::ProcessFoundForm(base, FormArray[i]->GetFormID(), true);
-				}
-			}
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t BHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void BHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::find(NameArray.begin(), NameArray.end(), a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Locations - Arctic
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CPatch_FishingSpots_A {
-
-	using namespace CFramework_Master;
-
-	// clang-format off
-
-	constexpr Serialization::FormArray MapMarkers = {
-	0x000956,0x00093C,0x000964,0x000951,0x00095A,0x000961,0x00095F,0x000962,
-	0x000963,0x000959,0x000958,0x000965,0x000950,0x000957,0x000966,0x00095B,
-	0x000953,0x000967,0x000955,0x000954,0x000952,
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		CHandler::Sink();
-		CHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Singleton ) ----------
-	//---------------------------------------------------
-
-	auto CHandler::GetSingleton() -> CHandler* {
-		static CHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::Sink() {
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	auto CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
-
-			for (auto i = 0; i < FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(FormArray[i], i);
-			}
-		}
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Map Marker ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos) {
+	bool CHandler::ProcessMapMarker(RE::TESForm* a_form) {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
-		if (a_marker) {
+		if (a_marker && CPatch_Fishing_A::Data.HasForm(a_marker->GetFormID())) {
 			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-					BoolArray[a_pos] = true;
-					FoundItemData.AddForm(a_marker);
-				}
+				return extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled();
 			}
 		}
-
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
+		return false;
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
+	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
+	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, PatchID a_patchID) {
 
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
+		if (a_patchID == ksection_F) {
+			if (!FoundItemData_NoShow.HasForm(a_eventID)) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_Fishing_F::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+			}
 
-		Data.CompileFormArray(CPatch_FishingSpots_A::MapMarkers, "Completionist_ITP.esp");
-		CPatch_FishingSpots_A::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
+			FoundItemData_NoShow.AddForm(a_baseID);
+			auto t_pos = std::ranges::find(F_FormArray, CPatch_Fishing_F::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(F_FormArray.begin(), t_pos);
+			F_BoolArray[b_pos] = true;
 
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
+			F_EntriesFound = std::ranges::count(F_BoolArray, true);
+			return;
 		}
 
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
+		if (a_patchID == ksection_I) {
+			if (!FoundItemData.HasForm(a_eventID)) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_Fishing_I::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifyItems");
+			}
+
+			FoundItemData.AddForm(a_baseID);
+			for (auto var : CPatch_Fishing_I::Data.GetAllVariations()) {
+				if (CPatch_Fishing_I::Data.GetBase(var) == a_baseID) {
+					FoundItemData.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(I_FormArray, CPatch_Fishing_I::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(I_FormArray.begin(), t_pos);
+			I_BoolArray[b_pos] = true;
+
+			I_EntriesFound = std::ranges::count(I_BoolArray, true);
+		}
+
+		if (a_patchID == ksection_B) {
+			if (!FoundItemData.HasForm(a_eventID)) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_Fishing_B::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+			}
+
+			FoundItemData.AddForm(a_baseID);
+			for (auto var : CPatch_Fishing_B::Data.GetAllVariations()) {
+				if (CPatch_Fishing_B::Data.GetBase(var) == a_baseID) {
+					FoundItemData.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(B_FormArray, CPatch_Fishing_B::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(B_FormArray.begin(), t_pos);
+			B_BoolArray[b_pos] = true;
+
+			B_EntriesFound = std::ranges::count(B_BoolArray, true);
+		}
 	}
 
 	//---------------------------------------------------
@@ -832,408 +504,82 @@ namespace CPatch_FishingSpots_A {
 
 	void CHandler::UpdateFoundForms() {
 
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
+		if (auto installed = Serialization::CompletionistData::IsModInstalled("ccbgssse001-fish.esm"); !installed) {
+			return;
+		}
+
+		for (auto i = 0; i < F_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(F_FormArray[i]->GetFormID())) {
+				F_BoolArray[i] = true;
 			}
 		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-}
+		F_EntriesTotal = F_FormArray.size();
+		F_EntriesFound = std::ranges::count(F_BoolArray, true);
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Locations - Caves
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
+		// ---------------------------------
 
-namespace CPatch_FishingSpots_C {
-
-	using namespace CFramework_Master;
-
-	// clang-format off
-
-	constexpr Serialization::FormArray MapMarkers = {
-	0x00095E,0x000960,
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		CHandler::Sink();
-		CHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Singleton ) ----------
-	//---------------------------------------------------
-
-	auto CHandler::GetSingleton() -> CHandler* {
-		static CHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::Sink() {
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	auto CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
-
-			for (auto i = 0; i < FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(FormArray[i], i);
+		for (auto i = 0; i < I_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(I_FormArray[i]->GetFormID())) {
+				I_BoolArray[i] = true;
 			}
 		}
-		return EventResult::kContinue;
-	}
+		I_EntriesTotal = I_FormArray.size();
+		I_EntriesFound = std::ranges::count(I_BoolArray, true);
 
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Map Marker ) -----
-	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos) {
+		// ---------------------------------
 
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-
-		if (a_marker) {
-			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-					BoolArray[a_pos] = true;
-					FoundItemData.AddForm(a_marker);
+		for (auto i = 0; i < B_FormArray.size(); i++) {
+			if (auto* book = static_cast<RE::TESObjectBOOK*>(B_FormArray[i]); book) {
+				if (book->IsRead() || (book->GetSpell() && RE::PlayerCharacter::GetSingleton()->HasSpell(book->GetSpell())) || FoundItemData.HasForm(book->GetFormID())) {
+					B_BoolArray[i] = true;
 				}
 			}
 		}
+		B_EntriesTotal = B_FormArray.size();
+		B_EntriesFound = std::ranges::count(B_BoolArray, true);
 
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
-	}
 
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
+		// ---------------------------------
 
-	void CHandler::InjectAndCompileData() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-
-		Data.CompileFormArray(CPatch_FishingSpots_C::MapMarkers, "Completionist_ITP.esp");
-		CPatch_FishingSpots_C::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
+		for (auto i = 0; i < A_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(A_FormArray[i]->GetFormID())) {
+				A_BoolArray[i] = true;
 			}
 		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-}
+		A_EntriesTotal = A_FormArray.size();
+		A_EntriesFound = std::ranges::count(A_BoolArray, true);
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Locations - Lakes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
 
-namespace CPatch_FishingSpots_L {
+		// ---------------------------------
 
-	using namespace CFramework_Master;
-
-	// clang-format off
-
-	constexpr Serialization::FormArray MapMarkers = {
-	0x000932,0x000937,0x00092F,0x000936,0x000939,0x000935,0x000930,0x000931,
-	0x000938,0x000933,
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		CHandler::Sink();
-		CHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Singleton ) ----------
-	//---------------------------------------------------
-
-	auto CHandler::GetSingleton() -> CHandler* {
-		static CHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::Sink() {
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	auto CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
-
-			for (auto i = 0; i < FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(FormArray[i], i);
+		for (auto i = 0; i < C_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(C_FormArray[i]->GetFormID())) {
+				C_BoolArray[i] = true;
 			}
 		}
-		return EventResult::kContinue;
-	}
+		C_EntriesTotal = C_FormArray.size();
+		C_EntriesFound = std::ranges::count(C_BoolArray, true);
 
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Map Marker ) -----
-	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos) {
+		// ---------------------------------
 
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-
-		if (a_marker) {
-			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-					BoolArray[a_pos] = true;
-					FoundItemData.AddForm(a_marker);
-				}
+		for (auto i = 0; i < L_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(L_FormArray[i]->GetFormID())) {
+				L_BoolArray[i] = true;
 			}
 		}
+		L_EntriesTotal = L_FormArray.size();
+		L_EntriesFound = std::ranges::count(L_BoolArray, true);
 
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
-	}
+		// ---------------------------------
 
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
-
-	void CHandler::InjectAndCompileData() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-
-		Data.CompileFormArray(CPatch_FishingSpots_L::MapMarkers, "Completionist_ITP.esp");
-		CPatch_FishingSpots_L::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
+		for (auto i = 0; i < S_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(S_FormArray[i]->GetFormID())) {
+				S_BoolArray[i] = true;
 			}
 		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Locations - Streams
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CPatch_FishingSpots_S {
-
-	using namespace CFramework_Master;
-
-	// clang-format off
-
-	constexpr Serialization::FormArray MapMarkers = {
-	0x000934,0x000945,0x00094C,0x000944,0x000948,0x000943,0x00094A,0x00093A,
-	0x00093E,0x00094F,0x000941,0x00093F,0x000946,0x00095D,0x000949,0x000940,
-	0x00093D,0x00093B,0x00095C,0x00094E,0x00094D,0x000942,0x00094B,0x000947,
-	};
-
-	// clang-format on
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-
-	inline ScriptObjectPtr  MCMScript;
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		CHandler::Sink();
-		CHandler::InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Singleton ) ----------
-	//---------------------------------------------------
-
-	auto CHandler::GetSingleton() -> CHandler* {
-		static CHandler singleton;
-		return std::addressof(singleton);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::Sink() {
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	auto CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
-
-		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
-
-			for (auto i = 0; i < FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(FormArray[i], i);
-			}
-		}
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Map Marker ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos) {
-
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-
-		if (a_marker) {
-			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-					BoolArray[a_pos] = true;
-					FoundItemData.AddForm(a_marker);
-				}
-			}
-		}
-
-		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
-
-	void CHandler::InjectAndCompileData() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		MCMScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-
-		Data.CompileFormArray(CPatch_FishingSpots_S::MapMarkers, "Completionist_ITP.esp");
-		CPatch_FishingSpots_S::Data.Populate(NameArray, FormArray, BoolArray, TextArray, true);
-
-		TextArray.clear();
-		for (auto& name : NameArray) {
-			TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
-			}
-		}
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
+		S_EntriesTotal = S_FormArray.size();
+		S_EntriesFound = std::ranges::count(S_BoolArray, true);
 	}
 }

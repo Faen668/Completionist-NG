@@ -2,6 +2,7 @@
 
 #include <SKSE\API.h>
 #include "Serialization.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
 
 namespace CPatch_CLW_Items {
 	extern Serialization::CompletionistData Data;
@@ -17,33 +18,33 @@ namespace CPatch_CLW_MapMa {
 
 namespace CPatch_CLW 
 {	
-	enum PatchID : uint32_t
+	enum PatchID : std::int32_t
 	{
-		kItems = 206,
-		KBooks = 207,
-		KMapMa = 208,
+		kItems = 204,
+		KBooks = 205,
+		KMapMa = 206,
 	};
 
 	extern std::vector<std::string> Items_NameArray;
 	extern std::vector<std::string> Items_TextArray;
 	extern std::vector<RE::TESForm*> Items_FormArray;
 	extern std::vector<bool> Items_BoolArray;
-	extern uint32_t Items_EntriesTotal;
-	extern uint32_t Items_EntriesFound;
+	extern std::int32_t Items_EntriesTotal;
+	extern std::int32_t Items_EntriesFound;
 
 	extern std::vector<std::string> Books_NameArray;
 	extern std::vector<std::string> Books_TextArray;
 	extern std::vector<RE::TESForm*> Books_FormArray;
 	extern std::vector<bool> Books_BoolArray;
-	extern uint32_t Books_EntriesTotal;
-	extern uint32_t Books_EntriesFound;
+	extern std::int32_t Books_EntriesTotal;
+	extern std::int32_t Books_EntriesFound;
 
 	extern std::vector<std::string> MapMa_NameArray;
 	extern std::vector<std::string> MapMa_TextArray;
 	extern std::vector<RE::TESForm*> MapMa_FormArray;
 	extern std::vector<bool> MapMa_BoolArray;
-	extern uint32_t MapMa_EntriesTotal;
-	extern uint32_t MapMa_EntriesFound;
+	extern std::int32_t MapMa_EntriesTotal;
+	extern std::int32_t MapMa_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -53,114 +54,201 @@ namespace CPatch_CLW
 	public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
 	public RE::BSTEventSink<RE::BooksRead::Event> {
 
-		public: [[nodiscard]] static CHandler* GetSingleton() {
-			static CHandler singleton;
-			return &singleton;
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+
+	EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
+	EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
+	EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+
+	static void			SinkEvents();
+	static void			InstallFramework();
+	static void			UpdateFoundForms();
+	static void			InjectAndCompileData();
+
+	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+	static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);
+
+	inline static const std::vector<std::string> Null_S = {};
+	inline static const std::vector<RE::TESForm*> Null_F = {};
+	inline static const std::vector<bool> Null_B = {};
+
+	public: [[nodiscard]] static std::int32_t ReturnEntriesInt(std::int32_t a_patchID, std::string a_section) {
+
+		switch (a_patchID) {
+
+		case kItems:
+			if (a_section == "Total") { return Items_EntriesTotal; }
+			if (a_section == "Found") { return Items_EntriesFound; }
+			return -1;
+
+		case KBooks:
+			if (a_section == "Total") { return Books_EntriesTotal; }
+			if (a_section == "Found") { return Books_EntriesFound; }
+			return -1;
+
+		case KMapMa:
+			if (a_section == "Total") { return MapMa_EntriesTotal; }
+			if (a_section == "Found") { return MapMa_EntriesFound; }
+			return -1;
+
+		default:
+			return -1;
 		}
+	}
 
-		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
-		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
-		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+	public: [[nodiscard]] static const std::vector<RE::TESForm*>& ReturnEntriesForm(std::int32_t a_patchID) {
 
-		static void			SinkEvents();
-		static void			InstallFramework();
-		static void			UpdateFoundForms();
-		static void			InjectAndCompileData();
+		switch (a_patchID) {
 
-		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
-		static void			ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos);
+		case kItems:
+			return Items_FormArray;
 
-		static uint32_t		IsOptionCompleted(std::string a_name);
-		static void			SetOptionCompleted(std::string a_name);
+		case KBooks:
+			return Books_FormArray;
 
-		public: [[nodiscard]] static uint32_t ReturnEntriesInt(uint32_t a_patchID, std::string a_section) {
+		case KMapMa:
+			return MapMa_FormArray;
 
-			switch (a_patchID) {
+		default:
+			return Null_F;
+		}
+	}
 
-			case kItems:
-				if (a_section == "Total") { return Items_EntriesTotal; }
-				if (a_section == "Found") { return Items_EntriesFound; }
-				return -1;
+	public: [[nodiscard]] static const std::vector<std::string>& ReturnEntriesString(std::int32_t a_patchID, std::string a_section) {
 
-			case KBooks:
-				if (a_section == "Total") { return Books_EntriesTotal; }
-				if (a_section == "Found") { return Books_EntriesFound; }
-				return -1;
+		switch (a_patchID) {
 
-			case KMapMa:
-				if (a_section == "Total") { return MapMa_EntriesTotal; }
-				if (a_section == "Found") { return MapMa_EntriesFound; }
-				return -1;
+		case kItems:
+			if (a_section == "Name") { return Items_NameArray; }
+			if (a_section == "Text") { return Items_TextArray; }
+			return Null_S;
 
-			default:
-				return -1;
+		case KBooks:
+			if (a_section == "Name") { return Books_NameArray; }
+			if (a_section == "Text") { return Books_TextArray; }
+			return Null_S;
+
+		case KMapMa:
+			if (a_section == "Name") { return MapMa_NameArray; }
+			if (a_section == "Text") { return MapMa_TextArray; }
+			return Null_S;
+
+		default:
+			return Null_S;
+		}
+	}
+
+	public: [[nodiscard]] static const std::vector<bool>& ReturnEntriesBool(std::int32_t a_patchID) {
+
+		switch (a_patchID) {
+
+		case kItems:
+			return Items_BoolArray;
+
+		case KBooks:
+			return Books_BoolArray;
+
+		case KMapMa:
+			return MapMa_BoolArray;
+
+		default:
+			return Null_B;
+		}
+	}
+
+	public: [[nodiscard]] static std::int32_t IsOptionCompleted(std::int32_t a_patchID, std::string a_name) {
+
+		switch (a_patchID) {
+
+		case kItems:
+			if (auto t_pos = std::ranges::find(Items_NameArray, a_name); t_pos != Items_NameArray.end()) {
+				return std::int32_t(Items_BoolArray[std::distance(Items_NameArray.begin(), t_pos)]);
 			}
-		}
+			return -1;
 
-		public: [[nodiscard]] static std::vector<RE::TESForm*> ReturnEntriesForm(uint32_t a_patchID) {
-
-			std::vector<RE::TESForm*> Null;
-
-			switch (a_patchID) {
-
-			case kItems:
-				return Items_FormArray;
-
-			case KBooks:
-				return Books_FormArray;
-
-			case KMapMa:
-				return MapMa_FormArray;
-
-			default:
-				return Null;
+		case KBooks:
+			if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
+				return std::int32_t(Books_BoolArray[std::distance(Books_NameArray.begin(), t_pos)]);
 			}
-		}
+			return -1;
 
-		public: [[nodiscard]] static std::vector<std::string> ReturnEntriesString(uint32_t a_patchID, std::string a_section) {
-
-			std::vector<std::string> Null;
-
-			switch (a_patchID) {
-
-			case kItems:
-				if (a_section == "Name") { return Items_NameArray; }
-				if (a_section == "Text") { return Items_TextArray; }
-				return Null;
-
-			case KBooks:
-				if (a_section == "Name") { return Books_NameArray; }
-				if (a_section == "Text") { return Books_TextArray; }
-				return Null;
-
-			case KMapMa:
-				if (a_section == "Name") { return MapMa_NameArray; }
-				if (a_section == "Text") { return MapMa_TextArray; }
-				return Null;
-
-			default:
-				return Null;
+		case KMapMa:
+			if (auto t_pos = std::ranges::find(MapMa_NameArray, a_name); t_pos != MapMa_NameArray.end()) {
+				return std::int32_t(MapMa_BoolArray[std::distance(MapMa_NameArray.begin(), t_pos)]);
 			}
+			return -1;
+
+		default:
+			return -1;
 		}
+	}
 
-		public: [[nodiscard]] static std::vector<bool> ReturnEntriesBool(uint32_t a_patchID) {
+	public: static void SetOptionCompleted(std::int32_t a_patchID, std::string a_name) {
+		using namespace CFramework_Master;
 
-			std::vector<bool> Null;
+		switch (a_patchID) {
 
-			switch (a_patchID) {
+		case kItems:
+			if (auto t_pos = std::ranges::find(Items_NameArray, a_name); t_pos != Items_NameArray.end()) {
+				auto b_pos = std::distance(Items_NameArray.begin(), t_pos);
 
-			case kItems:
-				return Items_BoolArray;
+				if (Items_BoolArray.at(b_pos)) {
+					Items_BoolArray.at(b_pos) = false;
 
-			case KBooks:
-				return Books_BoolArray;
+					FoundItemData.RemoveForm(Items_FormArray.at(b_pos)->GetFormID());
+					for (auto var : CPatch_CLW_Items::Data.GetAllVariations()) {
+						if (CPatch_CLW_Items::Data.GetBase(var) == Items_FormArray.at(b_pos)->GetFormID()) {
+							FoundItemData.RemoveForm(var);
+						}
+					}
+				}
+				else {
+					Items_BoolArray.at(b_pos) = true;
+					FoundItemData.AddForm(Items_FormArray.at(b_pos)->GetFormID());
+					for (auto var : CPatch_CLW_Items::Data.GetAllVariations()) {
+						if (CPatch_CLW_Items::Data.GetBase(var) == Items_FormArray.at(b_pos)->GetFormID()) {
+							FoundItemData.AddForm(var);
+						}
+					}
+				}
 
-			case KMapMa:
-				return MapMa_BoolArray;
-
-			default:
-				return Null;
+				Items_EntriesTotal = Items_FormArray.size();
+				Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
 			}
+			break;
+
+		case KBooks:
+			if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
+				auto b_pos = std::distance(Books_NameArray.begin(), t_pos);
+
+				if (Books_BoolArray.at(b_pos)) {
+					Books_BoolArray.at(b_pos) = false;
+
+					FoundItemData.RemoveForm(Books_FormArray.at(b_pos)->GetFormID());
+					for (auto var : CPatch_CLW_Books::Data.GetAllVariations()) {
+						if (CPatch_CLW_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
+							FoundItemData.RemoveForm(var);
+						}
+					}
+				}
+				else {
+					Books_BoolArray.at(b_pos) = true;
+					FoundItemData.AddForm(Books_FormArray.at(b_pos)->GetFormID());
+					for (auto var : CPatch_CLW_Books::Data.GetAllVariations()) {
+						if (CPatch_CLW_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
+							FoundItemData.AddForm(var);
+						}
+					}
+				}
+
+				Books_EntriesTotal = Books_FormArray.size();
+				Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
+			}
+			break;
+
+		default:
+			break;
 		}
+	}
 	};
 }

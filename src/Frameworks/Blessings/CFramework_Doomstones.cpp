@@ -76,7 +76,6 @@ namespace CFramework_Doomstones {
 		BoolArray[b_pos] = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("Found Items List Size - (No Show) = {}", FoundItemData_NoShow.data.size());
 	}
 
 	//---------------------------------------------------

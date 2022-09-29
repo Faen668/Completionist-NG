@@ -43,22 +43,22 @@ namespace CPatch_CLW {
 	inline std::vector<std::string> Items_TextArray;
 	inline std::vector<RE::TESForm*> Items_FormArray;
 	inline std::vector<bool> Items_BoolArray;
-	inline uint32_t Items_EntriesTotal;
-	inline uint32_t Items_EntriesFound;
+	inline std::int32_t Items_EntriesTotal;
+	inline std::int32_t Items_EntriesFound;
 
 	inline std::vector<std::string> Books_NameArray;
 	inline std::vector<std::string> Books_TextArray;
 	inline std::vector<RE::TESForm*> Books_FormArray;
 	inline std::vector<bool> Books_BoolArray;
-	inline uint32_t Books_EntriesTotal;
-	inline uint32_t Books_EntriesFound;
+	inline std::int32_t Books_EntriesTotal;
+	inline std::int32_t Books_EntriesFound;
 
 	inline std::vector<std::string> MapMa_NameArray;
 	inline std::vector<std::string> MapMa_TextArray;
 	inline std::vector<RE::TESForm*> MapMa_FormArray;
 	inline std::vector<bool> MapMa_BoolArray;
-	inline uint32_t MapMa_EntriesTotal;
-	inline uint32_t MapMa_EntriesFound;
+	inline std::int32_t MapMa_EntriesTotal;
+	inline std::int32_t MapMa_EntriesFound;
 
 	inline std::string_view modname = "Clockwork.esp";
 
@@ -200,7 +200,7 @@ namespace CPatch_CLW {
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, uint32_t a_pos) {
+	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos) {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
@@ -229,25 +229,8 @@ namespace CPatch_CLW {
 		CPatch_CLW_Books::Data.MergeAsCollectable();
 
 		CPatch_CLW_Items::Data.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
-		CPatch_CLW_Books::Data.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray);
-		CPatch_CLW_MapMa::Data.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, true);
-
-		MapMa_TextArray.clear();
-		for (auto& name : MapMa_NameArray) {
-			MapMa_TextArray.push_back("$AddLocationHighlight{" + name + "}");
-		}
-
-		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (Books_FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(Books_FormArray[i]);
-				if (book->GetSpell()) {
-					Books_TextArray[i] = "$AddSpellTomeHighlight{" + Books_NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					Books_TextArray[i] = "$AddSkillBookHighlight{" + Books_NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CPatch_CLW_Books::Data.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray, false, 1);
+		CPatch_CLW_MapMa::Data.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, false, 2);
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
@@ -257,18 +240,6 @@ namespace CPatch_CLW {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-
-		for (auto& name : Items_NameArray) {
-			INFO(name);
-		}
-
-		for (auto& name : Books_NameArray) {
-			INFO(name);
-		}
-
-		for (auto& name : MapMa_NameArray) {
-			INFO(name);
-		}
 
 		//using namespace FrameworkHandler;
 		//RegisterAs<FrameworkID::kCLW_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
@@ -312,90 +283,5 @@ namespace CPatch_CLW {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(Items_NameArray, a_name); t_pos != Items_NameArray.end()) {
-			return uint32_t(Items_BoolArray[std::distance(Items_NameArray.begin(), t_pos)]);
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
-			return uint32_t(Books_BoolArray[std::distance(Books_NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(Items_NameArray, a_name); t_pos != Items_NameArray.end()) {
-			auto b_pos = std::distance(Items_NameArray.begin(), t_pos);
-
-			if (Items_BoolArray.at(b_pos)) {
-				Items_BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(Items_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_CLW_Items::Data.GetAllVariations()) {
-					if (CPatch_CLW_Items::Data.GetBase(var) == Items_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				Items_BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(Items_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_CLW_Items::Data.GetAllVariations()) {
-					if (CPatch_CLW_Items::Data.GetBase(var) == Items_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			Items_EntriesTotal = Items_FormArray.size();
-			Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
-			return;
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
-			auto b_pos = std::distance(Books_NameArray.begin(), t_pos);
-
-			if (Books_BoolArray.at(b_pos)) {
-				Books_BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(Books_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_CLW_Books::Data.GetAllVariations()) {
-					if (CPatch_CLW_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				Books_BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(Books_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_CLW_Books::Data.GetAllVariations()) {
-					if (CPatch_CLW_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			Books_EntriesTotal = Books_FormArray.size();
-			Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
-			return;
-		}
 	}
 }

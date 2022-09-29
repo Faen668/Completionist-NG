@@ -154,7 +154,6 @@ namespace CFramework_Maps_V {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -166,7 +165,7 @@ namespace CFramework_Maps_V {
 		Data.CompileFormArray(CFramework_Maps_V::Maps, "Skyrim.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Maps_V::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
+		CFramework_Maps_V::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
@@ -359,7 +358,6 @@ namespace CFramework_Maps_NTH {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -373,7 +371,7 @@ namespace CFramework_Maps_NTH {
 		Data.CompileFormArray(CFramework_Maps_NTH::Maps, "treasure_hunt.esp");
 		Data.MergeAsCollectable();
 
-		CFramework_Maps_NTH::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
+		CFramework_Maps_NTH::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
@@ -566,7 +564,6 @@ namespace CFramework_Maps_TH {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -580,7 +577,7 @@ namespace CFramework_Maps_TH {
 		Data.CompileFormArray(CFramework_Maps_TH::Maps, "TreasureHunter.esp");
 		Data.MergeAsCollectable();
 
-		CFramework_Maps_TH::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
+		CFramework_Maps_TH::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);

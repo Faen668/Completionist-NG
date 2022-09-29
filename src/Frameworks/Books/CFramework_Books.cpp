@@ -174,7 +174,6 @@ namespace CFramework_Books_AG {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -188,18 +187,7 @@ namespace CFramework_Books_AG {
 		Data.CompileFormArray(CFramework_Books_AG::SkyrimForms, "Skyrim.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_AG::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_AG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -401,7 +389,6 @@ namespace CFramework_Books_HS {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -415,18 +402,7 @@ namespace CFramework_Books_HS {
 		Data.CompileFormArray(CFramework_Books_HS::SkyrimForms, "Skyrim.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_HS::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_HS::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -630,7 +606,6 @@ namespace CFramework_Books_TY {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -644,18 +619,7 @@ namespace CFramework_Books_TY {
 		Data.CompileFormArray(CFramework_Books_TY::SkyrimForms, "Skyrim.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_TY::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_TY::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -857,7 +821,6 @@ namespace CFramework_Books_SB {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -871,18 +834,7 @@ namespace CFramework_Books_SB {
 		Data.CompileFormArray(CFramework_Books_SB::SkyrimForms, "Skyrim.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_SB::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_SB::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -1086,7 +1038,6 @@ namespace CFramework_Books_ST {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1102,18 +1053,7 @@ namespace CFramework_Books_ST {
 
 		Data.MergeAsCollectable();
 
-		CFramework_Books_ST::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_ST::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -1309,7 +1249,6 @@ namespace CFramework_Books_DG {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1324,18 +1263,7 @@ namespace CFramework_Books_DG {
 		Data.CompileFormArray(CFramework_Books_DG::BookForms, "Dawnguard.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_DG::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_DG::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -1529,7 +1457,6 @@ namespace CFramework_Books_DGS {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1545,18 +1472,7 @@ namespace CFramework_Books_DGS {
 
 		Data.MergeAsCollectable();
 
-		CFramework_Books_DGS::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_DGS::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -1755,7 +1671,6 @@ namespace CFramework_Books_DB {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1770,18 +1685,7 @@ namespace CFramework_Books_DB {
 		Data.CompileFormArray(CFramework_Books_DB::BookForms, "Dragonborn.esm");
 		Data.MergeAsCollectable();
 
-		CFramework_Books_DB::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_DB::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}
@@ -1976,7 +1880,6 @@ namespace CFramework_Books_DBS {
 		BoolArray.at(b_pos) = true;
 
 		EntriesFound = std::ranges::count(BoolArray, true);
-		INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 	}
 
 	//---------------------------------------------------
@@ -1992,18 +1895,7 @@ namespace CFramework_Books_DBS {
 
 		Data.MergeAsCollectable();
 
-		CFramework_Books_DBS::Data.Populate(NameArray, FormArray, BoolArray, TextArray);
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FormArray[i]) {
-				auto* book = static_cast<RE::TESObjectBOOK*>(FormArray[i]);
-				if (book->GetSpell()) {
-					TextArray[i] = "$AddSpellTomeHighlight{" + NameArray[i] + "}{" + book->GetSpell()->GetName() + "}";
-				}
-				else if (book->TeachesSkill()) {
-					TextArray[i] = "$AddSkillBookHighlight{" + NameArray[i] + "}{" + CFramework_Master::FrameworkAPI::GetBookSkill(book->GetSkill()) + "}";
-				}
-			}
-		}
+		CFramework_Books_DBS::Data.Populate(NameArray, FormArray, BoolArray, TextArray, false, 1);
 		EntriesTotal = FormArray.size();
 		EntriesFound = std::ranges::count(BoolArray, true);
 	}

@@ -64,22 +64,22 @@ namespace CPatch_FOS {
 	inline std::vector<std::string> ItmL1_TextArray;
 	inline std::vector<RE::TESForm*> ItmL1_FormArray;
 	inline std::vector<bool> ItmL1_BoolArray;
-	inline uint32_t ItmL1_EntriesTotal;
-	inline uint32_t ItmL1_EntriesFound;
+	inline std::int32_t ItmL1_EntriesTotal;
+	inline std::int32_t ItmL1_EntriesFound;
 
 	inline std::vector<std::string> ItmL2_NameArray;
 	inline std::vector<std::string> ItmL2_TextArray;
 	inline std::vector<RE::TESForm*> ItmL2_FormArray;
 	inline std::vector<bool> ItmL2_BoolArray;
-	inline uint32_t ItmL2_EntriesTotal;
-	inline uint32_t ItmL2_EntriesFound;
+	inline std::int32_t ItmL2_EntriesTotal;
+	inline std::int32_t ItmL2_EntriesFound;
 
 	inline std::vector<std::string> ItmL3_NameArray;
 	inline std::vector<std::string> ItmL3_TextArray;
 	inline std::vector<RE::TESForm*> ItmL3_FormArray;
 	inline std::vector<bool> ItmL3_BoolArray;
-	inline uint32_t ItmL3_EntriesTotal;
-	inline uint32_t ItmL3_EntriesFound;
+	inline std::int32_t ItmL3_EntriesTotal;
+	inline std::int32_t ItmL3_EntriesFound;
 
 	inline std::string_view modname = "Fossilsyum.esp";
 
@@ -95,7 +95,6 @@ namespace CPatch_FOS {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
-		PatchesInstalled += 1;
 	}
 
 	//---------------------------------------------------
@@ -287,128 +286,5 @@ namespace CPatch_FOS {
 
 		ItmL3_EntriesTotal = ItmL3_FormArray.size();
 		ItmL3_EntriesFound = std::ranges::count(ItmL3_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-		
-		if (auto t_pos = std::ranges::find(ItmL1_NameArray, a_name); t_pos != ItmL1_NameArray.end()) {
-			return uint32_t(ItmL1_BoolArray[std::distance(ItmL1_NameArray.begin(), t_pos)]);
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(ItmL2_NameArray, a_name); t_pos != ItmL2_NameArray.end()) {
-			return uint32_t(ItmL2_BoolArray[std::distance(ItmL2_NameArray.begin(), t_pos)]);
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(ItmL3_NameArray, a_name); t_pos != ItmL3_NameArray.end()) {
-			return uint32_t(ItmL3_BoolArray[std::distance(ItmL3_NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(ItmL1_NameArray, a_name); t_pos != ItmL1_NameArray.end()) {
-			auto b_pos = std::distance(ItmL1_NameArray.begin(), t_pos);
-
-			if (ItmL1_BoolArray.at(b_pos)) {
-				ItmL1_BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(ItmL1_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL1::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL1::Data.GetBase(var) == ItmL1_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				ItmL1_BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(ItmL1_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL1::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL1::Data.GetBase(var) == ItmL1_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			ItmL1_EntriesTotal = ItmL1_FormArray.size();
-			ItmL1_EntriesFound = std::ranges::count(ItmL1_BoolArray, true);
-			return;
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(ItmL2_NameArray, a_name); t_pos != ItmL2_NameArray.end()) {
-			auto b_pos = std::distance(ItmL2_NameArray.begin(), t_pos);
-
-			if (ItmL2_BoolArray.at(b_pos)) {
-				ItmL2_BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(ItmL2_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL2::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL2::Data.GetBase(var) == ItmL2_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				ItmL2_BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(ItmL2_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL2::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL2::Data.GetBase(var) == ItmL2_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			ItmL2_EntriesTotal = ItmL2_FormArray.size();
-			ItmL2_EntriesFound = std::ranges::count(ItmL2_BoolArray, true);
-			return;
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (auto t_pos = std::ranges::find(ItmL3_NameArray, a_name); t_pos != ItmL3_NameArray.end()) {
-			auto b_pos = std::distance(ItmL3_NameArray.begin(), t_pos);
-
-			if (ItmL3_BoolArray.at(b_pos)) {
-				ItmL3_BoolArray.at(b_pos) = false;
-
-				FoundItemData.RemoveForm(ItmL3_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL3::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL3::Data.GetBase(var) == ItmL3_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				ItmL3_BoolArray.at(b_pos) = true;
-				FoundItemData.AddForm(ItmL3_FormArray.at(b_pos)->GetFormID());
-				for (auto var : CPatch_FOS_ItmL3::Data.GetAllVariations()) {
-					if (CPatch_FOS_ItmL3::Data.GetBase(var) == ItmL3_FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData.AddForm(var);
-					}
-				}
-			}
-
-			ItmL3_EntriesTotal = ItmL3_FormArray.size();
-			ItmL3_EntriesFound = std::ranges::count(ItmL3_BoolArray, true);
-			return;
-		}
 	}
 }

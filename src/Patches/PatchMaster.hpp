@@ -15,20 +15,18 @@ namespace CPatch_Master
 
 	public:
 
-		static void	InstallPatches();
-		static void LoadallPatches();
+		static void							InstallPatches();
+		static void							LoadallPatches();
 
-		static bool ShouldDisplayMiscHeader(RE::StaticFunctionTag*);
+		static bool							ShouldDisplayMiscHeader(RE::StaticFunctionTag*);
 
-		static std::vector<RE::TESForm*> GetFormArrayByID(uint32_t a_patchID);
-		static std::vector<std::string> GetNameArrayByID(uint32_t a_patchID);
-		static std::vector<std::string> GetTextArrayByID(uint32_t a_patchID);
-		static std::vector<bool> GetBoolArrayByID(uint32_t a_patchID);
+		static std::vector<RE::TESForm*>	GetFormArrayByID(std::int32_t a_patchID);
+		static std::vector<bool>			GetBoolArrayByID(std::int32_t a_patchID);
 
-		static uint32_t GetEntries_TotalByID(uint32_t a_patchID);
-		static uint32_t GetEntries_FoundByID(uint32_t a_patchID);
+		static std::vector<std::string>		GetStringValues(std::int32_t a_patchID, std::string a_section);
+		static std::int32_t					GetCountValues(std::int32_t a_patchID, std::string a_section);
 
-		static uint32_t IsOptionCompleted(uint32_t a_patchID, std::string a_name);
-		static void SetOptionCompleted(uint32_t a_patchID, std::string a_name);
+		static std::int32_t					IsOptionCompleted(std::int32_t a_patchID, std::string a_name);
+		static void							SetOptionCompleted(std::int32_t a_patchID, std::string a_name);
 	};
 }

@@ -13,6 +13,7 @@
 #include "Items/CFramework_Barenziah.hpp"
 
 //Misc Frameworks
+#include "Pets/CFramework_Pets.hpp"
 #include "Books/CFramework_Maps.hpp"
 #include "Books/CFramework_Books.hpp"
 #include "Locations/CFramework_Locations.hpp"
@@ -22,9 +23,6 @@
 //Blessings Frameworks
 #include "Blessings/CFramework_Shrines.hpp"
 #include "Blessings/CFramework_Doomstones.hpp"
-
-// Patches
-#include "Patches/Fishing/CFramework_Fishing.hpp"
 
 //Creation Club
 #include "Creation Club/CFramework_CreationClub.hpp"
@@ -44,6 +42,8 @@ namespace CFramework_Master {
 	//---------------------------------------------------
 
 	void FrameworkAPI::Register() {
+
+		auto t1 = std::chrono::system_clock::now();
 
 		FoundItemData.SetAsSerializable();
 		FoundItemData_NoShow.SetAsSerializable();
@@ -66,6 +66,7 @@ namespace CFramework_Master {
 		CFramework_DragonMasks_P::CHandler::InstallFramework();
 
 		//Misc
+		CFramework_Pets::CHandler::InstallFramework();
 		CFramework_MapsManager::CHandler::InstallFramework();
 		CFramework_BooksManager::CHandler::InstallFramework();
 		CFramework_LocationsManager::CHandler::InstallFramework();
@@ -87,10 +88,12 @@ namespace CFramework_Master {
 		// Patches
 		CPatch_Master::PatchAPI::InstallPatches();
 
-		CPatchManager_Fishing::CHandler::InstallFramework();
+		auto t2 = std::chrono::system_clock::now();
+		auto elapsedSE = (std::chrono::duration_cast<std::chrono::seconds>(t2 - t1)).count();
+		auto elapsedMS = (std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)).count();
+		auto elapsedNS = (std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)).count();
 
-		// Finished
-		RE::DebugMessageBox("Finished Installing Frameworks");
+		INFO("FInished Installing Completionist in {} seconds - {} Milliseconds - {} Nanoseconds", elapsedSE, elapsedMS, elapsedNS);
 	}
 	
 	//---------------------------------------------------
@@ -114,6 +117,7 @@ namespace CFramework_Master {
 		a_vm->RegisterFunction("Framework_IsOptionCompleted", "Completionist_Native", Framework_IsOptionCompleted);
 		a_vm->RegisterFunction("Framework_SetOptionCompleted", "Completionist_Native", Framework_SetOptionCompleted);
 
+		a_vm->RegisterFunction("Framework_UpdatePetOwnership", "Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
 		a_vm->RegisterFunction("ShouldDisplayMiscHeader", "Completionist_Native", CPatch_Master::PatchAPI::ShouldDisplayMiscHeader);
 		return true;
 	}
@@ -177,6 +181,7 @@ namespace CFramework_Master {
 		CFramework_DragonMasks_P::CHandler::UpdateFoundForms();
 
 		//Misc
+		CFramework_Pets::CHandler::UpdateFoundForms();
 		CFramework_MapsManager::CHandler::UpdateFoundForms();
 		CFramework_BooksManager::CHandler::UpdateFoundForms();
 		CFramework_LocationsManager::CHandler::UpdateFoundForms();
@@ -197,20 +202,23 @@ namespace CFramework_Master {
 
 		// Patches
 		CPatch_Master::PatchAPI::LoadallPatches();
-
-		CPatchManager_Fishing::CHandler::UpdateFoundForms();
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Getter - Total ) ---------
 	//---------------------------------------------------
 
-	uint32_t FrameworkAPI::Framework_GetEntries_TotalByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::int32_t FrameworkAPI::Framework_GetEntries_TotalByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
-			return CPatch_Master::PatchAPI::GetEntries_TotalByID(a_ID);
+			return CPatch_Master::PatchAPI::GetCountValues(a_ID, "Total");
 		}
-			
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::ReturnEntriesInt(a_ID, "Total");
+		}
+
 		switch (a_ID) {
 
 			//-------------------------------------------- Items
@@ -241,6 +249,9 @@ namespace CFramework_Master {
 
 		case 8:
 			return CFramework_Items::EntriesTotal;
+
+		case 9:
+			return CFramework_Pets::Pet_1_EntriesTotal;
 
 		case 29:
 			return CFramework_Barenziah::EntriesTotal;
@@ -273,6 +284,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::EntriesTotal;
+
+		case 19:
+			return CFramework_Pets::Pet_2_EntriesTotal;
 
 		case 37:
 			return CFramework_Maps_V::EntriesTotal;
@@ -336,47 +350,24 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::EntriesTotal;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::EntriesTotal;
-
-		case 51:
-			return CPatch_FishingBooks::EntriesTotal;
-
-		case 52:
-			return CPatch_FishingSpots_A::EntriesTotal;
-
-		case 53:
-			return CPatch_FishingSpots_C::EntriesTotal;
-
-		case 54:
-			return CPatch_FishingSpots_L::EntriesTotal;
-
-		case 55:
-			return CPatch_FishingSpots_S::EntriesTotal;
-
-		case 56:
-			return CPatch_FishingFood::EntriesTotal;
-
 			//-------------------------------------------- Creation CLub
 
-		case 90:
+		case 40:
 			return CFramework_CreationClub_L::EntriesTotal;
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::EntriesTotal;
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::EntriesTotal;
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::EntriesTotal;
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::EntriesTotal;
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::EntriesTotal;
 
 		default:
@@ -388,10 +379,15 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Getter - Found ) ---------
 	//---------------------------------------------------
 
-	uint32_t FrameworkAPI::Framework_GetEntries_FoundByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::int32_t FrameworkAPI::Framework_GetEntries_FoundByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
-			return CPatch_Master::PatchAPI::GetEntries_FoundByID(a_ID);
+			return CPatch_Master::PatchAPI::GetCountValues(a_ID, "Found");
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::ReturnEntriesInt(a_ID, "Found");
 		}
 
 		switch (a_ID) {
@@ -425,6 +421,9 @@ namespace CFramework_Master {
 	case 8:
 		return CFramework_Items::EntriesFound;
 
+	case 9:
+		return CFramework_Pets::Pet_1_EntriesFound;
+
 	case 29:
 		return CFramework_Barenziah::EntriesFound;
 
@@ -456,6 +455,9 @@ namespace CFramework_Master {
 
 	case 18:
 		return CFramework_Books_DBS::EntriesFound;
+
+	case 19:
+		return CFramework_Pets::Pet_2_EntriesFound;
 
 	case 37:
 		return CFramework_Maps_V::EntriesFound;
@@ -519,47 +521,24 @@ namespace CFramework_Master {
 	case 36:
 		return CFramework_PlayerHomes_P::EntriesFound;
 
-		//-------------------------------------------- Fishing
-
-	case 50:
-		return CPatch_FishingItems::EntriesFound;
-
-	case 51:
-		return CPatch_FishingBooks::EntriesFound;
-
-	case 52:
-		return CPatch_FishingSpots_A::EntriesFound;
-
-	case 53:
-		return CPatch_FishingSpots_C::EntriesFound;
-
-	case 54:
-		return CPatch_FishingSpots_L::EntriesFound;
-
-	case 55:
-		return CPatch_FishingSpots_S::EntriesFound;
-
-	case 56:
-		return CPatch_FishingFood::EntriesFound;
-
 		//-------------------------------------------- Creation CLub
 
-	case 90:
+	case 40:
 		return CFramework_CreationClub_L::EntriesFound;
 
-	case 91:
+	case 41:
 		return CFramework_CreationClub_B::EntriesFound;
 
-	case 92:
+	case 42:
 		return CFramework_CreationClub_S::EntriesFound;
 
-	case 93:
+	case 43:
 		return CFramework_CreationClub_A::EntriesFound;
 
-	case 94:
+	case 44:
 		return CFramework_CreationClub_W::EntriesFound;
 
-	case 95:
+	case 45:
 		return CFramework_CreationClub_I::EntriesFound;
 
 		default:
@@ -571,11 +550,20 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Getter - Forms ) ---------
 	//---------------------------------------------------
 
-	std::vector<RE::TESForm*> FrameworkAPI::Framework_GetFormArrayByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::vector<RE::TESForm*> FrameworkAPI::Framework_GetFormArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
+			INFO("Diverting To Patch Master Due To ID Being {} ", a_ID);
 			return CPatch_Master::PatchAPI::GetFormArrayByID(a_ID);
 		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			INFO("Diverting To PetFramework Due To ID Being {} ", a_ID);
+			return CFramework_Pets::CHandler::ReturnEntriesForm(a_ID);
+		}
+
+		INFO("Entering Switch Case for Framework - {} ", a_ID);
 
 		switch (a_ID) {
 
@@ -608,6 +596,9 @@ namespace CFramework_Master {
 		case 8:
 			return CFramework_Items::FormArray;
 
+		case 9:
+			return CFramework_Pets::Pet_1_FormArray;
+
 		case 29:
 			return CFramework_Barenziah::FormArray;
 
@@ -639,6 +630,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::FormArray;
+
+		case 19:
+			return CFramework_Pets::Pet_2_FormArray;
 
 		case 37:
 			return CFramework_Maps_V::FormArray;
@@ -702,47 +696,24 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::FormArray;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::FormArray;
-
-		case 51:
-			return CPatch_FishingBooks::FormArray;
-
-		case 52:
-			return CPatch_FishingSpots_A::FormArray;
-
-		case 53:
-			return CPatch_FishingSpots_C::FormArray;
-
-		case 54:
-			return CPatch_FishingSpots_L::FormArray;
-
-		case 55:
-			return CPatch_FishingSpots_S::FormArray;
-
-		case 56:
-			return CPatch_FishingFood::FormArray;
-
 			//-------------------------------------------- Creation CLub
 
-		case 90:
+		case 40:
 			return CFramework_CreationClub_L::FormArray;
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::FormArray;
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::FormArray;
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::FormArray;
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::FormArray;
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::FormArray;
 
 		default:
@@ -754,10 +725,15 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Getter - Names ) ---------
 	//---------------------------------------------------
 
-	std::vector<std::string> FrameworkAPI::Framework_GetNameArrayByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::vector<std::string> FrameworkAPI::Framework_GetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
-			return CPatch_Master::PatchAPI::GetNameArrayByID(a_ID);
+			return CPatch_Master::PatchAPI::GetStringValues(a_ID, "Name");
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::ReturnEntriesString(a_ID, "Name");
 		}
 
 		switch (a_ID) {
@@ -792,6 +768,9 @@ namespace CFramework_Master {
 		case 8:
 			return CFramework_Items::NameArray;
 
+		case 9:
+			return CFramework_Pets::Pet_1_NameArray;
+
 		case 29:
 			return CFramework_Barenziah::NameArray;
 
@@ -823,6 +802,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::NameArray;
+
+		case 19:
+			return CFramework_Pets::Pet_2_NameArray;
 
 		case 37:
 			return CFramework_Maps_V::NameArray;
@@ -886,47 +868,24 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::NameArray;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::NameArray;
-
-		case 51:
-			return CPatch_FishingBooks::NameArray;
-
-		case 52:
-			return CPatch_FishingSpots_A::NameArray;
-
-		case 53:
-			return CPatch_FishingSpots_C::NameArray;
-
-		case 54:
-			return CPatch_FishingSpots_L::NameArray;
-
-		case 55:
-			return CPatch_FishingSpots_S::NameArray;
-
-		case 56:
-			return CPatch_FishingFood::NameArray;
-
 			//-------------------------------------------- Creation CLub
 
-		case 90:
+		case 40:
 			return CFramework_CreationClub_L::NameArray;
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::NameArray;
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::NameArray;
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::NameArray;
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::NameArray;
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::NameArray;
 
 		default:
@@ -938,10 +897,15 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Getter - Texts ) ---------
 	//---------------------------------------------------
 
-	std::vector<std::string> FrameworkAPI::Framework_GetTextArrayByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::vector<std::string> FrameworkAPI::Framework_GetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
-			return CPatch_Master::PatchAPI::GetTextArrayByID(a_ID);
+			return CPatch_Master::PatchAPI::GetStringValues(a_ID, "Text");
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::ReturnEntriesString(a_ID, "Text");
 		}
 
 		switch (a_ID) {
@@ -975,6 +939,9 @@ namespace CFramework_Master {
 		case 8:
 			return CFramework_Items::TextArray;
 
+		case 9:
+			return CFramework_Pets::Pet_1_TextArray;
+
 		case 29:
 			return CFramework_Barenziah::TextArray;
 
@@ -1006,6 +973,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::TextArray;
+
+		case 19:
+			return CFramework_Pets::Pet_2_TextArray;
 
 		case 37:
 			return CFramework_Maps_V::TextArray;
@@ -1069,47 +1039,24 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::TextArray;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::TextArray;
-
-		case 51:
-			return CPatch_FishingBooks::TextArray;
-
-		case 52:
-			return CPatch_FishingSpots_A::TextArray;
-
-		case 53:
-			return CPatch_FishingSpots_C::TextArray;
-
-		case 54:
-			return CPatch_FishingSpots_L::TextArray;
-
-		case 55:
-			return CPatch_FishingSpots_S::TextArray;
-
-		case 56:
-			return CPatch_FishingFood::TextArray;
-
 			//-------------------------------------------- Creation CLub
 
-		case 90:
+		case 40:
 			return CFramework_CreationClub_L::TextArray;
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::TextArray;
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::TextArray;
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::TextArray;
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::TextArray;
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::TextArray;
 
 		default:
@@ -1121,10 +1068,15 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Getter - Bools ) ---------
 	//---------------------------------------------------
 
-	std::vector<bool> FrameworkAPI::Framework_GetBoolArrayByID(RE::StaticFunctionTag*, uint32_t a_ID) {
+	std::vector<bool> FrameworkAPI::Framework_GetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		if (a_ID >= 200) {
 			return CPatch_Master::PatchAPI::GetBoolArrayByID(a_ID);
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::ReturnEntriesBool(a_ID);
 		}
 
 		switch (a_ID) {
@@ -1158,6 +1110,9 @@ namespace CFramework_Master {
 		case 8:
 			return CFramework_Items::BoolArray;
 
+		case 9:
+			return CFramework_Pets::Pet_1_BoolArray;
+
 		case 29:
 			return CFramework_Barenziah::BoolArray;
 
@@ -1189,6 +1144,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::BoolArray;
+
+		case 19:
+			return CFramework_Pets::Pet_2_BoolArray;
 
 		case 37:
 			return CFramework_Maps_V::BoolArray;
@@ -1252,47 +1210,24 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::BoolArray;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::BoolArray;
-
-		case 51:
-			return CPatch_FishingBooks::BoolArray;
-
-		case 52:
-			return CPatch_FishingSpots_A::BoolArray;
-
-		case 53:
-			return CPatch_FishingSpots_C::BoolArray;
-
-		case 54:
-			return CPatch_FishingSpots_L::BoolArray;
-
-		case 55:
-			return CPatch_FishingSpots_S::BoolArray;
-
-		case 56:
-			return CPatch_FishingFood::BoolArray;
-
 			//-------------------------------------------- Creation CLub
 
-		case 90:
+		case 40:
 			return CFramework_CreationClub_L::BoolArray;
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::BoolArray;
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::BoolArray;
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::BoolArray;
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::BoolArray;
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::BoolArray;
 
 		default:
@@ -1304,10 +1239,15 @@ namespace CFramework_Master {
 	//-- Framework Functions ( MCM Getter - Status ) ----
 	//---------------------------------------------------
 
-	uint32_t FrameworkAPI::Framework_IsOptionCompleted(RE::StaticFunctionTag*, uint32_t a_ID, std::string a_name) {
+	std::int32_t FrameworkAPI::Framework_IsOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_name) {
 
 		if (a_ID >= 200) {
 			return CPatch_Master::PatchAPI::IsOptionCompleted(a_ID, a_name);
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			return CFramework_Pets::CHandler::IsOptionCompleted(a_ID, a_name);
 		}
 
 		switch (a_ID) {
@@ -1341,6 +1281,9 @@ namespace CFramework_Master {
 		case 8:
 			return CFramework_Items::CHandler::IsOptionCompleted(a_name);
 
+		case 9:
+			return CFramework_Pets::CHandler::IsOptionCompleted(a_ID, a_name);
+
 		case 29:
 			return CFramework_Barenziah::CHandler::IsOptionCompleted(a_name);
 
@@ -1372,6 +1315,9 @@ namespace CFramework_Master {
 
 		case 18:
 			return CFramework_Books_DBS::BookHandler::IsOptionCompleted(a_name);
+
+		case 19:
+			return CFramework_Pets::CHandler::IsOptionCompleted(a_ID, a_name);
 
 		case 37:
 			return CFramework_Maps_V::BookHandler::IsOptionCompleted(a_name);
@@ -1418,32 +1364,21 @@ namespace CFramework_Master {
 		case 36:
 			return CFramework_PlayerHomes_P::CHandler::IsOptionCompleted(a_name);
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			return CPatch_FishingItems::CHandler::IsOptionCompleted(a_name);
-
-		case 51:
-			return CPatch_FishingBooks::BHandler::IsOptionCompleted(a_name);
-
-		case 56:
-			return CPatch_FishingFood::CHandler::IsOptionCompleted(a_name);
-
 		//-------------------------------------------- Creation CLub
 
-		case 91:
+		case 41:
 			return CFramework_CreationClub_B::BookHandler::IsOptionCompleted(a_name);
 
-		case 92:
+		case 42:
 			return CFramework_CreationClub_S::BookHandler::IsOptionCompleted(a_name);
 
-		case 93:
+		case 43:
 			return CFramework_CreationClub_A::CHandler::IsOptionCompleted(a_name);
 
-		case 94:
+		case 44:
 			return CFramework_CreationClub_W::CHandler::IsOptionCompleted(a_name);
 
-		case 95:
+		case 45:
 			return CFramework_CreationClub_I::CHandler::IsOptionCompleted(a_name);
 
 		default:
@@ -1455,11 +1390,16 @@ namespace CFramework_Master {
 	//-- Framework Functions ( MCM Setter - Status ) ----
 	//---------------------------------------------------
 
-	void FrameworkAPI::Framework_SetOptionCompleted(RE::StaticFunctionTag*, uint32_t a_ID, std::string a_name) {
+	void FrameworkAPI::Framework_SetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_name) {
 
 		if (a_ID >= 200) {
 			CPatch_Master::PatchAPI::SetOptionCompleted(a_ID, a_name);
 			return;
+		}
+
+		if (a_ID == CFramework_Pets::kPet_1 || a_ID == CFramework_Pets::kPet_2 ||
+			a_ID == CFramework_Pets::kPet_3 || a_ID == CFramework_Pets::kPet_4) {
+			CFramework_Pets::CHandler::SetOptionCompleted(a_ID, a_name);
 		}
 
 		switch (a_ID) {
@@ -1502,6 +1442,10 @@ namespace CFramework_Master {
 			CFramework_Items::CHandler::SetOptionCompleted(a_name);
 			break;
 
+		case 9:
+			CFramework_Pets::CHandler::SetOptionCompleted(a_ID, a_name);
+			break;
+
 		case 29:
 			CFramework_Barenziah::CHandler::SetOptionCompleted(a_name);
 			break;
@@ -1542,6 +1486,10 @@ namespace CFramework_Master {
 
 		case 18:
 			CFramework_Books_DBS::BookHandler::SetOptionCompleted(a_name);
+			break;
+
+		case 19:
+			CFramework_Pets::CHandler::SetOptionCompleted(a_ID, a_name);
 			break;
 
 		case 37:
@@ -1602,39 +1550,25 @@ namespace CFramework_Master {
 			CFramework_PlayerHomes_P::CHandler::SetOptionCompleted(a_name);
 			break;
 
-			//-------------------------------------------- Fishing
-
-		case 50:
-			CPatch_FishingItems::CHandler::SetOptionCompleted(a_name);
-			break;
-
-		case 51:
-			CPatch_FishingBooks::BHandler::SetOptionCompleted(a_name);
-			break;
-
-		case 56:
-			CPatch_FishingFood::CHandler::SetOptionCompleted(a_name);
-			break;
-
 			//-------------------------------------------- Creation CLub
 
-		case 91:
+		case 41:
 			CFramework_CreationClub_B::BookHandler::SetOptionCompleted(a_name);
 			break;
 
-		case 92:
+		case 42:
 			CFramework_CreationClub_S::BookHandler::SetOptionCompleted(a_name);
 			break;
 
-		case 93:
+		case 43:
 			CFramework_CreationClub_A::CHandler::SetOptionCompleted(a_name);
 			break;
 
-		case 94:
+		case 44:
 			CFramework_CreationClub_W::CHandler::SetOptionCompleted(a_name);
 			break;
 
-		case 95:
+		case 45:
 			CFramework_CreationClub_I::CHandler::SetOptionCompleted(a_name);
 			break;
 

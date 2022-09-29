@@ -4,12 +4,22 @@
 #include "Radiant Quest Handler/Radiant Quests Manager.hpp"
 #include "Internal Utility/InventoryMode.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Variables.hpp"
 
 using namespace Completionist;
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
 const SKSE::QueryInterface* g_QueryInterface = nullptr;
+
+/*DLLEXPORT bool SKSEAPI moreHUDItemIsValid(const RE::FormID a_formID) {
+
+	if (a_formID) {
+		INFO("Got FormID {}", a_formID);
+		return true;
+	}
+	return false;
+};*/
 
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 {
@@ -22,6 +32,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CFramework_Master::FrameworkAPI::Register();
 		Quest_Manager::Install();
 		Papyrus::Register();
+		CVariables::CHandler::Register();
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:
@@ -31,6 +42,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
+		CVariables::CHandler::Update();
 		CFramework_Master::FrameworkAPI::Framework_Load();
 		break;
 

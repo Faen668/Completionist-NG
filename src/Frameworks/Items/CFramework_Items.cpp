@@ -105,7 +105,6 @@ namespace CFramework_Items {
 			}
 
 			EntriesFound = std::ranges::count(BoolArray, true);
-			INFO("FOUND ITEMS LIST = {}", FoundItemData.data.size());
 		}
 	}
 
