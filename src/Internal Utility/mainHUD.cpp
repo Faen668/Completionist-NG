@@ -18,21 +18,21 @@ namespace Completionist_MainHUD {
 	//-- Crosshair Hook For HUD Tagging -----------------
 	//---------------------------------------------------
 
-	void FunctionHolder::InstallHook() {
+	void TextnTagsAPI::Register() {
 
 		auto& trampoline = SKSE::GetTrampoline();
 		_OnUpdateCrosshairText = trampoline.write_call<5>(RELOCATION_ID(39535, 40621).address() + REL::Relocate(0x289, 0x280), OnUpdateCrosshairText);
 		_OnUpdateInventoryText = trampoline.write_branch<5>(RELOCATION_ID(50926, 51803).address() + REL::Relocate(0x4, 0x4), OnUpdateInventoryText);
 
 		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(FunctionHolder::GetSingleton()));
+		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(TextnTagsAPI::GetSingleton()));
 	}
 
 	//---------------------------------------------------
 	//-- Events ( Clear Garbage On Menu Close ) ---------
 	//---------------------------------------------------
 
-	EventResult FunctionHolder::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
+	EventResult TextnTagsAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 
 		if (!a_event || a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
 
@@ -44,7 +44,7 @@ namespace Completionist_MainHUD {
 	//-- Inventory Hook For Name Tagging ----------------
 	//---------------------------------------------------
 
-	const char* FunctionHolder::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
+	const char* TextnTagsAPI::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
 
 		auto baseform = a_this->object;
 		if (!baseform || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
@@ -96,7 +96,7 @@ namespace Completionist_MainHUD {
 	//-- Crosshair Hook For HUD Tagging -----------------
 	//---------------------------------------------------
 
-	void FunctionHolder::OnUpdateCrosshairText(RE::UIMessageQueue * a_this, const RE::BSFixedString & a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData * a_data) {
+	void TextnTagsAPI::OnUpdateCrosshairText(RE::UIMessageQueue * a_this, const RE::BSFixedString & a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData * a_data) {
 
 		_OnUpdateCrosshairText(a_this, a_menuName, a_type, a_data);
 
@@ -111,7 +111,7 @@ namespace Completionist_MainHUD {
 	//-- Crosshair Hook For HUD Tagging -----------------
 	//---------------------------------------------------
 
-	void FunctionHolder::ProcessCrosshairReference(RE::HUDData* data) {
+	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data) {
 
 		if (auto CurrentRef = RE::CrosshairPickData::GetSingleton(); CurrentRef) {
 			if (auto CurrentObj = CurrentRef->target.get(); CurrentObj) {
@@ -223,10 +223,14 @@ namespace Completionist_MainHUD {
 		}
 	}
 
-	bool FunctionHolder::ItemIsCollectable(RE::FormID a_formID) {
+	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) {
 		return CompletionistData::CheckIsCollectable(a_formID) && !FoundItemData.HasForm(a_formID) && !FoundItemData_NoShow.HasForm(a_formID);
 	}
 
-	bool FunctionHolder::ItemIsCollected(RE::FormID a_formID) { return FoundItemData.HasForm(a_formID); }
-	bool FunctionHolder::ItemIsCollected(RE::TESForm* a_form) { return FoundItemData.HasForm(a_form->GetFormID()); }
+	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) {
+		return CompletionistData::CheckIsCollectable(a_form->GetFormID()) && !FoundItemData.HasForm(a_form->GetFormID()) && !FoundItemData_NoShow.HasForm(a_form->GetFormID());
+	}
+
+	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { return FoundItemData.HasForm(a_formID); }
+	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) { return FoundItemData.HasForm(a_form->GetFormID()); }
 }

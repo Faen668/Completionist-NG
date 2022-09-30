@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_MTE.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -15,9 +14,7 @@ namespace CPatch_MTE_Books {
 }
 
 namespace CPatch_MTE {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
@@ -194,10 +191,6 @@ namespace CPatch_MTE {
 
 		Books_EntriesTotal = Books_FormArray.size();
 		Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kMTE_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
-		//RegisterAs<FrameworkID::kMTE_Books>(&Books_NameArray, &Books_FormArray, &Books_BoolArray, &Books_TextArray);
 	}
 
 	//---------------------------------------------------

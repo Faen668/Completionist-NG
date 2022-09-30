@@ -1,12 +1,9 @@
 ﻿#include "Serialization.hpp"
 #include "Internal Utility/mainHUD.hpp"
-#include "Papyrus.hpp"
 #include "Radiant Quest Handler/Radiant Quests Manager.hpp"
 #include "Internal Utility/InventoryMode.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Variables.hpp"
-
-using namespace Completionist;
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
@@ -21,18 +18,22 @@ const SKSE::QueryInterface* g_QueryInterface = nullptr;
 	return false;
 };*/
 
-static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
-{
+static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
+	using namespace Completionist_MainHUD;
+	using namespace CInventoryEvents;
+	using namespace CFramework_Master;
+	using namespace CVariables;
+
 	switch (message->type)
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
-
-		Completionist_MainHUD::FunctionHolder::InstallHook();
-		Completionist_Inventory::FunctionHolder::Register();
-		CFramework_Master::FrameworkAPI::Register();
+		
 		Quest_Manager::Install();
-		Papyrus::Register();
-		CVariables::CHandler::Register();
+
+		//InventoryAPI::Register();
+		TextnTagsAPI::Register();
+		VariablesAPI::Register();
+		FrameworkAPI::Register();
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:
@@ -42,8 +43,9 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
-		CVariables::CHandler::Update();
-		CFramework_Master::FrameworkAPI::Framework_Load();
+
+		VariablesAPI::Update();
+		FrameworkAPI::Framework_Load();
 		break;
 
 	case SKSE::MessagingInterface::kPostLoad:

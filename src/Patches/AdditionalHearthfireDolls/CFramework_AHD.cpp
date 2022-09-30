@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_AHD.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -11,9 +10,7 @@ namespace CPatch_AHD_Items {
 }
 
 namespace CPatch_AHD {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
@@ -109,7 +106,7 @@ namespace CPatch_AHD {
 	//-- Framework Functions ( Form Injection ) ---------
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
+	void CHandler::InjectAndCompileData() {	
 
 		CPatch_AHD_Items::Data.CompileFormArray(CPatch_AHD::Items, modname);
 		CPatch_AHD_Items::Data.MergeAsCollectable();
@@ -118,9 +115,6 @@ namespace CPatch_AHD {
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kAHD_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
 	}
 
 	//---------------------------------------------------

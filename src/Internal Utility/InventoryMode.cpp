@@ -1,131 +1,58 @@
-#include "InventoryMode.hpp"
 #include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-#include "Papyrus.hpp"
+#include "Variables.hpp"
+#include "InventoryMode.hpp"
+#include "mainHUD.hpp"
 #include "DKUtil/Utility.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
-using namespace Completionist;
-using namespace ScriptObject;
-
-namespace Inv_vars {
-
-	inline ScriptObjectPtr  Inv_MCM;
-
-	inline uint32_t IconChoice;
-	inline uint32_t TextChoice;
-
-	inline bool Inv_Ammo_Enabled_New;
-	inline bool Inv_Ammo_Enabled_Found;
-	inline uint32_t Inv_Ammo_Colour_New;
-	inline uint32_t Inv_Ammo_Colour_Found;
-	inline std::string Inv_Ammo_ColourString_New;
-	inline std::string Inv_Ammo_ColourString_Found;
-
-	inline bool Inv_Alchemy_Enabled_New;
-	inline bool Inv_Alchemy_Enabled_Found;
-	inline uint32_t Inv_Alchemy_Colour_New;
-	inline uint32_t Inv_Alchemy_Colour_Found;
-	inline std::string Inv_Alchemy_ColourString_New;
-	inline std::string Inv_Alchemy_ColourString_Found;
-
-	inline bool Inv_Armor_Enabled_New;
-	inline bool Inv_Armor_Enabled_Found;
-	inline uint32_t Inv_Armor_Colour_New;
-	inline uint32_t Inv_Armor_Colour_Found;
-	inline std::string Inv_Armor_ColourString_New;
-	inline std::string Inv_Armor_ColourString_Found;
-
-	inline bool Inv_Books_Enabled_New;
-	inline bool Inv_Books_Enabled_Found;
-	inline uint32_t Inv_Books_Colour_New;
-	inline uint32_t Inv_Books_Colour_Found;
-	inline std::string Inv_Books_ColourString_New;
-	inline std::string Inv_Books_ColourString_Found;
-
-	inline bool Inv_Weapons_Enabled_New;
-	inline bool Inv_Weapons_Enabled_Found;
-	inline uint32_t Inv_Weapons_Colour_New;
-	inline uint32_t Inv_Weapons_Colour_Found;
-	inline std::string Inv_Weapons_ColourString_New;
-	inline std::string Inv_Weapons_ColourString_Found;
-
-	inline bool Inv_Other_Enabled_New;
-	inline bool Inv_Other_Enabled_Found;
-	inline uint32_t Inv_Other_Colour_New;
-	inline uint32_t Inv_Other_Colour_Found;
-	inline std::string Inv_Other_ColourString_New;
-	inline std::string Inv_Other_ColourString_Found;
-
-	inline uint32_t Inv_Default_New = 4430046;
-	inline uint32_t Inv_Default_Found = 1288220;
-
-	inline std::string Inv_CrosshairTag_New = "Collectable";
-	inline std::string Inv_CrosshairTag_Found = "Collected";
-
-	inline bool Inv_DearDiarySupport;
-}
-
-namespace InventoryEvents {
+namespace CInventoryEvents {
 
 	//---------------------------------------------------
 	//-- Event Functions --------------------------------
 	//---------------------------------------------------
 
-	auto InventoryMenuHandler::GetSingleton() -> InventoryMenuHandler* {
-		static InventoryMenuHandler singleton;
-		return std::addressof(singleton);
-	}
+	void InventoryAPI::Register() {
 
-	//---------------------------------------------------
-	//-- Event Functions --------------------------------
-	//---------------------------------------------------
-
-	void InventoryMenuHandler::Sink() {
 		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(InventoryMenuHandler::GetSingleton()));
+		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(InventoryAPI::GetSingleton()));
 	}
 
 	//---------------------------------------------------
 	//-- Event Functions --------------------------------
 	//---------------------------------------------------
 
-	auto InventoryMenuHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl {
+	EventResult InventoryAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 
-		if (!a_event || !a_event->opening || !Completionist_Inventory::FunctionHolder::IsReady()) {
-			return EventResult::kContinue;
-		}
+		if (!a_event || !a_event->opening) { return EventResult::kContinue; }
 		
 		auto* const ui = RE::UI::GetSingleton();
-		auto* const intfcStr = RE::InterfaceStrings::GetSingleton();
 		RE::ItemList* itemList{ nullptr };
 		RE::GFxValue nullIconSetter{};
 
-		if (a_event->menuName == intfcStr->barterMenu) {
+		if (a_event->menuName == RE::BarterMenu::MENU_NAME) {
 			if (const auto* menu = static_cast<RE::BarterMenu*>(ui->GetMenu(a_event->menuName).get())) {
+				
 				menu->uiMovie->SetVariable("InventoryIconSetter", &nullIconSetter);
-
 				itemList = menu->itemList;
 			}
 		}
-		else if (a_event->menuName == intfcStr->containerMenu) {
+		else if (a_event->menuName == RE::ContainerMenu::MENU_NAME) {
 			if (const auto* menu = static_cast<RE::ContainerMenu*>(ui->GetMenu(a_event->menuName).get())) {
+				
 				menu->uiMovie->SetVariable("InventoryIconSetter", &nullIconSetter);
-
 				itemList = menu->itemList;
 			}
 		}
-		else if (a_event->menuName == intfcStr->giftMenu) {
+		else if (a_event->menuName == RE::GiftMenu::MENU_NAME) {
 			if (const auto* menu = static_cast<RE::GiftMenu*>(ui->GetMenu(a_event->menuName).get())) {
+				
 				menu->uiMovie->SetVariable("InventoryIconSetter", &nullIconSetter);
-
 				itemList = menu->itemList;
 			}
 		}
-		else if (a_event->menuName == intfcStr->inventoryMenu) {
+		else if (a_event->menuName == RE::InventoryMenu::MENU_NAME) {
 			if (const auto* menu = static_cast<RE::InventoryMenu*>(ui->GetMenu(a_event->menuName).get())) {
+				
 				menu->uiMovie->SetVariable("InventoryIconSetter", &nullIconSetter);
-
 				itemList = menu->itemList;
 			}
 		}
@@ -138,93 +65,9 @@ namespace InventoryEvents {
 	}
 }
 
-namespace Completionist_Inventory {
-
-	//---------------------------------------------------
-	//-- Script Functions -------------------------------
-	//---------------------------------------------------
-
-	void FunctionHolder::UpdateVariables() {
-
-		Inv_vars::IconChoice = (Inv_vars::Inv_MCM->GetProperty("InventoryMode_Icon_Choice")->GetUInt());
-		Inv_vars::TextChoice = (Inv_vars::Inv_MCM->GetProperty("InventoryMode_PrAp_Choice")->GetUInt());
-
-		Inv_vars::Inv_DearDiarySupport = (Inv_vars::Inv_MCM->GetProperty("varTags_DearDiaryWM")->GetBool());
-
-		Inv_vars::Inv_Ammo_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Ammo")->GetUInt();
-		Inv_vars::Inv_Ammo_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Ammo")->GetUInt();
-		Inv_vars::Inv_Ammo_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Ammo_N")->GetBool();
-		Inv_vars::Inv_Ammo_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Ammo_G")->GetBool();
-		Inv_vars::Inv_Ammo_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Ammo")->GetString();
-		Inv_vars::Inv_Ammo_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Ammo")->GetString();
-
-		Inv_vars::Inv_Alchemy_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Alchemy")->GetUInt();
-		Inv_vars::Inv_Alchemy_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Alchemy")->GetUInt();
-		Inv_vars::Inv_Alchemy_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Alchemy_N")->GetBool();
-		Inv_vars::Inv_Alchemy_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Alchemy_G")->GetBool();
-		Inv_vars::Inv_Alchemy_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Alchemy")->GetString();
-		Inv_vars::Inv_Alchemy_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Alchemy")->GetString();
-
-		Inv_vars::Inv_Armor_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Armor")->GetUInt();
-		Inv_vars::Inv_Armor_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Armor")->GetUInt();
-		Inv_vars::Inv_Armor_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Armor_N")->GetBool();
-		Inv_vars::Inv_Armor_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Armor_G")->GetBool();
-		Inv_vars::Inv_Armor_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Armor")->GetString();
-		Inv_vars::Inv_Armor_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Armor")->GetString();
-
-		Inv_vars::Inv_Books_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Books")->GetUInt();
-		Inv_vars::Inv_Books_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Books")->GetUInt();
-		Inv_vars::Inv_Books_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Books_N")->GetBool();
-		Inv_vars::Inv_Books_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Books_G")->GetBool();
-		Inv_vars::Inv_Books_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Books")->GetString();
-		Inv_vars::Inv_Books_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Books")->GetString();
-
-		Inv_vars::Inv_Weapons_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Weapons")->GetUInt();
-		Inv_vars::Inv_Weapons_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Weapons")->GetUInt();
-		Inv_vars::Inv_Weapons_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Weapons_N")->GetBool();
-		Inv_vars::Inv_Weapons_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Weapons_G")->GetBool();
-		Inv_vars::Inv_Weapons_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Weapons")->GetString();
-		Inv_vars::Inv_Weapons_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Weapons")->GetString();
-
-		Inv_vars::Inv_Other_Colour_New = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_N_Other")->GetUInt();
-		Inv_vars::Inv_Other_Colour_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourVal_G_Other")->GetUInt();
-		Inv_vars::Inv_Other_Enabled_New = Inv_vars::Inv_MCM->GetProperty("varTags_Other_N")->GetBool();
-		Inv_vars::Inv_Other_Enabled_Found = Inv_vars::Inv_MCM->GetProperty("varTags_Other_G")->GetBool();
-		Inv_vars::Inv_Other_ColourString_New = Inv_vars::Inv_MCM->GetProperty("State_ColourString_N_Other")->GetString();
-		Inv_vars::Inv_Other_ColourString_Found = Inv_vars::Inv_MCM->GetProperty("State_ColourString_G_Other")->GetString();
-
-		Inv_vars::Inv_CrosshairTag_New = Inv_vars::Inv_MCM->GetProperty("State_OverRide_N_Name_String")->GetString();
-		Inv_vars::Inv_CrosshairTag_Found = Inv_vars::Inv_MCM->GetProperty("State_OverRide_G_Name_String")->GetString();
-	}
-
-	//---------------------------------------------------
-	//-- Script Functions -------------------------------
-	//---------------------------------------------------
-
-	bool FunctionHolder::IsReady() {
-
-		auto handler = RE::TESDataHandler::GetSingleton();
-		Inv_vars::Inv_MCM = ScriptObject::FromForm(static_cast<RE::TESForm*>(handler->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
-
-		if (Inv_vars::Inv_MCM) {
-			UpdateVariables();
-			return true;
-		}
-		return false;
-	}
-
-	//---------------------------------------------------
-	//-- Registration Functions -------------------------
-	//---------------------------------------------------
-
-	void FunctionHolder::Register() {
-
-		//InventoryEvents::InventoryMenuHandler::Sink();
-		INFO("Completionist: Successfully Registered Inventory Functions");
-	}
-}
-
 namespace Completionist_IconSetter {
+	using namespace CVariables;
+	using namespace Completionist_MainHUD;
 
 	enum class MaskedArmorSlot : std::uint32_t
 	{
@@ -357,23 +200,7 @@ namespace Completionist_IconSetter {
 
 	constexpr inline std::uint32_t Color(ColorCode a_color)
 	{
-		return Inv_vars::Inv_DearDiarySupport ? ColorTbl[std::to_underlying(a_color)].second : ColorTbl[std::to_underlying(a_color)].first;
-	}
-
-	//---------------------------------------------------
-	//-- Icon Setter (Inventory Mode) -------------------
-	//---------------------------------------------------
-
-	bool ItemIsCollectable(RE::TESForm* a_form) {
-
-		return
-			Serialization::CompletionistData::CheckIsCollectable(a_form) &&
-			!CFramework_Master::FoundItemData.HasForm(a_form->GetFormID());
-	}
-
-	bool ItemIsCollected(RE::TESForm* a_form) {
-
-		return CFramework_Master::FoundItemData.HasForm(a_form->GetFormID());
+		return V_DearDiary ? ColorTbl[std::to_underlying(a_color)].second : ColorTbl[std::to_underlying(a_color)].first;
 	}
 
 	//---------------------------------------------------
@@ -433,24 +260,24 @@ namespace Completionist_IconSetter {
 		iconLabel = WEAPTYPE_ICON[idx];
 		iconColor = Color(ColorCode::kWeapon);
 
-		if (ItemIsCollectable(weapon)) {
+		if (TextnTagsAPI::ItemIsCollectable(weapon)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(weapon) && Inv_vars::Inv_Weapons_Enabled_New) {
-				iconColor = Inv_vars::Inv_Weapons_Colour_New ? Inv_vars::Inv_Weapons_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(weapon) && V_Weapons_Enabled_New) {
+				iconColor = V_Weapons_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(weapon) && Inv_vars::Inv_Weapons_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Weapons_Colour_Found ? Inv_vars::Inv_Weapons_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(weapon) && V_Weapons_Enabled_Found) {
+				iconColor = V_Weapons_Colour_Found;
 				return;
 			}
 		}
@@ -492,24 +319,24 @@ namespace Completionist_IconSetter {
 		iconLabel = SOULGEM_ICON[idx];
 		iconColor = Color(std::bit_cast<ColorCode>(std::to_underlying(ColorCode::kSoulGem) + std::to_underlying(level)));
 
-		if (ItemIsCollectable(soulgem)) {
+		if (TextnTagsAPI::ItemIsCollectable(soulgem)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(soulgem) && Inv_vars::Inv_Other_Enabled_New) {
-				iconColor = Inv_vars::Inv_Other_Colour_New ? Inv_vars::Inv_Other_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(soulgem) && V_Other_Enabled_New) {
+				iconColor = V_Other_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(soulgem) && Inv_vars::Inv_Other_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Other_Colour_Found ? Inv_vars::Inv_Other_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(soulgem) && V_Other_Enabled_Found) {
+				iconColor = V_Other_Colour_Found;
 				return;
 			}
 		}
@@ -612,24 +439,24 @@ namespace Completionist_IconSetter {
 		}
 		}
 
-		if (ItemIsCollectable(misc)) {
+		if (TextnTagsAPI::ItemIsCollectable(misc)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(misc) && Inv_vars::Inv_Other_Enabled_New) {
-				iconColor = Inv_vars::Inv_Other_Colour_New ? Inv_vars::Inv_Other_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(misc) && V_Other_Enabled_New) {
+				iconColor = V_Other_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(misc) && Inv_vars::Inv_Other_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Other_Colour_Found ? Inv_vars::Inv_Other_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(misc) && V_Other_Enabled_Found) {
+				iconColor = V_Other_Colour_Found;
 				return;
 			}
 		}
@@ -659,24 +486,24 @@ namespace Completionist_IconSetter {
 
 		iconLabel = "default_key";
 
-		if (ItemIsCollectable(key)) {
+		if (TextnTagsAPI::ItemIsCollectable(key)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(key) && Inv_vars::Inv_Other_Enabled_New) {
-				iconColor = Inv_vars::Inv_Other_Colour_New ? Inv_vars::Inv_Other_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(key) && V_Other_Enabled_New) {
+				iconColor = V_Other_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(key) && Inv_vars::Inv_Other_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Other_Colour_Found ? Inv_vars::Inv_Other_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(key) && V_Other_Enabled_Found) {
+				iconColor = V_Other_Colour_Found;
 				return;
 			}
 		}
@@ -692,24 +519,24 @@ namespace Completionist_IconSetter {
 
 		iconLabel = "default_ingredient";
 
-		if (ItemIsCollectable(ingredient)) {
+		if (TextnTagsAPI::ItemIsCollectable(ingredient)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(ingredient) && Inv_vars::Inv_Alchemy_Enabled_New) {
-				iconColor = Inv_vars::Inv_Alchemy_Colour_New ? Inv_vars::Inv_Alchemy_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(ingredient) && V_Alchemy_Enabled_New) {
+				iconColor = V_Alchemy_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(ingredient) && Inv_vars::Inv_Alchemy_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Alchemy_Colour_Found ? Inv_vars::Inv_Alchemy_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(ingredient) && V_Alchemy_Enabled_Found) {
+				iconColor = V_Alchemy_Colour_Found;
 				return;
 			}
 		}
@@ -733,24 +560,24 @@ namespace Completionist_IconSetter {
 			iconLabel = "default_book";
 		}
 
-		if (ItemIsCollectable(book)) {
+		if (TextnTagsAPI::ItemIsCollectable(book)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(book) && Inv_vars::Inv_Books_Enabled_New) {
-				iconColor = Inv_vars::Inv_Books_Colour_New ? Inv_vars::Inv_Books_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(book) && V_Books_Enabled_New) {
+				iconColor = V_Books_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(book) && Inv_vars::Inv_Books_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Books_Colour_Found ? Inv_vars::Inv_Books_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(book) && V_Books_Enabled_Found) {
+				iconColor = V_Books_Colour_Found;
 				return;
 			}
 		}
@@ -827,24 +654,24 @@ namespace Completionist_IconSetter {
 			iconLabel = "default_armor";
 		}
 
-		if (ItemIsCollectable(armor)) {
+		if (TextnTagsAPI::ItemIsCollectable(armor)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(armor) && Inv_vars::Inv_Armor_Enabled_New) {
-				iconColor = Inv_vars::Inv_Armor_Colour_New ? Inv_vars::Inv_Armor_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(armor) && V_Armor_Enabled_New) {
+				iconColor = V_Armor_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(armor) && Inv_vars::Inv_Armor_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Armor_Colour_Found ? Inv_vars::Inv_Armor_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(armor) && V_Armor_Enabled_Found) {
+				iconColor = V_Armor_Colour_Found;
 				return;
 			}
 		}
@@ -861,24 +688,24 @@ namespace Completionist_IconSetter {
 		iconLabel = ammo->IsBolt() ? "weapon_bolt" : "weapon_arrow";
 		iconColor = Color(ColorCode::kAmmo);
 
-		if (ItemIsCollectable(ammo)) {
+		if (TextnTagsAPI::ItemIsCollectable(ammo)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(ammo) && Inv_vars::Inv_Ammo_Enabled_New) {
-				iconColor = Inv_vars::Inv_Ammo_Colour_New ? Inv_vars::Inv_Ammo_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(ammo) && V_Ammo_Enabled_New) {
+				iconColor = V_Ammo_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(ammo) && Inv_vars::Inv_Ammo_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Ammo_Colour_Found ? Inv_vars::Inv_Ammo_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(ammo) && V_Ammo_Enabled_Found) {
+				iconColor = V_Ammo_Colour_Found;
 				return;
 			}
 		}
@@ -966,24 +793,24 @@ namespace Completionist_IconSetter {
 			}
 		}
 
-		if (ItemIsCollectable(alchemy)) {
+		if (TextnTagsAPI::ItemIsCollectable(alchemy)) {
 			ApplyTextModifications(itemName);
 		}
 
-		RE::stl::enumeration<IconType> icon = static_cast<IconType>(Inv_vars::IconChoice);
+		RE::stl::enumeration<IconType> icon = static_cast<IconType>(V_IconChoice);
 
 		if (icon == IconType::kNone) { return; }
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollectable) {
-			if (ItemIsCollectable(alchemy) && Inv_vars::Inv_Alchemy_Enabled_New) {
-				iconColor = Inv_vars::Inv_Alchemy_Colour_New ? Inv_vars::Inv_Alchemy_Colour_New : Inv_vars::Inv_Default_New;
+			if (TextnTagsAPI::ItemIsCollectable(alchemy) && V_Alchemy_Enabled_New) {
+				iconColor = V_Alchemy_Colour_New;
 				return;
 			}
 		}
 
 		if (icon == IconType::kShowAll || icon == IconType::kCollected) {
-			if (ItemIsCollected(alchemy) && Inv_vars::Inv_Alchemy_Enabled_Found) {
-				iconColor = Inv_vars::Inv_Alchemy_Colour_Found ? Inv_vars::Inv_Alchemy_Colour_Found : Inv_vars::Inv_Default_Found;
+			if (TextnTagsAPI::ItemIsCollected(alchemy) && V_Alchemy_Enabled_Found) {
+				iconColor = V_Alchemy_Colour_Found;
 				return;
 			}
 		}
@@ -1009,7 +836,6 @@ namespace Completionist_IconSetter {
 		case RE::FormType::Armor:
 		{
 			ICON_EXTEND(Armor, a_item);
-			//RE::DebugMessageBox("Processing Armor");
 			break;
 		}
 		case RE::FormType::Book:
@@ -1054,7 +880,7 @@ namespace Completionist_IconSetter {
 
 	void ApplyTextModifications(std::string& a_name) {
 
-		switch (static_cast<TextType>(Inv_vars::TextChoice)) {
+		switch (static_cast<TextType>(V_TextChoice)) {
 		case TextType::kAppend: {
 			a_name = a_name + " ***";
 			break;

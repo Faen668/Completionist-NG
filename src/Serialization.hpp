@@ -61,11 +61,12 @@ namespace Serialization
 		[[nodiscard]] void AddForm(RE::FormID a_form, std::string_view a_filename) noexcept
 		{
 			auto* handler = RE::TESDataHandler::GetSingleton();
-			if (!handler) {
-				return;
-			}
+			auto present = IsModInstalled(a_filename);
+			if (!handler || !present) { return; }
 
 			auto form = handler->LookupFormID(a_form, a_filename);
+			if (!form) { return; }
+
 			data.try_emplace(form);
 		}
 
@@ -73,11 +74,10 @@ namespace Serialization
 		//-------------------------------------------
 
 		[[nodiscard]] void AddForm(RE::FormID a_base, std::string_view a_filename, RE::FormID a_variation) noexcept
-		{
+		{	
 			auto* handler = RE::TESDataHandler::GetSingleton();
-			if (!handler) {
-				return;
-			}
+			auto present = IsModInstalled(a_filename);
+			if (!handler || !present) { return; }
 
 			auto base = handler->LookupFormID(a_base, a_filename);
 			auto variation = handler->LookupFormID(a_variation, a_filename);
@@ -97,9 +97,8 @@ namespace Serialization
 		[[nodiscard]] void AddForm(RE::FormID a_base, std::string_view a_basefilename, RE::FormID a_variation, std::string a_modfilename) noexcept
 		{
 			auto* handler = RE::TESDataHandler::GetSingleton();
-			if (!handler) {
-				return;
-			}
+			auto present = IsModInstalled(a_modfilename);
+			if (!handler || !present) { return; }
 
 			auto base = handler->LookupFormID(a_base, a_basefilename);
 			auto variation = handler->LookupFormID(a_variation, a_modfilename);
@@ -496,124 +495,3 @@ namespace Serialization
 		}
 	}
 }
-
-namespace FrameworkHandler
-{
-	using namespace Serialization;
-
-	enum class FrameworkID
-	{
-		kArmor = 0,
-		kJewelry = 1,
-		kDragonClaws_V = 2,
-		kDragonClaws_P = 3,
-		kLiquor = 4,
-		kDragonMasks_V = 5,
-		kDragonMasks_P = 6,
-		kWeapons = 7,
-		kItems = 8,
-
-		kBooks_AG = 10,
-		kBooks_HS = 11,
-		kBooks_TY = 12,
-		kBooks_SB = 13,
-		kBooks_ST = 14,
-
-		kBooks_DG = 15,
-		kBooks_DGS = 16,
-
-		kBooks_DB = 17,
-		kBooks_DBS = 18,
-
-		kLocations_DG = 20,
-		kLocations_DB = 21,
-		kLocations_AG = 23,
-		kLocations_HR = 24,
-		kLocations_SZ = 25,
-
-		kDoomstones = 26,
-		kShrines_V = 27,
-		kShrines_P = 28,
-		kBarenziah = 29,
-
-		kAEnchantments_V = 30,
-		kAEnchantments_P = 31,
-		kWEnchantments_V = 32,
-		kWEnchantments_P = 33,
-
-		kFishing_I = 50,
-		kFishing_B = 51,
-		kFishing_A = 52,
-		kFishing_C = 53,
-		kFishing_L = 54,
-		kFishing_S = 55,
-
-		kCreationClub_L = 90,
-		kCreationClub_B = 91,
-		kCreationClub_S = 92,
-		kCreationClub_A = 93,
-		kCreationClub_W = 94,
-		kCreationClub_I = 95,
-
-		// leave this one at end
-		kTotal,
-	};
-
-	static std::unordered_map<FrameworkID, std::vector<std::string>*> NameSet;
-	static std::unordered_map<FrameworkID, std::vector<std::string>*> TextSet;
-	static std::unordered_map<FrameworkID, std::vector<bool>*> BoolSet;
-
-	static std::unordered_map<FrameworkID, std::vector<RE::TESForm*>*> FormSet;
-	static std::unordered_map<FrameworkID, std::vector<uint32_t>*> FoundSet;
-	static std::unordered_map<FrameworkID, std::vector<uint32_t>*> TotalSet;
-	static std::unordered_map<FrameworkID, std::vector<CompletionistData>*> CDataSet;
-
-	static auto& HandleNameSet(FrameworkID a_cat) noexcept
-	{
-		return *NameSet.at(a_cat);
-	}
-
-	static auto& HandleTextSet(FrameworkID a_cat) noexcept
-	{
-		return *TextSet.at(a_cat);
-	}
-
-	static auto& HandleBoolSet(FrameworkID a_cat) noexcept
-	{
-		return *BoolSet.at(a_cat);
-	}
-
-	static auto& HandleFormSet(FrameworkID a_cat) noexcept
-	{
-		return *FormSet.at(a_cat);
-	}
-
-	static auto& HandleFoundSet(FrameworkID a_cat) noexcept
-	{
-		return *FoundSet.at(a_cat);
-	}
-
-	static auto& HandleTotalSet(FrameworkID a_cat) noexcept
-	{
-		return *TotalSet.at(a_cat);
-	}
-
-	static auto& HandleDataSet(FrameworkID a_cat) noexcept
-	{
-		return *CDataSet.at(a_cat);
-	}
-
-	template <FrameworkID a_id>
-	static void RegisterAs(std::vector<std::string>* a_names, std::vector<RE::TESForm*>* a_forms, std::vector<bool>* a_bools, std::vector<std::string>* a_texts) noexcept
-		requires(a_id != FrameworkID::kTotal) // so no overflow/out of bound access
-	{
-		NameSet.try_emplace(a_id, a_names);
-		FormSet.try_emplace(a_id, a_forms);
-		BoolSet.try_emplace(a_id, a_bools);
-		TextSet.try_emplace(a_id, a_texts);
-
-	}
-} // namespace FrameworkHandler
-
-
-//static void RegisterAs(std::vector<std::string>* a_names, std::vector<RE::TESForm*>* a_forms, std::vector<bool>* a_bools, std::vector<std::string>* a_texts, uint32_t* a_found, uint32_t* a_total, CompletionistData* a_data) noexcept

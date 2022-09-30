@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_WOL.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -19,9 +18,7 @@ namespace CPatch_WOL_MapMa {
 }
 
 namespace CPatch_WOL {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 

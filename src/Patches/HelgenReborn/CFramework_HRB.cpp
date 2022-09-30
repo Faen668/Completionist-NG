@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_HRB.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -19,9 +18,7 @@ namespace CPatch_HRB_MapMa {
 }
 
 namespace CPatch_HRB {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
@@ -240,11 +237,6 @@ namespace CPatch_HRB {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kHRB_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
-		//RegisterAs<FrameworkID::kHRB_Books>(&Books_NameArray, &Books_FormArray, &Books_BoolArray, &Books_TextArray);
-		//RegisterAs<FrameworkID::kHRB_MapMa>(&MapMa_NameArray, &MapMa_FormArray, &MapMa_BoolArray, &MapMa_TextArray);
 	}
 
 	//---------------------------------------------------

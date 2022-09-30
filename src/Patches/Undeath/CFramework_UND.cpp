@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_UND.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -15,9 +14,7 @@ namespace CPatch_UND_MapMa {
 }
 
 namespace CPatch_UND {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 

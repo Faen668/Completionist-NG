@@ -13,7 +13,7 @@ include(GNUInstallDirs)
 # info
 project(
 	Completionist
-	VERSION 1.3.7.9
+	VERSION 1.4.2.6
 	LANGUAGES CXX
 )
 

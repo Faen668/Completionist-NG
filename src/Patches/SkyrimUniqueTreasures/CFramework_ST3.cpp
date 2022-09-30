@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_ST3.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -23,9 +22,7 @@ namespace CPatch_ST3_ItmL4 {
 }
 
 namespace CPatch_ST3 {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 

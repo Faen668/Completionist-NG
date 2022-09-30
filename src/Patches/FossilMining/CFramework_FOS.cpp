@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_FOS.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -19,9 +18,7 @@ namespace CPatch_FOS_ItmL3 {
 }
 
 namespace CPatch_FOS {
-
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
@@ -155,7 +152,6 @@ namespace CPatch_FOS {
 				}
 			}
 
-
 			auto t_pos = std::ranges::find(ItmL1_FormArray, CPatch_FOS_ItmL1::Data.GetForm(a_baseID));
 			auto b_pos = std::distance(ItmL1_FormArray.begin(), t_pos);
 			ItmL1_BoolArray[b_pos] = true;
@@ -181,7 +177,6 @@ namespace CPatch_FOS {
 				}
 			}
 
-
 			auto t_pos = std::ranges::find(ItmL2_FormArray, CPatch_FOS_ItmL2::Data.GetForm(a_baseID));
 			auto b_pos = std::distance(ItmL2_FormArray.begin(), t_pos);
 			ItmL2_BoolArray[b_pos] = true;
@@ -206,7 +201,6 @@ namespace CPatch_FOS {
 					FoundItemData.AddForm(var);
 				}
 			}
-
 
 			auto t_pos = std::ranges::find(ItmL3_FormArray, CPatch_FOS_ItmL3::Data.GetForm(a_baseID));
 			auto b_pos = std::distance(ItmL3_FormArray.begin(), t_pos);
@@ -243,11 +237,6 @@ namespace CPatch_FOS {
 
 		ItmL3_EntriesTotal = ItmL3_FormArray.size();
 		ItmL3_EntriesFound = std::ranges::count(ItmL3_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kFOS_ItmL1>(&ItmL1_NameArray, &ItmL1_FormArray, ItmL1_BoolArray, &ItmL1_TextArray);
-		//RegisterAs<FrameworkID::kFOS_ItmL2>(&ItmL2_NameArray, &ItmL2_FormArray, ItmL2_BoolArray, &ItmL2_TextArray);
-		//RegisterAs<FrameworkID::kFOS_ItmL3>(&ItmL3_NameArray, &ItmL3_FormArray, ItmL3_BoolArray, &ItmL3_TextArray);
 	}
 
 	//---------------------------------------------------

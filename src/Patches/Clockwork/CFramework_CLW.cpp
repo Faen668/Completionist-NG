@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_CLW.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -21,7 +20,6 @@ namespace CPatch_CLW_MapMa {
 namespace CPatch_CLW {
 
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
@@ -240,11 +238,6 @@ namespace CPatch_CLW {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kCLW_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
-		//RegisterAs<FrameworkID::kCLW_Books>(&Books_NameArray, &Books_FormArray, &Books_BoolArray, &Books_TextArray);
-		//RegisterAs<FrameworkID::kCLW_MapMa>(&MapMa_NameArray, &MapMa_FormArray, &MapMa_BoolArray, &MapMa_TextArray);
 	}
 
 	//---------------------------------------------------

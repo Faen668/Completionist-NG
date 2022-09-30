@@ -48,15 +48,18 @@ namespace CVariables {
 	extern std::string V_CrosshairTag_Found;
 
 	extern std::int32_t V_TextChoice;
+	extern std::int32_t V_IconChoice;
+
+	extern bool			V_DearDiary;
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final :
+	class VariablesAPI final :
 
 		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
 
-	public: [[nodiscard]] static CHandler* GetSingleton() {
-		static CHandler singleton;
+	public: [[nodiscard]] static VariablesAPI* GetSingleton() {
+		static VariablesAPI singleton;
 		return &singleton;
 	}
 

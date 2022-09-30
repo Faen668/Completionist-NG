@@ -1,6 +1,5 @@
 #include "Serialization.hpp"
 #include "CFramework_TEL.hpp"
-#include "Patches/PatchMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
@@ -20,7 +19,6 @@ namespace CPatch_TEL_MapMa {
 
 namespace CPatch_TEL {
 	using namespace CFramework_Master;
-	using namespace CPatch_Master;
 
 	// clang-format off
 
