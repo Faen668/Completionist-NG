@@ -8,6 +8,8 @@
 #include "Frameworks/Misc/CFramework_Locations.hpp"
 #include "Frameworks/Misc/CFramework_Blessings.hpp"
 #include "Frameworks/Misc/CFramework_Enchantments.hpp"
+#include "Frameworks/Misc/CFramework_Pets.hpp"
+#include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
 
 //Patches
 #include "Patches/AdditionalHearthfireDolls/CFramework_AHD.hpp"
@@ -91,6 +93,17 @@ namespace ArrayHolder {
 		kFramework_SAE = 37, // Armor (Summermyst)
 		kFramework_VWE = 38, // Weapons	(Vanilla)
 		kFramework_SWE = 39, // Weapons (Summermyst)
+
+		//Misc (Pets)
+		kFramework_VPS = 40, // Pets (Vanilla)
+		kFramework_POS = 41, // Pets (Pets of Skyrim)
+		kFramework_SAS = 42, // Pets (Saints & Seducers)
+		kFramework_MSC = 43, // Pets (Miscellaneous)
+
+		//Misc (Player Homes)
+		kFramework_VPH = 44, // Player Homes (Vanilla)
+		kFramework_CPH = 45, // Player Homes (Creation Club)
+		kFramework_PPH = 46, // Player Homes (Supported Mods)
 
 		//Patches
 		kPatch_AHD_I = 200, // Additional Hearthfire Dolls
@@ -331,11 +344,23 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_VSH>(&CFramework_Blessings::VS_NameArray, &CFramework_Blessings::VS_TextArray, &CFramework_Blessings::VS_BoolArray, &CFramework_Blessings::VS_FormArray, &CFramework_Blessings::VS_EntriesFound, &CFramework_Blessings::VS_EntriesTotal, &CFramework_Blessings_VS::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_WSH>(&CFramework_Blessings::WS_NameArray, &CFramework_Blessings::WS_TextArray, &CFramework_Blessings::WS_BoolArray, &CFramework_Blessings::WS_FormArray, &CFramework_Blessings::WS_EntriesFound, &CFramework_Blessings::WS_EntriesTotal, &CFramework_Blessings_WS::Data, true);
 
-		//Frameworks - Misc (Enchantments) (Start) -------------
+		//Frameworks - Misc (Enchantments) (Start) ----------
 		AttemptToAdd<FrameworkID::kFramework_VAE>(&CFramework_Enchantments::VA_NameArray, &CFramework_Enchantments::VA_TextArray, &CFramework_Enchantments::VA_BoolArray, &CFramework_Enchantments::VA_FormArray, &CFramework_Enchantments::VA_EntriesFound, &CFramework_Enchantments::VA_EntriesTotal, &CFramework_Enchantments_VA::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_SAE>(&CFramework_Enchantments::SA_NameArray, &CFramework_Enchantments::SA_TextArray, &CFramework_Enchantments::SA_BoolArray, &CFramework_Enchantments::SA_FormArray, &CFramework_Enchantments::SA_EntriesFound, &CFramework_Enchantments::SA_EntriesTotal, &CFramework_Enchantments_SA::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_VWE>(&CFramework_Enchantments::VW_NameArray, &CFramework_Enchantments::VW_TextArray, &CFramework_Enchantments::VW_BoolArray, &CFramework_Enchantments::VW_FormArray, &CFramework_Enchantments::VW_EntriesFound, &CFramework_Enchantments::VW_EntriesTotal, &CFramework_Enchantments_VW::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_SWE>(&CFramework_Enchantments::SW_NameArray, &CFramework_Enchantments::SW_TextArray, &CFramework_Enchantments::SW_BoolArray, &CFramework_Enchantments::SW_FormArray, &CFramework_Enchantments::SW_EntriesFound, &CFramework_Enchantments::SW_EntriesTotal, &CFramework_Enchantments_SW::Data, true);
+
+		//Frameworks - Misc (Pets) (Start) ------------------
+		AttemptToAdd<FrameworkID::kFramework_VPS>(&CFramework_Pets::Pets_VP_NameArray, &CFramework_Pets::Pets_VP_TextArray, &CFramework_Pets::Pets_VP_BoolArray, &CFramework_Pets::Pets_VP_FormArray, &CFramework_Pets::Pets_VP_EntriesFound, &CFramework_Pets::Pets_VP_EntriesTotal, &CFramework_Pets_VP::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_POS>(&CFramework_Pets::Pets_PS_NameArray, &CFramework_Pets::Pets_PS_TextArray, &CFramework_Pets::Pets_PS_BoolArray, &CFramework_Pets::Pets_PS_FormArray, &CFramework_Pets::Pets_PS_EntriesFound, &CFramework_Pets::Pets_PS_EntriesTotal, &CFramework_Pets_PS::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_SAS>(&CFramework_Pets::Pets_SS_NameArray, &CFramework_Pets::Pets_SS_TextArray, &CFramework_Pets::Pets_SS_BoolArray, &CFramework_Pets::Pets_SS_FormArray, &CFramework_Pets::Pets_SS_EntriesFound, &CFramework_Pets::Pets_SS_EntriesTotal, &CFramework_Pets_SS::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_MSC>(&CFramework_Pets::Pets_MP_NameArray, &CFramework_Pets::Pets_MP_TextArray, &CFramework_Pets::Pets_MP_BoolArray, &CFramework_Pets::Pets_MP_FormArray, &CFramework_Pets::Pets_MP_EntriesFound, &CFramework_Pets::Pets_MP_EntriesTotal, &CFramework_Pets_MP::Data, true);
+
+		//Frameworks - Misc (Player Homes) (Start) ----------
+		AttemptToAdd<FrameworkID::kFramework_VPH>(&CFramework_PlayerHomes::VH_NameArray, &CFramework_PlayerHomes::VH_TextArray, &CFramework_PlayerHomes::VH_BoolArray, &CFramework_PlayerHomes::VH_FormArray, &CFramework_PlayerHomes::VH_EntriesFound, &CFramework_PlayerHomes::VH_EntriesTotal, &CFramework_PlayerHomes_VH::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_CPH>(&CFramework_PlayerHomes::CH_NameArray, &CFramework_PlayerHomes::CH_TextArray, &CFramework_PlayerHomes::CH_BoolArray, &CFramework_PlayerHomes::CH_FormArray, &CFramework_PlayerHomes::CH_EntriesFound, &CFramework_PlayerHomes::CH_EntriesTotal, &CFramework_PlayerHomes_CH::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_PPH>(&CFramework_PlayerHomes::PH_NameArray, &CFramework_PlayerHomes::PH_TextArray, &CFramework_PlayerHomes::PH_BoolArray, &CFramework_PlayerHomes::PH_FormArray, &CFramework_PlayerHomes::PH_EntriesFound, &CFramework_PlayerHomes::PH_EntriesTotal, &CFramework_PlayerHomes_PH::Data, true);
+
 
 		//---------------
 		//-- Patches ----

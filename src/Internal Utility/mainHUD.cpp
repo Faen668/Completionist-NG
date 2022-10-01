@@ -46,6 +46,8 @@ namespace Completionist_MainHUD {
 
 	const char* TextnTagsAPI::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
 
+		RE::ItemList* itemList{ nullptr };
+
 		auto baseform = a_this->object;
 		if (!baseform || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
 

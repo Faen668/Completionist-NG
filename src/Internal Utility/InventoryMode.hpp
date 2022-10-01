@@ -6,7 +6,10 @@ namespace CInventoryEvents
 
 	class InventoryAPI final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
 
-	public: [[nodiscard]] static InventoryAPI* GetSingleton() { static InventoryAPI singleton; return &singleton; }
+	public: [[nodiscard]] static InventoryAPI* GetSingleton() { 
+		static InventoryAPI singleton; 
+		return &singleton; 
+	}
 
 		  static void	Register();
 		  EventResult	ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;

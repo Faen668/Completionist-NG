@@ -5,28 +5,45 @@
 
 #undef AddForm
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Vanilla Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
+namespace CFramework_PlayerHomes_VH {
+	inline Serialization::CompletionistData Data;
+}
 
-namespace CFramework_PlayerHomes_V {
+namespace CFramework_PlayerHomes_CH {
+	inline Serialization::CompletionistData Data;
+}
+
+namespace CFramework_PlayerHomes_PH {
+	inline Serialization::CompletionistData Data;
+}
+
+namespace CFramework_PlayerHomes {
 
 	using namespace CFramework_Master;
 
-	Serialization::CompletionistData Data;
+	inline std::vector<std::string>		VH_NameArray;
+	inline std::vector<std::string>		VH_TextArray;
+	inline std::vector<RE::TESForm*>	VH_FormArray;
+	inline std::vector<std::string>		VH_QuestArray;
+	inline std::vector<bool>			VH_BoolArray;
+	inline std::int32_t					VH_EntriesTotal;
+	inline std::int32_t					VH_EntriesFound;
 
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<std::string> QuestArray{};
-	std::vector<bool> BoolArray{};
+	inline std::vector<std::string>		CH_NameArray;
+	inline std::vector<std::string>		CH_TextArray;
+	inline std::vector<RE::TESForm*>	CH_FormArray;
+	inline std::vector<std::string>		CH_QuestArray;
+	inline std::vector<bool>			CH_BoolArray;
+	inline std::int32_t					CH_EntriesTotal;
+	inline std::int32_t					CH_EntriesFound;
 
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	RE::Actor* Player;
+	inline std::vector<std::string>		PH_NameArray;
+	inline std::vector<std::string>		PH_TextArray;
+	inline std::vector<RE::TESForm*>	PH_FormArray;
+	inline std::vector<std::string>		PH_QuestArray;
+	inline std::vector<bool>			PH_BoolArray;
+	inline std::int32_t					PH_EntriesTotal;
+	inline std::int32_t					PH_EntriesFound;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -39,7 +56,27 @@ namespace CFramework_PlayerHomes_V {
 	}
 
 	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
+	//-- Framework Events ( On Item Added  ) ------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+
+		if (!a_event || a_event->newContainer != 0x00014 || !CFramework_PlayerHomes_PH::Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
+
+		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("TC_HighHrotgarLibraryKey"); key && key->GetFormID() == a_event->baseObj) {
+			ProcessFoundForm("TC_HighHrotgarLibraryKey");
+			return EventResult::kContinue;
+		}
+
+		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("manny_GF_Key_AlikrPlayerHome01"); key && key->GetFormID() == a_event->baseObj) {
+			ProcessFoundForm("manny_GF_Key_AlikrPlayerHome01");
+			return EventResult::kContinue;
+		}
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Quest Stage  ) -----------
 	//---------------------------------------------------
 
 	EventResult CHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
@@ -49,12 +86,79 @@ namespace CFramework_PlayerHomes_V {
 		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
 			auto questID = std::string(quest->GetFormEditorID());
 
+			//Vanilla
 			if ((questID == "HousePurchase" && a_event->stage == 10) || (questID == "DLC2RR02" && a_event->stage == 200)) {
 				ProcessFoundForm(questID);
+				return EventResult::kContinue;
 			}
 
 			if ((questID == "BYOHHouseFalkreath" || questID == "BYOHHouseHjaalmarch" || questID == "BYOHHousePale") && a_event->stage == 100) {
 				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+
+			//Creations
+			if (questID == "ccEEJSSE001_Quest" && a_event->stage == 10) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccEEJSSE002_MageTowerQuest" && a_event->stage == 100) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccEEJSSE003_HouseQuest" && a_event->stage == 100) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccAARSSE001ManufactoryControlQuest" && a_event->stage == 100) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccEEJSSE004_Quest" && a_event->stage == 100) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccRMSSSE001_Quest" && a_event->stage == 200) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccEEJSSE005_Quest" && (a_event->stage == 200 || a_event->stage == 300)) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccBGSSSE031_HomeQuest" && a_event->stage == 30) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "ccVSVSSE004_MainQuest" && a_event->stage == 300) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+
+			//Patches
+			if (questID == "CLWStory04Quest" && a_event->stage == 200) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "WTPlayerHome" && a_event->stage == 20) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "DwaSpSadrithKegranHomeOwner" && a_event->stage == 1) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "FalskaarHousePurchase" && a_event->stage == 10) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "BalokHelgen01" && a_event->stage == 20) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
+			}
+			if (questID == "AnvilQuestameir" && a_event->stage == 5) {
+				ProcessFoundForm(questID);
+				return EventResult::kContinue;
 			}
 		}
 		return EventResult::kContinue;
@@ -95,18 +199,46 @@ namespace CFramework_PlayerHomes_V {
 			}
 		}
 
-		if (auto t_pos = std::ranges::find(QuestArray, a_editorID); t_pos != QuestArray.end()) {
-			auto b_pos = std::distance(QuestArray.begin(), t_pos);
+		if (auto t_pos = std::ranges::find(VH_QuestArray, a_editorID); t_pos != VH_QuestArray.end()) {
+			auto b_pos = std::distance(VH_QuestArray.begin(), t_pos);
 
-			if (!FoundItemData_NoShow.HasForm(FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, NameArray[b_pos]);
+			if (!FoundItemData_NoShow.HasForm(VH_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, VH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 
-			FoundItemData_NoShow.AddForm(FormArray[b_pos]);
-			BoolArray[b_pos] = true;
+			FoundItemData_NoShow.AddForm(VH_FormArray[b_pos]);
+			
+			VH_BoolArray[b_pos] = true;
+			VH_EntriesFound = std::ranges::count(VH_BoolArray, true);
+		}
 
-			EntriesFound = std::ranges::count(BoolArray, true);
+		if (auto t_pos = std::ranges::find(CH_QuestArray, a_editorID); t_pos != CH_QuestArray.end()) {
+			auto b_pos = std::distance(CH_QuestArray.begin(), t_pos);
+
+			if (!FoundItemData_NoShow.HasForm(CH_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CH_NameArray[b_pos]);
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+			}
+
+			FoundItemData_NoShow.AddForm(CH_FormArray[b_pos]);
+			
+			CH_BoolArray[b_pos] = true;
+			CH_EntriesFound = std::ranges::count(CH_BoolArray, true);
+		}
+
+		if (auto t_pos = std::ranges::find(PH_QuestArray, a_editorID); t_pos != PH_QuestArray.end()) {
+			auto b_pos = std::distance(PH_QuestArray.begin(), t_pos);
+
+			if (!FoundItemData_NoShow.HasForm(PH_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, PH_NameArray[b_pos]);
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+			}
+
+			FoundItemData_NoShow.AddForm(PH_FormArray[b_pos]);
+			
+			PH_BoolArray[b_pos] = true;
+			PH_EntriesFound = std::ranges::count(PH_BoolArray, true);
 		}
 	}
 
@@ -117,61 +249,18 @@ namespace CFramework_PlayerHomes_V {
 
 	void CHandler::InjectAndCompileData() {
 
-		FormArray.clear();
-		NameArray.clear();
-		TextArray.clear();
-		BoolArray.clear();
-		QuestArray.clear();
+		CHandler::Compile_VH();
+		CHandler::Compile_CH();
+		CHandler::Compile_PH();
 
-		auto handler = RE::TESDataHandler::GetSingleton();
+		VH_EntriesTotal = VH_FormArray.size();
+		VH_EntriesFound = std::ranges::count(VH_BoolArray, true);
 
-		FormArray.push_back(handler->LookupForm(0x000804, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight00"); //Breezehome
-		QuestArray.push_back("HousePurchase_Breezehome");
+		CH_EntriesTotal = CH_FormArray.size();
+		CH_EntriesFound = std::ranges::count(CH_BoolArray, true);
 
-		FormArray.push_back(handler->LookupForm(0x000807, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight01"); //Heljarchen Hall
-		QuestArray.push_back("HousePurchase_HeljarchenHall");
-
-		FormArray.push_back(handler->LookupForm(0x000808, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight02"); //Hjerim
-		QuestArray.push_back("HousePurchase_Hjerim");
-
-		FormArray.push_back(handler->LookupForm(0x000809, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight03"); //Honeyside
-		QuestArray.push_back("HousePurchase_Honeyside");
-
-		FormArray.push_back(handler->LookupForm(0x00080A, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight04"); //Lakeview Manor
-		QuestArray.push_back("BYOHHouseFalkreath");
-
-		FormArray.push_back(handler->LookupForm(0x00080B, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight05"); //Proudspire Manor
-		QuestArray.push_back("HousePurchase_ProudspireManor");
-
-		FormArray.push_back(handler->LookupForm(0x00080C, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight06"); //Severin Manor
-		QuestArray.push_back("DLC2RR02");
-
-		FormArray.push_back(handler->LookupForm(0x00080D, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight07"); //Vlindrel Hall
-		QuestArray.push_back("HousePurchase_VlindrelHall");
-
-		FormArray.push_back(handler->LookupForm(0x00080E, "Completionist.esp"));
-		TextArray.push_back("$HouseHighlight08"); //Windstad Manor
-		QuestArray.push_back("BYOHHouseHjaalmarch");
-
-		for (auto form : FormArray) {
-			NameArray.push_back(form->GetName());
-		}
-
-		NameArray.resize(FormArray.size());
-		TextArray.resize(FormArray.size());
-		BoolArray.resize(FormArray.size());
-		QuestArray.resize(FormArray.size());
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
+		PH_EntriesTotal = PH_FormArray.size();
+		PH_EntriesFound = std::ranges::count(PH_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -180,557 +269,243 @@ namespace CFramework_PlayerHomes_V {
 
 	void CHandler::UpdateFoundForms() {
 
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
+		for (auto i = 0; i < VH_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(VH_FormArray[i]->GetFormID())) {
+				VH_BoolArray[i] = true;
 			}
 		}
 
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData_NoShow.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData_NoShow.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Creation CLub Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CFramework_PlayerHomes_C {
-
-	using namespace CFramework_Master;
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-	std::vector<std::string> QuestArray{};
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		RegisterEvents();
-		InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
-
-		if (!a_event) { return EventResult::kContinue; }
-
-		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
-			auto questID = std::string(quest->GetFormEditorID());
-
-			if (questID == "ccEEJSSE001_Quest" && a_event->stage == 10) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccEEJSSE002_MageTowerQuest" && a_event->stage == 100) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccEEJSSE003_HouseQuest" && a_event->stage == 100) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccAARSSE001ManufactoryControlQuest" && a_event->stage == 100) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccEEJSSE004_Quest" && a_event->stage == 100) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccRMSSSE001_Quest" && a_event->stage == 200) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccEEJSSE005_Quest" && (a_event->stage == 200 || a_event->stage == 300)) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccBGSSSE031_HomeQuest" && a_event->stage == 30) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "ccVSVSSE004_MainQuest" && a_event->stage == 300) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
+		for (auto i = 0; i < CH_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(CH_FormArray[i]->GetFormID())) {
+				CH_BoolArray[i] = true;
 			}
 		}
-		return EventResult::kContinue;
-	}
 
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Found Form ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessFoundForm(std::string a_editorID) {
-
-		if (auto t_pos = std::ranges::find(QuestArray, a_editorID); t_pos != QuestArray.end()) {
-			auto b_pos = std::distance(QuestArray.begin(), t_pos);
-
-			if (!FoundItemData_NoShow.HasForm(FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, NameArray[b_pos]);
-				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+		for (auto i = 0; i < PH_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(PH_FormArray[i]->GetFormID())) {
+				PH_BoolArray[i] = true;
 			}
-
-			FoundItemData_NoShow.AddForm(FormArray[b_pos]);
-			BoolArray[b_pos] = true;
-
-			EntriesFound = std::ranges::count(BoolArray, true);
 		}
+
+		VH_EntriesTotal = VH_FormArray.size();
+		VH_EntriesFound = std::ranges::count(VH_BoolArray, true);
+
+		CH_EntriesTotal = CH_FormArray.size();
+		CH_EntriesFound = std::ranges::count(CH_BoolArray, true);
+
+		PH_EntriesTotal = PH_FormArray.size();
+		PH_EntriesFound = std::ranges::count(PH_BoolArray, true);
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
+	//-- Framework Functions ( Compile Vanilla Homes ) --
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
+	void CHandler::Compile_VH() {
 
-		FormArray.clear();
-		NameArray.clear();
-		TextArray.clear();
-		BoolArray.clear();
-		QuestArray.clear();
+		VH_FormArray.clear();
+		VH_NameArray.clear();
+		VH_TextArray.clear();
+		VH_BoolArray.clear();
+		VH_QuestArray.clear();
+
+		auto handler = RE::TESDataHandler::GetSingleton();
+
+		VH_FormArray.push_back(handler->LookupForm(0x000804, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight00"); //Breezehome
+		VH_QuestArray.push_back("HousePurchase_Breezehome");
+
+		VH_FormArray.push_back(handler->LookupForm(0x000807, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight01"); //Heljarchen Hall
+		VH_QuestArray.push_back("HousePurchase_HeljarchenHall");
+
+		VH_FormArray.push_back(handler->LookupForm(0x000808, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight02"); //Hjerim
+		VH_QuestArray.push_back("HousePurchase_Hjerim");
+
+		VH_FormArray.push_back(handler->LookupForm(0x000809, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight03"); //Honeyside
+		VH_QuestArray.push_back("HousePurchase_Honeyside");
+
+		VH_FormArray.push_back(handler->LookupForm(0x00080A, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight04"); //Lakeview Manor
+		VH_QuestArray.push_back("BYOHHouseFalkreath");
+
+		VH_FormArray.push_back(handler->LookupForm(0x00080B, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight05"); //Proudspire Manor
+		VH_QuestArray.push_back("HousePurchase_ProudspireManor");
+
+		VH_FormArray.push_back(handler->LookupForm(0x00080C, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight06"); //Severin Manor
+		VH_QuestArray.push_back("DLC2RR02");
+
+		VH_FormArray.push_back(handler->LookupForm(0x00080D, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight07"); //Vlindrel Hall
+		VH_QuestArray.push_back("HousePurchase_VlindrelHall");
+
+		VH_FormArray.push_back(handler->LookupForm(0x00080E, "Completionist.esp"));
+		VH_TextArray.push_back("$HouseHighlight08"); //Windstad Manor
+		VH_QuestArray.push_back("BYOHHouseHjaalmarch");
+
+		for (auto form : VH_FormArray) {
+			VH_NameArray.push_back(form->GetName());
+		}
+
+		VH_NameArray.resize(VH_FormArray.size());
+		VH_TextArray.resize(VH_FormArray.size());
+		VH_BoolArray.resize(VH_FormArray.size());
+		VH_QuestArray.resize(VH_FormArray.size());
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Compile Creation Homes ) -
+	//---------------------------------------------------
+
+	void CHandler::Compile_CH() {
+
+		CH_FormArray.clear();
+		CH_NameArray.clear();
+		CH_TextArray.clear();
+		CH_BoolArray.clear();
+		CH_QuestArray.clear();
 
 		auto handler = RE::TESDataHandler::GetSingleton();
 		if (const auto* Mod = handler->LookupLoadedModByName("cceejsse005-cave.esm"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x00080F, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight18"); //Bloodchill Manor
-			QuestArray.push_back("ccEEJSSE005_Quest");
+			CH_FormArray.push_back(handler->LookupForm(0x00080F, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight18"); //Bloodchill Manor
+			CH_QuestArray.push_back("ccEEJSSE005_Quest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("ccbgssse031-advcyrus.esm"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000810, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight19"); //Dead Man's Dread
-			QuestArray.push_back("ccBGSSSE031_HomeQuest");
+			CH_FormArray.push_back(handler->LookupForm(0x000810, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight19"); //Dead Man's Dread
+			CH_QuestArray.push_back("ccBGSSSE031_HomeQuest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedLightModByName("ccrmssse001-necrohouse.esl"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000811, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight21"); //Gallows Hall
-			QuestArray.push_back("ccRMSSSE001_Quest");
+			CH_FormArray.push_back(handler->LookupForm(0x000811, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight21"); //Gallows Hall
+			CH_QuestArray.push_back("ccRMSSSE001_Quest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedLightModByName("ccvsvsse004-beafarmer.esl"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000812, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight20"); //Goldenhills Plantation
-			QuestArray.push_back("ccVSVSSE004_MainQuest");
+			CH_FormArray.push_back(handler->LookupForm(0x000812, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight20"); //Goldenhills Plantation
+			CH_QuestArray.push_back("ccVSVSSE004_MainQuest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedLightModByName("cceejsse004-hall.esl"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000813, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight22"); //Hendraheim
-			QuestArray.push_back("ccEEJSSE004_Quest");
+			CH_FormArray.push_back(handler->LookupForm(0x000813, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight22"); //Hendraheim
+			CH_QuestArray.push_back("ccEEJSSE004_Quest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedLightModByName("cceejsse002-tower.esl"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000814, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight23"); //Myrwatch
-			QuestArray.push_back("ccEEJSSE002_MageTowerQuest");
+			CH_FormArray.push_back(handler->LookupForm(0x000814, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight23"); //Myrwatch
+			CH_QuestArray.push_back("ccEEJSSE002_MageTowerQuest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("ccafdsse001-dwesanctuary.esm"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000815, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight24"); //Nchuanthumz
-			QuestArray.push_back("ccAARSSE001ManufactoryControlQuest");
+			CH_FormArray.push_back(handler->LookupForm(0x000815, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight24"); //Nchuanthumz
+			CH_QuestArray.push_back("ccAARSSE001ManufactoryControlQuest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedLightModByName("cceejsse003-hollow.esl"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000816, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight26"); //Shadowfoot Sanctum
-			QuestArray.push_back("ccEEJSSE003_HouseQuest");
+			CH_FormArray.push_back(handler->LookupForm(0x000816, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight26"); //Shadowfoot Sanctum
+			CH_QuestArray.push_back("ccEEJSSE003_HouseQuest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("cceejsse001-hstead.esm"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000817, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight25"); //Tundra Homestead
-			QuestArray.push_back("ccEEJSSE001_Quest");
+			CH_FormArray.push_back(handler->LookupForm(0x000817, "Completionist.esp"));
+			CH_TextArray.push_back("$HouseHighlight25"); //Tundra Homestead
+			CH_QuestArray.push_back("ccEEJSSE001_Quest");
 		}
 
-		for (auto form : FormArray) {
-			NameArray.push_back(form->GetName());
+		for (auto form : CH_FormArray) {
+			CH_NameArray.push_back(form->GetName());
 		}
 
-		NameArray.resize(FormArray.size());
-		TextArray.resize(FormArray.size());
-		BoolArray.resize(FormArray.size());
-		QuestArray.resize(FormArray.size());		
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
+		CH_NameArray.resize(CH_FormArray.size());
+		CH_TextArray.resize(CH_FormArray.size());
+		CH_BoolArray.resize(CH_FormArray.size());
+		CH_QuestArray.resize(CH_FormArray.size());
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
+	//-- Framework Functions ( Compile Creation Homes ) -
 	//---------------------------------------------------
 
-	void CHandler::UpdateFoundForms() {
+	void CHandler::Compile_PH() {
 
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
-			}
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData_NoShow.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData_NoShow.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Patches Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CFramework_PlayerHomes_P {
-
-	using namespace CFramework_Master;
-
-	Serialization::CompletionistData Data;
-
-	std::vector<std::string> NameArray{};
-	std::vector<std::string> TextArray{};
-	std::vector<RE::TESForm*> FormArray{};
-	std::vector<bool> BoolArray{};
-	std::vector<std::string> Identifier{};
-
-	inline uint32_t EntriesTotal;
-	inline uint32_t EntriesFound;
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallFramework() {
-
-		RegisterEvents();
-		InjectAndCompileData();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
-
-		if (!a_event || a_event->newContainer != 0x00014 || !Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
-
-		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("TC_HighHrotgarLibraryKey"); key && key->GetFormID() == a_event->baseObj) {
-			ProcessFoundForm("TC_HighHrotgarLibraryKey");
-			return EventResult::kContinue;
-		}
-
-		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("manny_GF_Key_AlikrPlayerHome01"); key && key->GetFormID() == a_event->baseObj) {
-			ProcessFoundForm("manny_GF_Key_AlikrPlayerHome01");
-			return EventResult::kContinue;
-		}
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Quest Stage ) ------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
-
-		if (!a_event) { return EventResult::kContinue; }
-
-		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
-			
-			auto questID = std::string(quest->GetFormEditorID());
-			if (questID == "CLWStory04Quest" && a_event->stage == 200) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "WTPlayerHome" && a_event->stage == 20) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "DwaSpSadrithKegranHomeOwner" && a_event->stage == 1) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "FalskaarHousePurchase" && a_event->stage == 10) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "BalokHelgen01" && a_event->stage == 20) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-			if (questID == "AnvilQuestameir" && a_event->stage == 5) {
-				ProcessFoundForm(questID);
-				return EventResult::kContinue;
-			}
-		}
-		return EventResult::kContinue;
-	}
-	
-	//---------------------------------------------------
-	//-- Framework Functions ( Process Found Form ) -----
-	//---------------------------------------------------
-
-	void CHandler::ProcessFoundForm(std::string a_editorID) {
-
-		if (auto t_pos = std::ranges::find(Identifier, a_editorID); t_pos != Identifier.end()) {
-			auto b_pos = std::distance(Identifier.begin(), t_pos);
-
-			if (!FoundItemData_NoShow.HasForm(FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, NameArray[b_pos]);
-				FrameworkAPI::SendNotification(msg, "NotifySpecial");
-			}
-
-			FoundItemData_NoShow.AddForm(FormArray[b_pos]);
-			BoolArray[b_pos] = true;
-
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Form Injection ) ---------
-	//---------------------------------------------------
-
-	void CHandler::InjectAndCompileData() {
-
-		FormArray.clear();
-		NameArray.clear();
-		TextArray.clear();
-		BoolArray.clear();
-		Identifier.clear();
+		PH_FormArray.clear();
+		PH_NameArray.clear();
+		PH_TextArray.clear();
+		PH_BoolArray.clear();
+		PH_QuestArray.clear();
 
 		auto handler = RE::TESDataHandler::GetSingleton();
 		if (const auto* Mod = handler->LookupLoadedModByName("Clockwork.esp"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A14, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight09"); //Clockwork Castle
-			Identifier.push_back("CLWStory04Quest");
+			PH_FormArray.push_back(handler->LookupForm(0x000A14, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight09"); //Clockwork Castle
+			PH_QuestArray.push_back("CLWStory04Quest");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Wyrmstooth.esp"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A15, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight17"); //Fort Valus
-			Identifier.push_back("WTPlayerHome");
+			PH_FormArray.push_back(handler->LookupForm(0x000A15, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight17"); //Fort Valus
+			PH_QuestArray.push_back("WTPlayerHome");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Thunderchild - Epic Shout Package.esp"); Mod) {
-			Data.AddForm(0x06B452, "Thunderchild - Epic Shout Package.esp");
-			FormArray.push_back(handler->LookupForm(0x000A16, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight16"); //High Hrothgar Library
-			Identifier.push_back("TC_HighHrotgarLibraryKey");
+			CFramework_PlayerHomes_PH::Data.AddForm(0x06B452, "Thunderchild - Epic Shout Package.esp");
+			PH_FormArray.push_back(handler->LookupForm(0x000A16, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight16"); //High Hrothgar Library
+			PH_QuestArray.push_back("TC_HighHrotgarLibraryKey");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Dwarfsphere.esp"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A17, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight15"); //Hla Fang
-			Identifier.push_back("DwaSpSadrithKegranHomeOwner");
+			PH_FormArray.push_back(handler->LookupForm(0x000A17, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight15"); //Hla Fang
+			PH_QuestArray.push_back("DwaSpSadrithKegranHomeOwner");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Falskaar.esm"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A18, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight10"); //Horndew Lodge
-			Identifier.push_back("FalskaarHousePurchase");
+			PH_FormArray.push_back(handler->LookupForm(0x000A18, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight10"); //Horndew Lodge
+			PH_QuestArray.push_back("FalskaarHousePurchase");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Gray Fox Cowl.esm"); Mod) {
-			Data.AddForm(0x03C3EF, "Gray Fox Cowl.esm");
-			FormArray.push_back(handler->LookupForm(0x000A19, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight11"); //Moonlight Home
-			Identifier.push_back("manny_GF_Key_AlikrPlayerHome01");
+			CFramework_PlayerHomes_PH::Data.AddForm(0x03C3EF, "Gray Fox Cowl.esm");
+			PH_FormArray.push_back(handler->LookupForm(0x000A19, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight11"); //Moonlight Home
+			PH_QuestArray.push_back("manny_GF_Key_AlikrPlayerHome01");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("Helgen Reborn.esp"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A1A, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight12"); //Private Tower
-			Identifier.push_back("BalokHelgen01");
+			PH_FormArray.push_back(handler->LookupForm(0x000A1A, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight12"); //Private Tower
+			PH_QuestArray.push_back("BalokHelgen01");
 		}
 
 		if (const auto* Mod = handler->LookupLoadedModByName("moonpath.esp"); Mod) {
-			FormArray.push_back(handler->LookupForm(0x000A1B, "Completionist.esp"));
-			TextArray.push_back("$HouseHighlight14"); //The Priderock
-			Identifier.push_back("AnvilQuestameir");
+			PH_FormArray.push_back(handler->LookupForm(0x000A1B, "Completionist.esp"));
+			PH_TextArray.push_back("$HouseHighlight14"); //The Priderock
+			PH_QuestArray.push_back("AnvilQuestameir");
 		}
 
-		for (auto &form : FormArray) {
+		for (auto& form : PH_FormArray) {
 			if (form) {
-				NameArray.push_back(form->GetName());
+				PH_NameArray.push_back(form->GetName());
 			}
 		}
 
-		NameArray.resize(FormArray.size());
-		TextArray.resize(FormArray.size());
-		BoolArray.resize(FormArray.size());
-		Identifier.resize(FormArray.size());
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(FormArray[i]->GetFormID())) {
-				BoolArray[i] = true;
-			}
-		}
-
-		EntriesTotal = FormArray.size();
-		EntriesFound = std::ranges::count(BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM is Entry Complete ) --
-	//---------------------------------------------------
-
-	uint32_t CHandler::IsOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			return uint32_t(BoolArray[std::distance(NameArray.begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Set Entry Complete ) -
-	//---------------------------------------------------
-
-	void CHandler::SetOptionCompleted(std::string a_name) {
-
-		if (auto t_pos = std::ranges::find(NameArray, a_name); t_pos != NameArray.end()) {
-			auto b_pos = std::distance(NameArray.begin(), t_pos);
-
-			if (BoolArray.at(b_pos)) {
-				BoolArray.at(b_pos) = false;
-
-				FoundItemData_NoShow.RemoveForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.RemoveForm(var);
-					}
-				}
-			}
-			else {
-				BoolArray.at(b_pos) = true;
-				FoundItemData_NoShow.AddForm(FormArray.at(b_pos)->GetFormID());
-				for (auto var : Data.GetAllVariations()) {
-					if (Data.GetBase(var) == FormArray.at(b_pos)->GetFormID()) {
-						FoundItemData_NoShow.AddForm(var);
-					}
-				}
-			}
-
-			EntriesTotal = FormArray.size();
-			EntriesFound = std::ranges::count(BoolArray, true);
-		}
+		PH_NameArray.resize(PH_FormArray.size());
+		PH_TextArray.resize(PH_FormArray.size());
+		PH_BoolArray.resize(PH_FormArray.size());
+		PH_QuestArray.resize(PH_FormArray.size());
 	}
 }

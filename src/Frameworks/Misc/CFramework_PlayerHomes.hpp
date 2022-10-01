@@ -1,151 +1,40 @@
 #pragma once
-
-#include <SKSE\API.h>
 #include "Serialization.hpp"
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Vanilla Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CFramework_PlayerHomes_V
-{
+namespace CFramework_PlayerHomes_VH {
 	extern Serialization::CompletionistData Data;
-
-	extern std::vector<std::string> NameArray;
-	extern std::vector<std::string> TextArray;
-	extern std::vector<RE::TESForm*> FormArray;
-	extern std::vector<bool> BoolArray;
-
-	extern uint32_t EntriesTotal;
-	extern uint32_t EntriesFound;
-
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
-
-		public: [[nodiscard]] static CHandler* GetSingleton() {
-			static CHandler singleton;
-			return &singleton;
-		}
-
-		  static void RegisterEvents() { register_event<RE::TESQuestStageEvent>(); }
-
-		  EventResult			ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		  static void			InstallFramework();
-		  static void			InjectAndCompileData();
-		  static void			ProcessFoundForm(std::string a_editorID);
-		  static void			UpdateFoundForms();
-
-		  static uint32_t		IsOptionCompleted(std::string a_name);
-		  static void			SetOptionCompleted(std::string a_name);
-		 
-
-	private:
-
-		CHandler() = default;
-		CHandler(const CHandler&) = delete;
-		CHandler(CHandler&&) = delete;
-
-		~CHandler() override = default;
-
-		CHandler& operator=(const CHandler&) = delete;
-		CHandler& operator=(CHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
-	};
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Creation CLub Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CFramework_PlayerHomes_C
-{
+namespace CFramework_PlayerHomes_CH {
 	extern Serialization::CompletionistData Data;
-
-	extern std::vector<std::string> NameArray;
-	extern std::vector<std::string> TextArray;
-	extern std::vector<RE::TESForm*> FormArray;
-	extern std::vector<bool> BoolArray;
-
-	extern uint32_t EntriesTotal;
-	extern uint32_t EntriesFound;
-
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
-
-	public: [[nodiscard]] static CHandler* GetSingleton() {
-		static CHandler singleton;
-		return &singleton;
-	}
-
-		  static void RegisterEvents() { register_event<RE::TESQuestStageEvent>(); }
-
-		  EventResult			ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		  static void			InstallFramework();
-		  static void			InjectAndCompileData();
-		  static void			ProcessFoundForm(std::string a_editorID);
-		  static void			UpdateFoundForms();
-
-		  static uint32_t		IsOptionCompleted(std::string a_name);
-		  static void			SetOptionCompleted(std::string a_name);
-
-
-	private:
-
-		CHandler() = default;
-		CHandler(const CHandler&) = delete;
-		CHandler(CHandler&&) = delete;
-
-		~CHandler() override = default;
-
-		CHandler& operator=(const CHandler&) = delete;
-		CHandler& operator=(CHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
-	};
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------ Patches Homes
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-namespace CFramework_PlayerHomes_P
-{
+namespace CFramework_PlayerHomes_PH {
 	extern Serialization::CompletionistData Data;
+}
 
-	extern std::vector<std::string> NameArray;
-	extern std::vector<std::string> TextArray;
-	extern std::vector<RE::TESForm*> FormArray;
-	extern std::vector<bool> BoolArray;
+namespace CFramework_PlayerHomes
+{
+	extern std::vector<std::string>		VH_NameArray;
+	extern std::vector<std::string>		VH_TextArray;
+	extern std::vector<RE::TESForm*>	VH_FormArray;
+	extern std::vector<bool>			VH_BoolArray;
+	extern std::int32_t					VH_EntriesTotal;
+	extern std::int32_t					VH_EntriesFound;
 
-	extern uint32_t EntriesTotal;
-	extern uint32_t EntriesFound;
+	extern std::vector<std::string>		CH_NameArray;
+	extern std::vector<std::string>		CH_TextArray;
+	extern std::vector<RE::TESForm*>	CH_FormArray;
+	extern std::vector<bool>			CH_BoolArray;
+	extern std::int32_t					CH_EntriesTotal;
+	extern std::int32_t					CH_EntriesFound;
+
+	extern std::vector<std::string>		PH_NameArray;
+	extern std::vector<std::string>		PH_TextArray;
+	extern std::vector<RE::TESForm*>	PH_FormArray;
+	extern std::vector<bool>			PH_BoolArray;
+	extern std::int32_t					PH_EntriesTotal;
+	extern std::int32_t					PH_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -161,21 +50,22 @@ namespace CFramework_PlayerHomes_P
 			return &singleton;
 		}
 
-		  static void RegisterEvents() {
-			  register_event<RE::TESQuestStageEvent>();
-			  register_event<RE::TESContainerChangedEvent>();
-		  }
+		static void RegisterEvents() {
+			register_event<RE::TESQuestStageEvent>();
+			register_event<RE::TESContainerChangedEvent>();
+		}
 
-		  EventResult			ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-		  EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
+		EventResult			ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
+		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
 
-		  static void			InstallFramework();
-		  static void			InjectAndCompileData();
-		  static void			ProcessFoundForm(std::string a_editorID);
-		  static void			UpdateFoundForms();
+		static void			InstallFramework();
+		static void			InjectAndCompileData();
+		static void			ProcessFoundForm(std::string a_editorID);
+		static void			UpdateFoundForms();
 
-		  static uint32_t		IsOptionCompleted(std::string a_name);
-		  static void			SetOptionCompleted(std::string a_name);
+		static void			Compile_VH();
+		static void			Compile_CH();
+		static void			Compile_PH();
 
 	private:
 

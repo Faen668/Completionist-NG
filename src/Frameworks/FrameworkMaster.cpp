@@ -2,10 +2,6 @@
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 
-//Misc Frameworks
-#include "Misc/CFramework_Pets.hpp"
-#include "Misc/CFramework_PlayerHomes.hpp"
-
 namespace CFramework_Master {
 	using namespace ArrayHolder;
 	using namespace Serialization;
@@ -35,11 +31,8 @@ namespace CFramework_Master {
 		CFramework_MapMa::			CHandler::InstallFramework();
 		CFramework_Blessings::		CHandler::InstallFramework();
 		CFramework_Enchantments::	CHandler::InstallFramework();
-
-		CFramework_Pets				::CHandler::InstallFramework();
-		CFramework_PlayerHomes_V	::CHandler::InstallFramework();
-		CFramework_PlayerHomes_C	::CHandler::InstallFramework();
-		CFramework_PlayerHomes_P	::CHandler::InstallFramework();
+		CFramework_Pets::			CHandler::InstallFramework();
+		CFramework_PlayerHomes::	CHandler::InstallFramework();
 
 		// Patches
 		CPatch_AHD::CHandler::InstallFramework();
@@ -160,11 +153,8 @@ namespace CFramework_Master {
 		CFramework_MapMa::			CHandler::UpdateFoundForms();
 		CFramework_Blessings::		CHandler::UpdateFoundForms();
 		CFramework_Enchantments::	CHandler::UpdateFoundForms();
-
-		CFramework_Pets::CHandler::UpdateFoundForms();
-		CFramework_PlayerHomes_V::CHandler::UpdateFoundForms();
-		CFramework_PlayerHomes_C::CHandler::UpdateFoundForms();
-		CFramework_PlayerHomes_P::CHandler::UpdateFoundForms();
+		CFramework_Pets::			CHandler::UpdateFoundForms();
+		CFramework_PlayerHomes::	CHandler::UpdateFoundForms();
 
 		// Patches
 		CPatch_AHD::CHandler::UpdateFoundForms();
@@ -300,73 +290,6 @@ namespace CFramework_Master {
 
 			HandleTotalSet(FrameworkID(a_ID)) = HandleFormSet(FrameworkID(a_ID)).size();
 			HandleFoundSet(FrameworkID(a_ID)) = std::ranges::count(HandleBoolSet(FrameworkID(a_ID)), true);
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Get Skill Book AVal ) ----
-	//---------------------------------------------------
-
-	std::string FrameworkAPI::GetBookSkill(RE::ActorValue a_val){
-
-		switch (a_val) {
-
-		case RE::ActorValue::kOneHanded:
-			return "One-Handed";
-
-		case RE::ActorValue::kTwoHanded:
-			return "Two-Handed";
-
-		case RE::ActorValue::kArchery:
-			return "Marksman";
-
-		case RE::ActorValue::kBlock:
-			return "Block";
-
-		case RE::ActorValue::kSmithing:
-			return "Smithing";
-
-		case RE::ActorValue::kHeavyArmor:
-			return "Heavy Armor";
-
-		case RE::ActorValue::kLightArmor:
-			return "Light Armor";
-
-		case RE::ActorValue::kPickpocket:
-			return "Pickpocket";
-
-		case RE::ActorValue::kLockpicking:
-			return "LockPicking";
-
-		case RE::ActorValue::kSneak:
-			return "Sneak";
-
-		case RE::ActorValue::kAlchemy:
-			return "Alchemy";
-
-		case RE::ActorValue::kSpeech:
-			return "SpeechCraft";
-
-		case RE::ActorValue::kAlteration:
-			return "Alteration";
-
-		case RE::ActorValue::kConjuration:
-			return "Conjuration";
-
-		case RE::ActorValue::kDestruction:
-			return "Destruction";
-
-		case RE::ActorValue::kIllusion:
-			return "Illusion";
-
-		case RE::ActorValue::kRestoration:
-			return "Restoration";
-
-		case RE::ActorValue::kEnchanting:
-			return "Enchanting";
-
-		default:
-			return "";
 		}
 	}
 }
