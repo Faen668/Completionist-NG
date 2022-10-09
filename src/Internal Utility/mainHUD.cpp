@@ -3,19 +3,22 @@
 #include "Variables.hpp"
 #include "mainHUD.hpp"
 
-inline RE::FormID a_form;
-inline RE::TESForm* a_base;
-
-inline std::string replacename;
-inline std::vector<std::string*> garbageDump{};
+inline std::vector<std::string> garbageDump{};
 
 namespace Completionist_MainHUD {
 	using namespace CFramework_Master;
 	using namespace Serialization;
 	using namespace CVariables;
 
+	struct moreHUDmessage {
+
+		RE::FormID m_formID;
+		bool m_icontype; // false = New, true = Found
+		bool m_display;
+	};
+
 	//---------------------------------------------------
-	//-- Crosshair Hook For HUD Tagging -----------------
+	//-- Install Hooks for Main HUD & Inventory Items ---
 	//---------------------------------------------------
 
 	void TextnTagsAPI::Register() {
@@ -29,76 +32,84 @@ namespace Completionist_MainHUD {
 	}
 
 	//---------------------------------------------------
-	//-- Events ( Clear Garbage On Menu Close ) ---------
+	//-- Events ( Update Variables & Clear Garbage ) ----
 	//---------------------------------------------------
 
 	EventResult TextnTagsAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 
-		if (!a_event || a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
+		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
 
-		garbageDump.clear();
+		if (a_event->opening) { VariablesAPI::Update(); }
+		else{ garbageDump.clear();}
+
 		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
-	//-- Inventory Hook For Name Tagging ----------------
+	//-- Object Processing For Inventory Items ----------
 	//---------------------------------------------------
 
 	const char* TextnTagsAPI::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
 
-		RE::ItemList* itemList{ nullptr };
+	auto baseform = a_this->object;
+	if (!baseform || !baseform->GetName() || !ItemIsCollectable(baseform) || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
 
-		auto baseform = a_this->object;
-		if (!baseform || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
+	switch (baseform->GetFormType())
+	{
 
-		auto basename = baseform->GetName();
-		if (!basename) { return _OnUpdateInventoryText(a_this); }
+	case RE::FormType::AlchemyItem:
+		return (V_Alchemy_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-		if (ItemIsCollectable(baseform->GetFormID())) {
+	case RE::FormType::Ingredient:
+		return (V_Alchemy_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-			std::string* myString = new std::string(_OnUpdateInventoryText(a_this));
+	case RE::FormType::Ammo:
+		return (V_Ammo_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-			switch (V_TextChoice) {
-			
-			case 0: {
+	case RE::FormType::Armor:
+		return (V_Armor_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-				myString->append(std::string(" ***"));
-				garbageDump.push_back(myString);
-				return myString->c_str();
-			}
+	case RE::FormType::Book:
+		return (V_Books_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-			case 1: {
+	case RE::FormType::Note:
+		return (V_Books_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-				std::string* str = new std::string("*** ");
-				str->append(myString->c_str());
-				garbageDump.push_back(str);
-				return str->c_str();
-			}
+	case RE::FormType::Weapon:
+		return (V_Weapons_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
 
-			case 2: {
+	default:
+		return (V_Other_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+	}
+}
 
-				std::string* pr = new std::string("*** ");
-				std::string* ap = new std::string(" ***");
+	//---------------------------------------------------
+	//-- Name Processing For Inventory Items ------------
+	//---------------------------------------------------
 
-				myString->append(ap->c_str());
-				pr->append(myString->c_str());
+	const char* TextnTagsAPI::OnUpdateInventoryName(const char* a_this) {
 
-				garbageDump.push_back(pr);
-				return pr->c_str();
-			}
+		switch (V_TextChoice) {
 
-			default:
-				return _OnUpdateInventoryText(a_this);
-			}
+		case 0: //Append
+			return garbageDump.emplace_back(fmt::format("{:s} ***CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+
+		case 1: //Prepend
+			return garbageDump.emplace_back(fmt::format("*** {:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+
+		case 2: //Wrap
+			return garbageDump.emplace_back(fmt::format("*** {:s} ***CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+
+		default: //None
+			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
 		}
-		return _OnUpdateInventoryText(a_this);
 	}
 
 	//---------------------------------------------------
-	//-- Crosshair Hook For HUD Tagging -----------------
+	//-- Crosshair Hook For Main HUD  -------------------
 	//---------------------------------------------------
 
-	void TextnTagsAPI::OnUpdateCrosshairText(RE::UIMessageQueue * a_this, const RE::BSFixedString & a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData * a_data) {
+	void TextnTagsAPI::OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data) {
 
 		_OnUpdateCrosshairText(a_this, a_menuName, a_type, a_data);
 
@@ -110,129 +121,84 @@ namespace Completionist_MainHUD {
 	}
 
 	//---------------------------------------------------
-	//-- Crosshair Hook For HUD Tagging -----------------
+	//-- Crosshair Ref Processing for Main HUD ----------
 	//---------------------------------------------------
 
 	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data) {
+		
+		auto* SKSEMessaging = SKSE::GetMessagingInterface();
 
-		if (auto CurrentRef = RE::CrosshairPickData::GetSingleton(); CurrentRef) {
-			if (auto CurrentObj = CurrentRef->target.get(); CurrentObj) {
-				a_base = CurrentObj.get()->GetBaseObject();
-				a_form = a_base->GetFormID();
-			}
-		}
+		auto CurrentRef = RE::CrosshairPickData::GetSingleton();
+		if (!CurrentRef) { return; }
 
-		if (!a_base || !a_form) { return; }
+		auto CurrentObj = CurrentRef->target.get();
+		if (!CurrentObj) { return; }
 
-		replacename = data->text.c_str();
+		RE::TESForm* Base = CurrentObj.get()->GetBaseObject();
+		if (!Base || !ItemIsCollectable(Base)) { return; }
 
-		switch (a_base->GetFormType()) {
+
+		bool ShouldDisplay = false;
+		bool PrevCollected = ItemIsCollected(Base);
+
+		switch (Base->GetFormType())
+		{
 		case RE::FormType::AlchemyItem:
-		{
-			if (ItemIsCollected(a_form) && V_Alchemy_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Alchemy_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Ammo:
-		{
-			if (ItemIsCollected(a_form) && V_Ammo_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Ammo_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Ammo_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Ammo_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Armor:
-		{
-			if (ItemIsCollected(a_form) && V_Armor_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Armor_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Armor_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Armor_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Book:
-		{
-			if (ItemIsCollected(a_form) && V_Books_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Books_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Note:
-		{
-			if (ItemIsCollected(a_form) && V_Books_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Books_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Books_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Ingredient:
-		{
-			if (ItemIsCollected(a_form) && V_Alchemy_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Alchemy_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Alchemy_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		case RE::FormType::Weapon:
-		{
-			if (ItemIsCollected(a_form) && V_Weapons_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Weapons_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Weapons_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Weapons_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
-		}
-		default:
+			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
 
-			if (ItemIsCollected(a_form) && V_Other_Enabled_Found) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Other_ColourString_Found, V_CrosshairTag_Found);
-				return;
-			}
-			else if (ItemIsCollectable(a_form) && V_Other_Enabled_New) {
-				data->text = fmt::format("{:s} <font color='{:s}'>{:s}</font>"sv, replacename, V_Other_ColourString_New, V_CrosshairTag_New);
-				return;
-			}
-			return;
+		case RE::FormType::Ingredient:
+			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
+
+		case RE::FormType::Ammo:
+			ShouldDisplay = (PrevCollected && V_Ammo_Enabled_Found) || (!PrevCollected && V_Ammo_Enabled_New); break;
+
+		case RE::FormType::Armor:
+			ShouldDisplay = (PrevCollected && V_Armor_Enabled_Found) || (!PrevCollected && V_Armor_Enabled_New); break;
+
+		case RE::FormType::Book:
+			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
+
+		case RE::FormType::Note:
+			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
+
+		case RE::FormType::Weapon: 
+			ShouldDisplay = (PrevCollected && V_Weapons_Enabled_Found) || (!PrevCollected && V_Weapons_Enabled_New); break;
+
+		default:
+			ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
+		}
+
+		if (SKSEMessaging) {
+			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (ShouldDisplay && V_moreHudEnabled) };
+			SKSEMessaging->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
+		}
+
+		if (ShouldDisplay && V_mainHudEnabled) {
+			data->text = PrevCollected ? 
+				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, V_HUD_ColourString_Found, V_CrosshairTag_Found) :
+				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, V_HUD_ColourString_New, V_CrosshairTag_New);
 		}
 	}
+
+	//---------------------------------------------------
+	//-- Collectability Functions -----------------------
+	//---------------------------------------------------
 
 	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) {
-		return CompletionistData::CheckIsCollectable(a_formID) && !FoundItemData.HasForm(a_formID) && !FoundItemData_NoShow.HasForm(a_formID);
+		return CompletionistData::CheckIsCollectable(a_formID);
 	}
 
+	// Override
 	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) {
-		return CompletionistData::CheckIsCollectable(a_form->GetFormID()) && !FoundItemData.HasForm(a_form->GetFormID()) && !FoundItemData_NoShow.HasForm(a_form->GetFormID());
+		return CompletionistData::CheckIsCollectable(a_form->GetFormID());
 	}
 
-	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { return FoundItemData.HasForm(a_formID); }
-	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) { return FoundItemData.HasForm(a_form->GetFormID()); }
+	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { 
+		return FoundItemData.HasForm(a_formID) || FoundItemData_NoShow.HasForm(a_formID); 
+	}
+
+	// Override
+	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) { 
+		return FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
+	}
 }

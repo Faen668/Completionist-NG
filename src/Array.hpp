@@ -10,6 +10,23 @@
 #include "Frameworks/Misc/CFramework_Enchantments.hpp"
 #include "Frameworks/Misc/CFramework_Pets.hpp"
 #include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
+#include "Frameworks/Misc/CFramework_Shouts.hpp"
+
+//Quest Frameworks
+#include "Frameworks/Quests/Main Story/CQuests_MainStory_SK.hpp"
+#include "Frameworks/Quests/Main Story/CQuests_MainStory_CW.hpp"
+#include "Frameworks/Quests/Main Story/CQuests_MainStory_DG.hpp"
+#include "Frameworks/Quests/Main Story/CQuests_MainStory_DB.hpp"
+#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_01.hpp"
+#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_02.hpp"
+#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_03.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Dawnstar.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Falkreath.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Markarth.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Morthal.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Riften.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Solitude.hpp"
+#include "Frameworks/Quests/Towns & Cities/CQuests_Whiterun.hpp"
 
 //Patches
 #include "Patches/AdditionalHearthfireDolls/CFramework_AHD.hpp"
@@ -104,6 +121,11 @@ namespace ArrayHolder {
 		kFramework_VPH = 44, // Player Homes (Vanilla)
 		kFramework_CPH = 45, // Player Homes (Creation Club)
 		kFramework_PPH = 46, // Player Homes (Supported Mods)
+
+		//Misc (Shouts)
+		kFramework_VNS = 47, // Shouts (Vanilla)
+		kFramework_TCS = 48, // Shouts (Thunderchild)
+		kFramework_MCS = 49, // Shouts (Miscellaneous)
 
 		//Patches
 		kPatch_AHD_I = 200, // Additional Hearthfire Dolls
@@ -204,7 +226,37 @@ namespace ArrayHolder {
 		kTotal,
 	};
 
-	//Main Array Containers 
+	enum class QuestID : std::int32_t
+	{
+		kQuest_MSQ_SK = 0,  // Main Story Quests (Skyrim)
+		kQuest_MSQ_CW = 1,  // Main Story Quests (Civil War)
+		kQuest_MSQ_DG = 2,  // Main Story Quests (Dawnguard)
+		kQuest_MSQ_DB = 3,  // Main Story Quests (Dragonborn)
+						    
+		kQuest_CCQ_01 = 4,  // Creation Club (Farming and Fishing)
+		kQuest_CCQ_02 = 5,  // Creation Club (A-G)
+		kQuest_CCQ_03 = 6,  // Creation Club (H-W)
+						    
+		kQuest_Dawnst = 7,  // Dawnstar Quests
+		kQuest_Falkre = 8,  // Falkreath Quests
+		kQuest_Markar = 9,  // Markarth Quests
+		kQuest_Mortha = 10, // Morthal Quests
+		kQuest_Riften = 11, // Riften Quests
+		kQuest_Solitu = 12, // Solitude Quests
+		kQuest_Whiter = 13, // Whiterun Quests
+		kTotal,
+	};
+
+	//Quest Array Containers 
+	static std::unordered_map<QuestID, std::vector<std::string>*>	qIdenSet;
+	static std::unordered_map<QuestID, std::vector<std::string>*>	qNameSet;
+	static std::unordered_map<QuestID, std::vector<std::string>*>	qTextSet;
+	static std::unordered_map<QuestID, std::vector<std::string>*>	qKeysSet;
+	static std::unordered_map<QuestID, std::vector<bool>*>			qBoolSet;
+	static std::unordered_map<QuestID, std::vector<int32_t>*>		qRadiSet;
+	static std::unordered_map<QuestID, CompletionistData*>			qDataSet;
+
+	//Misc Array Containers 
 	static std::unordered_map<FrameworkID, std::vector<std::string>*>	NameSet;
 	static std::unordered_map<FrameworkID, std::vector<std::string>*>	TextSet;
 	static std::unordered_map<FrameworkID, std::vector<RE::TESForm*>*>	FormSet;
@@ -216,6 +268,7 @@ namespace ArrayHolder {
 	
 	// Empty Return Containers
 	static std::vector<RE::TESForm*>	EFormVec{};
+	static std::vector<std::int32_t>	ERadiVec{};
 	static std::vector<std::string>		ETextVec{};
 	static std::vector<bool>			EBoolVec{};
 	static CompletionistData			EDataSet{};
@@ -230,43 +283,63 @@ namespace ArrayHolder {
 	//---------------------------------------------------
 
 	[[nodiscard]] static auto& HandleNameSet(FrameworkID a_frameworkID) noexcept {
-
-		return (NameSet.find(a_frameworkID) != NameSet.end() && NameSet.at(a_frameworkID) != nullptr) ? *NameSet.at(a_frameworkID) : ETextVec;
+		return (NameSet.contains(a_frameworkID) && NameSet.at(a_frameworkID)) ? *NameSet.at(a_frameworkID) : ETextVec;
 	}
 
 	[[nodiscard]] static auto& HandleTextSet(FrameworkID a_frameworkID) noexcept {
-
-		return (TextSet.find(a_frameworkID) != TextSet.end() && TextSet.at(a_frameworkID) != nullptr) ? *TextSet.at(a_frameworkID) : ETextVec;
+		return (TextSet.contains(a_frameworkID) && TextSet.at(a_frameworkID)) ? *TextSet.at(a_frameworkID) : ETextVec;
 	}
 
 	[[nodiscard]] static auto& HandleBoolSet(FrameworkID a_frameworkID) noexcept {
-
-		return (BoolSet.find(a_frameworkID) != BoolSet.end() && BoolSet.at(a_frameworkID) != nullptr) ? *BoolSet.at(a_frameworkID) : EBoolVec;
+		return (BoolSet.contains(a_frameworkID) && BoolSet.at(a_frameworkID)) ? *BoolSet.at(a_frameworkID) : EBoolVec;
 	}
 
 	[[nodiscard]] static auto& HandleFormSet(FrameworkID a_frameworkID) noexcept {
-
-		return (FormSet.find(a_frameworkID) != FormSet.end() && FormSet.at(a_frameworkID) != nullptr) ? *FormSet.at(a_frameworkID) : EFormVec;
+		return (FormSet.contains(a_frameworkID) && FormSet.at(a_frameworkID)) ? *FormSet.at(a_frameworkID) : EFormVec;
 	}
 
 	[[nodiscard]] static auto& HandleFoundSet(FrameworkID a_frameworkID) noexcept {
-
-		return (CntFSet.find(a_frameworkID) != CntFSet.end() && CntFSet.at(a_frameworkID) != nullptr) ? *CntFSet.at(a_frameworkID) : EsInt;
+		return (CntFSet.contains(a_frameworkID) && CntFSet.at(a_frameworkID)) ? *CntFSet.at(a_frameworkID) : EsInt;
 	}
 
 	[[nodiscard]] static auto& HandleTotalSet(FrameworkID a_frameworkID) noexcept {
-
-		return (CntTSet.find(a_frameworkID) != CntTSet.end() && CntTSet.at(a_frameworkID) != nullptr) ? *CntTSet.at(a_frameworkID) : EsInt;
+		return (CntTSet.contains(a_frameworkID) && CntTSet.at(a_frameworkID)) ? *CntTSet.at(a_frameworkID) : EsInt;
 	}
 
 	[[nodiscard]] static auto& HandleDataSet(FrameworkID a_frameworkID) noexcept {
-
-		return (DataSet.find(a_frameworkID) != DataSet.end() && DataSet.at(a_frameworkID) != nullptr) ? *DataSet.at(a_frameworkID) : EDataSet;
+		return (DataSet.contains(a_frameworkID) && DataSet.at(a_frameworkID)) ? *DataSet.at(a_frameworkID) : EDataSet;
 	}
 
 	[[nodiscard]] static auto HandleNoShow(FrameworkID a_frameworkID) noexcept {
+		return (NoShow.contains(a_frameworkID) && NoShow.at(a_frameworkID)) ? NoShow.at(a_frameworkID) : false;
+	}
 
-		return NoShow.find(a_frameworkID) != NoShow.end() ? NoShow.at(a_frameworkID) : false;
+	//---------------------------------------------------
+	//-- Quest Functions ( Array Getter (MCM Proc) ------
+	//---------------------------------------------------
+
+	[[nodiscard]] static auto& qHandleIdenSet(QuestID a_QuestID) noexcept {
+		return (qIdenSet.contains(a_QuestID) && qIdenSet.at(a_QuestID)) ? *qIdenSet.at(a_QuestID) : ETextVec;
+	}
+
+	[[nodiscard]] static auto& qHandleNameSet(QuestID a_QuestID) noexcept {
+		return (qNameSet.contains(a_QuestID) && qNameSet.at(a_QuestID)) ? *qNameSet.at(a_QuestID) : ETextVec;
+	}
+
+	[[nodiscard]] static auto& qHandleTextSet(QuestID a_QuestID) noexcept {
+		return (qTextSet.contains(a_QuestID) && qTextSet.at(a_QuestID)) ? *qTextSet.at(a_QuestID) : ETextVec;
+	}
+
+	[[nodiscard]] static auto& qHandleKeysSet(QuestID a_QuestID) noexcept {
+		return (qKeysSet.contains(a_QuestID) && qKeysSet.at(a_QuestID)) ? *qKeysSet.at(a_QuestID) : ETextVec;
+	}
+
+	[[nodiscard]] static auto& qHandleBoolSet(QuestID a_QuestID) noexcept {
+		return (qBoolSet.contains(a_QuestID) && qBoolSet.at(a_QuestID)) ? *qBoolSet.at(a_QuestID) : EBoolVec;
+	}
+
+	[[nodiscard]] static auto& qHandleRadiSet(QuestID a_QuestID) noexcept {
+		return (qRadiSet.contains(a_QuestID) && qRadiSet.at(a_QuestID)) ? *qRadiSet.at(a_QuestID) : ERadiVec;
 	}
 
 	//---------------------------------------------------
@@ -291,10 +364,46 @@ namespace ArrayHolder {
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Add To Unordered Map  ) --
+	//---------------------------------------------------
+
+	template <QuestID a_questID>
+	static void AttemptToAddQuest(std::vector<std::string>* a_KeyID, std::vector<std::string>* a_Idens, std::vector<std::string>* a_names, std::vector<std::string>* a_texts, std::vector<bool>* a_bools, std::vector<std::int32_t>* a_radis) noexcept
+		requires(a_questID != QuestID::kTotal)
+	{
+		qKeysSet.try_emplace(a_questID, a_KeyID);
+		qIdenSet.try_emplace(a_questID, a_Idens);
+		qNameSet.try_emplace(a_questID, a_names);
+		qTextSet.try_emplace(a_questID, a_texts);
+		qBoolSet.try_emplace(a_questID, a_bools);
+		qRadiSet.try_emplace(a_questID, a_radis);
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Array Registrations ) ----
 	//---------------------------------------------------
 
 	static void RegisterArrays() noexcept {
+
+		//Quests - Main Stroy Quests (Start) ----------------
+		AttemptToAddQuest<QuestID::kQuest_MSQ_SK>(&CQFramework_SK::KeysArray, &CQFramework_SK::IdenArray, &CQFramework_SK::NameArray, &CQFramework_SK::TextArray, &CQFramework_SK::BoolArray, &CQFramework_SK::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_MSQ_CW>(&CQFramework_CW::KeysArray, &CQFramework_CW::IdenArray, &CQFramework_CW::NameArray, &CQFramework_CW::TextArray, &CQFramework_CW::BoolArray, &CQFramework_CW::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_MSQ_DG>(&CQFramework_DG::KeysArray, &CQFramework_DG::IdenArray, &CQFramework_DG::NameArray, &CQFramework_DG::TextArray, &CQFramework_DG::BoolArray, &CQFramework_DG::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_MSQ_DB>(&CQFramework_DB::KeysArray, &CQFramework_DB::IdenArray, &CQFramework_DB::NameArray, &CQFramework_DB::TextArray, &CQFramework_DB::BoolArray, &CQFramework_DB::RadiArray);
+		
+		//Quests - Creation CLub (Start) --------------------
+		AttemptToAddQuest<QuestID::kQuest_CCQ_01>(&CQFramework_CC1::KeysArray, &CQFramework_CC1::IdenArray, &CQFramework_CC1::NameArray, &CQFramework_CC1::TextArray, &CQFramework_CC1::BoolArray, &CQFramework_CC1::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_CCQ_02>(&CQFramework_CC2::KeysArray, &CQFramework_CC2::IdenArray, &CQFramework_CC2::NameArray, &CQFramework_CC2::TextArray, &CQFramework_CC2::BoolArray, &CQFramework_CC2::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_CCQ_03>(&CQFramework_CC3::KeysArray, &CQFramework_CC3::IdenArray, &CQFramework_CC3::NameArray, &CQFramework_CC3::TextArray, &CQFramework_CC3::BoolArray, &CQFramework_CC3::RadiArray);
+
+		//Quests - Towns & Cities (Start) -------------------
+		AttemptToAddQuest<QuestID::kQuest_Dawnst>(&CQFramework_Dawnstar::KeysArray, &CQFramework_Dawnstar::IdenArray, &CQFramework_Dawnstar::NameArray, &CQFramework_Dawnstar::TextArray, &CQFramework_Dawnstar::BoolArray, &CQFramework_Dawnstar::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Falkre>(&CQFramework_Falkreath::KeysArray, &CQFramework_Falkreath::IdenArray, &CQFramework_Falkreath::NameArray, &CQFramework_Falkreath::TextArray, &CQFramework_Falkreath::BoolArray, &CQFramework_Falkreath::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Markar>(&CQFramework_Markarth::KeysArray, &CQFramework_Markarth::IdenArray, &CQFramework_Markarth::NameArray, &CQFramework_Markarth::TextArray, &CQFramework_Markarth::BoolArray, &CQFramework_Markarth::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Mortha>(&CQFramework_Morthal::KeysArray, &CQFramework_Morthal::IdenArray, &CQFramework_Morthal::NameArray, &CQFramework_Morthal::TextArray, &CQFramework_Morthal::BoolArray, &CQFramework_Morthal::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Riften>(&CQFramework_Riften::KeysArray, &CQFramework_Riften::IdenArray, &CQFramework_Riften::NameArray, &CQFramework_Riften::TextArray, &CQFramework_Riften::BoolArray, &CQFramework_Riften::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Solitu>(&CQFramework_Solitude::KeysArray, &CQFramework_Solitude::IdenArray, &CQFramework_Solitude::NameArray, &CQFramework_Solitude::TextArray, &CQFramework_Solitude::BoolArray, &CQFramework_Solitude::RadiArray);
+		AttemptToAddQuest<QuestID::kQuest_Whiter>(&CQFramework_Whiterun::KeysArray, &CQFramework_Whiterun::IdenArray, &CQFramework_Whiterun::NameArray, &CQFramework_Whiterun::TextArray, &CQFramework_Whiterun::BoolArray, &CQFramework_Whiterun::RadiArray);
 
 		//Frameworks - Items (Uniques) (Start) --------------
 		AttemptToAdd<FrameworkID::kFramework_ARM>(&CFramework_Uniques::A_NameArray, &CFramework_Uniques::A_TextArray, &CFramework_Uniques::A_BoolArray, &CFramework_Uniques::A_FormArray, &CFramework_Uniques::A_EntriesFound, &CFramework_Uniques::A_EntriesTotal, &CFramework_Uniques_A::Data);
@@ -360,6 +469,11 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_VPH>(&CFramework_PlayerHomes::VH_NameArray, &CFramework_PlayerHomes::VH_TextArray, &CFramework_PlayerHomes::VH_BoolArray, &CFramework_PlayerHomes::VH_FormArray, &CFramework_PlayerHomes::VH_EntriesFound, &CFramework_PlayerHomes::VH_EntriesTotal, &CFramework_PlayerHomes_VH::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_CPH>(&CFramework_PlayerHomes::CH_NameArray, &CFramework_PlayerHomes::CH_TextArray, &CFramework_PlayerHomes::CH_BoolArray, &CFramework_PlayerHomes::CH_FormArray, &CFramework_PlayerHomes::CH_EntriesFound, &CFramework_PlayerHomes::CH_EntriesTotal, &CFramework_PlayerHomes_CH::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_PPH>(&CFramework_PlayerHomes::PH_NameArray, &CFramework_PlayerHomes::PH_TextArray, &CFramework_PlayerHomes::PH_BoolArray, &CFramework_PlayerHomes::PH_FormArray, &CFramework_PlayerHomes::PH_EntriesFound, &CFramework_PlayerHomes::PH_EntriesTotal, &CFramework_PlayerHomes_PH::Data, true);
+
+		//Frameworks - Misc (Shouts) (Start) ----------------
+		AttemptToAdd<FrameworkID::kFramework_VNS>(&CFramework_Shouts::Vanilla_SH_NameOutput, &CFramework_Shouts::Vanilla_SH_TextArray, &CFramework_Shouts::Vanilla_SH_BoolArray, &CFramework_Shouts::Vanilla_SH_FormArray, &CFramework_Shouts::Vanilla_SH_EntriesFound, &CFramework_Shouts::Vanilla_SH_EntriesTotal, &CFramework_Shouts_VS::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_TCS>(&CFramework_Shouts::Thunderchild_SH_NameOutput, &CFramework_Shouts::Thunderchild_SH_TextArray, &CFramework_Shouts::Thunderchild_SH_BoolArray, &CFramework_Shouts::Thunderchild_SH_FormArray, &CFramework_Shouts::Thunderchild_SH_EntriesFound, &CFramework_Shouts::Thunderchild_SH_EntriesTotal, &CFramework_Shouts_TS::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_MCS>(&CFramework_Shouts::Miscellaneous_SH_NameOutput, &CFramework_Shouts::Miscellaneous_SH_TextArray, &CFramework_Shouts::Miscellaneous_SH_BoolArray, &CFramework_Shouts::Miscellaneous_SH_FormArray, &CFramework_Shouts::Miscellaneous_SH_EntriesFound, &CFramework_Shouts::Miscellaneous_SH_EntriesTotal, &CFramework_Shouts_TS::Data, true);
 
 
 		//---------------

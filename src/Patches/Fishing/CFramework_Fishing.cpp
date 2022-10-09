@@ -52,24 +52,25 @@ namespace CPatch_FSH {
 	};
 
 	constexpr Serialization::FormArray A_Forms = {
-	0x000956,0x00093C,0x000964,0x000951,0x00095A,0x000961,0x00095F,0x000962,
-	0x000963,0x000959,0x000958,0x000965,0x000950,0x000957,0x000966,0x00095B,
-	0x000953,0x000967,0x000955,0x000954,0x000952,
+	0x000F7E,0x000F64,0x000F8C,0x000F79,0x000F82,0x000F89,0x000F87,0x000F8A,
+	0x000F8B,0x000F81,0x000F80,0x000F8D,0x000F78,0x000F7F,0x000F8E,0x000F83,
+	0x000F7B,0x000F8F,0x000F7D,0x000F7C,0x000F7A,
+
 	};
 
 	constexpr Serialization::FormArray C_Forms = {
-	0x00095E,0x000960,
+	0x000F86,0x000F88,
 	};
 
 	constexpr Serialization::FormArray L_Forms = {
-	0x000932,0x000937,0x00092F,0x000936,0x000939,0x000935,0x000930,0x000931,
-	0x000938,0x000933,
+	0x000F5A,0x000F5F,0x000F57,0x000F5E,0x000F61,0x000F5D,0x000F58,0x000F59,
+	0x000F60,0x000F5B,
 	};
 
 	constexpr Serialization::FormArray S_Forms = {
-	0x000934,0x000945,0x00094C,0x000944,0x000948,0x000943,0x00094A,0x00093A,
-	0x00093E,0x00094F,0x000941,0x00093F,0x000946,0x00095D,0x000949,0x000940,
-	0x00093D,0x00093B,0x00095C,0x00094E,0x00094D,0x000942,0x00094B,0x000947,
+	0x000F5C,0x000F6D,0x000F74,0x000F6C,0x000F70,0x000F6B,0x000F72,0x000F62,
+	0x000F66,0x000F77,0x000F69,0x000F67,0x000F6E,0x000F85,0x000F71,0x000F68,
+	0x000F65,0x000F63,0x000F84,0x000F76,0x000F75,0x000F6A,0x000F73,0x000F6F,
 	};
 
 	inline std::vector<std::string>		F_NameArray;
@@ -193,7 +194,7 @@ namespace CPatch_FSH {
 
 		// Arctic Markers ---
 
-		CPatch_FSH_A::Data.CompileFormArray(CPatch_FSH::A_Forms, "Completionist_ITP.esp");
+		CPatch_FSH_A::Data.CompileFormArray(CPatch_FSH::A_Forms, "Completionist.esp");
 		CPatch_FSH_A::Data.Populate(A_NameArray, A_FormArray, A_BoolArray, A_TextArray, false, 2);
 
 		A_EntriesTotal = A_FormArray.size();
@@ -201,7 +202,7 @@ namespace CPatch_FSH {
 
 		// Caves Markers ---
 
-		CPatch_FSH_C::Data.CompileFormArray(CPatch_FSH::C_Forms, "Completionist_ITP.esp");
+		CPatch_FSH_C::Data.CompileFormArray(CPatch_FSH::C_Forms, "Completionist.esp");
 		CPatch_FSH_C::Data.Populate(C_NameArray, C_FormArray, C_BoolArray, C_TextArray, false, 2);
 
 		C_EntriesTotal = C_FormArray.size();
@@ -209,7 +210,7 @@ namespace CPatch_FSH {
 
 		// Lakes Markers ---
 
-		CPatch_FSH_L::Data.CompileFormArray(CPatch_FSH::L_Forms, "Completionist_ITP.esp");
+		CPatch_FSH_L::Data.CompileFormArray(CPatch_FSH::L_Forms, "Completionist.esp");
 		CPatch_FSH_L::Data.Populate(L_NameArray, L_FormArray, L_BoolArray, L_TextArray, false, 2);
 
 		L_EntriesTotal = L_FormArray.size();
@@ -217,7 +218,7 @@ namespace CPatch_FSH {
 
 		// Streams Markers ---
 
-		CPatch_FSH_S::Data.CompileFormArray(CPatch_FSH::S_Forms, "Completionist_ITP.esp");
+		CPatch_FSH_S::Data.CompileFormArray(CPatch_FSH::S_Forms, "Completionist.esp");
 		CPatch_FSH_S::Data.Populate(S_NameArray, S_FormArray, S_BoolArray, S_TextArray, false, 2);
 
 		S_EntriesTotal = S_FormArray.size();
@@ -316,7 +317,11 @@ namespace CPatch_FSH {
 
 		if (!a_event || a_event->actor.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
 		
+		INFO("Is Player");
+
 		if (!GlobalV || !RodList || !RodList->HasForm(a_event->baseObject)) { return EventResult::kContinue; }
+
+		INFO("Got List and Rods");
 
 		if (a_event->equipped) { GlobalV->value += 1; }
 

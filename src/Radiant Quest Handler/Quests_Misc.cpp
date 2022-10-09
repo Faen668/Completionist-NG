@@ -26,7 +26,6 @@ namespace MiscQuests
 				if (!drunkrefr) { return EventResult::kContinue; }
 
 				RadiantQuestManager::ProcessFormID(drunkrefr, "FavorJobsDrunks");
-				RE::DebugMessageBox("Updating :)");
 			}
 		}
 		return EventResult::kContinue;

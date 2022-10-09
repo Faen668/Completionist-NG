@@ -1,7 +1,6 @@
 ﻿#include "Serialization.hpp"
 #include "Internal Utility/mainHUD.hpp"
 #include "Radiant Quest Handler/Radiant Quests Manager.hpp"
-#include "Internal Utility/InventoryMode.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Variables.hpp"
 
@@ -9,18 +8,8 @@ const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
 const SKSE::QueryInterface* g_QueryInterface = nullptr;
 
-/*DLLEXPORT bool SKSEAPI moreHUDItemIsValid(const RE::FormID a_formID) {
-
-	if (a_formID) {
-		INFO("Got FormID {}", a_formID);
-		return true;
-	}
-	return false;
-};*/
-
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	using namespace Completionist_MainHUD;
-	using namespace CInventoryEvents;
 	using namespace CFramework_Master;
 	using namespace CVariables;
 
@@ -29,14 +18,15 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		
 		Quest_Manager::Install();
-
-		//InventoryAPI::Register();
 		TextnTagsAPI::Register();
 		VariablesAPI::Register();
 		FrameworkAPI::Register();
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:
+
+		VariablesAPI::Update();
+		FrameworkAPI::Framework_Load();
 		break;
 
 	case SKSE::MessagingInterface::kPreLoadGame:

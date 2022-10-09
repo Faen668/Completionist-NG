@@ -282,12 +282,6 @@ namespace CPatch_ST1 {
 
 		ItmL4_EntriesTotal = ItmL4_FormArray.size();
 		ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
-		
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kST1_ItmL1>(&ItmL1_NameArray, &ItmL1_FormArray, ItmL1_BoolArray, &ItmL1_TextArray);
-		//RegisterAs<FrameworkID::kST1_ItmL2>(&ItmL2_NameArray, &ItmL2_FormArray, ItmL2_BoolArray, &ItmL2_TextArray);
-		//RegisterAs<FrameworkID::kST1_ItmL3>(&ItmL3_NameArray, &ItmL3_FormArray, ItmL3_BoolArray, &ItmL3_TextArray);
-		//RegisterAs<FrameworkID::kST1_ItmL4>(&ItmL4_NameArray, &ItmL4_FormArray, ItmL4_BoolArray, &ItmL4_TextArray);
 	}
 
 	//---------------------------------------------------
