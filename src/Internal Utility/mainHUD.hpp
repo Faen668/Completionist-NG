@@ -28,7 +28,7 @@ namespace Completionist_MainHUD
 		
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
-		static const char* OnUpdateInventoryName(const char* a_this);
+		static const char* OnUpdateInventoryName(const char* a_this, bool a_displayTag);
 
 	private:
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;

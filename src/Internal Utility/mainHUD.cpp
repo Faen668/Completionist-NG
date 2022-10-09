@@ -52,42 +52,59 @@ namespace Completionist_MainHUD {
 	const char* TextnTagsAPI::OnUpdateInventoryText(RE::InventoryEntryData* a_this) {
 
 	auto baseform = a_this->object;
-	if (!baseform || !baseform->GetName() || !ItemIsCollectable(baseform) || ItemIsCollected(baseform)) { return _OnUpdateInventoryText(a_this); }
+	if (!baseform || !baseform->GetName() || !ItemIsCollectable(baseform)) { return _OnUpdateInventoryText(a_this); }
+
+	bool ShouldDisplay = false;
+	bool PrevCollected = ItemIsCollected(baseform);
 
 	switch (baseform->GetFormType())
 	{
 
 	case RE::FormType::AlchemyItem:
-		return (V_Alchemy_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
 
 	case RE::FormType::Ingredient:
-		return (V_Alchemy_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
 
 	case RE::FormType::Ammo:
-		return (V_Ammo_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Ammo_Enabled_Found) || (!PrevCollected && V_Ammo_Enabled_New); break;
 
 	case RE::FormType::Armor:
-		return (V_Armor_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Armor_Enabled_Found) || (!PrevCollected && V_Armor_Enabled_New); break;
 
 	case RE::FormType::Book:
-		return (V_Books_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
 
 	case RE::FormType::Note:
-		return (V_Books_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
 
 	case RE::FormType::Weapon:
-		return (V_Weapons_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Weapons_Enabled_Found) || (!PrevCollected && V_Weapons_Enabled_New); break;
 
 	default:
-		return (V_Other_Enabled_New) ? OnUpdateInventoryName(_OnUpdateInventoryText(a_this)) : _OnUpdateInventoryText(a_this);
+		ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
 	}
+
+	//SKSE Message Here
+
+	if (!ShouldDisplay) { return _OnUpdateInventoryText(a_this); }
+
+
+	if (V_mainHudEnabled) {
+		return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), PrevCollected);
+	}
+	return _OnUpdateInventoryText(a_this);
 }
 
 	//---------------------------------------------------
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
 
-	const char* TextnTagsAPI::OnUpdateInventoryName(const char* a_this) {
+	const char* TextnTagsAPI::OnUpdateInventoryName(const char* a_this, bool a_collected) {
+
+		if (a_collected) {
+			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_Found))).c_str();
+		}
 
 		switch (V_TextChoice) {
 

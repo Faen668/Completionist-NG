@@ -7,7 +7,7 @@ namespace BeggarQuests
 	const RE::FormID Degaine =	0x01F325; 
 	const RE::FormID Dervenin =	0x0198DC; 
 	const RE::FormID Edda =		0x044A8D; 
-	const RE::FormID Lucia =	0x03F55E; 
+	const RE::FormID Lucia =	0x003F5F;
 	const RE::FormID Narfi =	0x019E24; 
 	const RE::FormID Noster =	0x0198BD; 
 	const RE::FormID Silda =	0x01B122; 

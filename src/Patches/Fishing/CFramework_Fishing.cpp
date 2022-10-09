@@ -141,8 +141,7 @@ namespace CPatch_FSH {
 		if (auto installed = Serialization::CompletionistData::IsModInstalled("ccbgssse001-fish.esm"); !installed) {
 			return;
 		}
-
-		RodList = RE::TESForm::LookupByEditorID<RE::BGSListForm>("ccBGSSSE001_FishingRods");
+		RodList = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x000843, "ccbgssse001-fish.esm");
 		GlobalV = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingRods");
 		ContMap = RE::ControlMap::GetSingleton();
 
@@ -318,6 +317,14 @@ namespace CPatch_FSH {
 		if (!a_event || a_event->actor.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
 		
 		INFO("Is Player");
+
+		if (GlobalV) {
+			INFO("Got Global");
+		}
+
+		if (RodList) {
+			INFO("Got RodList");
+		}
 
 		if (!GlobalV || !RodList || !RodList->HasForm(a_event->baseObject)) { return EventResult::kContinue; }
 
