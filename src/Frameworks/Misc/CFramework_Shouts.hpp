@@ -2,15 +2,15 @@
 #include "Serialization.hpp"
 
 namespace CFramework_Shouts_VS {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Shouts_TS {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Shouts_MS {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Shouts{
@@ -25,40 +25,40 @@ namespace CFramework_Shouts{
 	};
 
 	//Vanilla Shouts
-	extern std::vector<std::string>				Vanilla_SH_NameOutput;
-	extern std::vector<std::string>				Vanilla_SH_NameArray;
-	extern std::vector<std::string>				Vanilla_SH_TextArray;
-	extern std::vector<RE::TESForm*>			Vanilla_SH_FormArray;
-	extern std::vector<RE::SpellItem*>			Vanilla_W1_FormArray;
-	extern std::vector<RE::SpellItem*>			Vanilla_W2_FormArray;
-	extern std::vector<RE::SpellItem*>			Vanilla_W3_FormArray;
-	extern std::vector<bool>					Vanilla_SH_BoolArray;
-	extern std::int32_t							Vanilla_SH_EntriesTotal;
-	extern std::int32_t							Vanilla_SH_EntriesFound;
+	inline std::vector<std::string>				Vanilla_SH_NameOutput;
+	inline std::vector<std::string>				Vanilla_SH_NameArray;
+	inline std::vector<std::string>				Vanilla_SH_TextArray;
+	inline std::vector<RE::TESForm*>			Vanilla_SH_FormArray;
+	inline std::vector<RE::SpellItem*>			Vanilla_W1_FormArray;
+	inline std::vector<RE::SpellItem*>			Vanilla_W2_FormArray;
+	inline std::vector<RE::SpellItem*>			Vanilla_W3_FormArray;
+	inline std::vector<bool>					Vanilla_SH_BoolArray;
+	inline std::int32_t							Vanilla_SH_EntriesTotal;
+	inline std::int32_t							Vanilla_SH_EntriesFound;
 
 	//Thunderchild Shouts
-	extern std::vector<std::string>				Thunderchild_SH_NameOutput;
-	extern std::vector<std::string>				Thunderchild_SH_NameArray;
-	extern std::vector<std::string>				Thunderchild_SH_TextArray;
-	extern std::vector<RE::TESForm*>			Thunderchild_SH_FormArray;
-	extern std::vector<RE::SpellItem*>			Thunderchild_W1_FormArray;
-	extern std::vector<RE::SpellItem*>			Thunderchild_W2_FormArray;
-	extern std::vector<RE::SpellItem*>			Thunderchild_W3_FormArray;
-	extern std::vector<bool>					Thunderchild_SH_BoolArray;
-	extern std::int32_t							Thunderchild_SH_EntriesTotal;
-	extern std::int32_t							Thunderchild_SH_EntriesFound;
+	inline std::vector<std::string>				Thunderchild_SH_NameOutput;
+	inline std::vector<std::string>				Thunderchild_SH_NameArray;
+	inline std::vector<std::string>				Thunderchild_SH_TextArray;
+	inline std::vector<RE::TESForm*>			Thunderchild_SH_FormArray;
+	inline std::vector<RE::SpellItem*>			Thunderchild_W1_FormArray;
+	inline std::vector<RE::SpellItem*>			Thunderchild_W2_FormArray;
+	inline std::vector<RE::SpellItem*>			Thunderchild_W3_FormArray;
+	inline std::vector<bool>					Thunderchild_SH_BoolArray;
+	inline std::int32_t							Thunderchild_SH_EntriesTotal;
+	inline std::int32_t							Thunderchild_SH_EntriesFound;
 
 	//Miscellaneous Shouts
-	extern std::vector<std::string>				Miscellaneous_SH_NameOutput;
-	extern std::vector<std::string>				Miscellaneous_SH_NameArray;
-	extern std::vector<std::string>				Miscellaneous_SH_TextArray;
-	extern std::vector<RE::TESForm*>			Miscellaneous_SH_FormArray;
-	extern std::vector<RE::SpellItem*>			Miscellaneous_W1_FormArray;
-	extern std::vector<RE::SpellItem*>			Miscellaneous_W2_FormArray;
-	extern std::vector<RE::SpellItem*>			Miscellaneous_W3_FormArray;
-	extern std::vector<bool>					Miscellaneous_SH_BoolArray;
-	extern std::int32_t							Miscellaneous_SH_EntriesTotal;
-	extern std::int32_t							Miscellaneous_SH_EntriesFound;
+	inline std::vector<std::string>				Miscellaneous_SH_NameOutput;
+	inline std::vector<std::string>				Miscellaneous_SH_NameArray;
+	inline std::vector<std::string>				Miscellaneous_SH_TextArray;
+	inline std::vector<RE::TESForm*>			Miscellaneous_SH_FormArray;
+	inline std::vector<RE::SpellItem*>			Miscellaneous_W1_FormArray;
+	inline std::vector<RE::SpellItem*>			Miscellaneous_W2_FormArray;
+	inline std::vector<RE::SpellItem*>			Miscellaneous_W3_FormArray;
+	inline std::vector<bool>					Miscellaneous_SH_BoolArray;
+	inline std::int32_t							Miscellaneous_SH_EntriesTotal;
+	inline std::int32_t							Miscellaneous_SH_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

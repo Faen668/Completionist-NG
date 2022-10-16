@@ -1,8 +1,7 @@
 ﻿#include "Serialization.hpp"
 #include "Internal Utility/mainHUD.hpp"
-#include "Radiant Quest Handler/Radiant Quests Manager.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Variables.hpp"
+#include "Internal Utility/Variables.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
@@ -17,7 +16,6 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
 		
-		Quest_Manager::Install();
 		TextnTagsAPI::Register();
 		VariablesAPI::Register();
 		FrameworkAPI::Register();
@@ -26,7 +24,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	case SKSE::MessagingInterface::kNewGame:
 
 		VariablesAPI::Update();
-		FrameworkAPI::Framework_Load();
+		FrameworkAPI::Update();
 		break;
 
 	case SKSE::MessagingInterface::kPreLoadGame:
@@ -35,7 +33,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	case SKSE::MessagingInterface::kPostLoadGame:
 
 		VariablesAPI::Update();
-		FrameworkAPI::Framework_Load();
+		FrameworkAPI::Update();
 		break;
 
 	case SKSE::MessagingInterface::kPostLoad:

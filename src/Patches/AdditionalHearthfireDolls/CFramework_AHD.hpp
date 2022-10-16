@@ -1,26 +1,17 @@
 #pragma once
 
-#include <SKSE\API.h>
-#include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-
 namespace CPatch_AHD_Items {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_AHD
 {
-	enum PatchID : std::int32_t
-	{
-		kItems = 200,
-	};
-
-	extern std::vector<std::string> Items_NameArray;
-	extern std::vector<std::string> Items_TextArray;
-	extern std::vector<RE::TESForm*> Items_FormArray;
-	extern std::vector<bool> Items_BoolArray;
-	extern std::int32_t Items_EntriesTotal;
-	extern std::int32_t Items_EntriesFound;
+	inline std::vector<std::string> Items_NameArray;
+	inline std::vector<std::string> Items_TextArray;
+	inline std::vector<RE::TESForm*> Items_FormArray;
+	inline std::vector<bool> Items_BoolArray;
+	inline std::int32_t Items_EntriesTotal;
+	inline std::int32_t Items_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

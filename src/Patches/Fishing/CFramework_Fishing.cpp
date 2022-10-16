@@ -1,37 +1,9 @@
 #include "Serialization.hpp"
 #include "CFramework_Fishing.hpp"
-#include "Internal Utility/ScriptObject.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
 #undef GetObject
-
-namespace CPatch_FSH_F {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_I {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_B {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_A {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_C {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_L {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_S {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_FSH {
 	using namespace CFramework_Master;
@@ -72,65 +44,6 @@ namespace CPatch_FSH {
 	0x000F66,0x000F77,0x000F69,0x000F67,0x000F6E,0x000F85,0x000F71,0x000F68,
 	0x000F65,0x000F63,0x000F84,0x000F76,0x000F75,0x000F6A,0x000F73,0x000F6F,
 	};
-
-	inline std::vector<std::string>		F_NameArray;
-	inline std::vector<std::string>		F_TextArray;
-	inline std::vector<RE::TESForm*>	F_FormArray;
-	inline std::vector<bool>			F_BoolArray;
-	inline std::int32_t					F_EntriesTotal;
-	inline std::int32_t					F_EntriesFound;
-
-	inline std::vector<std::string>		I_NameArray;
-	inline std::vector<std::string>		I_TextArray;
-	inline std::vector<RE::TESForm*>	I_FormArray;
-	inline std::vector<bool>			I_BoolArray;
-	inline std::int32_t					I_EntriesTotal;
-	inline std::int32_t					I_EntriesFound;
-
-	inline std::vector<std::string>		B_NameArray;
-	inline std::vector<std::string>		B_TextArray;
-	inline std::vector<RE::TESForm*>	B_FormArray;
-	inline std::vector<bool>			B_BoolArray;
-	inline std::int32_t					B_EntriesTotal;
-	inline std::int32_t					B_EntriesFound;
-
-	inline std::vector<std::string>		A_NameArray;
-	inline std::vector<std::string>		A_TextArray;
-	inline std::vector<RE::TESForm*>	A_FormArray;
-	inline std::vector<bool>			A_BoolArray;
-	inline std::int32_t					A_EntriesTotal;
-	inline std::int32_t					A_EntriesFound;
-	inline
-	inline std::vector<std::string>		C_NameArray;
-	inline std::vector<std::string>		C_TextArray;
-	inline std::vector<RE::TESForm*>	C_FormArray;
-	inline std::vector<bool>			C_BoolArray;
-	inline std::int32_t					C_EntriesTotal;
-	inline std::int32_t					C_EntriesFound;
-
-	inline std::vector<std::string>		L_NameArray;
-	inline std::vector<std::string>		L_TextArray;
-	inline std::vector<RE::TESForm*>	L_FormArray;
-	inline std::vector<bool>			L_BoolArray;
-	inline std::int32_t					L_EntriesTotal;
-	inline std::int32_t					L_EntriesFound;
-
-	inline std::vector<std::string>		S_NameArray;
-	inline std::vector<std::string>		S_TextArray;
-	inline std::vector<RE::TESForm*>	S_FormArray;
-	inline std::vector<bool>			S_BoolArray;
-	inline std::int32_t					S_EntriesTotal;
-	inline std::int32_t					S_EntriesFound;
-
-	inline ScriptObjectPtr MCMScript;
-
-	std::vector<std::string> temploc{};
-	std::vector<std::string> temprod{};
-	std::vector<RE::TESForm*> tempfsh{};
-
-	inline static RE::BGSListForm* RodList;
-	inline static RE::TESGlobal* GlobalV;
-	inline static RE::ControlMap* ContMap;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -315,20 +228,8 @@ namespace CPatch_FSH {
 	EventResult CHandler::ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>*) {
 
 		if (!a_event || a_event->actor.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
-		
-		INFO("Is Player");
-
-		if (GlobalV) {
-			INFO("Got Global");
-		}
-
-		if (RodList) {
-			INFO("Got RodList");
-		}
 
 		if (!GlobalV || !RodList || !RodList->HasForm(a_event->baseObject)) { return EventResult::kContinue; }
-
-		INFO("Got List and Rods");
 
 		if (a_event->equipped) { GlobalV->value += 1; }
 

@@ -2,50 +2,59 @@
 #include "Serialization.hpp"
 
 namespace CFramework_Pets_VP {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Pets_PS {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Pets_SS {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Pets_MP {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Pets
 {
-	extern std::vector<std::string>		Pets_VP_NameArray;
-	extern std::vector<std::string>		Pets_VP_TextArray;
-	extern std::vector<RE::TESForm*>	Pets_VP_FormArray;
-	extern std::vector<bool>			Pets_VP_BoolArray;
-	extern std::int32_t					Pets_VP_EntriesTotal;
-	extern std::int32_t					Pets_VP_EntriesFound;
+	inline std::vector<std::string>		Pets_VP_NameArray;
+	inline std::vector<std::string>		Pets_VP_TextArray;
+	inline std::vector<RE::TESForm*>	Pets_VP_FormArray;
+	inline std::vector<bool>			Pets_VP_BoolArray;
+	inline std::int32_t					Pets_VP_EntriesTotal;
+	inline std::int32_t					Pets_VP_EntriesFound;
 
-	extern std::vector<std::string>		Pets_PS_NameArray;
-	extern std::vector<std::string>		Pets_PS_TextArray;
-	extern std::vector<RE::TESForm*>	Pets_PS_FormArray;
-	extern std::vector<bool>			Pets_PS_BoolArray;
-	extern std::int32_t					Pets_PS_EntriesTotal;
-	extern std::int32_t					Pets_PS_EntriesFound;
+	inline std::vector<std::string>		Pets_PS_NameArray;
+	inline std::vector<std::string>		Pets_PS_TextArray;
+	inline std::vector<RE::TESForm*>	Pets_PS_FormArray;
+	inline std::vector<bool>			Pets_PS_BoolArray;
+	inline std::int32_t					Pets_PS_EntriesTotal;
+	inline std::int32_t					Pets_PS_EntriesFound;
 
-	extern std::vector<std::string>		Pets_SS_NameArray;
-	extern std::vector<std::string>		Pets_SS_TextArray;
-	extern std::vector<RE::TESForm*>	Pets_SS_FormArray;
-	extern std::vector<bool>			Pets_SS_BoolArray;
-	extern std::int32_t					Pets_SS_EntriesTotal;
-	extern std::int32_t					Pets_SS_EntriesFound;
+	inline std::vector<std::string>		Pets_SS_NameArray;
+	inline std::vector<std::string>		Pets_SS_TextArray;
+	inline std::vector<RE::TESForm*>	Pets_SS_FormArray;
+	inline std::vector<bool>			Pets_SS_BoolArray;
+	inline std::int32_t					Pets_SS_EntriesTotal;
+	inline std::int32_t					Pets_SS_EntriesFound;
 
-	extern std::vector<std::string>		Pets_MP_NameArray;
-	extern std::vector<std::string>		Pets_MP_TextArray;
-	extern std::vector<RE::TESForm*>	Pets_MP_FormArray;
-	extern std::vector<bool>			Pets_MP_BoolArray;
-	extern std::int32_t					Pets_MP_EntriesTotal;
-	extern std::int32_t					Pets_MP_EntriesFound;
+	inline std::vector<std::string>		Pets_MP_NameArray;
+	inline std::vector<std::string>		Pets_MP_TextArray;
+	inline std::vector<RE::TESForm*>	Pets_MP_FormArray;
+	inline std::vector<bool>			Pets_MP_BoolArray;
+	inline std::int32_t					Pets_MP_EntriesTotal;
+	inline std::int32_t					Pets_MP_EntriesFound;
+
+	inline bool PetsOfSkyrim_Installed = false;
+	inline bool SaintSeducer_Installed = false;
+
+	inline bool Petcrab_Installed = false;
+	inline bool PetWolf_Installed = false;
+	inline bool PetHund_Installed = false;
+
+	inline bool Miscellaneous_Installed = false;
 
 	class CHandler {
 

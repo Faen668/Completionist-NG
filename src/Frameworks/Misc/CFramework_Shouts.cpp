@@ -1,60 +1,12 @@
-#include "Variables.hpp"
+#include "Internal Utility/Variables.hpp"
 #include "CFramework_Shouts.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
 
-namespace CFramework_Shouts_VS {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Shouts_TS {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Shouts_MS {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_Shouts {
 	using namespace CFramework_Master;
 	using namespace CVariables;
-
-	//Vanilla Shouts
-	inline std::vector<std::string>				Vanilla_SH_NameOutput;
-	inline std::vector<std::string>				Vanilla_SH_NameArray;
-	inline std::vector<std::string>				Vanilla_SH_TextArray;
-	inline std::vector<RE::TESForm*>			Vanilla_SH_FormArray;
-	inline std::vector<RE::SpellItem*>			Vanilla_W1_FormArray;
-	inline std::vector<RE::SpellItem*>			Vanilla_W2_FormArray;
-	inline std::vector<RE::SpellItem*>			Vanilla_W3_FormArray;
-	inline std::vector<bool>					Vanilla_SH_BoolArray;
-	inline std::int32_t							Vanilla_SH_EntriesTotal;
-	inline std::int32_t							Vanilla_SH_EntriesFound;
-
-	//Thunderchild Shouts
-	inline std::vector<std::string>				Thunderchild_SH_NameOutput;
-	inline std::vector<std::string>				Thunderchild_SH_NameArray;
-	inline std::vector<std::string>				Thunderchild_SH_TextArray;
-	inline std::vector<RE::TESForm*>			Thunderchild_SH_FormArray;
-	inline std::vector<RE::SpellItem*>			Thunderchild_W1_FormArray;
-	inline std::vector<RE::SpellItem*>			Thunderchild_W2_FormArray;
-	inline std::vector<RE::SpellItem*>			Thunderchild_W3_FormArray;
-	inline std::vector<bool>					Thunderchild_SH_BoolArray;
-	inline std::int32_t							Thunderchild_SH_EntriesTotal;
-	inline std::int32_t							Thunderchild_SH_EntriesFound;
-
-	//Miscellaneous Shouts
-	inline std::vector<std::string>				Miscellaneous_SH_NameOutput;
-	inline std::vector<std::string>				Miscellaneous_SH_NameArray;
-	inline std::vector<std::string>				Miscellaneous_SH_TextArray;
-	inline std::vector<RE::TESForm*>			Miscellaneous_SH_FormArray;
-	inline std::vector<RE::SpellItem*>			Miscellaneous_W1_FormArray;
-	inline std::vector<RE::SpellItem*>			Miscellaneous_W2_FormArray;
-	inline std::vector<RE::SpellItem*>			Miscellaneous_W3_FormArray;
-	inline std::vector<bool>					Miscellaneous_SH_BoolArray;
-	inline std::int32_t							Miscellaneous_SH_EntriesTotal;
-	inline std::int32_t							Miscellaneous_SH_EntriesFound;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -475,6 +427,7 @@ namespace CFramework_Shouts {
 		std::string FSName = "Falskaar.esm";
 		std::string WYName = "Wyrmstooth.esp";
 		std::string THName = "Thunderchild - Epic Shout Package.esp";
+		std::string FTName = "ForcefulTongue.esp";
 
 		CHandler::AddToArray(Section::kVanilla, 0x05FC77, "$MiscDataShout00", "$MiscDataShoutHighlight00", SKName); //Animal Allegiance
 		CHandler::AddToArray(Section::kVanilla, 0x07097B, "$MiscDataShout01", "$MiscDataShoutHighlight01", SKName); //Aura Whisper
@@ -534,8 +487,9 @@ namespace CFramework_Shouts {
 		CHandler::AddToArray(Section::kThunderchild, 0x01FFDE, "$MiscDataShoutThunderChild27", "$MiscDataShoutHighlightThunder27", THName); //Wanderlust
 		CHandler::AddToArray(Section::kThunderchild, 0x004925, "$MiscDataShoutThunderChild28", "$MiscDataShoutHighlightThunder28", THName); //Warcry
 	
-		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F, "$MiscDataShoutFalskaar00", "$MiscDataShoutFalskaarH00", FSName);		//Champion's Spirit
-		CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "$MiscDataShoutWyrmstooth00", "$MiscDataShoutWyrmstoothH00", WYName);	//Phantom Form
+		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F, "$MiscDataShout_FSK_Name", "$MiscDataShout_FSK_Data", FSName);	//Champion's Spirit (Falskaar)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "$MiscDataShout_WYR_Name", "$MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
 	}
 
 	//---------------------------------------------------

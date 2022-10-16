@@ -5,7 +5,6 @@
 #undef AddForm
 
 namespace CFramework_Books_AG {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_AG::Data.HasForm(a_formID)) {
@@ -17,7 +16,6 @@ namespace CFramework_Books_AG {
 }
 
 namespace CFramework_Books_HS {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_HS::Data.HasForm(a_formID)) {
@@ -29,7 +27,6 @@ namespace CFramework_Books_HS {
 }
 
 namespace CFramework_Books_TY {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_TY::Data.HasForm(a_formID)) {
@@ -41,7 +38,6 @@ namespace CFramework_Books_TY {
 }
 
 namespace CFramework_Skill_SK {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Skill_SK::Data.HasForm(a_formID)) {
@@ -53,7 +49,6 @@ namespace CFramework_Skill_SK {
 }
 
 namespace CFramework_Tomes_SK {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Tomes_SK::Data.HasForm(a_formID)) {
@@ -65,7 +60,6 @@ namespace CFramework_Tomes_SK {
 }
 
 namespace CFramework_Books_DG {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_DG::Data.HasForm(a_formID)) {
@@ -77,7 +71,6 @@ namespace CFramework_Books_DG {
 }
 
 namespace CFramework_Tomes_DG {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Tomes_DG::Data.HasForm(a_formID)) {
@@ -89,7 +82,6 @@ namespace CFramework_Tomes_DG {
 }
 
 namespace CFramework_Books_DB {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_DB::Data.HasForm(a_formID)) {
@@ -101,7 +93,6 @@ namespace CFramework_Books_DB {
 }
 
 namespace CFramework_Tomes_DB {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Tomes_DB::Data.HasForm(a_formID)) {
@@ -113,7 +104,6 @@ namespace CFramework_Tomes_DB {
 }
 
 namespace CFramework_TMaps_SK {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_TMaps_SK::Data.HasForm(a_formID)) {
@@ -125,7 +115,6 @@ namespace CFramework_TMaps_SK {
 }
 
 namespace CFramework_TMaps_NT {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_TMaps_NT::Data.HasForm(a_formID)) {
@@ -137,7 +126,6 @@ namespace CFramework_TMaps_NT {
 }
 
 namespace CFramework_TMaps_TH {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_TMaps_TH::Data.HasForm(a_formID)) {
@@ -149,7 +137,6 @@ namespace CFramework_TMaps_TH {
 }
 
 namespace CFramework_Books_CC {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Books_CC::Data.HasForm(a_formID)) {
@@ -161,7 +148,6 @@ namespace CFramework_Books_CC {
 }
 
 namespace CFramework_Tomes_CC {
-	inline Serialization::CompletionistData Data;
 
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_Tomes_CC::Data.HasForm(a_formID)) {
@@ -301,104 +287,6 @@ namespace CFramework_Books {
 
 	// clang-format on
 
-	inline std::vector<std::string>		Books_AG_NameArray;
-	inline std::vector<std::string>		Books_AG_TextArray;
-	inline std::vector<RE::TESForm*>	Books_AG_FormArray;
-	inline std::vector<bool>			Books_AG_BoolArray;
-	inline std::int32_t					Books_AG_EntriesTotal;
-	inline std::int32_t					Books_AG_EntriesFound;
-
-	inline std::vector<std::string>		Books_HS_NameArray;
-	inline std::vector<std::string>		Books_HS_TextArray;
-	inline std::vector<RE::TESForm*>	Books_HS_FormArray;
-	inline std::vector<bool>			Books_HS_BoolArray;
-	inline std::int32_t					Books_HS_EntriesTotal;
-	inline std::int32_t					Books_HS_EntriesFound;
-
-	inline std::vector<std::string>		Books_TY_NameArray;
-	inline std::vector<std::string>		Books_TY_TextArray;
-	inline std::vector<RE::TESForm*>	Books_TY_FormArray;
-	inline std::vector<bool>			Books_TY_BoolArray;
-	inline std::int32_t					Books_TY_EntriesTotal;
-	inline std::int32_t					Books_TY_EntriesFound;
-
-	inline std::vector<std::string>		Skill_SK_NameArray;
-	inline std::vector<std::string>		Skill_SK_TextArray;
-	inline std::vector<RE::TESForm*>	Skill_SK_FormArray;
-	inline std::vector<bool>			Skill_SK_BoolArray;
-	inline std::int32_t					Skill_SK_EntriesTotal;
-	inline std::int32_t					Skill_SK_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_SK_NameArray;
-	inline std::vector<std::string>		Tomes_SK_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_SK_FormArray;
-	inline std::vector<bool>			Tomes_SK_BoolArray;
-	inline std::int32_t					Tomes_SK_EntriesTotal;
-	inline std::int32_t					Tomes_SK_EntriesFound;
-
-	inline std::vector<std::string>		Books_DG_NameArray;
-	inline std::vector<std::string>		Books_DG_TextArray;
-	inline std::vector<RE::TESForm*>	Books_DG_FormArray;
-	inline std::vector<bool>			Books_DG_BoolArray;
-	inline std::int32_t					Books_DG_EntriesTotal;
-	inline std::int32_t					Books_DG_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_DG_NameArray;
-	inline std::vector<std::string>		Tomes_DG_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_DG_FormArray;
-	inline std::vector<bool>			Tomes_DG_BoolArray;
-	inline std::int32_t					Tomes_DG_EntriesTotal;
-	inline std::int32_t					Tomes_DG_EntriesFound;
-
-	inline std::vector<std::string>		Books_DB_NameArray;
-	inline std::vector<std::string>		Books_DB_TextArray;
-	inline std::vector<RE::TESForm*>	Books_DB_FormArray;
-	inline std::vector<bool>			Books_DB_BoolArray;
-	inline std::int32_t					Books_DB_EntriesTotal;
-	inline std::int32_t					Books_DB_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_DB_NameArray;
-	inline std::vector<std::string>		Tomes_DB_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_DB_FormArray;
-	inline std::vector<bool>			Tomes_DB_BoolArray;
-	inline std::int32_t					Tomes_DB_EntriesTotal;
-	inline std::int32_t					Tomes_DB_EntriesFound;
-
-	inline std::vector<std::string>		TMaps_SK_NameArray;
-	inline std::vector<std::string>		TMaps_SK_TextArray;
-	inline std::vector<RE::TESForm*>	TMaps_SK_FormArray;
-	inline std::vector<bool>			TMaps_SK_BoolArray;
-	inline std::int32_t					TMaps_SK_EntriesTotal;
-	inline std::int32_t					TMaps_SK_EntriesFound;
-
-	inline std::vector<std::string>		TMaps_NT_NameArray;
-	inline std::vector<std::string>		TMaps_NT_TextArray;
-	inline std::vector<RE::TESForm*>	TMaps_NT_FormArray;
-	inline std::vector<bool>			TMaps_NT_BoolArray;
-	inline std::int32_t					TMaps_NT_EntriesTotal;
-	inline std::int32_t					TMaps_NT_EntriesFound;
-
-	inline std::vector<std::string>		TMaps_TH_NameArray;
-	inline std::vector<std::string>		TMaps_TH_TextArray;
-	inline std::vector<RE::TESForm*>	TMaps_TH_FormArray;
-	inline std::vector<bool>			TMaps_TH_BoolArray;
-	inline std::int32_t					TMaps_TH_EntriesTotal;
-	inline std::int32_t					TMaps_TH_EntriesFound;
-
-	inline std::vector<std::string>		Books_CC_NameArray;
-	inline std::vector<std::string>		Books_CC_TextArray;
-	inline std::vector<RE::TESForm*>	Books_CC_FormArray;
-	inline std::vector<bool>			Books_CC_BoolArray;
-	inline std::int32_t					Books_CC_EntriesTotal;
-	inline std::int32_t					Books_CC_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_NameArray;
-	inline std::vector<std::string>		Tomes_CC_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_FormArray;
-	inline std::vector<bool>			Tomes_CC_BoolArray;
-	inline std::int32_t					Tomes_CC_EntriesTotal;
-	inline std::int32_t					Tomes_CC_EntriesFound;
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -488,7 +376,7 @@ namespace CFramework_Books {
 
 		FoundItemData.AddForm(a_formID);
 
-		if (a_section == "Books_AG_FormArray") {
+		if (a_section == "CFramework_Books_AG") {
 			auto t_pos = std::ranges::find(Books_AG_FormArray, a_base);
 			auto b_pos = std::distance(Books_AG_FormArray.begin(), t_pos);
 
@@ -497,7 +385,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Books_HS_FormArray") {
+		if (a_section == "CFramework_Books_HS") {
 			auto t_pos = std::ranges::find(Books_HS_FormArray, a_base);
 			auto b_pos = std::distance(Books_HS_FormArray.begin(), t_pos);
 
@@ -506,7 +394,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Books_TY_FormArray") {
+		if (a_section == "CFramework_Books_TY") {
 			auto t_pos = std::ranges::find(Books_TY_FormArray, a_base);
 			auto b_pos = std::distance(Books_TY_FormArray.begin(), t_pos);
 
@@ -515,7 +403,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Skill_SK_FormArray") {
+		if (a_section == "CFramework_Skill_SK") {
 			auto t_pos = std::ranges::find(Skill_SK_FormArray, a_base);
 			auto b_pos = std::distance(Skill_SK_FormArray.begin(), t_pos);
 
@@ -524,7 +412,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Tomes_SK_FormArray") {
+		if (a_section == "CFramework_Tomes_SK") {
 			auto t_pos = std::ranges::find(Tomes_SK_FormArray, a_base);
 			auto b_pos = std::distance(Tomes_SK_FormArray.begin(), t_pos);
 
@@ -533,7 +421,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Books_DG_FormArray") {
+		if (a_section == "CFramework_Books_DG") {
 			auto t_pos = std::ranges::find(Books_DG_FormArray, a_base);
 			auto b_pos = std::distance(Books_DG_FormArray.begin(), t_pos);
 
@@ -542,7 +430,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Tomes_DG_FormArray") {
+		if (a_section == "CFramework_Tomes_DG") {
 			auto t_pos = std::ranges::find(Tomes_DG_FormArray, a_base);
 			auto b_pos = std::distance(Tomes_DG_FormArray.begin(), t_pos);
 
@@ -551,7 +439,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Books_DB_FormArray") {
+		if (a_section == "CFramework_Books_DB") {
 			auto t_pos = std::ranges::find(Books_DB_FormArray, a_base);
 			auto b_pos = std::distance(Books_DB_FormArray.begin(), t_pos);
 
@@ -560,7 +448,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Tomes_DB_FormArray") {
+		if (a_section == "CFramework_Tomes_DB") {
 			auto t_pos = std::ranges::find(Tomes_DB_FormArray, a_base);
 			auto b_pos = std::distance(Tomes_DB_FormArray.begin(), t_pos);
 
@@ -569,7 +457,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "TMaps_SK_FormArray") {
+		if (a_section == "CFramework_TMaps_SK") {
 			auto t_pos = std::ranges::find(TMaps_SK_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_SK_FormArray.begin(), t_pos);
 
@@ -578,7 +466,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "TMaps_NT_FormArray") {
+		if (a_section == "CFramework_TMaps_NT") {
 			auto t_pos = std::ranges::find(TMaps_NT_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_NT_FormArray.begin(), t_pos);
 
@@ -587,7 +475,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "TMaps_TH_FormArray") {
+		if (a_section == "CFramework_TMaps_TH") {
 			auto t_pos = std::ranges::find(TMaps_TH_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_TH_FormArray.begin(), t_pos);
 
@@ -596,7 +484,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Books_CC_FormArray") {
+		if (a_section == "CFramework_Books_CC") {
 			auto t_pos = std::ranges::find(Books_CC_FormArray, a_base);
 			auto b_pos = std::distance(Books_CC_FormArray.begin(), t_pos);
 
@@ -605,7 +493,7 @@ namespace CFramework_Books {
 			return;
 		}
 
-		if (a_section == "Tomes_CC_FormArray") {
+		if (a_section == "CFramework_Tomes_CC") {
 			auto t_pos = std::ranges::find(Tomes_CC_FormArray, a_base);
 			auto b_pos = std::distance(Tomes_CC_FormArray.begin(), t_pos);
 

@@ -3,22 +3,6 @@
 
 #undef AddForm
 
-namespace CFramework_Enchantments_VA {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Enchantments_VW {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Enchantments_SA {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Enchantments_SW {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_Enchantments {
 
 	using namespace CFramework_Master;
@@ -61,34 +45,6 @@ namespace CFramework_Enchantments {
 	};
 
 	// clang-format on
-
-	inline std::vector<std::string>		VA_NameArray;
-	inline std::vector<std::string>		VA_TextArray;
-	inline std::vector<RE::TESForm*>	VA_FormArray;
-	inline std::vector<bool>			VA_BoolArray;
-	inline std::int32_t					VA_EntriesTotal;
-	inline std::int32_t					VA_EntriesFound;
-
-	inline std::vector<std::string>		SA_NameArray;
-	inline std::vector<std::string>		SA_TextArray;
-	inline std::vector<RE::TESForm*>	SA_FormArray;
-	inline std::vector<bool>			SA_BoolArray;
-	inline std::int32_t					SA_EntriesTotal;
-	inline std::int32_t					SA_EntriesFound;
-
-	inline std::vector<std::string>		VW_NameArray;
-	inline std::vector<std::string>		VW_TextArray;
-	inline std::vector<RE::TESForm*>	VW_FormArray;
-	inline std::vector<bool>			VW_BoolArray;
-	inline std::int32_t					VW_EntriesTotal;
-	inline std::int32_t					VW_EntriesFound;
-
-	inline std::vector<std::string>		SW_NameArray;
-	inline std::vector<std::string>		SW_TextArray;
-	inline std::vector<RE::TESForm*>	SW_FormArray;
-	inline std::vector<bool>			SW_BoolArray;
-	inline std::int32_t					SW_EntriesTotal;
-	inline std::int32_t					SW_EntriesFound;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

@@ -1,43 +1,29 @@
 #include "PCH.h"
 #include "Quests_Bounty.hpp"
 
+constexpr std::tuple<std::size_t, const char*, int32_t, const char*> Quests[] = {
+
+	{0,"BQ01", 200, "Completionist_BountyBQ01"},
+	{1,"BQ02", 200, "Completionist_BountyBQ02"},
+	{2,"BQ03", 200, "Completionist_BountyBQ03"},
+	{3,"BQ04", 200, "Completionist_BountyBQ04"},
+};
+
 namespace BountyQuests
 {
 	EventResult ScriptEventHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
 		
 		if (!a_event) { return EventResult::kContinue; }
 
-		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
+		for (auto& [i, queststr, stage, globalstr] : Quests) {
 
-			auto questID = std::string(quest->GetFormEditorID());
+			auto* qst = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+			auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(globalstr);
 
-			if (IsValidQuest(questID, "BQ01") && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_BountyBQ01")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+			if (!qst || !var || !IsValidQuest(qst->GetFormEditorID(), queststr) || a_event->stage != stage) { return EventResult::kContinue; }
 
-			if (IsValidQuest(questID, "BQ02") && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_BountyBQ02")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
-
-			if (IsValidQuest(questID, "BQ03") && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_BountyBQ03")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
-
-			if (IsValidQuest(questID, "BQ04") && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_BountyBQ04")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+			var->value += 1;
+			return EventResult::kContinue;
 		}
 		return EventResult::kContinue;
 	}

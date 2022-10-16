@@ -1,87 +1,91 @@
 #pragma once
 
-#include <SKSE\API.h>
-#include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-
 namespace CPatch_FSH_F {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_I {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_B {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_A {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_C {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_L {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH_S {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FSH
 {
-	extern std::vector<std::string>		F_NameArray;
-	extern std::vector<std::string>		F_TextArray;
-	extern std::vector<RE::TESForm*>	F_FormArray;
-	extern std::vector<bool>			F_BoolArray;
-	extern std::int32_t					F_EntriesTotal;
-	extern std::int32_t					F_EntriesFound;
+	inline std::vector<std::string>		F_NameArray;
+	inline std::vector<std::string>		F_TextArray;
+	inline std::vector<RE::TESForm*>	F_FormArray;
+	inline std::vector<bool>			F_BoolArray;
+	inline std::int32_t					F_EntriesTotal;
+	inline std::int32_t					F_EntriesFound;
 
-	extern std::vector<std::string>		I_NameArray;
-	extern std::vector<std::string>		I_TextArray;
-	extern std::vector<RE::TESForm*>	I_FormArray;
-	extern std::vector<bool>			I_BoolArray;
-	extern std::int32_t					I_EntriesTotal;
-	extern std::int32_t					I_EntriesFound;
+	inline std::vector<std::string>		I_NameArray;
+	inline std::vector<std::string>		I_TextArray;
+	inline std::vector<RE::TESForm*>	I_FormArray;
+	inline std::vector<bool>			I_BoolArray;
+	inline std::int32_t					I_EntriesTotal;
+	inline std::int32_t					I_EntriesFound;
 
-	extern std::vector<std::string>		B_NameArray;
-	extern std::vector<std::string>		B_TextArray;
-	extern std::vector<RE::TESForm*>	B_FormArray;
-	extern std::vector<bool>			B_BoolArray;
-	extern std::int32_t					B_EntriesTotal;
-	extern std::int32_t					B_EntriesFound;
+	inline std::vector<std::string>		B_NameArray;
+	inline std::vector<std::string>		B_TextArray;
+	inline std::vector<RE::TESForm*>	B_FormArray;
+	inline std::vector<bool>			B_BoolArray;
+	inline std::int32_t					B_EntriesTotal;
+	inline std::int32_t					B_EntriesFound;
 
-	extern std::vector<std::string>		A_NameArray;
-	extern std::vector<std::string>		A_TextArray;
-	extern std::vector<RE::TESForm*>	A_FormArray;
-	extern std::vector<bool>			A_BoolArray;
-	extern std::int32_t					A_EntriesTotal;
-	extern std::int32_t					A_EntriesFound;
+	inline std::vector<std::string>		A_NameArray;
+	inline std::vector<std::string>		A_TextArray;
+	inline std::vector<RE::TESForm*>	A_FormArray;
+	inline std::vector<bool>			A_BoolArray;
+	inline std::int32_t					A_EntriesTotal;
+	inline std::int32_t					A_EntriesFound;
 
-	extern std::vector<std::string>		C_NameArray;
-	extern std::vector<std::string>		C_TextArray;
-	extern std::vector<RE::TESForm*>	C_FormArray;
-	extern std::vector<bool>			C_BoolArray;
-	extern std::int32_t					C_EntriesTotal;
-	extern std::int32_t					C_EntriesFound;
+	inline std::vector<std::string>		C_NameArray;
+	inline std::vector<std::string>		C_TextArray;
+	inline std::vector<RE::TESForm*>	C_FormArray;
+	inline std::vector<bool>			C_BoolArray;
+	inline std::int32_t					C_EntriesTotal;
+	inline std::int32_t					C_EntriesFound;
 
-	extern std::vector<std::string>		L_NameArray;
-	extern std::vector<std::string>		L_TextArray;
-	extern std::vector<RE::TESForm*>	L_FormArray;
-	extern std::vector<bool>			L_BoolArray;
-	extern std::int32_t					L_EntriesTotal;
-	extern std::int32_t					L_EntriesFound;
+	inline std::vector<std::string>		L_NameArray;
+	inline std::vector<std::string>		L_TextArray;
+	inline std::vector<RE::TESForm*>	L_FormArray;
+	inline std::vector<bool>			L_BoolArray;
+	inline std::int32_t					L_EntriesTotal;
+	inline std::int32_t					L_EntriesFound;
 
-	extern std::vector<std::string>		S_NameArray;
-	extern std::vector<std::string>		S_TextArray;
-	extern std::vector<RE::TESForm*>	S_FormArray;
-	extern std::vector<bool>			S_BoolArray;
-	extern std::int32_t					S_EntriesTotal;
-	extern std::int32_t					S_EntriesFound;
+	inline std::vector<std::string>		S_NameArray;
+	inline std::vector<std::string>		S_TextArray;
+	inline std::vector<RE::TESForm*>	S_FormArray;
+	inline std::vector<bool>			S_BoolArray;
+	inline std::int32_t					S_EntriesTotal;
+	inline std::int32_t					S_EntriesFound;
+
+	inline std::vector<std::string> temploc{};
+	inline std::vector<std::string> temprod{};
+	inline std::vector<RE::TESForm*> tempfsh{};
+
+	inline RE::BGSListForm* RodList;
+	inline RE::TESGlobal* GlobalV;
+	inline RE::ControlMap* ContMap;
 
 	using EventResult = RE::BSEventNotifyControl;
 

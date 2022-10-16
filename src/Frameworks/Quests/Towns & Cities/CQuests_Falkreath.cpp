@@ -2,22 +2,21 @@
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Falkreath {
-	using namespace Serialization;
 	using namespace CFramework_Master;
 
-	// Main Quests
-	inline std::vector<RE::TESForm*>	FormArray;
-	inline std::vector<std::string>		NameArray;
-	inline std::vector<std::string>		IdenArray;
-	inline std::vector<std::string>		TextArray;
-	inline std::vector<std::int32_t>	RadiArray;
-	inline std::vector<bool>			BoolArray;
-	inline std::vector<std::string>		KeysArray;
-
-	std::int32_t ArraySize = 128;
-	std::int32_t MAIN_QUEST_FLAG = 0;
-	std::int32_t SIDE_QUEST_FLAG = 1;
-	std::int32_t RADI_QUEST_FLAG = 2;
+	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
+	/*00*/ {"Falkreath_Quest00_Key", "$Falkreath_Quest00_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest00_Data", "DA03"},
+	/*01*/ {"Falkreath_Quest01_Key", "$Falkreath_Quest01_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest01_Data", "FreeformFalkreathQuest03"},
+	/*02*/ {"Falkreath_Quest02_Key", "$Falkreath_Quest02_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest02_Data", "DA05"},
+	/*03*/ {"Falkreath_Quest03_Key", "$Falkreath_Quest03_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest03_Data", "Favor154"},
+	/*04*/ {"Falkreath_Quest04_Key", "$Falkreath_Quest04_Name", RADI_QUEST_FLAG, "$Falkreath_Quest04_Data", "FavorJobsChopWood"},
+	/*05*/ {"Falkreath_Quest05_Key", "$Falkreath_Quest05_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest05_Data", "Favor001"},
+	/*06*/ {"Falkreath_Quest06_Key", "$Falkreath_Quest06_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest06_Data", "Favor205"},
+	/*07*/ {"Falkreath_Quest07_Key", "$Falkreath_Quest07_Name", RADI_QUEST_FLAG, "$Falkreath_Quest07_Data", "FavorJobsGatherWheat"},
+	/*08*/ {"Falkreath_Quest08_Key", "$Falkreath_Quest08_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest08_Data", "Favor110"},
+	/*09*/ {"Falkreath_Quest09_Key", "$Falkreath_Quest09_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest09_Data", "Favor018"},
+	/*10*/ {"Falkreath_Quest10_Key", "$Falkreath_Quest10_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest10_Data", "FavorJarlsMakeFriends"},
+	};
 
 	constexpr std::size_t StandardCompletion[] = { 
 	0,1,2 
@@ -50,17 +49,13 @@ namespace CQFramework_Falkreath {
 		NameArray.clear();
 		KeysArray.clear();
 
-		/*00*/ AddQuest("Falkreath_Quest00_Key", "$Falkreath_Quest00_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest00_Data", "DA03");
-		/*01*/ AddQuest("Falkreath_Quest01_Key", "$Falkreath_Quest01_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest01_Data", "FreeformFalkreathQuest03");
-		/*02*/ AddQuest("Falkreath_Quest02_Key", "$Falkreath_Quest02_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest02_Data", "DA05");
-		/*03*/ AddQuest("Falkreath_Quest03_Key", "$Falkreath_Quest03_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest03_Data", "Favor154");
-		/*04*/ AddQuest("Falkreath_Quest04_Key", "$Falkreath_Quest04_Name", RADI_QUEST_FLAG, "$Falkreath_Quest04_Data", "FavorJobsChopWood");
-		/*05*/ AddQuest("Falkreath_Quest05_Key", "$Falkreath_Quest05_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest05_Data", "Favor001");
-		/*06*/ AddQuest("Falkreath_Quest06_Key", "$Falkreath_Quest06_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest06_Data", "Favor205");
-		/*07*/ AddQuest("Falkreath_Quest07_Key", "$Falkreath_Quest07_Name", RADI_QUEST_FLAG, "$Falkreath_Quest07_Data", "FavorJobsGatherWheat");
-		/*08*/ AddQuest("Falkreath_Quest08_Key", "$Falkreath_Quest08_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest08_Data", "Favor110");
-		/*09*/ AddQuest("Falkreath_Quest09_Key", "$Falkreath_Quest09_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest09_Data", "Favor018");
-		/*10*/ AddQuest("Falkreath_Quest10_Key", "$Falkreath_Quest10_Name", SIDE_QUEST_FLAG, "$Falkreath_Quest10_Data", "FavorJarlsMakeFriends");
+		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
+			KeysArray.push_back(Key);
+			NameArray.push_back(Name);
+			RadiArray.push_back(Flag);
+			TextArray.push_back(Text);
+			IdenArray.push_back(ID);
+		}
 
 		assert(KeysArray.size() == ArraySize);
 		assert(IdenArray.size() == ArraySize);
@@ -68,19 +63,6 @@ namespace CQFramework_Falkreath {
 		assert(RadiArray.size() == ArraySize);
 		assert(TextArray.size() == ArraySize);
 		BoolArray = std::vector<bool>(ArraySize, false);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Add Quest To Array ) -----
-	//---------------------------------------------------
-
-	void CHandler::AddQuest(std::string k, std::string n, std::int32_t t, std::string h, std::string g) {
-
-		KeysArray.push_back(k);
-		NameArray.push_back(n);
-		RadiArray.push_back(t);
-		TextArray.push_back(h);
-		IdenArray.push_back(g);
 	}
 
 	//---------------------------------------------------

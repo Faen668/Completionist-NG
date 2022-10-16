@@ -1,39 +1,39 @@
 #pragma once
 
 namespace CPatch_OAP_Items {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_OAP_Books {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_OAP_MapMa {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_OAP 
 {	
-	extern std::vector<std::string> Items_NameArray;
-	extern std::vector<std::string> Items_TextArray;
-	extern std::vector<RE::TESForm*> Items_FormArray;
-	extern std::vector<bool> Items_BoolArray;
-	extern std::int32_t Items_EntriesTotal;
-	extern std::int32_t Items_EntriesFound;
+	inline std::vector<std::string> Items_NameArray;
+	inline std::vector<std::string> Items_TextArray;
+	inline std::vector<RE::TESForm*> Items_FormArray;
+	inline std::vector<bool> Items_BoolArray;
+	inline std::int32_t Items_EntriesTotal;
+	inline std::int32_t Items_EntriesFound;
 
-	extern std::vector<std::string> Books_NameArray;
-	extern std::vector<std::string> Books_TextArray;
-	extern std::vector<RE::TESForm*> Books_FormArray;
-	extern std::vector<bool> Books_BoolArray;
-	extern std::int32_t Books_EntriesTotal;
-	extern std::int32_t Books_EntriesFound;
+	inline std::vector<std::string> Books_NameArray;
+	inline std::vector<std::string> Books_TextArray;
+	inline std::vector<RE::TESForm*> Books_FormArray;
+	inline std::vector<bool> Books_BoolArray;
+	inline std::int32_t Books_EntriesTotal;
+	inline std::int32_t Books_EntriesFound;
 
-	extern std::vector<std::string> MapMa_NameArray;
-	extern std::vector<std::string> MapMa_TextArray;
-	extern std::vector<RE::TESForm*> MapMa_FormArray;
-	extern std::vector<bool> MapMa_BoolArray;
-	extern std::int32_t MapMa_EntriesTotal;
-	extern std::int32_t MapMa_EntriesFound;
+	inline std::vector<std::string> MapMa_NameArray;
+	inline std::vector<std::string> MapMa_TextArray;
+	inline std::vector<RE::TESForm*> MapMa_FormArray;
+	inline std::vector<bool> MapMa_BoolArray;
+	inline std::int32_t MapMa_EntriesTotal;
+	inline std::int32_t MapMa_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

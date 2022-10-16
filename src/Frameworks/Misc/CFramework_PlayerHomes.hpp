@@ -2,39 +2,42 @@
 #include "Serialization.hpp"
 
 namespace CFramework_PlayerHomes_VH {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_PlayerHomes_CH {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_PlayerHomes_PH {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_PlayerHomes
 {
-	extern std::vector<std::string>		VH_NameArray;
-	extern std::vector<std::string>		VH_TextArray;
-	extern std::vector<RE::TESForm*>	VH_FormArray;
-	extern std::vector<bool>			VH_BoolArray;
-	extern std::int32_t					VH_EntriesTotal;
-	extern std::int32_t					VH_EntriesFound;
+	inline std::vector<std::string>		VH_NameArray;
+	inline std::vector<std::string>		VH_TextArray;
+	inline std::vector<RE::TESForm*>	VH_FormArray;
+	inline std::vector<std::string>		VH_QuestArray;
+	inline std::vector<bool>			VH_BoolArray;
+	inline std::int32_t					VH_EntriesTotal;
+	inline std::int32_t					VH_EntriesFound;
 
-	extern std::vector<std::string>		CH_NameArray;
-	extern std::vector<std::string>		CH_TextArray;
-	extern std::vector<RE::TESForm*>	CH_FormArray;
-	extern std::vector<bool>			CH_BoolArray;
-	extern std::int32_t					CH_EntriesTotal;
-	extern std::int32_t					CH_EntriesFound;
+	inline std::vector<std::string>		CH_NameArray;
+	inline std::vector<std::string>		CH_TextArray;
+	inline std::vector<RE::TESForm*>	CH_FormArray;
+	inline std::vector<std::string>		CH_QuestArray;
+	inline std::vector<bool>			CH_BoolArray;
+	inline std::int32_t					CH_EntriesTotal;
+	inline std::int32_t					CH_EntriesFound;
 
-	extern std::vector<std::string>		PH_NameArray;
-	extern std::vector<std::string>		PH_TextArray;
-	extern std::vector<RE::TESForm*>	PH_FormArray;
-	extern std::vector<bool>			PH_BoolArray;
-	extern std::int32_t					PH_EntriesTotal;
-	extern std::int32_t					PH_EntriesFound;
+	inline std::vector<std::string>		PH_NameArray;
+	inline std::vector<std::string>		PH_TextArray;
+	inline std::vector<RE::TESForm*>	PH_FormArray;
+	inline std::vector<std::string>		PH_QuestArray;
+	inline std::vector<bool>			PH_BoolArray;
+	inline std::int32_t					PH_EntriesTotal;
+	inline std::int32_t					PH_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

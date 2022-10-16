@@ -1,43 +1,39 @@
 #pragma once
 
-#include <SKSE\API.h>
-#include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-
 namespace CPatch_FOS_ItmL1 {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FOS_ItmL2 {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FOS_ItmL3 {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_FOS 
 {	
-	extern std::vector<std::string> ItmL1_NameArray;
-	extern std::vector<std::string> ItmL1_TextArray;
-	extern std::vector<RE::TESForm*> ItmL1_FormArray;
-	extern std::vector<bool> ItmL1_BoolArray;
-	extern std::int32_t ItmL1_EntriesTotal;
-	extern std::int32_t ItmL1_EntriesFound;
+	inline std::vector<std::string> ItmL1_NameArray;
+	inline std::vector<std::string> ItmL1_TextArray;
+	inline std::vector<RE::TESForm*> ItmL1_FormArray;
+	inline std::vector<bool> ItmL1_BoolArray;
+	inline std::int32_t ItmL1_EntriesTotal;
+	inline std::int32_t ItmL1_EntriesFound;
 
-	extern std::vector<std::string> ItmL2_NameArray;
-	extern std::vector<std::string> ItmL2_TextArray;
-	extern std::vector<RE::TESForm*> ItmL2_FormArray;
-	extern std::vector<bool> ItmL2_BoolArray;
-	extern std::int32_t ItmL2_EntriesTotal;
-	extern std::int32_t ItmL2_EntriesFound;
+	inline std::vector<std::string> ItmL2_NameArray;
+	inline std::vector<std::string> ItmL2_TextArray;
+	inline std::vector<RE::TESForm*> ItmL2_FormArray;
+	inline std::vector<bool> ItmL2_BoolArray;
+	inline std::int32_t ItmL2_EntriesTotal;
+	inline std::int32_t ItmL2_EntriesFound;
 
-	extern std::vector<std::string> ItmL3_NameArray;
-	extern std::vector<std::string> ItmL3_TextArray;
-	extern std::vector<RE::TESForm*> ItmL3_FormArray;
-	extern std::vector<bool> ItmL3_BoolArray;
-	extern std::int32_t ItmL3_EntriesTotal;
-	extern std::int32_t ItmL3_EntriesFound;
+	inline std::vector<std::string> ItmL3_NameArray;
+	inline std::vector<std::string> ItmL3_TextArray;
+	inline std::vector<RE::TESForm*> ItmL3_FormArray;
+	inline std::vector<bool> ItmL3_BoolArray;
+	inline std::int32_t ItmL3_EntriesTotal;
+	inline std::int32_t ItmL3_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

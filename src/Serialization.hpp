@@ -18,40 +18,19 @@ namespace Serialization
 	using FormArray = RE::FormID[];
 	using Variation = std::pair<RE::FormID, std::array<RE::FormID, DEFAULT_VARIATION_MAX>>;
 
-
 	struct ISerializable
 	{
+		virtual void Save(SKSE::SerializationInterface*, std::string_view) noexcept = 0;
 		virtual void Load(SKSE::SerializationInterface*, std::string_view) noexcept = 0;
-		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
-		{
-			std::size_t total = data.size();
-			if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
-				ERROR("Failed to write serialized form data");
-			}
-
-			for (auto& m : data) {
-				if (!a_intfc->WriteRecordData(&m, sizeof(m))) {
-					ERROR("Failed to write serialized form data");
-				}
-			}
-
-			INFO("Saved {} to co-save with a size of - {}", a_name, total);
-		}
-		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
-		{
-			INFO("Reverting {} from co-save", a_name);
-			data.clear();
-		}
+		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface*, std::string_view) noexcept = 0;
 
 		void SetAsSerializable(std::string a_setName) noexcept
 		{
 			ManagedData.emplace_back(this, a_setName);
 		}
 
-		std::unordered_map<RE::FormID, RE::FormID> data;
 		inline static std::vector<std::pair<ISerializable*, std::string>> ManagedData = {};
 	};
-
 
 	struct CompletionistData final : public ISerializable
 	{
@@ -61,8 +40,13 @@ namespace Serialization
 
 		[[nodiscard]] static bool IsModInstalled(std::string_view a_modname) noexcept
 		{
-			auto ESP = RE::TESDataHandler::GetSingleton()->LookupLoadedModByName(a_modname) != nullptr;
-			auto ESL = RE::TESDataHandler::GetSingleton()->LookupLoadedLightModByName(a_modname) != nullptr;
+			auto* handler = RE::TESDataHandler::GetSingleton();
+			if (!handler) {
+				return false;
+			}
+
+			auto ESP = handler->LookupLoadedModByName(a_modname);
+			auto ESL = handler->LookupLoadedLightModByName(a_modname);
 			return ESP || ESL;
 		}
 
@@ -134,7 +118,7 @@ namespace Serialization
 
 		void MergeAsCollectable() noexcept
 		{
-			CompletionistData::NewItemData.emplace_back(this);
+			NewItemData.emplace_back(this);
 		}
 
 		//---------------------------------------------------
@@ -162,10 +146,10 @@ namespace Serialization
 		//Overload To Pass Through FormID With File Name
 		void AddForm(RE::FormID a_form, std::string_view a_filename) noexcept
 		{
-			if (auto valid = IsModInstalled(a_filename) && RE::TESDataHandler::GetSingleton() != nullptr; !valid) {
+			if (!IsModInstalled(a_filename)) {
 				return;
 			}
-			if (auto form = RE::TESDataHandler::GetSingleton()->LookupFormID(a_form, a_filename); form) {
+			if (auto form = RE::TESDataHandler::GetSingleton()->LookupFormID(a_form, a_filename)) {
 				data.try_emplace(form);
 			}
 		}
@@ -173,7 +157,7 @@ namespace Serialization
 		//Overload To Pass Through FormID With File Name and (1) Variation (Also used to add variations to existing base files)
 		void AddForm(RE::FormID a_base, std::string_view a_filename, RE::FormID a_vari) noexcept
 		{
-			if (auto valid = IsModInstalled(a_filename) && RE::TESDataHandler::GetSingleton() != nullptr; !valid) {
+			if (!IsModInstalled(a_filename)) {
 				return;
 			}
 
@@ -272,7 +256,7 @@ namespace Serialization
 
 		[[nodiscard]] std::string_view GetFileName(RE::FormID a_form) noexcept
 		{
-			return HasForm(a_form) ? GetForm(a_form)->GetFile()->GetFilename() : "";
+			return HasForm(a_form) ? GetForm(a_form)->GetFile()->GetFilename() : std::string_view{};
 		}
 
 		//---------------------------------------------------
@@ -447,17 +431,34 @@ namespace Serialization
 		}
 
 		//---------------------------------------------------
-		//-- Completionist Serialization ( Load Data ) ------
+		//-- Completionist Serialization ( SKSE APIs ) ------
 		//---------------------------------------------------
+
+		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			std::size_t total = data.size();
+			if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
+				ERROR("Failed to write serialized form data: size");
+			}
+
+			for (auto& m : data) {
+				if (!a_intfc->WriteRecordData(&m, sizeof(m))) {
+					ERROR("Failed to write serialized form data: pair");
+				}
+			}
+
+			INFO("Saved {} to co-save with a size of - {}", a_name, total);
+		}
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
 			std::size_t total;
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
-				ERROR("Failed to read serialized form data");
+				ERROR("Failed to read serialized form data: size");
 			}
 
-			for (auto i : std::views::iota(static_cast<std::size_t>(0), total)) {
+			auto read = 0;
+			for (auto i = 0; i < total; ++i) {
 				RE::FormID form, base;
 				if (!a_intfc->ReadRecordData(&form, sizeof(form)) ||
 					!a_intfc->ReadRecordData(&base, sizeof(base))) {
@@ -473,18 +474,30 @@ namespace Serialization
 				}
 
 				data.try_emplace(form, base);
+
+				read++;
+			}
+
+			if (read != total) {
+				ERROR("Lost data during loading co-save!\nExpected: {}\nWritten: {}", total, read);
 			}
 
 			INFO("Loaded {} from co-save with a size of - {}", a_name, total);
+		}
+
+		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			INFO("Reverting {} from co-save", a_name);
+			data.clear();
 		}
 
 		//---------------------------------------------------
 		//-- Completionist Serialization ( Members ) --------
 		//---------------------------------------------------
 
+		std::unordered_map<RE::FormID, RE::FormID> data;
 		inline static std::vector<CompletionistData*> NewItemData = {};
 	};
-
 
 	// new polymorphed data structure designed for keys
 	struct CompletionistKey final : public ISerializable
@@ -492,40 +505,153 @@ namespace Serialization
 		// modifier
 		void AddKey(std::string_view a_key) noexcept
 		{
-			data.try_emplace(DKUtil::numbers::FNV_1A_32(a_key));
+			if (!data.contains(a_key.data())) {
+				data.try_emplace(a_key.data());
+			}
+		}
+		void AddStage(std::string_view a_key, int a_stage) noexcept
+		{
+			if (HasStage(a_key, a_stage)) {
+				return;
+			}
+
+			auto stage = fmt::format("|{}|", a_stage);
+			data[a_key.data()] += stage;
 		}
 
 		void RemoveKey(std::string_view a_key) noexcept
 		{
-			if (const auto hash = DKUtil::numbers::FNV_1A_32(a_key); data.contains(hash)) {
-				data.erase(hash);
+			if (HasKey(a_key)) {
+				data.erase(a_key.data());
+			}
+		}
+		void RemoveStage(std::string_view a_key, int a_stage) noexcept
+		{
+			if (HasKey(a_key)) {
+				auto stage = fmt::format("|{}|", a_stage);
+				DKUtil::string::replace_all(data[a_key.data()], stage, {});
 			}
 		}
 
 		// accessor
 		[[nodiscard]] bool HasKey(std::string_view a_key) noexcept
 		{
-			return data.contains(DKUtil::numbers::FNV_1A_32(a_key));
+			return data.contains(a_key.data());
+		}
+		[[nodiscard]] bool HasStage(std::string_view a_key, int a_stage) noexcept
+		{
+			if (!HasKey(a_key)) {
+				return false;
+			}
+
+			auto stage = fmt::format("|{}|", a_stage);
+			return DKUtil::string::icontains(data[a_key.data()], stage);
+		}
+		[[nodiscard]] std::vector<int> GetAllStages(std::string_view a_key) noexcept
+		{
+			if (!HasKey(a_key)) {
+				return {};
+			}
+
+			std::vector<int> list;
+			auto raw = DKUtil::string::split(data[a_key.data()], "|");
+			for (auto& r : raw) {
+				if (!r.empty()) {
+					list.push_back(std::stoi(r));
+				}
+			}
+
+			return list;
+		}
+
+		// utility
+		void DumpToLog() noexcept
+		{
+			for (auto& [key, val] : data) {
+				INFO("Quest: {} {}", key, val);
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( SKSE APIs ) ------
+		//---------------------------------------------------
+
+		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			std::size_t total = data.size();
+			if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
+				ERROR("Failed to write serialized form data: size");
+			}
+
+			auto written = 0;
+			for (auto& [key, val] : data) {
+				std::size_t keySize{ key.size() }, valSize{ val.size() };
+				if (!a_intfc->WriteRecordData(&keySize, sizeof(keySize)) ||
+					!a_intfc->WriteRecordData(&valSize, sizeof(valSize))) {
+					ERROR("Failed to write serialized form data: pair_size");
+				}
+
+				if (!a_intfc->WriteRecordData(key.data(), keySize) ||
+					!a_intfc->WriteRecordData(val.data(), valSize)) {
+					ERROR("Failed to write serialized form data: pair_data");
+				}
+
+				written++;
+			}
+
+			if (written != total) {
+				ERROR("Lost data during saving co-save!\nExpected: {}\nWritten: {}", total, written);
+			}
+
+			INFO("Saved {} to co-save with a size of - {}", a_name, total);
 		}
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
 			std::size_t total;
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
-				ERROR("Failed to read serialized form data");
+				ERROR("Failed to read serialized form data: size");
 			}
 
-			for (auto i : std::views::iota(static_cast<std::size_t>(0), total)) {
-				std::pair<std::uint32_t, std::uint32_t> hash32;
-				if (!a_intfc->ReadRecordData(&hash32, sizeof(hash32))) {
-					continue;
+			auto read = 0;
+			for (auto i = 0; i < total; ++i) {
+				static std::string key, val;
+				std::size_t keySize, valSize;
+				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
+					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
+					ERROR("Failed to read serialized form data: pair_size");
 				}
-				data.try_emplace(hash32.first, hash32.second);
-			}
-			INFO("Loaded {} from co-save with a size of - {}", a_name, total);
-		}
-	};
 
+				key.resize(keySize);
+				val.resize(valSize);
+				if (!a_intfc->ReadRecordData(key.data(), keySize) ||
+					(valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
+					ERROR("Failed to read serialized form data: pair_data");
+				}
+
+				data.try_emplace(key, val);
+				read++;
+			}
+
+			if (read != total) {
+				ERROR("Lost data during loading co-save!\nExpected: {}\nWritten: {}", total, read);
+			}
+
+			INFO("Loaded SKSE co-save {} with a size of - {}", a_name, data.size());
+		}
+
+		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			INFO("Reverting {} from co-save", a_name);
+			data.clear();
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( Members ) --------
+		//---------------------------------------------------
+
+		std::unordered_map<std::string, std::string> data;
+	};
 
 	//---------------------------------------------------
 	//-- SKSE Callback Functions ( Save Callback ) ------

@@ -1,13 +1,8 @@
 #include "Serialization.hpp"
 #include "CFramework_AHD.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_AHD_Items {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_AHD {
 	using namespace CFramework_Master;
@@ -25,14 +20,7 @@ namespace CPatch_AHD {
 
 	// clang-format on
 
-	inline std::vector<std::string> Items_NameArray;
-	inline std::vector<std::string> Items_TextArray;
-	inline std::vector<RE::TESForm*> Items_FormArray;
-	inline std::vector<bool> Items_BoolArray;
-	inline std::int32_t Items_EntriesTotal;
-	inline std::int32_t Items_EntriesFound;
-
-	inline std::string_view modname = "AdditionalHearthfireDolls.esp";
+	constexpr std::string_view modname = "AdditionalHearthfireDolls.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

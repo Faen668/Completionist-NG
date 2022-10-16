@@ -3,8 +3,6 @@
 #include "Variables.hpp"
 #include "mainHUD.hpp"
 
-inline std::vector<std::string> garbageDump{};
-
 namespace Completionist_MainHUD {
 	using namespace CFramework_Master;
 	using namespace Serialization;
@@ -89,11 +87,7 @@ namespace Completionist_MainHUD {
 
 	if (!ShouldDisplay) { return _OnUpdateInventoryText(a_this); }
 
-
-	if (V_mainHudEnabled) {
-		return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), PrevCollected);
-	}
-	return _OnUpdateInventoryText(a_this);
+	return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), PrevCollected);
 }
 
 	//---------------------------------------------------

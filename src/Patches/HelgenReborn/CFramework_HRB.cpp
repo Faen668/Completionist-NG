@@ -1,26 +1,50 @@
 #include "Serialization.hpp"
 #include "CFramework_HRB.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_HRB_Items {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_HRB_Books {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_HRB_MapMa {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_HRB {
 	using namespace CFramework_Master;
 
 	// clang-format off
+
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
+		/*00*/ {"HelgenReborn_Quest00_Key", "$HelgenReborn_Quest00_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest00_Data", "BalokCourierTimer"},
+		/*01*/ {"HelgenReborn_Quest01_Key", "$HelgenReborn_Quest01_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest01_Data", "BalokHelgen01"},
+		/*02*/ {"HelgenReborn_Quest02_Key", "$HelgenReborn_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest02_Data", "BalokThalmorPrison"},
+		/*03*/ {"HelgenReborn_Quest03_Key", "$HelgenReborn_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest03_Data", "BalokConstructionQuest"},
+		/*04*/ {"HelgenReborn_Quest04_Key", "$HelgenReborn_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest04_Data", "BalokBitterWounds"},
+		/*05*/ {"HelgenReborn_Quest05_Key", "$HelgenReborn_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest05_Data", "BalokCiennaQuest"},
+		/*06*/ {"HelgenReborn_Quest06_Key", "$HelgenReborn_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest06_Data", "BalokHamingQuest"},
+		/*07*/ {"HelgenReborn_Quest07_Key", "$HelgenReborn_Quest07_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest07_Data", "BalokRadiant01"},
+		/*08*/ {"HelgenReborn_Quest08_Key", "$HelgenReborn_Quest08_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest08_Data", "BalokRadiant02"},
+		/*09*/ {"HelgenReborn_Quest09_Key", "$HelgenReborn_Quest09_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest09_Data", "BalokRadiant03"},
+		/*10*/ {"HelgenReborn_Quest10_Key", "$HelgenReborn_Quest10_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest10_Data", "BalokRadiant04"},
+		/*11*/ {"HelgenReborn_Quest11_Key", "$HelgenReborn_Quest11_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest11_Data", "BalokRadiant05"},
+		/*12*/ {"HelgenReborn_Quest12_Key", "$HelgenReborn_Quest12_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest12_Data", "BalokRadiant06"},
+		/*13*/ {"HelgenReborn_Quest13_Key", "$HelgenReborn_Quest13_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest13_Data", "BalokRadiant01Stormcloak"},
+		/*14*/ {"HelgenReborn_Quest14_Key", "$HelgenReborn_Quest14_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest14_Data", "BalokRadiant02Stormcloak"},
+		/*15*/ {"HelgenReborn_Quest15_Key", "$HelgenReborn_Quest15_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest15_Data", "BalokRadiant03Stormcloak"},
+		/*16*/ {"HelgenReborn_Quest16_Key", "$HelgenReborn_Quest16_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest16_Data", "BalokRadiant04Stormcloak"},
+		/*17*/ {"HelgenReborn_Quest17_Key", "$HelgenReborn_Quest17_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest17_Data", "BalokRadiant05Stormcloak"},
+		/*18*/ {"HelgenReborn_Quest18_Key", "$HelgenReborn_Quest18_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest18_Data", "BalokRadiant06Stormcloak"},
+		/*19*/ {"HelgenReborn_Quest19_Key", "$HelgenReborn_Quest19_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest19_Data", "BalokRadiant01Empire"},
+		/*20*/ {"HelgenReborn_Quest20_Key", "$HelgenReborn_Quest20_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest20_Data", "BalokRadiant02Empire"},
+		/*21*/ {"HelgenReborn_Quest21_Key", "$HelgenReborn_Quest21_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest21_Data", "BalokRadiant03Empire"},
+		/*22*/ {"HelgenReborn_Quest22_Key", "$HelgenReborn_Quest22_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest22_Data", "BalokRadiant04Empire"},
+		/*23*/ {"HelgenReborn_Quest23_Key", "$HelgenReborn_Quest23_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest23_Data", "BalokRadiant05Empire"},
+		/*24*/ {"HelgenReborn_Quest24_Key", "$HelgenReborn_Quest24_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$HelgenReborn_Quest24_Data", "BalokRadiant06Empire"},
+	};
+
+	constexpr std::size_t StandardCompletion[] = {
+		0,1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+	};
+
+	constexpr std::tuple<std::size_t, std::int32_t> StageCompletion[] = {
+		{ 6,  30  },
+	};
 
 	constexpr Serialization::FormArray Items = {
 	0x111E89,0x0022F2,0x130577,0x0B79CD,
@@ -36,28 +60,7 @@ namespace CPatch_HRB {
 	};
 	// clang-format on
 
-	inline std::vector<std::string> Items_NameArray;
-	inline std::vector<std::string> Items_TextArray;
-	inline std::vector<RE::TESForm*> Items_FormArray;
-	inline std::vector<bool> Items_BoolArray;
-	inline std::int32_t Items_EntriesTotal;
-	inline std::int32_t Items_EntriesFound;
-
-	inline std::vector<std::string> Books_NameArray;
-	inline std::vector<std::string> Books_TextArray;
-	inline std::vector<RE::TESForm*> Books_FormArray;
-	inline std::vector<bool> Books_BoolArray;
-	inline std::int32_t Books_EntriesTotal;
-	inline std::int32_t Books_EntriesFound;
-
-	inline std::vector<std::string> MapMa_NameArray;
-	inline std::vector<std::string> MapMa_TextArray;
-	inline std::vector<RE::TESForm*> MapMa_FormArray;
-	inline std::vector<bool> MapMa_BoolArray;
-	inline std::int32_t MapMa_EntriesTotal;
-	inline std::int32_t MapMa_EntriesFound;
-
-	inline std::string_view modname = "Helgen Reborn.esp";
+	constexpr std::string_view modname = "Helgen Reborn.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -71,7 +74,39 @@ namespace CPatch_HRB {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallQuestFramework();
 		PatchesInstalled += 1;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Framework ) ------
+	//---------------------------------------------------
+
+	void CHandler::InstallQuestFramework() {
+
+		Quest_IdenArray.clear();
+		Quest_NameArray.clear();
+		Quest_RadiArray.clear();
+		Quest_NameArray.clear();
+		Quest_KeysArray.clear();
+		Quest_StgeArray.clear();
+
+		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
+			Quest_KeysArray.push_back(key);
+			Quest_NameArray.push_back(name);
+			Quest_RadiArray.push_back(flag);
+			Quest_TextArray.push_back(text);
+			Quest_IdenArray.push_back(id);
+			Quest_StgeArray.push_back(isStageDone);
+		}
+
+		assert(Quest_KeysArray.size() == ArraySize);
+		assert(Quest_IdenArray.size() == ArraySize);
+		assert(Quest_NameArray.size() == ArraySize);
+		assert(Quest_RadiArray.size() == ArraySize);
+		assert(Quest_TextArray.size() == ArraySize);
+		assert(Quest_StgeArray.size() == ArraySize);
+		Quest_BoolArray = std::vector<bool>(ArraySize, false);
 	}
 
 	//---------------------------------------------------
@@ -86,6 +121,30 @@ namespace CPatch_HRB {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!quest) { return EventResult::kContinue; }
+
+		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
+		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
+
+
+		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
+			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
+			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
+		}
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -137,6 +196,11 @@ namespace CPatch_HRB {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
+
+		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
+			CHandler::UpdateQuestFramework();
+		}
+
 		return EventResult::kContinue;
 	}
 
@@ -275,5 +339,22 @@ namespace CPatch_HRB {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update Found Forms ) -----
+	//---------------------------------------------------
+
+	void CHandler::UpdateQuestFramework() {
+
+		for (auto i : StandardCompletion) {
+			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
+		};
+
+		for (auto& [i, stage] : StageCompletion) {
+			Quest_BoolArray[i] = Quest_StgeArray[i] ?
+				FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_S(Quest_KeysArray[i], Quest_IdenArray[i], stage) :
+				FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_P(Quest_KeysArray[i], Quest_IdenArray[i], stage);
+		}
 	}
 }

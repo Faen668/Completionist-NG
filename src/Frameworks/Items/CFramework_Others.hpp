@@ -2,62 +2,62 @@
 #include "Serialization.hpp"
 
 namespace CFramework_Others_VC {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Others_PC {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Others_VM {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Others_PM {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Others_SB {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Others
 {
 
-	extern std::vector<std::string> VC_NameArray;
-	extern std::vector<std::string> VC_TextArray;
-	extern std::vector<RE::TESForm*> VC_FormArray;
-	extern std::vector<bool> VC_BoolArray;
-	extern std::int32_t VC_EntriesTotal;
-	extern std::int32_t VC_EntriesFound;
+	inline std::vector<std::string> VC_NameArray;
+	inline std::vector<std::string> VC_TextArray;
+	inline std::vector<RE::TESForm*> VC_FormArray;
+	inline std::vector<bool> VC_BoolArray;
+	inline std::int32_t VC_EntriesTotal;
+	inline std::int32_t VC_EntriesFound;
 
-	extern std::vector<std::string> PC_NameArray;
-	extern std::vector<std::string> PC_TextArray;
-	extern std::vector<RE::TESForm*> PC_FormArray;
-	extern std::vector<bool> PC_BoolArray;
-	extern std::int32_t PC_EntriesTotal;
-	extern std::int32_t PC_EntriesFound;
+	inline std::vector<std::string> PC_NameArray;
+	inline std::vector<std::string> PC_TextArray;
+	inline std::vector<RE::TESForm*> PC_FormArray;
+	inline std::vector<bool> PC_BoolArray;
+	inline std::int32_t PC_EntriesTotal;
+	inline std::int32_t PC_EntriesFound;
 
-	extern std::vector<std::string> VM_NameArray;
-	extern std::vector<std::string> VM_TextArray;
-	extern std::vector<RE::TESForm*> VM_FormArray;
-	extern std::vector<bool> VM_BoolArray;
-	extern std::int32_t VM_EntriesTotal;
-	extern std::int32_t VM_EntriesFound;
+	inline std::vector<std::string> VM_NameArray;
+	inline std::vector<std::string> VM_TextArray;
+	inline std::vector<RE::TESForm*> VM_FormArray;
+	inline std::vector<bool> VM_BoolArray;
+	inline std::int32_t VM_EntriesTotal;
+	inline std::int32_t VM_EntriesFound;
 
-	extern std::vector<std::string> PM_NameArray;
-	extern std::vector<std::string> PM_TextArray;
-	extern std::vector<RE::TESForm*> PM_FormArray;
-	extern std::vector<bool> PM_BoolArray;
-	extern std::int32_t PM_EntriesTotal;
-	extern std::int32_t PM_EntriesFound;
+	inline std::vector<std::string> PM_NameArray;
+	inline std::vector<std::string> PM_TextArray;
+	inline std::vector<RE::TESForm*> PM_FormArray;
+	inline std::vector<bool> PM_BoolArray;
+	inline std::int32_t PM_EntriesTotal;
+	inline std::int32_t PM_EntriesFound;
 
-	extern std::vector<std::string> SB_NameArray;
-	extern std::vector<std::string> SB_TextArray;
-	extern std::vector<RE::TESForm*> SB_FormArray;
-	extern std::vector<bool> SB_BoolArray;
-	extern std::int32_t SB_EntriesTotal;
-	extern std::int32_t SB_EntriesFound;
+	inline std::vector<std::string> SB_NameArray;
+	inline std::vector<std::string> SB_TextArray;
+	inline std::vector<RE::TESForm*> SB_FormArray;
+	inline std::vector<bool> SB_BoolArray;
+	inline std::int32_t SB_EntriesTotal;
+	inline std::int32_t SB_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

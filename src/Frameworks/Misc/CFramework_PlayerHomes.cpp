@@ -1,49 +1,11 @@
 #include "Serialization.hpp"
 #include "CFramework_PlayerHomes.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
 
-namespace CFramework_PlayerHomes_VH {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_PlayerHomes_CH {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_PlayerHomes_PH {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_PlayerHomes {
-
 	using namespace CFramework_Master;
-
-	inline std::vector<std::string>		VH_NameArray;
-	inline std::vector<std::string>		VH_TextArray;
-	inline std::vector<RE::TESForm*>	VH_FormArray;
-	inline std::vector<std::string>		VH_QuestArray;
-	inline std::vector<bool>			VH_BoolArray;
-	inline std::int32_t					VH_EntriesTotal;
-	inline std::int32_t					VH_EntriesFound;
-
-	inline std::vector<std::string>		CH_NameArray;
-	inline std::vector<std::string>		CH_TextArray;
-	inline std::vector<RE::TESForm*>	CH_FormArray;
-	inline std::vector<std::string>		CH_QuestArray;
-	inline std::vector<bool>			CH_BoolArray;
-	inline std::int32_t					CH_EntriesTotal;
-	inline std::int32_t					CH_EntriesFound;
-
-	inline std::vector<std::string>		PH_NameArray;
-	inline std::vector<std::string>		PH_TextArray;
-	inline std::vector<RE::TESForm*>	PH_FormArray;
-	inline std::vector<std::string>		PH_QuestArray;
-	inline std::vector<bool>			PH_BoolArray;
-	inline std::int32_t					PH_EntriesTotal;
-	inline std::int32_t					PH_EntriesFound;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

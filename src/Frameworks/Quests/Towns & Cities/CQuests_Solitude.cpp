@@ -2,22 +2,33 @@
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Solitude {
-	using namespace Serialization;
 	using namespace CFramework_Master;
 
-	// Main Quests
-	inline std::vector<RE::TESForm*>	FormArray;
-	inline std::vector<std::string>		NameArray;
-	inline std::vector<std::string>		IdenArray;
-	inline std::vector<std::string>		TextArray;
-	inline std::vector<std::int32_t>	RadiArray;
-	inline std::vector<bool>			BoolArray;
-	inline std::vector<std::string>		KeysArray;
-
-	std::int32_t ArraySize = 128;
-	std::int32_t MAIN_QUEST_FLAG = 0;
-	std::int32_t SIDE_QUEST_FLAG = 1;
-	std::int32_t RADI_QUEST_FLAG = 2;
+	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
+	/*00*/ {"Solitude_Quest00_Key", "$Solitude_Quest00_Name", SIDE_QUEST_FLAG, "$Solitude_Quest00_Data", "SolitudeFreeform04"},
+	/*01*/ {"Solitude_Quest01_Key", "$Solitude_Quest01_Name", SIDE_QUEST_FLAG, "$Solitude_Quest01_Data", "SolitudeFreeform07"},
+	/*02*/ {"Solitude_Quest02_Key", "$Solitude_Quest02_Name", SIDE_QUEST_FLAG, "$Solitude_Quest02_Data", "BardsCollegeLute"},
+	/*03*/ {"Solitude_Quest03_Key", "$Solitude_Quest03_Name", SIDE_QUEST_FLAG, "$Solitude_Quest03_Data", "SolitudeFreeform02"},
+	/*04*/ {"Solitude_Quest04_Key", "$Solitude_Quest04_Name", SIDE_QUEST_FLAG, "$Solitude_Quest04_Data", "Favor109"},
+	/*05*/ {"Solitude_Quest05_Key", "$Solitude_Quest05_Name", SIDE_QUEST_FLAG, "$Solitude_Quest05_Data", "MS07"},
+	/*06*/ {"Solitude_Quest06_Key", "$Solitude_Quest06_Name", SIDE_QUEST_FLAG, "$Solitude_Quest06_Data", "SolitudeFreeform01"},
+	/*07*/ {"Solitude_Quest07_Key", "$Solitude_Quest07_Name", SIDE_QUEST_FLAG, "$Solitude_Quest07_Data", "BardsCollegeFlute"},
+	/*08*/ {"Solitude_Quest08_Key", "$Solitude_Quest08_Name", SIDE_QUEST_FLAG, "$Solitude_Quest08_Data", "SolitudeFreeform03"},
+	/*09*/ {"Solitude_Quest09_Key", "$Solitude_Quest09_Name", SIDE_QUEST_FLAG, "$Solitude_Quest09_Data", "BardsCollegeDrum"},
+	/*10*/ {"Solitude_Quest10_Key", "$Solitude_Quest10_Name", SIDE_QUEST_FLAG, "$Solitude_Quest10_Data", "MS05"},
+	/*11*/ {"Solitude_Quest11_Key", "$Solitude_Quest11_Name", SIDE_QUEST_FLAG, "$Solitude_Quest11_Data", "MS06Start"},
+	/*12*/ {"Solitude_Quest12_Key", "$Solitude_Quest12_Name", SIDE_QUEST_FLAG, "$Solitude_Quest12_Data", "DA15"},
+	/*13*/ {"Solitude_Quest13_Key", "$Solitude_Quest13_Name", SIDE_QUEST_FLAG, "$Solitude_Quest13_Data", "SolitudeFreeform06"},
+	/*14*/ {"Solitude_Quest14_Key", "$Solitude_Quest14_Name", SIDE_QUEST_FLAG, "$Solitude_Quest14_Data", "MS06"},
+	/*15*/ {"Solitude_Quest15_Key", "$Solitude_Quest15_Name", SIDE_QUEST_FLAG, "$Solitude_Quest15_Data", "Favor013"},
+	/*16*/ {"Solitude_Quest16_Key", "$Solitude_Quest16_Name", SIDE_QUEST_FLAG, "$Solitude_Quest16_Data", "Favor205"},
+	/*17*/ {"Solitude_Quest17_Key", "$Solitude_Quest17_Name", SIDE_QUEST_FLAG, "$Solitude_Quest17_Data", "Favor104"},
+	/*18*/ {"Solitude_Quest18_Key", "$Solitude_Quest18_Name", RADI_QUEST_FLAG, "$Solitude_Quest18_Data", "FavorJobsBeggars"},
+	/*19*/ {"Solitude_Quest19_Key", "$Solitude_Quest19_Name", RADI_QUEST_FLAG, "$Solitude_Quest19_Data", "FavorJobsBeggars"},
+	/*20*/ {"Solitude_Quest20_Key", "$Solitude_Quest20_Name", RADI_QUEST_FLAG, "$Solitude_Quest20_Data", "FavorJobsBeggars"},
+	/*21*/ {"Solitude_Quest21_Key", "$Solitude_Quest21_Name", SIDE_QUEST_FLAG, "$Solitude_Quest21_Data", "Favor110"},
+	/*22*/ {"Solitude_Quest22_Key", "$Solitude_Quest22_Name", SIDE_QUEST_FLAG, "$Solitude_Quest22_Data", "FavorJarlsMakeFriends"},
+	};
 
 	constexpr std::size_t StandardCompletion[] = {
 	2,5,7,9,10,11,12,14
@@ -60,29 +71,13 @@ namespace CQFramework_Solitude {
 		NameArray.clear();
 		KeysArray.clear();
 
-		/*00*/ AddQuest("Solitude_Quest00_Key", "$Solitude_Quest00_Name", SIDE_QUEST_FLAG, "$Solitude_Quest00_Data", "SolitudeFreeform04");
-		/*01*/ AddQuest("Solitude_Quest01_Key", "$Solitude_Quest01_Name", SIDE_QUEST_FLAG, "$Solitude_Quest01_Data", "SolitudeFreeform07");
-		/*02*/ AddQuest("Solitude_Quest02_Key", "$Solitude_Quest02_Name", SIDE_QUEST_FLAG, "$Solitude_Quest02_Data", "BardsCollegeLute");
-		/*03*/ AddQuest("Solitude_Quest03_Key", "$Solitude_Quest03_Name", SIDE_QUEST_FLAG, "$Solitude_Quest03_Data", "SolitudeFreeform02");
-		/*04*/ AddQuest("Solitude_Quest04_Key", "$Solitude_Quest04_Name", SIDE_QUEST_FLAG, "$Solitude_Quest04_Data", "Favor109");
-		/*05*/ AddQuest("Solitude_Quest05_Key", "$Solitude_Quest05_Name", SIDE_QUEST_FLAG, "$Solitude_Quest05_Data", "MS07");
-		/*06*/ AddQuest("Solitude_Quest06_Key", "$Solitude_Quest06_Name", SIDE_QUEST_FLAG, "$Solitude_Quest06_Data", "SolitudeFreeform01");
-		/*07*/ AddQuest("Solitude_Quest07_Key", "$Solitude_Quest07_Name", SIDE_QUEST_FLAG, "$Solitude_Quest07_Data", "BardsCollegeFlute");
-		/*08*/ AddQuest("Solitude_Quest08_Key", "$Solitude_Quest08_Name", SIDE_QUEST_FLAG, "$Solitude_Quest08_Data", "SolitudeFreeform03");
-		/*09*/ AddQuest("Solitude_Quest09_Key", "$Solitude_Quest09_Name", SIDE_QUEST_FLAG, "$Solitude_Quest09_Data", "BardsCollegeDrum");
-		/*10*/ AddQuest("Solitude_Quest10_Key", "$Solitude_Quest10_Name", SIDE_QUEST_FLAG, "$Solitude_Quest10_Data", "MS05");
-		/*11*/ AddQuest("Solitude_Quest11_Key", "$Solitude_Quest11_Name", SIDE_QUEST_FLAG, "$Solitude_Quest11_Data", "MS06Start");
-		/*12*/ AddQuest("Solitude_Quest12_Key", "$Solitude_Quest12_Name", SIDE_QUEST_FLAG, "$Solitude_Quest12_Data", "DA15");
-		/*13*/ AddQuest("Solitude_Quest13_Key", "$Solitude_Quest13_Name", SIDE_QUEST_FLAG, "$Solitude_Quest13_Data", "SolitudeFreeform06");
-		/*14*/ AddQuest("Solitude_Quest14_Key", "$Solitude_Quest14_Name", SIDE_QUEST_FLAG, "$Solitude_Quest14_Data", "MS06");
-		/*15*/ AddQuest("Solitude_Quest15_Key", "$Solitude_Quest15_Name", SIDE_QUEST_FLAG, "$Solitude_Quest15_Data", "Favor013");
-		/*16*/ AddQuest("Solitude_Quest16_Key", "$Solitude_Quest16_Name", SIDE_QUEST_FLAG, "$Solitude_Quest16_Data", "Favor205");
-		/*17*/ AddQuest("Solitude_Quest17_Key", "$Solitude_Quest17_Name", SIDE_QUEST_FLAG, "$Solitude_Quest17_Data", "Favor104");
-		/*18*/ AddQuest("Solitude_Quest18_Key", "$Solitude_Quest18_Name", RADI_QUEST_FLAG, "$Solitude_Quest18_Data", "FavorJobsBeggars");
-		/*19*/ AddQuest("Solitude_Quest19_Key", "$Solitude_Quest19_Name", RADI_QUEST_FLAG, "$Solitude_Quest19_Data", "FavorJobsBeggars");
-		/*20*/ AddQuest("Solitude_Quest20_Key", "$Solitude_Quest20_Name", RADI_QUEST_FLAG, "$Solitude_Quest20_Data", "FavorJobsBeggars");
-		/*21*/ AddQuest("Solitude_Quest21_Key", "$Solitude_Quest21_Name", SIDE_QUEST_FLAG, "$Solitude_Quest21_Data", "Favor110");
-		/*22*/ AddQuest("Solitude_Quest22_Key", "$Solitude_Quest22_Name", SIDE_QUEST_FLAG, "$Solitude_Quest22_Data", "FavorJarlsMakeFriends");
+		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
+			KeysArray.push_back(Key);
+			NameArray.push_back(Name);
+			RadiArray.push_back(Flag);
+			TextArray.push_back(Text);
+			IdenArray.push_back(ID);
+		}
 
 		assert(KeysArray.size() == ArraySize);
 		assert(IdenArray.size() == ArraySize);
@@ -90,19 +85,6 @@ namespace CQFramework_Solitude {
 		assert(RadiArray.size() == ArraySize);
 		assert(TextArray.size() == ArraySize);
 		BoolArray = std::vector<bool>(ArraySize, false);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Add Quest To Array ) -----
-	//---------------------------------------------------
-
-	void CHandler::AddQuest(std::string k, std::string n, std::int32_t t, std::string h, std::string g) {
-
-		KeysArray.push_back(k);
-		NameArray.push_back(n);
-		RadiArray.push_back(t);
-		TextArray.push_back(h);
-		IdenArray.push_back(g);
 	}
 
 	//---------------------------------------------------

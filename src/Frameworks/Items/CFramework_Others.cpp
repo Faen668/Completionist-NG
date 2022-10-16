@@ -3,26 +3,6 @@
 
 #undef AddForm
 
-namespace CFramework_Others_VC {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_PC {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_VM {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_PM {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_SB {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_Others {
 	using namespace CFramework_Master;
 
@@ -66,41 +46,6 @@ namespace CFramework_Others {
 	};
 
 	// clang-format on
-
-	inline std::vector<std::string> VC_NameArray;
-	inline std::vector<std::string> VC_TextArray;
-	inline std::vector<RE::TESForm*> VC_FormArray;
-	inline std::vector<bool> VC_BoolArray;
-	inline std::int32_t VC_EntriesTotal;
-	inline std::int32_t VC_EntriesFound;
-
-	inline std::vector<std::string> PC_NameArray;
-	inline std::vector<std::string> PC_TextArray;
-	inline std::vector<RE::TESForm*> PC_FormArray;
-	inline std::vector<bool> PC_BoolArray;
-	inline std::int32_t PC_EntriesTotal;
-	inline std::int32_t PC_EntriesFound;
-
-	inline std::vector<std::string> VM_NameArray;
-	inline std::vector<std::string> VM_TextArray;
-	inline std::vector<RE::TESForm*> VM_FormArray;
-	inline std::vector<bool> VM_BoolArray;
-	inline std::int32_t VM_EntriesTotal;
-	inline std::int32_t VM_EntriesFound;
-
-	inline std::vector<std::string> PM_NameArray;
-	inline std::vector<std::string> PM_TextArray;
-	inline std::vector<RE::TESForm*> PM_FormArray;
-	inline std::vector<bool> PM_BoolArray;
-	inline std::int32_t PM_EntriesTotal;
-	inline std::int32_t PM_EntriesFound;
-
-	inline std::vector<std::string> SB_NameArray;
-	inline std::vector<std::string> SB_TextArray;
-	inline std::vector<RE::TESForm*> SB_FormArray;
-	inline std::vector<bool> SB_BoolArray;
-	inline std::int32_t SB_EntriesTotal;
-	inline std::int32_t SB_EntriesFound;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

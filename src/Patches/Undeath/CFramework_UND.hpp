@@ -1,189 +1,61 @@
 #pragma once
 
-#include <SKSE\API.h>
-#include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-
 namespace CPatch_UND_Books {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_UND_MapMa {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CPatch_UND
 {
-	enum PatchID : std::int32_t
-	{
-		KBooks = 258,
-		KMapMa = 259,
-	};
+	inline std::vector<std::string> Books_NameArray;
+	inline std::vector<std::string> Books_TextArray;
+	inline std::vector<RE::TESForm*> Books_FormArray;
+	inline std::vector<bool> Books_BoolArray;
+	inline std::int32_t Books_EntriesTotal;
+	inline std::int32_t Books_EntriesFound;
 
-	extern std::vector<std::string> Books_NameArray;
-	extern std::vector<std::string> Books_TextArray;
-	extern std::vector<RE::TESForm*> Books_FormArray;
-	extern std::vector<bool> Books_BoolArray;
-	extern std::int32_t Books_EntriesTotal;
-	extern std::int32_t Books_EntriesFound;
+	inline std::vector<std::string> MapMa_NameArray;
+	inline std::vector<std::string> MapMa_TextArray;
+	inline std::vector<RE::TESForm*> MapMa_FormArray;
+	inline std::vector<bool> MapMa_BoolArray;
+	inline std::int32_t MapMa_EntriesTotal;
+	inline std::int32_t MapMa_EntriesFound;
 
-	extern std::vector<std::string> MapMa_NameArray;
-	extern std::vector<std::string> MapMa_TextArray;
-	extern std::vector<RE::TESForm*> MapMa_FormArray;
-	extern std::vector<bool> MapMa_BoolArray;
-	extern std::int32_t MapMa_EntriesTotal;
-	extern std::int32_t MapMa_EntriesFound;
+	inline std::vector<std::string>		Quest_NameArray;
+	inline std::vector<std::string>		Quest_IdenArray;
+	inline std::vector<std::string>		Quest_TextArray;
+	inline std::vector<std::string>		Quest_KeysArray;
+	inline std::vector<std::int32_t>	Quest_RadiArray;
+	inline std::vector<bool>			Quest_BoolArray;
+	inline std::vector<bool>			Quest_StgeArray;
 
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
 
 		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::BooksRead::Event> {
+		public RE::BSTEventSink<RE::BooksRead::Event>,
+		public RE::BSTEventSink<RE::TESQuestStageEvent> {
 
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
-		  EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
+		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
 
-		  static void			SinkEvents();
-		  static void			InstallFramework();
-		  static void			UpdateFoundForms();
-		  static void			InjectAndCompileData();
+		static void			SinkEvents();
+		static void			InjectAndCompileData();
 
-		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
-		  static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);
+		static void			InstallFramework();
+		static void			InstallQuestFramework();
 
-		  inline static const std::vector<std::string> Null_S = {};
-		  inline static const std::vector<RE::TESForm*> Null_F = {};
-		  inline static const std::vector<bool> Null_B = {};
+		static void			UpdateFoundForms();
+		static void			UpdateQuestFramework();
 
-	public: [[nodiscard]] static std::int32_t ReturnEntriesInt(std::int32_t a_patchID, std::string a_section) {
-
-		switch (a_patchID) {
-
-		case KBooks:
-			if (a_section == "Total") { return Books_EntriesTotal; }
-			if (a_section == "Found") { return Books_EntriesFound; }
-			return -1;
-
-		case KMapMa:
-			if (a_section == "Total") { return MapMa_EntriesTotal; }
-			if (a_section == "Found") { return MapMa_EntriesFound; }
-			return -1;
-
-		default:
-			return -1;
-		}
-	}
-
-	public: [[nodiscard]] static const std::vector<RE::TESForm*>& ReturnEntriesForm(std::int32_t a_patchID) {
-
-		switch (a_patchID) {
-
-		case KBooks:
-			return Books_FormArray;
-
-		case KMapMa:
-			return MapMa_FormArray;
-
-		default:
-			return Null_F;
-		}
-	}
-
-	public: [[nodiscard]] static const std::vector<std::string>& ReturnEntriesString(std::int32_t a_patchID, std::string a_section) {
-
-		switch (a_patchID) {
-
-		case KBooks:
-			if (a_section == "Name") { return Books_NameArray; }
-			if (a_section == "Text") { return Books_TextArray; }
-			return Null_S;
-
-		case KMapMa:
-			if (a_section == "Name") { return MapMa_NameArray; }
-			if (a_section == "Text") { return MapMa_TextArray; }
-			return Null_S;
-
-		default:
-			return Null_S;
-		}
-	}
-
-	public: [[nodiscard]] static const std::vector<bool>& ReturnEntriesBool(std::int32_t a_patchID) {
-
-		switch (a_patchID) {
-
-		case KBooks:
-			return Books_BoolArray;
-
-		case KMapMa:
-			return MapMa_BoolArray;
-
-		default:
-			return Null_B;
-		}
-	}
-
-	public: [[nodiscard]] static std::int32_t IsOptionCompleted(std::int32_t a_patchID, std::string a_name) {
-
-		switch (a_patchID) {
-
-		case KBooks:
-			if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
-				return std::int32_t(Books_BoolArray[std::distance(Books_NameArray.begin(), t_pos)]);
-			}
-			return -1;
-
-		case KMapMa:
-			if (auto t_pos = std::ranges::find(MapMa_NameArray, a_name); t_pos != MapMa_NameArray.end()) {
-				return std::int32_t(MapMa_BoolArray[std::distance(MapMa_NameArray.begin(), t_pos)]);
-			}
-			return -1;
-
-		default:
-			return -1;
-		}
-	}
-
-	public: static void SetOptionCompleted(std::int32_t a_patchID, std::string a_name) {
-		using namespace CFramework_Master;
-
-		switch (a_patchID) {
-
-		case KBooks:
-			if (auto t_pos = std::ranges::find(Books_NameArray, a_name); t_pos != Books_NameArray.end()) {
-				auto b_pos = std::distance(Books_NameArray.begin(), t_pos);
-
-				if (Books_BoolArray.at(b_pos)) {
-					Books_BoolArray.at(b_pos) = false;
-
-					FoundItemData.RemoveForm(Books_FormArray.at(b_pos)->GetFormID());
-					for (auto var : CPatch_UND_Books::Data.GetAllVariations()) {
-						if (CPatch_UND_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
-							FoundItemData.RemoveForm(var);
-						}
-					}
-				}
-				else {
-					Books_BoolArray.at(b_pos) = true;
-					FoundItemData.AddForm(Books_FormArray.at(b_pos)->GetFormID());
-					for (auto var : CPatch_UND_Books::Data.GetAllVariations()) {
-						if (CPatch_UND_Books::Data.GetBase(var) == Books_FormArray.at(b_pos)->GetFormID()) {
-							FoundItemData.AddForm(var);
-						}
-					}
-				}
-
-				Books_EntriesTotal = Books_FormArray.size();
-				Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
+		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+		static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);
 	};
 }

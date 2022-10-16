@@ -1,43 +1,7 @@
 #include "Variables.hpp"
-#include "Internal Utility/ScriptObject.hpp"
+#include "ScriptObject.hpp"
 
 namespace CVariables {
-
-	inline std::string 		V_ShoutColour_New;
-	inline std::string 		V_ShoutColour_Found;
-
-	inline bool 			V_Ammo_Enabled_New;
-	inline bool 			V_Ammo_Enabled_Found;
-
-	inline bool 			V_Alchemy_Enabled_New;
-	inline bool 			V_Alchemy_Enabled_Found;
-
-	inline bool 			V_Armor_Enabled_New;
-	inline bool 			V_Armor_Enabled_Found;
-
-	inline bool 			V_Books_Enabled_New;
-	inline bool 			V_Books_Enabled_Found;
-
-	inline bool 			V_Weapons_Enabled_New;
-	inline bool 			V_Weapons_Enabled_Found;
-
-	inline bool 			V_Other_Enabled_New;
-	inline bool 			V_Other_Enabled_Found;
-
-	inline std::int32_t		V_HUD_Colour_New;
-	inline std::int32_t		V_HUD_Colour_Found;
-	inline std::string 		V_HUD_ColourString_New;
-	inline std::string 		V_HUD_ColourString_Found;
-
-	inline std::int32_t		V_TextChoice;
-	inline std::string		V_CrosshairTag_New;
-	inline std::string		V_CrosshairTag_Found;
-
-	inline bool				V_mainHudEnabled;
-	inline bool				V_moreHudEnabled;
-
-	inline std::int32_t		V_RadiantCounterVal;
-
 
 	void VariablesAPI::Register() {
 		auto ui = RE::UI::GetSingleton();
@@ -89,5 +53,13 @@ namespace CVariables {
 		V_ShoutColour_Found = MCM->GetProperty("StateShout_GotColourString")->GetString();
 
 		V_RadiantCounterVal = MCM->GetProperty("State_RadiantCounterVal")->GetSInt();
+		V_Radiant_CollegeVal = MCM->GetProperty("State_CollegeCounterVal")->GetSInt();
+		V_Radiant_CompanionsVal = MCM->GetProperty("State_CompanionsCounterVal")->GetSInt();
+		V_Radiant_DBrotherhoodVal = MCM->GetProperty("State_DBCounterVal")->GetSInt();
+		V_Radiant_DawnguardVal = MCM->GetProperty("State_DLC1CounterVal")->GetSInt();
+		V_Radiant_ThievesGuildVal = MCM->GetProperty("State_TGRCounterVal")->GetSInt();
+		V_Radiant_BountyVal = MCM->GetProperty("State_BountyCounterVal")->GetSInt();
+		V_Radiant_VigilantVal = MCM->GetProperty("State_VigilantCounterVal")->GetSInt();
+		V_Radiant_LegacyVal = MCM->GetProperty("State_LOTDCounterVal")->GetSInt();
 	}
 }

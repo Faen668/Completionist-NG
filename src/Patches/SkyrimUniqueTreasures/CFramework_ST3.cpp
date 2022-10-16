@@ -1,25 +1,8 @@
 #include "Serialization.hpp"
 #include "CFramework_ST3.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_ST3_ItmL1 {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST3_ItmL2 {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST3_ItmL3 {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST3_ItmL4 {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_ST3 {
 	using namespace CFramework_Master;
@@ -55,35 +38,7 @@ namespace CPatch_ST3 {
 
 	// clang-format on
 
-	inline std::vector<std::string> ItmL1_NameArray;
-	inline std::vector<std::string> ItmL1_TextArray;
-	inline std::vector<RE::TESForm*> ItmL1_FormArray;
-	inline std::vector<bool> ItmL1_BoolArray;
-	inline std::int32_t ItmL1_EntriesTotal;
-	inline std::int32_t ItmL1_EntriesFound;
-
-	inline std::vector<std::string> ItmL2_NameArray;
-	inline std::vector<std::string> ItmL2_TextArray;
-	inline std::vector<RE::TESForm*> ItmL2_FormArray;
-	inline std::vector<bool> ItmL2_BoolArray;
-	inline std::int32_t ItmL2_EntriesTotal;
-	inline std::int32_t ItmL2_EntriesFound;
-
-	inline std::vector<std::string> ItmL3_NameArray;
-	inline std::vector<std::string> ItmL3_TextArray;
-	inline std::vector<RE::TESForm*> ItmL3_FormArray;
-	inline std::vector<bool> ItmL3_BoolArray;
-	inline std::int32_t ItmL3_EntriesTotal;
-	inline std::int32_t ItmL3_EntriesFound;
-
-	inline std::vector<std::string> ItmL4_NameArray;
-	inline std::vector<std::string> ItmL4_TextArray;
-	inline std::vector<RE::TESForm*> ItmL4_FormArray;
-	inline std::vector<bool> ItmL4_BoolArray;
-	inline std::int32_t ItmL4_EntriesTotal;
-	inline std::int32_t ItmL4_EntriesFound;
-
-	inline std::string_view modname = "SkyrimsUniqueTreasures.esp";
+	constexpr std::string_view modname = "SkyrimsUniqueTreasures.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

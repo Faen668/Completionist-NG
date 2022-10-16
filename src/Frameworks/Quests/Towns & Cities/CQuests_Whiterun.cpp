@@ -2,22 +2,28 @@
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Whiterun {
-	using namespace Serialization;
 	using namespace CFramework_Master;
 
-	// Main Quests
-	inline std::vector<RE::TESForm*>	FormArray;
-	inline std::vector<std::string>		NameArray;
-	inline std::vector<std::string>		IdenArray;
-	inline std::vector<std::string>		TextArray;
-	inline std::vector<std::int32_t>	RadiArray;
-	inline std::vector<bool>			BoolArray;
-	inline std::vector<std::string>		KeysArray;
-
-	std::int32_t ArraySize = 128;
-	std::int32_t MAIN_QUEST_FLAG = 0;
-	std::int32_t SIDE_QUEST_FLAG = 1;
-	std::int32_t RADI_QUEST_FLAG = 2;
+	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
+	/*00*/ {"Whiterun_Quest00_Key", "$Whiterun_Quest00_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest00_Data", "FreeformWhiterunQuest04"},
+	/*01*/ {"Whiterun_Quest01_Key", "$Whiterun_Quest01_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest01_Data", "FreeformWhiterunQuest02"},
+	/*02*/ {"Whiterun_Quest02_Key", "$Whiterun_Quest02_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest02_Data", "FreeformWhiterunQuest01"},
+	/*03*/ {"Whiterun_Quest03_Key", "$Whiterun_Quest03_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest03_Data", "FreeformWhiterunQuest03"},
+	/*04*/ {"Whiterun_Quest04_Key", "$Whiterun_Quest04_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest04_Data", "MS08"},
+	/*05*/ {"Whiterun_Quest05_Key", "$Whiterun_Quest05_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest05_Data", "MS09"},
+	/*06*/ {"Whiterun_Quest06_Key", "$Whiterun_Quest06_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest06_Data", "FreeformWhiterunQuest05"},
+	/*07*/ {"Whiterun_Quest07_Key", "$Whiterun_Quest07_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest07_Data", "dunSleepingTreeCampQST"},
+	/*08*/ {"Whiterun_Quest08_Key", "$Whiterun_Quest08_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest08_Data", "T03"},
+	/*09*/ {"Whiterun_Quest09_Key", "$Whiterun_Quest09_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest09_Data", "DA08"},
+	/*10*/ {"Whiterun_Quest10_Key", "$Whiterun_Quest10_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest10_Data", "Favor013"},
+	/*11*/ {"Whiterun_Quest11_Key", "$Whiterun_Quest11_Name", RADI_QUEST_FLAG, "$Whiterun_Quest11_Data", "FavorJobsChopWood"},
+	/*12*/ {"Whiterun_Quest12_Key", "$Whiterun_Quest12_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest12_Data", "Favor204"},
+	/*13*/ {"Whiterun_Quest13_Key", "$Whiterun_Quest13_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest13_Data", "Favor017"},
+	/*14*/ {"Whiterun_Quest14_Key", "$Whiterun_Quest14_Name", RADI_QUEST_FLAG, "$Whiterun_Quest14_Data", "FavorJobsBeggars"},
+	/*15*/ {"Whiterun_Quest15_Key", "$Whiterun_Quest15_Name", RADI_QUEST_FLAG, "$Whiterun_Quest15_Data", "FavorJobsBeggars"},
+	/*16*/ {"Whiterun_Quest16_Key", "$Whiterun_Quest16_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest16_Data", "Favor110"},
+	/*17*/ {"Whiterun_Quest17_Key", "$Whiterun_Quest17_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest17_Data", "FavorJarlsMakeFriends"},
+	};
 
 	constexpr std::size_t StandardCompletion[] = {
 	0,1,2,3,4,5,6,8,9,
@@ -51,24 +57,13 @@ namespace CQFramework_Whiterun {
 		NameArray.clear();
 		KeysArray.clear();
 
-		/*00*/ AddQuest("Whiterun_Quest00_Key", "$Whiterun_Quest00_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest00_Data", "FreeformWhiterunQuest04");
-		/*01*/ AddQuest("Whiterun_Quest01_Key", "$Whiterun_Quest01_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest01_Data", "FreeformWhiterunQuest02");
-		/*02*/ AddQuest("Whiterun_Quest02_Key", "$Whiterun_Quest02_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest02_Data", "FreeformWhiterunQuest01");
-		/*03*/ AddQuest("Whiterun_Quest03_Key", "$Whiterun_Quest03_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest03_Data", "FreeformWhiterunQuest03");
-		/*04*/ AddQuest("Whiterun_Quest04_Key", "$Whiterun_Quest04_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest04_Data", "MS08");
-		/*05*/ AddQuest("Whiterun_Quest05_Key", "$Whiterun_Quest05_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest05_Data", "MS09");
-		/*06*/ AddQuest("Whiterun_Quest06_Key", "$Whiterun_Quest06_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest06_Data", "FreeformWhiterunQuest05");
-		/*07*/ AddQuest("Whiterun_Quest07_Key", "$Whiterun_Quest07_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest07_Data", "dunSleepingTreeCampQST");
-		/*08*/ AddQuest("Whiterun_Quest08_Key", "$Whiterun_Quest08_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest08_Data", "T03");
-		/*09*/ AddQuest("Whiterun_Quest09_Key", "$Whiterun_Quest09_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest09_Data", "DA08");
-		/*10*/ AddQuest("Whiterun_Quest10_Key", "$Whiterun_Quest10_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest10_Data", "Favor013");
-		/*11*/ AddQuest("Whiterun_Quest11_Key", "$Whiterun_Quest11_Name", RADI_QUEST_FLAG, "$Whiterun_Quest11_Data", "FavorJobsChopWood");
-		/*12*/ AddQuest("Whiterun_Quest12_Key", "$Whiterun_Quest12_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest12_Data", "Favor204");
-		/*13*/ AddQuest("Whiterun_Quest13_Key", "$Whiterun_Quest13_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest13_Data", "Favor017");
-		/*14*/ AddQuest("Whiterun_Quest14_Key", "$Whiterun_Quest14_Name", RADI_QUEST_FLAG, "$Whiterun_Quest14_Data", "FavorJobsBeggars");
-		/*15*/ AddQuest("Whiterun_Quest15_Key", "$Whiterun_Quest15_Name", RADI_QUEST_FLAG, "$Whiterun_Quest15_Data", "FavorJobsBeggars");
-		/*16*/ AddQuest("Whiterun_Quest16_Key", "$Whiterun_Quest16_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest16_Data", "Favor110");
-		/*17*/ AddQuest("Whiterun_Quest17_Key", "$Whiterun_Quest17_Name", SIDE_QUEST_FLAG, "$Whiterun_Quest17_Data", "FavorJarlsMakeFriends");
+		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
+			KeysArray.push_back(Key);
+			NameArray.push_back(Name);
+			RadiArray.push_back(Flag);
+			TextArray.push_back(Text);
+			IdenArray.push_back(ID);
+		}
 
 		assert(KeysArray.size() == ArraySize);
 		assert(IdenArray.size() == ArraySize);
@@ -76,19 +71,6 @@ namespace CQFramework_Whiterun {
 		assert(RadiArray.size() == ArraySize);
 		assert(TextArray.size() == ArraySize);
 		BoolArray = std::vector<bool>(ArraySize, false);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Add Quest To Array ) -----
-	//---------------------------------------------------
-
-	void CHandler::AddQuest(std::string k, std::string n, std::int32_t t, std::string h, std::string g) {
-
-		KeysArray.push_back(k);
-		NameArray.push_back(n);
-		RadiArray.push_back(t);
-		TextArray.push_back(h);
-		IdenArray.push_back(g);
 	}
 
 	//---------------------------------------------------

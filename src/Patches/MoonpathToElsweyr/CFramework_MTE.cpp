@@ -1,22 +1,32 @@
 #include "Serialization.hpp"
 #include "CFramework_MTE.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_MTE_Items {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_MTE_Books {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_MTE {
 	using namespace CFramework_Master;
 
 	// clang-format off
+
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
+		/*00*/ {"Moonpath_Quest00_Key", "$Moonpath_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest00_Data", "AnvilMoonpathQuest"},
+		/*01*/ {"Moonpath_Quest01_Key", "$Moonpath_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest01_Data", "AnvilQuestameir"},
+		/*02*/ {"Moonpath_Quest02_Key", "$Moonpath_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest02_Data", "AnvilDenQuest"},
+		/*03*/ {"Moonpath_Quest03_Key", "$Moonpath_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest03_Data", "Anvil_buildquest"},
+		/*04*/ {"Moonpath_Quest04_Key", "$Moonpath_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest04_Data", "DBM_AirshipQuest"},
+		/*05*/ {"Moonpath_Quest05_Key", "$Moonpath_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest05_Data", "AnvilSloadquest"},
+		/*06*/ {"Moonpath_Quest06_Key", "$Moonpath_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Moonpath_Quest06_Data", "Anvil_armorquest"},
+	};
+
+	constexpr std::size_t DBM_StandardCompletion[] = {
+	0,1,2,3,4,5,6
+	};
+
+	constexpr std::size_t StandardCompletion[] = {
+	0,1,2,3,4,5
+	};
 
 	constexpr Serialization::FormArray Items = {
 	0x04C9AE,
@@ -28,21 +38,7 @@ namespace CPatch_MTE {
 
 	// clang-format on
 
-	inline std::vector<std::string> Items_NameArray;
-	inline std::vector<std::string> Items_TextArray;
-	inline std::vector<RE::TESForm*> Items_FormArray;
-	inline std::vector<bool> Items_BoolArray;
-	inline std::int32_t Items_EntriesTotal;
-	inline std::int32_t Items_EntriesFound;
-
-	inline std::vector<std::string> Books_NameArray;
-	inline std::vector<std::string> Books_TextArray;
-	inline std::vector<RE::TESForm*> Books_FormArray;
-	inline std::vector<bool> Books_BoolArray;
-	inline std::int32_t Books_EntriesTotal;
-	inline std::int32_t Books_EntriesFound;
-
-	inline std::string_view modname = "moonpath.esp";
+	constexpr std::string_view modname = "moonpath.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -56,7 +52,39 @@ namespace CPatch_MTE {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallQuestFramework();
 		PatchesInstalled += 1;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Framework ) ------
+	//---------------------------------------------------
+
+	void CHandler::InstallQuestFramework() {
+
+		Quest_IdenArray.clear();
+		Quest_NameArray.clear();
+		Quest_RadiArray.clear();
+		Quest_NameArray.clear();
+		Quest_KeysArray.clear();
+		Quest_StgeArray.clear();
+
+		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
+			Quest_KeysArray.push_back(key);
+			Quest_NameArray.push_back(name);
+			Quest_RadiArray.push_back(flag);
+			Quest_TextArray.push_back(text);
+			Quest_IdenArray.push_back(id);
+			Quest_StgeArray.push_back(isStageDone);
+		}
+
+		assert(Quest_KeysArray.size() == ArraySize);
+		assert(Quest_IdenArray.size() == ArraySize);
+		assert(Quest_NameArray.size() == ArraySize);
+		assert(Quest_RadiArray.size() == ArraySize);
+		assert(Quest_TextArray.size() == ArraySize);
+		assert(Quest_StgeArray.size() == ArraySize);
+		Quest_BoolArray = std::vector<bool>(ArraySize, false);
 	}
 
 	//---------------------------------------------------
@@ -71,6 +99,30 @@ namespace CPatch_MTE {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!quest) { return EventResult::kContinue; }
+
+		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
+		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
+
+
+		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
+			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
+			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
+		}
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -115,6 +167,11 @@ namespace CPatch_MTE {
 			}
 			return EventResult::kContinue;
 		}
+
+		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
+			CHandler::UpdateQuestFramework();
+		}
+
 		return EventResult::kContinue;
 	}
 
@@ -221,5 +278,16 @@ namespace CPatch_MTE {
 
 		Books_EntriesTotal = Books_FormArray.size();
 		Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update Found Forms ) -----
+	//---------------------------------------------------
+
+	void CHandler::UpdateQuestFramework() {
+
+		for (auto i : StandardCompletion) {
+			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
+		}
 	}
 }

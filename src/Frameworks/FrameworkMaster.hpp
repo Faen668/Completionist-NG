@@ -1,16 +1,34 @@
 #pragma once
 
-#include <SKSE\API.h>
 #include "Serialization.hpp"
 
 namespace CFramework_Master
 {
-	extern Serialization::CompletionistKey CQuestKeys_Natural;
-	extern Serialization::CompletionistKey CQuestKeys_Manual;
+	inline Serialization::CompletionistKey CQuestKeys_Natural;
+	inline Serialization::CompletionistKey CQuestKeys_Manual;
+	inline Serialization::CompletionistKey CQuestKeys_Stages;
 
-	extern Serialization::CompletionistData FoundItemData;
-	extern Serialization::CompletionistData FoundItemData_NoShow;
-	extern int PatchesInstalled;
+	inline Serialization::CompletionistData FoundItemData;
+	inline Serialization::CompletionistData FoundItemData_NoShow;
+	inline int PatchesInstalled;
+	
+	inline constexpr std::int32_t RADIANT_BOUNTY_VALUE = 55245;
+	inline constexpr std::int32_t RADIANT_COUNTER_VALUE = 72541;
+	inline constexpr std::int32_t RADIANT_COLLEGE_VALUE = 62541;
+	inline constexpr std::int32_t RADIANT_COMPANIONS_VALUE = 55285;
+	inline constexpr std::int32_t RADIANT_BROTHERHOOD_VALUE = 45845;
+	inline constexpr std::int32_t RADIANT_DAWNGUARD_VALUE = 45825;
+	inline constexpr std::int32_t RADIANT_THIEVESGUILD_VALUE = 11548;
+	inline constexpr std::int32_t VIGILANT_COUNTER_VALUE = 25141;
+	inline constexpr std::int32_t LEGACY_COUNTER_VALUE = 33524;
+
+	inline constexpr std::int32_t ArraySize = 128;
+	inline constexpr std::int32_t MAIN_QUEST_FLAG = 0;
+	inline constexpr std::int32_t SIDE_QUEST_FLAG = 1;
+	inline constexpr std::int32_t RADI_QUEST_FLAG = 2;
+
+	inline constexpr bool IS_STAGE_DONE_Y = true;
+	inline constexpr bool IS_STAGE_DONE_N = false;
 
 	class FrameworkAPI {
 
@@ -23,7 +41,7 @@ namespace CFramework_Master
 		static void							Register();
 		static bool							RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
-		static void							Framework_Load();
+		static void							Update();
 		
 		static std::vector<std::string>		qGetNameArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 		static std::vector<std::string>		qGetTextArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
@@ -61,7 +79,7 @@ namespace CFramework_Master
 
 		static RE::TESQuest*				GetQuest(std::string a_questID);
 		static bool							IsCompleted_P(std::string a_key, std::string a_questID, std::int32_t a_stage); //GetStage > Check
-		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::uint16_t a_stage); //IsStageDone Check
+		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage); //IsStageDone Check
 		static bool							IsCompleted_N(std::string a_key, std::string a_questID); // Normal Completion Check
 		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value = 1); // GLobal Check
 		static bool							IsCompleted_J(std::string a_key, std::string a_imp, std::string a_son); // Thane Check

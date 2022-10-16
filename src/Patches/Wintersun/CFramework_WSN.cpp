@@ -1,21 +1,8 @@
 #include "Serialization.hpp"
 #include "CFramework_WSN.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_WSN_Items {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_WSN_Books {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_WSN_MapMa {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_WSN {
 	using namespace CFramework_Master;
@@ -40,28 +27,7 @@ namespace CPatch_WSN {
 
 	// clang-format on
 
-	inline std::vector<std::string> Items_NameArray;
-	inline std::vector<std::string> Items_TextArray;
-	inline std::vector<RE::TESForm*> Items_FormArray;
-	inline std::vector<bool> Items_BoolArray;
-	inline std::int32_t Items_EntriesTotal;
-	inline std::int32_t Items_EntriesFound;
-
-	inline std::vector<std::string> Books_NameArray;
-	inline std::vector<std::string> Books_TextArray;
-	inline std::vector<RE::TESForm*> Books_FormArray;
-	inline std::vector<bool> Books_BoolArray;
-	inline std::int32_t Books_EntriesTotal;
-	inline std::int32_t Books_EntriesFound;
-
-	inline std::vector<std::string> MapMa_NameArray;
-	inline std::vector<std::string> MapMa_TextArray;
-	inline std::vector<RE::TESForm*> MapMa_FormArray;
-	inline std::vector<bool> MapMa_BoolArray;
-	inline std::int32_t MapMa_EntriesTotal;
-	inline std::int32_t MapMa_EntriesFound;
-
-	inline std::string_view modname = "Wintersun - Faiths of Skyrim.esp";
+	constexpr std::string_view modname = "Wintersun - Faiths of Skyrim.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------

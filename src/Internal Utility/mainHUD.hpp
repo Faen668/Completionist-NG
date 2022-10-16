@@ -2,6 +2,8 @@
 
 namespace Completionist_MainHUD
 {
+	inline std::vector<std::string> garbageDump{};
+
 	using EventResult = RE::BSEventNotifyControl;
 	using VM = RE::BSScript::Internal::VirtualMachine;
 	using StackID = RE::VMStackID;

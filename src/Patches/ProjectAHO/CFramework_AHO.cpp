@@ -1,26 +1,37 @@
 #include "Serialization.hpp"
 #include "CFramework_AHO.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 
 #undef AddForm
-
-namespace CPatch_AHO_Items {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_AHO_Books {
-	Serialization::CompletionistData Data;
-}
-
-namespace CPatch_AHO_MapMa {
-	Serialization::CompletionistData Data;
-}
 
 namespace CPatch_AHO {
 	using namespace CFramework_Master;
 
 	// clang-format off
+
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
+		/*00*/ {"ProjectAHO_Quest00_Key", "$ProjectAHO_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest00_Data", "DwarfSphereQ01"},
+		/*01*/ {"ProjectAHO_Quest01_Key", "$ProjectAHO_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest01_Data", "DwarfSphereQ03"},
+		/*02*/ {"ProjectAHO_Quest02_Key", "$ProjectAHO_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest02_Data", "DwarfSphereQ04"},
+		/*03*/ {"ProjectAHO_Quest03_Key", "$ProjectAHO_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest03_Data", "DwarfSphereQ05"},
+		/*04*/ {"ProjectAHO_Quest04_Key", "$ProjectAHO_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest04_Data", "DwarfSphereQ06"},
+		/*05*/ {"ProjectAHO_Quest05_Key", "$ProjectAHO_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest05_Data", "DwarfSphereQ07"},
+		/*06*/ {"ProjectAHO_Quest06_Key", "$ProjectAHO_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest06_Data", "DwarfSphereSQ01"},
+		/*07*/ {"ProjectAHO_Quest07_Key", "$ProjectAHO_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest07_Data", "DwarfSphereSQ02"},
+		/*08*/ {"ProjectAHO_Quest08_Key", "$ProjectAHO_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest08_Data", "DwarfSphereSQ03"},
+		/*09*/ {"ProjectAHO_Quest09_Key", "$ProjectAHO_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest09_Data", "DwarfSphereSQ04"},
+		/*10*/ {"ProjectAHO_Quest10_Key", "$ProjectAHO_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest10_Data", "DwarfSphereSQ05"},
+		/*11*/ {"ProjectAHO_Quest11_Key", "$ProjectAHO_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest11_Data", "DwarfSphereSQ06"},
+		/*12*/ {"ProjectAHO_Quest12_Key", "$ProjectAHO_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest12_Data", "DwarfSphereSQ07"},
+		/*13*/ {"ProjectAHO_Quest13_Key", "$ProjectAHO_Quest13_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest13_Data", "DwarfSphereSQ08"},
+		/*14*/ {"ProjectAHO_Quest14_Key", "$ProjectAHO_Quest14_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest14_Data", "DwarfSphereSQ09"},
+		/*15*/ {"ProjectAHO_Quest15_Key", "$ProjectAHO_Quest15_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest15_Data", "DwarfSphereSQ11"},
+	};
+
+	constexpr std::size_t StandardCompletion[] = {
+	0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+	};
 
 	constexpr Serialization::FormArray Items = {
 	0xAF7B13,0xA0D52D,0x7B54F3,
@@ -43,28 +54,7 @@ namespace CPatch_AHO {
 	
 	// clang-format on
 
-	inline std::vector<std::string> Items_NameArray;
-	inline std::vector<std::string> Items_TextArray;
-	inline std::vector<RE::TESForm*> Items_FormArray;
-	inline std::vector<bool> Items_BoolArray;
-	inline std::int32_t Items_EntriesTotal;
-	inline std::int32_t Items_EntriesFound;
-
-	inline std::vector<std::string> Books_NameArray;
-	inline std::vector<std::string> Books_TextArray;
-	inline std::vector<RE::TESForm*> Books_FormArray;
-	inline std::vector<bool> Books_BoolArray;
-	inline std::int32_t Books_EntriesTotal;
-	inline std::int32_t Books_EntriesFound;
-
-	inline std::vector<std::string> MapMa_NameArray;
-	inline std::vector<std::string> MapMa_TextArray;
-	inline std::vector<RE::TESForm*> MapMa_FormArray;
-	inline std::vector<bool> MapMa_BoolArray;
-	inline std::int32_t MapMa_EntriesTotal;
-	inline std::int32_t MapMa_EntriesFound;
-
-	inline std::string_view modname = "Dwarfsphere.esp";
+	constexpr std::string_view modname = "Dwarfsphere.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -78,7 +68,39 @@ namespace CPatch_AHO {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallQuestFramework();
 		PatchesInstalled += 1;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Framework ) ------
+	//---------------------------------------------------
+
+	void CHandler::InstallQuestFramework() {
+
+		Quest_IdenArray.clear();
+		Quest_NameArray.clear();
+		Quest_RadiArray.clear();
+		Quest_NameArray.clear();
+		Quest_KeysArray.clear();
+		Quest_StgeArray.clear();
+
+		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
+			Quest_KeysArray.push_back(key);
+			Quest_NameArray.push_back(name);
+			Quest_RadiArray.push_back(flag);
+			Quest_TextArray.push_back(text);
+			Quest_IdenArray.push_back(id);
+			Quest_StgeArray.push_back(isStageDone);
+		}
+
+		assert(Quest_KeysArray.size() == ArraySize);
+		assert(Quest_IdenArray.size() == ArraySize);
+		assert(Quest_NameArray.size() == ArraySize);
+		assert(Quest_RadiArray.size() == ArraySize);
+		assert(Quest_TextArray.size() == ArraySize);
+		assert(Quest_StgeArray.size() == ArraySize);
+		Quest_BoolArray = std::vector<bool>(ArraySize, false);
 	}
 
 	//---------------------------------------------------
@@ -93,7 +115,32 @@ namespace CPatch_AHO {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!quest) { return EventResult::kContinue; }
+
+		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
+		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
+
+
+		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
+			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
+			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
+		}
+		return EventResult::kContinue;
+	}
+
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
@@ -144,6 +191,11 @@ namespace CPatch_AHO {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
+
+		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
+			CHandler::UpdateQuestFramework();
+		}
+
 		return EventResult::kContinue;
 	}
 
@@ -244,11 +296,6 @@ namespace CPatch_AHO {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kAHO_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
-		//RegisterAs<FrameworkID::kAHO_Books>(&Books_NameArray, &Books_FormArray, &Books_BoolArray, &Books_TextArray);
-		//RegisterAs<FrameworkID::kAHO_MapMa>(&MapMa_NameArray, &MapMa_FormArray, &MapMa_BoolArray, &MapMa_TextArray);
 	}
 
 	//---------------------------------------------------
@@ -287,5 +334,16 @@ namespace CPatch_AHO {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update Found Forms ) -----
+	//---------------------------------------------------
+
+	void CHandler::UpdateQuestFramework() {
+
+		for (auto i : StandardCompletion) {
+			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
+		}
 	}
 }

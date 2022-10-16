@@ -1,20 +1,13 @@
-#include "Variables.hpp"
+#include "Internal Utility/Variables.hpp"
 #include "DKUtil/Utility.hpp"
-#include "Array.hpp"
+#include "Internal Utility/Array.hpp"
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
+#include "Frameworks/Quests/Radiant & Favors/Radiant Quests Manager.hpp"
 
 namespace CFramework_Master {
 	using namespace ArrayHolder;
 	using namespace Serialization;
-
-	int PatchesInstalled;
-
-	inline CompletionistKey CQuestKeys_Natural;
-	inline CompletionistKey CQuestKeys_Manual;
-
-	inline CompletionistData FoundItemData;
-	inline CompletionistData FoundItemData_NoShow;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Master Registration ) ----
@@ -32,6 +25,7 @@ namespace CFramework_Master {
 
 		SetSerializableInfo(CQuestKeys_Natural);
 		SetSerializableInfo(CQuestKeys_Manual);
+		SetSerializableInfo(CQuestKeys_Stages);
 
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
@@ -63,6 +57,30 @@ namespace CFramework_Master {
 		CQFramework_Riften::		CHandler::InstallFramework();
 		CQFramework_Solitude::		CHandler::InstallFramework();
 		CQFramework_Whiterun::		CHandler::InstallFramework();
+		CQFramework_Windhelm::		CHandler::InstallFramework();
+		CQFramework_Winterhold::	CHandler::InstallFramework();
+		CQFramework_RavenRock::		CHandler::InstallFramework();
+		CQFramework_SkaalVillage::	CHandler::InstallFramework();
+		CQFramework_TelMithryn::	CHandler::InstallFramework();
+		CQFramework_Thirsk::		CHandler::InstallFramework();
+		CQFramework_SmallTowns::	CHandler::InstallFramework();
+
+		//Quests (Guilds & Factions)
+		CQFramework_CollegeOfWinterhold::	CHandler::InstallFramework();
+		CQFramework_Companions::			CHandler::InstallFramework();
+		CQFramework_DarkBrotherhood::		CHandler::InstallFramework();
+		CQFramework_Dawnguard::				CHandler::InstallFramework();
+		CQFramework_ThievesGuild::			CHandler::InstallFramework();
+		CQFramework_Vampires::				CHandler::InstallFramework();
+
+		//Quests (Guilds & Factions)
+		CQFramework_Dungeons::	CHandler::InstallFramework();
+		CQFramework_Misc_SK::	CHandler::InstallFramework();
+		CQFramework_Misc_DG::	CHandler::InstallFramework();
+		CQFramework_Misc_DB::	CHandler::InstallFramework();
+
+		//Quests (Radiant Handler)
+		Quest_Manager::Install();
 
 		// Patches
 		CPatch_AHD::CHandler::InstallFramework();
@@ -88,6 +106,7 @@ namespace CFramework_Master {
 		CPatch_WYR::CHandler::InstallFramework();
 		CPatch_VIG::CHandler::InstallFramework();
 		CPatch_FSH::CHandler::InstallFramework();
+		CPatch_LOD::CHandler::InstallFramework();
 
 		//Register Arrays
 		ArrayHolder::RegisterArrays();
@@ -186,7 +205,7 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Load Frameworks ) --------
 	//---------------------------------------------------
 
-	void FrameworkAPI::Framework_Load() {
+	void FrameworkAPI::Update() {
 
 		//Frameworks
 		CFramework_Uniques::		CHandler::UpdateFoundForms();
@@ -223,6 +242,8 @@ namespace CFramework_Master {
 		CPatch_WYR::CHandler::UpdateFoundForms();
 		CPatch_VIG::CHandler::UpdateFoundForms();
 		CPatch_FSH::CHandler::UpdateFoundForms();
+
+		CQuestKeys_Stages.DumpToLog();
 	}
 
 	//---------------------------------------------------
@@ -353,6 +374,7 @@ namespace CFramework_Master {
 	
 		CQuestKeys_Natural.AddKey(a_key);
 		CQuestKeys_Manual.RemoveKey(a_key);
+		INFO("Returning 'Quest Complete'  for quest {}", a_key);
 		return true;
 	}
 
@@ -360,20 +382,12 @@ namespace CFramework_Master {
 	//-- Quest Functions ( Is Stage Done ) --------------
 	//---------------------------------------------------
 
-	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, uint16_t a_stage) {
-
-		auto* quest = GetQuest(a_questID);
-		if (!quest) { return false; }
-
-		auto* executedStages = quest->executedStages;
-		if (!executedStages) { return false; }
-
-		for (RE::TESQuestStage executedStage : *executedStages) {
-			if (executedStage && executedStage.data.index == a_stage) {
-				CQuestKeys_Natural.AddKey(a_key);
-				CQuestKeys_Manual.RemoveKey(a_key);
-				return true;
-			}
+	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage) {
+		
+		if (CQuestKeys_Stages.HasStage(a_key, a_stage)) {
+			CQuestKeys_Natural.AddKey(a_key);
+			CQuestKeys_Manual.RemoveKey(a_key);
+			return true;
 		}
 		return false;
 	}
@@ -393,6 +407,7 @@ namespace CFramework_Master {
 
 		CQuestKeys_Natural.AddKey(a_key);
 		CQuestKeys_Manual.RemoveKey(a_key);
+		INFO("Returning 'Quest Complete'  for quest {}", a_key);
 		return true;
 	}
 
@@ -405,13 +420,61 @@ namespace CFramework_Master {
 		auto* quest = GetQuest(a_questID);
 		auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_globalID);
 
-		if (a_value == -4) { a_value = CVariables::V_RadiantCounterVal; }
+		if (!quest || !global) { return false; }
 
-		if (!quest || !global || global->value < a_value) { return false; }
+		switch (a_value)
+		{
+		case RADIANT_COLLEGE_VALUE:
+			a_value = CVariables::V_Radiant_CollegeVal;
+			break;
 
-		CQuestKeys_Natural.AddKey(a_key);
-		CQuestKeys_Manual.RemoveKey(a_key);
-		return true;
+		case RADIANT_COMPANIONS_VALUE:
+			a_value = CVariables::V_Radiant_CompanionsVal;
+			break;
+
+		case RADIANT_BROTHERHOOD_VALUE:
+			a_value = CVariables::V_Radiant_DBrotherhoodVal;
+			break;
+
+		case RADIANT_DAWNGUARD_VALUE:
+			a_value = CVariables::V_Radiant_DawnguardVal;
+			break;
+
+		case RADIANT_THIEVESGUILD_VALUE:
+			a_value = CVariables::V_Radiant_ThievesGuildVal;
+			break;
+
+		case -4:
+			a_value = CVariables::V_RadiantCounterVal;
+			break;
+
+		case RADIANT_COUNTER_VALUE:
+			a_value = CVariables::V_RadiantCounterVal;
+			break;
+
+		case RADIANT_BOUNTY_VALUE:
+			a_value = CVariables::V_Radiant_BountyVal;
+			break;
+
+		case VIGILANT_COUNTER_VALUE:
+			a_value = CVariables::V_Radiant_VigilantVal;
+			break;
+
+		case LEGACY_COUNTER_VALUE:
+			a_value = CVariables::V_Radiant_LegacyVal;
+			break;
+
+		default:
+			break;
+		}
+
+		if (global->value >= a_value) { 
+			CQuestKeys_Natural.AddKey(a_key);
+			CQuestKeys_Manual.RemoveKey(a_key);
+			INFO("Returning 'Quest Complete'  for quest {}", a_key);
+			return true;
+		}
+		return false;
 	}
 
 	//---------------------------------------------------
@@ -425,6 +488,7 @@ namespace CFramework_Master {
 
 		CQuestKeys_Natural.AddKey(a_key);
 		CQuestKeys_Manual.RemoveKey(a_key);
+		INFO("Returning 'Quest Complete'  for quest {}", a_key);
 		return true;
 	}
 

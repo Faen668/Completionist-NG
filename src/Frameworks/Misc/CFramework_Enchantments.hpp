@@ -3,50 +3,50 @@
 #include "Serialization.hpp"
 
 namespace CFramework_Enchantments_VA {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Enchantments_VW {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Enchantments_SA {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Enchantments_SW {
-	extern Serialization::CompletionistData Data;
+	inline Serialization::CompletionistData Data;
 }
 
 namespace CFramework_Enchantments {
 
-	extern std::vector<std::string>		VA_NameArray;
-	extern std::vector<std::string>		VA_TextArray;
-	extern std::vector<RE::TESForm*>	VA_FormArray;
-	extern std::vector<bool>			VA_BoolArray;
-	extern std::int32_t					VA_EntriesTotal;
-	extern std::int32_t					VA_EntriesFound;
+	inline std::vector<std::string>		VA_NameArray;
+	inline std::vector<std::string>		VA_TextArray;
+	inline std::vector<RE::TESForm*>	VA_FormArray;
+	inline std::vector<bool>			VA_BoolArray;
+	inline std::int32_t					VA_EntriesTotal;
+	inline std::int32_t					VA_EntriesFound;
 
-	extern std::vector<std::string>		SA_NameArray;
-	extern std::vector<std::string>		SA_TextArray;
-	extern std::vector<RE::TESForm*>	SA_FormArray;
-	extern std::vector<bool>			SA_BoolArray;
-	extern std::int32_t					SA_EntriesTotal;
-	extern std::int32_t					SA_EntriesFound;
+	inline std::vector<std::string>		SA_NameArray;
+	inline std::vector<std::string>		SA_TextArray;
+	inline std::vector<RE::TESForm*>	SA_FormArray;
+	inline std::vector<bool>			SA_BoolArray;
+	inline std::int32_t					SA_EntriesTotal;
+	inline std::int32_t					SA_EntriesFound;
 
-	extern std::vector<std::string>		VW_NameArray;
-	extern std::vector<std::string>		VW_TextArray;
-	extern std::vector<RE::TESForm*>	VW_FormArray;
-	extern std::vector<bool>			VW_BoolArray;
-	extern std::int32_t					VW_EntriesTotal;
-	extern std::int32_t					VW_EntriesFound;
+	inline std::vector<std::string>		VW_NameArray;
+	inline std::vector<std::string>		VW_TextArray;
+	inline std::vector<RE::TESForm*>	VW_FormArray;
+	inline std::vector<bool>			VW_BoolArray;
+	inline std::int32_t					VW_EntriesTotal;
+	inline std::int32_t					VW_EntriesFound;
 
-	extern std::vector<std::string>		SW_NameArray;
-	extern std::vector<std::string>		SW_TextArray;
-	extern std::vector<RE::TESForm*>	SW_FormArray;
-	extern std::vector<bool>			SW_BoolArray;
-	extern std::int32_t					SW_EntriesTotal;
-	extern std::int32_t					SW_EntriesFound;
+	inline std::vector<std::string>		SW_NameArray;
+	inline std::vector<std::string>		SW_TextArray;
+	inline std::vector<RE::TESForm*>	SW_FormArray;
+	inline std::vector<bool>			SW_BoolArray;
+	inline std::int32_t					SW_EntriesTotal;
+	inline std::int32_t					SW_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 
