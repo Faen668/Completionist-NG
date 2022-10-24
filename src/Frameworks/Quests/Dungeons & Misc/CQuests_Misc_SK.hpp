@@ -21,6 +21,7 @@ namespace CQFramework_Misc_SK
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
+		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
 		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
 		public RE::BSTEventSink<RE::TESQuestStageEvent> {
 
@@ -28,6 +29,7 @@ namespace CQFramework_Misc_SK
 
 		  EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 		  EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  EventResult			ProcessEvent(RE::TESContainerChangedEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource) override;
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();

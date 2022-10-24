@@ -60,6 +60,20 @@ namespace CQFramework_CollegeOfWinterhold {
 	{ 16, 79 },
 	};
 
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<RE::FormID, RE::FormID, std::int32_t, std::int32_t, const char*> Radiant_QuestData[] = {
+		/*00*/ {0x0266F1, 0x000000, 1, 200, "Completionist_CollegeMGR01"},
+		/*01*/ {0x0266F2, 0x000000, 1, 200, "Completionist_CollegeMGR02"},
+		/*02*/ {0x028A13, 0x000000, 1, 200, "Completionist_CollegeMGR10"},
+		/*03*/ {0x028A19, 0x000000, 1, 200, "Completionist_CollegeMGR11"},
+		/*04*/ {0x028A1E, 0x000000, 1, 200, "Completionist_CollegeMGR12"},
+		/*05*/ {0x028A24, 0x0BC096, 1, 200, "Completionist_CollegeMGR20"},
+		/*06*/ {0x0E0E04, 0x000000, 1, 200, "Completionist_CollegeMGR21"},
+		/*07*/ {0x0C1E72, 0x000000, 1, 200, "Completionist_CollegeMGR30"},
+		/*08*/ {0x05A609, 0x000000, 1, 200, "Completionist_CollegeMGRRouge"},
+		/*09*/ {0x05D2EA, 0x000000, 1, 200, "Completionist_CollegeFreeformWinterholdCollegeA"},
+	};
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -96,6 +110,8 @@ namespace CQFramework_CollegeOfWinterhold {
 	void CHandler::SinkEvents() {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -107,6 +123,32 @@ namespace CQFramework_CollegeOfWinterhold {
 		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
 
 		CHandler::UpdateCompletion();
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!event) { return EventResult::kContinue; }
+
+		for (auto& [aformID, bformID, value, stage, global] : Radiant_QuestData) {
+			const auto* aquest = RE::TESForm::LookupByID<RE::TESQuest>(aformID);
+			const auto* bquest = RE::TESForm::LookupByID<RE::TESQuest>(bformID);
+
+			if (((aquest && aquest == event) || (bquest && bquest == event)) && a_event->stage == stage) {
+				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
+					var->value += value;
+					INFO("Increasing Var For {}", aquest ? aquest->GetName() : bquest ? bquest->GetName() : "");
+					return EventResult::kContinue;
+				}
+			}
+		}
 		return EventResult::kContinue;
 	}
 

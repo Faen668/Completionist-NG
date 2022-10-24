@@ -13,7 +13,7 @@ include(GNUInstallDirs)
 # info
 project(
 	Completionist
-	VERSION 1.4.2.6
+	VERSION 1.5.1.4
 	LANGUAGES CXX
 )
 
@@ -89,8 +89,18 @@ target_link_libraries(
 if (MSVC)
 	add_compile_definitions(_UNICODE)
 
+	target_link_options(
+		${PROJECT_NAME} 
+		PRIVATE 
+			"$<$<CONFIG:RELEASE>:/DEBUG:FULL>"
+	)
+
 	target_compile_options(
 		${PROJECT_NAME}
+
+		PUBLIC 
+			"$<$<CONFIG:RELEASE>:/Zi>"
+
 		PRIVATE
 			/MP
 			/await

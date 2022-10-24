@@ -90,6 +90,9 @@ namespace CQFramework_SmallTowns {
 	void CHandler::SinkEvents() {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -101,6 +104,31 @@ namespace CQFramework_SmallTowns {
 		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
 
 		CHandler::UpdateCompletion();
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Item Added ) -------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+
+		if (!a_event || !a_event->baseObj || a_event->oldContainer != RE::PlayerCharacter::GetSingleton()->GetFormID()) { return EventResult::kContinue; }
+
+		auto* List = static_cast<RE::BGSListForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x0072EA2, "Skyrim.esm"));
+		if (!List || !List->HasForm(a_event->baseObj)) { return EventResult::kContinue; }
+
+		auto speaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+		if (!speaker || speaker->GetFormID() != a_event->newContainer) { return EventResult::kContinue; }
+
+		auto* embry = static_cast<RE::TESObjectREFR*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x003550C, "Skyrim.esm"));
+		if (!embry) { return EventResult::kContinue; }
+
+		if (speaker == embry && a_event->newContainer == embry->GetFormID()) {
+			if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksEmbry")) {
+				var->value += 1;
+			}
+		}
 		return EventResult::kContinue;
 	}
 

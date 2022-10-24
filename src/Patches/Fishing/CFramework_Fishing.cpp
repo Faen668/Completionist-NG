@@ -45,15 +45,16 @@ namespace CPatch_FSH {
 	0x000F65,0x000F63,0x000F84,0x000F76,0x000F75,0x000F6A,0x000F73,0x000F6F,
 	};
 
+	constexpr std::string_view modname = "ccbgssse001-fish.esm";
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework() {
 
-		if (auto installed = Serialization::CompletionistData::IsModInstalled("ccbgssse001-fish.esm"); !installed) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
+
 		RodList = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x000843, "ccbgssse001-fish.esm");
 		GlobalV = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingRods");
 		ContMap = RE::ControlMap::GetSingleton();
@@ -425,14 +426,10 @@ namespace CPatch_FSH {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (auto installed = Serialization::CompletionistData::IsModInstalled("ccbgssse001-fish.esm"); !installed) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < F_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(F_FormArray[i]->GetFormID())) {
-				F_BoolArray[i] = true;
-			}
+			F_BoolArray[i] = FoundItemData_NoShow.HasForm(F_FormArray[i]->GetFormID());
 		}
 		F_EntriesTotal = F_FormArray.size();
 		F_EntriesFound = std::ranges::count(F_BoolArray, true);
@@ -440,9 +437,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < I_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(I_FormArray[i]->GetFormID())) {
-				I_BoolArray[i] = true;
-			}
+			I_BoolArray[i] = FrameworkAPI::IsItemKnown(I_FormArray[i], &CPatch_FSH_I::Data);
 		}
 		I_EntriesTotal = I_FormArray.size();
 		I_EntriesFound = std::ranges::count(I_BoolArray, true);
@@ -451,11 +446,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < B_FormArray.size(); i++) {
-			if (auto* book = static_cast<RE::TESObjectBOOK*>(B_FormArray[i]); book) {
-				if (book->IsRead() || (book->GetSpell() && RE::PlayerCharacter::GetSingleton()->HasSpell(book->GetSpell())) || FoundItemData.HasForm(book->GetFormID())) {
-					B_BoolArray[i] = true;
-				}
-			}
+			B_BoolArray[i] = FrameworkAPI::IsBookKnown(B_FormArray[i]);
 		}
 		B_EntriesTotal = B_FormArray.size();
 		B_EntriesFound = std::ranges::count(B_BoolArray, true);
@@ -464,9 +455,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < A_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(A_FormArray[i]->GetFormID())) {
-				A_BoolArray[i] = true;
-			}
+			A_BoolArray[i] = FoundItemData_NoShow.HasForm(A_FormArray[i]->GetFormID());
 		}
 		A_EntriesTotal = A_FormArray.size();
 		A_EntriesFound = std::ranges::count(A_BoolArray, true);
@@ -475,9 +464,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < C_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(C_FormArray[i]->GetFormID())) {
-				C_BoolArray[i] = true;
-			}
+			C_BoolArray[i] = FoundItemData_NoShow.HasForm(C_FormArray[i]->GetFormID());
 		}
 		C_EntriesTotal = C_FormArray.size();
 		C_EntriesFound = std::ranges::count(C_BoolArray, true);
@@ -486,9 +473,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < L_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(L_FormArray[i]->GetFormID())) {
-				L_BoolArray[i] = true;
-			}
+			L_BoolArray[i] = FoundItemData_NoShow.HasForm(L_FormArray[i]->GetFormID());
 		}
 		L_EntriesTotal = L_FormArray.size();
 		L_EntriesFound = std::ranges::count(L_BoolArray, true);
@@ -496,9 +481,7 @@ namespace CPatch_FSH {
 		// ---------------------------------
 
 		for (auto i = 0; i < S_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(S_FormArray[i]->GetFormID())) {
-				S_BoolArray[i] = true;
-			}
+			S_BoolArray[i] = FoundItemData_NoShow.HasForm(S_FormArray[i]->GetFormID());
 		}
 		S_EntriesTotal = S_FormArray.size();
 		S_EntriesFound = std::ranges::count(S_BoolArray, true);

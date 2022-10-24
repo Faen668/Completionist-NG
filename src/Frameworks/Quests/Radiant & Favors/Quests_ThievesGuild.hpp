@@ -6,36 +6,15 @@ namespace ThievesGuildQuests
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final : 
+	class CHandler final :
 		public RE::BSTEventSink<RE::TESQuestStageEvent> {
-	
-		public: [[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+
+		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+
+		EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
 
 		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-		
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+			 RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
+		};
 	};
 }

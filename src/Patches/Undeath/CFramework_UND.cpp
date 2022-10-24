@@ -45,9 +45,7 @@ namespace CPatch_UND {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -241,20 +239,14 @@ namespace CPatch_UND {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_FormArray[i]->GetFormID())) {
-				Books_BoolArray[i] = true;
-			}
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
 
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID())) {
-				MapMa_BoolArray[i] = true;
-			}
+			MapMa_BoolArray[i] = FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID());
 		}
 
 		Books_EntriesTotal = Books_FormArray.size();
@@ -269,6 +261,8 @@ namespace CPatch_UND {
 	//---------------------------------------------------
 
 	void CHandler::UpdateQuestFramework() {
+
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i : StandardCompletion) {
 			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);

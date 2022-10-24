@@ -11,6 +11,7 @@ namespace CFramework_Master
 	inline Serialization::CompletionistData FoundItemData;
 	inline Serialization::CompletionistData FoundItemData_NoShow;
 	inline int PatchesInstalled;
+	inline int TomesInstalled;
 	
 	inline constexpr std::int32_t RADIANT_BOUNTY_VALUE = 55245;
 	inline constexpr std::int32_t RADIANT_COUNTER_VALUE = 72541;
@@ -69,6 +70,7 @@ namespace CFramework_Master
 		static bool							CCBooksInstalled(RE::StaticFunctionTag*);
 		static bool							CCLocationsInstalled(RE::StaticFunctionTag*);
 		static bool							ShouldDisplayMiscHeader(RE::StaticFunctionTag*);
+		static bool							ShouldDisplayTomeHeader(RE::StaticFunctionTag*);
 
 		static void							SendNotification(std::string a_msg, std::string a_setting);
 		static void							SendNotificationExt(RE::StaticFunctionTag*, std::string Message, std::string Colour, bool ColourEnabled);
@@ -77,12 +79,17 @@ namespace CFramework_Master
 		static std::string					GetHexValue(RE::StaticFunctionTag*, std::uint32_t IntVal);
 		static std::string					GetVersion(RE::StaticFunctionTag*);
 
+		static void							UpdateCompletion(RE::StaticFunctionTag*);
+
 		static RE::TESQuest*				GetQuest(std::string a_questID);
 		static bool							IsCompleted_P(std::string a_key, std::string a_questID, std::int32_t a_stage); //GetStage > Check
 		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage); //IsStageDone Check
 		static bool							IsCompleted_N(std::string a_key, std::string a_questID); // Normal Completion Check
 		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value = 1); // GLobal Check
 		static bool							IsCompleted_J(std::string a_key, std::string a_imp, std::string a_son); // Thane Check
+
+		static bool							IsBookKnown(RE::TESForm* a_form);
+		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
 		
 	};
 }

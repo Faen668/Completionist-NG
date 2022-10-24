@@ -111,7 +111,7 @@ namespace CFramework_Blessings {
 
 	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, Section a_section) {
 
-		if (!FoundItemData_NoShow.HasForm(a_eventID)) {
+		if (!FoundItemData_NoShow.HasForm(a_baseID)) {
 			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, RE::TESForm::LookupByID(a_eventID)->GetName());
 			FrameworkAPI::SendNotification(msg, "NotifySpecial");
 		}
@@ -208,19 +208,19 @@ namespace CFramework_Blessings {
 	void CHandler::UpdateFoundForms() {
 
 		for (auto i = 0; i < DS_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(DS_FormArray[i]->GetFormID())) {
+			if (FoundItemData_NoShow.HasForm(DS_FormArray[i]->GetFormID())) {
 				DS_BoolArray[i] = true;
 			}
 		}
 
 		for (auto i = 0; i < VS_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(VS_FormArray[i]->GetFormID())) {
+			if (FoundItemData_NoShow.HasForm(VS_FormArray[i]->GetFormID())) {
 				VS_BoolArray[i] = true;
 			}
 		}
 
 		for (auto i = 0; i < WS_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(WS_FormArray[i]->GetFormID())) {
+			if (FoundItemData_NoShow.HasForm(WS_FormArray[i]->GetFormID())) {
 				WS_BoolArray[i] = true;
 			}
 		}

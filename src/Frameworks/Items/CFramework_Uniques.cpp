@@ -528,51 +528,35 @@ namespace CFramework_Uniques {
 	void CHandler::UpdateFoundForms() {
 
 		for (auto i = 0; i < A_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(A_FormArray[i]->GetFormID())) {
-				A_BoolArray[i] = true;
-			}
+			A_BoolArray[i] = FrameworkAPI::IsItemKnown(A_FormArray[i], &CFramework_Uniques_A::Data);
 		}
 
 		for (auto i = 0; i < W_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(W_FormArray[i]->GetFormID())) {
-				W_BoolArray[i] = true;
-			}
+			W_BoolArray[i] = FrameworkAPI::IsItemKnown(W_FormArray[i], &CFramework_Uniques_W::Data);
 		}
 
 		for (auto i = 0; i < I_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(I_FormArray[i]->GetFormID())) {
-				I_BoolArray[i] = true;
-			}
+			I_BoolArray[i] = FrameworkAPI::IsItemKnown(I_FormArray[i], &CFramework_Uniques_I::Data);
 		}
 
 		for (auto i = 0; i < J_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(J_FormArray[i]->GetFormID())) {
-				J_BoolArray[i] = true;
-			}
+			J_BoolArray[i] = FrameworkAPI::IsItemKnown(J_FormArray[i], &CFramework_Uniques_J::Data);
 		}
 
 		for (auto i = 0; i < L_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(L_FormArray[i]->GetFormID())) {
-				L_BoolArray[i] = true;
-			}
+			L_BoolArray[i] = FrameworkAPI::IsItemKnown(L_FormArray[i], &CFramework_Uniques_L::Data);
 		}
 
 		for (auto i = 0; i < CCA_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(CCA_FormArray[i]->GetFormID())) {
-				CCA_BoolArray[i] = true;
-			}
+			CCA_BoolArray[i] = FrameworkAPI::IsItemKnown(CCA_FormArray[i], &CFramework_Uniques_CCA::Data);
 		}
 
 		for (auto i = 0; i < CCI_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(CCI_FormArray[i]->GetFormID())) {
-				CCI_BoolArray[i] = true;
-			}
+			CCI_BoolArray[i] = FrameworkAPI::IsItemKnown(CCI_FormArray[i], &CFramework_Uniques_CCI::Data);
 		}
 
 		for (auto i = 0; i < CCW_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(CCW_FormArray[i]->GetFormID())) {
-				CCW_BoolArray[i] = true;
-			}
+			CCW_BoolArray[i] = FrameworkAPI::IsItemKnown(CCW_FormArray[i], &CFramework_Uniques_CCW::Data);
 		}
 
 		A_EntriesTotal = A_FormArray.size();

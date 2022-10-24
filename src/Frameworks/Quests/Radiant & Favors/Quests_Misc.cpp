@@ -6,32 +6,7 @@ using namespace Quest_Manager;
 
 namespace MiscQuests
 {
-	EventResult ScriptEventHandler::ProcessEvent(const RE::TESQuestStartStopEvent* a_event, RE::BSTEventSource<RE::TESQuestStartStopEvent>*) {
-
-		if (!a_event || !a_event->started) { return EventResult::kContinue; }
-
-		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
-			auto questID = std::string(quest->GetFormEditorID());
-
-			if (questID != "FavorJobsDrunksScene") { return EventResult::kContinue; }
-
-			for (const auto& alias : quest->aliases) {
-
-				if (!alias || alias->aliasName != "Drunk") { break; }
-					
-				auto reference = static_cast<RE::BGSRefAlias*>(alias);
-				if (!reference) { return EventResult::kContinue; }
-
-				auto drunkrefr = reference->GetActorReference()->GetActorBase()->GetFormID();
-				if (!drunkrefr) { return EventResult::kContinue; }
-
-				RadiantQuestManager::ProcessFormID(drunkrefr, "FavorJobsDrunks");
-			}
-		}
-		return EventResult::kContinue;
-	}
-
-	EventResult ScriptEventHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
+	EventResult CHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
 		
 		if (!a_event) { return EventResult::kContinue; }
 

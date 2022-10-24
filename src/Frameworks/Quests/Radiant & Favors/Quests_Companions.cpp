@@ -48,7 +48,8 @@ namespace CompanionsQuests
 					return EventResult::kContinue;
 				}
 			}
-			else if (questID == "CR06" && a_event->stage == 200) {
+
+			if (questID == "CR06" && a_event->stage == 200) {
 				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_Companions_CR06")) {
 					global->value += 1;
 					return EventResult::kContinue;

@@ -11,14 +11,18 @@ namespace CQFramework_Markarth
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+	class CHandler final :
 
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
+		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
 
-		  EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  static void			SinkEvents();
-		  static void			InstallFramework();
-		  static void			UpdateCompletion();
+		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
+		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+
+		static void			SinkEvents();
+		static void			InstallFramework();
+		static void			UpdateCompletion();
 	};
 }

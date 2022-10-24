@@ -40,6 +40,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 		break;
 
 	case SKSE::MessagingInterface::kPostPostLoad:
+		TextnTagsAPI::RegisterMessageListener();
 		break;
 	}
 }

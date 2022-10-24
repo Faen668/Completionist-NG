@@ -289,27 +289,19 @@ namespace CFramework_Others {
 	void CHandler::UpdateFoundForms() {
 
 		for (auto i = 0; i < VC_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(VC_FormArray[i]->GetFormID())) {
-				VC_BoolArray[i] = true;
-			}
+			VC_BoolArray[i] = FrameworkAPI::IsItemKnown(VC_FormArray[i], &CFramework_Others_VC::Data);
 		}
 
 		for (auto i = 0; i < PC_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(PC_FormArray[i]->GetFormID())) {
-				PC_BoolArray[i] = true;
-			}
+			PC_BoolArray[i] = FrameworkAPI::IsItemKnown(PC_FormArray[i], &CFramework_Others_PC::Data);
 		}
 
 		for (auto i = 0; i < VM_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(VM_FormArray[i]->GetFormID())) {
-				VM_BoolArray[i] = true;
-			}
+			VM_BoolArray[i] = FrameworkAPI::IsItemKnown(VM_FormArray[i], &CFramework_Others_VM::Data);
 		}
 
 		for (auto i = 0; i < PM_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(PM_FormArray[i]->GetFormID())) {
-				PM_BoolArray[i] = true;
-			}
+			PM_BoolArray[i] = FrameworkAPI::IsItemKnown(PM_FormArray[i], &CFramework_Others_PM::Data);
 		}
 
 		for (auto i = 0; i < SB_FormArray.size(); i++) {

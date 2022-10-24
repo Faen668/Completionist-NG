@@ -46,9 +46,7 @@ namespace CPatch_MTE {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -256,22 +254,15 @@ namespace CPatch_MTE {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Items_FormArray[i]->GetFormID())) {
-				Items_BoolArray[i] = true;
-			}
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_MTE_Items::Data);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_FormArray[i]->GetFormID())) {
-				Books_BoolArray[i] = true;
-			}
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
-
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
@@ -285,6 +276,8 @@ namespace CPatch_MTE {
 	//---------------------------------------------------
 
 	void CHandler::UpdateQuestFramework() {
+
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i : StandardCompletion) {
 			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);

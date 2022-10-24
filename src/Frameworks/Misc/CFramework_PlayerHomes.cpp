@@ -23,16 +23,50 @@ namespace CFramework_PlayerHomes {
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 
-		if (!a_event || a_event->newContainer != 0x00014 || !CFramework_PlayerHomes_PH::Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
+		if (!a_event || a_event->newContainer != 0x00014) { return EventResult::kContinue; }
 
-		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("TC_HighHrotgarLibraryKey"); key && key->GetFormID() == a_event->baseObj) {
-			ProcessFoundForm("TC_HighHrotgarLibraryKey");
-			return EventResult::kContinue;
+		auto* key = RE::TESForm::LookupByID(a_event->baseObj);
+		if (!key) { return EventResult::kContinue; }
+
+		if (CFramework_PlayerHomes_VH::Data.HasForm(a_event->baseObj)) {
+
+			if (auto* k1 = RE::TESDataHandler::GetSingleton()->LookupForm(0x093B08, "Skyrim.esm"); k1 && k1 == key) {
+				ProcessFoundForm("key_Breezehome");
+				return EventResult::kContinue;
+			}
+
+			if (auto* k2 = RE::TESDataHandler::GetSingleton()->LookupForm(0x021679, "Skyrim.esm"); k2 && k2 == key) {
+				ProcessFoundForm("key_Hjerim");
+				return EventResult::kContinue;
+			}
+
+			if (auto* k3 = RE::TESDataHandler::GetSingleton()->LookupForm(0x0A7B36, "Skyrim.esm"); k3 && k3 == key) {
+				ProcessFoundForm("key_Honeyside");
+				return EventResult::kContinue;
+			}
+
+			if (auto* k4 = RE::TESDataHandler::GetSingleton()->LookupForm(0x0A7B37, "Skyrim.esm"); k4 && k4 == key) {
+				ProcessFoundForm("key_ProudspireManor");
+				return EventResult::kContinue;
+			}
+
+			if (auto* k5 = RE::TESDataHandler::GetSingleton()->LookupForm(0x094391, "Skyrim.esm"); k5 && k5 == key) {
+				ProcessFoundForm("key_VlindrelHall");
+				return EventResult::kContinue;
+			}
 		}
 
-		if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("manny_GF_Key_AlikrPlayerHome01"); key && key->GetFormID() == a_event->baseObj) {
-			ProcessFoundForm("manny_GF_Key_AlikrPlayerHome01");
-			return EventResult::kContinue;
+		if (CFramework_PlayerHomes_PH::Data.HasForm(a_event->baseObj)) {
+
+			if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("TC_HighHrotgarLibraryKey"); key && key->GetFormID() == a_event->baseObj) {
+				ProcessFoundForm("TC_HighHrotgarLibraryKey");
+				return EventResult::kContinue;
+			}
+
+			if (auto key = RE::TESForm::LookupByEditorID<RE::TESKey>("manny_GF_Key_AlikrPlayerHome01"); key && key->GetFormID() == a_event->baseObj) {
+				ProcessFoundForm("manny_GF_Key_AlikrPlayerHome01");
+				return EventResult::kContinue;
+			}
 		}
 		return EventResult::kContinue;
 	}
@@ -49,7 +83,7 @@ namespace CFramework_PlayerHomes {
 			auto questID = std::string(quest->GetFormEditorID());
 
 			//Vanilla
-			if ((questID == "HousePurchase" && a_event->stage == 10) || (questID == "DLC2RR02" && a_event->stage == 200)) {
+			if (questID == "DLC2RR02" && a_event->stage == 200) {
 				ProcessFoundForm(questID);
 				return EventResult::kContinue;
 			}
@@ -131,35 +165,6 @@ namespace CFramework_PlayerHomes {
 	//---------------------------------------------------
 
 	void CHandler::ProcessFoundForm(std::string a_editorID) {
-
-		if (a_editorID == "HousePurchase") {
-			
-			auto location = RE::PlayerCharacter::GetSingleton()->GetCurrentLocation();
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("WhiterunHoldLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_Breezehome";
-			}
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("PaleHoldLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_HeljarchenHall";
-			}
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("WindhelmLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_Hjerim";
-			}
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("RiftenLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_Honeyside";
-			}
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("SolitudeLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_ProudspireManor";
-			}
-
-			if (auto loc = RE::TESForm::LookupByEditorID<RE::BGSLocation>("MarkarthLocation"); location == loc || loc->IsChild(location)) {
-				a_editorID = "HousePurchase_VlindrelHall";
-			}
-		}
 
 		if (auto t_pos = std::ranges::find(VH_QuestArray, a_editorID); t_pos != VH_QuestArray.end()) {
 			auto b_pos = std::distance(VH_QuestArray.begin(), t_pos);
@@ -274,36 +279,41 @@ namespace CFramework_PlayerHomes {
 		auto handler = RE::TESDataHandler::GetSingleton();
 
 		VH_FormArray.push_back(handler->LookupForm(0x000804, "Completionist.esp"));
+		CFramework_PlayerHomes_VH::Data.AddForm(0x093B08, "Skyrim.esm");
 		VH_TextArray.push_back("$HouseHighlight00"); //Breezehome
-		VH_QuestArray.push_back("HousePurchase_Breezehome");
+		VH_QuestArray.push_back("key_Breezehome");
 
 		VH_FormArray.push_back(handler->LookupForm(0x000807, "Completionist.esp"));
 		VH_TextArray.push_back("$HouseHighlight01"); //Heljarchen Hall
-		VH_QuestArray.push_back("HousePurchase_HeljarchenHall");
+		VH_QuestArray.push_back("BYOHHousePale");
 
 		VH_FormArray.push_back(handler->LookupForm(0x000808, "Completionist.esp"));
+		CFramework_PlayerHomes_VH::Data.AddForm(0x021679, "Skyrim.esm");
 		VH_TextArray.push_back("$HouseHighlight02"); //Hjerim
-		VH_QuestArray.push_back("HousePurchase_Hjerim");
+		VH_QuestArray.push_back("key_Hjerim");
 
 		VH_FormArray.push_back(handler->LookupForm(0x000809, "Completionist.esp"));
+		CFramework_PlayerHomes_VH::Data.AddForm(0x0A7B36, "Skyrim.esm");
 		VH_TextArray.push_back("$HouseHighlight03"); //Honeyside
-		VH_QuestArray.push_back("HousePurchase_Honeyside");
+		VH_QuestArray.push_back("key_Honeyside");
 
 		VH_FormArray.push_back(handler->LookupForm(0x00080A, "Completionist.esp"));
 		VH_TextArray.push_back("$HouseHighlight04"); //Lakeview Manor
 		VH_QuestArray.push_back("BYOHHouseFalkreath");
 
 		VH_FormArray.push_back(handler->LookupForm(0x00080B, "Completionist.esp"));
+		CFramework_PlayerHomes_VH::Data.AddForm(0x0A7B37, "Skyrim.esm");
 		VH_TextArray.push_back("$HouseHighlight05"); //Proudspire Manor
-		VH_QuestArray.push_back("HousePurchase_ProudspireManor");
+		VH_QuestArray.push_back("key_ProudspireManor");
 
 		VH_FormArray.push_back(handler->LookupForm(0x00080C, "Completionist.esp"));
 		VH_TextArray.push_back("$HouseHighlight06"); //Severin Manor
 		VH_QuestArray.push_back("DLC2RR02");
 
 		VH_FormArray.push_back(handler->LookupForm(0x00080D, "Completionist.esp"));
+		CFramework_PlayerHomes_VH::Data.AddForm(0x094391, "Skyrim.esm");
 		VH_TextArray.push_back("$HouseHighlight07"); //Vlindrel Hall
-		VH_QuestArray.push_back("HousePurchase_VlindrelHall");
+		VH_QuestArray.push_back("key_VlindrelHall");
 
 		VH_FormArray.push_back(handler->LookupForm(0x00080E, "Completionist.esp"));
 		VH_TextArray.push_back("$HouseHighlight08"); //Windstad Manor

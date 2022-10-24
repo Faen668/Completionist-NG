@@ -3,59 +3,37 @@
 
 namespace ThievesGuildQuests
 {
-	EventResult ScriptEventHandler::ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) {
-		
-		if (!a_event) { return EventResult::kContinue; }
 
-		if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID)) {
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<RE::FormID, std::int32_t, std::int32_t, const char*> QuestData[] = {
+		/*00*/ {0x060990, 1, 200, "Completionist_TGR_Bedlam"},
+		/*01*/ {0x02893B, 1, 200, "Completionist_TGR_Burglary"},
+		/*02*/ {0x028922, 1, 200, "Completionist_TGR_Fishing"},
+		/*03*/ {0x02893E, 1, 200, "Completionist_TGR_Heist"},
+		/*04*/ {0x02893B, 1, 200, "Completionist_TGR_Numbers"},
+		/*05*/ {0x06098E, 1, 200, "Completionist_TGR_Shill"},
+		/*06*/ {0x028936, 1, 200, "Completionist_TGR_Sweep"},
 
-			auto questID = std::string(quest->GetFormEditorID());
+	};
 
-			if (questID == "TGRNT" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Bedlam")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
 
-			if (questID == "TGRBE" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Burglary")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
 
-			if (questID == "TGRGF" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Fishing")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
 
-			if (questID == "TGRSL" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Heist")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!event) { return EventResult::kContinue; }
 
-			if (questID == "TGRFO" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Numbers")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
+		for (auto& [formID, value, stage, global] : QuestData) {
+			const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(formID);
 
-			if (questID == "TGRDU" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Shill")) {
-					global->value += 1;
-					return EventResult::kContinue;
-				}
-			}
-
-			if (questID == "TGRHC" && a_event->stage == 200) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_TGR_Sweep")) {
-					global->value += 1;
+			if (event == quest && a_event->stage == stage) {
+				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
+					var->value += value;
+					INFO("Increasing Var For {}", quest->GetName());
 					return EventResult::kContinue;
 				}
 			}

@@ -23,17 +23,38 @@ namespace CVariables {
 	inline bool 			V_Other_Enabled_New;
 	inline bool 			V_Other_Enabled_Found;
 
-	inline std::int32_t		V_HUD_Colour_New;
-	inline std::int32_t		V_HUD_Colour_Found;
-	inline std::string 		V_HUD_ColourString_New;
-	inline std::string 		V_HUD_ColourString_Found;
+	inline bool 			V_HUD_Override_Enabled_New_Crosshair;
+	inline bool 			V_HUD_Override_Enabled_Found_Crosshair;
+	inline std::int32_t		V_HUD_Colour_New_Crosshair;
+	inline std::int32_t		V_HUD_Colour_Found_Crosshair;
+	inline std::string 		V_HUD_ColourString_New_Crosshair;
+	inline std::string 		V_HUD_ColourString_Found_Crosshair;
 
-	inline std::int32_t		V_TextChoice;
+	inline bool 			V_HUD_Override_Enabled_New_Menus;
+	inline bool 			V_HUD_Override_Enabled_Found_Menus;
+	inline std::int32_t		V_HUD_Colour_New_Menus;
+	inline std::int32_t		V_HUD_Colour_Found_Menus;
+	inline std::string 		V_HUD_ColourString_New_Menus;
+	inline std::string 		V_HUD_ColourString_Found_Menus;
+
+	inline std::int32_t		V_HUD_CustomColour_New_Crosshair;
+	inline std::int32_t		V_HUD_CustomColour_Found_Crosshair;
+	inline std::string 		V_HUD_CustomColourString_New_Crosshair;
+	inline std::string 		V_HUD_CustomColourString_Found_Crosshair;
+
+	inline std::int32_t		V_HUD_CustomColour_New_Menus;
+	inline std::int32_t		V_HUD_CustomColour_Found_Menus;
+	inline std::string 		V_HUD_CustomColourString_New_Menus;
+	inline std::string 		V_HUD_CustomColourString_Found_Menus;
+
+	inline std::int32_t		V_TextChoice_N;
+	inline std::int32_t		V_TextChoice_G;
+
 	inline std::string		V_CrosshairTag_New;
 	inline std::string		V_CrosshairTag_Found;
 
-	inline bool				V_mainHudEnabled;
-	inline bool				V_moreHudEnabled;
+	inline bool				V_moreHudEnabled_Crosshair;
+	inline bool				V_moreHudEnabled_Menus;
 
 	inline std::int32_t		V_RadiantCounterVal;
 	inline std::int32_t		V_Radiant_CollegeVal;
@@ -60,5 +81,7 @@ namespace CVariables {
 		 
 		  static void Register();
 		  static void Update();
+
+		  static void MCMReady(RE::StaticFunctionTag*);
 	};
 }

@@ -38,10 +38,6 @@ namespace CPatch_BOO {
 		/*24*/ {"TBOO_Quest24_Key", "$TBOO_Quest24_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$TBOO_Quest24_Data", "TBOSQ8"},
 	};
 
-	constexpr std::size_t StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
-	};
-
 	constexpr Serialization::FormArray Items = {
 	0x0D0417,0x01CAC9,0x0BCA45,0x215502,0x2A85F0,
 	0x0BCA63,0x0BCA52,0x0937F5,0x08445F,
@@ -65,9 +61,7 @@ namespace CPatch_BOO {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 		
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -306,26 +300,18 @@ namespace CPatch_BOO {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Items_FormArray[i]->GetFormID())) {
-				Items_BoolArray[i] = true;
-			}
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_BOO_Items::Data);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_FormArray[i]->GetFormID())) {
-				Books_BoolArray[i] = true;
-			}
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
 
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID())) {
-				MapMa_BoolArray[i] = true;
-			}
+			MapMa_BoolArray[i] = FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID());
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();
@@ -344,8 +330,10 @@ namespace CPatch_BOO {
 
 	void CHandler::UpdateQuestFramework() {
 
-		for (auto i : StandardCompletion) {
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
+
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
 			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		};
+		}
 	}
 }

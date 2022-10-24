@@ -3,6 +3,8 @@
 #include "Variables.hpp"
 #include "mainHUD.hpp"
 
+#undef GetModuleHandle
+
 namespace Completionist_MainHUD {
 	using namespace CFramework_Master;
 	using namespace Serialization;
@@ -14,6 +16,78 @@ namespace Completionist_MainHUD {
 		bool m_icontype; // false = New, true = Found
 		bool m_display;
 	};
+
+	struct CompletionistRequest
+	{
+		RE::FormID m_formId;
+	};
+
+	CompletionistRequest s_messagefrommoreHUD{};
+
+	void TextnTagsAPI::MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+	{
+		auto* SKSEMessaging = SKSE::GetMessagingInterface();
+
+		if (a_msg->type != 1) { return; }
+
+		if (!a_msg->data) { return; }
+
+		s_messagefrommoreHUD = *static_cast<CompletionistRequest*>(a_msg->data);
+		
+		auto* baseform = RE::TESForm::LookupByID(s_messagefrommoreHUD.m_formId);
+
+		if (!baseform || !baseform->GetName() || !TextnTagsAPI::ItemIsCollectable(baseform)) { 
+
+			if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDInventory")) {
+				moreHUDmessage msg{ s_messagefrommoreHUD.m_formId, false, false };
+				SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
+				return;
+			}
+			return;
+		}
+
+		bool ShouldDisplay = false;
+		bool PrevCollected = TextnTagsAPI::ItemIsCollected(baseform);
+
+		switch (baseform->GetFormType())
+		{
+
+		case RE::FormType::AlchemyItem:
+			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
+
+		case RE::FormType::Ingredient:
+			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
+
+		case RE::FormType::Ammo:
+			ShouldDisplay = (PrevCollected && V_Ammo_Enabled_Found) || (!PrevCollected && V_Ammo_Enabled_New); break;
+
+		case RE::FormType::Armor:
+			ShouldDisplay = (PrevCollected && V_Armor_Enabled_Found) || (!PrevCollected && V_Armor_Enabled_New); break;
+
+		case RE::FormType::Book:
+			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
+
+		case RE::FormType::Note:
+			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
+
+		case RE::FormType::Weapon:
+			ShouldDisplay = (PrevCollected && V_Weapons_Enabled_Found) || (!PrevCollected && V_Weapons_Enabled_New); break;
+
+		default:
+			ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
+		}
+
+		if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDInventory")) {
+			moreHUDmessage msg{ baseform->GetFormID(), PrevCollected, (ShouldDisplay && V_moreHudEnabled_Menus) };
+			SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
+		}
+	}
+
+	void TextnTagsAPI::RegisterMessageListener()
+	{
+		auto messageInterface = SKSE::GetMessagingInterface();
+		auto isRegistered = messageInterface->RegisterListener("Ahzaab's moreHUD Inventory Plugin", TextnTagsAPI::MessageHandler);
+	}
 
 	//---------------------------------------------------
 	//-- Install Hooks for Main HUD & Inventory Items ---
@@ -37,8 +111,7 @@ namespace Completionist_MainHUD {
 
 		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
 
-		if (a_event->opening) { VariablesAPI::Update(); }
-		else{ garbageDump.clear();}
+		if (!a_event->opening) { garbageDump.clear(); }
 
 		return EventResult::kContinue;
 	}
@@ -96,23 +169,63 @@ namespace Completionist_MainHUD {
 
 	const char* TextnTagsAPI::OnUpdateInventoryName(const char* a_this, bool a_collected) {
 
+		auto newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
+		auto foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
+
 		if (a_collected) {
-			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_Found))).c_str();
+			switch (V_TextChoice_G) {
+
+			case 0: //Append
+				return garbageDump.emplace_back(fmt::format("{:s} ***"sv, a_this)).c_str();
+
+			case 1: //Prepend
+				return garbageDump.emplace_back(fmt::format("*** {:s}"sv, a_this)).c_str();
+
+			case 2: //Wrap
+				return garbageDump.emplace_back(fmt::format("*** {:s} ***"sv, a_this)).c_str();
+
+			case 3: //Append With Colour
+				return garbageDump.emplace_back(fmt::format("{:s} ***CompTag{:s}"sv, a_this, std::to_string(foundColour))).c_str();
+
+			case 4: //Prepend With Colour
+				return garbageDump.emplace_back(fmt::format("*** {:s}CompTag{:s}"sv, a_this, std::to_string(foundColour))).c_str();
+
+			case 5: //Wrap With Colour
+				return garbageDump.emplace_back(fmt::format("*** {:s} ***CompTag{:s}"sv, a_this, std::to_string(foundColour))).c_str();
+
+			case 6: //Just Colour
+				return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(foundColour))).c_str();
+
+			default: //None
+				return a_this;
+			}
 		}
 
-		switch (V_TextChoice) {
+		switch (V_TextChoice_N) {
 
 		case 0: //Append
-			return garbageDump.emplace_back(fmt::format("{:s} ***CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+			return garbageDump.emplace_back(fmt::format("{:s} ***"sv, a_this)).c_str();
 
 		case 1: //Prepend
-			return garbageDump.emplace_back(fmt::format("*** {:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+			return garbageDump.emplace_back(fmt::format("*** {:s}"sv, a_this)).c_str();
 
 		case 2: //Wrap
-			return garbageDump.emplace_back(fmt::format("*** {:s} ***CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+			return garbageDump.emplace_back(fmt::format("*** {:s} ***"sv, a_this)).c_str();
+
+		case 3: //Append With Colour
+			return garbageDump.emplace_back(fmt::format("{:s} ***CompTag{:s}"sv, a_this, std::to_string(newColour))).c_str();
+
+		case 4: //Prepend With Colour
+			return garbageDump.emplace_back(fmt::format("*** {:s}CompTag{:s}"sv, a_this, std::to_string(newColour))).c_str();
+
+		case 5: //Wrap With Colour
+			return garbageDump.emplace_back(fmt::format("*** {:s} ***CompTag{:s}"sv, a_this, std::to_string(newColour))).c_str();
+
+		case 6: //Just Colour
+			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(newColour))).c_str();
 
 		default: //None
-			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(V_HUD_Colour_New))).c_str();
+			return a_this;
 		}
 	}
 
@@ -152,6 +265,11 @@ namespace Completionist_MainHUD {
 		bool ShouldDisplay = false;
 		bool PrevCollected = ItemIsCollected(Base);
 
+		if (PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
+
+		auto& newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
+		auto& foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;
+
 		switch (Base->GetFormType())
 		{
 		case RE::FormType::AlchemyItem:
@@ -179,15 +297,15 @@ namespace Completionist_MainHUD {
 			ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
 		}
 
-		if (SKSEMessaging) {
-			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (ShouldDisplay && V_moreHudEnabled) };
+		if (SKSEMessaging && SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
+			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (ShouldDisplay && V_moreHudEnabled_Crosshair) };
 			SKSEMessaging->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
 		}
 
-		if (ShouldDisplay && V_mainHudEnabled) {
+		if (ShouldDisplay) {
 			data->text = PrevCollected ? 
-				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, V_HUD_ColourString_Found, V_CrosshairTag_Found) :
-				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, V_HUD_ColourString_New, V_CrosshairTag_New);
+				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, foundColour, V_CrosshairTag_Found) :
+				fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, newColour, V_CrosshairTag_New);
 		}
 	}
 

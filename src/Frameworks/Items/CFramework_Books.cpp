@@ -174,7 +174,7 @@ namespace CFramework_Books {
 	0x001B23C,0x001AD04,0x001ACC9,0x00ED040,0x00EF2C0,0x00E2FC5,0x0083168,0x0083169,
 	0x008316A,0x001ACEA,0x00E7F31,0x00E7F33,0x00E7F34,0x003010B,0x002D513,0x0048782,
 	0x00ED033,0x001ACF7,0x001ACEB,0x001ACEC,0x001ACED,0x001B267,0x001AD05,0x00ED04E,
-	0x00E3E69,0x0072841,0x001ACCB,0x001ACCD,0x00ED031,0x001AD07,0x001ACD5,
+	0x00E3E69,0x0072841,0x001ACCB,0x001ACCD,0x00ED031,0x001AD07,0x001ACD5,0x001B00c,
 	};
 
 	constexpr Serialization::FormArray Books_HS = {
@@ -413,12 +413,45 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_SK") {
-			auto t_pos = std::ranges::find(Tomes_SK_FormArray, a_base);
-			auto b_pos = std::distance(Tomes_SK_FormArray.begin(), t_pos);
+			auto t_pos = std::ranges::find(Tomes_SK_A_FormArray, a_base);
+			if (t_pos != Tomes_SK_A_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_SK_A_FormArray.begin(), t_pos);
+				Tomes_SK_A_BoolArray[b_pos] = true;
+				Tomes_SK_A_EntriesFound = std::ranges::count(Tomes_SK_A_BoolArray, true);
+				return;
+			}
 
-			Tomes_SK_BoolArray[b_pos] = true;
-			Tomes_SK_EntriesFound = std::ranges::count(Tomes_SK_BoolArray, true);
-			return;
+			t_pos = std::ranges::find(Tomes_SK_C_FormArray, a_base);
+			if (t_pos != Tomes_SK_C_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_SK_C_FormArray.begin(), t_pos);
+				Tomes_SK_C_BoolArray[b_pos] = true;
+				Tomes_SK_C_EntriesFound = std::ranges::count(Tomes_SK_C_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_SK_D_FormArray, a_base);
+			if (t_pos != Tomes_SK_D_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_SK_D_FormArray.begin(), t_pos);
+				Tomes_SK_D_BoolArray[b_pos] = true;
+				Tomes_SK_D_EntriesFound = std::ranges::count(Tomes_SK_D_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_SK_I_FormArray, a_base);
+			if (t_pos != Tomes_SK_I_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_SK_I_FormArray.begin(), t_pos);
+				Tomes_SK_I_BoolArray[b_pos] = true;
+				Tomes_SK_I_EntriesFound = std::ranges::count(Tomes_SK_I_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_SK_R_FormArray, a_base);
+			if (t_pos != Tomes_SK_R_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_SK_R_FormArray.begin(), t_pos);
+				Tomes_SK_R_BoolArray[b_pos] = true;
+				Tomes_SK_R_EntriesFound = std::ranges::count(Tomes_SK_R_BoolArray, true);
+				return;
+			}
 		}
 
 		if (a_section == "CFramework_Books_DG") {
@@ -431,12 +464,45 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_DG") {
-			auto t_pos = std::ranges::find(Tomes_DG_FormArray, a_base);
-			auto b_pos = std::distance(Tomes_DG_FormArray.begin(), t_pos);
+			auto t_pos = std::ranges::find(Tomes_DG_A_FormArray, a_base);
+			if (t_pos != Tomes_DG_A_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DG_A_FormArray.begin(), t_pos);
+				Tomes_DG_A_BoolArray[b_pos] = true;
+				Tomes_DG_A_EntriesFound = std::ranges::count(Tomes_DG_A_BoolArray, true);
+				return;
+			}
 
-			Tomes_DG_BoolArray[b_pos] = true;
-			Tomes_DG_EntriesFound = std::ranges::count(Tomes_DG_BoolArray, true);
-			return;
+			t_pos = std::ranges::find(Tomes_DG_C_FormArray, a_base);
+			if (t_pos != Tomes_DG_C_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DG_C_FormArray.begin(), t_pos);
+				Tomes_DG_C_BoolArray[b_pos] = true;
+				Tomes_DG_C_EntriesFound = std::ranges::count(Tomes_DG_C_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DG_D_FormArray, a_base);
+			if (t_pos != Tomes_DG_D_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DG_D_FormArray.begin(), t_pos);
+				Tomes_DG_D_BoolArray[b_pos] = true;
+				Tomes_DG_D_EntriesFound = std::ranges::count(Tomes_DG_D_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DG_I_FormArray, a_base);
+			if (t_pos != Tomes_DG_I_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DG_I_FormArray.begin(), t_pos);
+				Tomes_DG_I_BoolArray[b_pos] = true;
+				Tomes_DG_I_EntriesFound = std::ranges::count(Tomes_DG_I_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DG_R_FormArray, a_base);
+			if (t_pos != Tomes_DG_R_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DG_R_FormArray.begin(), t_pos);
+				Tomes_DG_R_BoolArray[b_pos] = true;
+				Tomes_DG_R_EntriesFound = std::ranges::count(Tomes_DG_R_BoolArray, true);
+				return;
+			}
 		}
 
 		if (a_section == "CFramework_Books_DB") {
@@ -449,12 +515,45 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_DB") {
-			auto t_pos = std::ranges::find(Tomes_DB_FormArray, a_base);
-			auto b_pos = std::distance(Tomes_DB_FormArray.begin(), t_pos);
+			auto t_pos = std::ranges::find(Tomes_DB_A_FormArray, a_base);
+			if (t_pos != Tomes_DB_A_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DB_A_FormArray.begin(), t_pos);
+				Tomes_DB_A_BoolArray[b_pos] = true;
+				Tomes_DB_A_EntriesFound = std::ranges::count(Tomes_DB_A_BoolArray, true);
+				return;
+			}
 
-			Tomes_DB_BoolArray[b_pos] = true;
-			Tomes_DB_EntriesFound = std::ranges::count(Tomes_DB_BoolArray, true);
-			return;
+			t_pos = std::ranges::find(Tomes_DB_C_FormArray, a_base);
+			if (t_pos != Tomes_DB_C_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DB_C_FormArray.begin(), t_pos);
+				Tomes_DB_C_BoolArray[b_pos] = true;
+				Tomes_DB_C_EntriesFound = std::ranges::count(Tomes_DB_C_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DB_D_FormArray, a_base);
+			if (t_pos != Tomes_DB_D_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DB_D_FormArray.begin(), t_pos);
+				Tomes_DB_D_BoolArray[b_pos] = true;
+				Tomes_DB_D_EntriesFound = std::ranges::count(Tomes_DB_D_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DB_I_FormArray, a_base);
+			if (t_pos != Tomes_DB_I_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DB_I_FormArray.begin(), t_pos);
+				Tomes_DB_I_BoolArray[b_pos] = true;
+				Tomes_DB_I_EntriesFound = std::ranges::count(Tomes_DB_I_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_DB_R_FormArray, a_base);
+			if (t_pos != Tomes_DB_R_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_DB_R_FormArray.begin(), t_pos);
+				Tomes_DB_R_BoolArray[b_pos] = true;
+				Tomes_DB_R_EntriesFound = std::ranges::count(Tomes_DB_R_BoolArray, true);
+				return;
+			}
 		}
 
 		if (a_section == "CFramework_TMaps_SK") {
@@ -494,12 +593,45 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_CC") {
-			auto t_pos = std::ranges::find(Tomes_CC_FormArray, a_base);
-			auto b_pos = std::distance(Tomes_CC_FormArray.begin(), t_pos);
+			auto t_pos = std::ranges::find(Tomes_CC_A_FormArray, a_base);
+			if (t_pos != Tomes_CC_A_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_CC_A_FormArray.begin(), t_pos);
+				Tomes_CC_A_BoolArray[b_pos] = true;
+				Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
+				return;
+			}
 
-			Tomes_CC_BoolArray[b_pos] = true;
-			Tomes_CC_EntriesFound = std::ranges::count(Tomes_CC_BoolArray, true);
-			return;
+			t_pos = std::ranges::find(Tomes_CC_C_FormArray, a_base);
+			if (t_pos != Tomes_CC_C_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_CC_C_FormArray.begin(), t_pos);
+				Tomes_CC_C_BoolArray[b_pos] = true;
+				Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_CC_D_FormArray, a_base);
+			if (t_pos != Tomes_CC_D_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_CC_D_FormArray.begin(), t_pos);
+				Tomes_CC_D_BoolArray[b_pos] = true;
+				Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_CC_I_FormArray, a_base);
+			if (t_pos != Tomes_CC_I_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_CC_I_FormArray.begin(), t_pos);
+				Tomes_CC_I_BoolArray[b_pos] = true;
+				Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
+				return;
+			}
+
+			t_pos = std::ranges::find(Tomes_CC_R_FormArray, a_base);
+			if (t_pos != Tomes_CC_R_FormArray.end()) {
+				auto b_pos = std::distance(Tomes_CC_R_FormArray.begin(), t_pos);
+				Tomes_CC_R_BoolArray[b_pos] = true;
+				Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
+				return;
+			}
 		}
 	}
 
@@ -512,56 +644,123 @@ namespace CFramework_Books {
 		CHandler::Install_CCB();
 		CHandler::Install_CCT();
 
+		//Spell Tomes (Skyrim)
+		CFramework_Tomes_SK::Data.CompileFormArray(CFramework_Books::Tomes_SK, "Skyrim.esm");
+		CFramework_Tomes_SK::Data.MergeAsCollectable();
+		CFramework_Tomes_SK::Data.PopulateSpellTomes(Tomes_SK_A_NameArray, Tomes_SK_A_FormArray, Tomes_SK_A_BoolArray, Tomes_SK_A_TextArray, RE::ActorValue::kAlteration);
+		CFramework_Tomes_SK::Data.PopulateSpellTomes(Tomes_SK_C_NameArray, Tomes_SK_C_FormArray, Tomes_SK_C_BoolArray, Tomes_SK_C_TextArray, RE::ActorValue::kConjuration);
+		CFramework_Tomes_SK::Data.PopulateSpellTomes(Tomes_SK_D_NameArray, Tomes_SK_D_FormArray, Tomes_SK_D_BoolArray, Tomes_SK_D_TextArray, RE::ActorValue::kDestruction);
+		CFramework_Tomes_SK::Data.PopulateSpellTomes(Tomes_SK_I_NameArray, Tomes_SK_I_FormArray, Tomes_SK_I_BoolArray, Tomes_SK_I_TextArray, RE::ActorValue::kIllusion);
+		CFramework_Tomes_SK::Data.PopulateSpellTomes(Tomes_SK_R_NameArray, Tomes_SK_R_FormArray, Tomes_SK_R_BoolArray, Tomes_SK_R_TextArray, RE::ActorValue::kRestoration);
+
+		Tomes_SK_A_EntriesTotal = Tomes_SK_A_FormArray.size();
+		Tomes_SK_C_EntriesTotal = Tomes_SK_C_FormArray.size();
+		Tomes_SK_D_EntriesTotal = Tomes_SK_D_FormArray.size();
+		Tomes_SK_I_EntriesTotal = Tomes_SK_I_FormArray.size();
+		Tomes_SK_R_EntriesTotal = Tomes_SK_R_FormArray.size();
+
+		Tomes_SK_A_EntriesFound = std::ranges::count(Tomes_SK_A_BoolArray, true);
+		Tomes_SK_C_EntriesFound = std::ranges::count(Tomes_SK_C_BoolArray, true);
+		Tomes_SK_D_EntriesFound = std::ranges::count(Tomes_SK_D_BoolArray, true);
+		Tomes_SK_I_EntriesFound = std::ranges::count(Tomes_SK_I_BoolArray, true);
+		Tomes_SK_R_EntriesFound = std::ranges::count(Tomes_SK_R_BoolArray, true);
+
+		//Spell Tomes (Dawnguard)
+		CFramework_Tomes_DG::Data.CompileFormArray(CFramework_Books::Tomes_DG, "Dawnguard.esm");
+		CFramework_Tomes_DG::Data.MergeAsCollectable();
+		CFramework_Tomes_DG::Data.PopulateSpellTomes(Tomes_DG_A_NameArray, Tomes_DG_A_FormArray, Tomes_DG_A_BoolArray, Tomes_DG_A_TextArray, RE::ActorValue::kAlteration);
+		CFramework_Tomes_DG::Data.PopulateSpellTomes(Tomes_DG_C_NameArray, Tomes_DG_C_FormArray, Tomes_DG_C_BoolArray, Tomes_DG_C_TextArray, RE::ActorValue::kConjuration);
+		CFramework_Tomes_DG::Data.PopulateSpellTomes(Tomes_DG_D_NameArray, Tomes_DG_D_FormArray, Tomes_DG_D_BoolArray, Tomes_DG_D_TextArray, RE::ActorValue::kDestruction);
+		CFramework_Tomes_DG::Data.PopulateSpellTomes(Tomes_DG_I_NameArray, Tomes_DG_I_FormArray, Tomes_DG_I_BoolArray, Tomes_DG_I_TextArray, RE::ActorValue::kIllusion);
+		CFramework_Tomes_DG::Data.PopulateSpellTomes(Tomes_DG_R_NameArray, Tomes_DG_R_FormArray, Tomes_DG_R_BoolArray, Tomes_DG_R_TextArray, RE::ActorValue::kRestoration);
+
+		Tomes_DG_A_EntriesTotal = Tomes_DG_A_FormArray.size();
+		Tomes_DG_C_EntriesTotal = Tomes_DG_C_FormArray.size();
+		Tomes_DG_D_EntriesTotal = Tomes_DG_D_FormArray.size();
+		Tomes_DG_I_EntriesTotal = Tomes_DG_I_FormArray.size();
+		Tomes_DG_R_EntriesTotal = Tomes_DG_R_FormArray.size();
+
+		Tomes_DG_A_EntriesFound = std::ranges::count(Tomes_DG_A_BoolArray, true);
+		Tomes_DG_C_EntriesFound = std::ranges::count(Tomes_DG_C_BoolArray, true);
+		Tomes_DG_D_EntriesFound = std::ranges::count(Tomes_DG_D_BoolArray, true);
+		Tomes_DG_I_EntriesFound = std::ranges::count(Tomes_DG_I_BoolArray, true);
+		Tomes_DG_R_EntriesFound = std::ranges::count(Tomes_DG_R_BoolArray, true);
+
+		//Spell Tomes (Dragonborn)
+		CFramework_Tomes_DB::Data.CompileFormArray(CFramework_Books::Tomes_DB, "Dragonborn.esm");
+		CFramework_Tomes_DB::Data.MergeAsCollectable();
+		CFramework_Tomes_DB::Data.PopulateSpellTomes(Tomes_DB_A_NameArray, Tomes_DB_A_FormArray, Tomes_DB_A_BoolArray, Tomes_DB_A_TextArray, RE::ActorValue::kAlteration);
+		CFramework_Tomes_DB::Data.PopulateSpellTomes(Tomes_DB_C_NameArray, Tomes_DB_C_FormArray, Tomes_DB_C_BoolArray, Tomes_DB_C_TextArray, RE::ActorValue::kConjuration);
+		CFramework_Tomes_DB::Data.PopulateSpellTomes(Tomes_DB_D_NameArray, Tomes_DB_D_FormArray, Tomes_DB_D_BoolArray, Tomes_DB_D_TextArray, RE::ActorValue::kDestruction);
+		CFramework_Tomes_DB::Data.PopulateSpellTomes(Tomes_DB_I_NameArray, Tomes_DB_I_FormArray, Tomes_DB_I_BoolArray, Tomes_DB_I_TextArray, RE::ActorValue::kIllusion);
+		CFramework_Tomes_DB::Data.PopulateSpellTomes(Tomes_DB_R_NameArray, Tomes_DB_R_FormArray, Tomes_DB_R_BoolArray, Tomes_DB_R_TextArray, RE::ActorValue::kRestoration);
+
+		Tomes_DB_A_EntriesTotal = Tomes_DB_A_FormArray.size();
+		Tomes_DB_C_EntriesTotal = Tomes_DB_C_FormArray.size();
+		Tomes_DB_D_EntriesTotal = Tomes_DB_D_FormArray.size();
+		Tomes_DB_I_EntriesTotal = Tomes_DB_I_FormArray.size();
+		Tomes_DB_R_EntriesTotal = Tomes_DB_R_FormArray.size();
+
+		Tomes_DB_A_EntriesFound = std::ranges::count(Tomes_DB_A_BoolArray, true);
+		Tomes_DB_C_EntriesFound = std::ranges::count(Tomes_DB_C_BoolArray, true);
+		Tomes_DB_D_EntriesFound = std::ranges::count(Tomes_DB_D_BoolArray, true);
+		Tomes_DB_I_EntriesFound = std::ranges::count(Tomes_DB_I_BoolArray, true);
+		Tomes_DB_R_EntriesFound = std::ranges::count(Tomes_DB_R_BoolArray, true);
+
+		//Spell Tomes (Creation Club)
+		CFramework_Tomes_CC::Data.CompileFormArray(CFramework_Books::Tomes_CC, "");
+		CFramework_Tomes_CC::Data.MergeAsCollectable();
+		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_A_NameArray, Tomes_CC_A_FormArray, Tomes_CC_A_BoolArray, Tomes_CC_A_TextArray, RE::ActorValue::kAlteration);
+		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_C_NameArray, Tomes_CC_C_FormArray, Tomes_CC_C_BoolArray, Tomes_CC_C_TextArray, RE::ActorValue::kConjuration);
+		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_D_NameArray, Tomes_CC_D_FormArray, Tomes_CC_D_BoolArray, Tomes_CC_D_TextArray, RE::ActorValue::kDestruction);
+		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_I_NameArray, Tomes_CC_I_FormArray, Tomes_CC_I_BoolArray, Tomes_CC_I_TextArray, RE::ActorValue::kIllusion);
+		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_R_NameArray, Tomes_CC_R_FormArray, Tomes_CC_R_BoolArray, Tomes_CC_R_TextArray, RE::ActorValue::kRestoration);
+
+		Tomes_CC_A_EntriesTotal = Tomes_CC_A_FormArray.size();
+		Tomes_CC_C_EntriesTotal = Tomes_CC_C_FormArray.size();
+		Tomes_CC_D_EntriesTotal = Tomes_CC_D_FormArray.size();
+		Tomes_CC_I_EntriesTotal = Tomes_CC_I_FormArray.size();
+		Tomes_CC_R_EntriesTotal = Tomes_CC_R_FormArray.size();
+
+		Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
+		Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
+		Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
+		Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
+		Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
+
+		//Books
 		CFramework_Books_AG::Data.CompileFormArray(CFramework_Books::Books_AG, "Skyrim.esm");
 		CFramework_Books_HS::Data.CompileFormArray(CFramework_Books::Books_HS, "Skyrim.esm");
 		CFramework_Books_TY::Data.CompileFormArray(CFramework_Books::Books_TY, "Skyrim.esm");
 		CFramework_Skill_SK::Data.CompileFormArray(CFramework_Books::Skill_SK, "Skyrim.esm");
-		CFramework_Tomes_SK::Data.CompileFormArray(CFramework_Books::Tomes_SK, "Skyrim.esm");
 		CFramework_Books_DG::Data.CompileFormArray(CFramework_Books::Books_DG, "Dawnguard.esm");
-		CFramework_Tomes_DG::Data.CompileFormArray(CFramework_Books::Tomes_DG, "Dawnguard.esm");
 		CFramework_Books_DB::Data.CompileFormArray(CFramework_Books::Books_DB, "Dragonborn.esm");
-		CFramework_Tomes_DB::Data.CompileFormArray(CFramework_Books::Tomes_DB, "Dragonborn.esm");
-
 		CFramework_TMaps_SK::Data.CompileFormArray(CFramework_Books::TMaps_SK, "Skyrim.esm");
 		CFramework_TMaps_NT::Data.CompileFormArray(CFramework_Books::TMaps_NT, "treasure_hunt.esp");
 		CFramework_TMaps_TH::Data.CompileFormArray(CFramework_Books::TMaps_TH, "TreasureHunter.esp");
-
 		CFramework_Books_CC::Data.CompileFormArray(CFramework_Books::Books_CC, "");
-		CFramework_Tomes_CC::Data.CompileFormArray(CFramework_Books::Tomes_CC, "");
 
 		CFramework_Books_AG::Data.MergeAsCollectable();
 		CFramework_Books_HS::Data.MergeAsCollectable();
 		CFramework_Books_TY::Data.MergeAsCollectable();
 		CFramework_Skill_SK::Data.MergeAsCollectable();
-		CFramework_Tomes_SK::Data.MergeAsCollectable();
 		CFramework_Books_DG::Data.MergeAsCollectable();
-		CFramework_Tomes_DG::Data.MergeAsCollectable();
 		CFramework_Books_DB::Data.MergeAsCollectable();
-		CFramework_Tomes_DB::Data.MergeAsCollectable();
-
 		CFramework_TMaps_SK::Data.MergeAsCollectable();
 		CFramework_TMaps_NT::Data.MergeAsCollectable();
 		CFramework_TMaps_TH::Data.MergeAsCollectable();
-
 		CFramework_Books_CC::Data.MergeAsCollectable();
-		CFramework_Tomes_CC::Data.MergeAsCollectable();
 
 		CFramework_Books_AG::Data.Populate(Books_AG_NameArray, Books_AG_FormArray, Books_AG_BoolArray, Books_AG_TextArray, false, 1);
 		CFramework_Books_HS::Data.Populate(Books_HS_NameArray, Books_HS_FormArray, Books_HS_BoolArray, Books_HS_TextArray, false, 1);
 		CFramework_Books_TY::Data.Populate(Books_TY_NameArray, Books_TY_FormArray, Books_TY_BoolArray, Books_TY_TextArray, false, 1);
 		CFramework_Skill_SK::Data.Populate(Skill_SK_NameArray, Skill_SK_FormArray, Skill_SK_BoolArray, Skill_SK_TextArray, false, 1);
-		CFramework_Tomes_SK::Data.Populate(Tomes_SK_NameArray, Tomes_SK_FormArray, Tomes_SK_BoolArray, Tomes_SK_TextArray, false, 1);
 		CFramework_Books_DG::Data.Populate(Books_DG_NameArray, Books_DG_FormArray, Books_DG_BoolArray, Books_DG_TextArray, false, 1);
-		CFramework_Tomes_DG::Data.Populate(Tomes_DG_NameArray, Tomes_DG_FormArray, Tomes_DG_BoolArray, Tomes_DG_TextArray, false, 1);
 		CFramework_Books_DB::Data.Populate(Books_DB_NameArray, Books_DB_FormArray, Books_DB_BoolArray, Books_DB_TextArray, false, 1);
-		CFramework_Tomes_DB::Data.Populate(Tomes_DB_NameArray, Tomes_DB_FormArray, Tomes_DB_BoolArray, Tomes_DB_TextArray, false, 1);
-
 		CFramework_TMaps_SK::Data.Populate(TMaps_SK_NameArray, TMaps_SK_FormArray, TMaps_SK_BoolArray, TMaps_SK_TextArray, false, 1);
 		CFramework_TMaps_NT::Data.Populate(TMaps_NT_NameArray, TMaps_NT_FormArray, TMaps_NT_BoolArray, TMaps_NT_TextArray, false, 1);
 		CFramework_TMaps_TH::Data.Populate(TMaps_TH_NameArray, TMaps_TH_FormArray, TMaps_TH_BoolArray, TMaps_TH_TextArray, false, 1);
-
 		CFramework_Books_CC::Data.Populate(Books_CC_NameArray, Books_CC_FormArray, Books_CC_BoolArray, Books_CC_TextArray, false, 1);
-		CFramework_Tomes_CC::Data.Populate(Tomes_CC_NameArray, Tomes_CC_FormArray, Tomes_CC_BoolArray, Tomes_CC_TextArray, false, 1);
 
 		Books_AG_EntriesTotal = Books_AG_FormArray.size();
 		Books_AG_EntriesFound = std::ranges::count(Books_AG_BoolArray, true);
@@ -575,20 +774,11 @@ namespace CFramework_Books {
 		Skill_SK_EntriesTotal = Skill_SK_FormArray.size();
 		Skill_SK_EntriesFound = std::ranges::count(Skill_SK_BoolArray, true);
 
-		Tomes_SK_EntriesTotal = Tomes_SK_FormArray.size();
-		Tomes_SK_EntriesFound = std::ranges::count(Tomes_SK_BoolArray, true);
-
 		Books_DG_EntriesTotal = Books_DG_FormArray.size();
 		Books_DG_EntriesFound = std::ranges::count(Books_DG_BoolArray, true);
 
-		Tomes_DG_EntriesTotal = Tomes_DG_FormArray.size();
-		Tomes_DG_EntriesFound = std::ranges::count(Tomes_DG_BoolArray, true);
-
 		Books_DB_EntriesTotal = Books_DB_FormArray.size();
 		Books_DB_EntriesFound = std::ranges::count(Books_DB_BoolArray, true);
-
-		Tomes_DB_EntriesTotal = Tomes_DB_FormArray.size();
-		Tomes_DB_EntriesFound = std::ranges::count(Tomes_DB_BoolArray, true);
 
 		TMaps_SK_EntriesTotal = TMaps_SK_FormArray.size();
 		TMaps_SK_EntriesFound = std::ranges::count(TMaps_SK_BoolArray, true);
@@ -601,9 +791,6 @@ namespace CFramework_Books {
 
 		Books_CC_EntriesTotal = Books_CC_FormArray.size();
 		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
-
-		Tomes_CC_EntriesTotal = Tomes_CC_FormArray.size();
-		Tomes_CC_EntriesFound = std::ranges::count(Tomes_CC_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -612,60 +799,177 @@ namespace CFramework_Books {
 
 	void CHandler::UpdateFoundForms() {
 
+		//Spell Tomes (Skyrim)
+		for (auto i = 0; i < Tomes_SK_A_FormArray.size(); i++) {
+			Tomes_SK_A_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_SK_A_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_SK_C_FormArray.size(); i++) {
+			Tomes_SK_C_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_SK_C_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_SK_D_FormArray.size(); i++) {
+			Tomes_SK_D_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_SK_D_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_SK_I_FormArray.size(); i++) {
+			Tomes_SK_I_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_SK_I_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_SK_R_FormArray.size(); i++) {
+			Tomes_SK_R_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_SK_R_FormArray[i]);
+		}
+
+		Tomes_SK_A_EntriesTotal = Tomes_SK_A_FormArray.size();
+		Tomes_SK_C_EntriesTotal = Tomes_SK_C_FormArray.size();
+		Tomes_SK_D_EntriesTotal = Tomes_SK_D_FormArray.size();
+		Tomes_SK_I_EntriesTotal = Tomes_SK_I_FormArray.size();
+		Tomes_SK_R_EntriesTotal = Tomes_SK_R_FormArray.size();
+
+		Tomes_SK_A_EntriesFound = std::ranges::count(Tomes_SK_A_BoolArray, true);
+		Tomes_SK_C_EntriesFound = std::ranges::count(Tomes_SK_C_BoolArray, true);
+		Tomes_SK_D_EntriesFound = std::ranges::count(Tomes_SK_D_BoolArray, true);
+		Tomes_SK_I_EntriesFound = std::ranges::count(Tomes_SK_I_BoolArray, true);
+		Tomes_SK_R_EntriesFound = std::ranges::count(Tomes_SK_R_BoolArray, true);
+
+		//Spell Tomes (Dawnguard)
+		for (auto i = 0; i < Tomes_DG_A_FormArray.size(); i++) {
+			Tomes_DG_A_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DG_A_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DG_C_FormArray.size(); i++) {
+			Tomes_DG_C_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DG_C_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DG_D_FormArray.size(); i++) {
+			Tomes_DG_D_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DG_D_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DG_I_FormArray.size(); i++) {
+			Tomes_DG_I_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DG_I_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DG_R_FormArray.size(); i++) {
+			Tomes_DG_R_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DG_R_FormArray[i]);
+		}
+
+		Tomes_DG_A_EntriesTotal = Tomes_DG_A_FormArray.size();
+		Tomes_DG_C_EntriesTotal = Tomes_DG_C_FormArray.size();
+		Tomes_DG_D_EntriesTotal = Tomes_DG_D_FormArray.size();
+		Tomes_DG_I_EntriesTotal = Tomes_DG_I_FormArray.size();
+		Tomes_DG_R_EntriesTotal = Tomes_DG_R_FormArray.size();
+
+		Tomes_DG_A_EntriesFound = std::ranges::count(Tomes_DG_A_BoolArray, true);
+		Tomes_DG_C_EntriesFound = std::ranges::count(Tomes_DG_C_BoolArray, true);
+		Tomes_DG_D_EntriesFound = std::ranges::count(Tomes_DG_D_BoolArray, true);
+		Tomes_DG_I_EntriesFound = std::ranges::count(Tomes_DG_I_BoolArray, true);
+		Tomes_DG_R_EntriesFound = std::ranges::count(Tomes_DG_R_BoolArray, true);
+
+		//Spell Tomes (Dragonborn)
+		for (auto i = 0; i < Tomes_DB_A_FormArray.size(); i++) {
+			Tomes_DB_A_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DB_A_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DB_C_FormArray.size(); i++) {
+			Tomes_DB_C_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DB_C_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DB_D_FormArray.size(); i++) {
+			Tomes_DB_D_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DB_D_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DB_I_FormArray.size(); i++) {
+			Tomes_DB_I_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DB_I_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_DB_R_FormArray.size(); i++) {
+			Tomes_DB_R_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_DB_R_FormArray[i]);
+		}
+
+		Tomes_DB_A_EntriesTotal = Tomes_DB_A_FormArray.size();
+		Tomes_DB_C_EntriesTotal = Tomes_DB_C_FormArray.size();
+		Tomes_DB_D_EntriesTotal = Tomes_DB_D_FormArray.size();
+		Tomes_DB_I_EntriesTotal = Tomes_DB_I_FormArray.size();
+		Tomes_DB_R_EntriesTotal = Tomes_DB_R_FormArray.size();
+
+		Tomes_DB_A_EntriesFound = std::ranges::count(Tomes_DB_A_BoolArray, true);
+		Tomes_DB_C_EntriesFound = std::ranges::count(Tomes_DB_C_BoolArray, true);
+		Tomes_DB_D_EntriesFound = std::ranges::count(Tomes_DB_D_BoolArray, true);
+		Tomes_DB_I_EntriesFound = std::ranges::count(Tomes_DB_I_BoolArray, true);
+		Tomes_DB_R_EntriesFound = std::ranges::count(Tomes_DB_R_BoolArray, true);
+
+		//Spell Tomes (Creation Club)
+		for (auto i = 0; i < Tomes_CC_A_FormArray.size(); i++) {
+			Tomes_CC_A_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_A_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_CC_C_FormArray.size(); i++) {
+			Tomes_CC_C_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_C_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_CC_D_FormArray.size(); i++) {
+			Tomes_CC_D_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_D_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_CC_I_FormArray.size(); i++) {
+			Tomes_CC_I_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_I_FormArray[i]);
+		}
+
+		for (auto i = 0; i < Tomes_CC_R_FormArray.size(); i++) {
+			Tomes_CC_R_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_R_FormArray[i]);
+		}
+
+		Tomes_CC_A_EntriesTotal = Tomes_CC_A_FormArray.size();
+		Tomes_CC_C_EntriesTotal = Tomes_CC_C_FormArray.size();
+		Tomes_CC_D_EntriesTotal = Tomes_CC_D_FormArray.size();
+		Tomes_CC_I_EntriesTotal = Tomes_CC_I_FormArray.size();
+		Tomes_CC_R_EntriesTotal = Tomes_CC_R_FormArray.size();
+
+		Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
+		Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
+		Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
+		Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
+		Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
+
+		//Books
 		for (auto i = 0; i < Books_AG_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_AG_FormArray[i]->GetFormID())) { Books_AG_BoolArray[i] = true; }
+			Books_AG_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_AG_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Books_HS_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_HS_FormArray[i]->GetFormID())) { Books_HS_BoolArray[i] = true; }
+			Books_HS_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_HS_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Books_TY_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_TY_FormArray[i]->GetFormID())) { Books_TY_BoolArray[i] = true; }
+			Books_TY_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_TY_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Skill_SK_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Skill_SK_FormArray[i]->GetFormID())) { Skill_SK_BoolArray[i] = true; }
-		}
-
-		for (auto i = 0; i < Tomes_SK_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Tomes_SK_FormArray[i]->GetFormID())) { Tomes_SK_BoolArray[i] = true; }
+			Skill_SK_BoolArray[i] = FrameworkAPI::IsBookKnown(Skill_SK_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Books_DG_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_DG_FormArray[i]->GetFormID())) { Books_DG_BoolArray[i] = true; }
-		}
-
-		for (auto i = 0; i < Tomes_DG_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Tomes_DG_FormArray[i]->GetFormID())) { Tomes_DG_BoolArray[i] = true; }
+			Books_DG_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_DG_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Books_DB_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_DB_FormArray[i]->GetFormID())) { Books_DB_BoolArray[i] = true; }
-		}
-
-		for (auto i = 0; i < Tomes_DB_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Tomes_DB_FormArray[i]->GetFormID())) { Tomes_DB_BoolArray[i] = true; }
+			Books_DB_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_DB_FormArray[i]);
 		}
 
 		for (auto i = 0; i < TMaps_SK_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(TMaps_SK_FormArray[i]->GetFormID())) { TMaps_SK_BoolArray[i] = true; }
+			TMaps_SK_BoolArray[i] = FrameworkAPI::IsBookKnown(TMaps_SK_FormArray[i]);
 		}
 
 		for (auto i = 0; i < TMaps_NT_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(TMaps_NT_FormArray[i]->GetFormID())) { TMaps_NT_BoolArray[i] = true; }
+			TMaps_NT_BoolArray[i] = FrameworkAPI::IsBookKnown(TMaps_NT_FormArray[i]);
 		}
 
 		for (auto i = 0; i < TMaps_TH_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(TMaps_TH_FormArray[i]->GetFormID())) { TMaps_TH_BoolArray[i] = true; }
+			TMaps_TH_BoolArray[i] = FrameworkAPI::IsBookKnown(TMaps_TH_FormArray[i]);
 		}
 
 		for (auto i = 0; i < Books_CC_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_CC_FormArray[i]->GetFormID())) { Books_CC_BoolArray[i] = true; }
-		}
-
-		for (auto i = 0; i < Tomes_CC_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Tomes_CC_FormArray[i]->GetFormID())) { Tomes_CC_BoolArray[i] = true; }
+			Books_CC_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_CC_FormArray[i]);
 		}
 
 		Books_AG_EntriesTotal = Books_AG_FormArray.size();
@@ -680,20 +984,11 @@ namespace CFramework_Books {
 		Skill_SK_EntriesTotal = Skill_SK_FormArray.size();
 		Skill_SK_EntriesFound = std::ranges::count(Skill_SK_BoolArray, true);
 
-		Tomes_SK_EntriesTotal = Tomes_SK_FormArray.size();
-		Tomes_SK_EntriesFound = std::ranges::count(Tomes_SK_BoolArray, true);
-
 		Books_DG_EntriesTotal = Books_DG_FormArray.size();
 		Books_DG_EntriesFound = std::ranges::count(Books_DG_BoolArray, true);
 
-		Tomes_DG_EntriesTotal = Tomes_DG_FormArray.size();
-		Tomes_DG_EntriesFound = std::ranges::count(Tomes_DG_BoolArray, true);
-
 		Books_DB_EntriesTotal = Books_DB_FormArray.size();
 		Books_DB_EntriesFound = std::ranges::count(Books_DB_BoolArray, true);
-
-		Tomes_DB_EntriesTotal = Tomes_DB_FormArray.size();
-		Tomes_DB_EntriesFound = std::ranges::count(Tomes_DB_BoolArray, true);
 
 		TMaps_SK_EntriesTotal = TMaps_SK_FormArray.size();
 		TMaps_SK_EntriesFound = std::ranges::count(TMaps_SK_BoolArray, true);
@@ -706,9 +1001,6 @@ namespace CFramework_Books {
 
 		Books_CC_EntriesTotal = Books_CC_FormArray.size();
 		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
-
-		Tomes_CC_EntriesTotal = Tomes_CC_FormArray.size();
-		Tomes_CC_EntriesFound = std::ranges::count(Tomes_CC_BoolArray, true);
 	}
 
 	//---------------------------------------------------

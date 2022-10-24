@@ -86,12 +86,40 @@ namespace CFramework_Books
 	inline std::int32_t					Skill_SK_EntriesTotal;
 	inline std::int32_t					Skill_SK_EntriesFound;
 
-	inline std::vector<std::string>		Tomes_SK_NameArray;
-	inline std::vector<std::string>		Tomes_SK_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_SK_FormArray;
-	inline std::vector<bool>			Tomes_SK_BoolArray;
-	inline std::int32_t					Tomes_SK_EntriesTotal;
-	inline std::int32_t					Tomes_SK_EntriesFound;
+	inline std::vector<std::string>		Tomes_SK_A_NameArray;
+	inline std::vector<std::string>		Tomes_SK_A_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_SK_A_FormArray;
+	inline std::vector<bool>			Tomes_SK_A_BoolArray;
+	inline std::int32_t					Tomes_SK_A_EntriesTotal;
+	inline std::int32_t					Tomes_SK_A_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_SK_C_NameArray;
+	inline std::vector<std::string>		Tomes_SK_C_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_SK_C_FormArray;
+	inline std::vector<bool>			Tomes_SK_C_BoolArray;
+	inline std::int32_t					Tomes_SK_C_EntriesTotal;
+	inline std::int32_t					Tomes_SK_C_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_SK_D_NameArray;
+	inline std::vector<std::string>		Tomes_SK_D_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_SK_D_FormArray;
+	inline std::vector<bool>			Tomes_SK_D_BoolArray;
+	inline std::int32_t					Tomes_SK_D_EntriesTotal;
+	inline std::int32_t					Tomes_SK_D_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_SK_I_NameArray;
+	inline std::vector<std::string>		Tomes_SK_I_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_SK_I_FormArray;
+	inline std::vector<bool>			Tomes_SK_I_BoolArray;
+	inline std::int32_t					Tomes_SK_I_EntriesTotal;
+	inline std::int32_t					Tomes_SK_I_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_SK_R_NameArray;
+	inline std::vector<std::string>		Tomes_SK_R_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_SK_R_FormArray;
+	inline std::vector<bool>			Tomes_SK_R_BoolArray;
+	inline std::int32_t					Tomes_SK_R_EntriesTotal;
+	inline std::int32_t					Tomes_SK_R_EntriesFound;
 
 	inline std::vector<std::string>		Books_DG_NameArray;
 	inline std::vector<std::string>		Books_DG_TextArray;
@@ -100,12 +128,40 @@ namespace CFramework_Books
 	inline std::int32_t					Books_DG_EntriesTotal;
 	inline std::int32_t					Books_DG_EntriesFound;
 
-	inline std::vector<std::string>		Tomes_DG_NameArray;
-	inline std::vector<std::string>		Tomes_DG_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_DG_FormArray;
-	inline std::vector<bool>			Tomes_DG_BoolArray;
-	inline std::int32_t					Tomes_DG_EntriesTotal;
-	inline std::int32_t					Tomes_DG_EntriesFound;
+	inline std::vector<std::string>		Tomes_DG_A_NameArray;
+	inline std::vector<std::string>		Tomes_DG_A_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DG_A_FormArray;
+	inline std::vector<bool>			Tomes_DG_A_BoolArray;
+	inline std::int32_t					Tomes_DG_A_EntriesTotal;
+	inline std::int32_t					Tomes_DG_A_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DG_C_NameArray;
+	inline std::vector<std::string>		Tomes_DG_C_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DG_C_FormArray;
+	inline std::vector<bool>			Tomes_DG_C_BoolArray;
+	inline std::int32_t					Tomes_DG_C_EntriesTotal;
+	inline std::int32_t					Tomes_DG_C_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DG_D_NameArray;
+	inline std::vector<std::string>		Tomes_DG_D_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DG_D_FormArray;
+	inline std::vector<bool>			Tomes_DG_D_BoolArray;
+	inline std::int32_t					Tomes_DG_D_EntriesTotal;
+	inline std::int32_t					Tomes_DG_D_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DG_I_NameArray;
+	inline std::vector<std::string>		Tomes_DG_I_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DG_I_FormArray;
+	inline std::vector<bool>			Tomes_DG_I_BoolArray;
+	inline std::int32_t					Tomes_DG_I_EntriesTotal;
+	inline std::int32_t					Tomes_DG_I_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DG_R_NameArray;
+	inline std::vector<std::string>		Tomes_DG_R_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DG_R_FormArray;
+	inline std::vector<bool>			Tomes_DG_R_BoolArray;
+	inline std::int32_t					Tomes_DG_R_EntriesTotal;
+	inline std::int32_t					Tomes_DG_R_EntriesFound;
 
 	inline std::vector<std::string>		Books_DB_NameArray;
 	inline std::vector<std::string>		Books_DB_TextArray;
@@ -114,12 +170,40 @@ namespace CFramework_Books
 	inline std::int32_t					Books_DB_EntriesTotal;
 	inline std::int32_t					Books_DB_EntriesFound;
 
-	inline std::vector<std::string>		Tomes_DB_NameArray;
-	inline std::vector<std::string>		Tomes_DB_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_DB_FormArray;
-	inline std::vector<bool>			Tomes_DB_BoolArray;
-	inline std::int32_t					Tomes_DB_EntriesTotal;
-	inline std::int32_t					Tomes_DB_EntriesFound;
+	inline std::vector<std::string>		Tomes_DB_A_NameArray;
+	inline std::vector<std::string>		Tomes_DB_A_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DB_A_FormArray;
+	inline std::vector<bool>			Tomes_DB_A_BoolArray;
+	inline std::int32_t					Tomes_DB_A_EntriesTotal;
+	inline std::int32_t					Tomes_DB_A_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DB_C_NameArray;
+	inline std::vector<std::string>		Tomes_DB_C_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DB_C_FormArray;
+	inline std::vector<bool>			Tomes_DB_C_BoolArray;
+	inline std::int32_t					Tomes_DB_C_EntriesTotal;
+	inline std::int32_t					Tomes_DB_C_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DB_D_NameArray;
+	inline std::vector<std::string>		Tomes_DB_D_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DB_D_FormArray;
+	inline std::vector<bool>			Tomes_DB_D_BoolArray;
+	inline std::int32_t					Tomes_DB_D_EntriesTotal;
+	inline std::int32_t					Tomes_DB_D_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DB_I_NameArray;
+	inline std::vector<std::string>		Tomes_DB_I_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DB_I_FormArray;
+	inline std::vector<bool>			Tomes_DB_I_BoolArray;
+	inline std::int32_t					Tomes_DB_I_EntriesTotal;
+	inline std::int32_t					Tomes_DB_I_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_DB_R_NameArray;
+	inline std::vector<std::string>		Tomes_DB_R_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_DB_R_FormArray;
+	inline std::vector<bool>			Tomes_DB_R_BoolArray;
+	inline std::int32_t					Tomes_DB_R_EntriesTotal;
+	inline std::int32_t					Tomes_DB_R_EntriesFound;
 
 	inline std::vector<std::string>		TMaps_SK_NameArray;
 	inline std::vector<std::string>		TMaps_SK_TextArray;
@@ -149,12 +233,40 @@ namespace CFramework_Books
 	inline std::int32_t					Books_CC_EntriesTotal;
 	inline std::int32_t					Books_CC_EntriesFound;
 
-	inline std::vector<std::string>		Tomes_CC_NameArray;
-	inline std::vector<std::string>		Tomes_CC_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_FormArray;
-	inline std::vector<bool>			Tomes_CC_BoolArray;
-	inline std::int32_t					Tomes_CC_EntriesTotal;
-	inline std::int32_t					Tomes_CC_EntriesFound;
+	inline std::vector<std::string>		Tomes_CC_A_NameArray;
+	inline std::vector<std::string>		Tomes_CC_A_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_CC_A_FormArray;
+	inline std::vector<bool>			Tomes_CC_A_BoolArray;
+	inline std::int32_t					Tomes_CC_A_EntriesTotal;
+	inline std::int32_t					Tomes_CC_A_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_CC_C_NameArray;
+	inline std::vector<std::string>		Tomes_CC_C_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_CC_C_FormArray;
+	inline std::vector<bool>			Tomes_CC_C_BoolArray;
+	inline std::int32_t					Tomes_CC_C_EntriesTotal;
+	inline std::int32_t					Tomes_CC_C_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_CC_D_NameArray;
+	inline std::vector<std::string>		Tomes_CC_D_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_CC_D_FormArray;
+	inline std::vector<bool>			Tomes_CC_D_BoolArray;
+	inline std::int32_t					Tomes_CC_D_EntriesTotal;
+	inline std::int32_t					Tomes_CC_D_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_CC_I_NameArray;
+	inline std::vector<std::string>		Tomes_CC_I_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_CC_I_FormArray;
+	inline std::vector<bool>			Tomes_CC_I_BoolArray;
+	inline std::int32_t					Tomes_CC_I_EntriesTotal;
+	inline std::int32_t					Tomes_CC_I_EntriesFound;
+
+	inline std::vector<std::string>		Tomes_CC_R_NameArray;
+	inline std::vector<std::string>		Tomes_CC_R_TextArray;
+	inline std::vector<RE::TESForm*>	Tomes_CC_R_FormArray;
+	inline std::vector<bool>			Tomes_CC_R_BoolArray;
+	inline std::int32_t					Tomes_CC_R_EntriesTotal;
+	inline std::int32_t					Tomes_CC_R_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

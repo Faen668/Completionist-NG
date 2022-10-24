@@ -1,5 +1,6 @@
 #include "CQuests_Misc_SK.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Internal Utility/Variables.hpp"
 
 namespace CQFramework_Misc_SK {
 	using namespace CFramework_Master;
@@ -62,8 +63,8 @@ namespace CQFramework_Misc_SK {
 	/*00*/ {"Radi_SK_Quest00_Key", "$Radi_SK_Quest00_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest00_Data", "Favor013"},
 	/*01*/ {"Radi_SK_Quest01_Key", "$Radi_SK_Quest01_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest01_Data", "BQ01"},
 	/*02*/ {"Radi_SK_Quest02_Key", "$Radi_SK_Quest02_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest02_Data", "BQ04"},
-	/*03*/ {"Radi_SK_Quest03_Key", "$Radi_SK_Quest03_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest03_Data", "BQ02"},
-	/*04*/ {"Radi_SK_Quest04_Key", "$Radi_SK_Quest04_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest04_Data", "BQ03"},
+	/*03*/ {"Radi_SK_Quest03_Key", "$Radi_SK_Quest03_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest03_Data", "BQ03"},
+	/*04*/ {"Radi_SK_Quest04_Key", "$Radi_SK_Quest04_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest04_Data", "BQ02"},
 	/*05*/ {"Radi_SK_Quest05_Key", "$Radi_SK_Quest05_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest05_Data", "FavorJobsChopWood"},
 	/*06*/ {"Radi_SK_Quest06_Key", "$Radi_SK_Quest06_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest06_Data", "FavorJobsChopWood"},
 	/*07*/ {"Radi_SK_Quest07_Key", "$Radi_SK_Quest07_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Radi_SK_Quest07_Data", "FavorJobsChopWood"},
@@ -111,8 +112,8 @@ namespace CQFramework_Misc_SK {
 		{0, "Completionist_Favor013Iddra", 1},
 		{1, "Completionist_BountyBQ01", RADIANT_BOUNTY_VALUE},
 		{2, "Completionist_BountyBQ04", RADIANT_BOUNTY_VALUE},
-		{3, "Completionist_BountyBQ02", RADIANT_BOUNTY_VALUE},
-		{4, "Completionist_BountyBQ03", RADIANT_BOUNTY_VALUE},
+		{3, "Completionist_BountyBQ03", RADIANT_BOUNTY_VALUE},
+		{4, "Completionist_BountyBQ02", RADIANT_BOUNTY_VALUE},
 		{5, "Completionist_Favor_ChopWoodAeri", RADIANT_COUNTER_VALUE},
 		{6, "Completionist_Favor_ChopWoodGrosta", RADIANT_COUNTER_VALUE},
 		{7, "Completionist_Favor_ChopWoodGannaUriel", RADIANT_COUNTER_VALUE},
@@ -214,6 +215,9 @@ namespace CQFramework_Misc_SK {
 		auto userinterface = RE::UI::GetSingleton();
 		userinterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
 
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 	}
 
@@ -243,6 +247,31 @@ namespace CQFramework_Misc_SK {
 				CQuestKeys_Stages.AddStage(KeysArray_Radi.at(std::distance(IdenArray_Radi.begin(), t_pos)), a_event->stage);
 				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, IdenArray_Radi.at(std::distance(IdenArray_Radi.begin(), t_pos)));
 				return EventResult::kContinue;
+			}
+		}
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Item Added ) -------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+
+		if (!a_event || !a_event->baseObj || a_event->oldContainer != RE::PlayerCharacter::GetSingleton()->GetFormID()) { return EventResult::kContinue; }
+
+		auto* List = static_cast<RE::BGSListForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x0072EA2, "Skyrim.esm"));
+		if (!List || !List->HasForm(a_event->baseObj)) { return EventResult::kContinue; }
+
+		auto speaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+		if (!speaker || speaker->GetFormID() != a_event->newContainer) { return EventResult::kContinue; }
+
+		auto* razelan = static_cast<RE::TESObjectREFR*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x00683A7, "Skyrim.esm"));
+		if (!razelan) { return EventResult::kContinue; }
+
+		if (speaker == razelan && a_event->newContainer == razelan->GetFormID()) {
+			if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksRazelan")) {
+				var->value += 1;
 			}
 		}
 		return EventResult::kContinue;

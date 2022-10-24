@@ -52,9 +52,7 @@ namespace CPatch_FOS {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -211,26 +209,18 @@ namespace CPatch_FOS {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < ItmL1_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL1_FormArray[i]->GetFormID())) {
-				ItmL1_BoolArray[i] = true;
-			}
+			ItmL1_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_FormArray[i], &CPatch_FOS_ItmL1::Data);
 		}
 
 		for (auto i = 0; i < ItmL2_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL2_FormArray[i]->GetFormID())) {
-				ItmL2_BoolArray[i] = true;
-			}
+			ItmL2_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL2_FormArray[i], &CPatch_FOS_ItmL2::Data);
 		}
 
 		for (auto i = 0; i < ItmL3_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL3_FormArray[i]->GetFormID())) {
-				ItmL3_BoolArray[i] = true;
-			}
+			ItmL3_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL3_FormArray[i], &CPatch_FOS_ItmL3::Data);
 		}
 
 		ItmL1_EntriesTotal = ItmL1_FormArray.size();

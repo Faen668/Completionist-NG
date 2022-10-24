@@ -309,15 +309,15 @@ namespace CPatch_FSK {
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			Items_BoolArray[i] = FoundItemData.HasForm(Items_FormArray[i]->GetFormID());
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_FSK_Items::Data);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			Books_BoolArray[i] = FoundItemData.HasForm(Books_FormArray[i]->GetFormID());
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
 
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-			MapMa_BoolArray[i] = FoundItemData.HasForm(MapMa_FormArray[i]->GetFormID());
+			MapMa_BoolArray[i] = FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID());
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();
@@ -335,6 +335,8 @@ namespace CPatch_FSK {
 	//---------------------------------------------------
 
 	void CHandler::UpdateQuestFramework() {
+
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
 			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);

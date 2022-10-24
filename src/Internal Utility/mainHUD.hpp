@@ -20,6 +20,10 @@ namespace Completionist_MainHUD
 
 		static void Register();
 
+		static void RegisterMessageListener();
+
+		static void MessageHandler(SKSE::MessagingInterface::Message* a_msg);
+
 		static void	ProcessCrosshairReference(RE::HUDData* data);
 
 		static bool ItemIsCollectable(RE::FormID a_formID);

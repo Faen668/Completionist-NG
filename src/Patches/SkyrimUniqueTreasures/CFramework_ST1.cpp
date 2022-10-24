@@ -33,10 +33,6 @@ namespace CPatch_ST1 {
 	
 	// clang-format on
 
-	constexpr std::vector<std::string> Null_S = {};
-	constexpr std::vector<RE::TESForm*> Null_F = {};
-	constexpr std::vector<bool> Null_B = {};
-
 	constexpr std::string_view modname = "SkyrimsUniqueTreasures.esp";
 
 	//---------------------------------------------------
@@ -45,9 +41,7 @@ namespace CPatch_ST1 {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -245,34 +239,24 @@ namespace CPatch_ST1 {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < ItmL1_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL1_FormArray[i]->GetFormID())) {
-				ItmL1_BoolArray[i] = true;
-			}
+			ItmL1_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_FormArray[i], &CPatch_ST1_ItmL1::Data);
 		}
 
 		for (auto i = 0; i < ItmL2_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL2_FormArray[i]->GetFormID())) {
-				ItmL2_BoolArray[i] = true;
-			}
+			ItmL2_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL2_FormArray[i], &CPatch_ST1_ItmL2::Data);
 		}
 
 		for (auto i = 0; i < ItmL3_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL3_FormArray[i]->GetFormID())) {
-				ItmL3_BoolArray[i] = true;
-			}
+			ItmL3_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL3_FormArray[i], &CPatch_ST1_ItmL3::Data);
 		}
 
 		for (auto i = 0; i < ItmL4_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(ItmL4_FormArray[i]->GetFormID())) {
-				ItmL4_BoolArray[i] = true;
-			}
+			ItmL4_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL4_FormArray[i], &CPatch_ST1_ItmL4::Data);
 		}
-		
+
 		ItmL1_EntriesTotal = ItmL1_FormArray.size();
 		ItmL1_EntriesFound = std::ranges::count(ItmL1_BoolArray, true);
 

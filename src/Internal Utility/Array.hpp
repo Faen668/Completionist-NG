@@ -69,6 +69,7 @@
 #include "Patches/Wyrmstooth/CFramework_WYR.hpp"
 #include "Patches/Vigilant/CFramework_VIG.hpp"
 #include "Patches/Legacy of the Dragonborn/CFramework_LOD.hpp"
+#include "Patches/SpellTomes/CFramework_SpellTomes.hpp"
 
 namespace ArrayHolder {
 	using namespace Serialization;
@@ -98,16 +99,39 @@ namespace ArrayHolder {
 		kFramework_BHS = 14, // Books (H-S)
 		kFramework_BTY = 15, // Books (T-Y)
 		kFramework_SSK = 16, // Skill (Skyrim)
-		kFramework_TSK = 17, // Tomes (Skyrim)
+
+		kFramework_T0A = 17, // Tomes (Skyrim)
+		kFramework_T0C = 50, // Tomes (Skyrim)
+		kFramework_T0D = 51, // Tomes (Skyrim)
+		kFramework_T0I = 52, // Tomes (Skyrim)
+		kFramework_T0R = 53, // Tomes (Skyrim)
+
 		kFramework_BDG = 18, // Books (Dawnguard)
-		kFramework_TDG = 19, // Tomes (Dawnguard)
+
+		kFramework_T1A = 19, // Tomes (Dawnguard)
+		kFramework_T1C = 54, // Tomes (Dawnguard)
+		kFramework_T1D = 55, // Tomes (Dawnguard)
+		kFramework_T1I = 56, // Tomes (Dawnguard)
+		kFramework_T1R = 57, // Tomes (Dawnguard)
+
 		kFramework_BDB = 20, // Books (Dragonborn)
-		kFramework_TDB = 21, // Tomes (Dragonborn)
+
+		kFramework_T2A = 21, // Tomes (Dragonborn)
+		kFramework_T2C = 58, // Tomes (Dragonborn)
+		kFramework_T2D = 59, // Tomes (Dragonborn)
+		kFramework_T2I = 60, // Tomes (Dragonborn)
+		kFramework_T2R = 61, // Tomes (Dragonborn)
+
 		kFramework_MSK = 22, // Treasure Maps (Skyrim)
 		kFramework_MNT = 23, // Treasure Maps (New Treasure Hunt)
 		kFramework_MTH = 24, // Treasure Maps (Treasure Hunter)
 		kFramework_CCB = 25, // Books (Creation Club)
-		kFramework_CCT = 26, // Tomes (Creation Club)
+
+		kFramework_T3A = 26, // Tomes (Creation Club)
+		kFramework_T3C = 62, // Tomes (Creation Club)
+		kFramework_T3D = 63, // Tomes (Creation Club)
+		kFramework_T3I = 64, // Tomes (Creation Club)
+		kFramework_T3R = 65, // Tomes (Creation Club)
 
 		//Misc (Locations)
 		kFramework_MAG = 27, // Locations (A-G)
@@ -239,6 +263,36 @@ namespace ArrayHolder {
 		kPatch_VIG_I = 269, // Vigilant {Items)
 		kPatch_VIG_B = 270,	// Vigilant {Books)
 		kPatch_VIG_L = 271,	// Vigilant {Locations)
+		
+		kPatch_SpellTomes_ApoA = 300, // Apocalypse - Magic of Skyrim
+		kPatch_SpellTomes_ApoC = 301, // Apocalypse - Magic of Skyrim
+		kPatch_SpellTomes_ApoD = 302, // Apocalypse - Magic of Skyrim
+		kPatch_SpellTomes_ApoI = 303, // Apocalypse - Magic of Skyrim
+		kPatch_SpellTomes_ApoR = 304, // Apocalypse - Magic of Skyrim
+
+		kPatch_SpellTomes_OdiA = 305, // Odin - Skyrim Magic Overhaul
+		kPatch_SpellTomes_OdiC = 306, // Odin - Skyrim Magic Overhaul
+		kPatch_SpellTomes_OdiD = 307, // Odin - Skyrim Magic Overhaul
+		kPatch_SpellTomes_OdiI = 308, // Odin - Skyrim Magic Overhaul
+		kPatch_SpellTomes_OdiR = 309, // Odin - Skyrim Magic Overhaul
+
+		kPatch_SpellTomes_MysA = 310, // Mysticism
+		kPatch_SpellTomes_MysC = 311, // Mysticism
+		kPatch_SpellTomes_MysD = 312, // Mysticism
+		kPatch_SpellTomes_MysI = 313, // Mysticism
+		kPatch_SpellTomes_MysR = 314, // Mysticism
+
+		kPatch_SpellTomes_ForA = 315, // Forgotten Magic Redone
+		kPatch_SpellTomes_ForC = 316, // Forgotten Magic Redone
+		kPatch_SpellTomes_ForD = 317, // Forgotten Magic Redone
+		kPatch_SpellTomes_ForI = 318, // Forgotten Magic Redone
+		kPatch_SpellTomes_ForR = 319, // Forgotten Magic Redone
+
+		kPatch_SpellTomes_TriA = 320, // Triumvirate
+		kPatch_SpellTomes_TriC = 321, // Triumvirate
+		kPatch_SpellTomes_TriD = 322, // Triumvirate
+		kPatch_SpellTomes_TriI = 323, // Triumvirate
+		kPatch_SpellTomes_TriR = 324, // Triumvirate
 
 		kTotal,
 	};
@@ -343,6 +397,7 @@ namespace ArrayHolder {
 	//Counters 
 	static std::int32_t i_Nsize = 0;
 	static std::int32_t i_Ssize = 0;
+	static std::int32_t i_Qsize = 0;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Array Getter (MCM Proc) --
@@ -443,6 +498,8 @@ namespace ArrayHolder {
 		qTextSet.try_emplace(a_questID, a_texts);
 		qBoolSet.try_emplace(a_questID, a_bools);
 		qRadiSet.try_emplace(a_questID, a_radis);
+
+		i_Qsize += 1;
 	}
 
 	//---------------------------------------------------
@@ -549,17 +606,37 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_BHS>(&CFramework_Books::Books_HS_NameArray, &CFramework_Books::Books_HS_TextArray, &CFramework_Books::Books_HS_BoolArray, &CFramework_Books::Books_HS_FormArray, &CFramework_Books::Books_HS_EntriesFound, &CFramework_Books::Books_HS_EntriesTotal, &CFramework_Books_HS::Data);
 		AttemptToAdd<FrameworkID::kFramework_BTY>(&CFramework_Books::Books_TY_NameArray, &CFramework_Books::Books_TY_TextArray, &CFramework_Books::Books_TY_BoolArray, &CFramework_Books::Books_TY_FormArray, &CFramework_Books::Books_TY_EntriesFound, &CFramework_Books::Books_TY_EntriesTotal, &CFramework_Books_TY::Data);
 		AttemptToAdd<FrameworkID::kFramework_SSK>(&CFramework_Books::Skill_SK_NameArray, &CFramework_Books::Skill_SK_TextArray, &CFramework_Books::Skill_SK_BoolArray, &CFramework_Books::Skill_SK_FormArray, &CFramework_Books::Skill_SK_EntriesFound, &CFramework_Books::Skill_SK_EntriesTotal, &CFramework_Skill_SK::Data);
-		AttemptToAdd<FrameworkID::kFramework_TSK>(&CFramework_Books::Tomes_SK_NameArray, &CFramework_Books::Tomes_SK_TextArray, &CFramework_Books::Tomes_SK_BoolArray, &CFramework_Books::Tomes_SK_FormArray, &CFramework_Books::Tomes_SK_EntriesFound, &CFramework_Books::Tomes_SK_EntriesTotal, &CFramework_Tomes_SK::Data);
 		AttemptToAdd<FrameworkID::kFramework_BDG>(&CFramework_Books::Books_DG_NameArray, &CFramework_Books::Books_DG_TextArray, &CFramework_Books::Books_DG_BoolArray, &CFramework_Books::Books_DG_FormArray, &CFramework_Books::Books_DG_EntriesFound, &CFramework_Books::Books_DG_EntriesTotal, &CFramework_Books_DG::Data);
-		AttemptToAdd<FrameworkID::kFramework_TDG>(&CFramework_Books::Tomes_DG_NameArray, &CFramework_Books::Tomes_DG_TextArray, &CFramework_Books::Tomes_DG_BoolArray, &CFramework_Books::Tomes_DG_FormArray, &CFramework_Books::Tomes_DG_EntriesFound, &CFramework_Books::Tomes_DG_EntriesTotal, &CFramework_Tomes_DG::Data);
 		AttemptToAdd<FrameworkID::kFramework_BDB>(&CFramework_Books::Books_DB_NameArray, &CFramework_Books::Books_DB_TextArray, &CFramework_Books::Books_DB_BoolArray, &CFramework_Books::Books_DB_FormArray, &CFramework_Books::Books_DB_EntriesFound, &CFramework_Books::Books_DB_EntriesTotal, &CFramework_Books_DB::Data);
-		AttemptToAdd<FrameworkID::kFramework_TDB>(&CFramework_Books::Tomes_DB_NameArray, &CFramework_Books::Tomes_DB_TextArray, &CFramework_Books::Tomes_DB_BoolArray, &CFramework_Books::Tomes_DB_FormArray, &CFramework_Books::Tomes_DB_EntriesFound, &CFramework_Books::Tomes_DB_EntriesTotal, &CFramework_Tomes_DB::Data);
 		AttemptToAdd<FrameworkID::kFramework_MSK>(&CFramework_Books::TMaps_SK_NameArray, &CFramework_Books::TMaps_SK_TextArray, &CFramework_Books::TMaps_SK_BoolArray, &CFramework_Books::TMaps_SK_FormArray, &CFramework_Books::TMaps_SK_EntriesFound, &CFramework_Books::TMaps_SK_EntriesTotal, &CFramework_TMaps_SK::Data);
 		AttemptToAdd<FrameworkID::kFramework_MNT>(&CFramework_Books::TMaps_NT_NameArray, &CFramework_Books::TMaps_NT_TextArray, &CFramework_Books::TMaps_NT_BoolArray, &CFramework_Books::TMaps_NT_FormArray, &CFramework_Books::TMaps_NT_EntriesFound, &CFramework_Books::TMaps_NT_EntriesTotal, &CFramework_TMaps_NT::Data);
 		AttemptToAdd<FrameworkID::kFramework_MTH>(&CFramework_Books::TMaps_TH_NameArray, &CFramework_Books::TMaps_TH_TextArray, &CFramework_Books::TMaps_TH_BoolArray, &CFramework_Books::TMaps_TH_FormArray, &CFramework_Books::TMaps_TH_EntriesFound, &CFramework_Books::TMaps_TH_EntriesTotal, &CFramework_TMaps_TH::Data);
-		
 		AttemptToAdd<FrameworkID::kFramework_CCB>(&CFramework_Books::Books_CC_NameArray, &CFramework_Books::Books_CC_TextArray, &CFramework_Books::Books_CC_BoolArray, &CFramework_Books::Books_CC_FormArray, &CFramework_Books::Books_CC_EntriesFound, &CFramework_Books::Books_CC_EntriesTotal, &CFramework_Books_CC::Data);
-		AttemptToAdd<FrameworkID::kFramework_CCT>(&CFramework_Books::Tomes_CC_NameArray, &CFramework_Books::Tomes_CC_TextArray, &CFramework_Books::Tomes_CC_BoolArray, &CFramework_Books::Tomes_CC_FormArray, &CFramework_Books::Tomes_CC_EntriesFound, &CFramework_Books::Tomes_CC_EntriesTotal, &CFramework_Tomes_CC::Data);
+
+		AttemptToAdd<FrameworkID::kFramework_T0A>(&CFramework_Books::Tomes_SK_A_NameArray, &CFramework_Books::Tomes_SK_A_TextArray, &CFramework_Books::Tomes_SK_A_BoolArray, &CFramework_Books::Tomes_SK_A_FormArray, &CFramework_Books::Tomes_SK_A_EntriesFound, &CFramework_Books::Tomes_SK_A_EntriesTotal, &CFramework_Tomes_SK::Data);
+		AttemptToAdd<FrameworkID::kFramework_T0C>(&CFramework_Books::Tomes_SK_C_NameArray, &CFramework_Books::Tomes_SK_C_TextArray, &CFramework_Books::Tomes_SK_C_BoolArray, &CFramework_Books::Tomes_SK_C_FormArray, &CFramework_Books::Tomes_SK_C_EntriesFound, &CFramework_Books::Tomes_SK_C_EntriesTotal, &CFramework_Tomes_SK::Data);
+		AttemptToAdd<FrameworkID::kFramework_T0D>(&CFramework_Books::Tomes_SK_D_NameArray, &CFramework_Books::Tomes_SK_D_TextArray, &CFramework_Books::Tomes_SK_D_BoolArray, &CFramework_Books::Tomes_SK_D_FormArray, &CFramework_Books::Tomes_SK_D_EntriesFound, &CFramework_Books::Tomes_SK_D_EntriesTotal, &CFramework_Tomes_SK::Data);
+		AttemptToAdd<FrameworkID::kFramework_T0I>(&CFramework_Books::Tomes_SK_I_NameArray, &CFramework_Books::Tomes_SK_I_TextArray, &CFramework_Books::Tomes_SK_I_BoolArray, &CFramework_Books::Tomes_SK_I_FormArray, &CFramework_Books::Tomes_SK_I_EntriesFound, &CFramework_Books::Tomes_SK_I_EntriesTotal, &CFramework_Tomes_SK::Data);
+		AttemptToAdd<FrameworkID::kFramework_T0R>(&CFramework_Books::Tomes_SK_R_NameArray, &CFramework_Books::Tomes_SK_R_TextArray, &CFramework_Books::Tomes_SK_R_BoolArray, &CFramework_Books::Tomes_SK_R_FormArray, &CFramework_Books::Tomes_SK_R_EntriesFound, &CFramework_Books::Tomes_SK_R_EntriesTotal, &CFramework_Tomes_SK::Data);
+
+		AttemptToAdd<FrameworkID::kFramework_T1A>(&CFramework_Books::Tomes_DG_A_NameArray, &CFramework_Books::Tomes_DG_A_TextArray, &CFramework_Books::Tomes_DG_A_BoolArray, &CFramework_Books::Tomes_DG_A_FormArray, &CFramework_Books::Tomes_DG_A_EntriesFound, &CFramework_Books::Tomes_DG_A_EntriesTotal, &CFramework_Tomes_DG::Data);
+		AttemptToAdd<FrameworkID::kFramework_T1C>(&CFramework_Books::Tomes_DG_C_NameArray, &CFramework_Books::Tomes_DG_C_TextArray, &CFramework_Books::Tomes_DG_C_BoolArray, &CFramework_Books::Tomes_DG_C_FormArray, &CFramework_Books::Tomes_DG_C_EntriesFound, &CFramework_Books::Tomes_DG_C_EntriesTotal, &CFramework_Tomes_DG::Data);
+		AttemptToAdd<FrameworkID::kFramework_T1D>(&CFramework_Books::Tomes_DG_D_NameArray, &CFramework_Books::Tomes_DG_D_TextArray, &CFramework_Books::Tomes_DG_D_BoolArray, &CFramework_Books::Tomes_DG_D_FormArray, &CFramework_Books::Tomes_DG_D_EntriesFound, &CFramework_Books::Tomes_DG_D_EntriesTotal, &CFramework_Tomes_DG::Data);
+		AttemptToAdd<FrameworkID::kFramework_T1I>(&CFramework_Books::Tomes_DG_I_NameArray, &CFramework_Books::Tomes_DG_I_TextArray, &CFramework_Books::Tomes_DG_I_BoolArray, &CFramework_Books::Tomes_DG_I_FormArray, &CFramework_Books::Tomes_DG_I_EntriesFound, &CFramework_Books::Tomes_DG_I_EntriesTotal, &CFramework_Tomes_DG::Data);
+		AttemptToAdd<FrameworkID::kFramework_T1R>(&CFramework_Books::Tomes_DG_R_NameArray, &CFramework_Books::Tomes_DG_R_TextArray, &CFramework_Books::Tomes_DG_R_BoolArray, &CFramework_Books::Tomes_DG_R_FormArray, &CFramework_Books::Tomes_DG_R_EntriesFound, &CFramework_Books::Tomes_DG_R_EntriesTotal, &CFramework_Tomes_DG::Data);
+
+		AttemptToAdd<FrameworkID::kFramework_T2A>(&CFramework_Books::Tomes_DB_A_NameArray, &CFramework_Books::Tomes_DB_A_TextArray, &CFramework_Books::Tomes_DB_A_BoolArray, &CFramework_Books::Tomes_DB_A_FormArray, &CFramework_Books::Tomes_DB_A_EntriesFound, &CFramework_Books::Tomes_DB_A_EntriesTotal, &CFramework_Tomes_DB::Data);
+		AttemptToAdd<FrameworkID::kFramework_T2C>(&CFramework_Books::Tomes_DB_C_NameArray, &CFramework_Books::Tomes_DB_C_TextArray, &CFramework_Books::Tomes_DB_C_BoolArray, &CFramework_Books::Tomes_DB_C_FormArray, &CFramework_Books::Tomes_DB_C_EntriesFound, &CFramework_Books::Tomes_DB_C_EntriesTotal, &CFramework_Tomes_DB::Data);
+		AttemptToAdd<FrameworkID::kFramework_T2D>(&CFramework_Books::Tomes_DB_D_NameArray, &CFramework_Books::Tomes_DB_D_TextArray, &CFramework_Books::Tomes_DB_D_BoolArray, &CFramework_Books::Tomes_DB_D_FormArray, &CFramework_Books::Tomes_DB_D_EntriesFound, &CFramework_Books::Tomes_DB_D_EntriesTotal, &CFramework_Tomes_DB::Data);
+		AttemptToAdd<FrameworkID::kFramework_T2I>(&CFramework_Books::Tomes_DB_I_NameArray, &CFramework_Books::Tomes_DB_I_TextArray, &CFramework_Books::Tomes_DB_I_BoolArray, &CFramework_Books::Tomes_DB_I_FormArray, &CFramework_Books::Tomes_DB_I_EntriesFound, &CFramework_Books::Tomes_DB_I_EntriesTotal, &CFramework_Tomes_DB::Data);
+		AttemptToAdd<FrameworkID::kFramework_T2R>(&CFramework_Books::Tomes_DB_R_NameArray, &CFramework_Books::Tomes_DB_R_TextArray, &CFramework_Books::Tomes_DB_R_BoolArray, &CFramework_Books::Tomes_DB_R_FormArray, &CFramework_Books::Tomes_DB_R_EntriesFound, &CFramework_Books::Tomes_DB_R_EntriesTotal, &CFramework_Tomes_DB::Data);
+
+		AttemptToAdd<FrameworkID::kFramework_T3A>(&CFramework_Books::Tomes_CC_A_NameArray, &CFramework_Books::Tomes_CC_A_TextArray, &CFramework_Books::Tomes_CC_A_BoolArray, &CFramework_Books::Tomes_CC_A_FormArray, &CFramework_Books::Tomes_CC_A_EntriesFound, &CFramework_Books::Tomes_CC_A_EntriesTotal, &CFramework_Tomes_CC::Data);
+		AttemptToAdd<FrameworkID::kFramework_T3C>(&CFramework_Books::Tomes_CC_C_NameArray, &CFramework_Books::Tomes_CC_C_TextArray, &CFramework_Books::Tomes_CC_C_BoolArray, &CFramework_Books::Tomes_CC_C_FormArray, &CFramework_Books::Tomes_CC_C_EntriesFound, &CFramework_Books::Tomes_CC_C_EntriesTotal, &CFramework_Tomes_CC::Data);
+		AttemptToAdd<FrameworkID::kFramework_T3D>(&CFramework_Books::Tomes_CC_D_NameArray, &CFramework_Books::Tomes_CC_D_TextArray, &CFramework_Books::Tomes_CC_D_BoolArray, &CFramework_Books::Tomes_CC_D_FormArray, &CFramework_Books::Tomes_CC_D_EntriesFound, &CFramework_Books::Tomes_CC_D_EntriesTotal, &CFramework_Tomes_CC::Data);
+		AttemptToAdd<FrameworkID::kFramework_T3I>(&CFramework_Books::Tomes_CC_I_NameArray, &CFramework_Books::Tomes_CC_I_TextArray, &CFramework_Books::Tomes_CC_I_BoolArray, &CFramework_Books::Tomes_CC_I_FormArray, &CFramework_Books::Tomes_CC_I_EntriesFound, &CFramework_Books::Tomes_CC_I_EntriesTotal, &CFramework_Tomes_CC::Data);
+		AttemptToAdd<FrameworkID::kFramework_T3R>(&CFramework_Books::Tomes_CC_R_NameArray, &CFramework_Books::Tomes_CC_R_TextArray, &CFramework_Books::Tomes_CC_R_BoolArray, &CFramework_Books::Tomes_CC_R_FormArray, &CFramework_Books::Tomes_CC_R_EntriesFound, &CFramework_Books::Tomes_CC_R_EntriesTotal, &CFramework_Tomes_CC::Data);
+
 
 		//Frameworks - Misc (Locations) (Start) -------------
 		AttemptToAdd<FrameworkID::kFramework_MAG>(&CFramework_MapMa::MapMa_AG_NameArray, &CFramework_MapMa::MapMa_AG_TextArray, &CFramework_MapMa::MapMa_AG_BoolArray, &CFramework_MapMa::MapMa_AG_FormArray, &CFramework_MapMa::MapMa_AG_EntriesFound, &CFramework_MapMa::MapMa_AG_EntriesTotal, &CFramework_MapMa_AG::Data, true);
@@ -721,6 +798,37 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kPatch_VIG_B>(&CPatch_VIG::Books_NameArray, &CPatch_VIG::Books_TextArray, &CPatch_VIG::Books_BoolArray, &CPatch_VIG::Books_FormArray, &CPatch_VIG::Books_EntriesFound, &CPatch_VIG::Books_EntriesTotal, &CPatch_VIG_Books::Data);
 		AttemptToAdd<FrameworkID::kPatch_VIG_L>(&CPatch_VIG::MapMa_NameArray, &CPatch_VIG::MapMa_TextArray, &CPatch_VIG::MapMa_BoolArray, &CPatch_VIG::MapMa_FormArray, &CPatch_VIG::MapMa_EntriesFound, &CPatch_VIG::MapMa_EntriesTotal, &CPatch_VIG_MapMa::Data);
 
-		INFO("Registered {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Ssize, i_Nsize, (i_Ssize - i_Nsize));
+		//Patches - Spell Tomes (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoA>(&CPatch_SpellTomes::Apocalypse_A_NameArray, &CPatch_SpellTomes::Apocalypse_A_TextArray, &CPatch_SpellTomes::Apocalypse_A_BoolArray, &CPatch_SpellTomes::Apocalypse_A_FormArray, &CPatch_SpellTomes::Apocalypse_A_EntriesFound, &CPatch_SpellTomes::Apocalypse_A_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoC>(&CPatch_SpellTomes::Apocalypse_C_NameArray, &CPatch_SpellTomes::Apocalypse_C_TextArray, &CPatch_SpellTomes::Apocalypse_C_BoolArray, &CPatch_SpellTomes::Apocalypse_C_FormArray, &CPatch_SpellTomes::Apocalypse_C_EntriesFound, &CPatch_SpellTomes::Apocalypse_C_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoD>(&CPatch_SpellTomes::Apocalypse_D_NameArray, &CPatch_SpellTomes::Apocalypse_D_TextArray, &CPatch_SpellTomes::Apocalypse_D_BoolArray, &CPatch_SpellTomes::Apocalypse_D_FormArray, &CPatch_SpellTomes::Apocalypse_D_EntriesFound, &CPatch_SpellTomes::Apocalypse_D_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoI>(&CPatch_SpellTomes::Apocalypse_I_NameArray, &CPatch_SpellTomes::Apocalypse_I_TextArray, &CPatch_SpellTomes::Apocalypse_I_BoolArray, &CPatch_SpellTomes::Apocalypse_I_FormArray, &CPatch_SpellTomes::Apocalypse_I_EntriesFound, &CPatch_SpellTomes::Apocalypse_I_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoR>(&CPatch_SpellTomes::Apocalypse_R_NameArray, &CPatch_SpellTomes::Apocalypse_R_TextArray, &CPatch_SpellTomes::Apocalypse_R_BoolArray, &CPatch_SpellTomes::Apocalypse_R_FormArray, &CPatch_SpellTomes::Apocalypse_R_EntriesFound, &CPatch_SpellTomes::Apocalypse_R_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);
+
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_OdiA>(&CPatch_SpellTomes::Odin_A_NameArray, &CPatch_SpellTomes::Odin_A_TextArray, &CPatch_SpellTomes::Odin_A_BoolArray, &CPatch_SpellTomes::Odin_A_FormArray, &CPatch_SpellTomes::Odin_A_EntriesFound, &CPatch_SpellTomes::Odin_A_EntriesTotal, &CPatch_SpellTomes_Odin::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_OdiC>(&CPatch_SpellTomes::Odin_C_NameArray, &CPatch_SpellTomes::Odin_C_TextArray, &CPatch_SpellTomes::Odin_C_BoolArray, &CPatch_SpellTomes::Odin_C_FormArray, &CPatch_SpellTomes::Odin_C_EntriesFound, &CPatch_SpellTomes::Odin_C_EntriesTotal, &CPatch_SpellTomes_Odin::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_OdiD>(&CPatch_SpellTomes::Odin_D_NameArray, &CPatch_SpellTomes::Odin_D_TextArray, &CPatch_SpellTomes::Odin_D_BoolArray, &CPatch_SpellTomes::Odin_D_FormArray, &CPatch_SpellTomes::Odin_D_EntriesFound, &CPatch_SpellTomes::Odin_D_EntriesTotal, &CPatch_SpellTomes_Odin::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_OdiI>(&CPatch_SpellTomes::Odin_I_NameArray, &CPatch_SpellTomes::Odin_I_TextArray, &CPatch_SpellTomes::Odin_I_BoolArray, &CPatch_SpellTomes::Odin_I_FormArray, &CPatch_SpellTomes::Odin_I_EntriesFound, &CPatch_SpellTomes::Odin_I_EntriesTotal, &CPatch_SpellTomes_Odin::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_OdiR>(&CPatch_SpellTomes::Odin_R_NameArray, &CPatch_SpellTomes::Odin_R_TextArray, &CPatch_SpellTomes::Odin_R_BoolArray, &CPatch_SpellTomes::Odin_R_FormArray, &CPatch_SpellTomes::Odin_R_EntriesFound, &CPatch_SpellTomes::Odin_R_EntriesTotal, &CPatch_SpellTomes_Odin::Data);
+
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_MysA>(&CPatch_SpellTomes::Mysticism_A_NameArray, &CPatch_SpellTomes::Mysticism_A_TextArray, &CPatch_SpellTomes::Mysticism_A_BoolArray, &CPatch_SpellTomes::Mysticism_A_FormArray, &CPatch_SpellTomes::Mysticism_A_EntriesFound, &CPatch_SpellTomes::Mysticism_A_EntriesTotal, &CPatch_SpellTomes_Mysticism::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_MysC>(&CPatch_SpellTomes::Mysticism_C_NameArray, &CPatch_SpellTomes::Mysticism_C_TextArray, &CPatch_SpellTomes::Mysticism_C_BoolArray, &CPatch_SpellTomes::Mysticism_C_FormArray, &CPatch_SpellTomes::Mysticism_C_EntriesFound, &CPatch_SpellTomes::Mysticism_C_EntriesTotal, &CPatch_SpellTomes_Mysticism::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_MysD>(&CPatch_SpellTomes::Mysticism_D_NameArray, &CPatch_SpellTomes::Mysticism_D_TextArray, &CPatch_SpellTomes::Mysticism_D_BoolArray, &CPatch_SpellTomes::Mysticism_D_FormArray, &CPatch_SpellTomes::Mysticism_D_EntriesFound, &CPatch_SpellTomes::Mysticism_D_EntriesTotal, &CPatch_SpellTomes_Mysticism::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_MysI>(&CPatch_SpellTomes::Mysticism_I_NameArray, &CPatch_SpellTomes::Mysticism_I_TextArray, &CPatch_SpellTomes::Mysticism_I_BoolArray, &CPatch_SpellTomes::Mysticism_I_FormArray, &CPatch_SpellTomes::Mysticism_I_EntriesFound, &CPatch_SpellTomes::Mysticism_I_EntriesTotal, &CPatch_SpellTomes_Mysticism::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_MysR>(&CPatch_SpellTomes::Mysticism_R_NameArray, &CPatch_SpellTomes::Mysticism_R_TextArray, &CPatch_SpellTomes::Mysticism_R_BoolArray, &CPatch_SpellTomes::Mysticism_R_FormArray, &CPatch_SpellTomes::Mysticism_R_EntriesFound, &CPatch_SpellTomes::Mysticism_R_EntriesTotal, &CPatch_SpellTomes_Mysticism::Data);
+
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ForA>(&CPatch_SpellTomes::ForgottenMagic_A_NameArray, &CPatch_SpellTomes::ForgottenMagic_A_TextArray, &CPatch_SpellTomes::ForgottenMagic_A_BoolArray, &CPatch_SpellTomes::ForgottenMagic_A_FormArray, &CPatch_SpellTomes::ForgottenMagic_A_EntriesFound, &CPatch_SpellTomes::ForgottenMagic_A_EntriesTotal, &CPatch_SpellTomes_ForgottenMagic::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ForC>(&CPatch_SpellTomes::ForgottenMagic_C_NameArray, &CPatch_SpellTomes::ForgottenMagic_C_TextArray, &CPatch_SpellTomes::ForgottenMagic_C_BoolArray, &CPatch_SpellTomes::ForgottenMagic_C_FormArray, &CPatch_SpellTomes::ForgottenMagic_C_EntriesFound, &CPatch_SpellTomes::ForgottenMagic_C_EntriesTotal, &CPatch_SpellTomes_ForgottenMagic::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ForD>(&CPatch_SpellTomes::ForgottenMagic_D_NameArray, &CPatch_SpellTomes::ForgottenMagic_D_TextArray, &CPatch_SpellTomes::ForgottenMagic_D_BoolArray, &CPatch_SpellTomes::ForgottenMagic_D_FormArray, &CPatch_SpellTomes::ForgottenMagic_D_EntriesFound, &CPatch_SpellTomes::ForgottenMagic_D_EntriesTotal, &CPatch_SpellTomes_ForgottenMagic::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ForI>(&CPatch_SpellTomes::ForgottenMagic_I_NameArray, &CPatch_SpellTomes::ForgottenMagic_I_TextArray, &CPatch_SpellTomes::ForgottenMagic_I_BoolArray, &CPatch_SpellTomes::ForgottenMagic_I_FormArray, &CPatch_SpellTomes::ForgottenMagic_I_EntriesFound, &CPatch_SpellTomes::ForgottenMagic_I_EntriesTotal, &CPatch_SpellTomes_ForgottenMagic::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ForR>(&CPatch_SpellTomes::ForgottenMagic_R_NameArray, &CPatch_SpellTomes::ForgottenMagic_R_TextArray, &CPatch_SpellTomes::ForgottenMagic_R_BoolArray, &CPatch_SpellTomes::ForgottenMagic_R_FormArray, &CPatch_SpellTomes::ForgottenMagic_R_EntriesFound, &CPatch_SpellTomes::ForgottenMagic_R_EntriesTotal, &CPatch_SpellTomes_ForgottenMagic::Data);
+
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriA>(&CPatch_SpellTomes::Triumvirate_A_NameArray, &CPatch_SpellTomes::Triumvirate_A_TextArray, &CPatch_SpellTomes::Triumvirate_A_BoolArray, &CPatch_SpellTomes::Triumvirate_A_FormArray, &CPatch_SpellTomes::Triumvirate_A_EntriesFound, &CPatch_SpellTomes::Triumvirate_A_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriC>(&CPatch_SpellTomes::Triumvirate_C_NameArray, &CPatch_SpellTomes::Triumvirate_C_TextArray, &CPatch_SpellTomes::Triumvirate_C_BoolArray, &CPatch_SpellTomes::Triumvirate_C_FormArray, &CPatch_SpellTomes::Triumvirate_C_EntriesFound, &CPatch_SpellTomes::Triumvirate_C_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriD>(&CPatch_SpellTomes::Triumvirate_D_NameArray, &CPatch_SpellTomes::Triumvirate_D_TextArray, &CPatch_SpellTomes::Triumvirate_D_BoolArray, &CPatch_SpellTomes::Triumvirate_D_FormArray, &CPatch_SpellTomes::Triumvirate_D_EntriesFound, &CPatch_SpellTomes::Triumvirate_D_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriI>(&CPatch_SpellTomes::Triumvirate_I_NameArray, &CPatch_SpellTomes::Triumvirate_I_TextArray, &CPatch_SpellTomes::Triumvirate_I_BoolArray, &CPatch_SpellTomes::Triumvirate_I_FormArray, &CPatch_SpellTomes::Triumvirate_I_EntriesFound, &CPatch_SpellTomes::Triumvirate_I_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
+		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriR>(&CPatch_SpellTomes::Triumvirate_R_NameArray, &CPatch_SpellTomes::Triumvirate_R_TextArray, &CPatch_SpellTomes::Triumvirate_R_BoolArray, &CPatch_SpellTomes::Triumvirate_R_FormArray, &CPatch_SpellTomes::Triumvirate_R_EntriesFound, &CPatch_SpellTomes::Triumvirate_R_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
+
+		INFO("Registered {} Quest Arrays and {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Qsize, i_Ssize, i_Nsize, (i_Ssize - i_Nsize));
 	}
 }

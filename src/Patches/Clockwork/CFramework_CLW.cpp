@@ -21,10 +21,6 @@ namespace CPatch_CLW {
 		/*06*/ {"Clockwork_Quest06_Key", "$Clockwork_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Clockwork_Quest06_Data", "CLWSide02Quest"},
 	};
 
-	constexpr std::size_t StandardCompletion[] = {
-	0,1,2,3,4,5,6
-	};
-
 	constexpr Serialization::FormArray Items = {
 	0x50BCDD,0x79768C,0x50BCDB,0x792579,
 	};
@@ -47,9 +43,7 @@ namespace CPatch_CLW {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -288,26 +282,18 @@ namespace CPatch_CLW {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Items_FormArray[i]->GetFormID())) {
-				Items_BoolArray[i] = true;
-			}
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_CLW_Items::Data);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_FormArray[i]->GetFormID())) {
-				Books_BoolArray[i] = true;
-			}
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
 
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID())) {
-				MapMa_BoolArray[i] = true;
-			}
+			MapMa_BoolArray[i] = FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID());
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();
@@ -326,7 +312,9 @@ namespace CPatch_CLW {
 
 	void CHandler::UpdateQuestFramework() {
 
-		for (auto i : StandardCompletion) {
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
+
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
 			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
 		}
 	};

@@ -5,6 +5,7 @@
 
 namespace CFramework_Pets {
 	using namespace CFramework_Master;
+	using namespace Serialization;
 
 	// clang-format off
 
@@ -32,15 +33,6 @@ namespace CFramework_Pets {
 
 	void CHandler::InstallFramework() {
 
-		PetsOfSkyrim_Installed = Serialization::CompletionistData::IsModInstalled("ccvsvsse002-pets.esl");
-		SaintSeducer_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse025-advdsgs.esm");
-
-		Petcrab_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse010-petdwarvenarmoredmudcrab.esl");
-		PetWolf_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse036-petbwolf.esl");
-		PetHund_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse035-petnhound.esl");
-
-		Miscellaneous_Installed = Petcrab_Installed || PetWolf_Installed || PetHund_Installed;
-
 		InjectAndCompileData();
 	}
 
@@ -64,52 +56,46 @@ namespace CFramework_Pets {
 			return;
 		}
 
-		if (PetsOfSkyrim_Installed) {
-			if (auto t_pos = std::ranges::find(Pets_PS_NameArray, a_name); t_pos != Pets_PS_NameArray.end()) {
-				auto b_pos = std::distance(Pets_PS_NameArray.begin(), t_pos);
+		if (auto t_pos = std::ranges::find(Pets_PS_NameArray, a_name); t_pos != Pets_PS_NameArray.end()) {
+			auto b_pos = std::distance(Pets_PS_NameArray.begin(), t_pos);
 
-				if (!FoundItemData_NoShow.HasForm(Pets_PS_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_PS_NameArray[b_pos]);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-				}
-
-				FoundItemData_NoShow.AddForm(Pets_PS_FormArray[b_pos]);
-				Pets_PS_BoolArray[b_pos] = true;
-				Pets_PS_EntriesFound = std::ranges::count(Pets_PS_BoolArray, true);
-				return;
+			if (!FoundItemData_NoShow.HasForm(Pets_PS_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_PS_NameArray[b_pos]);
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
+
+			FoundItemData_NoShow.AddForm(Pets_PS_FormArray[b_pos]);
+			Pets_PS_BoolArray[b_pos] = true;
+			Pets_PS_EntriesFound = std::ranges::count(Pets_PS_BoolArray, true);
+			return;
 		}
 
-		if (SaintSeducer_Installed) {
-			if (auto t_pos = std::ranges::find(Pets_SS_NameArray, a_name); t_pos != Pets_SS_NameArray.end()) {
-				auto b_pos = std::distance(Pets_SS_NameArray.begin(), t_pos);
+		if (auto t_pos = std::ranges::find(Pets_SS_NameArray, a_name); t_pos != Pets_SS_NameArray.end()) {
+			auto b_pos = std::distance(Pets_SS_NameArray.begin(), t_pos);
 
-				if (!FoundItemData_NoShow.HasForm(Pets_SS_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_SS_NameArray[b_pos]);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-				}
-
-				FoundItemData_NoShow.AddForm(Pets_SS_FormArray[b_pos]);
-				Pets_SS_BoolArray[b_pos] = true;
-				Pets_SS_EntriesFound = std::ranges::count(Pets_SS_BoolArray, true);
-				return;
+			if (!FoundItemData_NoShow.HasForm(Pets_SS_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_SS_NameArray[b_pos]);
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
+
+			FoundItemData_NoShow.AddForm(Pets_SS_FormArray[b_pos]);
+			Pets_SS_BoolArray[b_pos] = true;
+			Pets_SS_EntriesFound = std::ranges::count(Pets_SS_BoolArray, true);
+			return;
 		}
 
-		if (Miscellaneous_Installed) {
-			if (auto t_pos = std::ranges::find(Pets_MP_NameArray, a_name); t_pos != Pets_MP_NameArray.end()) {
-				auto b_pos = std::distance(Pets_MP_NameArray.begin(), t_pos);
+		if (auto t_pos = std::ranges::find(Pets_MP_NameArray, a_name); t_pos != Pets_MP_NameArray.end()) {
+			auto b_pos = std::distance(Pets_MP_NameArray.begin(), t_pos);
 
-				if (!FoundItemData_NoShow.HasForm(Pets_MP_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_MP_NameArray[b_pos]);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-				}
-
-				FoundItemData_NoShow.AddForm(Pets_MP_FormArray[b_pos]);
-				Pets_MP_BoolArray[b_pos] = true;
-				Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
-				return;
+			if (!FoundItemData_NoShow.HasForm(Pets_MP_FormArray[b_pos]->GetFormID())) {
+				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_MP_NameArray[b_pos]);
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
+
+			FoundItemData_NoShow.AddForm(Pets_MP_FormArray[b_pos]);
+			Pets_MP_BoolArray[b_pos] = true;
+			Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
+			return;
 		}
 	}
 
@@ -118,6 +104,13 @@ namespace CFramework_Pets {
 	//---------------------------------------------------
 
 	void CHandler::InjectAndCompileData() {
+
+		auto PetsOfSkyrim_Installed = Serialization::CompletionistData::IsModInstalled("ccvsvsse002-pets.esl");
+		auto SaintSeducer_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse025-advdsgs.esm");
+
+		auto Petcrab_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse010-petdwarvenarmoredmudcrab.esl");
+		auto PetWolf_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse036-petbwolf.esl");
+		auto PetHund_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse035-petnhound.esl");
 
 		CFramework_Pets_VP::Data.CompileFormArray(CFramework_Pets::VanillaPets, "HearthFires.esm");
 		CFramework_Pets_VP::Data.Populate(Pets_VP_NameArray, Pets_VP_FormArray, Pets_VP_BoolArray, Pets_VP_TextArray);
@@ -156,40 +149,40 @@ namespace CFramework_Pets {
 			Pets_SS_EntriesFound = std::ranges::count(Pets_SS_BoolArray, true);
 		}
 
-		if (Miscellaneous_Installed) {
-
-			if (PetWolf_Installed) {
-				CFramework_Pets_MP::Data.AddForm(0x000D62, "ccbgssse010-petdwarvenarmoredmudcrab.esl");
-			}
-
-			if (Petcrab_Installed) {
-				CFramework_Pets_MP::Data.AddForm(0x000D63, "ccbgssse036-petbwolf.esl");
-			}
-
-			if (PetHund_Installed) {
-				CFramework_Pets_MP::Data.AddForm(0x000D64, "ccbgssse035-petnhound.esl");
-			}
-
-			CFramework_Pets_MP::Data.CompileFormArray(CFramework_Pets::Miscellaneous, "");
-			CFramework_Pets_MP::Data.Populate(Pets_MP_NameArray, Pets_MP_FormArray, Pets_MP_BoolArray, Pets_MP_TextArray, false);
-
-			Pets_MP_TextArray.clear();
-
-			if (PetWolf_Installed) {
-				Pets_MP_TextArray.push_back("$PetHighlightMisc00{" + Pets_MP_NameArray[0] + "}{" + Pets_MP_NameArray[0] + "}"); //Bone Wolf
-			}
-
-			if (Petcrab_Installed) {
-				Pets_MP_TextArray.push_back("$PetHighlightMisc01{" + Pets_MP_NameArray[1] + "}{" + Pets_MP_NameArray[1] + "}"); //Dwarven Armored Mudcrab
-			}
-
-			if (PetHund_Installed) {
-				Pets_MP_TextArray.push_back("$PetHighlightMisc02{" + Pets_MP_NameArray[2] + "}{" + Pets_MP_NameArray[2] + "}"); //Nix-Hound
-			}
-
-			Pets_MP_EntriesTotal = Pets_MP_FormArray.size();
-			Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
+		if (PetWolf_Installed) {
+			CFramework_Pets_MP::Data.AddForm(0x000D63, "ccbgssse036-petbwolf.esl");
 		}
+
+		if (Petcrab_Installed) {
+			CFramework_Pets_MP::Data.AddForm(0x000D62, "ccbgssse010-petdwarvenarmoredmudcrab.esl");
+		}
+
+		if (PetHund_Installed) {
+			CFramework_Pets_MP::Data.AddForm(0x000D64, "ccbgssse035-petnhound.esl");
+		}
+
+		CFramework_Pets_MP::Data.CompileFormArray(CFramework_Pets::Miscellaneous, "");
+		CFramework_Pets_MP::Data.Populate(Pets_MP_NameArray, Pets_MP_FormArray, Pets_MP_BoolArray, Pets_MP_TextArray, false);
+
+		Pets_MP_TextArray.clear();
+
+		if (PetWolf_Installed) {
+			std::string name = RE::TESDataHandler::GetSingleton()->LookupForm(0x000D63, "ccbgssse036-petbwolf.esl")->GetName();
+			Pets_MP_TextArray.push_back("$PetHighlightMisc00{" + name + "}{" + name + "}"); //Bone Wolf
+		}
+
+		if (Petcrab_Installed) {
+			std::string name = RE::TESDataHandler::GetSingleton()->LookupForm(0x000D62, "ccbgssse010-petdwarvenarmoredmudcrab.esl")->GetName();
+			Pets_MP_TextArray.push_back("$PetHighlightMisc01{" + name + "}{" + name + "}"); //Dwarven Armored Mudcrab
+		}
+
+		if (PetHund_Installed) {
+			std::string name = RE::TESDataHandler::GetSingleton()->LookupForm(0x000D64, "ccbgssse035-petnhound.esl")->GetName();
+			Pets_MP_TextArray.push_back("$PetHighlightMisc02{" + name + "}{" + name + "}"); //Nix-Hound
+		}
+
+		Pets_MP_EntriesTotal = Pets_MP_FormArray.size();
+		Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
 	}
 
 	//---------------------------------------------------

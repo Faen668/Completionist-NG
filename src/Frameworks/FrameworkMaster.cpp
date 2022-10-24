@@ -108,6 +108,9 @@ namespace CFramework_Master {
 		CPatch_FSH::CHandler::InstallFramework();
 		CPatch_LOD::CHandler::InstallFramework();
 
+		//SpellTomes
+		CPatch_SpellTomes::CHandler::InstallFramework();
+
 		//Register Arrays
 		ArrayHolder::RegisterArrays();
 
@@ -151,11 +154,77 @@ namespace CFramework_Master {
 		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
 		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
 		a_vm->RegisterFunction("ShouldDisplayMiscHeader",		"Completionist_Native", ShouldDisplayMiscHeader);
+		a_vm->RegisterFunction("ShouldDisplayTomeHeader",		"Completionist_Native", ShouldDisplayTomeHeader);
 
 		a_vm->RegisterFunction("GetVersion",					"Completionist_Native", GetVersion);
 		a_vm->RegisterFunction("GetHexValue",					"Completionist_Native", GetHexValue);
 		a_vm->RegisterFunction("SendNotification",				"Completionist_Native", SendNotificationExt);
+
+		a_vm->RegisterFunction("UpdateVariables", "Completionist_Native", UpdateCompletion);
+
 		return true;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update From MCM ) --------
+	//---------------------------------------------------
+
+	void FrameworkAPI::UpdateCompletion(RE::StaticFunctionTag*) {
+		using namespace CVariables;
+
+		VariablesAPI::Update();
+
+		CQFramework_SK::CHandler::UpdateCompletion();
+		CQFramework_DG::CHandler::UpdateCompletion();
+		CQFramework_DB::CHandler::UpdateCompletion();
+		CQFramework_CW::CHandler::UpdateCompletion();
+
+		CQFramework_Dawnstar::CHandler::UpdateCompletion();
+		CQFramework_Falkreath::CHandler::UpdateCompletion();
+		CQFramework_Markarth::CHandler::UpdateCompletion();
+		CQFramework_Morthal::CHandler::UpdateCompletion();
+		CQFramework_RavenRock::CHandler::UpdateCompletion();
+		CQFramework_Riften::CHandler::UpdateCompletion();
+		CQFramework_SkaalVillage::CHandler::UpdateCompletion();
+		CQFramework_SmallTowns::CHandler::UpdateCompletion();
+		CQFramework_Solitude::CHandler::UpdateCompletion();
+		CQFramework_TelMithryn::CHandler::UpdateCompletion();
+		CQFramework_Thirsk::CHandler::UpdateCompletion();
+		CQFramework_Whiterun::CHandler::UpdateCompletion();
+		CQFramework_Windhelm::CHandler::UpdateCompletion();
+		CQFramework_Winterhold::CHandler::UpdateCompletion();
+
+		CQFramework_CollegeOfWinterhold::CHandler::UpdateCompletion();
+		CQFramework_Companions::CHandler::UpdateCompletion();
+		CQFramework_DarkBrotherhood::CHandler::UpdateCompletion();
+		CQFramework_Dawnguard::CHandler::UpdateCompletion();
+		CQFramework_ThievesGuild::CHandler::UpdateCompletion();
+		CQFramework_Vampires::CHandler::UpdateCompletion();
+
+		CQFramework_Dungeons::CHandler::UpdateCompletion();
+		CQFramework_Misc_SK::CHandler::UpdateCompletion();
+		CQFramework_Misc_DG::CHandler::UpdateCompletion();
+		CQFramework_Misc_DB::CHandler::UpdateCompletion();
+
+		CQFramework_CC1::CHandler::UpdateCompletion();
+		CQFramework_CC2::CHandler::UpdateCompletion();
+		CQFramework_CC3::CHandler::UpdateCompletion();
+
+		CPatch_BOO::CHandler::UpdateQuestFramework();
+		CPatch_CLW::CHandler::UpdateQuestFramework();
+		CPatch_FSK::CHandler::UpdateQuestFramework();
+		CPatch_GCN::CHandler::UpdateQuestFramework();
+		CPatch_HRB::CHandler::UpdateQuestFramework();
+		CPatch_3DC::CHandler::UpdateQuestFramework();
+		CPatch_LOD::CHandler::UpdateQuestFramework();
+		CPatch_MAS::CHandler::UpdateQuestFramework();
+		CPatch_MTE::CHandler::UpdateQuestFramework();
+		CPatch_AHO::CHandler::UpdateQuestFramework();
+		CPatch_TEL::CHandler::UpdateQuestFramework();
+		CPatch_UND::CHandler::UpdateQuestFramework();
+		CPatch_VIG::CHandler::UpdateQuestFramework();
+		CPatch_WOL::CHandler::UpdateQuestFramework();
+		CPatch_WYR::CHandler::UpdateQuestFramework();
 	}
 
 	//---------------------------------------------------
@@ -200,6 +269,7 @@ namespace CFramework_Master {
 	bool FrameworkAPI::CCBooksInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_Books_CC::Data.data.size());; }
 	bool FrameworkAPI::CCItemsInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
 	bool FrameworkAPI::ShouldDisplayMiscHeader(RE::StaticFunctionTag*)			{ return bool(PatchesInstalled); }
+	bool FrameworkAPI::ShouldDisplayTomeHeader(RE::StaticFunctionTag*)			{ return bool(TomesInstalled); }
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Load Frameworks ) --------
@@ -243,7 +313,8 @@ namespace CFramework_Master {
 		CPatch_VIG::CHandler::UpdateFoundForms();
 		CPatch_FSH::CHandler::UpdateFoundForms();
 
-		CQuestKeys_Stages.DumpToLog();
+		//SpellTomes
+		CPatch_SpellTomes::CHandler::UpdateFoundForms();
 	}
 
 	//---------------------------------------------------
@@ -374,7 +445,6 @@ namespace CFramework_Master {
 	
 		CQuestKeys_Natural.AddKey(a_key);
 		CQuestKeys_Manual.RemoveKey(a_key);
-		INFO("Returning 'Quest Complete'  for quest {}", a_key);
 		return true;
 	}
 
@@ -403,12 +473,15 @@ namespace CFramework_Master {
 
 		auto Imp = JarlScript->GetProperty(a_imp);
 		auto Son = JarlScript->GetProperty(a_son);
-		if (!Imp || Imp->GetSInt() < 1 ||  !Son || Son->GetSInt() < 1) { return false; }
+		if (!Imp || !Son) { return false; }
 
-		CQuestKeys_Natural.AddKey(a_key);
-		CQuestKeys_Manual.RemoveKey(a_key);
-		INFO("Returning 'Quest Complete'  for quest {}", a_key);
-		return true;
+		if (Imp->GetSInt() > 0 || Son->GetSInt() > 0) {
+			CQuestKeys_Natural.AddKey(a_key);
+			CQuestKeys_Manual.RemoveKey(a_key);
+			return true;
+			
+		}
+		return false;
 	}
 
 	//---------------------------------------------------
@@ -417,7 +490,7 @@ namespace CFramework_Master {
 
 	bool FrameworkAPI::IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value) {
 
-		auto* quest = GetQuest(a_questID);
+		const auto* quest = GetQuest(a_questID);
 		auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_globalID);
 
 		if (!quest || !global) { return false; }
@@ -471,7 +544,6 @@ namespace CFramework_Master {
 		if (global->value >= a_value) { 
 			CQuestKeys_Natural.AddKey(a_key);
 			CQuestKeys_Manual.RemoveKey(a_key);
-			INFO("Returning 'Quest Complete'  for quest {}", a_key);
 			return true;
 		}
 		return false;
@@ -488,7 +560,6 @@ namespace CFramework_Master {
 
 		CQuestKeys_Natural.AddKey(a_key);
 		CQuestKeys_Manual.RemoveKey(a_key);
-		INFO("Returning 'Quest Complete'  for quest {}", a_key);
 		return true;
 	}
 
@@ -593,5 +664,59 @@ namespace CFramework_Master {
 			HandleTotalSet(FrameworkID(a_ID)) = HandleFormSet(FrameworkID(a_ID)).size();
 			HandleFoundSet(FrameworkID(a_ID)) = std::ranges::count(HandleBoolSet(FrameworkID(a_ID)), true);
 		}
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Has Book Spell / Read ) --
+	//---------------------------------------------------
+
+	bool FrameworkAPI::IsBookKnown(RE::TESForm* a_form) {
+
+		auto* itm = static_cast<RE::TESObjectBOOK*>(a_form);
+		auto* pcr = RE::PlayerCharacter::GetSingleton();
+		if (!itm || !pcr) { return false; }
+
+		if (itm->IsRead() || (itm->GetSpell() ? pcr->HasSpell(itm->GetSpell()) : false)) {
+			FoundItemData.AddForm(itm);
+		}
+
+		return FoundItemData.HasForm(itm);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Is Item Known ) ----------
+	//---------------------------------------------------
+
+	bool FrameworkAPI::IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data = nullptr) {
+
+		if (!a_form) { return false; }
+
+		auto base = a_data->GetBase(a_form->GetFormID()) ? a_data->GetBase(a_form->GetFormID()) : a_form->GetFormID();
+		auto* pcr = RE::PlayerCharacter::GetSingleton();
+
+		if (pcr->GetItemCount(a_data->GetForm<RE::TESBoundObject>(base)) > 0) {
+			FoundItemData.AddForm(base);
+			for (auto var : a_data->GetAllVariations()) {
+				if (a_data->GetBase(var) == base) {
+					FoundItemData.AddForm(var);
+				}
+			}
+			return FoundItemData.HasForm(a_form);
+		}
+
+		for (auto var : a_data->GetAllVariations()) {
+			if (a_data->GetBase(var) == base && pcr->GetItemCount(a_data->GetForm<RE::TESBoundObject>(var)) > 0) {
+
+				FoundItemData.AddForm(base);
+				for (auto variation : a_data->GetAllVariations()) {
+					if (a_data->GetBase(variation) == base) {
+						FoundItemData.AddForm(variation);
+					}
+				}
+				return FoundItemData.HasForm(a_form);
+			}
+		}
+
+		return FoundItemData.HasForm(a_form);
 	}
 }

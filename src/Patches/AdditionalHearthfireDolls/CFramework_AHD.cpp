@@ -28,9 +28,7 @@ namespace CPatch_AHD {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -111,14 +109,10 @@ namespace CPatch_AHD {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Items_FormArray[i]->GetFormID())) {
-				Items_BoolArray[i] = true;
-			}
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_AHD_Items::Data);
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();

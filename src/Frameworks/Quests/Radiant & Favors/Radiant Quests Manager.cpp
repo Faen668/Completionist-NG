@@ -1,12 +1,10 @@
 #include "Radiant Quests Manager.hpp"
 #include "Quests_Bounty.hpp"
-#include "Quests_College.hpp"
 #include "Quests_Companions.hpp"
 #include "Quests_Dawnguard.hpp"
 #include "Quests_Favors.hpp"
 #include "Quests_Misc.hpp"
 #include "Quests_SupportedMods.hpp"
-#include "Quests_ThievesGuild.hpp"
 #include "Quests_Beggars.hpp"
 
 namespace Quest_Manager
@@ -26,56 +24,6 @@ namespace Quest_Manager
 				auto args = RE::MakeFunctionArguments(RE::BSFixedString(questID), RE::BSFixedString(AliasName));
 				papyrusVM->DispatchMethodCall2(questHandle, "Completionist_QuestsScript", "ProcessQuest_CW", args, funcReturn);
 				return;
-			}
-			return;
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (questID == "FavorJobsDrunks") {
-
-			if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x0013390, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksCosnach")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x0013392, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksDegaine")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x003550B, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksEmbry")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x0013619, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksKarl")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x001C186, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksRanmir")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x00368C8, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksRazelan")) {
-					global->value += 1;
-					return;
-				}
-			}
-			else if (_ID == RE::TESDataHandler::GetSingleton()->LookupFormID(0x001413F, "Skyrim.esm")) {
-				if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FavorDrunksTorbjorn")) {
-					global->value += 1;
-					return;
-				}
 			}
 			return;
 		}
@@ -520,14 +468,14 @@ namespace Quest_Manager
 	//---------------------------------------------------
 
 	void Install() {
-
-		BeggarQuests::ScriptEventHandler::Register();
-		BountyQuests::ScriptEventHandler::Register();
-		CollegeQuests::ScriptEventHandler::Register();
+	
+		
 		CompanionsQuests::ScriptEventHandler::Register();
 		DawnguardQuests::ScriptEventHandler::Register();
-		ThievesGuildQuests::ScriptEventHandler::Register();
-		MiscQuests::ScriptEventHandler::Register();
+
+		BeggarQuests::CHandler::Register();
+		BountyQuests::CHandler::Register();
+		MiscQuests::CHandler::Register();
 
 		Favor001::ScriptEventHandler::Register();
 		Favor013::ScriptEventHandler::Register();

@@ -47,15 +47,6 @@ namespace CFramework_Pets
 	inline std::int32_t					Pets_MP_EntriesTotal;
 	inline std::int32_t					Pets_MP_EntriesFound;
 
-	inline bool PetsOfSkyrim_Installed = false;
-	inline bool SaintSeducer_Installed = false;
-
-	inline bool Petcrab_Installed = false;
-	inline bool PetWolf_Installed = false;
-	inline bool PetHund_Installed = false;
-
-	inline bool Miscellaneous_Installed = false;
-
 	class CHandler {
 
 		using VM = RE::BSScript::Internal::VirtualMachine;

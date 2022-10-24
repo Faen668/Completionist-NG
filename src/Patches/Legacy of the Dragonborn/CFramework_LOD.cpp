@@ -122,9 +122,7 @@ namespace CPatch_LOD {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InstallQuestFramework();
@@ -342,6 +340,8 @@ namespace CPatch_LOD {
 	//---------------------------------------------------
 
 	void CHandler::UpdateQuestFramework() {
+
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i : Quest1_StandardCompletion) {
 			Quest1_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest1_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest1_KeysArray[i], Quest1_IdenArray[i]);

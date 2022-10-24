@@ -35,9 +35,7 @@ namespace CPatch_WSN {
 
 	void CHandler::InstallFramework() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
@@ -207,11 +205,6 @@ namespace CPatch_WSN {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-
-		//using namespace FrameworkHandler;
-		//RegisterAs<FrameworkID::kWSN_Items>(&Items_NameArray, &Items_FormArray, &Items_BoolArray, &Items_TextArray);
-		//RegisterAs<FrameworkID::kWSN_Books>(&Books_NameArray, &Books_FormArray, &Books_BoolArray, &Books_TextArray);
-		//RegisterAs<FrameworkID::kWSN_MapMa>(&MapMa_NameArray, &MapMa_FormArray, &MapMa_BoolArray, &MapMa_TextArray);
 	}
 
 	//---------------------------------------------------
@@ -220,26 +213,18 @@ namespace CPatch_WSN {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled(modname); !Mod) {
-			return;
-		}
+		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Items_FormArray[i]->GetFormID())) {
-				Items_BoolArray[i] = true;
-			}
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_WSN_Items::Data);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {
-			if (FoundItemData.HasForm(Books_FormArray[i]->GetFormID())) {
-				Books_BoolArray[i] = true;
-			}
+			Books_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_FormArray[i]);
 		}
 
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID())) {
-				MapMa_BoolArray[i] = true;
-			}
+			MapMa_BoolArray[i] = FoundItemData_NoShow.HasForm(MapMa_FormArray[i]->GetFormID());
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();

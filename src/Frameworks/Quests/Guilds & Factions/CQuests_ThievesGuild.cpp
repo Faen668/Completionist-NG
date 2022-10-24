@@ -36,18 +36,29 @@ namespace CQFramework_ThievesGuild {
 	/*28*/ {"ThievesGuild_Quest28_Key", "$ThievesGuild_Quest28_Name", RADI_QUEST_FLAG, "$ThievesGuild_Quest28_Data", "TGRHC"},
 	};
 
+	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
+	constexpr std::tuple<RE::FormID, std::int32_t, std::int32_t, const char*> Radiant_QuestData[] = {
+		/*00*/ {0x060990, 1, 200, "Completionist_TGR_Bedlam"},
+		/*01*/ {0x02893B, 1, 200, "Completionist_TGR_Burglary"},
+		/*02*/ {0x028922, 1, 200, "Completionist_TGR_Fishing"},
+		/*03*/ {0x02893E, 1, 200, "Completionist_TGR_Heist"},
+		/*04*/ {0x06098E, 1, 200, "Completionist_TGR_Numbers"},
+		/*05*/ {0x015D24, 1, 200, "Completionist_TGR_Shill"},
+		/*06*/ {0x028936, 1, 200, "Completionist_TGR_Sweep"},
+	};
+
 	constexpr std::size_t StandardCompletion[] = {
 	0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,19,20,21
 	};
 
 	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
-	{22, " Completionist_TGR_Bedlam", RADIANT_THIEVESGUILD_VALUE},
-	{23, " Completionist_TGR_Burglary", RADIANT_THIEVESGUILD_VALUE},
-	{24, " Completionist_TGR_Fishing", RADIANT_THIEVESGUILD_VALUE},
-	{25, " Completionist_TGR_Heist", RADIANT_THIEVESGUILD_VALUE},
-	{26, " Completionist_TGR_Numbers", RADIANT_THIEVESGUILD_VALUE},
-	{27, " Completionist_TGR_Shill", RADIANT_THIEVESGUILD_VALUE},
-	{28, " Completionist_TGR_Sweep", RADIANT_THIEVESGUILD_VALUE},
+	{22, "Completionist_TGR_Bedlam", RADIANT_THIEVESGUILD_VALUE},
+	{23, "Completionist_TGR_Burglary", RADIANT_THIEVESGUILD_VALUE},
+	{24, "Completionist_TGR_Fishing", RADIANT_THIEVESGUILD_VALUE},
+	{25, "Completionist_TGR_Heist", RADIANT_THIEVESGUILD_VALUE},
+	{26, "Completionist_TGR_Numbers", RADIANT_THIEVESGUILD_VALUE},
+	{27, "Completionist_TGR_Shill", RADIANT_THIEVESGUILD_VALUE},
+	{28, "Completionist_TGR_Sweep", RADIANT_THIEVESGUILD_VALUE},
 	};
 
 	constexpr std::pair<std::size_t, std::int32_t> StagePastCompletion[] = {
@@ -91,6 +102,8 @@ namespace CQFramework_ThievesGuild {
 	void CHandler::SinkEvents() {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -102,6 +115,31 @@ namespace CQFramework_ThievesGuild {
 		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
 
 		CHandler::UpdateCompletion();
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Set ) --------------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!event) { return EventResult::kContinue; }
+
+		for (auto& [formID, value, stage, global] : Radiant_QuestData) {
+			const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(formID);
+
+			if (event == quest && a_event->stage == stage) {
+				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
+					var->value += value;
+					INFO("Increasing Var For {}", quest->GetName());
+					return EventResult::kContinue;
+				}
+			}
+		}
 		return EventResult::kContinue;
 	}
 

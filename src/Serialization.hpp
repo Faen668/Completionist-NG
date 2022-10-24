@@ -9,7 +9,7 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1000,
+		kVersion = 1001,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -403,8 +403,8 @@ namespace Serialization
 			{
 				for (auto* form : a_forms) {
 					auto* book = static_cast<RE::TESObjectBOOK*>(form);
-					if (book && book->GetSpell()) {
-						a_texts.push_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + book->GetSpell()->GetName() + "}");
+					if (book && book->GetSpell()) {		
+						a_texts.push_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSpell()->GetAssociatedSkill()) + "}{" + book->GetSpell()->GetName() + "}");
 					}
 					else if (book && book->TeachesSkill()) {
 						a_texts.push_back("$AddSkillBookHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSkill()) + "}");
@@ -428,6 +428,53 @@ namespace Serialization
 				break;
 			}
 			}
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Data Functions ( Populate Array )-
+		//---------------------------------------------------
+
+		void PopulateSpellTomes(
+			std::vector<std::string>& a_names, std::vector<RE::TESForm*>& a_forms, std::vector<bool>& a_bools, std::vector<std::string>& a_texts, RE::ActorValue a_actorval)
+		{
+			a_names.clear();
+			a_forms.clear();
+			a_bools.clear();
+			a_texts.clear();
+
+			using zipped_t = std::pair<std::string, std::pair<RE::TESForm*, bool>>;
+
+			auto bases = GetAllBases() |
+				std::views::filter([&](auto f) { return GetForm(f) && GetForm(f)->GetName(); }) |
+				std::views::transform([&](auto f) {
+				std::string name = GetForm(f)->GetName();
+
+				name[0] = std::toupper(name[0]);  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
+				return std::make_pair(std::move(name), std::make_pair(GetForm(f), false));
+					});
+
+			std::vector<zipped_t> zipped = { std::ranges::begin(bases), std::ranges::end(bases) };
+			std::ranges::sort(zipped);
+
+			for (auto& [name, data] : zipped) {
+				auto& [form, status] = data;
+
+				auto* book = static_cast<RE::TESObjectBOOK*>(form);
+				if (book && book->GetSpell()) {
+					if (book->GetSpell()->GetAssociatedSkill() == a_actorval) {
+						a_names.emplace_back(name);
+						a_bools.emplace_back(status);
+						a_forms.emplace_back(form);
+						a_texts.emplace_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSpell()->GetAssociatedSkill()) + "}{" + book->GetSpell()->GetName() + "}");
+					}
+				}
+			}
+
+			// assertions can be removed
+			assert(a_names.size() == zipped.size());
+			assert(a_forms.size() == zipped.size());
+			assert(a_bools.size() == zipped.size());
+			assert(a_texts.size() == zipped.size());
 		}
 
 		//---------------------------------------------------
@@ -686,14 +733,18 @@ namespace Serialization
 				ERROR("New version of save file detected, possbily using an outdated plugin?");
 			}
 
-			if (version < kVersion) {
-				/*if somehow the serialized data structure changed, thus resulting a kVersion change
-				  it must be able to patch/regress the backward compatibility or it will ERROR*/
-			}
-
 			for (auto& [data, name] : ISerializable::ManagedData) {
 				if (data) {
 					data->Load(a_intfc, name);
+				}
+			}
+
+			if (version < kVersion) {
+				/*if somehow the serialized data structure changed, thus resulting a kVersion change
+				  it must be able to patch/regress the backward compatibility or it will ERROR*/
+
+				if (version == 1000) {
+
 				}
 			}
 		}
