@@ -101,11 +101,11 @@ namespace CFramework_Uniques {
 	};
 
 	constexpr Serialization::FormArray I_Forms_CC = {
-0,
+	0,
 	};
 
 	constexpr Serialization::FormArray W_Forms_CC = {
-0,
+	0,
 	};
 
 	constexpr Serialization::Variation A_FormV_SK[] = {

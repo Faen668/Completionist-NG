@@ -699,7 +699,15 @@ namespace Serialization
 
 		std::unordered_map<std::string, std::string> data;
 	};
+}
 
+namespace CFramework_Master
+{
+	extern Serialization::CompletionistData FoundItemData;
+}
+
+namespace Serialization
+{
 	//---------------------------------------------------
 	//-- SKSE Callback Functions ( Save Callback ) ------
 	//---------------------------------------------------
@@ -723,6 +731,7 @@ namespace Serialization
 
 	static void LoadCallback([[maybe_unused]] SKSE::SerializationInterface* a_intfc) noexcept
 	{
+		using namespace CFramework_Master;
 		std::uint32_t type, version, length;
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
 			if (type != kHeader) {
@@ -744,7 +753,122 @@ namespace Serialization
 				  it must be able to patch/regress the backward compatibility or it will ERROR*/
 
 				if (version == 1000) {
+					// patch notes goes here
+					/*
+					 * 1000 -> 1001:
+					 * extra records written to FoundItemsData
+					 */
+					INFO("Patching old data from version 1000");
 
+					constexpr FormArray SK_BrokenForms = {
+					0x10F570,0x07C932,0x109C11,0x0B144D,0x0D2844,0x05ABC3,0x0D2842,0x05ABC4,0x05A9E3,0x05A9DF,0x05DB86,0x0FCC0E,0x0FCC0F,
+					0x0FCC0C,0x05DB85,0x0FCC0D,0x05DB87,0x0FCC10,0x0FCC11,0x05DB88,0x0FCC13,0x0FCC12,0x0D3AC3,0x0D3ACC,0x0D3AC2,0x0D3ACB,
+					0x0D3AC4,0x0D3ACD,0x0D3AC5,0x0D3ACE,0x0AB702,0x0F5D1A,0x0F5D1B,0x0F5D1C,0x0F5D1D,0x0D37CE,0x0F5D2A,0x0F5D2B,0x0F5D2C,
+					0x0F5D2D,0x0A5DEF,0x0F5D1F,0x0F5D20,0x0F5D21,0x0F5D22,0x03B0BF,0x03B0C0,0x03B0C1,0x03B0C2,0x03B0C3,0x03B0C4,0x03B0C5,
+					0x03B0C6,0x03B0C7,0x03B0B6,0x03B0B9,0x03B0BC,0x03B0B7,0x03B0BA,0x03B0BD,0x03B0B8,0x03B0BB,0x03B0BE,0x0F1AC1,0x0F71CD,
+					0x0F71CE,0x0F71CF,0x0F71D0,0x07A917,0x0F6524,0x0F6525,0x0F6526,0x0F6527,0x07E5C3,0x0F6529,0x0F652A,0x0F652B,0x0F652C,
+					0x0F8313,0x0F8314,0x0F8315,0x0F8316,0x0F8317,0x0F8318,0x02AC6F,0x09B2B2,0x063B27,0x063B29,0x021EA3,0x10CC6A,0x03E6BB,
+					0x03E6BC,0x08D770,0x09DFF5,0x0DA74D,0x02AC60,0x0F82FE,
+					};
+
+					constexpr FormArray DG_BrokenForms = {
+					0x00C816,0x00CAD3,0x0191CB,0x002B29,
+					};
+
+					constexpr FormArray DB_BrokenForms = {
+					0x039FA6,0x039FAC,0x039FAD,0x0397F6,0x039FB1,0x039FB4,0x039FA1,0x039FA2,0x039FA3,0x039D2B,0x039D2E,0x039D2F,
+					};
+
+					constexpr FormArray CC_BrokenForms = {
+					0x000D62,0x000D63,
+					};
+
+					constexpr FormArray Fishing_BrokenForms = {
+					0x07AED6,0x0009D9,0x04D05E,
+					};
+
+					constexpr FormArray MoonAndStar_BrokenForms = {
+					0x00E285,0x00E284,
+					};
+
+					constexpr FormArray Oblivion_BrokenForms = {
+					0x00453D,0x00453F,0x003A02,0x003469,0x07F8B4,0x08A088,0x00EEED,0x00EEEF,0x00454C,0x02046D,0x02046A,0x020464,
+					0x020471,0x022C11,0x022C12,0x040A2D,0x03BAEE,0x000D6B,
+					};
+
+					constexpr FormArray WheelsOfLull_BrokenForms = {
+					0x271EB0,0x271EB1,0x271EB2,0x271EB3,0x271EB4,0x271EB5,0x271EB6,
+					};
+
+					constexpr FormArray Vigilant_BrokenForms = {
+					0x23007E,0x230080,0x23007C,0x23007D,0x23007F,0x230081,0x144CDD,0x144CDE,0x0BBF35,0x0BD352,0x0D428A,0x0D568D,
+					0x323B2F,0x43CBAD,0x0C3DA4,0x0B828B,0x1AABC2,0x1AABC3,0x0C68B9,0x0C68B8,
+					};
+
+					auto* handler = RE::TESDataHandler::GetSingleton();
+
+					for (auto formID : SK_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "Skyrim.esm"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : DG_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "Dawnguard.esm"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : DB_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "Dragonborn.esm"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : CC_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "ccbgssse018-shadowrend.esl"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : Fishing_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "ccbgssse001-fish.esm"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : MoonAndStar_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "MoonAndStar_MAS.esp"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : Oblivion_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "WZOblivionArtifacts.esp"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : WheelsOfLull_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "WheelsOfLull.esp"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
+
+					for (auto formID : Vigilant_BrokenForms) {
+						if (auto* form = handler->LookupForm(formID, "Vigilant.esm"); form) {
+							FoundItemData.RemoveForm(form->GetFormID());
+							INFO("{} {} From List", !FoundItemData.HasForm(form) ? "Successfully removed" : "Failed to remove", form->GetName());
+						}
+					}
 				}
 			}
 		}
