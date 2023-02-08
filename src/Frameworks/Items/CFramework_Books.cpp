@@ -370,7 +370,7 @@ namespace CFramework_Books {
 	void CHandler::ProcessFoundForm(RE::FormID a_formID, RE::TESForm* a_base, std::string a_section) {
 
 		if (!FoundItemData.HasForm(a_formID)) {
-			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, a_base->GetName());
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, a_base->GetName());
 			FrameworkAPI::SendNotification(msg, "NotifyBooks");
 		}
 

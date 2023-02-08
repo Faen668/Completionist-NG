@@ -43,50 +43,18 @@ namespace CFramework_PlayerHomes
 
 	class CHandler final :
 		public RE::BSTEventSink<RE::TESQuestStageEvent>,
-		public RE::BSTEventSink<RE::TESContainerChangedEvent>
+		public RE::BSTEventSink<RE::TESContainerChangedEvent>{
 
-	{
-	public:
-		[[nodiscard]] static CHandler* GetSingleton()
-		{
-			static CHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void RegisterEvents() {
-			register_event<RE::TESQuestStageEvent>();
-			register_event<RE::TESContainerChangedEvent>();
-		}
+		  EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  EventResult			ProcessEvent(RE::TESContainerChangedEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource) override;
 
-		EventResult			ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
+		  static void			SinkEvents();
+		  static void			InstallFramework();
 
-		static void			InstallFramework();
-		static void			InjectAndCompileData();
-		static void			ProcessFoundForm(std::string a_editorID);
-		static void			UpdateFoundForms();
-
-		static void			Compile_VH();
-		static void			Compile_CH();
-		static void			Compile_PH();
-
-	private:
-
-		CHandler() = default;
-		CHandler(const CHandler&) = delete;
-		CHandler(CHandler&&) = delete;
-
-		~CHandler() override = default;
-
-		CHandler& operator=(const CHandler&) = delete;
-		CHandler& operator=(CHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  static void			UpdateFoundForms();
+		  static void			InjectAndCompileData();
+		  static void			ProcessFoundForm(std::string a_editorID);	  
 	};
 }

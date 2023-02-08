@@ -40,11 +40,10 @@ namespace CFramework_Blessings {
 	0x0E476B,0x107FC5,0x107FC6,0x0C60C4,0x0C6099,0x107FC7,0x0FDD3E,
 	0x107FC8,0x09D7FA,0x107FCB,0x1B9652,0x1B9653,0x1B9650,0x1B9651,
 	0x3D283F,0x1B964F,0x107FCC,0x2EE923,0x3F5FA1,0x107FC4,0x1B964E,
-	0x1B964B,0x107FCE,0x1B964D,0x26FD37,0x1C89C7,0x1B964C,
+	0x1B964B,0x107FCE,0x1B964D,0x26FD37,0x1C89C7,0x1B964C,0x0986CA
 	};
 
 	constexpr Serialization::Variation WS_FormV[] = {
-	{ 0x0986CA, { 0x2B6B9A, } },			//Mehrunes Dagon
 	{ 0x0C60C5, { 0x3D283B, } },			//Sanguine
 	{ 0x2D0116, { 0x2E4677, } },			//Jephre
 	{ 0x2E464B, { 0x065C05, } },			//Magnus
@@ -75,12 +74,35 @@ namespace CFramework_Blessings {
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Sink Event ) -------------
+	//---------------------------------------------------
+
+	void CHandler::ActivateShrineFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_shrine) {
+
+		if (!a_shrine) { return; }
+
+		const auto formID = a_shrine->GetFormID();
+
+		if (CFramework_Blessings_VS::Data.HasForm(formID)) {
+			auto base = CFramework_Blessings_VS::Data.GetBase(formID) ? CFramework_Blessings_VS::Data.GetBase(formID) : formID;
+			CHandler::ProcessFoundForm(base, formID, Section::kSection_VS);
+			return;
+		}
+
+		if (CFramework_Blessings_WS::Data.HasForm(a_shrine->GetFormID())) {
+			auto base = CFramework_Blessings_WS::Data.GetBase(formID) ? CFramework_Blessings_WS::Data.GetBase(formID) : formID;
+			CHandler::ProcessFoundForm(base, formID, Section::kSection_WS);
+			return;
+		}
+	}
+
+	//---------------------------------------------------
 	//-- Framework Events ( On Item Activated ) ---------
 	//---------------------------------------------------
 
 	EventResult CHandler::ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) {
 
-		if (!a_event || !a_event->objectActivated || a_event->actionRef.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
+		if (!a_event || !a_event->objectActivated) { return EventResult::kContinue; }
 
 		if (CFramework_Blessings_DS::Data.HasForm(a_event->objectActivated->GetBaseObject()->GetFormID())) {
 			auto formID = a_event->objectActivated->GetBaseObject()->GetFormID();
@@ -112,7 +134,7 @@ namespace CFramework_Blessings {
 	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, Section a_section) {
 
 		if (!FoundItemData_NoShow.HasForm(a_baseID)) {
-			auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, RE::TESForm::LookupByID(a_eventID)->GetName());
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, RE::TESForm::LookupByID(a_eventID)->GetName());
 			FrameworkAPI::SendNotification(msg, "NotifySpecial");
 		}
 
@@ -191,6 +213,10 @@ namespace CFramework_Blessings {
 		CFramework_Blessings_VS::Data.Populate(VS_NameArray, VS_FormArray, VS_BoolArray, VS_TextArray);
 		CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
 
+		if (Serialization::CompletionistData::IsModInstalled("Wintersun - Faiths of Skyrim.esp")) {
+			CHandler::AddFormsToList();
+		}
+		
 		DS_EntriesTotal = DS_FormArray.size();
 		DS_EntriesFound = std::ranges::count(DS_BoolArray, true);
 
@@ -199,6 +225,48 @@ namespace CFramework_Blessings {
 
 		WS_EntriesTotal = WS_FormArray.size();
 		WS_EntriesFound = std::ranges::count(WS_BoolArray, true);
+	}
+
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update Found Forms ) -----
+	//---------------------------------------------------
+	
+	void CHandler::AddFormsToList() {
+
+		auto* ShrineList = Serialization::CompletionistData::GetFullForm<RE::BGSListForm>(0x00081B, "Completionist.esp");
+		if (ShrineList) {
+
+			for (auto formID : WS_Forms) {
+				if (auto* Shrine = Serialization::CompletionistData::GetFullForm(formID, "Wintersun - Faiths of Skyrim.esp")) {
+					ShrineList->AddForm(Shrine);
+				}
+			}
+
+			for (auto formID : WS_FormV) {
+				if (formID.second.empty()) {
+					continue;
+				}
+
+				if (auto* Shrine = Serialization::CompletionistData::GetFullForm(formID.first, "Wintersun - Faiths of Skyrim.esp")) {
+					ShrineList->AddForm(Shrine);
+				}
+
+				for (auto var : formID.second) {
+					if (var) {
+						if (auto* Shrine = Serialization::CompletionistData::GetFullForm(var, "Wintersun - Faiths of Skyrim.esp")) {
+							ShrineList->AddForm(Shrine);
+						}
+					}
+					else {
+						break;
+					}
+				}
+			}
+		}
+		else {
+			INFO("Unable To Retrieve Shrine List");
+		}
 	}
 
 	//---------------------------------------------------

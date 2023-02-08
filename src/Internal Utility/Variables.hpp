@@ -66,6 +66,27 @@ namespace CVariables {
 	inline std::int32_t		V_Radiant_VigilantVal;
 	inline std::int32_t		V_Radiant_LegacyVal;
 
+	inline std::string 		V_NotificationText;
+	inline std::string		V_NotificationTextShout0;
+	inline std::string		V_NotificationTextShout1;
+	inline std::string		V_NotificationTextShout2;
+	inline std::string		V_NotificationTextShout3;
+	inline std::string		V_NotificationTextBarenziah;
+
+	inline std::string		V_notificationTextCellScan0;
+	inline std::string		V_notificationTextCellScan1;
+	inline std::string		V_notificationTextCellScan2;
+	inline std::string		V_notificationTextCellScan3;
+	inline std::string		V_notificationTextCellScan4;
+	inline std::string		V_notificationTextCellScan5;
+	inline std::string		V_notificationTextCellScan6;
+
+	inline bool				V_CellScanner_REFS;
+	inline bool				V_CellScanner_CONT;
+	inline bool				V_CellScanner_NPCS;
+	inline bool				V_CellScanner_NUMB;
+	inline bool				V_CellScanner_DETA;
+
 	using EventResult = RE::BSEventNotifyControl;
 
 	class VariablesAPI final :
@@ -82,6 +103,6 @@ namespace CVariables {
 		  static void Register();
 		  static void Update();
 
-		  static void MCMReady(RE::StaticFunctionTag*);
+		  static RE::BSScript::Variable* GetProperty(ScriptObjectPtr mcm, const char* a_prop);
 	};
 }

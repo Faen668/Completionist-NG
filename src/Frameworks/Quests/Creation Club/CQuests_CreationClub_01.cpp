@@ -1,42 +1,35 @@
+#include "Structs.hpp"
 #include "CQuests_CreationClub_01.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_CC1 {
 	using namespace CFramework_Master;
 
-	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
-		/*00*/ {"CC01_Quest00_Key", "$CC01_Quest00_Name", MAIN_QUEST_FLAG, "$CC01_Quest00_Data", "ccVSVSSE004_MainQuest"},
-		/*01*/ {"CC01_Quest01_Key", "$CC01_Quest01_Name", MAIN_QUEST_FLAG, "$CC01_Quest01_Data", "ccVSVSSE004_RestoreFarmQuest"},
-		/*02*/ {"CC01_Quest02_Key", "$CC01_Quest02_Name", MAIN_QUEST_FLAG, "$CC01_Quest02_Data", "ccBGSSSE001_Start_MQ2"},
-		/*03*/ {"CC01_Quest03_Key", "$CC01_Quest03_Name", SIDE_QUEST_FLAG, "$CC01_Quest03_Data", "ccBGSSSE001_Misc_Dwarven"},
-		/*04*/ {"CC01_Quest04_Key", "$CC01_Quest04_Name", SIDE_QUEST_FLAG, "$CC01_Quest04_Data", "ccBGSSSE001_Misc_Falkreath"},
-		/*05*/ {"CC01_Quest05_Key", "$CC01_Quest05_Name", MAIN_QUEST_FLAG, "$CC01_Quest05_Data", "ccBGSSSE001_Fish_MQ1"},
-		/*06*/ {"CC01_Quest06_Key", "$CC01_Quest06_Name", MAIN_QUEST_FLAG, "$CC01_Quest06_Data", "ccBGSSSE001_Fish_MQ2"},
-		/*07*/ {"CC01_Quest07_Key", "$CC01_Quest07_Name", MAIN_QUEST_FLAG, "$CC01_Quest07_Data", "ccBGSSSE001_Crab_MQ2"},
-		/*08*/ {"CC01_Quest08_Key", "$CC01_Quest08_Name", MAIN_QUEST_FLAG, "$CC01_Quest08_Data", "ccBGSSSE001_Fish_MQ4"},
-		/*09*/ {"CC01_Quest09_Key", "$CC01_Quest09_Name", MAIN_QUEST_FLAG, "$CC01_Quest09_Data", "ccBGSSSE001_Crab_MQ3"},
-		/*10*/ {"CC01_Quest10_Key", "$CC01_Quest10_Name", MAIN_QUEST_FLAG, "$CC01_Quest10_Data", "ccBGSSSE001_Fish_MQ5"},
-		/*11*/ {"CC01_Quest11_Key", "$CC01_Quest11_Name", MAIN_QUEST_FLAG, "$CC01_Quest11_Data", "ccBGSSSE001_Fish_MQ3"},
-		/*12*/ {"CC01_Quest12_Key", "$CC01_Quest12_Name", SIDE_QUEST_FLAG, "$CC01_Quest12_Data", "ccBGSSSE001_Misc_WhiterunPartOne"},
-		/*13*/ {"CC01_Quest13_Key", "$CC01_Quest13_Name", MAIN_QUEST_FLAG, "$CC01_Quest13_Data", "ccBGSSSE001_Crab_MQ1"},
-		/*14*/ {"CC01_Quest14_Key", "$CC01_Quest14_Name", SIDE_QUEST_FLAG, "$CC01_Quest14_Data", "ccBGSSSE001_Misc_Morthal"},
-		/*15*/ {"CC01_Quest15_Key", "$CC01_Quest15_Name", SIDE_QUEST_FLAG, "$CC01_Quest15_Data", "ccBGSSSE001_Misc_Markarth"},
-		/*16*/ {"CC01_Quest16_Key", "$CC01_Quest16_Name", SIDE_QUEST_FLAG, "$CC01_Quest16_Data", "ccBGSSSE001_Misc_Khajiit"},
-		/*17*/ {"CC01_Quest17_Key", "$CC01_Quest17_Name", SIDE_QUEST_FLAG, "$CC01_Quest17_Data", "ccBGSSSE001_Misc_Solitude"},
-		/*18*/ {"CC01_Quest18_Key", "$CC01_Quest18_Name", SIDE_QUEST_FLAG, "$CC01_Quest18_Data", "ccBGSSSE001_Misc_Windhelm"},
-		/*19*/ {"CC01_Quest19_Key", "$CC01_Quest19_Name", SIDE_QUEST_FLAG, "$CC01_Quest19_Data", "ccBGSSSE001_Misc_WhiterunPartTwo"},
-		/*20*/ {"CC01_Quest20_Key", "$CC01_Quest20_Name", MAIN_QUEST_FLAG, "$CC01_Quest20_Data", "ccBGSSSE001_Crab_MQ4"},
-		/*21*/ {"CC01_Quest21_Key", "$CC01_Quest21_Name", RADI_QUEST_FLAG, "$CC01_Quest21_Data", "ccBGSSSE001_Radiant_2"},
-		/*22*/ {"CC01_Quest22_Key", "$CC01_Quest22_Name", RADI_QUEST_FLAG, "$CC01_Quest22_Data", "ccBGSSSE001_Radiant_3"},
-		/*23*/ {"CC01_Quest23_Key", "$CC01_Quest23_Name", RADI_QUEST_FLAG, "$CC01_Quest23_Data", "ccBGSSSE001_Radiant_1"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 };
-
-	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
-		{21, "Completionist_Fishing2", 4},
-		{22, "Completionist_Fishing3", 4},
-		{23, "Completionist_Fishing1", 4},
+	CQuestData QuestData[] {
+		{"CC01_Quest00", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccVSVSSE004_MainQuest"},
+		{"CC01_Quest01", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccVSVSSE004_RestoreFarmQuest"},
+		{"CC01_Quest02", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Start_MQ2"},
+		{"CC01_Quest03", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Dwarven"},
+		{"CC01_Quest04", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Falkreath"},
+		{"CC01_Quest05", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Fish_MQ1"},
+		{"CC01_Quest06", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Fish_MQ2"},
+		{"CC01_Quest07", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Crab_MQ2"},
+		{"CC01_Quest08", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Fish_MQ4"},
+		{"CC01_Quest09", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Crab_MQ3"},
+		{"CC01_Quest10", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Fish_MQ5"},
+		{"CC01_Quest11", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Fish_MQ3"},
+		{"CC01_Quest12", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_WhiterunPartOne"},
+		{"CC01_Quest13", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Crab_MQ1"},
+		{"CC01_Quest14", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Morthal"},
+		{"CC01_Quest15", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Markarth"},
+		{"CC01_Quest16", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Khajiit"},
+		{"CC01_Quest17", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Solitude"},
+		{"CC01_Quest18", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_Windhelm"},
+		{"CC01_Quest19", CFlagEnum::kSide, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Misc_WhiterunPartTwo"},
+		{"CC01_Quest20", CFlagEnum::kMain, CCompEnum::kStand, { CStageEnum::kNone, 0   , 0 }, { " ",						CRadiantEnum::kRadiant_Non }, "ccBGSSSE001_Crab_MQ4"},
+		{"CC01_Quest21", CFlagEnum::kRadi, CCompEnum::kGlobl, { CStageEnum::kNone, 0   , 0 }, { "Completionist_Fishing2",	CRadiantEnum::kRadiant_Fsh }, "ccBGSSSE001_Radiant_2"},
+		{"CC01_Quest22", CFlagEnum::kRadi, CCompEnum::kGlobl, { CStageEnum::kNone, 0   , 0 }, { "Completionist_Fishing3",	CRadiantEnum::kRadiant_Fsh }, "ccBGSSSE001_Radiant_3"},
+		{"CC01_Quest23", CFlagEnum::kRadi, CCompEnum::kGlobl, { CStageEnum::kNone, 0   , 0 }, { "Completionist_Fishing1",	CRadiantEnum::kRadiant_Fsh }, "ccBGSSSE001_Radiant_1"},
 	};
 
 	//---------------------------------------------------
@@ -52,12 +45,14 @@ namespace CQFramework_CC1 {
 		NameArray.clear();
 		KeysArray.clear();
 
-		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
-			KeysArray.push_back(Key);
-			NameArray.push_back(Name);
-			RadiArray.push_back(Flag);
-			TextArray.push_back(Text);
-			IdenArray.push_back(ID);
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
+			auto& Data = QuestData[i];
+
+			KeysArray.push_back(fmt::format("{:s}_Key"sv, Data.UDID));
+			NameArray.push_back(fmt::format("${:s}_Name"sv, Data.UDID));
+			TextArray.push_back(fmt::format("${:s}_Data"sv, Data.UDID));
+			RadiArray.push_back(std::to_underlying(Data.FLAG));
+			IdenArray.push_back(Data.EDID);
 		}
 
 		assert(KeysArray.size() == ArraySize);
@@ -95,12 +90,53 @@ namespace CQFramework_CC1 {
 
 	void CHandler::UpdateCompletion() {
 
-		for (auto i : StandardCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
-		}
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
+			auto& Data = QuestData[i];
 
-		for (auto& [i, global, value] : GlobalCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], global, value);
+			if (std::ranges::find(ExcludedQuestsArray, Data.EDID) != ExcludedQuestsArray.end()) {
+				continue;
+			}
+
+			switch (Data.COMP) {
+
+			case CCompEnum::kStand: {
+				BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
+				break;
+			}
+
+			case CCompEnum::kGlobl: {
+				BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], Data.GLOBAL.NAME, Data.GLOBAL.VALUE);
+				break;
+			}
+
+			case CCompEnum::kStage: {
+
+				switch (Data.STAGE.CONDITION) {
+
+				case CStageEnum::kDone:
+					BoolArray[i] =
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_S(KeysArray[i], IdenArray[i], Data.STAGE.VALUE) || Data.STAGE.OPVALUE != 0 &&
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_S(KeysArray[i], IdenArray[i], Data.STAGE.OPVALUE);
+					break;
+
+				case CStageEnum::kPast:
+					BoolArray[i] =
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], Data.STAGE.VALUE) || Data.STAGE.OPVALUE != 0 &&
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], Data.STAGE.OPVALUE);
+					break;
+
+				default:
+					BoolArray[i] = false;
+					break;
+				}
+				break;
+			}
+
+			default: {
+				BoolArray[i] = false;
+				break;
+			}
+			}
 		}
 	};
-} 
+}

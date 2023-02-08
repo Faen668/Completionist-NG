@@ -1,8 +1,10 @@
 #include "CQuests_SkaalVillage.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Serialization.hpp";
 
 namespace CQFramework_SkaalVillage {
 	using namespace CFramework_Master;
+	using namespace Serialization;
 
 	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
 	/*00*/ {"SkaalVillage_Quest00_Key", "$SkaalVillage_Quest00_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest00_Data", "DLC2SkaalVillageFreeform2"},

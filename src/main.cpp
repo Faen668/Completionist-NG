@@ -37,10 +37,12 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 		break;
 
 	case SKSE::MessagingInterface::kPostLoad:
+		TextnTagsAPI::RegisterQuickLootListener();
 		break;
 
 	case SKSE::MessagingInterface::kPostPostLoad:
-		TextnTagsAPI::RegisterMessageListener();
+		TextnTagsAPI::RegistermoreHUDListener();
+		TextnTagsAPI::RegisterQuickLootEEListener();
 		break;
 	}
 }

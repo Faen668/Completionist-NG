@@ -1,4 +1,5 @@
 #include "DKUtil/Utility.hpp"
+#include "Internal Utility/Variables.hpp"
 #pragma once
 
 #undef GetForm
@@ -48,6 +49,21 @@ namespace Serialization
 			auto ESP = handler->LookupLoadedModByName(a_modname);
 			auto ESL = handler->LookupLoadedLightModByName(a_modname);
 			return ESP || ESL;
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Is Mod Installed ) ---------
+		//---------------------------------------------------
+
+		[[nodiscard]] static bool IsModInstalled(std::string_view a_modname, RE::FormID a_formID) noexcept
+		{
+			auto* handler = RE::TESDataHandler::GetSingleton();
+			if (!handler) {
+				return false;
+			}
+
+			auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(a_formID, a_modname);
+			return form != nullptr;
 		}
 
 		//---------------------------------------------------
@@ -175,7 +191,13 @@ namespace Serialization
 		//Overload To Pass Through FormID With Base File And (1) Variation From A Seperate File (Also used to add variations to existing base files)
 		void AddForm(RE::FormID a_base, std::string_view a_bfilename, RE::FormID a_vari, std::string a_mfilename) noexcept
 		{
-			if (IsModInstalled(a_bfilename) && RE::TESDataHandler::GetSingleton()) {
+			if (!IsModInstalled(a_bfilename) || !RE::TESDataHandler::GetSingleton()) {
+				INFO("Unable to Install {} from {} as {} is not installed.", a_vari, a_mfilename, a_bfilename);
+				return;
+			}
+
+			if (!IsModInstalled(a_mfilename) || !RE::TESDataHandler::GetSingleton()) {
+				INFO("Unable to Install {} from {} as {} is not installed.", a_vari, a_mfilename, a_mfilename);
 				return;
 			}
 
@@ -229,6 +251,13 @@ namespace Serialization
 		[[nodiscard]] T* GetForm(RE::FormID a_form) noexcept
 		{
 			auto* form = GetForm(a_form);
+			return form ? form->As<T>() : nullptr;
+		}
+
+		template <typename T = RE::TESForm>
+		[[nodiscard]] static T* GetFullForm(RE::FormID a_form, const char* a_filename) noexcept
+		{
+			auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(a_form, a_filename);
 			return form ? form->As<T>() : nullptr;
 		}
 
@@ -526,10 +555,10 @@ namespace Serialization
 			}
 
 			if (read != total) {
-				ERROR("Lost data during loading co-save!\nExpected: {}\nWritten: {}", total, read);
+				INFO("Lost data while loading {} from co-save... Expected: {} Written: {}", a_name, total, read);
 			}
 
-			INFO("Loaded {} from co-save with a size of - {}", a_name, total);
+			INFO("Loaded {} from co-save with a size of - {}", a_name, data.size());
 		}
 
 		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
@@ -681,7 +710,7 @@ namespace Serialization
 			}
 
 			if (read != total) {
-				ERROR("Lost data during loading co-save!\nExpected: {}\nWritten: {}", total, read);
+				INFO("Lost data while loading {} from co-save... Expected: {} Written: {}", a_name, total, read);
 			}
 
 			INFO("Loaded SKSE co-save {} with a size of - {}", a_name, data.size());
@@ -704,6 +733,7 @@ namespace Serialization
 namespace CFramework_Master
 {
 	extern Serialization::CompletionistData FoundItemData;
+	extern Serialization::CompletionistData ExcludedCellData;
 }
 
 namespace Serialization

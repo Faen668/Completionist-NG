@@ -56,7 +56,9 @@ namespace CFramework_Blessings{
 		  static void			InstallFramework();
 		  static void			UpdateFoundForms();
 		  static void			InjectAndCompileData();
-
 		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, Section a_section);
+
+		  static void			AddFormsToList();
+		  static void			ActivateShrineFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_shrine);
 	};
 }

@@ -1,27 +1,16 @@
+#include "Structs.hpp"
 #include "CQuests_Misc_DG.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Misc_DG {
 	using namespace CFramework_Master;
 
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-	/*00*/ {"Misc_DG_Quest00_Key", "$Misc_DG_Quest00_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_Y, "$Misc_DG_Quest00_Data", "DLC1VQDragon"},
-	/*01*/ {"Misc_DG_Quest01_Key", "$Misc_DG_Quest01_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_Y, "$Misc_DG_Quest01_Data", "DLC1VQFVBooks"},
-	/*02*/ {"Misc_DG_Quest02_Key", "$Misc_DG_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Misc_DG_Quest02_Data", "DLC1VQSaint"},
-	/*03*/ {"Misc_DG_Quest03_Key", "$Misc_DG_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_Y, "$Misc_DG_Quest03_Data", "DLC1LD"},
-	/*04*/ {"Misc_DG_Quest04_Key", "$Misc_DG_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_Y, "$Misc_DG_Quest04_Data", "DLC01SoulCairnHorseQuest2"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-	2
-	};
-
-	constexpr std::tuple<std::size_t, std::int32_t> StageCompletion[] = {
-	{ 0,  60  },
-	{ 1,  200 },
-	{ 3,  255 },
-	{ 4,  255 },
+	CQuestData QuestData[]{
+	{"Misc_DG_Quest00", CFlagEnum::kSide,  CCompEnum::kStage, { CStageEnum::kDone, 60,	0  }, { " ", CRadiantEnum::kRadiant_Non }, "DLC1VQDragon"},
+	{"Misc_DG_Quest01", CFlagEnum::kSide,  CCompEnum::kStage, { CStageEnum::kDone, 200,	0  }, { " ", CRadiantEnum::kRadiant_Non }, "DLC1VQFVBooks"},
+	{"Misc_DG_Quest02", CFlagEnum::kSide,  CCompEnum::kStand, { CStageEnum::kNone, 0,	0  }, { " ", CRadiantEnum::kRadiant_Non }, "DLC1VQSaint"},
+	{"Misc_DG_Quest03", CFlagEnum::kSide,  CCompEnum::kStage, { CStageEnum::kDone, 255,	0  }, { " ", CRadiantEnum::kRadiant_Non }, "DLC1LD"},
+	{"Misc_DG_Quest04", CFlagEnum::kSide,  CCompEnum::kStage, { CStageEnum::kDone, 255,	0  }, { " ", CRadiantEnum::kRadiant_Non }, "DLC01SoulCairnHorseQuest2"},
 	};
 
 	//---------------------------------------------------
@@ -36,15 +25,15 @@ namespace CQFramework_Misc_DG {
 		RadiArray.clear();
 		NameArray.clear();
 		KeysArray.clear();
-		StgeArray.clear();
 
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			KeysArray.push_back(key);
-			NameArray.push_back(name);
-			RadiArray.push_back(flag);
-			TextArray.push_back(text);
-			IdenArray.push_back(id);
-			StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
+			auto& Data = QuestData[i];
+
+			KeysArray.push_back(fmt::format("{:s}_Key"sv, Data.UDID));
+			NameArray.push_back(fmt::format("${:s}_Name"sv, Data.UDID));
+			TextArray.push_back(fmt::format("${:s}_Data"sv, Data.UDID));
+			RadiArray.push_back(std::to_underlying(Data.FLAG));
+			IdenArray.push_back(Data.EDID);
 		}
 
 		assert(KeysArray.size() == ArraySize);
@@ -52,7 +41,6 @@ namespace CQFramework_Misc_DG {
 		assert(NameArray.size() == ArraySize);
 		assert(RadiArray.size() == ArraySize);
 		assert(TextArray.size() == ArraySize);
-		assert(StgeArray.size() == ArraySize);
 		BoolArray = std::vector<bool>(ArraySize, false);
 	}
 
@@ -78,13 +66,11 @@ namespace CQFramework_Misc_DG {
 		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
 		if (!quest) { return EventResult::kContinue; }
 
-		auto t_pos = std::ranges::find(IdenArray, quest->GetFormEditorID());
-		if (t_pos == IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (StgeArray.at(std::distance(IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(KeysArray.at(std::distance(IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, IdenArray.at(std::distance(IdenArray.begin(), t_pos)));
+		for (auto& Data : QuestData) {
+			if (Data.STAGE.CONDITION == CStageEnum::kDone && DKUtil::string::iequals(Data.EDID, quest->GetFormEditorID())) {
+				CQuestKeys_Stages.AddStage(fmt::format("{:s}_Key"sv, Data.UDID), a_event->stage);
+				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, fmt::format("{:s}_Key [{}]"sv, Data.UDID, quest->GetName()));
+			}
 		}
 		return EventResult::kContinue;
 	}
@@ -107,14 +93,53 @@ namespace CQFramework_Misc_DG {
 
 	void CHandler::UpdateCompletion() {
 
-		for (auto i : StandardCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
-		}
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
+			auto& Data = QuestData[i];
 
-		for (auto& [i, stage] : StageCompletion) {
-			BoolArray[i] = StgeArray[i] ?
-				FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_S(KeysArray[i], IdenArray[i], stage) :
-				FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], stage);
+			if (std::ranges::find(ExcludedQuestsArray, Data.EDID) != ExcludedQuestsArray.end()) {
+				continue;
+			}
+
+			switch (Data.COMP) {
+
+			case CCompEnum::kStand: {
+				BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
+				break;
+			}
+
+			case CCompEnum::kGlobl: {
+				BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], Data.GLOBAL.NAME, Data.GLOBAL.VALUE);
+				break;
+			}
+
+			case CCompEnum::kStage: {
+
+				switch (Data.STAGE.CONDITION) {
+
+				case CStageEnum::kDone:
+					BoolArray[i] =
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_S(KeysArray[i], IdenArray[i], Data.STAGE.VALUE) || Data.STAGE.OPVALUE != 0 &&
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_S(KeysArray[i], IdenArray[i], Data.STAGE.OPVALUE);
+					break;
+
+				case CStageEnum::kPast:
+					BoolArray[i] =
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], Data.STAGE.VALUE) || Data.STAGE.OPVALUE != 0 &&
+						FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], Data.STAGE.OPVALUE);
+					break;
+
+				default:
+					BoolArray[i] = false;
+					break;
+				}
+				break;
+			}
+
+			default: {
+				BoolArray[i] = false;
+				break;
+			}
+			}
 		}
 	};
 }

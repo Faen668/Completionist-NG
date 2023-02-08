@@ -20,9 +20,15 @@ namespace Completionist_MainHUD
 
 		static void Register();
 
-		static void RegisterMessageListener();
+		static void RegisterQuickLootListener();
+		static void RegistermoreHUDListener();
+		static void RegisterQuickLootEEListener();
 
-		static void MessageHandler(SKSE::MessagingInterface::Message* a_msg);
+		static void QuickLootEEMessageHandler(SKSE::MessagingInterface::Message* a_msg);
+		static void moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg);
+
+		static void QuickLootMessageHandler(SKSE::MessagingInterface::Message* a_msg);
+		static void QuickLootMessageCallBack(void*, RE::GFxValue* gfx, RE::TESForm* form, int32_t count);
 
 		static void	ProcessCrosshairReference(RE::HUDData* data);
 
@@ -32,6 +38,8 @@ namespace Completionist_MainHUD
 		static bool ItemIsCollected(RE::FormID a_formID);
 		static bool ItemIsCollected(RE::TESForm* a_form);
 		
+		static bool EvaluateFormTypeCondition(RE::TESForm* a_form, bool a_collected);
+
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
 		static const char* OnUpdateInventoryName(const char* a_this, bool a_displayTag);

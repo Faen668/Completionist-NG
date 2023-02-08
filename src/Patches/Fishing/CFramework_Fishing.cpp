@@ -6,46 +6,48 @@
 #undef GetObject
 
 namespace CPatch_FSH {
+	using namespace Serialization;
 	using namespace CFramework_Master;
 
-	constexpr Serialization::FormArray I_Forms = {
+	constexpr FormArray I_Forms = {
 	0x000ED3,0x000A6F,0x000C66,0x000B2B,0x000B29,0x000B94,0x0EA5CC,
 	0x0008E3,0x000BC0,0x000BA0,0x000C07,0x000F07,0x000B2A,
 	};
 
-	constexpr Serialization::Variation I_Varia[] = {
+	constexpr Variation I_Varia[] = {
 	{ 0x07AED6, { 0x0009D9,0x04D05E } },
 	};
 
-	constexpr Serialization::FormArray B_Forms = {
+	constexpr FormArray B_Forms = {
 	0x000E7F,0x0009AE,0x0009AF,0x000ABA,0x000ABC,0x070CCC,0x070CCD,
 	0x070CCE,0x070CCF,0x070CD0,0x070CD1,0x070CD2,0x070CD3,0x070CD4,
 	0x070CD5,0x0008E5,
 	};
 
-	constexpr Serialization::FormArray A_Forms = {
+	constexpr FormArray A_Forms = {
 	0x000F7E,0x000F64,0x000F8C,0x000F79,0x000F82,0x000F89,0x000F87,0x000F8A,
 	0x000F8B,0x000F81,0x000F80,0x000F8D,0x000F78,0x000F7F,0x000F8E,0x000F83,
 	0x000F7B,0x000F8F,0x000F7D,0x000F7C,0x000F7A,
 
 	};
 
-	constexpr Serialization::FormArray C_Forms = {
+	constexpr FormArray C_Forms = {
 	0x000F86,0x000F88,
 	};
 
-	constexpr Serialization::FormArray L_Forms = {
+	constexpr FormArray L_Forms = {
 	0x000F5A,0x000F5F,0x000F57,0x000F5E,0x000F61,0x000F5D,0x000F58,0x000F59,
 	0x000F60,0x000F5B,
 	};
 
-	constexpr Serialization::FormArray S_Forms = {
+	constexpr FormArray S_Forms = {
 	0x000F5C,0x000F6D,0x000F74,0x000F6C,0x000F70,0x000F6B,0x000F72,0x000F62,
 	0x000F66,0x000F77,0x000F69,0x000F67,0x000F6E,0x000F85,0x000F71,0x000F68,
 	0x000F65,0x000F63,0x000F84,0x000F76,0x000F75,0x000F6A,0x000F73,0x000F6F,
 	};
 
 	constexpr std::string_view modname = "ccbgssse001-fish.esm";
+	constexpr std::string_view modnameCACO = "Complete Alchemy & Cooking Overhaul.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -53,7 +55,7 @@ namespace CPatch_FSH {
 
 	void CHandler::InstallFramework() {
 
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
+		if (!CompletionistData::IsModInstalled(modname)) { return; }
 
 		RodList = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x000843, "ccbgssse001-fish.esm");
 		GlobalV = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingRods");
@@ -138,14 +140,13 @@ namespace CPatch_FSH {
 		S_EntriesFound = std::ranges::count(S_BoolArray, true);
 
 		// Fish ---
-
 		std::string pName = "ccbgssse001-fish.esm";
 		std::string sName = "Skyrim.esm";
 
 		std::string Rod0 = "";
 		std::string Rod1 = "Argonian Fishing Rod";
 		std::string Rod2 = "Alik'ri Fishing Rod";
-
+	
 		tempfsh.clear();
 		temprod.clear();
 		temploc.clear();
@@ -220,6 +221,25 @@ namespace CPatch_FSH {
 		tempfsh.push_back(a_form);
 		temprod.push_back(a_rod);
 		temploc.push_back(a_loc);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events (Add CACO Salmon  ) -----------
+	//---------------------------------------------------
+
+	void CHandler::AddCACOFishingForms() {
+
+		if (!CompletionistData::IsModInstalled(modnameCACO) || !CompletionistData::IsModInstalled(modname)) { return; }
+
+		CPatch_FSH_F::Data.AddForm(0x00089B, "ccbgssse001-fish.esm", 0xCCA147, "Update.esm");
+
+		for (auto& [first, second] : CPatch_FSH_F::Data.data) {
+			INFO("first = {}, second = {}", first ? std::to_string(first) : "", second ? std::to_string(second) : "")
+		}
+
+		for (auto var : CPatch_FSH_F::Data.GetAllVariations()) {
+			INFO("Variation is {}", var);
+		}
 	}
 
 	//---------------------------------------------------
@@ -303,7 +323,7 @@ namespace CPatch_FSH {
 				auto* a_marker = static_cast<RE::TESObjectREFR*>(A_FormArray[i]);
 
 				if (a_marker && CPatch_FSH_A::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
+					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 							A_BoolArray[i] = true;
 							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(A_FormArray[i]));
@@ -316,7 +336,7 @@ namespace CPatch_FSH {
 				auto* a_marker = static_cast<RE::TESObjectREFR*>(C_FormArray[i]);
 
 				if (a_marker && CPatch_FSH_C::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
+					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 							C_BoolArray[i] = true;
 							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(C_FormArray[i]));
@@ -329,7 +349,7 @@ namespace CPatch_FSH {
 				auto* a_marker = static_cast<RE::TESObjectREFR*>(L_FormArray[i]);
 
 				if (a_marker && CPatch_FSH_L::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
+					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 							L_BoolArray[i] = true;
 							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(L_FormArray[i]));
@@ -342,7 +362,7 @@ namespace CPatch_FSH {
 				auto* a_marker = static_cast<RE::TESObjectREFR*>(S_FormArray[i]);
 
 				if (a_marker && CPatch_FSH_S::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
+					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 							S_BoolArray[i] = true;
 							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(S_FormArray[i]));
@@ -366,11 +386,16 @@ namespace CPatch_FSH {
 
 		if (a_section == "Fish") {
 			if (!FoundItemData_NoShow.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_FSH_F::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_F::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 
 			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CPatch_FSH_F::Data.GetAllVariations()) {
+				if (CPatch_FSH_F::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
 			auto t_pos = std::ranges::find(F_FormArray, CPatch_FSH_F::Data.GetForm(a_baseID));
 			auto b_pos = std::distance(F_FormArray.begin(), t_pos);
 			F_BoolArray[b_pos] = true;
@@ -381,7 +406,7 @@ namespace CPatch_FSH {
 
 		if (a_section == "Items") {
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_FSH_I::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_I::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -401,7 +426,7 @@ namespace CPatch_FSH {
 
 		if (a_section == "Books") {
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_FSH_B::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_B::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 
@@ -426,7 +451,7 @@ namespace CPatch_FSH {
 
 	void CHandler::UpdateFoundForms() {
 
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
+		if (!CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < F_FormArray.size(); i++) {
 			F_BoolArray[i] = FoundItemData_NoShow.HasForm(F_FormArray[i]->GetFormID());

@@ -1,8 +1,10 @@
 #include "CQuests_Companions.hpp"
+#include "Serialization.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Companions {
 	using namespace CFramework_Master;
+	using namespace Serialization;
 
 	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
 	/*00*/ {"Companions_Quest00_Key", "$Companions_Quest00_Name", MAIN_QUEST_FLAG, "$Companions_Quest00_Data", "C00"},
@@ -50,11 +52,30 @@ namespace CQFramework_Companions {
 	{20, "Completionist_Companions_CR05", RADIANT_COMPANIONS_VALUE},
 	};
 
+	constexpr CompanionsQuestData CQD[] = {
+	{ 0x01CEEE, "Skyrim.esm", "Completionist_Companions_CR01", "", 1, 200 },
+	{ 0x01CEEE, "Skyrim.esm", "Completionist_Companions_CR01", "", 1, 200 },
+	{ 0x025185, "Skyrim.esm", "Completionist_Companions_CR02", "", 1, 200 },
+	{ 0x025230, "Skyrim.esm", "Completionist_Companions_CR03", "", 1, 200 },
+	{ 0x025231, "Skyrim.esm", "Completionist_Companions_CR04", "", 1, 100 },
+	{ 0x02522F, "Skyrim.esm", "Completionist_Companions_CR05", "", 1, 200 },
+	{ 0x0C18E1, "Skyrim.esm", "Completionist_Companions_CR06", "", 1, 200 },
+	{ 0x025250, "Skyrim.esm", "Completionist_Companions_CR07", "", 1, 200 },
+	{ 0x025251, "Skyrim.esm", "Completionist_Companions_CR08", "", 1, 100 },
+	{ 0x025252, "Skyrim.esm", "Completionist_Companions_CR09", "", 1, 200 },
+	{ 0x09D6FC, "Skyrim.esm", "Completionist_Companions_CR10", "", 1, 200 },
+	{ 0x09D700, "Skyrim.esm", "Completionist_Companions_CR11", "", 1, 200 },
+	{ 0x0E3145, "Skyrim.esm", "Completionist_Companions_CR12", "", 1, 200 },
+	{ 0x0E3163, "Skyrim.esm", "Completionist_Companions_CR13Farkas", "Completionist_Companions_CR13Vilkas", 1, 200 },
+	{ 0x0E3156, "Skyrim.esm", "Completionist_Companions_CR14", "", 1, 200 },
+	};
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework() {
+
 		SinkEvents();
 
 		IdenArray.clear();
@@ -64,6 +85,7 @@ namespace CQFramework_Companions {
 		KeysArray.clear();
 
 		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
+
 			KeysArray.push_back(Key);
 			NameArray.push_back(Name);
 			RadiArray.push_back(Flag);
@@ -86,6 +108,9 @@ namespace CQFramework_Companions {
 	void CHandler::SinkEvents() {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -97,6 +122,68 @@ namespace CQFramework_Companions {
 		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
 
 		CHandler::UpdateCompletion();
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Stage Change ) -----------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!event) { return EventResult::kContinue; }
+
+		for (auto& dataSet : CQD) {
+
+			const auto* questBase = CompletionistData::GetFullForm<RE::TESQuest>(dataSet.QuestID, dataSet.QuestFN);
+			auto* questGlob1 = RE::TESForm::LookupByEditorID<RE::TESGlobal>(dataSet.Global1);
+			auto* questGlob2 = RE::TESForm::LookupByEditorID<RE::TESGlobal>(dataSet.Global2);
+
+			if (!questBase || questBase != event || a_event->stage != dataSet.Stage) {
+				continue;
+			}
+
+			INFO("Got Quest - [{}]", questBase->GetName());
+
+			if (dataSet.Global1 == "Completionist_Companions_CR13Farkas") {
+				
+				auto* FarkasRef = CompletionistData::GetFullForm<RE::Actor>(0x01A693, dataSet.QuestFN);
+				auto* VilkasRef = CompletionistData::GetFullForm<RE::Actor>(0x01A695, dataSet.QuestFN);
+
+				if (!FarkasRef || !VilkasRef || !questGlob1 || !questGlob2) {
+					continue;
+				}
+
+				for (const auto& alias : questBase->aliases) {
+					if (alias && alias->aliasName == "Questgiver") {
+
+						auto* reference = static_cast<RE::BGSRefAlias*>(alias);
+						if (reference && reference->GetActorReference() == FarkasRef) {
+							questGlob1->value += dataSet.Value;
+							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", dataSet.Global1, questBase->GetName(), FarkasRef->GetName());
+							return EventResult::kContinue;
+						}
+
+						if (reference && reference->GetActorReference() == VilkasRef) {
+							questGlob2->value += dataSet.Value;
+							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", dataSet.Global2, questBase->GetName(), VilkasRef->GetName());
+							return EventResult::kContinue;
+						}
+					}
+				}
+			}
+			else {
+				if (questGlob1) {
+					questGlob1->value += dataSet.Value;
+					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}]", dataSet.Global1, questBase->GetName());
+					return EventResult::kContinue;
+				}
+
+			}
+		}
 		return EventResult::kContinue;
 	}
 

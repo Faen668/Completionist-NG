@@ -118,7 +118,7 @@ namespace CPatch_THU {
 		if (a_variable == "NotifyBooks") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_THU_Books::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_THU_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
 			}
 
@@ -141,7 +141,7 @@ namespace CPatch_THU {
 		if (a_variable == "NotifyItems") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_THU_Items::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_THU_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
 			}
 

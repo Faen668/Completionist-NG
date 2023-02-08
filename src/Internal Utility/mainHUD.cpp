@@ -2,6 +2,7 @@
 #include "Serialization.hpp"
 #include "Variables.hpp"
 #include "mainHUD.hpp"
+#include "QuickLootAPI.h"
 
 #undef GetModuleHandle
 
@@ -17,20 +18,67 @@ namespace Completionist_MainHUD {
 		bool m_display;
 	};
 
+	struct quickLootMessage {
+
+		const char* newName;
+	};
+
 	struct CompletionistRequest
 	{
 		RE::FormID m_formId;
 	};
 
 	CompletionistRequest s_messagefrommoreHUD{};
+	CompletionistRequest s_messagefromQuickLootEE{};
 
-	void TextnTagsAPI::MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+	//---------------------------------------------------
+	//-- QuickLoot EE Support ---------------------------
+	//---------------------------------------------------
+
+	void TextnTagsAPI::RegisterQuickLootEEListener()
+	{
+		auto messageInterface = SKSE::GetMessagingInterface();
+		auto regQLEE = messageInterface->RegisterListener("QuickLootEE", TextnTagsAPI::QuickLootEEMessageHandler);
+	}
+
+	void TextnTagsAPI::QuickLootEEMessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	{
 		auto* SKSEMessaging = SKSE::GetMessagingInterface();
 
-		if (a_msg->type != 1) { return; }
+		if (a_msg->type != 1 || !a_msg->data) { return; }
 
-		if (!a_msg->data) { return; }
+		s_messagefromQuickLootEE = *static_cast<CompletionistRequest*>(a_msg->data);
+
+		auto* baseform = RE::TESForm::LookupByID(s_messagefromQuickLootEE.m_formId);
+
+		if (!baseform || !baseform->GetName() || !TextnTagsAPI::ItemIsCollectable(baseform)) {
+			return;
+		}
+
+		auto* name = OnUpdateInventoryName(baseform->GetName(), TextnTagsAPI::ItemIsCollected(baseform));
+
+		if (SKSE::WinAPI::GetModuleHandle(L"QuickLootEE")) {
+			quickLootMessage msg{ name };
+			SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "QuickLootEE");
+		}
+	}
+
+	//---------------------------------------------------
+	//-- moreHUD Support --------------------------------
+	//---------------------------------------------------
+
+	void TextnTagsAPI::RegistermoreHUDListener()
+	{
+		auto messageInterface = SKSE::GetMessagingInterface();
+		auto regMHUD = messageInterface->RegisterListener("Ahzaab's moreHUD Inventory Plugin", TextnTagsAPI::moreHUDMessageHandler);
+		auto regQLEE = messageInterface->RegisterListener("QuickLootEE", TextnTagsAPI::moreHUDMessageHandler);
+	}
+
+	void TextnTagsAPI::moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg)
+	{
+		auto* SKSEMessaging = SKSE::GetMessagingInterface();
+
+		if (a_msg->type != 1 || !a_msg->data) { return; }
 
 		s_messagefrommoreHUD = *static_cast<CompletionistRequest*>(a_msg->data);
 		
@@ -46,47 +94,44 @@ namespace Completionist_MainHUD {
 			return;
 		}
 
-		bool ShouldDisplay = false;
 		bool PrevCollected = TextnTagsAPI::ItemIsCollected(baseform);
 
-		switch (baseform->GetFormType())
-		{
-
-		case RE::FormType::AlchemyItem:
-			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
-
-		case RE::FormType::Ingredient:
-			ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
-
-		case RE::FormType::Ammo:
-			ShouldDisplay = (PrevCollected && V_Ammo_Enabled_Found) || (!PrevCollected && V_Ammo_Enabled_New); break;
-
-		case RE::FormType::Armor:
-			ShouldDisplay = (PrevCollected && V_Armor_Enabled_Found) || (!PrevCollected && V_Armor_Enabled_New); break;
-
-		case RE::FormType::Book:
-			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
-
-		case RE::FormType::Note:
-			ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
-
-		case RE::FormType::Weapon:
-			ShouldDisplay = (PrevCollected && V_Weapons_Enabled_Found) || (!PrevCollected && V_Weapons_Enabled_New); break;
-
-		default:
-			ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
-		}
-
 		if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDInventory")) {
-			moreHUDmessage msg{ baseform->GetFormID(), PrevCollected, (ShouldDisplay && V_moreHudEnabled_Menus) };
+			moreHUDmessage msg{ baseform->GetFormID(), PrevCollected, (EvaluateFormTypeCondition(baseform, PrevCollected) && V_moreHudEnabled_Menus) };
 			SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
 		}
 	}
 
-	void TextnTagsAPI::RegisterMessageListener()
+	//---------------------------------------------------
+	//-- Quickloot RE Support  --------------------------
+	//---------------------------------------------------
+
+	void TextnTagsAPI::RegisterQuickLootListener()
 	{
 		auto messageInterface = SKSE::GetMessagingInterface();
-		auto isRegistered = messageInterface->RegisterListener("Ahzaab's moreHUD Inventory Plugin", TextnTagsAPI::MessageHandler);
+		auto isRegistered = messageInterface->RegisterListener("QuickLootRE", TextnTagsAPI::QuickLootMessageHandler);
+	}
+
+	void TextnTagsAPI::QuickLootMessageHandler(SKSE::MessagingInterface::Message* a_msg)
+	{
+		if ((strcmp(a_msg->sender, "QuickLootRE") == 0) && a_msg->type == QL_RegisterPreprocessListItem) {
+			QL_RegisterPreprocessListItem_t DataSet = (QL_RegisterPreprocessListItem_t)a_msg->data;
+			DataSet(NULL, (QL_PreprocessListItemCallback_t)TextnTagsAPI::QuickLootMessageCallBack);
+		}
+	}
+	
+	void TextnTagsAPI::QuickLootMessageCallBack(void*, RE::GFxValue* gfx, RE::TESForm* form, int32_t count)
+	{
+		if (!form || !gfx || !form->GetName() || !TextnTagsAPI::ItemIsCollectable(form)) {
+			return;
+		}
+
+		bool PrevCollected = ItemIsCollected(form);
+
+		if (!EvaluateFormTypeCondition(form, PrevCollected)) { 
+			return;
+		}
+		gfx->SetMember("displayName", { OnUpdateInventoryName(form->GetName(), PrevCollected) } );
 	}
 
 	//---------------------------------------------------
@@ -125,40 +170,11 @@ namespace Completionist_MainHUD {
 	auto baseform = a_this->object;
 	if (!baseform || !baseform->GetName() || !ItemIsCollectable(baseform)) { return _OnUpdateInventoryText(a_this); }
 
-	bool ShouldDisplay = false;
 	bool PrevCollected = ItemIsCollected(baseform);
 
-	switch (baseform->GetFormType())
-	{
-
-	case RE::FormType::AlchemyItem:
-		ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
-
-	case RE::FormType::Ingredient:
-		ShouldDisplay = (PrevCollected && V_Alchemy_Enabled_Found) || (!PrevCollected && V_Alchemy_Enabled_New); break;
-
-	case RE::FormType::Ammo:
-		ShouldDisplay = (PrevCollected && V_Ammo_Enabled_Found) || (!PrevCollected && V_Ammo_Enabled_New); break;
-
-	case RE::FormType::Armor:
-		ShouldDisplay = (PrevCollected && V_Armor_Enabled_Found) || (!PrevCollected && V_Armor_Enabled_New); break;
-
-	case RE::FormType::Book:
-		ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
-
-	case RE::FormType::Note:
-		ShouldDisplay = (PrevCollected && V_Books_Enabled_Found) || (!PrevCollected && V_Books_Enabled_New); break;
-
-	case RE::FormType::Weapon:
-		ShouldDisplay = (PrevCollected && V_Weapons_Enabled_Found) || (!PrevCollected && V_Weapons_Enabled_New); break;
-
-	default:
-		ShouldDisplay = (PrevCollected && V_Other_Enabled_Found) || (!PrevCollected && V_Other_Enabled_New); break;
+	if (!EvaluateFormTypeCondition(baseform, PrevCollected)) {
+		return _OnUpdateInventoryText(a_this);
 	}
-
-	//SKSE Message Here
-
-	if (!ShouldDisplay) { return _OnUpdateInventoryText(a_this); }
 
 	return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), PrevCollected);
 }
@@ -261,7 +277,6 @@ namespace Completionist_MainHUD {
 		RE::TESForm* Base = CurrentObj.get()->GetBaseObject();
 		if (!Base || !ItemIsCollectable(Base)) { return; }
 
-
 		bool ShouldDisplay = false;
 		bool PrevCollected = ItemIsCollected(Base);
 
@@ -329,5 +344,40 @@ namespace Completionist_MainHUD {
 	// Override
 	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) { 
 		return FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
+	}
+
+	//---------------------------------------------------
+	//-- Display Query Functions ------------------------
+	//---------------------------------------------------
+
+	bool TextnTagsAPI::EvaluateFormTypeCondition(RE::TESForm* a_form, bool a_collected)
+	{
+		switch (a_form->GetFormType())
+		{
+
+		case RE::FormType::AlchemyItem:
+			return (a_collected && V_Alchemy_Enabled_Found) || (!a_collected && V_Alchemy_Enabled_New);
+
+		case RE::FormType::Ingredient:
+			return (a_collected && V_Alchemy_Enabled_Found) || (!a_collected && V_Alchemy_Enabled_New);
+
+		case RE::FormType::Ammo:
+			return (a_collected && V_Ammo_Enabled_Found) || (!a_collected && V_Ammo_Enabled_New);
+
+		case RE::FormType::Armor:
+			return (a_collected && V_Armor_Enabled_Found) || (!a_collected && V_Armor_Enabled_New);
+
+		case RE::FormType::Book:
+			return (a_collected && V_Books_Enabled_Found) || (!a_collected && V_Books_Enabled_New);
+
+		case RE::FormType::Note:
+			return (a_collected && V_Books_Enabled_Found) || (!a_collected && V_Books_Enabled_New);
+
+		case RE::FormType::Weapon:
+			return (a_collected && V_Weapons_Enabled_Found) || (!a_collected && V_Weapons_Enabled_New);
+
+		default:
+			return (a_collected && V_Other_Enabled_Found) || (!a_collected && V_Other_Enabled_New);
+		}
 	}
 }

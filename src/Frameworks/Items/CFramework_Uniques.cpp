@@ -254,7 +254,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_A") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -276,7 +276,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_W") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -298,7 +298,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_I") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -320,7 +320,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_J") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -342,7 +342,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_L") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -364,7 +364,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_CCA") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -386,7 +386,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_CCI") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -408,7 +408,7 @@ namespace CFramework_Uniques {
 		if (a_variable == "CFramework_Uniques_CCW") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 

@@ -126,7 +126,7 @@ namespace CFramework_Others {
 		auto b_pos = std::distance(SB_FormArray.begin(), t_pos);
 
 		if (!FoundItemData_NoShow.HasForm(a_object->GetFormID())) {
-			auto msg = fmt::format("Completionist: Entry Complete - Stone of Barenziah!"sv);
+			auto msg = fmt::format("{:s}!"sv, CVariables::V_NotificationTextBarenziah);
 			FrameworkAPI::SendNotification(msg, "NotifySpecial");
 		}
 
@@ -145,7 +145,7 @@ namespace CFramework_Others {
 		if (VC_variable == "CFramework_Others_VC") {
 
 			if (!FoundItemData.HasForm(VC_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Others_VC::Data.GetForm(VC_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_VC::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -167,7 +167,7 @@ namespace CFramework_Others {
 		if (VC_variable == "CFramework_Others_PC") {
 
 			if (!FoundItemData.HasForm(VC_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Others_PC::Data.GetForm(VC_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_PC::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -189,7 +189,7 @@ namespace CFramework_Others {
 		if (VC_variable == "CFramework_Others_VM") {
 
 			if (!FoundItemData.HasForm(VC_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Others_VM::Data.GetForm(VC_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_VM::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -211,7 +211,7 @@ namespace CFramework_Others {
 		if (VC_variable == "CFramework_Others_PM") {
 
 			if (!FoundItemData.HasForm(VC_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CFramework_Others_PM::Data.GetForm(VC_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_PM::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 

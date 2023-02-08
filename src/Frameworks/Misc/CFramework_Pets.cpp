@@ -46,7 +46,7 @@ namespace CFramework_Pets {
 			auto b_pos = std::distance(Pets_VP_NameArray.begin(), t_pos);
 
 			if (!FoundItemData_NoShow.HasForm(Pets_VP_FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_VP_NameArray[b_pos]);
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_VP_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 
@@ -60,7 +60,7 @@ namespace CFramework_Pets {
 			auto b_pos = std::distance(Pets_PS_NameArray.begin(), t_pos);
 
 			if (!FoundItemData_NoShow.HasForm(Pets_PS_FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_PS_NameArray[b_pos]);
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_PS_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 
@@ -74,7 +74,7 @@ namespace CFramework_Pets {
 			auto b_pos = std::distance(Pets_SS_NameArray.begin(), t_pos);
 
 			if (!FoundItemData_NoShow.HasForm(Pets_SS_FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_SS_NameArray[b_pos]);
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_SS_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 
@@ -88,7 +88,7 @@ namespace CFramework_Pets {
 			auto b_pos = std::distance(Pets_MP_NameArray.begin(), t_pos);
 
 			if (!FoundItemData_NoShow.HasForm(Pets_MP_FormArray[b_pos]->GetFormID())) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Pets_MP_NameArray[b_pos]);
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_MP_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
 

@@ -22,7 +22,17 @@ namespace CQFramework_TelMithryn {
 	};
 
 	constexpr std::size_t StandardCompletion[] = {
-	0,1,2,3,4,5,6,7,8,9,10,11,12,13,
+	1,2,3,4,5,6,8,9,10,11,12,13,
+	};
+
+	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
+	{0, "Completionist_TelMithryn_DLC2TTR7", 1},
+	{7, "Completionist_TelMithryn_DLC2TTR8", 1},
+	};
+
+	constexpr std::tuple<RE::FormID, const char*, std::int32_t, std::int32_t, const char*> GlobalSetter[] = {
+	/*00*/ {0x01BD18, "Dragonborn.esm", 1, 300, "Completionist_TelMithryn_DLC2TTR7"},
+	/*07*/ {0x01F13B, "Dragonborn.esm", 1, 100, "Completionist_TelMithryn_DLC2TTR8"},
 	};
 
 	//---------------------------------------------------
@@ -61,6 +71,9 @@ namespace CQFramework_TelMithryn {
 	void CHandler::SinkEvents() {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
 	}
 
 	//---------------------------------------------------
@@ -76,6 +89,31 @@ namespace CQFramework_TelMithryn {
 	}
 
 	//---------------------------------------------------
+	//-- Framework Events ( On Stage Change ) -----------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+
+		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!event) { return EventResult::kContinue; }
+
+		for (auto& [formID, fileName, value, stage, global] : GlobalSetter) {
+			const auto* quest = static_cast<RE::TESQuest*>(RE::TESDataHandler::GetSingleton()->LookupForm(formID, fileName));
+
+			if (event == quest && a_event->stage == stage) {
+				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
+					var->value += value;
+					INFO("Incrememnting Var For {}", quest->GetName());
+					return EventResult::kContinue;
+				}
+			}
+		}
+		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Update Found Forms ) -----
 	//---------------------------------------------------
 
@@ -83,6 +121,10 @@ namespace CQFramework_TelMithryn {
 
 		for (auto i : StandardCompletion) {
 			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
+		}
+
+		for (auto& [i, global, value] : GlobalCompletion) {
+			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], global, value);
 		}
 	};
 }

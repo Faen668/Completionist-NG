@@ -376,7 +376,7 @@ namespace CPatch_3DC {
 		if (a_variable == "NotifyBooks") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_3DC_Books::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_3DC_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
 			}
 
@@ -399,7 +399,7 @@ namespace CPatch_3DC {
 		if (a_variable == "NotifyItems") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_3DC_Items::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_3DC_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
 			}
 

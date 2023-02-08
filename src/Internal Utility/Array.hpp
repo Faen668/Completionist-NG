@@ -685,17 +685,17 @@ namespace ArrayHolder {
 		//Patches - The Brotherhood of Old (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_BOO_I>(&CPatch_BOO::Items_NameArray, &CPatch_BOO::Items_TextArray, &CPatch_BOO::Items_BoolArray, &CPatch_BOO::Items_FormArray, &CPatch_BOO::Items_EntriesFound, &CPatch_BOO::Items_EntriesTotal, &CPatch_BOO_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_BOO_B>(&CPatch_BOO::Books_NameArray, &CPatch_BOO::Books_TextArray, &CPatch_BOO::Books_BoolArray, &CPatch_BOO::Books_FormArray, &CPatch_BOO::Books_EntriesFound, &CPatch_BOO::Books_EntriesTotal, &CPatch_BOO_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_BOO_L>(&CPatch_BOO::MapMa_NameArray, &CPatch_BOO::MapMa_TextArray, &CPatch_BOO::MapMa_BoolArray, &CPatch_BOO::MapMa_FormArray, &CPatch_BOO::MapMa_EntriesFound, &CPatch_BOO::MapMa_EntriesTotal, &CPatch_BOO_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_BOO_L>(&CPatch_BOO::MapMa_NameArray, &CPatch_BOO::MapMa_TextArray, &CPatch_BOO::MapMa_BoolArray, &CPatch_BOO::MapMa_FormArray, &CPatch_BOO::MapMa_EntriesFound, &CPatch_BOO::MapMa_EntriesTotal, &CPatch_BOO_MapMa::Data, true);
 
 		//Patches - Clockwork (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_CLW_I>(&CPatch_CLW::Items_NameArray, &CPatch_CLW::Items_TextArray, &CPatch_CLW::Items_BoolArray, &CPatch_CLW::Items_FormArray, &CPatch_CLW::Items_EntriesFound, &CPatch_CLW::Items_EntriesTotal, &CPatch_CLW_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_CLW_B>(&CPatch_CLW::Books_NameArray, &CPatch_CLW::Books_TextArray, &CPatch_CLW::Books_BoolArray, &CPatch_CLW::Books_FormArray, &CPatch_CLW::Books_EntriesFound, &CPatch_CLW::Books_EntriesTotal, &CPatch_CLW_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_CLW_L>(&CPatch_CLW::MapMa_NameArray, &CPatch_CLW::MapMa_TextArray, &CPatch_CLW::MapMa_BoolArray, &CPatch_CLW::MapMa_FormArray, &CPatch_CLW::MapMa_EntriesFound, &CPatch_CLW::MapMa_EntriesTotal, &CPatch_CLW_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_CLW_L>(&CPatch_CLW::MapMa_NameArray, &CPatch_CLW::MapMa_TextArray, &CPatch_CLW::MapMa_BoolArray, &CPatch_CLW::MapMa_FormArray, &CPatch_CLW::MapMa_EntriesFound, &CPatch_CLW::MapMa_EntriesTotal, &CPatch_CLW_MapMa::Data, true);
 
 		//Patches - Falskaar (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_FSK_I>(&CPatch_FSK::Items_NameArray, &CPatch_FSK::Items_TextArray, &CPatch_FSK::Items_BoolArray, &CPatch_FSK::Items_FormArray, &CPatch_FSK::Items_EntriesFound, &CPatch_FSK::Items_EntriesTotal, &CPatch_FSK_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_FSK_B>(&CPatch_FSK::Books_NameArray, &CPatch_FSK::Books_TextArray, &CPatch_FSK::Books_BoolArray, &CPatch_FSK::Books_FormArray, &CPatch_FSK::Books_EntriesFound, &CPatch_FSK::Books_EntriesTotal, &CPatch_FSK_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSK_L>(&CPatch_FSK::MapMa_NameArray, &CPatch_FSK::MapMa_TextArray, &CPatch_FSK::MapMa_BoolArray, &CPatch_FSK::MapMa_FormArray, &CPatch_FSK::MapMa_EntriesFound, &CPatch_FSK::MapMa_EntriesTotal, &CPatch_FSK_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_FSK_L>(&CPatch_FSK::MapMa_NameArray, &CPatch_FSK::MapMa_TextArray, &CPatch_FSK::MapMa_BoolArray, &CPatch_FSK::MapMa_FormArray, &CPatch_FSK::MapMa_EntriesFound, &CPatch_FSK::MapMa_EntriesTotal, &CPatch_FSK_MapMa::Data, true);
 
 		//Patches - Fossil Mining (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_FOS_1>(&CPatch_FOS::ItmL1_NameArray, &CPatch_FOS::ItmL1_TextArray, &CPatch_FOS::ItmL1_BoolArray, &CPatch_FOS::ItmL1_FormArray, &CPatch_FOS::ItmL1_EntriesFound, &CPatch_FOS::ItmL1_EntriesTotal, &CPatch_FOS_ItmL1::Data);
@@ -705,27 +705,27 @@ namespace ArrayHolder {
 		//Patches - Gray Cowl of Nocturnal (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_GCN_I>(&CPatch_GCN::Items_NameArray, &CPatch_GCN::Items_TextArray, &CPatch_GCN::Items_BoolArray, &CPatch_GCN::Items_FormArray, &CPatch_GCN::Items_EntriesFound, &CPatch_GCN::Items_EntriesTotal, &CPatch_GCN_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_GCN_B>(&CPatch_GCN::Books_NameArray, &CPatch_GCN::Books_TextArray, &CPatch_GCN::Books_BoolArray, &CPatch_GCN::Books_FormArray, &CPatch_GCN::Books_EntriesFound, &CPatch_GCN::Books_EntriesTotal, &CPatch_GCN_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_GCN_L>(&CPatch_GCN::MapMa_NameArray, &CPatch_GCN::MapMa_TextArray, &CPatch_GCN::MapMa_BoolArray, &CPatch_GCN::MapMa_FormArray, &CPatch_GCN::MapMa_EntriesFound, &CPatch_GCN::MapMa_EntriesTotal, &CPatch_GCN_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_GCN_L>(&CPatch_GCN::MapMa_NameArray, &CPatch_GCN::MapMa_TextArray, &CPatch_GCN::MapMa_BoolArray, &CPatch_GCN::MapMa_FormArray, &CPatch_GCN::MapMa_EntriesFound, &CPatch_GCN::MapMa_EntriesTotal, &CPatch_GCN_MapMa::Data, true);
 
 		//Patches - Oblivion Artifacts (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_OAP_I>(&CPatch_OAP::Items_NameArray, &CPatch_OAP::Items_TextArray, &CPatch_OAP::Items_BoolArray, &CPatch_OAP::Items_FormArray, &CPatch_OAP::Items_EntriesFound, &CPatch_OAP::Items_EntriesTotal, &CPatch_OAP_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_OAP_B>(&CPatch_OAP::Books_NameArray, &CPatch_OAP::Books_TextArray, &CPatch_OAP::Books_BoolArray, &CPatch_OAP::Books_FormArray, &CPatch_OAP::Books_EntriesFound, &CPatch_OAP::Books_EntriesTotal, &CPatch_OAP_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_OAP_L>(&CPatch_OAP::MapMa_NameArray, &CPatch_OAP::MapMa_TextArray, &CPatch_OAP::MapMa_BoolArray, &CPatch_OAP::MapMa_FormArray, &CPatch_OAP::MapMa_EntriesFound, &CPatch_OAP::MapMa_EntriesTotal, &CPatch_OAP_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_OAP_L>(&CPatch_OAP::MapMa_NameArray, &CPatch_OAP::MapMa_TextArray, &CPatch_OAP::MapMa_BoolArray, &CPatch_OAP::MapMa_FormArray, &CPatch_OAP::MapMa_EntriesFound, &CPatch_OAP::MapMa_EntriesTotal, &CPatch_OAP_MapMa::Data, true);
 
 		//Patches - Helgen Reborn (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_HRB_I>(&CPatch_HRB::Items_NameArray, &CPatch_HRB::Items_TextArray, &CPatch_HRB::Items_BoolArray, &CPatch_HRB::Items_FormArray, &CPatch_HRB::Items_EntriesFound, &CPatch_HRB::Items_EntriesTotal, &CPatch_HRB_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_HRB_B>(&CPatch_HRB::Books_NameArray, &CPatch_HRB::Books_TextArray, &CPatch_HRB::Books_BoolArray, &CPatch_HRB::Books_FormArray, &CPatch_HRB::Books_EntriesFound, &CPatch_HRB::Books_EntriesTotal, &CPatch_HRB_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_HRB_L>(&CPatch_HRB::MapMa_NameArray, &CPatch_HRB::MapMa_TextArray, &CPatch_HRB::MapMa_BoolArray, &CPatch_HRB::MapMa_FormArray, &CPatch_HRB::MapMa_EntriesFound, &CPatch_HRB::MapMa_EntriesTotal, &CPatch_HRB_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_HRB_L>(&CPatch_HRB::MapMa_NameArray, &CPatch_HRB::MapMa_TextArray, &CPatch_HRB::MapMa_BoolArray, &CPatch_HRB::MapMa_FormArray, &CPatch_HRB::MapMa_EntriesFound, &CPatch_HRB::MapMa_EntriesTotal, &CPatch_HRB_MapMa::Data, true);
 
 		//Patches - Interesting NPC's (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_3DC_I>(&CPatch_3DC::Items_NameArray, &CPatch_3DC::Items_TextArray, &CPatch_3DC::Items_BoolArray, &CPatch_3DC::Items_FormArray, &CPatch_3DC::Items_EntriesFound, &CPatch_3DC::Items_EntriesTotal, &CPatch_3DC_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_3DC_B>(&CPatch_3DC::Books_NameArray, &CPatch_3DC::Books_TextArray, &CPatch_3DC::Books_BoolArray, &CPatch_3DC::Books_FormArray, &CPatch_3DC::Books_EntriesFound, &CPatch_3DC::Books_EntriesTotal, &CPatch_3DC_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_3DC_L>(&CPatch_3DC::MapMa_NameArray, &CPatch_3DC::MapMa_TextArray, &CPatch_3DC::MapMa_BoolArray, &CPatch_3DC::MapMa_FormArray, &CPatch_3DC::MapMa_EntriesFound, &CPatch_3DC::MapMa_EntriesTotal, &CPatch_3DC_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_3DC_L>(&CPatch_3DC::MapMa_NameArray, &CPatch_3DC::MapMa_TextArray, &CPatch_3DC::MapMa_BoolArray, &CPatch_3DC::MapMa_FormArray, &CPatch_3DC::MapMa_EntriesFound, &CPatch_3DC::MapMa_EntriesTotal, &CPatch_3DC_MapMa::Data, true);
 
 		//Patches - Moon and Star (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_MAS_I>(&CPatch_MAS::Items_NameArray, &CPatch_MAS::Items_TextArray, &CPatch_MAS::Items_BoolArray, &CPatch_MAS::Items_FormArray, &CPatch_MAS::Items_EntriesFound, &CPatch_MAS::Items_EntriesTotal, &CPatch_MAS_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_MAS_B>(&CPatch_MAS::Books_NameArray, &CPatch_MAS::Books_TextArray, &CPatch_MAS::Books_BoolArray, &CPatch_MAS::Books_FormArray, &CPatch_MAS::Books_EntriesFound, &CPatch_MAS::Books_EntriesTotal, &CPatch_MAS_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_MAS_L>(&CPatch_MAS::MapMa_NameArray, &CPatch_MAS::MapMa_TextArray, &CPatch_MAS::MapMa_BoolArray, &CPatch_MAS::MapMa_FormArray, &CPatch_MAS::MapMa_EntriesFound, &CPatch_MAS::MapMa_EntriesTotal, &CPatch_MAS_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_MAS_L>(&CPatch_MAS::MapMa_NameArray, &CPatch_MAS::MapMa_TextArray, &CPatch_MAS::MapMa_BoolArray, &CPatch_MAS::MapMa_FormArray, &CPatch_MAS::MapMa_EntriesFound, &CPatch_MAS::MapMa_EntriesTotal, &CPatch_MAS_MapMa::Data, true);
 
 		//Patches - Moonpath to Elsweyr (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_MTE_I>(&CPatch_MTE::Items_NameArray, &CPatch_MTE::Items_TextArray, &CPatch_MTE::Items_BoolArray, &CPatch_MTE::Items_FormArray, &CPatch_MTE::Items_EntriesFound, &CPatch_MTE::Items_EntriesTotal, &CPatch_MTE_Items::Data);
@@ -734,7 +734,7 @@ namespace ArrayHolder {
 		//Patches - Project AHO (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_AHO_I>(&CPatch_AHO::Items_NameArray, &CPatch_AHO::Items_TextArray, &CPatch_AHO::Items_BoolArray, &CPatch_AHO::Items_FormArray, &CPatch_AHO::Items_EntriesFound, &CPatch_AHO::Items_EntriesTotal, &CPatch_AHO_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_AHO_B>(&CPatch_AHO::Books_NameArray, &CPatch_AHO::Books_TextArray, &CPatch_AHO::Books_BoolArray, &CPatch_AHO::Books_FormArray, &CPatch_AHO::Books_EntriesFound, &CPatch_AHO::Books_EntriesTotal, &CPatch_AHO_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_AHO_L>(&CPatch_AHO::MapMa_NameArray, &CPatch_AHO::MapMa_TextArray, &CPatch_AHO::MapMa_BoolArray, &CPatch_AHO::MapMa_FormArray, &CPatch_AHO::MapMa_EntriesFound, &CPatch_AHO::MapMa_EntriesTotal, &CPatch_AHO_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_AHO_L>(&CPatch_AHO::MapMa_NameArray, &CPatch_AHO::MapMa_TextArray, &CPatch_AHO::MapMa_BoolArray, &CPatch_AHO::MapMa_FormArray, &CPatch_AHO::MapMa_EntriesFound, &CPatch_AHO::MapMa_EntriesTotal, &CPatch_AHO_MapMa::Data, true);
 
 		//Patches - Skyrim Unique Treasures (1) (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_ST1_1>(&CPatch_ST1::ItmL1_NameArray, &CPatch_ST1::ItmL1_TextArray, &CPatch_ST1::ItmL1_BoolArray, &CPatch_ST1::ItmL1_FormArray, &CPatch_ST1::ItmL1_EntriesFound, &CPatch_ST1::ItmL1_EntriesTotal, &CPatch_ST1_ItmL1::Data);
@@ -755,48 +755,47 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kPatch_ST3_4>(&CPatch_ST3::ItmL4_NameArray, &CPatch_ST3::ItmL4_TextArray, &CPatch_ST3::ItmL4_BoolArray, &CPatch_ST3::ItmL4_FormArray, &CPatch_ST3::ItmL4_EntriesFound, &CPatch_ST3::ItmL4_EntriesTotal, &CPatch_ST3_ItmL4::Data);
 
 		//Patches - Fishing (Start) ---------------
-		AttemptToAdd<FrameworkID::kPatch_FSH_F>(&CPatch_FSH::F_NameArray, &CPatch_FSH::F_TextArray, &CPatch_FSH::F_BoolArray, &CPatch_FSH::F_FormArray, &CPatch_FSH::F_EntriesFound, &CPatch_FSH::F_EntriesTotal, &CPatch_FSH_F::Data);
+		AttemptToAdd<FrameworkID::kPatch_FSH_F>(&CPatch_FSH::F_NameArray, &CPatch_FSH::F_TextArray, &CPatch_FSH::F_BoolArray, &CPatch_FSH::F_FormArray, &CPatch_FSH::F_EntriesFound, &CPatch_FSH::F_EntriesTotal, &CPatch_FSH_F::Data, true);
 		AttemptToAdd<FrameworkID::kPatch_FSH_I>(&CPatch_FSH::I_NameArray, &CPatch_FSH::I_TextArray, &CPatch_FSH::I_BoolArray, &CPatch_FSH::I_FormArray, &CPatch_FSH::I_EntriesFound, &CPatch_FSH::I_EntriesTotal, &CPatch_FSH_I::Data);
 		AttemptToAdd<FrameworkID::kPatch_FSH_B>(&CPatch_FSH::B_NameArray, &CPatch_FSH::B_TextArray, &CPatch_FSH::B_BoolArray, &CPatch_FSH::B_FormArray, &CPatch_FSH::B_EntriesFound, &CPatch_FSH::B_EntriesTotal, &CPatch_FSH_B::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSH_L>(&CPatch_FSH::L_NameArray, &CPatch_FSH::L_TextArray, &CPatch_FSH::L_BoolArray, &CPatch_FSH::L_FormArray, &CPatch_FSH::L_EntriesFound, &CPatch_FSH::L_EntriesTotal, &CPatch_FSH_L::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSH_A>(&CPatch_FSH::A_NameArray, &CPatch_FSH::A_TextArray, &CPatch_FSH::A_BoolArray, &CPatch_FSH::A_FormArray, &CPatch_FSH::A_EntriesFound, &CPatch_FSH::A_EntriesTotal, &CPatch_FSH_A::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSH_C>(&CPatch_FSH::C_NameArray, &CPatch_FSH::C_TextArray, &CPatch_FSH::C_BoolArray, &CPatch_FSH::C_FormArray, &CPatch_FSH::C_EntriesFound, &CPatch_FSH::C_EntriesTotal, &CPatch_FSH_C::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSH_L>(&CPatch_FSH::L_NameArray, &CPatch_FSH::L_TextArray, &CPatch_FSH::L_BoolArray, &CPatch_FSH::L_FormArray, &CPatch_FSH::L_EntriesFound, &CPatch_FSH::L_EntriesTotal, &CPatch_FSH_L::Data);
-		AttemptToAdd<FrameworkID::kPatch_FSH_S>(&CPatch_FSH::S_NameArray, &CPatch_FSH::S_TextArray, &CPatch_FSH::S_BoolArray, &CPatch_FSH::S_FormArray, &CPatch_FSH::S_EntriesFound, &CPatch_FSH::S_EntriesTotal, &CPatch_FSH_S::Data);
+		AttemptToAdd<FrameworkID::kPatch_FSH_L>(&CPatch_FSH::L_NameArray, &CPatch_FSH::L_TextArray, &CPatch_FSH::L_BoolArray, &CPatch_FSH::L_FormArray, &CPatch_FSH::L_EntriesFound, &CPatch_FSH::L_EntriesTotal, &CPatch_FSH_L::Data, true);
+		AttemptToAdd<FrameworkID::kPatch_FSH_A>(&CPatch_FSH::A_NameArray, &CPatch_FSH::A_TextArray, &CPatch_FSH::A_BoolArray, &CPatch_FSH::A_FormArray, &CPatch_FSH::A_EntriesFound, &CPatch_FSH::A_EntriesTotal, &CPatch_FSH_A::Data, true);
+		AttemptToAdd<FrameworkID::kPatch_FSH_C>(&CPatch_FSH::C_NameArray, &CPatch_FSH::C_TextArray, &CPatch_FSH::C_BoolArray, &CPatch_FSH::C_FormArray, &CPatch_FSH::C_EntriesFound, &CPatch_FSH::C_EntriesTotal, &CPatch_FSH_C::Data, true);
+		AttemptToAdd<FrameworkID::kPatch_FSH_S>(&CPatch_FSH::S_NameArray, &CPatch_FSH::S_TextArray, &CPatch_FSH::S_BoolArray, &CPatch_FSH::S_FormArray, &CPatch_FSH::S_EntriesFound, &CPatch_FSH::S_EntriesTotal, &CPatch_FSH_S::Data, true);
 
 		//Patches - Teldryn Serious (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_TEL_I>(&CPatch_TEL::Items_NameArray, &CPatch_TEL::Items_TextArray, &CPatch_TEL::Items_BoolArray, &CPatch_TEL::Items_FormArray, &CPatch_TEL::Items_EntriesFound, &CPatch_TEL::Items_EntriesTotal, &CPatch_TEL_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_TEL_B>(&CPatch_TEL::Books_NameArray, &CPatch_TEL::Books_TextArray, &CPatch_TEL::Books_BoolArray, &CPatch_TEL::Books_FormArray, &CPatch_TEL::Books_EntriesFound, &CPatch_TEL::Books_EntriesTotal, &CPatch_TEL_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_TEL_L>(&CPatch_TEL::MapMa_NameArray, &CPatch_TEL::MapMa_TextArray, &CPatch_TEL::MapMa_BoolArray, &CPatch_TEL::MapMa_FormArray, &CPatch_TEL::MapMa_EntriesFound, &CPatch_TEL::MapMa_EntriesTotal, &CPatch_TEL_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_TEL_L>(&CPatch_TEL::MapMa_NameArray, &CPatch_TEL::MapMa_TextArray, &CPatch_TEL::MapMa_BoolArray, &CPatch_TEL::MapMa_FormArray, &CPatch_TEL::MapMa_EntriesFound, &CPatch_TEL::MapMa_EntriesTotal, &CPatch_TEL_MapMa::Data, true);
 		
 		//Patches - Thunderchild (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_THU_I>(&CPatch_THU::Items_NameArray, &CPatch_THU::Items_TextArray, &CPatch_THU::Items_BoolArray, &CPatch_THU::Items_FormArray, &CPatch_THU::Items_EntriesFound, &CPatch_THU::Items_EntriesTotal, &CPatch_THU_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_THU_B>(&CPatch_THU::Books_NameArray, &CPatch_THU::Books_TextArray, &CPatch_THU::Books_BoolArray, &CPatch_THU::Books_FormArray, &CPatch_THU::Books_EntriesFound, &CPatch_THU::Books_EntriesTotal, &CPatch_THU_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_THU_L>(&CPatch_THU::MapMa_NameArray, &CPatch_THU::MapMa_TextArray, &CPatch_THU::MapMa_BoolArray, &CPatch_THU::MapMa_FormArray, &CPatch_THU::MapMa_EntriesFound, &CPatch_THU::MapMa_EntriesTotal, &CPatch_THU_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_THU_L>(&CPatch_THU::MapMa_NameArray, &CPatch_THU::MapMa_TextArray, &CPatch_THU::MapMa_BoolArray, &CPatch_THU::MapMa_FormArray, &CPatch_THU::MapMa_EntriesFound, &CPatch_THU::MapMa_EntriesTotal, &CPatch_THU_MapMa::Data, true);
 
 		//Patches - Undeath (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_UND_B>(&CPatch_UND::Books_NameArray, &CPatch_UND::Books_TextArray, &CPatch_UND::Books_BoolArray, &CPatch_UND::Books_FormArray, &CPatch_UND::Books_EntriesFound, &CPatch_UND::Books_EntriesTotal, &CPatch_UND_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_UND_L>(&CPatch_UND::MapMa_NameArray, &CPatch_UND::MapMa_TextArray, &CPatch_UND::MapMa_BoolArray, &CPatch_UND::MapMa_FormArray, &CPatch_UND::MapMa_EntriesFound, &CPatch_UND::MapMa_EntriesTotal, &CPatch_UND_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_UND_L>(&CPatch_UND::MapMa_NameArray, &CPatch_UND::MapMa_TextArray, &CPatch_UND::MapMa_BoolArray, &CPatch_UND::MapMa_FormArray, &CPatch_UND::MapMa_EntriesFound, &CPatch_UND::MapMa_EntriesTotal, &CPatch_UND_MapMa::Data, true);
 
 		//Patches - Wheels of Lull (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_WOL_I>(&CPatch_WOL::Items_NameArray, &CPatch_WOL::Items_TextArray, &CPatch_WOL::Items_BoolArray, &CPatch_WOL::Items_FormArray, &CPatch_WOL::Items_EntriesFound, &CPatch_WOL::Items_EntriesTotal, &CPatch_WOL_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_WOL_B>(&CPatch_WOL::Books_NameArray, &CPatch_WOL::Books_TextArray, &CPatch_WOL::Books_BoolArray, &CPatch_WOL::Books_FormArray, &CPatch_WOL::Books_EntriesFound, &CPatch_WOL::Books_EntriesTotal, &CPatch_WOL_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_WOL_L>(&CPatch_WOL::MapMa_NameArray, &CPatch_WOL::MapMa_TextArray, &CPatch_WOL::MapMa_BoolArray, &CPatch_WOL::MapMa_FormArray, &CPatch_WOL::MapMa_EntriesFound, &CPatch_WOL::MapMa_EntriesTotal, &CPatch_WOL_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_WOL_L>(&CPatch_WOL::MapMa_NameArray, &CPatch_WOL::MapMa_TextArray, &CPatch_WOL::MapMa_BoolArray, &CPatch_WOL::MapMa_FormArray, &CPatch_WOL::MapMa_EntriesFound, &CPatch_WOL::MapMa_EntriesTotal, &CPatch_WOL_MapMa::Data, true);
 
 		//Patches - Wintersun (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_WSN_I>(&CPatch_WSN::Items_NameArray, &CPatch_WSN::Items_TextArray, &CPatch_WSN::Items_BoolArray, &CPatch_WSN::Items_FormArray, &CPatch_WSN::Items_EntriesFound, &CPatch_WSN::Items_EntriesTotal, &CPatch_WSN_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_WSN_B>(&CPatch_WSN::Books_NameArray, &CPatch_WSN::Books_TextArray, &CPatch_WSN::Books_BoolArray, &CPatch_WSN::Books_FormArray, &CPatch_WSN::Books_EntriesFound, &CPatch_WSN::Books_EntriesTotal, &CPatch_WSN_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_WSN_L>(&CPatch_WSN::MapMa_NameArray, &CPatch_WSN::MapMa_TextArray, &CPatch_WSN::MapMa_BoolArray, &CPatch_WSN::MapMa_FormArray, &CPatch_WSN::MapMa_EntriesFound, &CPatch_WSN::MapMa_EntriesTotal, &CPatch_WSN_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_WSN_L>(&CPatch_WSN::MapMa_NameArray, &CPatch_WSN::MapMa_TextArray, &CPatch_WSN::MapMa_BoolArray, &CPatch_WSN::MapMa_FormArray, &CPatch_WSN::MapMa_EntriesFound, &CPatch_WSN::MapMa_EntriesTotal, &CPatch_WSN_MapMa::Data, true);
 
 		//Patches - Wyrmstooth (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_WYR_I>(&CPatch_WYR::Items_NameArray, &CPatch_WYR::Items_TextArray, &CPatch_WYR::Items_BoolArray, &CPatch_WYR::Items_FormArray, &CPatch_WYR::Items_EntriesFound, &CPatch_WYR::Items_EntriesTotal, &CPatch_WYR_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_WYR_B>(&CPatch_WYR::Books_NameArray, &CPatch_WYR::Books_TextArray, &CPatch_WYR::Books_BoolArray, &CPatch_WYR::Books_FormArray, &CPatch_WYR::Books_EntriesFound, &CPatch_WYR::Books_EntriesTotal, &CPatch_WYR_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_WYR_L>(&CPatch_WYR::MapMa_NameArray, &CPatch_WYR::MapMa_TextArray, &CPatch_WYR::MapMa_BoolArray, &CPatch_WYR::MapMa_FormArray, &CPatch_WYR::MapMa_EntriesFound, &CPatch_WYR::MapMa_EntriesTotal, &CPatch_WYR_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_WYR_L>(&CPatch_WYR::MapMa_NameArray, &CPatch_WYR::MapMa_TextArray, &CPatch_WYR::MapMa_BoolArray, &CPatch_WYR::MapMa_FormArray, &CPatch_WYR::MapMa_EntriesFound, &CPatch_WYR::MapMa_EntriesTotal, &CPatch_WYR_MapMa::Data, true);
 
 		//Patches - Vigilant (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_VIG_I>(&CPatch_VIG::Items_NameArray, &CPatch_VIG::Items_TextArray, &CPatch_VIG::Items_BoolArray, &CPatch_VIG::Items_FormArray, &CPatch_VIG::Items_EntriesFound, &CPatch_VIG::Items_EntriesTotal, &CPatch_VIG_Items::Data);
 		AttemptToAdd<FrameworkID::kPatch_VIG_B>(&CPatch_VIG::Books_NameArray, &CPatch_VIG::Books_TextArray, &CPatch_VIG::Books_BoolArray, &CPatch_VIG::Books_FormArray, &CPatch_VIG::Books_EntriesFound, &CPatch_VIG::Books_EntriesTotal, &CPatch_VIG_Books::Data);
-		AttemptToAdd<FrameworkID::kPatch_VIG_L>(&CPatch_VIG::MapMa_NameArray, &CPatch_VIG::MapMa_TextArray, &CPatch_VIG::MapMa_BoolArray, &CPatch_VIG::MapMa_FormArray, &CPatch_VIG::MapMa_EntriesFound, &CPatch_VIG::MapMa_EntriesTotal, &CPatch_VIG_MapMa::Data);
+		AttemptToAdd<FrameworkID::kPatch_VIG_L>(&CPatch_VIG::MapMa_NameArray, &CPatch_VIG::MapMa_TextArray, &CPatch_VIG::MapMa_BoolArray, &CPatch_VIG::MapMa_FormArray, &CPatch_VIG::MapMa_EntriesFound, &CPatch_VIG::MapMa_EntriesTotal, &CPatch_VIG_MapMa::Data, true);
 
 		//Patches - Spell Tomes (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_SpellTomes_ApoA>(&CPatch_SpellTomes::Apocalypse_A_NameArray, &CPatch_SpellTomes::Apocalypse_A_TextArray, &CPatch_SpellTomes::Apocalypse_A_BoolArray, &CPatch_SpellTomes::Apocalypse_A_FormArray, &CPatch_SpellTomes::Apocalypse_A_EntriesFound, &CPatch_SpellTomes::Apocalypse_A_EntriesTotal, &CPatch_SpellTomes_Apocalypse::Data);

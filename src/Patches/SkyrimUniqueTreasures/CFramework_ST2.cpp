@@ -98,7 +98,7 @@ namespace CPatch_ST2 {
 		if (a_variable == "CPatch_ST2_ItmL1") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_ST2_ItmL1::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST2_ItmL1::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -124,7 +124,7 @@ namespace CPatch_ST2 {
 		if (a_variable == "CPatch_ST2_ItmL2") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_ST2_ItmL2::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST2_ItmL2::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -150,7 +150,7 @@ namespace CPatch_ST2 {
 		if (a_variable == "CPatch_ST2_ItmL3") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_ST2_ItmL3::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST2_ItmL3::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 
@@ -176,7 +176,7 @@ namespace CPatch_ST2 {
 		if (a_variable == "CPatch_ST2_ItmL4") {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_ST2_ItmL4::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST2_ItmL4::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
 			}
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Structs.hpp"
 #include "Serialization.hpp"
 
 namespace CFramework_Master
@@ -10,6 +10,8 @@ namespace CFramework_Master
 
 	inline Serialization::CompletionistData FoundItemData;
 	inline Serialization::CompletionistData FoundItemData_NoShow;
+	inline Serialization::CompletionistData ExcludedCellData;
+
 	inline int PatchesInstalled;
 	inline int TomesInstalled;
 	
@@ -30,6 +32,8 @@ namespace CFramework_Master
 
 	inline constexpr bool IS_STAGE_DONE_Y = true;
 	inline constexpr bool IS_STAGE_DONE_N = false;
+
+	inline std::vector<std::string> ExcludedQuestsArray;
 
 	class FrameworkAPI {
 
@@ -84,12 +88,16 @@ namespace CFramework_Master
 		static RE::TESQuest*				GetQuest(std::string a_questID);
 		static bool							IsCompleted_P(std::string a_key, std::string a_questID, std::int32_t a_stage); //GetStage > Check
 		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage); //IsStageDone Check
+		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage, std::int32_t a_stage2); //IsStageDone Check
 		static bool							IsCompleted_N(std::string a_key, std::string a_questID); // Normal Completion Check
 		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value = 1); // GLobal Check
+		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, CRadiantEnum a_value); // GLobal Check
 		static bool							IsCompleted_J(std::string a_key, std::string a_imp, std::string a_son); // Thane Check
 
 		static bool							IsBookKnown(RE::TESForm* a_form);
 		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
+
+		static void							LoadInjectedForms(RE::StaticFunctionTag*);
 		
 	};
 }

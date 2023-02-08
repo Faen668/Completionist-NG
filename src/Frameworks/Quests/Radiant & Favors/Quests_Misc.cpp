@@ -49,7 +49,7 @@ namespace MiscQuests
 			}
 
 			if ((questID == "CWSiegeObj" || questID == "CWFortSiegeFort") && a_event->stage == 9000) {
-				RadiantQuestManager::ProcessFormID(uint32_t(0), questID);
+				RadiantQuestManager::ProcessFormID(0, questID);
 				return EventResult::kContinue;
 			}
 		}

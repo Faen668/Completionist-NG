@@ -73,7 +73,7 @@ namespace CFramework_Shouts {
 				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
 				
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Vanilla_SH_FormArray[b_pos]->GetName());
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Vanilla_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 				
@@ -94,7 +94,7 @@ namespace CFramework_Shouts {
 				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 2 ({:s}) - Learnt!"sv, Vanilla_SH_FormArray[b_pos]->GetName(), Word2->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -112,7 +112,7 @@ namespace CFramework_Shouts {
 				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 1 ({:s}) - Learnt!"sv, Vanilla_SH_FormArray[b_pos]->GetName(), Word1->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -133,7 +133,7 @@ namespace CFramework_Shouts {
 				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Thunderchild_SH_FormArray[b_pos]->GetName());
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Thunderchild_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -154,7 +154,7 @@ namespace CFramework_Shouts {
 				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 2 ({:s}) - Learnt!"sv, Thunderchild_SH_FormArray[b_pos]->GetName(), Word2->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -172,7 +172,7 @@ namespace CFramework_Shouts {
 				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 1 ({:s}) - Learnt!"sv, Thunderchild_SH_FormArray[b_pos]->GetName(), Word1->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -193,7 +193,7 @@ namespace CFramework_Shouts {
 				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, Miscellaneous_SH_FormArray[b_pos]->GetName());
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Miscellaneous_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -214,7 +214,7 @@ namespace CFramework_Shouts {
 				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 2 ({:s}) - Learnt!"sv, Miscellaneous_SH_FormArray[b_pos]->GetName(), Word2->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -232,7 +232,7 @@ namespace CFramework_Shouts {
 				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("Completionist: {:s} - Word 1 ({:s}) - Learnt!"sv, Miscellaneous_SH_FormArray[b_pos]->GetName(), Word1->GetName());
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -488,8 +488,14 @@ namespace CFramework_Shouts {
 		CHandler::AddToArray(Section::kThunderchild, 0x004925, "$MiscDataShoutThunderChild28", "$MiscDataShoutHighlightThunder28", THName); //Warcry
 	
 		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F, "$MiscDataShout_FSK_Name", "$MiscDataShout_FSK_Data", FSName);	//Champion's Spirit (Falskaar)
-		CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "$MiscDataShout_WYR_Name", "$MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
-		CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
+
+		if (Serialization::CompletionistData::IsModInstalled("ForcefulTongue - Wyrmstooth Patch.esp")) {
+			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFTWYR_Data", FTName);	//Phantom Form (Forceful Tongue)
+		}
+		else {
+			CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "$MiscDataShout_WYR_Name", "$MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
+			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
+		}
 	}
 
 	//---------------------------------------------------

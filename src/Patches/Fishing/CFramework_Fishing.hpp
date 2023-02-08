@@ -110,6 +110,8 @@ namespace CPatch_FSH
 
 		  static void			InjectAndCompileData();;
 		  static void			BuildFishArrays(RE::TESForm* a_form, std::string a_rod, std::string a_loc);
+
+		  static void			AddCACOFishingForms();
 	};
 
 }

@@ -22,7 +22,7 @@ namespace CQFramework_Morthal {
 
 	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
 	{3, "Completionist_Favor_ChopWoodHroggar", -4},
-	{4, "Completionist_Favor_ChopWoodHroggar", -4},
+	{4, "Completionist_Favor_ChopWoodJorgen", -4},
 	{5, "Completionist_Favor001Idgrod", 1},
 	{6, "Completionist_Favor017Benor", 1},
 	{7, "Completionist_Favor110Lami", 1},

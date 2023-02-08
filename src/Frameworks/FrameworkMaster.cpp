@@ -1,11 +1,13 @@
 #include "Internal Utility/Variables.hpp"
 #include "DKUtil/Utility.hpp"
+#include "Internal Utility/CellScanner.hpp"
 #include "Internal Utility/Array.hpp"
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Frameworks/Quests/Radiant & Favors/Radiant Quests Manager.hpp"
 
 namespace CFramework_Master {
+	using namespace CVariables;
 	using namespace ArrayHolder;
 	using namespace Serialization;
 
@@ -26,6 +28,8 @@ namespace CFramework_Master {
 		SetSerializableInfo(CQuestKeys_Natural);
 		SetSerializableInfo(CQuestKeys_Manual);
 		SetSerializableInfo(CQuestKeys_Stages);
+		
+		ExcludedQuestsArray.clear();
 
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
@@ -151,8 +155,7 @@ namespace CFramework_Master {
 		a_vm->RegisterFunction("qIsOptionCompleted",			"Completionist_Native", qIsOptionCompleted); // Returns true if completed by any natural means.
 		a_vm->RegisterFunction("qSetOptionCompleted",			"Completionist_Native", qSetOptionCompleted); // Only used to manually complete (CQuestKeys_Manual)
 
-		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
-		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
+
 		a_vm->RegisterFunction("ShouldDisplayMiscHeader",		"Completionist_Native", ShouldDisplayMiscHeader);
 		a_vm->RegisterFunction("ShouldDisplayTomeHeader",		"Completionist_Native", ShouldDisplayTomeHeader);
 
@@ -160,8 +163,13 @@ namespace CFramework_Master {
 		a_vm->RegisterFunction("GetHexValue",					"Completionist_Native", GetHexValue);
 		a_vm->RegisterFunction("SendNotification",				"Completionist_Native", SendNotificationExt);
 
-		a_vm->RegisterFunction("UpdateVariables", "Completionist_Native", UpdateCompletion);
-
+		a_vm->RegisterFunction("UpdateVariables",				"Completionist_Native", UpdateCompletion);
+		a_vm->RegisterFunction("LoadInjectedForms",				"Completionist_Native", LoadInjectedForms);
+		
+		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
+		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
+		a_vm->RegisterFunction("ActivateShrineByID",			"Completionist_Native", CFramework_Blessings::CHandler::ActivateShrineFromPapyrus);
+		a_vm->RegisterFunction("CheckForReferences",			"Completionist_Native", CellScanner::CHandler::CheckForReferences);
 		return true;
 	}
 
@@ -169,8 +177,16 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Update From MCM ) --------
 	//---------------------------------------------------
 
+	void FrameworkAPI::LoadInjectedForms(RE::StaticFunctionTag*) {
+
+		CPatch_FSH::CHandler::AddCACOFishingForms();
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Update From MCM ) --------
+	//---------------------------------------------------
+
 	void FrameworkAPI::UpdateCompletion(RE::StaticFunctionTag*) {
-		using namespace CVariables;
 
 		VariablesAPI::Update();
 
@@ -453,8 +469,30 @@ namespace CFramework_Master {
 	//---------------------------------------------------
 
 	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage) {
-		
+
+		auto* executedStages = GetQuest(a_questID)->executedStages;
+
+		if (executedStages)
+		{
+			for (auto& executedStage : *executedStages)
+			{
+				if (executedStage) {
+					INFO("Got executedStage for quest {}", a_questID);
+				}
+			}
+		}
+
 		if (CQuestKeys_Stages.HasStage(a_key, a_stage)) {
+			CQuestKeys_Natural.AddKey(a_key);
+			CQuestKeys_Manual.RemoveKey(a_key);
+			return true;
+		}
+		return false;
+	}
+
+	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage, std::int32_t a_stage2) {
+
+		if (CQuestKeys_Stages.HasStage(a_key, a_stage) || a_stage2 != 0 && CQuestKeys_Stages.HasStage(a_key, a_stage2)) {
 			CQuestKeys_Natural.AddKey(a_key);
 			CQuestKeys_Manual.RemoveKey(a_key);
 			return true;
@@ -480,6 +518,74 @@ namespace CFramework_Master {
 			CQuestKeys_Manual.RemoveKey(a_key);
 			return true;
 			
+		}
+		return false;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Get Complete By Global )------
+	//---------------------------------------------------
+
+	bool FrameworkAPI::IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, CRadiantEnum a_value) {
+
+		const auto* quest = GetQuest(a_questID);
+		auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_globalID);
+		int32_t value;
+
+		if (!quest || !global) { return false; }
+
+		switch (a_value)
+		{
+
+		case CRadiantEnum::kRadiant_One:
+		case CRadiantEnum::kRadiant_Fsh:
+			value = std::to_underlying(a_value);
+			break;
+	
+		case CRadiantEnum::kRadiant_Def:
+			value = CVariables::V_RadiantCounterVal;
+			break;
+
+		case CRadiantEnum::kRadiant_Bty:
+			value = CVariables::V_Radiant_BountyVal;
+			break;
+
+		case CRadiantEnum::kRadiant_COL:
+			value = CVariables::V_Radiant_CollegeVal;
+			break;
+
+		case CRadiantEnum::kRadiant_COM:
+			value = CVariables::V_Radiant_CompanionsVal;
+			break;
+
+		case CRadiantEnum::kRadiant_DBR:
+			value = CVariables::V_Radiant_DBrotherhoodVal;
+			break;
+
+		case CRadiantEnum::kRadiant_DGU:
+			value = CVariables::V_Radiant_DawnguardVal;
+			break;
+
+		case CRadiantEnum::kRadiant_THG:
+			value = CVariables::V_Radiant_ThievesGuildVal;
+			break;
+
+		case CRadiantEnum::kRadiant_VIG:
+			value = CVariables::V_Radiant_VigilantVal;
+			break;
+
+		case CRadiantEnum::kRadiant_LEG:
+			value = CVariables::V_Radiant_LegacyVal;
+			break;
+
+		default:
+			return false;
+		}
+
+		if (global->value >= value) {
+			CQuestKeys_Natural.AddKey(a_key);
+			CQuestKeys_Manual.RemoveKey(a_key);
+			return true;
 		}
 		return false;
 	}
@@ -541,7 +647,7 @@ namespace CFramework_Master {
 			break;
 		}
 
-		if (global->value >= a_value) { 
+		if (global->value >= a_value) {
 			CQuestKeys_Natural.AddKey(a_key);
 			CQuestKeys_Manual.RemoveKey(a_key);
 			return true;

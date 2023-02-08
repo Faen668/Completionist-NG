@@ -11,11 +11,15 @@ namespace CQFramework_TelMithryn
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::MenuOpenCloseEvent>,
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
 		  EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		  EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();

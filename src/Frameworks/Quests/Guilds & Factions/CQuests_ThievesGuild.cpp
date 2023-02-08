@@ -36,7 +36,6 @@ namespace CQFramework_ThievesGuild {
 	/*28*/ {"ThievesGuild_Quest28_Key", "$ThievesGuild_Quest28_Name", RADI_QUEST_FLAG, "$ThievesGuild_Quest28_Data", "TGRHC"},
 	};
 
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
 	constexpr std::tuple<RE::FormID, std::int32_t, std::int32_t, const char*> Radiant_QuestData[] = {
 		/*00*/ {0x060990, 1, 200, "Completionist_TGR_Bedlam"},
 		/*01*/ {0x02893B, 1, 200, "Completionist_TGR_Burglary"},

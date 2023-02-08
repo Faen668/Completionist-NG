@@ -8,7 +8,6 @@ namespace CQFramework_CC3
 	inline std::vector<std::string>		KeysArray;
 	inline std::vector<std::int32_t>	RadiArray;
 	inline std::vector<bool>			BoolArray;
-	inline std::vector<bool>			StgeArray;
 
 	using EventResult = RE::BSEventNotifyControl;
 

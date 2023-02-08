@@ -1,6 +1,36 @@
 #pragma once
 
-#include <SKSE\API.h>
+#include "Serialization.hpp";
+
+struct FavorQuestData
+{
+	struct Data
+	{
+		RE::FormID ID;
+		const char* FN;
+	};
+
+	Data base;
+	Data vari;
+	Data actr;
+
+	std::int32_t Stage;
+	std::int32_t Value;
+
+	const char* Global;
+};
+
+//---------------------------------------------------
+//---------------------------------------------------
+//---------------------------------------------------
+
+namespace FavorProcessor
+{
+	template <std::size_t N>
+	static void ProcessQuest(const RE::FormID a_formID, const FavorQuestData(&a_array)[N], std::uint16_t a_stage);
+
+	auto Register() -> void;
+}		
 
 //---------------------------------------------------
 //---------------------------------------------------
@@ -10,40 +40,14 @@ namespace Favor001
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final : 
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
-	
-	public: 
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	class CHandler: public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-		
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-	
-		static bool IsValidQuest(std::string questID, std::string checkID);
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -55,40 +59,14 @@ namespace Favor013
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -100,38 +78,14 @@ namespace Favor017
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -143,40 +97,14 @@ namespace Favor018
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -188,38 +116,14 @@ namespace Favor019
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -231,40 +135,14 @@ namespace Favor104
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -276,38 +154,14 @@ namespace Favor109
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -319,40 +173,14 @@ namespace Favor110
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -364,38 +192,14 @@ namespace Favor151
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -407,38 +211,14 @@ namespace Favor153
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -450,38 +230,14 @@ namespace Favor154
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -493,38 +249,14 @@ namespace Favor157
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -536,38 +268,14 @@ namespace Favor158
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -579,40 +287,14 @@ namespace Favor204
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }
 
@@ -624,39 +306,13 @@ namespace Favor205
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class ScriptEventHandler final :
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::TESQuestStageEvent>
+	{
 
-	public:
-		[[nodiscard]] static ScriptEventHandler* GetSingleton() {
-			static ScriptEventHandler singleton;
-			return &singleton;
-		}
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		static void Register() {
-			register_event<RE::TESQuestStageEvent>();
-		}
-
-		EventResult ProcessEvent(const RE::TESQuestStageEvent* a_event, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
-
-		static bool IsValidQuest(std::string questID, std::string checkID);
-
-	private:
-		ScriptEventHandler() = default;
-		ScriptEventHandler(const ScriptEventHandler&) = delete;
-		ScriptEventHandler(ScriptEventHandler&&) = delete;
-
-		~ScriptEventHandler() override = default;
-
-		ScriptEventHandler& operator=(const ScriptEventHandler&) = delete;
-		ScriptEventHandler& operator=(ScriptEventHandler&&) = delete;
-
-		template <class T>
-		static void register_event()
-		{
-			if (const auto scripts = RE::ScriptEventSourceHolder::GetSingleton(); scripts) {
-				scripts->AddEventSink<T>(GetSingleton());
-			}
-		}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
+		  static void Sink();
 	};
 }

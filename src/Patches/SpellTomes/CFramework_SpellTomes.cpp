@@ -223,7 +223,7 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Apocalypse: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 
@@ -275,7 +275,7 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_ForgottenMagic: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 
@@ -326,7 +326,7 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Mysticism: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 
@@ -377,7 +377,7 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Odin: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 
@@ -428,7 +428,7 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Triumvirate: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("Completionist: Entry Complete - {:s}!"sv, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
 			}
 

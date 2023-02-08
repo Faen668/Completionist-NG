@@ -5,38 +5,38 @@ namespace CQFramework_CollegeOfWinterhold {
 	using namespace CFramework_Master;
 
 	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
-	/*00*/ {"CollegeOfWinterhold_Quest00_Key", "$CollegeOfWinterhold_Quest00_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest00_Data", "MG01"},
-	/*01*/ {"CollegeOfWinterhold_Quest01_Key", "$CollegeOfWinterhold_Quest01_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest01_Data", "MG02"},
-	/*02*/ {"CollegeOfWinterhold_Quest02_Key", "$CollegeOfWinterhold_Quest02_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest02_Data", "MG03"},
-	/*03*/ {"CollegeOfWinterhold_Quest03_Key", "$CollegeOfWinterhold_Quest03_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest03_Data", "MG04"},
-	/*04*/ {"CollegeOfWinterhold_Quest04_Key", "$CollegeOfWinterhold_Quest04_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest04_Data", "mg06"},
-	/*05*/ {"CollegeOfWinterhold_Quest05_Key", "$CollegeOfWinterhold_Quest05_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest05_Data", "MG05"},
-	/*06*/ {"CollegeOfWinterhold_Quest06_Key", "$CollegeOfWinterhold_Quest06_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest06_Data", "MG07"},
-	/*07*/ {"CollegeOfWinterhold_Quest07_Key", "$CollegeOfWinterhold_Quest07_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest07_Data", "MG08"},
-	/*08*/ {"CollegeOfWinterhold_Quest08_Key", "$CollegeOfWinterhold_Quest08_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest08_Data", "MGRitual05"},
-	/*09*/ {"CollegeOfWinterhold_Quest09_Key", "$CollegeOfWinterhold_Quest09_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest09_Data", "MGRArniel01"},
-	/*10*/ {"CollegeOfWinterhold_Quest10_Key", "$CollegeOfWinterhold_Quest10_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest10_Data", "MGRArniel02"},
-	/*11*/ {"CollegeOfWinterhold_Quest11_Key", "$CollegeOfWinterhold_Quest11_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest11_Data", "MGRArniel03"},
-	/*12*/ {"CollegeOfWinterhold_Quest12_Key", "$CollegeOfWinterhold_Quest12_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest12_Data", "MGRArniel04"},
-	/*13*/ {"CollegeOfWinterhold_Quest13_Key", "$CollegeOfWinterhold_Quest13_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest13_Data", "MGRAppBrelyna01"},
-	/*14*/ {"CollegeOfWinterhold_Quest14_Key", "$CollegeOfWinterhold_Quest14_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest14_Data", "MGRitual03"},
-	/*15*/ {"CollegeOfWinterhold_Quest15_Key", "$CollegeOfWinterhold_Quest15_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest15_Data", "MGRitual01"},
-	/*16*/ {"CollegeOfWinterhold_Quest16_Key", "$CollegeOfWinterhold_Quest16_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest16_Data", "dunMidden01QST"},
-	/*17*/ {"CollegeOfWinterhold_Quest17_Key", "$CollegeOfWinterhold_Quest17_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest17_Data", "MGRitual02"},
-	/*18*/ {"CollegeOfWinterhold_Quest18_Key", "$CollegeOfWinterhold_Quest18_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest18_Data", "MGRAppJzargo01"},
-	/*19*/ {"CollegeOfWinterhold_Quest19_Key", "$CollegeOfWinterhold_Quest19_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest19_Data", "MGRAppOnmund01"},
-	/*20*/ {"CollegeOfWinterhold_Quest20_Key", "$CollegeOfWinterhold_Quest20_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest20_Data", "MGRitual04"},
-	/*21*/ {"CollegeOfWinterhold_Quest21_Key", "$CollegeOfWinterhold_Quest21_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest21_Data", "FreeformWinterholdCollegeB"},
-	/*22*/ {"CollegeOfWinterhold_Quest22_Key", "$CollegeOfWinterhold_Quest22_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest22_Data", "MGR30"},
-	/*23*/ {"CollegeOfWinterhold_Quest23_Key", "$CollegeOfWinterhold_Quest23_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest23_Data", "MGR10"},
-	/*24*/ {"CollegeOfWinterhold_Quest24_Key", "$CollegeOfWinterhold_Quest24_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest24_Data", "MGR20"},
-	/*25*/ {"CollegeOfWinterhold_Quest25_Key", "$CollegeOfWinterhold_Quest25_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest25_Data", "MGR12"},
-	/*26*/ {"CollegeOfWinterhold_Quest26_Key", "$CollegeOfWinterhold_Quest26_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest26_Data", "MGR02"},
-	/*27*/ {"CollegeOfWinterhold_Quest27_Key", "$CollegeOfWinterhold_Quest27_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest27_Data", "FreeformWinterholdCollegeA"},
-	/*28*/ {"CollegeOfWinterhold_Quest28_Key", "$CollegeOfWinterhold_Quest28_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest28_Data", "MGR11"},
-	/*29*/ {"CollegeOfWinterhold_Quest29_Key", "$CollegeOfWinterhold_Quest29_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest29_Data", "MGRRogue"},
-	/*30*/ {"CollegeOfWinterhold_Quest30_Key", "$CollegeOfWinterhold_Quest30_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest30_Data", "MGR21"},
-	/*31*/ {"CollegeOfWinterhold_Quest31_Key", "$CollegeOfWinterhold_Quest31_Name", RADI_QUEST_FLAG, "$CollegeOfWinterhold_Quest31_Data", "MGR01"},
+		/*00*/ {"CollegeOfWinterhold_Quest00_Key", "$CollegeOfWinterhold_Quest00_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest00_Data", "MG01"},
+		/*01*/ {"CollegeOfWinterhold_Quest01_Key", "$CollegeOfWinterhold_Quest01_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest01_Data", "MG02"},
+		/*02*/ {"CollegeOfWinterhold_Quest02_Key", "$CollegeOfWinterhold_Quest02_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest02_Data", "MG03"},
+		/*03*/ {"CollegeOfWinterhold_Quest03_Key", "$CollegeOfWinterhold_Quest03_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest03_Data", "MG04"},
+		/*04*/ {"CollegeOfWinterhold_Quest04_Key", "$CollegeOfWinterhold_Quest04_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest04_Data", "mg06"},
+		/*05*/ {"CollegeOfWinterhold_Quest05_Key", "$CollegeOfWinterhold_Quest05_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest05_Data", "MG05"},
+		/*06*/ {"CollegeOfWinterhold_Quest06_Key", "$CollegeOfWinterhold_Quest06_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest06_Data", "MG07"},
+		/*07*/ {"CollegeOfWinterhold_Quest07_Key", "$CollegeOfWinterhold_Quest07_Name", MAIN_QUEST_FLAG, "$CollegeOfWinterhold_Quest07_Data", "MG08"},
+		/*08*/ {"CollegeOfWinterhold_Quest08_Key", "$CollegeOfWinterhold_Quest08_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest08_Data", "MGRitual05"},
+		/*09*/ {"CollegeOfWinterhold_Quest09_Key", "$CollegeOfWinterhold_Quest09_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest09_Data", "MGRArniel01"},
+		/*10*/ {"CollegeOfWinterhold_Quest10_Key", "$CollegeOfWinterhold_Quest10_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest10_Data", "MGRArniel02"},
+		/*11*/ {"CollegeOfWinterhold_Quest11_Key", "$CollegeOfWinterhold_Quest11_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest11_Data", "MGRArniel03"},
+		/*12*/ {"CollegeOfWinterhold_Quest12_Key", "$CollegeOfWinterhold_Quest12_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest12_Data", "MGRArniel04"},
+		/*13*/ {"CollegeOfWinterhold_Quest13_Key", "$CollegeOfWinterhold_Quest13_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest13_Data", "MGRAppBrelyna01"},
+		/*14*/ {"CollegeOfWinterhold_Quest14_Key", "$CollegeOfWinterhold_Quest14_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest14_Data", "MGRitual03"},
+		/*15*/ {"CollegeOfWinterhold_Quest15_Key", "$CollegeOfWinterhold_Quest15_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest15_Data", "MGRitual01"},
+		/*16*/ {"CollegeOfWinterhold_Quest16_Key", "$CollegeOfWinterhold_Quest16_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest16_Data", "dunMidden01QST"},
+		/*17*/ {"CollegeOfWinterhold_Quest17_Key", "$CollegeOfWinterhold_Quest17_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest17_Data", "MGRitual02"},
+		/*18*/ {"CollegeOfWinterhold_Quest18_Key", "$CollegeOfWinterhold_Quest18_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest18_Data", "MGRAppJzargo01"},
+		/*19*/ {"CollegeOfWinterhold_Quest19_Key", "$CollegeOfWinterhold_Quest19_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest19_Data", "MGRAppOnmund01"},
+		/*20*/ {"CollegeOfWinterhold_Quest20_Key", "$CollegeOfWinterhold_Quest20_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest20_Data", "MGRitual04"},
+		/*21*/ {"CollegeOfWinterhold_Quest21_Key", "$CollegeOfWinterhold_Quest21_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest21_Data", "FreeformWinterholdCollegeB"},
+		/*22*/ {"CollegeOfWinterhold_Quest22_Key", "$CollegeOfWinterhold_Quest22_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest22_Data", "MGR30"},
+		/*23*/ {"CollegeOfWinterhold_Quest23_Key", "$CollegeOfWinterhold_Quest23_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest23_Data", "MGR10"},
+		/*24*/ {"CollegeOfWinterhold_Quest24_Key", "$CollegeOfWinterhold_Quest24_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest24_Data", "MGR20"},
+		/*25*/ {"CollegeOfWinterhold_Quest25_Key", "$CollegeOfWinterhold_Quest25_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest25_Data", "MGR12"},
+		/*26*/ {"CollegeOfWinterhold_Quest26_Key", "$CollegeOfWinterhold_Quest26_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest26_Data", "MGR02"},
+		/*27*/ {"CollegeOfWinterhold_Quest27_Key", "$CollegeOfWinterhold_Quest27_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest27_Data", "FreeformWinterholdCollegeA"},
+		/*28*/ {"CollegeOfWinterhold_Quest28_Key", "$CollegeOfWinterhold_Quest28_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest28_Data", "MGR11"},
+		/*29*/ {"CollegeOfWinterhold_Quest29_Key", "$CollegeOfWinterhold_Quest29_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest29_Data", "MGRRogue"},
+		/*30*/ {"CollegeOfWinterhold_Quest30_Key", "$CollegeOfWinterhold_Quest30_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest30_Data", "MGR21"},
+		/*31*/ {"CollegeOfWinterhold_Quest31_Key", "$CollegeOfWinterhold_Quest31_Name", SIDE_QUEST_FLAG, "$CollegeOfWinterhold_Quest31_Data", "MGR01"},
 	};
 
 	constexpr std::size_t StandardCompletion[] = {
@@ -60,18 +60,17 @@ namespace CQFramework_CollegeOfWinterhold {
 	{ 16, 79 },
 	};
 
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
 	constexpr std::tuple<RE::FormID, RE::FormID, std::int32_t, std::int32_t, const char*> Radiant_QuestData[] = {
-		/*00*/ {0x0266F1, 0x000000, 1, 200, "Completionist_CollegeMGR01"},
-		/*01*/ {0x0266F2, 0x000000, 1, 200, "Completionist_CollegeMGR02"},
-		/*02*/ {0x028A13, 0x000000, 1, 200, "Completionist_CollegeMGR10"},
-		/*03*/ {0x028A19, 0x000000, 1, 200, "Completionist_CollegeMGR11"},
-		/*04*/ {0x028A1E, 0x000000, 1, 200, "Completionist_CollegeMGR12"},
-		/*05*/ {0x028A24, 0x0BC096, 1, 200, "Completionist_CollegeMGR20"},
-		/*06*/ {0x0E0E04, 0x000000, 1, 200, "Completionist_CollegeMGR21"},
-		/*07*/ {0x0C1E72, 0x000000, 1, 200, "Completionist_CollegeMGR30"},
-		/*08*/ {0x05A609, 0x000000, 1, 200, "Completionist_CollegeMGRRouge"},
-		/*09*/ {0x05D2EA, 0x000000, 1, 200, "Completionist_CollegeFreeformWinterholdCollegeA"},
+	{0x0266F1, 0x000000, 1, 200, "Completionist_CollegeMGR01"},
+	{0x0266F2, 0x000000, 1, 200, "Completionist_CollegeMGR02"},
+	{0x028A13, 0x000000, 1, 200, "Completionist_CollegeMGR10"},
+	{0x028A19, 0x000000, 1, 200, "Completionist_CollegeMGR11"},
+	{0x028A1E, 0x000000, 1, 200, "Completionist_CollegeMGR12"},
+	{0x028A24, 0x0BC096, 1, 200, "Completionist_CollegeMGR20"},
+	{0x0E0E04, 0x000000, 1, 200, "Completionist_CollegeMGR21"},
+	{0x0C1E72, 0x000000, 1, 200, "Completionist_CollegeMGR30"},
+	{0x05A609, 0x000000, 1, 200, "Completionist_CollegeMGRRouge"},
+	{0x05D2EA, 0x000000, 1, 200, "Completionist_CollegeFreeformWinterholdCollegeA"},
 	};
 
 	//---------------------------------------------------
@@ -143,7 +142,7 @@ namespace CQFramework_CollegeOfWinterhold {
 
 			if (((aquest && aquest == event) || (bquest && bquest == event)) && a_event->stage == stage) {
 				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
-					var->value += value;
+					var->value++;
 					INFO("Increasing Var For {}", aquest ? aquest->GetName() : bquest ? bquest->GetName() : "");
 					return EventResult::kContinue;
 				}
@@ -151,7 +150,7 @@ namespace CQFramework_CollegeOfWinterhold {
 		}
 		return EventResult::kContinue;
 	}
-
+	
 	//---------------------------------------------------
 	//-- Framework Functions ( Update Found Forms ) -----
 	//---------------------------------------------------

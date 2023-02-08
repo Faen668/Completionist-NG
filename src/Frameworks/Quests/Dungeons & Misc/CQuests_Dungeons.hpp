@@ -10,7 +10,6 @@ namespace CQFramework_Dungeons
 	inline std::vector<std::string>		KeysArray;
 	inline std::vector<std::int32_t>	RadiArray;
 	inline std::vector<bool>			BoolArray;
-	inline std::vector<bool>			StgeArray;
 
 	using EventResult = RE::BSEventNotifyControl;
 

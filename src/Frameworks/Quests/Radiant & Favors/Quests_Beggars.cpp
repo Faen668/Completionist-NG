@@ -1,6 +1,10 @@
 #include "Quests_Beggars.hpp"
+#include "Serialization.hpp"
 
-RE::TESObjectREFR* curspeaker;
+using namespace Serialization;
+
+std::unordered_set<RE::Actor*> refs;
+RE::Actor* curspeaker;
 
 namespace BeggarQuests
 {
@@ -19,23 +23,34 @@ namespace BeggarQuests
 	};
 
 	//---------------------------------------------------
+	//-- Framework Events ( Install ) -------------------
+	//---------------------------------------------------
+
+	void CHandler::Install() {
+
+		for (auto& [formID, global, fileName] : Begggars) {
+
+			auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
+			if (Beggar && Beggar->GetFormID() != 0) {
+				refs.emplace(Beggar);
+			}
+		}
+
+	}
+
+	//---------------------------------------------------
 	//-- Framework Events ( On Activate ) ---------------
 	//---------------------------------------------------
 
 	EventResult CHandler::ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) {
 
-		if (!a_event || !a_event->objectActivated || a_event->actionRef.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
+		if (!a_event || !a_event->objectActivated || a_event->actionRef.get() != RE::PlayerCharacter::GetSingleton()) {
+			return EventResult::kContinue;
+		}
 
-		for (auto& [formID, global, fileName] : Begggars) {
-
-			auto* Beggar = static_cast<RE::TESObjectREFR*>(RE::TESDataHandler::GetSingleton()->LookupForm(formID, fileName));
-			if (!Beggar) { return EventResult::kContinue; }
-
-			if (a_event->objectActivated.get() == Beggar) {
-				curspeaker = a_event->objectActivated.get();
-				INFO("Set CurSpeaker to {}", curspeaker->GetName());
-				return EventResult::kContinue;
-			}
+		if (refs.contains(a_event->objectActivated.get()->As<RE::Actor>())) {
+			curspeaker = a_event->objectActivated.get()->As<RE::Actor>();
+			INFO("{} is a valid beggar", curspeaker->GetName());
 		}
 		return EventResult::kContinue;
 	}
@@ -46,18 +61,22 @@ namespace BeggarQuests
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 		
-		if (!a_event || !a_event->baseObj || a_event->baseObj != 0x00000F || !curspeaker) { return EventResult::kContinue; }
-			
-		for (auto& [formID, global, fileName] : Begggars) {
+		if (!a_event || !a_event->baseObj || a_event->baseObj != RE::TESForm::LookupByID(0x00000F)->GetFormID() || !curspeaker) { 
+			return EventResult::kContinue; 
+		}
 
-			auto* Beggar = static_cast<RE::TESObjectREFR*>(RE::TESDataHandler::GetSingleton()->LookupForm(formID, fileName));
-			if (!Beggar) { return EventResult::kContinue; }
+		if (a_event->newContainer == curspeaker->GetFormID()) {
+			INFO("{} is the new container", curspeaker->GetName());
 
-			if (Beggar == curspeaker && curspeaker->GetFormID() == a_event->newContainer) {
-				INFO("Updating Global Variable For {}", curspeaker->GetName());
-				RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)->value += 1;
-				curspeaker = nullptr;
-				return EventResult::kContinue;
+			for (auto& [formID, global, fileName] : Begggars) {
+
+				auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
+				if (Beggar->GetFormID() == curspeaker->GetFormID()) {
+					INFO("Updating Global Variable For {}", curspeaker->GetName());
+					RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)->value++;
+					curspeaker = nullptr;
+					return EventResult::kContinue;
+				}
 			}
 		}
 		return EventResult::kContinue;

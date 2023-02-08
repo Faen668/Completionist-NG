@@ -84,7 +84,7 @@ namespace CFramework_MapMa
 
 	class CHandler final :
 
-	public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+	public RE::BSTEventSink<RE::MenuOpenCloseEvent>{
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 

@@ -11,7 +11,9 @@ namespace CQFramework_SkaalVillage
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+	class CHandler final : public
+		RE::BSTEventSink<RE::MenuOpenCloseEvent>
+	{
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
