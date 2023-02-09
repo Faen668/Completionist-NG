@@ -88,7 +88,6 @@ namespace CFramework_Master
 		static RE::TESQuest*				GetQuest(std::string a_questID);
 		static bool							IsCompleted_P(std::string a_key, std::string a_questID, std::int32_t a_stage); //GetStage > Check
 		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage); //IsStageDone Check
-		static bool							IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage, std::int32_t a_stage2); //IsStageDone Check
 		static bool							IsCompleted_N(std::string a_key, std::string a_questID); // Normal Completion Check
 		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value = 1); // GLobal Check
 		static bool							IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, CRadiantEnum a_value); // GLobal Check

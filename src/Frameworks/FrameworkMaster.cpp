@@ -470,29 +470,7 @@ namespace CFramework_Master {
 
 	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage) {
 
-		auto* executedStages = GetQuest(a_questID)->executedStages;
-
-		if (executedStages)
-		{
-			for (auto& executedStage : *executedStages)
-			{
-				if (executedStage) {
-					INFO("Got executedStage for quest {}", a_questID);
-				}
-			}
-		}
-
 		if (CQuestKeys_Stages.HasStage(a_key, a_stage)) {
-			CQuestKeys_Natural.AddKey(a_key);
-			CQuestKeys_Manual.RemoveKey(a_key);
-			return true;
-		}
-		return false;
-	}
-
-	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage, std::int32_t a_stage2) {
-
-		if (CQuestKeys_Stages.HasStage(a_key, a_stage) || a_stage2 != 0 && CQuestKeys_Stages.HasStage(a_key, a_stage2)) {
 			CQuestKeys_Natural.AddKey(a_key);
 			CQuestKeys_Manual.RemoveKey(a_key);
 			return true;

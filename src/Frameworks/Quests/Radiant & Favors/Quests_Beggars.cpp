@@ -3,39 +3,38 @@
 
 using namespace Serialization;
 
-std::unordered_set<RE::Actor*> refs;
 RE::Actor* curspeaker;
 
 namespace BeggarQuests
 {
 	constexpr std::tuple<RE::FormID, const char*, const char*> Begggars[] = {
-	{0x01B138, "Completionist_FavorBeggarAngrenor",		"Skyrim.esm" },
-	{0x02C90F, "Completionist_FavorBeggarBrenuin",		"Skyrim.esm" },
-	{0x01F325, "Completionist_FavorBeggarDegaine",		"Skyrim.esm" },
-	{0x0198DC, "Completionist_FavorBeggarDervenin",		"Skyrim.esm" },
-	{0x044A8D, "Completionist_FavorBeggarEdda",			"Skyrim.esm" },
-	{0x003F5E, "Completionist_FavorBeggarLucia",		"Hearthfires.esm" },
-	{0x019E24, "Completionist_FavorBeggarNarfi",		"Skyrim.esm" },
-	{0x0198BD, "Completionist_FavorBeggarNoster",		"Skyrim.esm" },
-	{0x01B122, "Completionist_FavorBeggarSilda",		"Skyrim.esm" },
-	{0x044A8E, "Completionist_FavorBeggarSnilf",		"Skyrim.esm" },
-	{0x01A636, "Completionist_FavorBeggarSvari",		"Skyrim.esm" },
+	{0x1B138, "Completionist_FavorBeggarAngrenor",	"Skyrim.esm" },
+	{0x2C90F, "Completionist_FavorBeggarBrenuin",	"Skyrim.esm" },
+	{0x1F325, "Completionist_FavorBeggarDegaine",	"Skyrim.esm" },
+	{0x198DC, "Completionist_FavorBeggarDervenin",	"Skyrim.esm" },
+	{0x44A8D, "Completionist_FavorBeggarEdda",		"Skyrim.esm" },
+	{0x03F5E, "Completionist_FavorBeggarLucia",		"Hearthfires.esm" },
+	{0x19E24, "Completionist_FavorBeggarNarfi",		"Skyrim.esm" },
+	{0x198BD, "Completionist_FavorBeggarNoster",	"Skyrim.esm" },
+	{0x1B122, "Completionist_FavorBeggarSilda",		"Skyrim.esm" },
+	{0x44A8E, "Completionist_FavorBeggarSnilf",		"Skyrim.esm" },
+	{0x1A636, "Completionist_FavorBeggarSvari",		"Skyrim.esm" },
 	};
 
 	//---------------------------------------------------
 	//-- Framework Events ( Install ) -------------------
 	//---------------------------------------------------
 
-	void CHandler::Install() {
+	bool CHandler::IsReferenceAValidBeggar(RE::Actor* a_actor) {
 
 		for (auto& [formID, global, fileName] : Begggars) {
 
 			auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
-			if (Beggar && Beggar->GetFormID() != 0) {
-				refs.emplace(Beggar);
+			if (Beggar && Beggar->GetFormID() == a_actor->GetFormID()) {
+				return true;
 			}
 		}
-
+		return false;
 	}
 
 	//---------------------------------------------------
@@ -48,7 +47,7 @@ namespace BeggarQuests
 			return EventResult::kContinue;
 		}
 
-		if (refs.contains(a_event->objectActivated.get()->As<RE::Actor>())) {
+		if (CHandler::IsReferenceAValidBeggar(a_event->objectActivated.get()->As<RE::Actor>())) {
 			curspeaker = a_event->objectActivated.get()->As<RE::Actor>();
 			INFO("{} is a valid beggar", curspeaker->GetName());
 		}
@@ -71,7 +70,7 @@ namespace BeggarQuests
 			for (auto& [formID, global, fileName] : Begggars) {
 
 				auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
-				if (Beggar->GetFormID() == curspeaker->GetFormID()) {
+				if (Beggar && Beggar->GetFormID() == curspeaker->GetFormID()) {
 					INFO("Updating Global Variable For {}", curspeaker->GetName());
 					RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)->value++;
 					curspeaker = nullptr;
