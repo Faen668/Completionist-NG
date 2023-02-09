@@ -7,6 +7,7 @@ namespace BeggarQuests
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
+
 		public RE::BSTEventSink<RE::TESActivateEvent>,
 		public RE::BSTEventSink<RE::TESContainerChangedEvent> {
 
@@ -15,7 +16,7 @@ namespace BeggarQuests
 		EventResult ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
 		EventResult	ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override;
 
-		static bool IsReferenceAValidBeggar(RE::Actor* a_actor);
+		static void EvaluateActivatedReference(RE::Actor* a_actor);
 
 		static void	Register() {
 
