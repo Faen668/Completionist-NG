@@ -37,12 +37,12 @@ namespace Completionist_MainHUD
 
 		static bool ItemIsCollected(RE::FormID a_formID);
 		static bool ItemIsCollected(RE::TESForm* a_form);
-		
-		static bool EvaluateFormTypeCondition(RE::TESForm* a_form, bool a_collected);
 
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
 		static const char* OnUpdateInventoryName(const char* a_this, bool a_displayTag);
+
+		static std::string GetPrefix(int32_t a_variable);
 
 	private:
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;

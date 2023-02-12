@@ -146,6 +146,16 @@ namespace CVariables {
 			V_TextChoice_G = prop->GetSInt();
 		}
 
+		V_PrefixChoice_N = 3;
+		if (const auto* prop = VariablesAPI::GetProperty(MCM, "InventoryMode_PrFx_Choice_N")) {
+			V_PrefixChoice_N = prop->GetSInt();
+		}
+
+		V_PrefixChoice_G = 3;
+		if (const auto* prop = VariablesAPI::GetProperty(MCM, "InventoryMode_PrFx_Choice_G")) {
+			V_PrefixChoice_G = prop->GetSInt();
+		}
+
 		V_CrosshairTag_New = "Need It!";
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "State_OverRide_N_Name_String")) {
 			V_CrosshairTag_New = prop->GetString();
@@ -154,66 +164,6 @@ namespace CVariables {
 		V_CrosshairTag_Found = "Got It!";
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "State_OverRide_G_Name_String")) {
 			V_CrosshairTag_Found = prop->GetString();
-		}
-
-		V_Ammo_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Ammo_N")) {
-			V_Ammo_Enabled_New = prop->GetBool();
-		}
-
-		V_Ammo_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Ammo_G")) {
-			V_Ammo_Enabled_Found = prop->GetBool();
-		}
-
-		V_Armor_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Armor_N")) {
-			V_Armor_Enabled_New = prop->GetBool();
-		}
-
-		V_Armor_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Armor_G")) {
-			V_Armor_Enabled_Found = prop->GetBool();
-		}
-
-		V_Alchemy_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Alchemy_N")) {
-			V_Alchemy_Enabled_New = prop->GetBool();
-		}
-
-		V_Alchemy_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Alchemy_G")) {
-			V_Alchemy_Enabled_Found = prop->GetBool();
-		}
-
-		V_Books_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Books_N")) {
-			V_Books_Enabled_New = prop->GetBool();
-		}
-
-		V_Books_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Books_G")) {
-			V_Books_Enabled_Found = prop->GetBool();
-		}
-
-		V_Weapons_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Weapons_N")) {
-			V_Weapons_Enabled_New = prop->GetBool();
-		}
-
-		V_Weapons_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Weapons_G")) {
-			V_Weapons_Enabled_Found = prop->GetBool();
-		}
-
-		V_Other_Enabled_New = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Other_N")) {
-			V_Other_Enabled_New = prop->GetBool();
-		}
-
-		V_Other_Enabled_Found = true;
-		if (const auto* prop = VariablesAPI::GetProperty(MCM, "varTags_Other_G")) {
-			V_Other_Enabled_Found = prop->GetBool();
 		}
 
 		V_HUD_Override_Enabled_New_Crosshair = false;
@@ -382,6 +332,11 @@ namespace CVariables {
 			V_moreHudEnabled_Menus = prop->GetBool();
 		}
 
+		V_quickLoot_Enabled = true;
+		if (const auto* prop = VariablesAPI::GetProperty(MCM, "b_quickLoot_Enabled")) {
+			V_quickLoot_Enabled = prop->GetBool();
+		}
+		
 		INFO("Finished Loading Variables");
 	}
 }
