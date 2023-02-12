@@ -149,7 +149,7 @@ namespace Completionist_MainHUD
 	
 	void TextnTagsAPI::QuickLootMessageCallBack(void*, RE::GFxValue* gfx, RE::TESForm* form, int32_t count)
 	{
-		if (!form || !gfx || !form->GetName() || !TextnTagsAPI::ItemIsCollectable(form)) 
+		if (!form || !gfx || !form->GetName() || !TextnTagsAPI::ItemIsCollectable(form) || !V_quickLoot_Enabled)
 		{
 			return;
 		}

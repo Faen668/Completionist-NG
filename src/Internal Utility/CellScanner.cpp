@@ -54,7 +54,7 @@ namespace CellScanner
 								refs.emplace(obj);
 								cont++;
 							}
-							return true;
+							return RE::BSContainer::ForEachResult::kContinue;
 							});
 					}
 				}
