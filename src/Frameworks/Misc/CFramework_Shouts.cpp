@@ -70,7 +70,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
+
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
 				
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Vanilla_SH_FormArray[b_pos]->GetName());
@@ -91,10 +92,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -109,10 +110,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -130,7 +131,7 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Thunderchild_SH_FormArray[b_pos]->GetName());
@@ -151,10 +152,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -169,10 +170,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -190,7 +191,7 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}";
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Miscellaneous_SH_FormArray[b_pos]->GetName());
@@ -211,10 +212,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -229,10 +230,10 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}";
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->GetName(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 				}
 
@@ -286,7 +287,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[i])) {
 
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}");
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Vanilla_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
@@ -297,7 +298,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[i])) {
 
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 				
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
@@ -307,13 +308,13 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[i])) {
 				
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 				
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
 				continue;
 			}
 
-			Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+			Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 			Vanilla_SH_BoolArray[i] = false;
 		}
 
@@ -328,7 +329,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}");
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
@@ -339,7 +340,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
@@ -349,13 +350,13 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
 				continue;
 			}
 
-			Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+			Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 			Thunderchild_SH_BoolArray[i] = false;
 		}
 
@@ -370,7 +371,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->GetName() + "}");
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
@@ -381,7 +382,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
@@ -391,13 +392,13 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
 				continue;
 			}
 
-			Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->GetName() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->GetName() + "}");
+			Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
 			Miscellaneous_SH_BoolArray[i] = false;
 		}
 
@@ -512,6 +513,7 @@ namespace CFramework_Shouts {
 		auto* Word1 = static_cast<RE::SpellItem*>(Shout->variations[0].spell);
 		auto* Word2 = static_cast<RE::SpellItem*>(Shout->variations[1].spell);
 		auto* Word3 = static_cast<RE::SpellItem*>(Shout->variations[2].spell);
+
 		if (!Word1 || !Word2 || !Word3) { return; }
 
 		switch (a_section)
