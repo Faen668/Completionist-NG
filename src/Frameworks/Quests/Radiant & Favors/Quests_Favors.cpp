@@ -82,20 +82,20 @@ constexpr FavorQuestData Favor_157[] = {
 };
 
 constexpr FavorQuestData Favor_158[] = {
-	{ 0x0940D0, SK_NAME, 0, "", 0x01C188, SK_NAME, 20, 1, "Completionist_Favor158Korir"},
+	{ 0x0940D0, SK_NAME, 0, "", 0x01C1B5, SK_NAME, 20, 1, "Completionist_Favor158Korir"},
 };
 
 constexpr FavorQuestData Favor_204[] = {
-	{ 0x07105B, SK_NAME, 0x000DB9, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor204Amren"},
-	{ 0x07105B, SK_NAME, 0x000DC2, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor204Shahvee"},
+	{ 0x07105B, SK_NAME, 0x000DB9, FS_NAME, 0x01A66A, SK_NAME, 20, 1, "Completionist_Favor204Amren"},
+	{ 0x07105B, SK_NAME, 0x000DC2, FS_NAME, 0x01B141, SK_NAME, 20, 1, "Completionist_Favor204Shahvee"},
 };
 
 constexpr FavorQuestData Favor_205[] = {
-	{ 0x06FE37, SK_NAME, 0x000DD5, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor205Frida"},
-	{ 0x06FE37, SK_NAME, 0x000DDE, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor205Noster"},
-	{ 0x06FE37, SK_NAME, 0x000DE7, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor205Oengul"},
-	{ 0x06FE37, SK_NAME, 0x000DF0, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor205Roggi"},
-	{ 0x06FE37, SK_NAME, 0x000DF9, FS_NAME, 0x0, SK_NAME, 20, 1, "Completionist_Favor205Runil"},
+	{ 0x06FE37, SK_NAME, 0x000DD5, FS_NAME, 0x01A6B5, SK_NAME, 20, 1, "Completionist_Favor205Frida"},
+	{ 0x06FE37, SK_NAME, 0x000DDE, FS_NAME, 0x01988D, SK_NAME, 20, 1, "Completionist_Favor205Noster"},
+	{ 0x06FE37, SK_NAME, 0x000DE7, FS_NAME, 0x01B135, SK_NAME, 20, 1, "Completionist_Favor205Oengul"},
+	{ 0x06FE37, SK_NAME, 0x000DF0, FS_NAME, 0x01B084, SK_NAME, 20, 1, "Completionist_Favor205Roggi"},
+	{ 0x06FE37, SK_NAME, 0x000DF9, FS_NAME, 0x019820, SK_NAME, 20, 1, "Completionist_Favor205Runil"},
 };
 
 //---------------------------------------------------
@@ -447,6 +447,8 @@ namespace Favor205
 //---------------------------------------------------
 //---------------------------------------------------
 
+#define arrayName(arrayName) (#arrayName)
+
 namespace FavorProcessor
 {
 	template <std::size_t N>
@@ -459,7 +461,7 @@ namespace FavorProcessor
 			const auto* questActr = CompletionistData::GetFullForm<RE::Actor>(dataSet.actr.ID, dataSet.actr.FN);
 			const auto* questForm = questVari ? questVari : questBase;
 
-			if (!questActr || !questForm || questForm->GetFormID() != a_formID || a_stage != dataSet.Stage) {
+			if (!questForm || !questActr || questForm->GetFormID() != a_formID || a_stage != dataSet.Stage) {
 				continue;
 			}
 

@@ -34,6 +34,7 @@ namespace CFramework_Master
 	inline constexpr bool IS_STAGE_DONE_N = false;
 
 	inline std::vector<std::string> ExcludedQuestsArray;
+	inline std::unordered_map<std::string, std::string> ExcludedQuests;
 
 	class FrameworkAPI {
 
@@ -97,6 +98,8 @@ namespace CFramework_Master
 		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
 
 		static void							LoadInjectedForms(RE::StaticFunctionTag*);
+
+		static bool							UpdateQuestCompletion(CQuestData a_data, std::string a_name, std::string a_identifier);
 		
 	};
 }

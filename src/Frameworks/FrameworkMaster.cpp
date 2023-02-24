@@ -183,6 +183,70 @@ namespace CFramework_Master {
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Update Quest Completion )-
+	//---------------------------------------------------
+
+	bool FrameworkAPI::UpdateQuestCompletion(CQuestData a_data, std::string a_key, std::string a_identifier)
+	{
+		auto is_complete = false;
+
+		switch (a_data.COMP)
+		{
+		case CCompEnum::kStand: 
+		{
+			is_complete = FrameworkAPI::IsCompleted_N(a_key, a_identifier);
+			break;
+		}
+
+		case CCompEnum::kGlobl: 
+		{
+			is_complete = FrameworkAPI::IsCompleted_G(a_key, a_identifier, a_data.GLOBAL.NAME, a_data.GLOBAL.VALUE);
+			break;
+		}
+
+		case CCompEnum::kJarls: 
+		{
+			is_complete = FrameworkAPI::IsCompleted_J(a_key, a_data.JARL.Imps, a_data.JARL.Sons);
+			break;
+		}
+
+		case CCompEnum::kStage: 
+		{
+			switch (a_data.STAGE.CONDITION)
+			{
+			case CStageEnum::kDone:
+			{
+				is_complete = FrameworkAPI::IsCompleted_S(a_key, a_identifier, a_data.STAGE.VALUE) || (a_data.STAGE.OPVALUE != 0 && FrameworkAPI::IsCompleted_S(a_key, a_identifier, a_data.STAGE.OPVALUE));
+				break;
+			}
+
+			case CStageEnum::kPast:
+			{
+				is_complete = FrameworkAPI::IsCompleted_P(a_key, a_identifier, a_data.STAGE.VALUE) || (a_data.STAGE.OPVALUE != 0 && FrameworkAPI::IsCompleted_P(a_key, a_identifier, a_data.STAGE.OPVALUE));
+				break;
+			}
+
+			default:
+			{
+				is_complete = false;
+				break;
+			}
+			}
+			break;
+		}
+
+		default: 
+		{
+			is_complete = false;
+			break;
+		}
+		}
+		INFO("Quest {} is {}", a_data.EDID, is_complete);
+
+		return is_complete ? true : FrameworkAPI::qIsOptionToggledInternal(a_key);
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Update From MCM ) --------
 	//---------------------------------------------------
 

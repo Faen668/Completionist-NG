@@ -232,13 +232,22 @@ namespace CPatch_FSH {
 		if (!CompletionistData::IsModInstalled(modnameCACO) || !CompletionistData::IsModInstalled(modname)) { return; }
 
 		CPatch_FSH_F::Data.AddForm(0x00089B, "ccbgssse001-fish.esm", 0xCCA147, "Update.esm");
+		CPatch_FSH_F::Data.AddForm(0x00089B, "ccbgssse001-fish.esm", 0xCCA148, "Update.esm");
 
-		for (auto& [first, second] : CPatch_FSH_F::Data.data) {
-			INFO("first = {}, second = {}", first ? std::to_string(first) : "", second ? std::to_string(second) : "")
-		}
+		for (auto& [first, second] : CPatch_FSH_F::Data.data) 
+		{
+			auto* base = RE::TESForm::LookupByID(first);
+			auto* vari = RE::TESForm::LookupByID(second);
 
-		for (auto var : CPatch_FSH_F::Data.GetAllVariations()) {
-			INFO("Variation is {}", var);
+			if (base && !vari)
+			{
+				INFO("Data form is [{} - {}] with no variations.", base->GetName(), base->GetFormID());
+			}
+
+			if (base && vari)
+			{
+				INFO("Data form is [{} - {}] with a base form of [{} - {}]", base->GetName(), base->GetFormID(), vari->GetName(), vari->GetFormID());
+			}
 		}
 	}
 

@@ -12,6 +12,7 @@ enum class CCompEnum
 	kStand = 0,
 	kStage = 1,
 	kGlobl = 2,
+	kJarls = 3,
 };
 
 enum class CStageEnum
@@ -53,6 +54,13 @@ struct CStageData
 	int32_t OPVALUE;
 };
 
+struct CJarlsData
+{
+	const char* Sons;
+	const char* Imps;
+};
+
+#define CQuestData_Params Data, fmt::format("{:s}_Key"s, Data.UDID), std::string(Data.EDID)
 struct CQuestData
 {
 	const char* UDID;
@@ -62,6 +70,8 @@ struct CQuestData
 	CRadiantData GLOBAL;
 
 	const char* EDID;
+
+	CJarlsData JARL;
 };
 
 struct PlayerHomesData
@@ -78,6 +88,4 @@ struct PlayerHomesData
 	const char* PROVIDER;
 
 	const char* MODNAME;
-
-	
 };
