@@ -1,6 +1,12 @@
 #pragma once
 
-namespace CVariables {
+namespace CVariables 
+{
+	inline std::unordered_map<std::string_view, std::string_view> filelist;
+
+	inline RE::BGSListForm* TCC_New;
+	inline RE::BGSListForm* TCC_FND;
+	inline RE::BGSListForm* TCC_DSP;
 
 	inline std::string 		V_ShoutColour_New;
 	inline std::string 		V_ShoutColour_Found;
@@ -42,7 +48,7 @@ namespace CVariables {
 	inline bool				V_moreHudEnabled_Crosshair;
 	inline bool				V_moreHudEnabled_Menus;
 
-	inline std::int32_t		V_RadiantCounterVal;
+	inline std::int32_t		V_Radiant_FavorVal;
 	inline std::int32_t		V_Radiant_CollegeVal;
 	inline std::int32_t		V_Radiant_CompanionsVal;
 	inline std::int32_t		V_Radiant_DBrotherhoodVal;
@@ -73,6 +79,8 @@ namespace CVariables {
 	inline bool				V_CellScanner_NUMB;
 	inline bool				V_CellScanner_DETA;
 
+	inline bool				V_Debugging;
+
 	using EventResult = RE::BSEventNotifyControl;
 
 	class VariablesAPI final :
@@ -85,9 +93,11 @@ namespace CVariables {
 	}
 
 		  EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
-		 
+
 		  static void Register();
 		  static void Update();
+
+		  static bool IsDebuggingEnabled();
 
 		  static RE::BSScript::Variable* GetProperty(ScriptObjectPtr mcm, const char* a_prop);
 	};

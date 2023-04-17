@@ -1,35 +1,35 @@
 #include "Serialization.hpp"
 #include "CFramework_GCN.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_GCN {
+namespace CPatch_GCN 
+{
 	using namespace CFramework_Master;
 
+	CQuestData QuestData[]
+	{
+		{"GrayCowl_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "manny_GF_MQ"},
+		{"GrayCowl_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "manny_GF_ColdharbourQuest"},
+		{"GrayCowl_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "manny_GF_Farewell"},
+		{"GrayCowl_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "manny_GF_Books"},
+		{"GrayCowl_Quest04", CFlagEnum::kSide, CCompEnum::kStand, "manny_GF_Sadraaka"},
+		{"GrayCowl_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "manny_GF_BuryValenDreth"},
+		{"GrayCowl_Quest06", CFlagEnum::kSide, CCompEnum::kStage, "manny_GF_MiscQuestDesertWolfPelts"},
+		{"GrayCowl_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "manny_GF_MiscQuestDuneripperBlood"},
+		{"GrayCowl_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "manny_GF_MiscQuestMetiliusAmulet"},
+		{"GrayCowl_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "manny_GF_MiscQuestPraetorianCores"},
+	};
+
+	CStageData StageData[]{
+		{"GrayCowl_Quest06", CStageEnum::kDone, 20, 0},
+	};
+
+	/*NA*/ CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
 	// clang-format off
-
-		/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"GrayCowl_Quest00_Key", "$GrayCowl_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest00_Data", "manny_GF_MQ"},
-		/*01*/ {"GrayCowl_Quest01_Key", "$GrayCowl_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest01_Data", "manny_GF_ColdharbourQuest"},
-		/*02*/ {"GrayCowl_Quest02_Key", "$GrayCowl_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest02_Data", "manny_GF_Farewell"},
-		/*03*/ {"GrayCowl_Quest03_Key", "$GrayCowl_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest03_Data", "manny_GF_Books"},
-		/*04*/ {"GrayCowl_Quest04_Key", "$GrayCowl_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest04_Data", "manny_GF_Sadraaka"},
-		/*05*/ {"GrayCowl_Quest05_Key", "$GrayCowl_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest05_Data", "manny_GF_BuryValenDreth"},
-		/*06*/ {"GrayCowl_Quest06_Key", "$GrayCowl_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_Y, "$GrayCowl_Quest06_Data", "manny_GF_MiscQuestDesertWolfPelts"},
-		/*07*/ {"GrayCowl_Quest07_Key", "$GrayCowl_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest07_Data", "manny_GF_MiscQuestDuneripperBlood"},
-		/*08*/ {"GrayCowl_Quest08_Key", "$GrayCowl_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest08_Data", "manny_GF_MiscQuestMetiliusAmulet"},
-		/*09*/ {"GrayCowl_Quest09_Key", "$GrayCowl_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$GrayCowl_Quest09_Data", "manny_GF_MiscQuestPraetorianCores"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-	0,1,2,3,4,5,7,8,9
-	};
-
-	constexpr std::tuple<std::size_t, std::int32_t> StageCompletion[] = {
-	{ 6,  20  },
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0x034B20,0x004D9F,0x00AE03,0x00AE02,0x00AE01,0x018B4B,
@@ -48,6 +48,7 @@ namespace CPatch_GCN {
 	0x00C993,0x00FA59,0x028CA1,0x028678,0x029283,0x00FA58,
 	0x001A9B,0x0280A7,
 	};
+
 	// clang-format on
 
 	constexpr std::string_view modname = "Gray Fox Cowl.esm";
@@ -70,38 +71,24 @@ namespace CPatch_GCN {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData)
+				->initStageData(StageData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 40));
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
 	//---------------------------------------------------
 
-	void CHandler::SinkEvents() {
+	void CHandler::SinkEvents() 
+	{
 		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
 
 		auto UserInterface = RE::UI::GetSingleton();
@@ -109,30 +96,6 @@ namespace CPatch_GCN {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -184,11 +147,6 @@ namespace CPatch_GCN {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -319,24 +277,5 @@ namespace CPatch_GCN {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : StandardCompletion) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		};
-
-		for (auto& [i, stage] : StageCompletion) {
-			Quest_BoolArray[i] = Quest_StgeArray[i] ?
-				FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_S(Quest_KeysArray[i], Quest_IdenArray[i], stage) :
-				FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_P(Quest_KeysArray[i], Quest_IdenArray[i], stage);
-		}
 	}
 }

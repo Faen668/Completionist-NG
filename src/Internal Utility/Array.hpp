@@ -11,39 +11,6 @@
 #include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
 
-//Quest Frameworks
-#include "Frameworks/Quests/Main Story/CQuests_MainStory_SK.hpp"
-#include "Frameworks/Quests/Main Story/CQuests_MainStory_CW.hpp"
-#include "Frameworks/Quests/Main Story/CQuests_MainStory_DG.hpp"
-#include "Frameworks/Quests/Main Story/CQuests_MainStory_DB.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_01.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_02.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_03.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Dawnstar.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Falkreath.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Markarth.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Morthal.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Riften.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Solitude.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Whiterun.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Windhelm.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Winterhold.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_RavenRock.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_SkaalVillage.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_TelMithryn.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_Thirsk.hpp"
-#include "Frameworks/Quests/Towns & Cities/CQuests_SmallTowns.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_CollegeOfWinterhold.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_Companions.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_DarkBrotherhood.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_Dawnguard.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_ThievesGuild.hpp"
-#include "Frameworks/Quests/Guilds & Factions/CQuests_Vampires.hpp"
-#include "Frameworks/Quests/Dungeons & Misc/CQuests_Dungeons.hpp"
-#include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_SK.hpp"
-#include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_DG.hpp"
-#include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_DB.hpp"
-
 //Patches
 #include "Patches/AdditionalHearthfireDolls/CFramework_AHD.hpp"
 #include "Patches/BrotherhoodOfOld/CFramework_BOO.hpp"
@@ -70,6 +37,8 @@
 #include "Patches/Vigilant/CFramework_VIG.hpp"
 #include "Patches/Legacy of the Dragonborn/CFramework_LOD.hpp"
 #include "Patches/SpellTomes/CFramework_SpellTomes.hpp"
+#include "Patches/Skyrim Unique Drinks/CFramework_SUD.hpp"
+#include "Patches/Cheesemod/CFramework_Cheese.hpp"
 
 namespace ArrayHolder {
 	using namespace Serialization;
@@ -148,6 +117,7 @@ namespace ArrayHolder {
 
 		//Misc (Enchantments)
 		kFramework_VAE = 36, // Armor (Vanilla)
+		kFramework_NGA = 66, // Armor (Necromantic Grimoire)
 		kFramework_SAE = 37, // Armor (Summermyst)
 		kFramework_VWE = 38, // Weapons	(Vanilla)
 		kFramework_SWE = 39, // Weapons (Summermyst)
@@ -294,11 +264,20 @@ namespace ArrayHolder {
 		kPatch_SpellTomes_TriI = 323, // Triumvirate
 		kPatch_SpellTomes_TriR = 324, // Triumvirate
 
+		kPatch_SUD_I = 325, // Skyrim Unique Drinks
+
+		kPatch_CHM_1 = 326, // CheeseMod (Misc)
+		kPatch_CHM_2 = 327, // CheeseMod (Sliced)
+		kPatch_CHM_3 = 328, // CheeseMod (Wedges)
+		kPatch_CHM_4 = 329, // CheeseMod (Wheels)
+
 		kTotal,
 	};
 
 	enum class QuestID : std::int32_t
 	{
+		//DO NOT CHANGE THIS ORDER - USED BY CQUESTDATA
+
 		kQuest_MSQ_SK = 0,  // Main Story Quests (Skyrim)
 		kQuest_MSQ_CW = 1,  // Main Story Quests (Civil War)
 		kQuest_MSQ_DG = 2,  // Main Story Quests (Dawnguard)
@@ -322,6 +301,7 @@ namespace ArrayHolder {
 		kQuest_TelMit = 18, // Tel Mithryn Quests
 		kQuest_Thirsk = 19, // Thirsk Quests
 		kQuest_SmallT = 20, // Small Towns Quests
+
 		kQuest_Colleg = 21, // College of Winterhold Quests
 		kQuest_Compan = 22, // Companions Quests
 		kQuest_DarkBr = 23, // Dark Brotherhood Quests
@@ -367,15 +347,6 @@ namespace ArrayHolder {
 		kTotal,
 	};
 
-	//Quest Array Containers 
-	static std::unordered_map<QuestID, std::vector<std::string>*>	qIdenSet;
-	static std::unordered_map<QuestID, std::vector<std::string>*>	qNameSet;
-	static std::unordered_map<QuestID, std::vector<std::string>*>	qTextSet;
-	static std::unordered_map<QuestID, std::vector<std::string>*>	qKeysSet;
-	static std::unordered_map<QuestID, std::vector<bool>*>			qBoolSet;
-	static std::unordered_map<QuestID, std::vector<int32_t>*>		qRadiSet;
-	static std::unordered_map<QuestID, CompletionistData*>			qDataSet;
-
 	//Misc Array Containers 
 	static std::unordered_map<FrameworkID, std::vector<std::string>*>	NameSet;
 	static std::unordered_map<FrameworkID, std::vector<std::string>*>	TextSet;
@@ -397,7 +368,7 @@ namespace ArrayHolder {
 	//Counters 
 	static std::int32_t i_Nsize = 0;
 	static std::int32_t i_Ssize = 0;
-	static std::int32_t i_Qsize = 0;
+
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Array Getter (MCM Proc) --
@@ -436,34 +407,6 @@ namespace ArrayHolder {
 	}
 
 	//---------------------------------------------------
-	//-- Quest Functions ( Array Getter (MCM Proc) ------
-	//---------------------------------------------------
-
-	[[nodiscard]] static auto& qHandleIdenSet(QuestID a_QuestID) noexcept {
-		return (qIdenSet.contains(a_QuestID) && qIdenSet.at(a_QuestID)) ? *qIdenSet.at(a_QuestID) : ETextVec;
-	}
-
-	[[nodiscard]] static auto& qHandleNameSet(QuestID a_QuestID) noexcept {
-		return (qNameSet.contains(a_QuestID) && qNameSet.at(a_QuestID)) ? *qNameSet.at(a_QuestID) : ETextVec;
-	}
-
-	[[nodiscard]] static auto& qHandleTextSet(QuestID a_QuestID) noexcept {
-		return (qTextSet.contains(a_QuestID) && qTextSet.at(a_QuestID)) ? *qTextSet.at(a_QuestID) : ETextVec;
-	}
-
-	[[nodiscard]] static auto& qHandleKeysSet(QuestID a_QuestID) noexcept {
-		return (qKeysSet.contains(a_QuestID) && qKeysSet.at(a_QuestID)) ? *qKeysSet.at(a_QuestID) : ETextVec;
-	}
-
-	[[nodiscard]] static auto& qHandleBoolSet(QuestID a_QuestID) noexcept {
-		return (qBoolSet.contains(a_QuestID) && qBoolSet.at(a_QuestID)) ? *qBoolSet.at(a_QuestID) : EBoolVec;
-	}
-
-	[[nodiscard]] static auto& qHandleRadiSet(QuestID a_QuestID) noexcept {
-		return (qRadiSet.contains(a_QuestID) && qRadiSet.at(a_QuestID)) ? *qRadiSet.at(a_QuestID) : ERadiVec;
-	}
-
-	//---------------------------------------------------
 	//-- Framework Functions ( Add To Unordered Map  ) --
 	//---------------------------------------------------
 	
@@ -485,104 +428,11 @@ namespace ArrayHolder {
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Add To Unordered Map  ) --
-	//---------------------------------------------------
-
-	template <QuestID a_questID>
-	static void AttemptToAddQuest(std::vector<std::string>* a_KeyID, std::vector<std::string>* a_Idens, std::vector<std::string>* a_names, std::vector<std::string>* a_texts, std::vector<bool>* a_bools, std::vector<std::int32_t>* a_radis) noexcept
-		requires(a_questID != QuestID::kTotal)
-	{
-		qKeysSet.try_emplace(a_questID, a_KeyID);
-		qIdenSet.try_emplace(a_questID, a_Idens);
-		qNameSet.try_emplace(a_questID, a_names);
-		qTextSet.try_emplace(a_questID, a_texts);
-		qBoolSet.try_emplace(a_questID, a_bools);
-		qRadiSet.try_emplace(a_questID, a_radis);
-
-		i_Qsize += 1;
-	}
-
-	//---------------------------------------------------
 	//-- Framework Functions ( Array Registrations ) ----
 	//---------------------------------------------------
 
-	static void RegisterArrays() noexcept {
-
-		//Quests - Main Stroy Quests (Start) ----------------
-		AttemptToAddQuest<QuestID::kQuest_MSQ_SK>(&CQFramework_SK::KeysArray, &CQFramework_SK::IdenArray, &CQFramework_SK::NameArray, &CQFramework_SK::TextArray, &CQFramework_SK::BoolArray, &CQFramework_SK::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MSQ_CW>(&CQFramework_CW::KeysArray, &CQFramework_CW::IdenArray, &CQFramework_CW::NameArray, &CQFramework_CW::TextArray, &CQFramework_CW::BoolArray, &CQFramework_CW::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MSQ_DG>(&CQFramework_DG::KeysArray, &CQFramework_DG::IdenArray, &CQFramework_DG::NameArray, &CQFramework_DG::TextArray, &CQFramework_DG::BoolArray, &CQFramework_DG::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MSQ_DB>(&CQFramework_DB::KeysArray, &CQFramework_DB::IdenArray, &CQFramework_DB::NameArray, &CQFramework_DB::TextArray, &CQFramework_DB::BoolArray, &CQFramework_DB::RadiArray);
-		
-		//Quests - Creation CLub (Start) --------------------
-		AttemptToAddQuest<QuestID::kQuest_CCQ_01>(&CQFramework_CC1::KeysArray, &CQFramework_CC1::IdenArray, &CQFramework_CC1::NameArray, &CQFramework_CC1::TextArray, &CQFramework_CC1::BoolArray, &CQFramework_CC1::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_CCQ_02>(&CQFramework_CC2::KeysArray, &CQFramework_CC2::IdenArray, &CQFramework_CC2::NameArray, &CQFramework_CC2::TextArray, &CQFramework_CC2::BoolArray, &CQFramework_CC2::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_CCQ_03>(&CQFramework_CC3::KeysArray, &CQFramework_CC3::IdenArray, &CQFramework_CC3::NameArray, &CQFramework_CC3::TextArray, &CQFramework_CC3::BoolArray, &CQFramework_CC3::RadiArray);
-
-		//Quests - Towns & Cities (Start) -------------------
-		AttemptToAddQuest<QuestID::kQuest_Dawnst>(&CQFramework_Dawnstar::KeysArray, &CQFramework_Dawnstar::IdenArray, &CQFramework_Dawnstar::NameArray, &CQFramework_Dawnstar::TextArray, &CQFramework_Dawnstar::BoolArray, &CQFramework_Dawnstar::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Falkre>(&CQFramework_Falkreath::KeysArray, &CQFramework_Falkreath::IdenArray, &CQFramework_Falkreath::NameArray, &CQFramework_Falkreath::TextArray, &CQFramework_Falkreath::BoolArray, &CQFramework_Falkreath::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Markar>(&CQFramework_Markarth::KeysArray, &CQFramework_Markarth::IdenArray, &CQFramework_Markarth::NameArray, &CQFramework_Markarth::TextArray, &CQFramework_Markarth::BoolArray, &CQFramework_Markarth::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Mortha>(&CQFramework_Morthal::KeysArray, &CQFramework_Morthal::IdenArray, &CQFramework_Morthal::NameArray, &CQFramework_Morthal::TextArray, &CQFramework_Morthal::BoolArray, &CQFramework_Morthal::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Riften>(&CQFramework_Riften::KeysArray, &CQFramework_Riften::IdenArray, &CQFramework_Riften::NameArray, &CQFramework_Riften::TextArray, &CQFramework_Riften::BoolArray, &CQFramework_Riften::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Solitu>(&CQFramework_Solitude::KeysArray, &CQFramework_Solitude::IdenArray, &CQFramework_Solitude::NameArray, &CQFramework_Solitude::TextArray, &CQFramework_Solitude::BoolArray, &CQFramework_Solitude::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Whiter>(&CQFramework_Whiterun::KeysArray, &CQFramework_Whiterun::IdenArray, &CQFramework_Whiterun::NameArray, &CQFramework_Whiterun::TextArray, &CQFramework_Whiterun::BoolArray, &CQFramework_Whiterun::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Windhe>(&CQFramework_Windhelm::KeysArray, &CQFramework_Windhelm::IdenArray, &CQFramework_Windhelm::NameArray, &CQFramework_Windhelm::TextArray, &CQFramework_Windhelm::BoolArray, &CQFramework_Windhelm::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Winter>(&CQFramework_Winterhold::KeysArray, &CQFramework_Winterhold::IdenArray, &CQFramework_Winterhold::NameArray, &CQFramework_Winterhold::TextArray, &CQFramework_Winterhold::BoolArray, &CQFramework_Winterhold::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_RavenR>(&CQFramework_RavenRock::KeysArray, &CQFramework_RavenRock::IdenArray, &CQFramework_RavenRock::NameArray, &CQFramework_RavenRock::TextArray, &CQFramework_RavenRock::BoolArray, &CQFramework_RavenRock::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_SkaalV>(&CQFramework_SkaalVillage::KeysArray, &CQFramework_SkaalVillage::IdenArray, &CQFramework_SkaalVillage::NameArray, &CQFramework_SkaalVillage::TextArray, &CQFramework_SkaalVillage::BoolArray, &CQFramework_SkaalVillage::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_TelMit>(&CQFramework_TelMithryn::KeysArray, &CQFramework_TelMithryn::IdenArray, &CQFramework_TelMithryn::NameArray, &CQFramework_TelMithryn::TextArray, &CQFramework_TelMithryn::BoolArray, &CQFramework_TelMithryn::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Thirsk>(&CQFramework_Thirsk::KeysArray, &CQFramework_Thirsk::IdenArray, &CQFramework_Thirsk::NameArray, &CQFramework_Thirsk::TextArray, &CQFramework_Thirsk::BoolArray, &CQFramework_Thirsk::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_SmallT>(&CQFramework_SmallTowns::KeysArray, &CQFramework_SmallTowns::IdenArray, &CQFramework_SmallTowns::NameArray, &CQFramework_SmallTowns::TextArray, &CQFramework_SmallTowns::BoolArray, &CQFramework_SmallTowns::RadiArray);
-
-		//Quests - Guilds & Factions (Start) ----------------
-		AttemptToAddQuest<QuestID::kQuest_Colleg>(&CQFramework_CollegeOfWinterhold::KeysArray, &CQFramework_CollegeOfWinterhold::IdenArray, &CQFramework_CollegeOfWinterhold::NameArray, &CQFramework_CollegeOfWinterhold::TextArray, &CQFramework_CollegeOfWinterhold::BoolArray, &CQFramework_CollegeOfWinterhold::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Compan>(&CQFramework_Companions::KeysArray, &CQFramework_Companions::IdenArray, &CQFramework_Companions::NameArray, &CQFramework_Companions::TextArray, &CQFramework_Companions::BoolArray, &CQFramework_Companions::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_DarkBr>(&CQFramework_DarkBrotherhood::KeysArray, &CQFramework_DarkBrotherhood::IdenArray, &CQFramework_DarkBrotherhood::NameArray, &CQFramework_DarkBrotherhood::TextArray, &CQFramework_DarkBrotherhood::BoolArray, &CQFramework_DarkBrotherhood::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Dawngu>(&CQFramework_Dawnguard::KeysArray, &CQFramework_Dawnguard::IdenArray, &CQFramework_Dawnguard::NameArray, &CQFramework_Dawnguard::TextArray, &CQFramework_Dawnguard::BoolArray, &CQFramework_Dawnguard::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Thieve>(&CQFramework_ThievesGuild::KeysArray, &CQFramework_ThievesGuild::IdenArray, &CQFramework_ThievesGuild::NameArray, &CQFramework_ThievesGuild::TextArray, &CQFramework_ThievesGuild::BoolArray, &CQFramework_ThievesGuild::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_Vampir>(&CQFramework_Vampires::KeysArray, &CQFramework_Vampires::IdenArray, &CQFramework_Vampires::NameArray, &CQFramework_Vampires::TextArray, &CQFramework_Vampires::BoolArray, &CQFramework_Vampires::RadiArray);
-
-		//Quests - Dungeons & Misc (Start) ------------------
-		AttemptToAddQuest<QuestID::kQuest_Dungeo>(&CQFramework_Dungeons::KeysArray, &CQFramework_Dungeons::IdenArray, &CQFramework_Dungeons::NameArray, &CQFramework_Dungeons::TextArray, &CQFramework_Dungeons::BoolArray, &CQFramework_Dungeons::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MiscSK>(&CQFramework_Misc_SK::KeysArray_Side, &CQFramework_Misc_SK::IdenArray_Side, &CQFramework_Misc_SK::NameArray_Side, &CQFramework_Misc_SK::TextArray_Side, &CQFramework_Misc_SK::BoolArray_Side, &CQFramework_Misc_SK::RadiArray_Side);
-		AttemptToAddQuest<QuestID::kQuest_RadiSK>(&CQFramework_Misc_SK::KeysArray_Radi, &CQFramework_Misc_SK::IdenArray_Radi, &CQFramework_Misc_SK::NameArray_Radi, &CQFramework_Misc_SK::TextArray_Radi, &CQFramework_Misc_SK::BoolArray_Radi, &CQFramework_Misc_SK::RadiArray_Radi);
-		AttemptToAddQuest<QuestID::kQuest_MiscDG>(&CQFramework_Misc_DG::KeysArray, &CQFramework_Misc_DG::IdenArray, &CQFramework_Misc_DG::NameArray, &CQFramework_Misc_DG::TextArray, &CQFramework_Misc_DG::BoolArray, &CQFramework_Misc_DG::RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MiscDB>(&CQFramework_Misc_DB::KeysArray, &CQFramework_Misc_DB::IdenArray, &CQFramework_Misc_DB::NameArray, &CQFramework_Misc_DB::TextArray, &CQFramework_Misc_DB::BoolArray, &CQFramework_Misc_DB::RadiArray);
-
-		//Quests - Miscellaneous Mods (Start) ------------------
-		AttemptToAddQuest<QuestID::kQuest_CLW>(&CPatch_CLW::Quest_KeysArray, &CPatch_CLW::Quest_IdenArray, &CPatch_CLW::Quest_NameArray, &CPatch_CLW::Quest_TextArray, &CPatch_CLW::Quest_BoolArray, &CPatch_CLW::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_FSK>(&CPatch_FSK::Quest_KeysArray, &CPatch_FSK::Quest_IdenArray, &CPatch_FSK::Quest_NameArray, &CPatch_FSK::Quest_TextArray, &CPatch_FSK::Quest_BoolArray, &CPatch_FSK::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_HRB>(&CPatch_HRB::Quest_KeysArray, &CPatch_HRB::Quest_IdenArray, &CPatch_HRB::Quest_NameArray, &CPatch_HRB::Quest_TextArray, &CPatch_HRB::Quest_BoolArray, &CPatch_HRB::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MTE>(&CPatch_MTE::Quest_KeysArray, &CPatch_MTE::Quest_IdenArray, &CPatch_MTE::Quest_NameArray, &CPatch_MTE::Quest_TextArray, &CPatch_MTE::Quest_BoolArray, &CPatch_MTE::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_MAS>(&CPatch_MAS::Quest_KeysArray, &CPatch_MAS::Quest_IdenArray, &CPatch_MAS::Quest_NameArray, &CPatch_MAS::Quest_TextArray, &CPatch_MAS::Quest_BoolArray, &CPatch_MAS::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_AHO>(&CPatch_AHO::Quest_KeysArray, &CPatch_AHO::Quest_IdenArray, &CPatch_AHO::Quest_NameArray, &CPatch_AHO::Quest_TextArray, &CPatch_AHO::Quest_BoolArray, &CPatch_AHO::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_TEL>(&CPatch_TEL::Quest_KeysArray, &CPatch_TEL::Quest_IdenArray, &CPatch_TEL::Quest_NameArray, &CPatch_TEL::Quest_TextArray, &CPatch_TEL::Quest_BoolArray, &CPatch_TEL::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_WOL>(&CPatch_WOL::Quest_KeysArray, &CPatch_WOL::Quest_IdenArray, &CPatch_WOL::Quest_NameArray, &CPatch_WOL::Quest_TextArray, &CPatch_WOL::Quest_BoolArray, &CPatch_WOL::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_GCN>(&CPatch_GCN::Quest_KeysArray, &CPatch_GCN::Quest_IdenArray, &CPatch_GCN::Quest_NameArray, &CPatch_GCN::Quest_TextArray, &CPatch_GCN::Quest_BoolArray, &CPatch_GCN::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_WYR>(&CPatch_WYR::Quest_KeysArray, &CPatch_WYR::Quest_IdenArray, &CPatch_WYR::Quest_NameArray, &CPatch_WYR::Quest_TextArray, &CPatch_WYR::Quest_BoolArray, &CPatch_WYR::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_UND>(&CPatch_UND::Quest_KeysArray, &CPatch_UND::Quest_IdenArray, &CPatch_UND::Quest_NameArray, &CPatch_UND::Quest_TextArray, &CPatch_UND::Quest_BoolArray, &CPatch_UND::Quest_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_BOO>(&CPatch_BOO::Quest_KeysArray, &CPatch_BOO::Quest_IdenArray, &CPatch_BOO::Quest_NameArray, &CPatch_BOO::Quest_TextArray, &CPatch_BOO::Quest_BoolArray, &CPatch_BOO::Quest_RadiArray);
-
-		//Quests - Interesting NPC's (Start) ------------------
-		AttemptToAddQuest<QuestID::kQuest_3D1>(&CPatch_3DC::Quest1_KeysArray, &CPatch_3DC::Quest1_IdenArray, &CPatch_3DC::Quest1_NameArray, &CPatch_3DC::Quest1_TextArray, &CPatch_3DC::Quest1_BoolArray, &CPatch_3DC::Quest1_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_3D2>(&CPatch_3DC::Quest2_KeysArray, &CPatch_3DC::Quest2_IdenArray, &CPatch_3DC::Quest2_NameArray, &CPatch_3DC::Quest2_TextArray, &CPatch_3DC::Quest2_BoolArray, &CPatch_3DC::Quest2_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_3D3>(&CPatch_3DC::Quest3_KeysArray, &CPatch_3DC::Quest3_IdenArray, &CPatch_3DC::Quest3_NameArray, &CPatch_3DC::Quest3_TextArray, &CPatch_3DC::Quest3_BoolArray, &CPatch_3DC::Quest3_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_3D4>(&CPatch_3DC::Quest4_KeysArray, &CPatch_3DC::Quest4_IdenArray, &CPatch_3DC::Quest4_NameArray, &CPatch_3DC::Quest4_TextArray, &CPatch_3DC::Quest4_BoolArray, &CPatch_3DC::Quest4_RadiArray);
-
-		//Quests - Vigilant (Start) ------------------
-		AttemptToAddQuest<QuestID::kQuest_VG1>(&CPatch_VIG::Quest1_KeysArray, &CPatch_VIG::Quest1_IdenArray, &CPatch_VIG::Quest1_NameArray, &CPatch_VIG::Quest1_TextArray, &CPatch_VIG::Quest1_BoolArray, &CPatch_VIG::Quest1_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_VG2>(&CPatch_VIG::Quest2_KeysArray, &CPatch_VIG::Quest2_IdenArray, &CPatch_VIG::Quest2_NameArray, &CPatch_VIG::Quest2_TextArray, &CPatch_VIG::Quest2_BoolArray, &CPatch_VIG::Quest2_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_VG3>(&CPatch_VIG::Quest3_KeysArray, &CPatch_VIG::Quest3_IdenArray, &CPatch_VIG::Quest3_NameArray, &CPatch_VIG::Quest3_TextArray, &CPatch_VIG::Quest3_BoolArray, &CPatch_VIG::Quest3_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_VG4>(&CPatch_VIG::Quest4_KeysArray, &CPatch_VIG::Quest4_IdenArray, &CPatch_VIG::Quest4_NameArray, &CPatch_VIG::Quest4_TextArray, &CPatch_VIG::Quest4_BoolArray, &CPatch_VIG::Quest4_RadiArray);
-
-		//Quests - Legacy of the Dragonborn (Start) ------------------
-		AttemptToAddQuest<QuestID::kQuest_LD1>(&CPatch_LOD::Quest1_KeysArray, &CPatch_LOD::Quest1_IdenArray, &CPatch_LOD::Quest1_NameArray, &CPatch_LOD::Quest1_TextArray, &CPatch_LOD::Quest1_BoolArray, &CPatch_LOD::Quest1_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_LD2>(&CPatch_LOD::Quest2_KeysArray, &CPatch_LOD::Quest2_IdenArray, &CPatch_LOD::Quest2_NameArray, &CPatch_LOD::Quest2_TextArray, &CPatch_LOD::Quest2_BoolArray, &CPatch_LOD::Quest2_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_LD3>(&CPatch_LOD::Quest3_KeysArray, &CPatch_LOD::Quest3_IdenArray, &CPatch_LOD::Quest3_NameArray, &CPatch_LOD::Quest3_TextArray, &CPatch_LOD::Quest3_BoolArray, &CPatch_LOD::Quest3_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_LD4>(&CPatch_LOD::Quest4_KeysArray, &CPatch_LOD::Quest4_IdenArray, &CPatch_LOD::Quest4_NameArray, &CPatch_LOD::Quest4_TextArray, &CPatch_LOD::Quest4_BoolArray, &CPatch_LOD::Quest4_RadiArray);
-		AttemptToAddQuest<QuestID::kQuest_LD5>(&CPatch_LOD::Quest5_KeysArray, &CPatch_LOD::Quest5_IdenArray, &CPatch_LOD::Quest5_NameArray, &CPatch_LOD::Quest5_TextArray, &CPatch_LOD::Quest5_BoolArray, &CPatch_LOD::Quest5_RadiArray);
-
+	static void RegisterArrays() noexcept 
+	{
 		//Frameworks - Items (Uniques) (Start) --------------
 		AttemptToAdd<FrameworkID::kFramework_ARM>(&CFramework_Uniques::A_NameArray, &CFramework_Uniques::A_TextArray, &CFramework_Uniques::A_BoolArray, &CFramework_Uniques::A_FormArray, &CFramework_Uniques::A_EntriesFound, &CFramework_Uniques::A_EntriesTotal, &CFramework_Uniques_A::Data);
 		AttemptToAdd<FrameworkID::kFramework_WPN>(&CFramework_Uniques::W_NameArray, &CFramework_Uniques::W_TextArray, &CFramework_Uniques::W_BoolArray, &CFramework_Uniques::W_FormArray, &CFramework_Uniques::W_EntriesFound, &CFramework_Uniques::W_EntriesTotal, &CFramework_Uniques_W::Data);
@@ -653,6 +503,7 @@ namespace ArrayHolder {
 
 		//Frameworks - Misc (Enchantments) (Start) ----------
 		AttemptToAdd<FrameworkID::kFramework_VAE>(&CFramework_Enchantments::VA_NameArray, &CFramework_Enchantments::VA_TextArray, &CFramework_Enchantments::VA_BoolArray, &CFramework_Enchantments::VA_FormArray, &CFramework_Enchantments::VA_EntriesFound, &CFramework_Enchantments::VA_EntriesTotal, &CFramework_Enchantments_VA::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_NGA>(&CFramework_Enchantments::NGA_NameArray, &CFramework_Enchantments::NGA_TextArray, &CFramework_Enchantments::NGA_BoolArray, &CFramework_Enchantments::NGA_FormArray, &CFramework_Enchantments::NGA_EntriesFound, &CFramework_Enchantments::NGA_EntriesTotal, &CFramework_Enchantments_NGA::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_SAE>(&CFramework_Enchantments::SA_NameArray, &CFramework_Enchantments::SA_TextArray, &CFramework_Enchantments::SA_BoolArray, &CFramework_Enchantments::SA_FormArray, &CFramework_Enchantments::SA_EntriesFound, &CFramework_Enchantments::SA_EntriesTotal, &CFramework_Enchantments_SA::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_VWE>(&CFramework_Enchantments::VW_NameArray, &CFramework_Enchantments::VW_TextArray, &CFramework_Enchantments::VW_BoolArray, &CFramework_Enchantments::VW_FormArray, &CFramework_Enchantments::VW_EntriesFound, &CFramework_Enchantments::VW_EntriesTotal, &CFramework_Enchantments_VW::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_SWE>(&CFramework_Enchantments::SW_NameArray, &CFramework_Enchantments::SW_TextArray, &CFramework_Enchantments::SW_BoolArray, &CFramework_Enchantments::SW_FormArray, &CFramework_Enchantments::SW_EntriesFound, &CFramework_Enchantments::SW_EntriesTotal, &CFramework_Enchantments_SW::Data, true);
@@ -828,6 +679,12 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriI>(&CPatch_SpellTomes::Triumvirate_I_NameArray, &CPatch_SpellTomes::Triumvirate_I_TextArray, &CPatch_SpellTomes::Triumvirate_I_BoolArray, &CPatch_SpellTomes::Triumvirate_I_FormArray, &CPatch_SpellTomes::Triumvirate_I_EntriesFound, &CPatch_SpellTomes::Triumvirate_I_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
 		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriR>(&CPatch_SpellTomes::Triumvirate_R_NameArray, &CPatch_SpellTomes::Triumvirate_R_TextArray, &CPatch_SpellTomes::Triumvirate_R_BoolArray, &CPatch_SpellTomes::Triumvirate_R_FormArray, &CPatch_SpellTomes::Triumvirate_R_EntriesFound, &CPatch_SpellTomes::Triumvirate_R_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
 
-		INFO("Registered {} Quest Arrays and {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Qsize, i_Ssize, i_Nsize, (i_Ssize - i_Nsize));
+		AttemptToAdd<FrameworkID::kPatch_SUD_I>(&CPatch_SUD::Items_NameArray, &CPatch_SUD::Items_TextArray, &CPatch_SUD::Items_BoolArray, &CPatch_SUD::Items_FormArray, &CPatch_SUD::Items_EntriesFound, &CPatch_SUD::Items_EntriesTotal, &CPatch_SUD_Items::Data);
+		AttemptToAdd<FrameworkID::kPatch_CHM_1>(&CPatch_CHM::ItmL1_NameArray, &CPatch_CHM::ItmL1_TextArray, &CPatch_CHM::ItmL1_BoolArray, &CPatch_CHM::ItmL1_FormArray, &CPatch_CHM::ItmL1_EntriesFound, &CPatch_CHM::ItmL1_EntriesTotal, &CPatch_CHM_ItmL1::Data);
+		AttemptToAdd<FrameworkID::kPatch_CHM_2>(&CPatch_CHM::ItmL2_NameArray, &CPatch_CHM::ItmL2_TextArray, &CPatch_CHM::ItmL2_BoolArray, &CPatch_CHM::ItmL2_FormArray, &CPatch_CHM::ItmL2_EntriesFound, &CPatch_CHM::ItmL2_EntriesTotal, &CPatch_CHM_ItmL2::Data);
+		AttemptToAdd<FrameworkID::kPatch_CHM_3>(&CPatch_CHM::ItmL3_NameArray, &CPatch_CHM::ItmL3_TextArray, &CPatch_CHM::ItmL3_BoolArray, &CPatch_CHM::ItmL3_FormArray, &CPatch_CHM::ItmL3_EntriesFound, &CPatch_CHM::ItmL3_EntriesTotal, &CPatch_CHM_ItmL3::Data);
+		AttemptToAdd<FrameworkID::kPatch_CHM_4>(&CPatch_CHM::ItmL4_NameArray, &CPatch_CHM::ItmL4_TextArray, &CPatch_CHM::ItmL4_BoolArray, &CPatch_CHM::ItmL4_FormArray, &CPatch_CHM::ItmL4_EntriesFound, &CPatch_CHM::ItmL4_EntriesTotal, &CPatch_CHM_ItmL4::Data);
+
+		INFO("Registered {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Ssize, i_Nsize, (i_Ssize - i_Nsize));
 	}
 }

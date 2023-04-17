@@ -1,130 +1,46 @@
 #include "CQuests_TelMithryn.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
-namespace CQFramework_TelMithryn {
-	using namespace CFramework_Master;
-
-	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
-	/*00*/ {"TelMithryn_Quest00_Key", "$TelMithryn_Quest00_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest00_Data", "DLC2TTR7"},
-	/*01*/ {"TelMithryn_Quest01_Key", "$TelMithryn_Quest01_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest01_Data", "DLC2TTR5"},
-	/*02*/ {"TelMithryn_Quest02_Key", "$TelMithryn_Quest02_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest02_Data", "DLC2TTR4a"},
-	/*03*/ {"TelMithryn_Quest03_Key", "$TelMithryn_Quest03_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest03_Data", "DLC2TTR4b"},
-	/*04*/ {"TelMithryn_Quest04_Key", "$TelMithryn_Quest04_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest04_Data", "DLC2TTF1"},
-	/*05*/ {"TelMithryn_Quest05_Key", "$TelMithryn_Quest05_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest05_Data", "DLC2TTF2"},
-	/*06*/ {"TelMithryn_Quest06_Key", "$TelMithryn_Quest06_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest06_Data", "DLC2TTR2"},
-	/*07*/ {"TelMithryn_Quest07_Key", "$TelMithryn_Quest07_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest07_Data", "DLC2TTR8"},
-	/*08*/ {"TelMithryn_Quest08_Key", "$TelMithryn_Quest08_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest08_Data", "DLC2TTR1"},
-	/*09*/ {"TelMithryn_Quest09_Key", "$TelMithryn_Quest09_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest09_Data", "DLC2TT1b"},
-	/*10*/ {"TelMithryn_Quest10_Key", "$TelMithryn_Quest10_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest10_Data", "DLC2TT2"},
-	/*11*/ {"TelMithryn_Quest11_Key", "$TelMithryn_Quest11_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest11_Data", "DLC2TT1"},
-	/*12*/ {"TelMithryn_Quest12_Key", "$TelMithryn_Quest12_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest12_Data", "DLC2TTR3a"},
-	/*13*/ {"TelMithryn_Quest13_Key", "$TelMithryn_Quest13_Name", SIDE_QUEST_FLAG, "$TelMithryn_Quest13_Data", "DLC2TTR3b"},
+namespace CQFramework_TelMithryn 
+{
+	CQuestData QuestData[] {
+		{"TelMithryn_Quest00", CFlagEnum::kSide, CCompEnum::kStage, "DLC2TTR7"},
+		{"TelMithryn_Quest01", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR5"},
+		{"TelMithryn_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR4a"},
+		{"TelMithryn_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR4b"},
+		{"TelMithryn_Quest04", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTF1"},
+		{"TelMithryn_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTF2"},
+		{"TelMithryn_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR2"},
+		{"TelMithryn_Quest07", CFlagEnum::kSide, CCompEnum::kStage, "DLC2TTR8"},
+		{"TelMithryn_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR1"},
+		{"TelMithryn_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TT1b"},
+		{"TelMithryn_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TT2"},
+		{"TelMithryn_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TT1"},
+		{"TelMithryn_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR3a"},
+		{"TelMithryn_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "DLC2TTR3b"},
 	};
 
-	constexpr std::size_t StandardCompletion[] = {
-	1,2,3,4,5,6,8,9,10,11,12,13,
+	CStageData StageData[]{
+		{"TelMithryn_Quest00", CStageEnum::kDone, 300, 0},
+		{"TelMithryn_Quest07", CStageEnum::kDone, 100, 0},
 	};
 
-	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
-	{0, "Completionist_TelMithryn_DLC2TTR7", 1},
-	{7, "Completionist_TelMithryn_DLC2TTR8", 1},
-	};
-
-	constexpr std::tuple<RE::FormID, const char*, std::int32_t, std::int32_t, const char*> GlobalSetter[] = {
-	/*00*/ {0x01BD18, "Dragonborn.esm", 1, 300, "Completionist_TelMithryn_DLC2TTR7"},
-	/*07*/ {0x01F13B, "Dragonborn.esm", 1, 100, "Completionist_TelMithryn_DLC2TTR8"},
-	};
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallFramework() {
-		SinkEvents();
+	void CHandler::InstallFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData)
+				->initStageData(StageData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 18));
 
-		IdenArray.clear();
-		NameArray.clear();
-		RadiArray.clear();
-		NameArray.clear();
-		KeysArray.clear();
-
-		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
-			KeysArray.push_back(Key);
-			NameArray.push_back(Name);
-			RadiArray.push_back(Flag);
-			TextArray.push_back(Text);
-			IdenArray.push_back(ID);
 		}
-
-		assert(KeysArray.size() == ArraySize);
-		assert(IdenArray.size() == ArraySize);
-		assert(NameArray.size() == ArraySize);
-		assert(RadiArray.size() == ArraySize);
-		assert(TextArray.size() == ArraySize);
-		BoolArray = std::vector<bool>(ArraySize, false);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Menu Open ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
-
-		CHandler::UpdateCompletion();
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Change ) -----------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		for (auto& [formID, fileName, value, stage, global] : GlobalSetter) {
-			const auto* quest = static_cast<RE::TESQuest*>(RE::TESDataHandler::GetSingleton()->LookupForm(formID, fileName));
-
-			if (event == quest && a_event->stage == stage) {
-				if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(global)) {
-					var->value += value;
-					INFO("Incrememnting Var For {}", quest->GetName());
-					return EventResult::kContinue;
-				}
-			}
-		}
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateCompletion() {
-
-		for (auto i : StandardCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
-		}
-
-		for (auto& [i, global, value] : GlobalCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], global, value);
-		}
+		BoolArray = std::vector<bool>(CArraySize, false);
 	};
-}
+};

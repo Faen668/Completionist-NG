@@ -1,38 +1,38 @@
 #include "Serialization.hpp"
 #include "CFramework_WYR.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_WYR {
+namespace CPatch_WYR 
+{
 	using namespace CFramework_Master;
 
+	CQuestData QuestData[]
+	{
+		{"Wyrmstooth_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "WTDragonHunt"},
+		{"Wyrmstooth_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "WTBarrowOfTheWyrm"},
+		{"Wyrmstooth_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "WTBountyAnimal"},
+		{"Wyrmstooth_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "WTBountyBandit"},
+		{"Wyrmstooth_Quest04", CFlagEnum::kSide, CCompEnum::kStand, "WTBountyVampire"},
+		{"Wyrmstooth_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "WTBountyWarlock"},
+		{"Wyrmstooth_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "WTWolfFollower"},
+		{"Wyrmstooth_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "WTPricelessCommodity"},
+		{"Wyrmstooth_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "WTPlayerHome"},
+		{"Wyrmstooth_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "WTShargamFavor"},
+		{"Wyrmstooth_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "WTAthirFavor"},
+		{"Wyrmstooth_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "WTDaenlitFavor"},
+		{"Wyrmstooth_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "WTUberEncounter"},
+		{"Wyrmstooth_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "WTKillThalmor"},
+		{"Wyrmstooth_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "WTWrapMeUp"},
+		{"Wyrmstooth_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "WTBlindRobbersCache"},
+		{"Wyrmstooth_Quest16", CFlagEnum::kSide, CCompEnum::kStand, "WTElmeraFavor"},
+	};
+
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"Wyrmstooth_Quest00_Key", "$Wyrmstooth_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest00_Data", "WTDragonHunt"},
-		/*01*/ {"Wyrmstooth_Quest01_Key", "$Wyrmstooth_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest01_Data", "WTBarrowOfTheWyrm"},
-		/*02*/ {"Wyrmstooth_Quest02_Key", "$Wyrmstooth_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest02_Data", "WTBountyAnimal"},
-		/*03*/ {"Wyrmstooth_Quest03_Key", "$Wyrmstooth_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest03_Data", "WTBountyBandit"},
-		/*04*/ {"Wyrmstooth_Quest04_Key", "$Wyrmstooth_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest04_Data", "WTBountyVampire"},
-		/*05*/ {"Wyrmstooth_Quest05_Key", "$Wyrmstooth_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest05_Data", "WTBountyWarlock"},
-		/*06*/ {"Wyrmstooth_Quest06_Key", "$Wyrmstooth_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest06_Data", "WTWolfFollower"},
-		/*07*/ {"Wyrmstooth_Quest07_Key", "$Wyrmstooth_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest07_Data", "WTPricelessCommodity"},
-		/*08*/ {"Wyrmstooth_Quest08_Key", "$Wyrmstooth_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest08_Data", "WTPlayerHome"},
-		/*09*/ {"Wyrmstooth_Quest09_Key", "$Wyrmstooth_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest09_Data", "WTShargamFavor"},
-		/*10*/ {"Wyrmstooth_Quest10_Key", "$Wyrmstooth_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest10_Data", "WTAthirFavor"},
-		/*11*/ {"Wyrmstooth_Quest11_Key", "$Wyrmstooth_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest11_Data", "WTDaenlitFavor"},
-		/*12*/ {"Wyrmstooth_Quest12_Key", "$Wyrmstooth_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest12_Data", "WTUberEncounter"},
-		/*13*/ {"Wyrmstooth_Quest13_Key", "$Wyrmstooth_Quest13_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest13_Data", "WTKillThalmor"},
-		/*14*/ {"Wyrmstooth_Quest14_Key", "$Wyrmstooth_Quest14_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest14_Data", "WTWrapMeUp"},
-		/*15*/ {"Wyrmstooth_Quest15_Key", "$Wyrmstooth_Quest15_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest15_Data", "WTBlindRobbersCache"},
-		/*16*/ {"Wyrmstooth_Quest16_Key", "$Wyrmstooth_Quest16_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Wyrmstooth_Quest16_Data", "WTElmeraFavor"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0x2BF880,0x3B9371,0x6F6806,0x6F67FD,0x8F793C,0x723033,0x784A71,
@@ -79,32 +79,16 @@ namespace CPatch_WYR {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 41));
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
@@ -118,30 +102,6 @@ namespace CPatch_WYR {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -193,11 +153,6 @@ namespace CPatch_WYR {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -328,18 +283,5 @@ namespace CPatch_WYR {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : StandardCompletion) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		}
 	}
 }

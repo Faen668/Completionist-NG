@@ -1,204 +1,128 @@
 #include "CQuests_Companions.hpp"
-#include "Serialization.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
-namespace CQFramework_Companions {
-	using namespace CFramework_Master;
-	using namespace Serialization;
-
-	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
-	/*00*/ {"Companions_Quest00_Key", "$Companions_Quest00_Name", MAIN_QUEST_FLAG, "$Companions_Quest00_Data", "C00"},
-	/*01*/ {"Companions_Quest01_Key", "$Companions_Quest01_Name", MAIN_QUEST_FLAG, "$Companions_Quest01_Data", "C01"},
-	/*02*/ {"Companions_Quest02_Key", "$Companions_Quest02_Name", MAIN_QUEST_FLAG, "$Companions_Quest02_Data", "C03"},
-	/*03*/ {"Companions_Quest03_Key", "$Companions_Quest03_Name", MAIN_QUEST_FLAG, "$Companions_Quest03_Data", "C04"},
-	/*04*/ {"Companions_Quest04_Key", "$Companions_Quest04_Name", MAIN_QUEST_FLAG, "$Companions_Quest04_Data", "C05"},
-	/*05*/ {"Companions_Quest05_Key", "$Companions_Quest05_Name", MAIN_QUEST_FLAG, "$Companions_Quest05_Data", "C06"},
-	/*06*/ {"Companions_Quest06_Key", "$Companions_Quest06_Name", RADI_QUEST_FLAG, "$Companions_Quest06_Data", "CR01"},
-	/*07*/ {"Companions_Quest07_Key", "$Companions_Quest07_Name", RADI_QUEST_FLAG, "$Companions_Quest07_Data", "CR02"},
-	/*08*/ {"Companions_Quest08_Key", "$Companions_Quest08_Name", RADI_QUEST_FLAG, "$Companions_Quest08_Data", "CR03"},
-	/*09*/ {"Companions_Quest09_Key", "$Companions_Quest09_Name", RADI_QUEST_FLAG, "$Companions_Quest09_Data", "CR14"},
-	/*10*/ {"Companions_Quest10_Key", "$Companions_Quest10_Name", RADI_QUEST_FLAG, "$Companions_Quest10_Data", "CR07"},
-	/*11*/ {"Companions_Quest11_Key", "$Companions_Quest11_Name", RADI_QUEST_FLAG, "$Companions_Quest11_Data", "CR06"},
-	/*12*/ {"Companions_Quest12_Key", "$Companions_Quest12_Name", RADI_QUEST_FLAG, "$Companions_Quest12_Data", "CR04"},
-	/*13*/ {"Companions_Quest13_Key", "$Companions_Quest13_Name", RADI_QUEST_FLAG, "$Companions_Quest13_Data", "CR13"},
-	/*14*/ {"Companions_Quest14_Key", "$Companions_Quest14_Name", RADI_QUEST_FLAG, "$Companions_Quest14_Data", "CR13"},
-	/*15*/ {"Companions_Quest15_Key", "$Companions_Quest15_Name", RADI_QUEST_FLAG, "$Companions_Quest15_Data", "CR08"},
-	/*16*/ {"Companions_Quest16_Key", "$Companions_Quest16_Name", RADI_QUEST_FLAG, "$Companions_Quest16_Data", "CR11"},
-	/*17*/ {"Companions_Quest17_Key", "$Companions_Quest17_Name", RADI_QUEST_FLAG, "$Companions_Quest17_Data", "CR10"},
-	/*18*/ {"Companions_Quest18_Key", "$Companions_Quest18_Name", RADI_QUEST_FLAG, "$Companions_Quest18_Data", "CR09"},
-	/*19*/ {"Companions_Quest19_Key", "$Companions_Quest19_Name", RADI_QUEST_FLAG, "$Companions_Quest19_Data", "CR12"},
-	/*20*/ {"Companions_Quest20_Key", "$Companions_Quest20_Name", RADI_QUEST_FLAG, "$Companions_Quest20_Data", "CR05"},
+namespace CQFramework_Companions 
+{
+	CRadiantData RadiantData[] {
+		/*06*/ {"Companions_Quest06",  CRadiantEnum::kRadiant_COM,		0x01CEEE, 0, 200, "Completionist_Companions_CR01" },
+		/*07*/ {"Companions_Quest07",  CRadiantEnum::kRadiant_COM,		0x01CEEE, 0, 200, "Completionist_Companions_CR02" },
+		/*08*/ {"Companions_Quest08",  CRadiantEnum::kRadiant_COM,		0x025185, 0, 200, "Completionist_Companions_CR03" },
+		/*09*/ {"Companions_Quest09",  CRadiantEnum::kRadiant_COM,		0x025230, 0, 200, "Completionist_Companions_CR14" },
+		/*10*/ {"Companions_Quest10",  CRadiantEnum::kRadiant_COM,		0x025231, 0, 200, "Completionist_Companions_CR07" },
+		/*11*/ {"Companions_Quest11",  CRadiantEnum::kRadiant_COM,		0x02522F, 0, 200, "Completionist_Companions_CR06" },
+		/*12*/ {"Companions_Quest12",  CRadiantEnum::kRadiant_COM,		0x0C18E1, 0, 200, "Completionist_Companions_CR04" },
+		/*13*/ {"Companions_Quest13",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Farkas" },
+		/*14*/ {"Companions_Quest14",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Vilkas" },
+		/*15*/ {"Companions_Quest15",  CRadiantEnum::kRadiant_COM,		0x025252, 0, 200, "Completionist_Companions_CR08" },
+		/*16*/ {"Companions_Quest16",  CRadiantEnum::kRadiant_DF1,		0x09D6FC, 0, 200, "Completionist_Companions_CR11" },
+		/*17*/ {"Companions_Quest17",  CRadiantEnum::kRadiant_DF1,		0x09D700, 0, 200, "Completionist_Companions_CR10" },
+		/*18*/ {"Companions_Quest18",  CRadiantEnum::kRadiant_DF1,		0x0E3145, 0, 200, "Completionist_Companions_CR09" },
+		/*19*/ {"Companions_Quest19",  CRadiantEnum::kRadiant_DF3,	0x0E3163, 0, 200, "Completionist_Companions_CR12" },
+		/*20*/ {"Companions_Quest20",  CRadiantEnum::kRadiant_COM,		0x0E3156, 0, 200, "Completionist_Companions_CR05" },
 	};
 
-	constexpr std::size_t StandardCompletion[] = {
-	0,1,2,3,4,5
+	CQuestData QuestData[] {
+		/*00*/ {"Companions_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "C00"},
+		/*01*/ {"Companions_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "C01"},
+		/*02*/ {"Companions_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "C03"},
+		/*03*/ {"Companions_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "C04"},
+		/*04*/ {"Companions_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "C05"},
+		/*05*/ {"Companions_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "C06"},
+		/*06*/ {"Companions_Quest06", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR01"},
+		/*07*/ {"Companions_Quest07", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR02"},
+		/*08*/ {"Companions_Quest08", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR03"},
+		/*09*/ {"Companions_Quest09", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR14"},
+		/*10*/ {"Companions_Quest10", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR07"},
+		/*11*/ {"Companions_Quest11", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR06"},
+		/*12*/ {"Companions_Quest12", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR04"},
+		/*13*/ {"Companions_Quest13", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR13"},
+		/*14*/ {"Companions_Quest14", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR13"},
+		/*15*/ {"Companions_Quest15", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR08"},
+		/*16*/ {"Companions_Quest16", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR11"},
+		/*17*/ {"Companions_Quest17", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR10"},
+		/*18*/ {"Companions_Quest18", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR09"},
+		/*19*/ {"Companions_Quest19", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR12"},
+		/*20*/ {"Companions_Quest20", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR05"},
 	};
 
-	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
-	{6, "Completionist_Companions_CR01", RADIANT_COMPANIONS_VALUE},
-	{7, "Completionist_Companions_CR02", RADIANT_COMPANIONS_VALUE},
-	{8, "Completionist_Companions_CR03", RADIANT_COMPANIONS_VALUE},
-	{9, "Completionist_Companions_CR14", RADIANT_COMPANIONS_VALUE},
-	{10, "Completionist_Companions_CR07", RADIANT_COMPANIONS_VALUE},
-	{11, "Completionist_Companions_CR06", RADIANT_COMPANIONS_VALUE},
-	{12, "Completionist_Companions_CR04", RADIANT_COMPANIONS_VALUE},
-	{13, "Completionist_Companions_CR13Farkas", 1},
-	{14, "Completionist_Companions_CR13Vilkas", 1},
-	{15, "Completionist_Companions_CR08", RADIANT_COMPANIONS_VALUE},
-	{16, "Completionist_Companions_CR11", 1},
-	{17, "Completionist_Companions_CR10", 1},
-	{18, "Completionist_Companions_CR09", 1},
-	{19, "Completionist_Companions_CR12", 3},
-	{20, "Completionist_Companions_CR05", RADIANT_COMPANIONS_VALUE},
-	};
+	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
 
-	constexpr CompanionsQuestData CQD[] = {
-	{ 0x01CEEE, "Skyrim.esm", "Completionist_Companions_CR01", "", 1, 200 },
-	{ 0x01CEEE, "Skyrim.esm", "Completionist_Companions_CR01", "", 1, 200 },
-	{ 0x025185, "Skyrim.esm", "Completionist_Companions_CR02", "", 1, 200 },
-	{ 0x025230, "Skyrim.esm", "Completionist_Companions_CR03", "", 1, 200 },
-	{ 0x025231, "Skyrim.esm", "Completionist_Companions_CR04", "", 1, 100 },
-	{ 0x02522F, "Skyrim.esm", "Completionist_Companions_CR05", "", 1, 200 },
-	{ 0x0C18E1, "Skyrim.esm", "Completionist_Companions_CR06", "", 1, 200 },
-	{ 0x025250, "Skyrim.esm", "Completionist_Companions_CR07", "", 1, 200 },
-	{ 0x025251, "Skyrim.esm", "Completionist_Companions_CR08", "", 1, 100 },
-	{ 0x025252, "Skyrim.esm", "Completionist_Companions_CR09", "", 1, 200 },
-	{ 0x09D6FC, "Skyrim.esm", "Completionist_Companions_CR10", "", 1, 200 },
-	{ 0x09D700, "Skyrim.esm", "Completionist_Companions_CR11", "", 1, 200 },
-	{ 0x0E3145, "Skyrim.esm", "Completionist_Companions_CR12", "", 1, 200 },
-	{ 0x0E3163, "Skyrim.esm", "Completionist_Companions_CR13Farkas", "Completionist_Companions_CR13Vilkas", 1, 200 },
-	{ 0x0E3156, "Skyrim.esm", "Completionist_Companions_CR14", "", 1, 200 },
-	};
+	CompanionsQuestData GlobalSetter{ 0x0E3163, "Skyrim.esm", "Completionist_Companions_CR13Farkas", "Completionist_Companions_CR13Vilkas" };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallFramework() {
+	void CHandler::InstallFramework()
+	{
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 
-		SinkEvents();
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			// Handle Exclusions for CRF
+			if (!Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
+				if (i == 8) { INFO("Excluded quest - {} due to CRF being missing", QuestData[i].editor_id); continue; }
+			}
 
-		IdenArray.clear();
-		NameArray.clear();
-		RadiArray.clear();
-		NameArray.clear();
-		KeysArray.clear();
+			// Handle Exclusions for 'Dont be a milk drinker'
+			if (i == 12 && (Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker.esp") || Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker (Farkas only option).esp"))) {
+				INFO("Excluded quest - {} due to 'Don't be a milk drinker' being installed", QuestData[i].editor_id); continue;
+			}
 
-		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
-
-			KeysArray.push_back(Key);
-			NameArray.push_back(Name);
-			RadiArray.push_back(Flag);
-			TextArray.push_back(Text);
-			IdenArray.push_back(ID);
+			QuestData[i].init()
+				->initQuestData(&QuestArrays)
+				->initRadiantData(RadiantData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 22));
 		}
-
-		assert(KeysArray.size() == ArraySize);
-		assert(IdenArray.size() == ArraySize);
-		assert(NameArray.size() == ArraySize);
-		assert(RadiArray.size() == ArraySize);
-		assert(TextArray.size() == ArraySize);
-		BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Menu Open ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
-
-		CHandler::UpdateCompletion();
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Change ) -----------
+	//-- Framework Events ( On Radiant Stage Set ) ------
 	//---------------------------------------------------
 
 	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
 
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+		if (!a_event || !a_event->stage || a_event->stage != 200) { 
+			return RE::BSEventNotifyControl::kContinue; 
+		}
 
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
+		const auto* quest1 = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		const auto* quest2 = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(GlobalSetter.QuestID, GlobalSetter.QuestFN);
+		
+		if (!quest1 || !quest2 || quest1->GetFormID() != quest2->GetFormID()) { 
+			return EventResult::kContinue; 
+		}
 
-		for (auto& dataSet : CQD) {
+		auto* farkasGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>(GlobalSetter.Global1);
+		auto* vilkasGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>(GlobalSetter.Global2);
 
-			const auto* questBase = CompletionistData::GetFullForm<RE::TESQuest>(dataSet.QuestID, dataSet.QuestFN);
-			auto* questGlob1 = RE::TESForm::LookupByEditorID<RE::TESGlobal>(dataSet.Global1);
-			auto* questGlob2 = RE::TESForm::LookupByEditorID<RE::TESGlobal>(dataSet.Global2);
+		INFO("Companions global setter got quest - [{}]", quest1->GetName());
 
-			if (!questBase || questBase != event || a_event->stage != dataSet.Stage) {
-				continue;
-			}
+		auto* FarkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A693, GlobalSetter.QuestFN);
+		auto* VilkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A695, GlobalSetter.QuestFN);
 
-			INFO("Got Quest - [{}]", questBase->GetName());
+		if (!FarkasRef || !VilkasRef || !farkasGlobal || !vilkasGlobal) {
+			return EventResult::kContinue;
+		}
 
-			if (dataSet.Global1 == "Completionist_Companions_CR13Farkas") {
-				
-				auto* FarkasRef = CompletionistData::GetFullForm<RE::Actor>(0x01A693, dataSet.QuestFN);
-				auto* VilkasRef = CompletionistData::GetFullForm<RE::Actor>(0x01A695, dataSet.QuestFN);
+		for (const auto& alias : quest1->aliases) {
+			if (alias && alias->aliasName == "Questgiver") {
 
-				if (!FarkasRef || !VilkasRef || !questGlob1 || !questGlob2) {
-					continue;
-				}
-
-				for (const auto& alias : questBase->aliases) {
-					if (alias && alias->aliasName == "Questgiver") {
-
-						auto* reference = static_cast<RE::BGSRefAlias*>(alias);
-						if (reference && reference->GetActorReference() == FarkasRef) {
-							questGlob1->value += dataSet.Value;
-							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", dataSet.Global1, questBase->GetName(), FarkasRef->GetName());
-							return EventResult::kContinue;
-						}
-
-						if (reference && reference->GetActorReference() == VilkasRef) {
-							questGlob2->value += dataSet.Value;
-							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", dataSet.Global2, questBase->GetName(), VilkasRef->GetName());
-							return EventResult::kContinue;
-						}
-					}
-				}
-			}
-			else {
-				if (questGlob1) {
-					questGlob1->value += dataSet.Value;
-					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}]", dataSet.Global1, questBase->GetName());
+				auto* reference = static_cast<RE::BGSRefAlias*>(alias);
+				if (reference && reference->GetActorReference()->formID == FarkasRef->formID) {
+					farkasGlobal->value++;
+					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", GlobalSetter.Global1, quest1->GetName(), FarkasRef->GetName());
 					return EventResult::kContinue;
 				}
 
+				if (reference && reference->GetActorReference()->formID == VilkasRef->formID) {
+					vilkasGlobal->value++;
+					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", GlobalSetter.Global2, quest1->GetName(), VilkasRef->GetName());
+					return EventResult::kContinue;
+				}
 			}
 		}
 		return EventResult::kContinue;
 	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateCompletion() {
-
-		for (auto i : StandardCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
-		}
-
-		for (auto& [i, global, value] : GlobalCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], global, value);
-		}
-	};
 }

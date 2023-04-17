@@ -301,7 +301,8 @@ namespace CFramework_Books {
 	//-- Framework Functions ( Sink Event ) -------------
 	//---------------------------------------------------
 
-	void CHandler::SinkEvents() {
+	void CHandler::SinkEvents() 
+	{
 		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
 
 		auto UserInterface = RE::UI::GetSingleton();
@@ -736,8 +737,6 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.CompileFormArray(CFramework_Books::Books_DG, "Dawnguard.esm");
 		CFramework_Books_DB::Data.CompileFormArray(CFramework_Books::Books_DB, "Dragonborn.esm");
 		CFramework_TMaps_SK::Data.CompileFormArray(CFramework_Books::TMaps_SK, "Skyrim.esm");
-		CFramework_TMaps_NT::Data.CompileFormArray(CFramework_Books::TMaps_NT, "treasure_hunt.esp");
-		CFramework_TMaps_TH::Data.CompileFormArray(CFramework_Books::TMaps_TH, "TreasureHunter.esp");
 		CFramework_Books_CC::Data.CompileFormArray(CFramework_Books::Books_CC, "");
 
 		CFramework_Books_AG::Data.MergeAsCollectable();
@@ -747,8 +746,6 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.MergeAsCollectable();
 		CFramework_Books_DB::Data.MergeAsCollectable();
 		CFramework_TMaps_SK::Data.MergeAsCollectable();
-		CFramework_TMaps_NT::Data.MergeAsCollectable();
-		CFramework_TMaps_TH::Data.MergeAsCollectable();
 		CFramework_Books_CC::Data.MergeAsCollectable();
 
 		CFramework_Books_AG::Data.Populate(Books_AG_NameArray, Books_AG_FormArray, Books_AG_BoolArray, Books_AG_TextArray, false, 1);
@@ -758,9 +755,27 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.Populate(Books_DG_NameArray, Books_DG_FormArray, Books_DG_BoolArray, Books_DG_TextArray, false, 1);
 		CFramework_Books_DB::Data.Populate(Books_DB_NameArray, Books_DB_FormArray, Books_DB_BoolArray, Books_DB_TextArray, false, 1);
 		CFramework_TMaps_SK::Data.Populate(TMaps_SK_NameArray, TMaps_SK_FormArray, TMaps_SK_BoolArray, TMaps_SK_TextArray, false, 1);
-		CFramework_TMaps_NT::Data.Populate(TMaps_NT_NameArray, TMaps_NT_FormArray, TMaps_NT_BoolArray, TMaps_NT_TextArray, false, 1);
-		CFramework_TMaps_TH::Data.Populate(TMaps_TH_NameArray, TMaps_TH_FormArray, TMaps_TH_BoolArray, TMaps_TH_TextArray, false, 1);
 		CFramework_Books_CC::Data.Populate(Books_CC_NameArray, Books_CC_FormArray, Books_CC_BoolArray, Books_CC_TextArray, false, 1);
+
+		if (Serialization::CompletionistData::IsModInstalled("treasure_hunt.esp"))
+		{
+			CFramework_TMaps_NT::Data.CompileFormArray(CFramework_Books::TMaps_NT, "treasure_hunt.esp");
+			CFramework_TMaps_NT::Data.MergeAsCollectable();
+			CFramework_TMaps_NT::Data.Populate(TMaps_NT_NameArray, TMaps_NT_FormArray, TMaps_NT_BoolArray, TMaps_NT_TextArray, false, 1);
+
+			TMaps_NT_EntriesTotal = TMaps_NT_FormArray.size();
+			TMaps_NT_EntriesFound = std::ranges::count(TMaps_NT_BoolArray, true);
+		}
+
+		if (Serialization::CompletionistData::IsModInstalled("TreasureHunter.esp"))
+		{
+			CFramework_TMaps_TH::Data.CompileFormArray(CFramework_Books::TMaps_TH, "TreasureHunter.esp");
+			CFramework_TMaps_TH::Data.MergeAsCollectable();
+			CFramework_TMaps_TH::Data.Populate(TMaps_TH_NameArray, TMaps_TH_FormArray, TMaps_TH_BoolArray, TMaps_TH_TextArray, false, 1);
+
+			TMaps_TH_EntriesTotal = TMaps_TH_FormArray.size();
+			TMaps_TH_EntriesFound = std::ranges::count(TMaps_TH_BoolArray, true);
+		}
 
 		Books_AG_EntriesTotal = Books_AG_FormArray.size();
 		Books_AG_EntriesFound = std::ranges::count(Books_AG_BoolArray, true);
@@ -782,12 +797,6 @@ namespace CFramework_Books {
 
 		TMaps_SK_EntriesTotal = TMaps_SK_FormArray.size();
 		TMaps_SK_EntriesFound = std::ranges::count(TMaps_SK_BoolArray, true);
-
-		TMaps_NT_EntriesTotal = TMaps_NT_FormArray.size();
-		TMaps_NT_EntriesFound = std::ranges::count(TMaps_NT_BoolArray, true);
-
-		TMaps_TH_EntriesTotal = TMaps_TH_FormArray.size();
-		TMaps_TH_EntriesFound = std::ranges::count(TMaps_TH_BoolArray, true);
 
 		Books_CC_EntriesTotal = Books_CC_FormArray.size();
 		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
@@ -1021,10 +1030,6 @@ namespace CFramework_Books {
 		CFramework_Books_CC::Data.AddForm(0x00081A, "ccbgssse061-ba_dwarven.esl");			// The Crimson Dirks, v9
 		CFramework_Books_CC::Data.AddForm(0x000809, "ccbgssse031-advcyrus.esm");			// The Restless
 		CFramework_Books_CC::Data.AddForm(0x0008A2, "cctwbsse001-puzzledungeon.esm");		// Forgotten Seasons, v1
-		CFramework_Books_CC::Data.AddForm(0x0008AA, "cctwbsse001-puzzledungeon.esm");		// Log of Elberon the Great, Vol 2
-		CFramework_Books_CC::Data.AddForm(0x0008A0, "cctwbsse001-puzzledungeon.esm");		// Log of Elberon the Great, Vol 3
-		CFramework_Books_CC::Data.AddForm(0x0008AB, "cctwbsse001-puzzledungeon.esm");		// Log of Elberon the Great, Vol 4
-		CFramework_Books_CC::Data.AddForm(0x0008A1, "cctwbsse001-puzzledungeon.esm");		// Log of Elberon the Great, Vol 5
 		CFramework_Books_CC::Data.AddForm(0x00083D, "ccedhsse003-redguard.esl");			// The Alik'r
 		CFramework_Books_CC::Data.AddForm(0x0008D3, "ccedhsse003-redguard.esl");			// The Ebon Arm
 		CFramework_Books_CC::Data.AddForm(0x000AEC, "ccbgssse025-advdsgs.esm");				// Heretical Thoughts

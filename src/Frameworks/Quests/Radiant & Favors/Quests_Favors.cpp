@@ -7,498 +7,293 @@ constexpr const char* DG_NAME = "Dawnguard.esm";
 constexpr const char* DB_NAME = "Dragonborn.esm";
 constexpr const char* FS_NAME = "Favor Quests Seperated.esp";
 
-constexpr FavorQuestData Favor_001[] = {
-	{ 0x0403B0, SK_NAME, 0x00082D, FS_NAME, 0x01B119, SK_NAME, 20, 1, "Completionist_Favor001Adonato"},
-	{ 0x0403B0, SK_NAME, 0x000835, FS_NAME, 0x01A6D2, SK_NAME, 20, 1, "Completionist_Favor001Aeri" },
-	{ 0x0403B0, SK_NAME, 0x000838, FS_NAME, 0x09A7A9, SK_NAME, 20, 1, "Completionist_Favor001Banning" },
-	{ 0x0403B0, SK_NAME, 0x00083D, FS_NAME, 0x01AA67, SK_NAME, 20, 1, "Completionist_Favor001Idgrod" },
-	{ 0x0403B0, SK_NAME, 0x000842, FS_NAME, 0x01B08E, SK_NAME, 20, 1, "Completionist_Favor001Sondas" },
-	{ 0x0403B0, SK_NAME, 0x000847, FS_NAME, 0x04E5EA, SK_NAME, 20, 1, "Completionist_Favor001Thadgeir" },
+FavorMergedData Favor_001[] = {
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x00082d, FS_NAME}, FavorActorData{0x01413c, SK_NAME}, 20, 1, "Completionist_Favor001Adonato"},
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x000835, FS_NAME}, FavorActorData{0x01360b, SK_NAME}, 20, 1, "Completionist_Favor001Aeri" },
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x000838, FS_NAME}, FavorActorData{0x09a7a8, SK_NAME}, 20, 1, "Completionist_Favor001Banning" },
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x00083d, FS_NAME}, FavorActorData{0x0135ec, SK_NAME}, 20, 1, "Completionist_Favor001Idgrod" },
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x000842, FS_NAME}, FavorActorData{0x01366b, SK_NAME}, 20, 1, "Completionist_Favor001Sondas" },
+	{ FavorQuestData{0x0403b0, SK_NAME}, FavorQuestData{0x000847, FS_NAME}, FavorActorData{0x04e5e9, SK_NAME}, 20, 1, "Completionist_Favor001Thadgeir" },
 };
 
-constexpr FavorQuestData Favor_013[] = {
-	{ 0x0CA209, SK_NAME, 0x000869, FS_NAME, 0x01A675, SK_NAME, 20, 1, "Completionist_Favor013CarlottaValentia"},
-	{ 0x0CA209, SK_NAME, 0x000887, FS_NAME, 0x01C18E, SK_NAME, 20, 1, "Completionist_Favor013Haran" },
-	{ 0x0CA209, SK_NAME, 0x000896, FS_NAME, 0x01B085, SK_NAME, 20, 1, "Completionist_Favor013Iddra" },
-	{ 0x0CA209, SK_NAME, 0x0008A5, FS_NAME, 0x0198B4, SK_NAME, 20, 1, "Completionist_Favor013OctieveSan" },
-	{ 0x0CA209, SK_NAME, 0x0008B3, FS_NAME, 0x0198FC, SK_NAME, 20, 1, "Completionist_Favor013Omluag" },
-	{ 0x0CA209, SK_NAME, 0x000878, FS_NAME, 0x01B140, SK_NAME, 20, 1, "Completionist_Favor013ScoutsManyMarshes" },
+FavorMergedData Favor_013[] = {
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x000869, FS_NAME}, FavorActorData{0x013b99, SK_NAME}, 20, 1, "Completionist_Favor013CarlottaValentia"},
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x000887, FS_NAME}, FavorActorData{0x01C184, SK_NAME}, 20, 1, "Completionist_Favor013Haran" },
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x000896, FS_NAME}, FavorActorData{0x013662, SK_NAME}, 20, 1, "Completionist_Favor013Iddra" },
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x0008A5, FS_NAME}, FavorActorData{0x01329d, SK_NAME}, 20, 1, "Completionist_Favor013OctieveSan" },
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x0008B3, FS_NAME}, FavorActorData{0x0133ae, SK_NAME}, 20, 1, "Completionist_Favor013Omluag" },
+	{ FavorQuestData{0x0CA209, SK_NAME}, FavorQuestData{0x000878, FS_NAME}, FavorActorData{0x01412e, SK_NAME}, 20, 1, "Completionist_Favor013ScoutsManyMarshes" },
 };
 
-constexpr FavorQuestData Favor_017[] = {
-	{ 0x0CA210, SK_NAME, 0, "", 0x01AA65, SK_NAME, 20, 1, "Completionist_Favor017Benor"},
-	{ 0x0CA210, SK_NAME, 0, "", 0x019928, SK_NAME, 20, 1, "Completionist_Favor017Burguk" },
-	{ 0x0CA210, SK_NAME, 0, "", 0x05B683, SK_NAME, 20, 1, "Completionist_Favor017Larak" },
-	{ 0x0CA210, SK_NAME, 0, "", 0x01B098, SK_NAME, 20, 1, "Completionist_Favor017Mauhulakh" },
-	{ 0x0CA210, SK_NAME, 0, "", 0x0198FA, SK_NAME, 20, 1, "Completionist_Favor017Cosnach" },
-	{ 0x0CA210, SK_NAME, 0, "", 0x03EFED, SK_NAME, 20, 1, "Completionist_Favor017Rolff" },
-	{ 0x0CA210, SK_NAME, 0, "", 0x091918, SK_NAME, 20, 1, "Completionist_Favor017Uthgerd" },
+FavorMergedData Favor_017[] = {
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x0135e8, SK_NAME}, 20, 1, "Completionist_Favor017Benor"},
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x013b79, SK_NAME}, 20, 1, "Completionist_Favor017Burguk" },
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x019951, SK_NAME}, 20, 1, "Completionist_Favor017Larak" },
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x01b075, SK_NAME}, 20, 1, "Completionist_Favor017Mauhulakh" },
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x013390, SK_NAME}, 20, 1, "Completionist_Favor017Cosnach" },
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x03efe9, SK_NAME}, 20, 1, "Completionist_Favor017Rolff" },
+	{ FavorQuestData{0x0CA210, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x0918e2, SK_NAME}, 20, 1, "Completionist_Favor017Uthgerd" },
 };
 
-constexpr FavorQuestData Favor_018[] = {
-	{ 0x03F46A, SK_NAME, 0x000A0C, FS_NAME, 0x01981B, SK_NAME, 20, 1, "Completionist_Favor018Dengeir"},
-	{ 0x03F46A, SK_NAME, 0x000A1D, FS_NAME, 0x01C192, SK_NAME, 20, 1, "Completionist_Favor018Malur" },
-	{ 0x03F46A, SK_NAME, 0x000A14, FS_NAME, 0x01B142, SK_NAME, 20, 1, "Completionist_Favor018StandInShallows" },
+FavorMergedData Favor_018[] = {
+	{ FavorQuestData{0x03F46A, SK_NAME}, FavorQuestData{0x000A0C, FS_NAME}, FavorActorData{0x01365a, SK_NAME}, 20, 1, "Completionist_Favor018Dengeir"},
+	{ FavorQuestData{0x03F46A, SK_NAME}, FavorQuestData{0x000A1D, FS_NAME}, FavorActorData{0x01C182, SK_NAME}, 20, 1, "Completionist_Favor018Malur" },
+	{ FavorQuestData{0x03F46A, SK_NAME}, FavorQuestData{0x000A14, FS_NAME}, FavorActorData{0x014130, SK_NAME}, 20, 1, "Completionist_Favor018StandInShallows" },
 };
 
-constexpr FavorQuestData Favor_019[] = {
-	{ 0x03F4EC, SK_NAME, 0, "", 0x01B123, SK_NAME, 20, 1, "Completionist_Favor019Revyn"},
+FavorMergedData Favor_019[] = {
+	{ FavorQuestData{0x03F4EC, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x01413a, SK_NAME}, 20, 1, "Completionist_Favor019Revyn"},
 };
 
-constexpr FavorQuestData Favor_104[] = {
-	{ 0x06FD35, SK_NAME, 0x000B50, FS_NAME, 0x018FCF, DB_NAME, 20, 1, "Completionist_Favor104Fanari"},
-	{ 0x06FD35, SK_NAME, 0x000B34, FS_NAME, 0x0198B0, SK_NAME, 20, 1, "Completionist_Favor104Ahtar" },
-	{ 0x06FD35, SK_NAME, 0x000B3E, FS_NAME, 0x01B092, SK_NAME, 20, 1, "Completionist_Favor104Annekke" },
-	{ 0x06FD35, SK_NAME, 0x000B47, FS_NAME, 0x01B117, SK_NAME, 20, 1, "Completionist_Favor104Brunwulf" },
+FavorMergedData Favor_104[] = {
+	{ FavorQuestData{0x06FD35, SK_NAME}, FavorQuestData{0x000B50, FS_NAME}, FavorActorData{0x018fc5, DB_NAME}, 20, 1, "Completionist_Favor104Fanari"},
+	{ FavorQuestData{0x06FD35, SK_NAME}, FavorQuestData{0x000B34, FS_NAME}, FavorActorData{0x01325f, SK_NAME}, 20, 1, "Completionist_Favor104Ahtar" },
+	{ FavorQuestData{0x06FD35, SK_NAME}, FavorQuestData{0x000B3E, FS_NAME}, FavorActorData{0x013666, SK_NAME}, 20, 1, "Completionist_Favor104Annekke" },
+	{ FavorQuestData{0x06FD35, SK_NAME}, FavorQuestData{0x000B47, FS_NAME}, FavorActorData{0x014149, SK_NAME}, 20, 1, "Completionist_Favor104Brunwulf" },
 };
 
-constexpr FavorQuestData Favor_109[] = {
-	{ 0x0940E0, SK_NAME, 0, "", 0x0198C5, SK_NAME, 20, 1, "Completionist_Favor109Sybille"},
+FavorMergedData Favor_109[] = {
+	{ FavorQuestData{0x0940E0, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x0132aa, SK_NAME}, 20, 1, "Completionist_Favor109Sybille"},
 };
 
-constexpr FavorQuestData Favor_110[] = {
-	{ 0x0CA439, SK_NAME, 0x000D6E, FS_NAME, 0x041FB9, SK_NAME, 20, 1, "Completionist_Favor110Aldis"},
-	{ 0x0CA439, SK_NAME, 0x000D76, FS_NAME, 0x01AA61, SK_NAME, 20, 1, "Completionist_Favor110Lami" },
-	{ 0x0CA439, SK_NAME, 0x000D7E, FS_NAME, 0x01A6BE, SK_NAME, 20, 1, "Completionist_Favor110Rustleif" },
-	{ 0x0CA439, SK_NAME, 0x000D86, FS_NAME, 0x019822, SK_NAME, 20, 1, "Completionist_Favor110Siddgeir" },
-	{ 0x0CA439, SK_NAME, 0x000D6E, FS_NAME, 0x01B12B, SK_NAME, 20, 1, "Completionist_Favor110Torbjorn" },
-	{ 0x0CA439, SK_NAME, 0x000D97, FS_NAME, 0x01A69A, SK_NAME, 20, 1, "Completionist_Favor110Ysolda" },
+FavorMergedData Favor_110[] = {
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D6E, FS_NAME}, FavorActorData{0x041fb8, SK_NAME}, 20, 1, "Completionist_Favor110Aldis"},
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D76, FS_NAME}, FavorActorData{0x0135ef, SK_NAME}, 20, 1, "Completionist_Favor110Lami" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D7E, FS_NAME}, FavorActorData{0x01361e, SK_NAME}, 20, 1, "Completionist_Favor110Rustleif" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D86, FS_NAME}, FavorActorData{0x013653, SK_NAME}, 20, 1, "Completionist_Favor110Siddgeir" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D6E, FS_NAME}, FavorActorData{0x01413f, SK_NAME}, 20, 1, "Completionist_Favor110Torbjorn" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D97, FS_NAME}, FavorActorData{0x013bab, SK_NAME}, 20, 1, "Completionist_Favor110Ysolda" },
 };
 
-constexpr FavorQuestData Favor_151[] = {
-	{ 0x06C824, SK_NAME, 0, "", 0x019903, SK_NAME, 20, 1, "Completionist_Favor151Igmund"},
+FavorMergedData Favor_151[] = {
+{ FavorQuestData{0x06C824, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x01339f, SK_NAME}, 20, 1, "Completionist_Favor151Igmund"},
 };
 
-constexpr FavorQuestData Favor_153[] = {
-	{ 0x090E36, SK_NAME, 0, "", 0x01A6C0, SK_NAME, 20, 1, "Completionist_Favor153Skald"},
+FavorMergedData Favor_153[] = {
+	{ FavorQuestData{0x090E36, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x013620, SK_NAME}, 20, 1, "Completionist_Favor153Skald"},
 };
 
-constexpr FavorQuestData Favor_154[] = {
-	{ 0x07172A, SK_NAME, 0, "", 0x019822, SK_NAME, 20, 1, "Completionist_Favor154Siddgeir"},
+FavorMergedData Favor_154[] = {
+	{ FavorQuestData{0x07172A, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x013653, SK_NAME}, 20, 1, "Completionist_Favor154Siddgeir"},
 };
 
-constexpr FavorQuestData Favor_157[] = {
-	{ 0x0A3504, SK_NAME, 0, "", 0x019903, SK_NAME, 20, 1, "Completionist_Favor157Igmund"},
+FavorMergedData Favor_157[] = {
+	{ FavorQuestData{0x0A3504, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x01339f, SK_NAME}, 20, 1, "Completionist_Favor157Igmund"},
 };
 
-constexpr FavorQuestData Favor_158[] = {
-	{ 0x0940D0, SK_NAME, 0, "", 0x01C1B5, SK_NAME, 20, 1, "Completionist_Favor158Korir"},
+FavorMergedData Favor_158[] = {
+	{ FavorQuestData{0x0940D0, SK_NAME}, FavorQuestData{0, ""}, FavorActorData{0x01c188, SK_NAME}, 20, 1, "Completionist_Favor158Korir"},
 };
 
-constexpr FavorQuestData Favor_204[] = {
-	{ 0x07105B, SK_NAME, 0x000DB9, FS_NAME, 0x01A66A, SK_NAME, 20, 1, "Completionist_Favor204Amren"},
-	{ 0x07105B, SK_NAME, 0x000DC2, FS_NAME, 0x01B141, SK_NAME, 20, 1, "Completionist_Favor204Shahvee"},
+FavorMergedData Favor_204[] = {
+	{ FavorQuestData{0x07105B, SK_NAME}, FavorQuestData{0x000DB9, FS_NAME}, FavorActorData{0x013baa, SK_NAME}, 20, 1, "Completionist_Favor204Amren"},
+	{ FavorQuestData{0x07105B, SK_NAME}, FavorQuestData{0x000DC2, FS_NAME}, FavorActorData{0x01411a, SK_NAME}, 20, 1, "Completionist_Favor204Shahvee"},
 };
 
-constexpr FavorQuestData Favor_205[] = {
-	{ 0x06FE37, SK_NAME, 0x000DD5, FS_NAME, 0x01A6B5, SK_NAME, 20, 1, "Completionist_Favor205Frida"},
-	{ 0x06FE37, SK_NAME, 0x000DDE, FS_NAME, 0x01988D, SK_NAME, 20, 1, "Completionist_Favor205Noster"},
-	{ 0x06FE37, SK_NAME, 0x000DE7, FS_NAME, 0x01B135, SK_NAME, 20, 1, "Completionist_Favor205Oengul"},
-	{ 0x06FE37, SK_NAME, 0x000DF0, FS_NAME, 0x01B084, SK_NAME, 20, 1, "Completionist_Favor205Roggi"},
-	{ 0x06FE37, SK_NAME, 0x000DF9, FS_NAME, 0x019820, SK_NAME, 20, 1, "Completionist_Favor205Runil"},
+FavorMergedData Favor_205[] = {
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DD5, FS_NAME}, FavorActorData{0x013614, SK_NAME}, 20, 1, "Completionist_Favor205Frida"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DDE, FS_NAME}, FavorActorData{0x01329c, SK_NAME}, 20, 1, "Completionist_Favor205Noster"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DE7, FS_NAME}, FavorActorData{0x014142, SK_NAME}, 20, 1, "Completionist_Favor205Oengul"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DF0, FS_NAME}, FavorActorData{0x01403f, SK_NAME}, 20, 1, "Completionist_Favor205Roggi"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DF9, FS_NAME}, FavorActorData{0x01364d, SK_NAME}, 20, 1, "Completionist_Favor205Runil"},
 };
 
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
+MerchantFavors activeMerchant{};
 
-namespace Favor001
-{
-	void Favor001::CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
+FavorMerchantData Merchant_Data[] = {
+	{0x01360b, "Completionist_Favor_ChopWoodAeri"},
+	{0x01365d, "Completionist_Favor_ChopWoodGannaUriel"},
+	{0x01367a, "Completionist_Favor_ChopWoodGilfre"},
+	{0x019c00, "Completionist_Favor_ChopWoodGrosta"},
+	{0x01367c, "Completionist_Favor_ChopWoodHert"},
+	{0x013287, "Completionist_Favor_ChopWoodHjorunn"},
+	{0x019a1d, "Completionist_Favor_ChopWoodHorgeir"},
+	{0x0135f0, "Completionist_Favor_ChopWoodHroggar"},
+	{0x013ba3, "Completionist_Favor_ChopWoodHulda"},
+	{0x01347d, "Completionist_Favor_ChopWoodHod"},
+	{0x0138b6, "Completionist_Favor_ChopWoodJorgen"},
+	{0x0658d2, "Completionist_Favor_ChopWoodTembaWideArm"},
 
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+	{0x013612, "Completionist_FavorMineOreBeitld"},
+	{0x01b079, "Completionist_FavorMineOreDushnamub"},
+	{0x013603, "Completionist_FavorMineOreGestur"},
+	{0x013b7c, "Completionist_FavorMineOreGharol"},
+	{0x0136c6, "Completionist_FavorMineOreGrogmar"},
+	{0x013663, "Completionist_FavorMineOreKjeld"},
+	{0x01361b, "Completionist_FavorMineOreLeigelf"},
+	{0x0133b1, "Completionist_FavorMineOrePavo"},
+	{0x01996c, "Completionist_FavorMineOrePerth"},
+	{0x019957, "Completionist_FavorMineOreShuftharz"},
+	{0x0133b8, "Completionist_FavorMineOreSkaggi"},
+	{0x0ae777, "Completionist_FavorMineOreThorgar"},
+	{0x013665, "Completionist_FavorMineOreVerner"},
 
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
+	{0x019dc7, "Completionist_FavorHarvestAddvild"},
+	{0x013bb0, "Completionist_FavorHarvestAlfhild"},
+	{0x019bfe, "Completionist_FavorHarvestAvrusa"},
+	{0x019a2a, "Completionist_FavorHarvestAzzada"},
+	{0x014138, "Completionist_FavorHarvestBelyn"},
+	{0x014126, "Completionist_FavorHarvestBolfrida"},
+	{0x0136be, "Completionist_FavorHarvestBoti"},
+	{0x013290, "Completionist_FavorHarvestKatla"},
+	{0x0136b8, "Completionist_FavorHarvestLemkil"},
+	{0x01364e, "Completionist_FavorHarvestMathies"},
+	{0x0136b4, "Completionist_FavorHarvestReldith"},
+	{0x02c925, "Completionist_FavorHarvestSeverio"},
+	{0x0bb2c0, "Completionist_FavorHarvestSynda"},
+	{0x014139, "Completionist_FavorHarvestTulvur"},
+	{0x0133bf, "Completionist_FavorHarvestVigdis"},
+};
 
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_001, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor013
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_013, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor017
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_017, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
+std::vector<FavorMergedData*> FavorArray{};
 
 //---------------------------------------------------
 //---------------------------------------------------
 //---------------------------------------------------
 
-namespace Favor018
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_018, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor019
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_019, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor104
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_104, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor109
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_109, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor110
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_110, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor151
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_151, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor153
-{
-	void CHandler::Sink() {
-		const auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_153, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor154
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_154, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor157
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_157, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor158
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_158, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor204
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_204, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor205
-{
-	void CHandler::Sink() {
-		auto EventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		EventHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
-	}
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* event = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!event) { return EventResult::kContinue; }
-
-		FavorProcessor::ProcessQuest(event->GetFormID(), Favor_205, a_event->stage);
-		return EventResult::kContinue;
-	}
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-#define arrayName(arrayName) (#arrayName)
-
-namespace FavorProcessor
+namespace CQFramework_FavorQuests
 {
 	template <std::size_t N>
-	void ProcessQuest(const RE::FormID a_formID, const FavorQuestData(&a_array)[N], uint16_t a_stage) {
+	void CHandler::AddToArray(FavorMergedData(&a_data)[N]) {
 
-		for (auto& dataSet : a_array) {
+		for (auto idx = 0; idx < N; ++idx) {
+			FavorArray.push_back(&a_data[idx]);
 
-			const auto* questBase = CompletionistData::GetFullForm<RE::TESQuest>(dataSet.base.ID, dataSet.base.FN);
-			const auto* questVari = CompletionistData::GetFullForm<RE::TESQuest>(dataSet.vari.ID, dataSet.vari.FN);
-			const auto* questActr = CompletionistData::GetFullForm<RE::Actor>(dataSet.actr.ID, dataSet.actr.FN);
+			const auto* questBase = CompletionistData::GetFullForm<RE::TESQuest>(a_data[idx].base.formID, a_data[idx].base.fileName);
+			const auto* questVari = CompletionistData::GetFullForm<RE::TESQuest>(a_data[idx].vari.formID, a_data[idx].vari.fileName);
+			const auto* questActr = CompletionistData::GetFullForm<RE::TESNPC>(a_data[idx].actr.formID, a_data[idx].actr.fileName);
+			const auto* questForm = questVari ? questVari : questBase ? questBase : nullptr;
+
+			INFO("Installed Favor Quest Array - [{}] With Actor - [{}]", (questForm && questForm->GetName()) ? questForm->GetName() : "ERROR GETTING Quest", (questActr && questActr->GetName()) ? questActr->GetName() : "ERROR GETTING ACTOR");
+		}
+		INFO(" ");
+	}
+
+	void CHandler::InstallFramework()
+	{
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(GetSingleton()));
+
+		AddToArray(Favor_001);
+		AddToArray(Favor_013);
+		AddToArray(Favor_017);
+		AddToArray(Favor_018);
+		AddToArray(Favor_019);
+		AddToArray(Favor_104);
+		AddToArray(Favor_109);
+		AddToArray(Favor_110);
+		AddToArray(Favor_151);
+		AddToArray(Favor_153);
+		AddToArray(Favor_154);
+		AddToArray(Favor_157);
+		AddToArray(Favor_158);
+		AddToArray(Favor_204);
+		AddToArray(Favor_205);
+	}
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->stage) 
+		{ 
+			return RE::BSEventNotifyControl::kContinue; 
+		}
+
+		for (auto& data : FavorArray)
+		{
+			const auto* eventBase = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+			const auto* questBase = CompletionistData::GetFullForm<RE::TESQuest>(data->base.formID, data->base.fileName);
+			const auto* questVari = CompletionistData::GetFullForm<RE::TESQuest>(data->vari.formID, data->vari.fileName);
+			const auto* questActr = CompletionistData::GetFullForm<RE::TESNPC>(data->actr.formID, data->actr.fileName);
 			const auto* questForm = questVari ? questVari : questBase;
 
-			if (!questForm || !questActr || questForm->GetFormID() != a_formID || a_stage != dataSet.Stage) {
+			if (!questForm || !questActr || questForm->GetFormID() != eventBase->formID || a_event->stage != data->Stage) {
 				continue;
 			}
-
-			INFO("Got Quest - [{}] With Actor - [{}]", questForm->GetName(), questActr->GetName());
 
 			for (const auto& alias : questForm->aliases) {
 				if (alias && alias->aliasName == "QuestGiver") {
 
 					auto* reference = static_cast<RE::BGSRefAlias*>(alias);
-					if (reference && reference->GetActorReference() == questActr) {
-						if (auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(dataSet.Global)) {
-							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", dataSet.Global, questForm->GetName(), questActr->GetName());
+					if (reference && reference->GetActorReference()->GetActorBase()->GetFormID() == questActr->GetFormID()) {
+						if (auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(data->Global)) {
+							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", data->Global, questForm->GetName(), questActr->GetName());
 							global->value++;
 						};
 					}
 				}
 			}
 		}
+		return EventResult::kContinue;
 	}
 
-	auto Register() -> void {
-		Favor001::CHandler::Sink();
-		Favor013::CHandler::Sink();
-		Favor017::CHandler::Sink();
-		Favor018::CHandler::Sink();
-		Favor019::CHandler::Sink();
-		Favor104::CHandler::Sink();
-		Favor109::CHandler::Sink();
-		Favor110::CHandler::Sink();
-		Favor151::CHandler::Sink();
-		Favor153::CHandler::Sink();
-		Favor154::CHandler::Sink();
-		Favor157::CHandler::Sink();
-		Favor158::CHandler::Sink();
-		Favor204::CHandler::Sink();
-		Favor205::CHandler::Sink();
+	//---------------------------------------------------
+	//-- Favors for Chopping Wood and Selling Ore -------
+	//---------------------------------------------------
 
-		INFO("Finished Registering Favor Event Listeners");
+	void CHandler::RegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
+		
+		auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+
+		if (!a_actor || !curspeaker || a_actor->GetFormID() != curspeaker->GetFormID()) { 
+			return; 
+		}
+
+		activeMerchant.Merchant = a_actor->GetFormID();
+		activeMerchant.BaseActor = RE::TESForm::LookupByID<RE::TESNPC>(a_actor->GetActorBase()->GetFormID());
+		INFO("Registered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
 	}
+
+	void CHandler::UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
+
+		activeMerchant = {};
+		INFO("Unregistered Merchant");
+	}
+
+	EventResult CHandler::ProcessEvent(RE::TESContainerChangedEvent const* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource)
+	{
+		if (a_event && a_event->baseObj)
+		{
+			if (a_event->newContainer == RE::PlayerCharacter::GetSingleton()->GetFormID() && activeMerchant.SoldForm) {
+				auto* GoldForm = RE::TESForm::LookupByID(0x00000f);
+				auto* EvntForm = RE::TESForm::LookupByID(a_event->baseObj);
+
+				if (GoldForm->GetFormID() == EvntForm->GetFormID())
+				{
+					INFO("Receieved {} Gold for: {} {}. Performing NPC Lookup...", a_event->itemCount, activeMerchant.SoldQuantity, RE::TESForm::LookupByID(activeMerchant.SoldForm)->GetName());
+				}
+
+				for (auto& [FormID, Global] : Merchant_Data) 
+				{
+					auto* LookupNPC = RE::TESForm::LookupByID<RE::TESNPC>(FormID);
+					auto* GlobalVar = RE::TESForm::LookupByEditorID<RE::TESGlobal>(Global);
+
+					auto oldvalue = GlobalVar->value;
+
+					if (GlobalVar && LookupNPC->GetFormID() == activeMerchant.BaseActor->GetFormID()) {
+						GlobalVar->value++;
+						INFO("Incremented Global Variable for Matching Actor: {} from {} > {}", activeMerchant.BaseActor->GetName(), oldvalue, GlobalVar->value);
+						return EventResult::kContinue;
+					}
+				}
+
+				return EventResult::kContinue;
+			}
+
+			if (a_event->oldContainer == RE::PlayerCharacter::GetSingleton()->GetFormID()) {
+				auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+
+				if (activeMerchant.Merchant && curspeaker && activeMerchant.Merchant == curspeaker->GetFormID()) {
+
+					auto* SoldForm = RE::TESForm::LookupByID(a_event->baseObj);
+
+					if (SoldForm) {
+						activeMerchant.SoldForm = SoldForm->GetFormID();
+						activeMerchant.SoldQuantity = a_event->itemCount;
+					}
+				}
+			}
+		}
+		return EventResult::kContinue;
+	};
 }

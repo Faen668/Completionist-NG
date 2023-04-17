@@ -1,34 +1,34 @@
 #include "Serialization.hpp"
 #include "CFramework_WOL.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_WOL {
+namespace CPatch_WOL 
+{
 	using namespace CFramework_Master;
 
+	CQuestData QuestData[]
+	{
+		{"WheelsOfLull_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ01"},
+		{"WheelsOfLull_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ02"},
+		{"WheelsOfLull_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ03"},
+		{"WheelsOfLull_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ04"},
+		{"WheelsOfLull_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ05"},
+		{"WheelsOfLull_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ06"},
+		{"WheelsOfLull_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "_Lull_MQ07"},
+		{"WheelsOfLull_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_Watchman_Restore"},
+		{"WheelsOfLull_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_Water"},
+		{"WheelsOfLull_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_HammarUpdate"},
+		{"WheelsOfLull_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_CartRide"},
+		{"WheelsOfLull_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_ArcheronMines"},
+		{"WheelsOfLull_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "_Lull_SQ_Seamonster"},
+	};
+
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"WheelsOfLull_Quest00_Key", "$WheelsOfLull_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest00_Data", "_Lull_MQ01"},
-		/*01*/ {"WheelsOfLull_Quest01_Key", "$WheelsOfLull_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest01_Data", "_Lull_MQ02"},
-		/*02*/ {"WheelsOfLull_Quest02_Key", "$WheelsOfLull_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest02_Data", "_Lull_MQ03"},
-		/*03*/ {"WheelsOfLull_Quest03_Key", "$WheelsOfLull_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest03_Data", "_Lull_MQ04"},
-		/*04*/ {"WheelsOfLull_Quest04_Key", "$WheelsOfLull_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest04_Data", "_Lull_MQ05"},
-		/*05*/ {"WheelsOfLull_Quest05_Key", "$WheelsOfLull_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest05_Data", "_Lull_MQ06"},
-		/*06*/ {"WheelsOfLull_Quest06_Key", "$WheelsOfLull_Quest06_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest06_Data", "_Lull_MQ07"},
-		/*07*/ {"WheelsOfLull_Quest07_Key", "$WheelsOfLull_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest07_Data", "_Lull_SQ_Watchman_Restore"},
-		/*08*/ {"WheelsOfLull_Quest08_Key", "$WheelsOfLull_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest08_Data", "_Lull_SQ_Water"},
-		/*09*/ {"WheelsOfLull_Quest09_Key", "$WheelsOfLull_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest09_Data", "_Lull_SQ_HammarUpdate"},
-		/*10*/ {"WheelsOfLull_Quest10_Key", "$WheelsOfLull_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest10_Data", "_Lull_SQ_CartRide"},
-		/*11*/ {"WheelsOfLull_Quest11_Key", "$WheelsOfLull_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest11_Data", "_Lull_SQ_ArcheronMines"},
-		/*12*/ {"WheelsOfLull_Quest12_Key", "$WheelsOfLull_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$WheelsOfLull_Quest12_Data", "_Lull_SQ_Seamonster"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0x4F3AA5,0x000B5B,0x25D297,0x25D294,0x25D292,0x25D295,
@@ -74,32 +74,17 @@ namespace CPatch_WOL {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 39));
 
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
@@ -113,30 +98,6 @@ namespace CPatch_WOL {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -188,11 +149,6 @@ namespace CPatch_WOL {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -325,18 +281,5 @@ namespace CPatch_WOL {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : StandardCompletion) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		}
 	}
 }

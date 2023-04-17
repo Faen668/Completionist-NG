@@ -206,14 +206,14 @@ namespace CFramework_Blessings {
 		CFramework_Blessings_VS::Data.CompileFormArray(CFramework_Blessings::VS_Forms_SK, "Skyrim.esm");
 		CFramework_Blessings_VS::Data.CompileFormArray(CFramework_Blessings::VS_Forms_DG, "Dawnguard.esm");
 		CFramework_Blessings_VS::Data.CompileFormArray(CFramework_Blessings::VS_Forms_DB, "Dragonborn.esm");
-		CFramework_Blessings_WS::Data.CompileFormArray(CFramework_Blessings::WS_Forms, "Wintersun - Faiths of Skyrim.esp");
-		CFramework_Blessings_WS::Data.CompileVariation(CFramework_Blessings::WS_FormV, "Wintersun - Faiths of Skyrim.esp");
 
 		CFramework_Blessings_DS::Data.Populate(DS_NameArray, DS_FormArray, DS_BoolArray, DS_TextArray);
 		CFramework_Blessings_VS::Data.Populate(VS_NameArray, VS_FormArray, VS_BoolArray, VS_TextArray);
-		CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
 
 		if (Serialization::CompletionistData::IsModInstalled("Wintersun - Faiths of Skyrim.esp")) {
+			CFramework_Blessings_WS::Data.CompileFormArray(CFramework_Blessings::WS_Forms, "Wintersun - Faiths of Skyrim.esp");
+			CFramework_Blessings_WS::Data.CompileVariation(CFramework_Blessings::WS_FormV, "Wintersun - Faiths of Skyrim.esp");
+			CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
 			CHandler::AddFormsToList();
 		}
 		

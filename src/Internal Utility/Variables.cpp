@@ -6,7 +6,7 @@ namespace CVariables {
 	void VariablesAPI::Register() {
 		auto ui = RE::UI::GetSingleton();
 		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(VariablesAPI::GetSingleton()));
-	}
+	};
 
 	//---------------------------------------------------
 	//-- Variables Functions ( On Menu Open / Close ) ---
@@ -30,21 +30,29 @@ namespace CVariables {
 			INFO("Variables API: Unable To Get Property - [{}]", a_prop);
 			return nullptr;
 		}
-
-		INFO("Variables API: Successfully Loaded Property - [{}]", a_prop);
 		return a_mcm->GetProperty(a_prop);
+	}
+
+	//---------------------------------------------------
+	//-- Variables Functions ( Is Debugging Enabled ) ---
+	//---------------------------------------------------
+
+	bool VariablesAPI::IsDebuggingEnabled() {
+		return V_Debugging;
 	}
 
 	//---------------------------------------------------
 	//-- Variables Functions ( Update Properties ) ------
 	//---------------------------------------------------
 
-	void VariablesAPI::Update() { 
-
-		INFO("Loading Variables");
-
+	void VariablesAPI::Update() 
+	{ 
 		auto MCM = ScriptObject::FromForm(static_cast<RE::TESForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
 		if (!MCM) { ERROR("Unable To Locate Completionist.esp. Exiting..."); return; }
+
+		TCC_New = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558285, "DBM_RelicNotifications.esp");
+		TCC_FND = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558286, "DBM_RelicNotifications.esp");
+		TCC_DSP = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558287, "DBM_RelicNotifications.esp");
 
 		V_CellScanner_CONT = true;
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "bCellScanner_CONT")) {
@@ -276,9 +284,9 @@ namespace CVariables {
 			V_ShoutColour_Found = prop->GetString();
 		}
 
-		V_RadiantCounterVal = 5;
+		V_Radiant_FavorVal = 5;
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "State_RadiantCounterVal")) {
-			V_RadiantCounterVal = prop->GetSInt();
+			V_Radiant_FavorVal = prop->GetSInt();
 		}
 
 		V_Radiant_CollegeVal = 5;
@@ -336,7 +344,10 @@ namespace CVariables {
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "b_quickLoot_Enabled")) {
 			V_quickLoot_Enabled = prop->GetBool();
 		}
-		
-		INFO("Finished Loading Variables");
+
+		V_Debugging = true;
+		if (const auto* prop = VariablesAPI::GetProperty(MCM, "bDebug")) {
+			V_Debugging = prop->GetBool();
+		}
 	}
 }

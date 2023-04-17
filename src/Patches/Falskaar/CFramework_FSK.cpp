@@ -1,43 +1,47 @@
 #include "Serialization.hpp"
 #include "CFramework_FSK.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_FSK {
+namespace CPatch_FSK 
+{
 	using namespace CFramework_Master;
 
-	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"Falskaar_Quest00_Key", "$Falskaar_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest00_Data", "FSMQ01"},
-		/*01*/ {"Falskaar_Quest01_Key", "$Falskaar_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest01_Data", "FSMQ02"},
-		/*02*/ {"Falskaar_Quest02_Key", "$Falskaar_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest02_Data", "FSMQ03"},
-		/*03*/ {"Falskaar_Quest03_Key", "$Falskaar_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest03_Data", "FSMQ04"},
-		/*04*/ {"Falskaar_Quest04_Key", "$Falskaar_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest04_Data", "FSMQ05"},
-		/*05*/ {"Falskaar_Quest05_Key", "$Falskaar_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest05_Data", "FSMQ06"},
-		/*06*/ {"Falskaar_Quest06_Key", "$Falskaar_Quest06_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest06_Data", "FSMQ07"},
-		/*07*/ {"Falskaar_Quest07_Key", "$Falskaar_Quest07_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest07_Data", "FSMQ08"},
-		/*08*/ {"Falskaar_Quest08_Key", "$Falskaar_Quest08_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest08_Data", "FSMQ09"},
-		/*09*/ {"Falskaar_Quest09_Key", "$Falskaar_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest09_Data", "FSSQ11"},
-		/*10*/ {"Falskaar_Quest10_Key", "$Falskaar_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest10_Data", "FSSQ08"},
-		/*11*/ {"Falskaar_Quest11_Key", "$Falskaar_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest11_Data", "FSSQ06"},
-		/*12*/ {"Falskaar_Quest12_Key", "$Falskaar_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest12_Data", "FSSQ05"},
-		/*13*/ {"Falskaar_Quest13_Key", "$Falskaar_Quest13_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest13_Data", "FSSQ09"},
-		/*14*/ {"Falskaar_Quest14_Key", "$Falskaar_Quest14_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest14_Data", "FSSQ10"},
-		/*15*/ {"Falskaar_Quest15_Key", "$Falskaar_Quest15_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest15_Data", "FSSQ02"},
-		/*16*/ {"Falskaar_Quest16_Key", "$Falskaar_Quest16_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest16_Data", "FSSQ01"},
-		/*17*/ {"Falskaar_Quest17_Key", "$Falskaar_Quest17_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest17_Data", "FSSQ07"},
-		/*18*/ {"Falskaar_Quest18_Key", "$Falskaar_Quest18_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest18_Data", "FSSQ13"},
-		/*19*/ {"Falskaar_Quest19_Key", "$Falskaar_Quest19_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest19_Data", "FSSQ12"},
-		/*20*/ {"Falskaar_Quest20_Key", "$Falskaar_Quest20_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest20_Data", "FSSQ04"},
-		/*21*/ {"Falskaar_Quest21_Key", "$Falskaar_Quest21_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest21_Data", "FSSQ16"},
-		/*22*/ {"Falskaar_Quest22_Key", "$Falskaar_Quest22_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest22_Data", "FSSQ17"},
-		/*23*/ {"Falskaar_Quest23_Key", "$Falskaar_Quest23_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest23_Data", "FSSQ15"},
-		/*24*/ {"Falskaar_Quest24_Key", "$Falskaar_Quest24_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest24_Data", "FSSQ14"},
-		/*25*/ {"Falskaar_Quest25_Key", "$Falskaar_Quest25_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Falskaar_Quest25_Data", "FSSQ03"},
+	CQuestData QuestData[]
+	{
+		/*00*/ {"Falskaar_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ01"},
+		/*01*/ {"Falskaar_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ02"},
+		/*02*/ {"Falskaar_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ03"},
+		/*03*/ {"Falskaar_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ04"},
+		/*04*/ {"Falskaar_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ05"},
+		/*05*/ {"Falskaar_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "FSMQ06"},
+		/*06*/ {"Falskaar_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "FSMQ07"},
+		/*07*/ {"Falskaar_Quest07", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ08"},
+		/*08*/ {"Falskaar_Quest08", CFlagEnum::kMain, CCompEnum::kStand, "FSMQ09"},
+		/*09*/ {"Falskaar_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ11"},
+		/*10*/ {"Falskaar_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ08"},
+		/*11*/ {"Falskaar_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ06"},
+		/*12*/ {"Falskaar_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ05"},
+		/*13*/ {"Falskaar_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ09"},
+		/*14*/ {"Falskaar_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ10"},
+		/*15*/ {"Falskaar_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ02"},
+		/*16*/ {"Falskaar_Quest16", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ01"},
+		/*17*/ {"Falskaar_Quest17", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ07"},
+		/*18*/ {"Falskaar_Quest18", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ13"},
+		/*19*/ {"Falskaar_Quest19", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ12"},
+		/*20*/ {"Falskaar_Quest20", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ04"},
+		/*21*/ {"Falskaar_Quest21", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ16"},
+		/*22*/ {"Falskaar_Quest22", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ17"},
+		/*23*/ {"Falskaar_Quest23", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ15"},
+		/*24*/ {"Falskaar_Quest24", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ14"},
+		/*25*/ {"Falskaar_Quest25", CFlagEnum::kSide, CCompEnum::kStand, "FSSQ03"},
 	};
+
+	/*NA*/ CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
+	// clang-format off
 
 	constexpr Serialization::FormArray Items = {
 	0x1699D4,0x11D62E,0x110AEB,
@@ -57,6 +61,7 @@ namespace CPatch_FSK {
 	0x0A4507,0x0F4740,0x0A3F0A,0x0985BD,0x153CCA,0x153CC9,0x0E83F7,0x11F697,
 	0x0580B4,0x12FF94,0x11F694,0x11FBFA,0x15104A,
 	};
+
 	// clang-format on
 
 	constexpr std::string_view modname = "Falskaar.esm";
@@ -79,32 +84,16 @@ namespace CPatch_FSK {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 33));
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
@@ -118,30 +107,6 @@ namespace CPatch_FSK {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -193,11 +158,6 @@ namespace CPatch_FSK {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -328,18 +288,5 @@ namespace CPatch_FSK {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		}
 	}
 }

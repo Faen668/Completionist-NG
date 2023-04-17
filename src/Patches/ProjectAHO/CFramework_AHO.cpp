@@ -1,37 +1,37 @@
 #include "Serialization.hpp"
 #include "CFramework_AHO.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_AHO {
+namespace CPatch_AHO 
+{
 	using namespace CFramework_Master;
 
+	CQuestData QuestData[]
+	{
+		/*00*/ {"ProjectAHO_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ01"},
+		/*01*/ {"ProjectAHO_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ03"},
+		/*02*/ {"ProjectAHO_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ04"},
+		/*03*/ {"ProjectAHO_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ05"},
+		/*04*/ {"ProjectAHO_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ06"},
+		/*05*/ {"ProjectAHO_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "DwarfSphereQ07"},
+		/*06*/ {"ProjectAHO_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ01"},
+		/*07*/ {"ProjectAHO_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ02"},
+		/*08*/ {"ProjectAHO_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ03"},
+		/*09*/ {"ProjectAHO_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ04"},
+		/*10*/ {"ProjectAHO_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ05"},
+		/*11*/ {"ProjectAHO_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ06"},
+		/*12*/ {"ProjectAHO_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ07"},
+		/*13*/ {"ProjectAHO_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ08"},
+		/*14*/ {"ProjectAHO_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ09"},
+		/*15*/ {"ProjectAHO_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "DwarfSphereSQ11"},
+	};
+
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"ProjectAHO_Quest00_Key", "$ProjectAHO_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest00_Data", "DwarfSphereQ01"},
-		/*01*/ {"ProjectAHO_Quest01_Key", "$ProjectAHO_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest01_Data", "DwarfSphereQ03"},
-		/*02*/ {"ProjectAHO_Quest02_Key", "$ProjectAHO_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest02_Data", "DwarfSphereQ04"},
-		/*03*/ {"ProjectAHO_Quest03_Key", "$ProjectAHO_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest03_Data", "DwarfSphereQ05"},
-		/*04*/ {"ProjectAHO_Quest04_Key", "$ProjectAHO_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest04_Data", "DwarfSphereQ06"},
-		/*05*/ {"ProjectAHO_Quest05_Key", "$ProjectAHO_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest05_Data", "DwarfSphereQ07"},
-		/*06*/ {"ProjectAHO_Quest06_Key", "$ProjectAHO_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest06_Data", "DwarfSphereSQ01"},
-		/*07*/ {"ProjectAHO_Quest07_Key", "$ProjectAHO_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest07_Data", "DwarfSphereSQ02"},
-		/*08*/ {"ProjectAHO_Quest08_Key", "$ProjectAHO_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest08_Data", "DwarfSphereSQ03"},
-		/*09*/ {"ProjectAHO_Quest09_Key", "$ProjectAHO_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest09_Data", "DwarfSphereSQ04"},
-		/*10*/ {"ProjectAHO_Quest10_Key", "$ProjectAHO_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest10_Data", "DwarfSphereSQ05"},
-		/*11*/ {"ProjectAHO_Quest11_Key", "$ProjectAHO_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest11_Data", "DwarfSphereSQ06"},
-		/*12*/ {"ProjectAHO_Quest12_Key", "$ProjectAHO_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest12_Data", "DwarfSphereSQ07"},
-		/*13*/ {"ProjectAHO_Quest13_Key", "$ProjectAHO_Quest13_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest13_Data", "DwarfSphereSQ08"},
-		/*14*/ {"ProjectAHO_Quest14_Key", "$ProjectAHO_Quest14_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest14_Data", "DwarfSphereSQ09"},
-		/*15*/ {"ProjectAHO_Quest15_Key", "$ProjectAHO_Quest15_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$ProjectAHO_Quest15_Data", "DwarfSphereSQ11"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-	0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0xAF7B13,0xA0D52D,0x7B54F3,
@@ -74,32 +74,16 @@ namespace CPatch_AHO {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 37));
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
@@ -113,32 +97,7 @@ namespace CPatch_AHO {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
-	}
-
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
@@ -189,11 +148,6 @@ namespace CPatch_AHO {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -324,18 +278,5 @@ namespace CPatch_AHO {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : StandardCompletion) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		}
 	}
 }

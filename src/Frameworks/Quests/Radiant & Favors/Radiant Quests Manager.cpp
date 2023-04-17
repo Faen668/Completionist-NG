@@ -1,14 +1,11 @@
 #include "Radiant Quests Manager.hpp"
 #include "Quests_Bounty.hpp"
-#include "Quests_Dawnguard.hpp"
-#include "Quests_Favors.hpp"
 #include "Quests_Misc.hpp"
-#include "Quests_SupportedMods.hpp"
 #include "Quests_Beggars.hpp"
 
 namespace Quest_Manager
 {
-	void RadiantQuestManager::ProcessFormID(std::uint32_t _ID, std::string questID) {
+	void RadiantQuestManager::ProcessFormID(std::string questID) {
 
 		if (questID == "CWSiegeObj" || questID == "CWFortSiegeFort") {
 			auto papyrusVM = RE::BSScript::Internal::VirtualMachine::GetSingleton();
@@ -53,15 +50,8 @@ namespace Quest_Manager
 	void Install() {
 
 		BeggarQuests::CHandler::Register();
-
-		DawnguardQuests::ScriptEventHandler::Register();
 		MiscQuests::CHandler::Register();
-		
 		BountyProcessor::CHandler::Sink();
-		FavorProcessor::Register();
-
-		/*Supported Mods*/ LOTD::ScriptEventHandler::Register();
-		/*Supported Mods*/ Vigilant::ScriptEventHandler::Register();
 	}
 
 	//---------------------------------------------------

@@ -86,9 +86,26 @@ namespace CFramework_MapMa {
 	0x0143E6,0x0143CD,0x0143E7,0x0143CF,
 	};
 
-	constexpr Serialization::FormArray MapMa_CC = {
-	0,
-	};
+	constexpr Serialization::FormArray MapMa_CC = {0};
+
+	constexpr std::array<std::pair<RE::FormID, const char*>, 15> CC_LocationsVector = 
+	{{
+		{0x00085C, "ccbgssse059-ba_dragonplate.esl"},
+		{0x127259, "cceejsse005-cave.esm"},
+		{0x000F74, "ccbgssse031-advcyrus.esm"},
+		{0x000B63, "ccvsvsse004-beafarmer.esl"},
+		{0x0038D6, "cctwbsse001-puzzledungeon.esm"},
+		{0x0BC826, "ccasvsse001-almsivi.esm"},
+		{0x000B86, "ccbgssse005-goldbrand.esl"},
+		{0x000AFF, "cceejsse004-hall.esl"},
+		{0x000FA2, "cceejsse002-tower.esl"},
+		{0x070E0A, "ccafdsse001-dwesanctuary.esm"},
+		{0x000F72, "cceejsse003-hollow.esl"},
+		{0x1D67E3, "ccbgssse067-daedinv.esm"},
+		{0x1D67E4, "ccbgssse067-daedinv.esm"},
+		{0x000B8A, "cceejsse001-hstead.esm"},
+		{0x00CD93, "ccbgssse016-umbra.esm"}
+	}};
 
 	// clang-format on
 
@@ -211,13 +228,22 @@ namespace CFramework_MapMa {
 	//-- Framework Functions ( Form Injection ) ---------
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
+	void CHandler::InjectAndCompileData() 
+	{
+		// Install Creation Club Locations
+		for (auto& [formID, filename] : CC_LocationsVector)
+		{
+			if (CompletionistData::IsModInstalled(filename)) {
+				CFramework_MapMa_CC::Data.AddForm(formID, filename);
+			}
+		};
 
-		CHandler::Install_CCM();
-
-		CFramework_MapMa_AG::Data.AddForm(0x012BF7, "Cutting Room Floor.esp");
-		CFramework_MapMa_AG::Data.AddForm(0x199843, "Cutting Room Floor.esp");
-		CFramework_MapMa_HR::Data.AddForm(0x14378F, "Cutting Room Floor.esp");
+		// Install Cutting Room Floor Locations
+		if (CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
+			CFramework_MapMa_AG::Data.AddForm(0x012BF7, "Cutting Room Floor.esp");
+			CFramework_MapMa_AG::Data.AddForm(0x199843, "Cutting Room Floor.esp");
+			CFramework_MapMa_HR::Data.AddForm(0x14378F, "Cutting Room Floor.esp");
+		}
 
 		CFramework_MapMa_AG::Data.CompileFormArray(CFramework_MapMa::MapMa_AG, "Skyrim.esm");
 		CFramework_MapMa_HR::Data.CompileFormArray(CFramework_MapMa::MapMa_HR, "Skyrim.esm");
@@ -320,21 +346,5 @@ namespace CFramework_MapMa {
 
 	void CHandler::Install_CCM() {
 
-		CFramework_MapMa_CC::Data.AddForm(0x00085C, "ccbgssse059-ba_dragonplate.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x127259, "cceejsse005-cave.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x000F74, "ccbgssse031-advcyrus.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x000B63, "ccvsvsse004-beafarmer.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x0038D6, "cctwbsse001-puzzledungeon.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x0BC826, "ccasvsse001-almsivi.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x000B86, "ccbgssse005-goldbrand.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x000AFF, "cceejsse004-hall.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x000FA2, "cceejsse002-tower.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x070E0A, "ccafdsse001-dwesanctuary.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x000F72, "cceejsse003-hollow.esl");
-		CFramework_MapMa_CC::Data.AddForm(0x1D67E3, "ccbgssse067-daedinv.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x1D67E4, "ccbgssse067-daedinv.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x1D67E7, "ccbgssse067-daedinv.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x000B8A, "cceejsse001-hstead.esm");
-		CFramework_MapMa_CC::Data.AddForm(0x00CD93, "ccbgssse016-umbra.esm");
 	}
 }

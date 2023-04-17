@@ -1,136 +1,130 @@
 #include "Serialization.hpp"
 #include "CFramework_VIG.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_VIG {
+namespace CPatch_VIG 
+{
 	using namespace CFramework_Master;
 
+	CQuestData Quest1_Data[]
+	{
+		{"Vigilant_Main_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq00"},
+		{"Vigilant_Main_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq01"},
+		{"Vigilant_Main_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq02"},
+		{"Vigilant_Main_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq03"},
+		{"Vigilant_Main_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq04"},
+		{"Vigilant_Main_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq05"},
+		{"Vigilant_Main_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq06"},
+		{"Vigilant_Main_Quest07", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq07"},
+		{"Vigilant_Main_Quest08", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq08"},
+		{"Vigilant_Main_Quest09", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMqGoodEnd"},
+		{"Vigilant_Main_Quest10", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq09"},
+		{"Vigilant_Main_Quest11", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMMq10"},
+		{"Vigilant_Main_Quest12", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMSubQ01"},
+		{"Vigilant_Main_Quest13", CFlagEnum::kMain, CCompEnum::kStand, "zzzBMMq01"},
+		{"Vigilant_Main_Quest14", CFlagEnum::kMain, CCompEnum::kStand, "zzzBMMq02"},
+		{"Vigilant_Main_Quest15", CFlagEnum::kMain, CCompEnum::kStand, "zzzBMMq03"},
+		{"Vigilant_Main_Quest16", CFlagEnum::kMain, CCompEnum::kStand, "zzzCOMq01"},
+		{"Vigilant_Main_Quest17", CFlagEnum::kMain, CCompEnum::kStand, "zzzCHMQ00"},
+		{"Vigilant_Main_Quest18", CFlagEnum::kMain, CCompEnum::kStand, "zzzCHMQ01"},
+		{"Vigilant_Main_Quest19", CFlagEnum::kMain, CCompEnum::kStage, "zzzCHMQ02"},
+		{"Vigilant_Main_Quest20", CFlagEnum::kMain, CCompEnum::kStage, "zzzCHEpilogueQuest01"},
+		{"Vigilant_Main_Quest21", CFlagEnum::kMain, CCompEnum::kStand, "zzzAoMSubQ02"},
+	};
+
+	CStageData Quest1_StageData[]{
+		{"Vigilant_Main_Quest19", CStageEnum::kPast, 50, 0},
+		{"Vigilant_Main_Quest20", CStageEnum::kPast, 20, 0},
+	};
+
+	CQuestData Quest2_Data[]
+	{
+		{"Vigilant_Side_Quest00", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest02"},
+		{"Vigilant_Side_Quest01", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest03"},
+		{"Vigilant_Side_Quest02", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest04"},
+		{"Vigilant_Side_Quest03", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest01"},
+		{"Vigilant_Side_Quest04", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest09"},
+		{"Vigilant_Side_Quest05", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest10"},
+		{"Vigilant_Side_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHSubQuest08"},
+		{"Vigilant_Side_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHSubQuest07"},
+		{"Vigilant_Side_Quest08", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest12"},
+		{"Vigilant_Side_Quest09", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest05"},
+		{"Vigilant_Side_Quest10", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHSubQuest06"},
+		{"Vigilant_Side_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHSubQuest11"},
+		{"Vigilant_Side_Quest12", CFlagEnum::kSide, CCompEnum::kStage, "zzzCHGreymarchQuest"},
+	};
+
+	CStageData Quest2_StageData[]{
+		{"Vigilant_Side_Quest00", CStageEnum::kPast, 255, 0},
+		{"Vigilant_Side_Quest01", CStageEnum::kPast, 255, 0},
+		{"Vigilant_Side_Quest02", CStageEnum::kPast, 255, 0},
+		{"Vigilant_Side_Quest03", CStageEnum::kPast, 255, 0},
+		{"Vigilant_Side_Quest04", CStageEnum::kPast, 20,  0},
+		{"Vigilant_Side_Quest05", CStageEnum::kPast, 20,  0},
+		{"Vigilant_Side_Quest08", CStageEnum::kPast, 50,  0},
+		{"Vigilant_Side_Quest09", CStageEnum::kPast, 60,  0},
+		{"Vigilant_Side_Quest10", CStageEnum::kPast, 30,  0},
+		{"Vigilant_Side_Quest12", CStageEnum::kPast, 20,  0},
+	};
+
+	CQuestData Quest3_Data[]
+	{
+		{"Vigilant_Memory_Quest00", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest03"},
+		{"Vigilant_Memory_Quest01", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest04"},
+		{"Vigilant_Memory_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest10"},
+		{"Vigilant_Memory_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest01"},
+		{"Vigilant_Memory_Quest04", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest02"},
+		{"Vigilant_Memory_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest05"},
+		{"Vigilant_Memory_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest11"},
+		{"Vigilant_Memory_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest12"},
+		{"Vigilant_Memory_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest06"},
+		{"Vigilant_Memory_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest07"},
+		{"Vigilant_Memory_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest08"},
+		{"Vigilant_Memory_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "zzzCHMemoryQuest09"},
+	};
+
+	CQuestData Quest4_Data[]
+	{
+		{"Vigilant_Radiant_Quest00", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountyBook"},
+		{"Vigilant_Radiant_Quest01", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountyChickTrader"},
+		{"Vigilant_Radiant_Quest02", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountyRelic"},
+		{"Vigilant_Radiant_Quest03", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMBountyRelicHorn"},
+		{"Vigilant_Radiant_Quest04", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMBountyPiper"},
+		{"Vigilant_Radiant_Quest05", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountySummoner"},
+		{"Vigilant_Radiant_Quest06", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountyVampire"},
+		{"Vigilant_Radiant_Quest07", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAomBountyWitch"},
+		{"Vigilant_Radiant_Quest08", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMRadDead"},
+		{"Vigilant_Radiant_Quest09", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMRadDoppler"},
+		{"Vigilant_Radiant_Quest10", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMRadMolag"},
+		{"Vigilant_Radiant_Quest11", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMRadVampire"},
+		{"Vigilant_Radiant_Quest12", CFlagEnum::kRadi, CCompEnum::kGlobl, "zzzAoMRadWitchHunter"},
+	};
+
+	CRadiantData Quest4_RadiantData[]{
+	{"Vigilant_Radiant_Quest00", CRadiantEnum::kRadiant_VIG, 0x4E1318, 0x000000, 20, "Completionist_BountyVigilantBook"},
+	{"Vigilant_Radiant_Quest01", CRadiantEnum::kRadiant_VIG, 0x4E372E, 0x000000, 20, "Completionist_BountyVigilantChick"},
+	{"Vigilant_Radiant_Quest02", CRadiantEnum::kRadiant_VIG, 0x4E011B, 0x000000, 20, "Completionist_BountyVigilantRelic"},
+	{"Vigilant_Radiant_Quest03", CRadiantEnum::kRadiant_VIG, 0x4E0121, 0x000000, 20, "Completionist_BountyVigilantHorn"},
+	{"Vigilant_Radiant_Quest04", CRadiantEnum::kRadiant_VIG, 0x4E0116, 0x000000, 10, "Completionist_BountyVigilantPiper"},
+	{"Vigilant_Radiant_Quest05", CRadiantEnum::kRadiant_VIG, 0x4E0102, 0x000000, 10, "Completionist_BountyVigilantSummoner"},
+	{"Vigilant_Radiant_Quest06", CRadiantEnum::kRadiant_VIG, 0x4E0108, 0x000000, 10, "Completionist_BountyVigilantVampire"},
+	{"Vigilant_Radiant_Quest07", CRadiantEnum::kRadiant_VIG, 0x4E010E, 0x000000, 10, "Completionist_BountyVigilantWitch"},
+	{"Vigilant_Radiant_Quest08", CRadiantEnum::kRadiant_VIG, 0x4EA3A8, 0x000000, 10, "Completionist_RadianceVigilantDead"},
+	{"Vigilant_Radiant_Quest09", CRadiantEnum::kRadiant_VIG, 0x4EA3D1, 0x000000, 10, "Completionist_RadianceVigilantDopple"},
+	{"Vigilant_Radiant_Quest10", CRadiantEnum::kRadiant_VIG, 0x4EA3AC, 0x000000, 10, "Completionist_RadianceVigilantSpawn"},
+	{"Vigilant_Radiant_Quest11", CRadiantEnum::kRadiant_VIG, 0x4E91B0, 0x000000, 10, "Completionist_RadianceVigilantVampire"},
+	{"Vigilant_Radiant_Quest12", CRadiantEnum::kRadiant_VIG, 0x4EA3C8, 0x000000, 10, "Completionist_RadianceVigilantWitchHunter"},
+	};
+
+	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray };
+	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray };
+	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray };
+	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest1_QuestData[] = {
-		/*00*/ {"Vigilant_Main_Quest00_Key", "$Vigilant_Main_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest00_Data", "zzzAoMMq00"},
-		/*01*/ {"Vigilant_Main_Quest01_Key", "$Vigilant_Main_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest01_Data", "zzzAoMMq01"},
-		/*02*/ {"Vigilant_Main_Quest02_Key", "$Vigilant_Main_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest02_Data", "zzzAoMMq02"},
-		/*03*/ {"Vigilant_Main_Quest03_Key", "$Vigilant_Main_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest03_Data", "zzzAoMMq03"},
-		/*04*/ {"Vigilant_Main_Quest04_Key", "$Vigilant_Main_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest04_Data", "zzzAoMMq04"},
-		/*05*/ {"Vigilant_Main_Quest05_Key", "$Vigilant_Main_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest05_Data", "zzzAoMMq05"},
-		/*06*/ {"Vigilant_Main_Quest06_Key", "$Vigilant_Main_Quest06_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest06_Data", "zzzAoMMq06"},
-		/*07*/ {"Vigilant_Main_Quest07_Key", "$Vigilant_Main_Quest07_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest07_Data", "zzzAoMMq07"},
-		/*08*/ {"Vigilant_Main_Quest08_Key", "$Vigilant_Main_Quest08_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest08_Data", "zzzAoMMq08"},
-		/*09*/ {"Vigilant_Main_Quest09_Key", "$Vigilant_Main_Quest09_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest09_Data", "zzzAoMMqGoodEnd"},
-		/*10*/ {"Vigilant_Main_Quest10_Key", "$Vigilant_Main_Quest10_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest10_Data", "zzzAoMMq09"},
-		/*11*/ {"Vigilant_Main_Quest11_Key", "$Vigilant_Main_Quest11_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest11_Data", "zzzAoMMq10"},
-		/*12*/ {"Vigilant_Main_Quest12_Key", "$Vigilant_Main_Quest12_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest12_Data", "zzzAoMSubQ01"},
-		/*13*/ {"Vigilant_Main_Quest13_Key", "$Vigilant_Main_Quest13_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest13_Data", "zzzBMMq01"},
-		/*14*/ {"Vigilant_Main_Quest14_Key", "$Vigilant_Main_Quest14_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest14_Data", "zzzBMMq02"},
-		/*15*/ {"Vigilant_Main_Quest15_Key", "$Vigilant_Main_Quest15_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest15_Data", "zzzBMMq03"},
-		/*16*/ {"Vigilant_Main_Quest16_Key", "$Vigilant_Main_Quest16_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest16_Data", "zzzCOMq01"},
-		/*17*/ {"Vigilant_Main_Quest17_Key", "$Vigilant_Main_Quest17_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest17_Data", "zzzCHMQ00"},
-		/*18*/ {"Vigilant_Main_Quest18_Key", "$Vigilant_Main_Quest18_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest18_Data", "zzzCHMQ01"},
-		/*19*/ {"Vigilant_Main_Quest19_Key", "$Vigilant_Main_Quest19_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest19_Data", "zzzCHMQ02"},
-		/*20*/ {"Vigilant_Main_Quest20_Key", "$Vigilant_Main_Quest20_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest20_Data", "zzzCHEpilogueQuest01"},
-		/*21*/ {"Vigilant_Main_Quest21_Key", "$Vigilant_Main_Quest21_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Main_Quest21_Data", "zzzAoMSubQ02"},
-	};
-
-	constexpr std::size_t Quest1_StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21
-	};
-
-	constexpr std::tuple<std::size_t, std::int32_t> Quest1_StageCompletion[] = {
-		{ 19,  50 },
-		{ 20,  20 },
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest2_QuestData[] = {
-		/*00*/ {"Vigilant_Side_Quest00_Key", "$Vigilant_Side_Quest00_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest00_Data", "zzzCHSubQuest02"},
-		/*01*/ {"Vigilant_Side_Quest01_Key", "$Vigilant_Side_Quest01_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest01_Data", "zzzCHSubQuest03"},
-		/*02*/ {"Vigilant_Side_Quest02_Key", "$Vigilant_Side_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest02_Data", "zzzCHSubQuest04"},
-		/*03*/ {"Vigilant_Side_Quest03_Key", "$Vigilant_Side_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest03_Data", "zzzCHSubQuest01"},
-		/*04*/ {"Vigilant_Side_Quest04_Key", "$Vigilant_Side_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest04_Data", "zzzCHSubQuest09"},
-		/*05*/ {"Vigilant_Side_Quest05_Key", "$Vigilant_Side_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest05_Data", "zzzCHSubQuest10"},
-		/*06*/ {"Vigilant_Side_Quest06_Key", "$Vigilant_Side_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest06_Data", "zzzCHSubQuest08"},
-		/*07*/ {"Vigilant_Side_Quest07_Key", "$Vigilant_Side_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest07_Data", "zzzCHSubQuest07"},
-		/*08*/ {"Vigilant_Side_Quest08_Key", "$Vigilant_Side_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest08_Data", "zzzCHSubQuest12"},
-		/*09*/ {"Vigilant_Side_Quest09_Key", "$Vigilant_Side_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest09_Data", "zzzCHSubQuest05"},
-		/*10*/ {"Vigilant_Side_Quest10_Key", "$Vigilant_Side_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest10_Data", "zzzCHSubQuest06"},
-		/*11*/ {"Vigilant_Side_Quest11_Key", "$Vigilant_Side_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest11_Data", "zzzCHSubQuest11"},
-		/*12*/ {"Vigilant_Side_Quest12_Key", "$Vigilant_Side_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Side_Quest12_Data", "zzzCHGreymarchQuest"},
-	};
-
-	constexpr std::size_t Quest2_StandardCompletion[] = {
-		6,7,11
-	};
-
-	constexpr std::tuple<std::size_t, std::int32_t> Quest2_StageCompletion[] = {
-		{ 0,   255 },
-		{ 1,   255 },
-		{ 2,   255 },
-		{ 3,   255 },
-		{ 4,   20 },
-		{ 5,   20 },
-		{ 8,   50 },
-		{ 9,   60 },
-		{ 10,  30 },
-		{ 12,  20 },
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest3_QuestData[] = {
-		/*00*/ {"Vigilant_Memory_Quest00_Key", "$Vigilant_Memory_Quest00_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest00_Data", "zzzCHMemoryQuest03"},
-		/*01*/ {"Vigilant_Memory_Quest01_Key", "$Vigilant_Memory_Quest01_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest01_Data", "zzzCHMemoryQuest04"},
-		/*02*/ {"Vigilant_Memory_Quest02_Key", "$Vigilant_Memory_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest02_Data", "zzzCHMemoryQuest10"},
-		/*03*/ {"Vigilant_Memory_Quest03_Key", "$Vigilant_Memory_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest03_Data", "zzzCHMemoryQuest01"},
-		/*04*/ {"Vigilant_Memory_Quest04_Key", "$Vigilant_Memory_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest04_Data", "zzzCHMemoryQuest02"},
-		/*05*/ {"Vigilant_Memory_Quest05_Key", "$Vigilant_Memory_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest05_Data", "zzzCHMemoryQuest05"},
-		/*06*/ {"Vigilant_Memory_Quest06_Key", "$Vigilant_Memory_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest06_Data", "zzzCHMemoryQuest11"},
-		/*07*/ {"Vigilant_Memory_Quest07_Key", "$Vigilant_Memory_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest07_Data", "zzzCHMemoryQuest12"},
-		/*08*/ {"Vigilant_Memory_Quest08_Key", "$Vigilant_Memory_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest08_Data", "zzzCHMemoryQuest06"},
-		/*09*/ {"Vigilant_Memory_Quest09_Key", "$Vigilant_Memory_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest09_Data", "zzzCHMemoryQuest07"},
-		/*10*/ {"Vigilant_Memory_Quest10_Key", "$Vigilant_Memory_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest10_Data", "zzzCHMemoryQuest08"},
-		/*11*/ {"Vigilant_Memory_Quest11_Key", "$Vigilant_Memory_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Memory_Quest11_Data", "zzzCHMemoryQuest09"},
-	};
-
-	constexpr std::size_t Quest3_StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest4_QuestData[] = {
-		/*00*/ {"Vigilant_Radiant_Quest00_Key", "$Vigilant_Radiant_Quest00_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest00_Data", "zzzAomBountyBook"},
-		/*01*/ {"Vigilant_Radiant_Quest01_Key", "$Vigilant_Radiant_Quest01_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest01_Data", "zzzAomBountyChickTrader"},
-		/*02*/ {"Vigilant_Radiant_Quest02_Key", "$Vigilant_Radiant_Quest02_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest02_Data", "zzzAomBountyRelic"},
-		/*03*/ {"Vigilant_Radiant_Quest03_Key", "$Vigilant_Radiant_Quest03_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest03_Data", "zzzAoMBountyRelicHorn"},
-		/*04*/ {"Vigilant_Radiant_Quest04_Key", "$Vigilant_Radiant_Quest04_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest04_Data", "zzzAoMBountyPiper"},
-		/*05*/ {"Vigilant_Radiant_Quest05_Key", "$Vigilant_Radiant_Quest05_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest05_Data", "zzzAomBountySummoner"},
-		/*06*/ {"Vigilant_Radiant_Quest06_Key", "$Vigilant_Radiant_Quest06_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest06_Data", "zzzAomBountyVampire"},
-		/*07*/ {"Vigilant_Radiant_Quest07_Key", "$Vigilant_Radiant_Quest07_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest07_Data", "zzzAomBountyWitch"},
-		/*08*/ {"Vigilant_Radiant_Quest08_Key", "$Vigilant_Radiant_Quest08_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest08_Data", "zzzAoMRadDead"},
-		/*09*/ {"Vigilant_Radiant_Quest09_Key", "$Vigilant_Radiant_Quest09_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest09_Data", "zzzAoMRadDoppler"},
-		/*10*/ {"Vigilant_Radiant_Quest10_Key", "$Vigilant_Radiant_Quest10_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest10_Data", "zzzAoMRadMolag"},
-		/*11*/ {"Vigilant_Radiant_Quest11_Key", "$Vigilant_Radiant_Quest11_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest11_Data", "zzzAoMRadVampire"},
-		/*12*/ {"Vigilant_Radiant_Quest12_Key", "$Vigilant_Radiant_Quest12_Name", RADI_QUEST_FLAG, IS_STAGE_DONE_N, "$Vigilant_Radiant_Quest12_Data", "zzzAoMRadWitchHunter"},
-	};
-
-	constexpr std::tuple<std::size_t, const char*, std::int32_t> Quest4_GlobalCompletion[] = {
-		
-	{0,  "Completionist_BountyVigilantBook",			VIGILANT_COUNTER_VALUE},
-	{1,  "Completionist_BountyVigilantChick",			VIGILANT_COUNTER_VALUE},
-	{2,  "Completionist_BountyVigilantRelic",			VIGILANT_COUNTER_VALUE},
-	{3,  "Completionist_BountyVigilantHorn",			VIGILANT_COUNTER_VALUE},
-	{4,  "Completionist_BountyVigilantPiper",			VIGILANT_COUNTER_VALUE},
-	{5,  "Completionist_BountyVigilantSummoner",		VIGILANT_COUNTER_VALUE},
-	{6,  "Completionist_BountyVigilantVampire",			VIGILANT_COUNTER_VALUE},
-	{7,  "Completionist_BountyVigilantWitch",			VIGILANT_COUNTER_VALUE},
-	{8,  "Completionist_RadianceVigilantDead",			VIGILANT_COUNTER_VALUE},
-	{9,  "Completionist_RadianceVigilantDopple",		VIGILANT_COUNTER_VALUE},
-	{10, "Completionist_RadianceVigilantSpawn",			VIGILANT_COUNTER_VALUE},
-	{11, "Completionist_RadianceVigilantVampire",		VIGILANT_COUNTER_VALUE},
-	{12, "Completionist_RadianceVigilantWitchHunter",	VIGILANT_COUNTER_VALUE},
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0x1353DF,0x3B3500,0x148177,0x03D213,0x119E3C,0x11B7D0,0x0EF0B6,
@@ -201,103 +195,42 @@ namespace CPatch_VIG {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest1_KeysArray.clear();
-		Quest1_NameArray.clear();
-		Quest1_TextArray.clear();
-		Quest1_IdenArray.clear();
-		Quest1_RadiArray.clear();
-		Quest1_StgeArray.clear();
-
-		Quest2_KeysArray.clear();
-		Quest2_NameArray.clear();
-		Quest2_TextArray.clear();
-		Quest2_IdenArray.clear();
-		Quest2_RadiArray.clear();
-		Quest2_StgeArray.clear();
-
-		Quest3_KeysArray.clear();
-		Quest3_NameArray.clear();
-		Quest3_TextArray.clear();
-		Quest3_IdenArray.clear();
-		Quest3_RadiArray.clear();
-		Quest3_StgeArray.clear();
-
-		Quest4_KeysArray.clear();
-		Quest4_NameArray.clear();
-		Quest4_TextArray.clear();
-		Quest4_IdenArray.clear();
-		Quest4_RadiArray.clear();
-		Quest4_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest1_QuestData) {
-			Quest1_KeysArray.push_back(key);
-			Quest1_NameArray.push_back(name);
-			Quest1_RadiArray.push_back(flag);
-			Quest1_TextArray.push_back(text);
-			Quest1_IdenArray.push_back(id);
-			Quest1_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(Quest1_Data)>; i++)
+		{
+			Quest1_Data[i].init()
+				->initQuestData(&ArrayData1)
+				->initStageData(Quest1_StageData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 48));
 		}
+		Quest1_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest2_QuestData) {
-			Quest2_KeysArray.push_back(key);
-			Quest2_NameArray.push_back(name);
-			Quest2_RadiArray.push_back(flag);
-			Quest2_TextArray.push_back(text);
-			Quest2_IdenArray.push_back(id);
-			Quest2_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest2_Data)>; i++)
+		{
+			Quest2_Data[i].init()
+				->initQuestData(&ArrayData2)
+				->initStageData(Quest2_StageData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 49));
 		}
+		Quest2_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest3_QuestData) {
-			Quest3_KeysArray.push_back(key);
-			Quest3_NameArray.push_back(name);
-			Quest3_RadiArray.push_back(flag);
-			Quest3_TextArray.push_back(text);
-			Quest3_IdenArray.push_back(id);
-			Quest3_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest3_Data)>; i++)
+		{
+			Quest3_Data[i].init()
+				->initQuestData(&ArrayData3);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 50));
 		}
+		Quest3_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest4_QuestData) {
-			Quest4_KeysArray.push_back(key);
-			Quest4_NameArray.push_back(name);
-			Quest4_RadiArray.push_back(flag);
-			Quest4_TextArray.push_back(text);
-			Quest4_IdenArray.push_back(id);
-			Quest4_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest4_Data)>; i++)
+		{
+			Quest4_Data[i].init()
+				->initQuestData(&ArrayData4)
+				->initRadiantData(Quest4_RadiantData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 51));
 		}
-
-		assert(Quest1_KeysArray.size() == ArraySize);
-		assert(Quest1_IdenArray.size() == ArraySize);
-		assert(Quest1_NameArray.size() == ArraySize);
-		assert(Quest1_RadiArray.size() == ArraySize);
-		assert(Quest1_TextArray.size() == ArraySize);
-		assert(Quest1_StgeArray.size() == ArraySize);
-		Quest1_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest2_KeysArray.size() == ArraySize);
-		assert(Quest2_IdenArray.size() == ArraySize);
-		assert(Quest2_NameArray.size() == ArraySize);
-		assert(Quest2_RadiArray.size() == ArraySize);
-		assert(Quest2_TextArray.size() == ArraySize);
-		assert(Quest2_StgeArray.size() == ArraySize);
-		Quest2_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest3_KeysArray.size() == ArraySize);
-		assert(Quest3_IdenArray.size() == ArraySize);
-		assert(Quest3_NameArray.size() == ArraySize);
-		assert(Quest3_RadiArray.size() == ArraySize);
-		assert(Quest3_TextArray.size() == ArraySize);
-		assert(Quest3_StgeArray.size() == ArraySize);
-		Quest3_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest4_KeysArray.size() == ArraySize);
-		assert(Quest4_IdenArray.size() == ArraySize);
-		assert(Quest4_NameArray.size() == ArraySize);
-		assert(Quest4_RadiArray.size() == ArraySize);
-		assert(Quest4_TextArray.size() == ArraySize);
-		assert(Quest4_StgeArray.size() == ArraySize);
-		Quest4_BoolArray = std::vector<bool>(ArraySize, false);
+		Quest4_BoolArray = std::vector<bool>(CArraySize, false);
 	}
 
 	//---------------------------------------------------
@@ -312,57 +245,6 @@ namespace CPatch_VIG {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest1_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest1_IdenArray.end()) {
-			if (Quest1_StgeArray.at(std::distance(Quest1_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest1_KeysArray.at(std::distance(Quest1_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest1_IdenArray.at(std::distance(Quest1_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest2_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest2_IdenArray.end()) {
-			if (Quest2_StgeArray.at(std::distance(Quest2_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest2_KeysArray.at(std::distance(Quest2_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest2_IdenArray.at(std::distance(Quest2_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest3_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest3_IdenArray.end()) {
-			if (Quest3_StgeArray.at(std::distance(Quest3_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest3_KeysArray.at(std::distance(Quest3_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest3_IdenArray.at(std::distance(Quest3_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest4_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest4_IdenArray.end()) {
-			if (Quest4_StgeArray.at(std::distance(Quest4_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest4_KeysArray.at(std::distance(Quest4_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest4_IdenArray.at(std::distance(Quest4_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -414,11 +296,6 @@ namespace CPatch_VIG {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -551,42 +428,5 @@ namespace CPatch_VIG {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : Quest1_StandardCompletion) {
-			Quest1_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest1_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest1_KeysArray[i], Quest1_IdenArray[i]);
-		};
-
-		for (auto i : Quest2_StandardCompletion) {
-			Quest2_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest2_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest2_KeysArray[i], Quest2_IdenArray[i]);
-		};
-
-		for (auto i : Quest3_StandardCompletion) {
-			Quest3_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest3_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest3_KeysArray[i], Quest3_IdenArray[i]);
-		};
-
-		for (auto& [i, stage] : Quest1_StageCompletion) {
-			Quest1_BoolArray[i] = Quest1_StgeArray[i] ?
-				FrameworkAPI::qIsOptionToggledInternal(Quest1_KeysArray[i]) || FrameworkAPI::IsCompleted_S(Quest1_KeysArray[i], Quest1_IdenArray[i], stage) :
-				FrameworkAPI::qIsOptionToggledInternal(Quest1_KeysArray[i]) || FrameworkAPI::IsCompleted_P(Quest1_KeysArray[i], Quest1_IdenArray[i], stage);
-		}
-
-		for (auto& [i, stage] : Quest2_StageCompletion) {
-			Quest2_BoolArray[i] = Quest2_StgeArray[i] ?
-				FrameworkAPI::qIsOptionToggledInternal(Quest2_KeysArray[i]) || FrameworkAPI::IsCompleted_S(Quest2_KeysArray[i], Quest2_IdenArray[i], stage) :
-				FrameworkAPI::qIsOptionToggledInternal(Quest2_KeysArray[i]) || FrameworkAPI::IsCompleted_P(Quest2_KeysArray[i], Quest2_IdenArray[i], stage);
-		}
-
-		for (auto& [i, global, value] : Quest4_GlobalCompletion) {
-			Quest4_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest4_KeysArray[i]) || FrameworkAPI::IsCompleted_G(Quest4_KeysArray[i], Quest4_IdenArray[i], global, value);
-		}
 	}
 }

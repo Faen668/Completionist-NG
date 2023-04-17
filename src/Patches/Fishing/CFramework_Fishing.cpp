@@ -233,22 +233,6 @@ namespace CPatch_FSH {
 
 		CPatch_FSH_F::Data.AddForm(0x00089B, "ccbgssse001-fish.esm", 0xCCA147, "Update.esm");
 		CPatch_FSH_F::Data.AddForm(0x00089B, "ccbgssse001-fish.esm", 0xCCA148, "Update.esm");
-
-		for (auto& [first, second] : CPatch_FSH_F::Data.data) 
-		{
-			auto* base = RE::TESForm::LookupByID(first);
-			auto* vari = RE::TESForm::LookupByID(second);
-
-			if (base && !vari)
-			{
-				INFO("Data form is [{} - {}] with no variations.", base->GetName(), base->GetFormID());
-			}
-
-			if (base && vari)
-			{
-				INFO("Data form is [{} - {}] with a base form of [{} - {}]", base->GetName(), base->GetFormID(), vari->GetName(), vari->GetFormID());
-			}
-		}
 	}
 
 	//---------------------------------------------------

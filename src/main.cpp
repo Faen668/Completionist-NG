@@ -1,6 +1,8 @@
 ﻿#include "Serialization.hpp"
+#include "Internal Utility/Array.hpp"
 #include "Internal Utility/mainHUD.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Variables.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
@@ -11,14 +13,20 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	using namespace Completionist_MainHUD;
 	using namespace CFramework_Master;
 	using namespace CVariables;
+	using namespace CQuestMaster;
+
+	auto t1 = std::chrono::steady_clock::now();
 
 	switch (message->type)
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
-		
+
 		TextnTagsAPI::Register();
 		VariablesAPI::Register();
+
+		QuestAPI::Register();
 		FrameworkAPI::Register();
+		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:

@@ -4,9 +4,10 @@
 #include "Internal Utility/Array.hpp"
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
-#include "Frameworks/Quests/Radiant & Favors/Radiant Quests Manager.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
-namespace CFramework_Master {
+namespace CFramework_Master 
+{
 	using namespace CVariables;
 	using namespace ArrayHolder;
 	using namespace Serialization;
@@ -15,12 +16,9 @@ namespace CFramework_Master {
 	//-- Framework Functions ( Master Registration ) ----
 	//---------------------------------------------------
 
-	void FrameworkAPI::Register() {
-
-		auto t1 = std::chrono::steady_clock::now();
-
-		auto papyrus = SKSE::GetPapyrusInterface();
-		papyrus->Register(FrameworkAPI::RegisterFunctions);
+	void FrameworkAPI::Register() 
+	{
+		SKSE::GetPapyrusInterface()->Register(FrameworkAPI::RegisterFunctions);
 
 		SetSerializableInfo(FoundItemData);
 		SetSerializableInfo(FoundItemData_NoShow);
@@ -28,8 +26,6 @@ namespace CFramework_Master {
 		SetSerializableInfo(CQuestKeys_Natural);
 		SetSerializableInfo(CQuestKeys_Manual);
 		SetSerializableInfo(CQuestKeys_Stages);
-		
-		ExcludedQuestsArray.clear();
 
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
@@ -42,85 +38,39 @@ namespace CFramework_Master {
 		CFramework_PlayerHomes::	CHandler::InstallFramework();
 		CFramework_Shouts::			CHandler::InstallFramework();
 
-		//Quests (Main Story)
-		CQFramework_SK::CHandler::InstallFramework();
-		CQFramework_CW::CHandler::InstallFramework();
-		CQFramework_DG::CHandler::InstallFramework();
-		CQFramework_DB::CHandler::InstallFramework();
-
-		//Quests (Creation Club)
-		CQFramework_CC1::CHandler::InstallFramework();
-		CQFramework_CC2::CHandler::InstallFramework();
-		CQFramework_CC3::CHandler::InstallFramework();
-
-		//Quests (Towns & Cities)
-		CQFramework_Dawnstar::		CHandler::InstallFramework();
-		CQFramework_Falkreath::		CHandler::InstallFramework();
-		CQFramework_Markarth::		CHandler::InstallFramework();
-		CQFramework_Morthal::		CHandler::InstallFramework();
-		CQFramework_Riften::		CHandler::InstallFramework();
-		CQFramework_Solitude::		CHandler::InstallFramework();
-		CQFramework_Whiterun::		CHandler::InstallFramework();
-		CQFramework_Windhelm::		CHandler::InstallFramework();
-		CQFramework_Winterhold::	CHandler::InstallFramework();
-		CQFramework_RavenRock::		CHandler::InstallFramework();
-		CQFramework_SkaalVillage::	CHandler::InstallFramework();
-		CQFramework_TelMithryn::	CHandler::InstallFramework();
-		CQFramework_Thirsk::		CHandler::InstallFramework();
-		CQFramework_SmallTowns::	CHandler::InstallFramework();
-
-		//Quests (Guilds & Factions)
-		CQFramework_CollegeOfWinterhold::	CHandler::InstallFramework();
-		CQFramework_Companions::			CHandler::InstallFramework();
-		CQFramework_DarkBrotherhood::		CHandler::InstallFramework();
-		CQFramework_Dawnguard::				CHandler::InstallFramework();
-		CQFramework_ThievesGuild::			CHandler::InstallFramework();
-		CQFramework_Vampires::				CHandler::InstallFramework();
-
-		//Quests (Guilds & Factions)
-		CQFramework_Dungeons::	CHandler::InstallFramework();
-		CQFramework_Misc_SK::	CHandler::InstallFramework();
-		CQFramework_Misc_DG::	CHandler::InstallFramework();
-		CQFramework_Misc_DB::	CHandler::InstallFramework();
-
-		//Quests (Radiant Handler)
-		Quest_Manager::Install();
-
 		// Patches
-		CPatch_AHD::CHandler::InstallFramework();
-		CPatch_BOO::CHandler::InstallFramework();
-		CPatch_CLW::CHandler::InstallFramework();
-		CPatch_FSK::CHandler::InstallFramework();
-		CPatch_FOS::CHandler::InstallFramework();
-		CPatch_GCN::CHandler::InstallFramework();
-		CPatch_OAP::CHandler::InstallFramework();
-		CPatch_HRB::CHandler::InstallFramework();
-		CPatch_3DC::CHandler::InstallFramework();
-		CPatch_MAS::CHandler::InstallFramework();
-		CPatch_MTE::CHandler::InstallFramework();
-		CPatch_AHO::CHandler::InstallFramework();
-		CPatch_ST1::CHandler::InstallFramework();
-		CPatch_ST2::CHandler::InstallFramework();
-		CPatch_ST3::CHandler::InstallFramework();
-		CPatch_TEL::CHandler::InstallFramework();
-		CPatch_THU::CHandler::InstallFramework();
-		CPatch_UND::CHandler::InstallFramework();
-		CPatch_WOL::CHandler::InstallFramework();
-		CPatch_WSN::CHandler::InstallFramework();
-		CPatch_WYR::CHandler::InstallFramework();
-		CPatch_VIG::CHandler::InstallFramework();
-		CPatch_FSH::CHandler::InstallFramework();
-		CPatch_LOD::CHandler::InstallFramework();
+		CPatch_AHD::				CHandler::InstallFramework();
+		CPatch_BOO::				CHandler::InstallFramework();
+		CPatch_CLW::				CHandler::InstallFramework();
+		CPatch_FSK::				CHandler::InstallFramework();
+		CPatch_FOS::				CHandler::InstallFramework();
+		CPatch_GCN::				CHandler::InstallFramework();
+		CPatch_OAP::				CHandler::InstallFramework();
+		CPatch_HRB::				CHandler::InstallFramework();
+		CPatch_3DC::				CHandler::InstallFramework();
+		CPatch_MAS::				CHandler::InstallFramework();
+		CPatch_MTE::				CHandler::InstallFramework();
+		CPatch_AHO::				CHandler::InstallFramework();
+		CPatch_ST1::				CHandler::InstallFramework();
+		CPatch_ST2::				CHandler::InstallFramework();
+		CPatch_ST3::				CHandler::InstallFramework();
+		CPatch_TEL::				CHandler::InstallFramework();
+		CPatch_THU::				CHandler::InstallFramework();
+		CPatch_UND::				CHandler::InstallFramework();
+		CPatch_WOL::				CHandler::InstallFramework();
+		CPatch_WSN::				CHandler::InstallFramework();
+		CPatch_WYR::				CHandler::InstallFramework();
+		CPatch_VIG::				CHandler::InstallFramework();
+		CPatch_FSH::				CHandler::InstallFramework();
+		CPatch_LOD::				CHandler::InstallFramework();
+		CPatch_SUD::				CHandler::InstallFramework();
+		CPatch_CHM::				CHandler::InstallFramework();
 
 		//SpellTomes
-		CPatch_SpellTomes::CHandler::InstallFramework();
+		CPatch_SpellTomes::			CHandler::InstallFramework();
 
 		//Register Arrays
 		ArrayHolder::RegisterArrays();
-
-		auto t2 = std::chrono::steady_clock::now();
-		auto elapsedMS = (std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)).count();
-		INFO("Finished installing Completionist in - {} Milliseconds", elapsedMS);
 	}
 	
 	//---------------------------------------------------
@@ -129,17 +79,12 @@ namespace CFramework_Master {
 
 	auto FrameworkAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 	{
+		a_vm->RegisterFunction("LogWithPlugin",					"Completionist_Native", LogWithPlugin);
+
 		a_vm->RegisterFunction("GetFormArrayByID",				"Completionist_Native", GetFormArrayByID);
 		a_vm->RegisterFunction("GetNameArrayByID",				"Completionist_Native", GetNameArrayByID);
 		a_vm->RegisterFunction("GetBoolArrayByID",				"Completionist_Native", GetBoolArrayByID);
 		a_vm->RegisterFunction("GetTextArrayByID",				"Completionist_Native", GetTextArrayByID);
-
-		a_vm->RegisterFunction("qGetNameArrayByID",				"Completionist_Native", qGetNameArrayByID);
-		a_vm->RegisterFunction("qGetTextArrayByID",				"Completionist_Native", qGetTextArrayByID);
-		a_vm->RegisterFunction("qGetKeysArrayByID",				"Completionist_Native", qGetKeysArrayByID);
-		a_vm->RegisterFunction("qGetIdenArrayByID",				"Completionist_Native", qGetIdenArrayByID);
-		a_vm->RegisterFunction("qGetBoolArrayByID",				"Completionist_Native", qGetBoolArrayByID);
-		a_vm->RegisterFunction("qGetRadiArrayByID",				"Completionist_Native", qGetRadiArrayByID);
 
 		a_vm->RegisterFunction("GetEntries_TotalByID",			"Completionist_Native", GetEntries_TotalByID);
 		a_vm->RegisterFunction("GetEntries_FoundByID",			"Completionist_Native", GetEntries_FoundByID);
@@ -150,11 +95,6 @@ namespace CFramework_Master {
 
 		a_vm->RegisterFunction("IsOptionCompleted",				"Completionist_Native", IsOptionCompleted);
 		a_vm->RegisterFunction("SetOptionCompleted",			"Completionist_Native", SetOptionCompleted);
-
-		a_vm->RegisterFunction("qIsOptionToggled",				"Completionist_Native", qIsOptionToggled); // Returns true if completed manually.
-		a_vm->RegisterFunction("qIsOptionCompleted",			"Completionist_Native", qIsOptionCompleted); // Returns true if completed by any natural means.
-		a_vm->RegisterFunction("qSetOptionCompleted",			"Completionist_Native", qSetOptionCompleted); // Only used to manually complete (CQuestKeys_Manual)
-
 
 		a_vm->RegisterFunction("ShouldDisplayMiscHeader",		"Completionist_Native", ShouldDisplayMiscHeader);
 		a_vm->RegisterFunction("ShouldDisplayTomeHeader",		"Completionist_Native", ShouldDisplayTomeHeader);
@@ -183,128 +123,22 @@ namespace CFramework_Master {
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Update Quest Completion )-
+	//-- Framework Functions ( Update From MCM ) --------
 	//---------------------------------------------------
 
-	bool FrameworkAPI::UpdateQuestCompletion(CQuestData a_data, std::string a_key, std::string a_identifier)
-	{
-		auto is_complete = false;
+	void FrameworkAPI::LogWithPlugin(RE::StaticFunctionTag*, std::string a_message) {
 
-		switch (a_data.COMP)
-		{
-		case CCompEnum::kStand: 
-		{
-			is_complete = FrameworkAPI::IsCompleted_N(a_key, a_identifier);
-			break;
-		}
-
-		case CCompEnum::kGlobl: 
-		{
-			is_complete = FrameworkAPI::IsCompleted_G(a_key, a_identifier, a_data.GLOBAL.NAME, a_data.GLOBAL.VALUE);
-			break;
-		}
-
-		case CCompEnum::kJarls: 
-		{
-			is_complete = FrameworkAPI::IsCompleted_J(a_key, a_data.JARL.Imps, a_data.JARL.Sons);
-			break;
-		}
-
-		case CCompEnum::kStage: 
-		{
-			switch (a_data.STAGE.CONDITION)
-			{
-			case CStageEnum::kDone:
-			{
-				is_complete = FrameworkAPI::IsCompleted_S(a_key, a_identifier, a_data.STAGE.VALUE) || (a_data.STAGE.OPVALUE != 0 && FrameworkAPI::IsCompleted_S(a_key, a_identifier, a_data.STAGE.OPVALUE));
-				break;
-			}
-
-			case CStageEnum::kPast:
-			{
-				is_complete = FrameworkAPI::IsCompleted_P(a_key, a_identifier, a_data.STAGE.VALUE) || (a_data.STAGE.OPVALUE != 0 && FrameworkAPI::IsCompleted_P(a_key, a_identifier, a_data.STAGE.OPVALUE));
-				break;
-			}
-
-			default:
-			{
-				is_complete = false;
-				break;
-			}
-			}
-			break;
-		}
-
-		default: 
-		{
-			is_complete = false;
-			break;
-		}
-		}
-		INFO("Quest {} is {}", a_data.EDID, is_complete);
-
-		return is_complete ? true : FrameworkAPI::qIsOptionToggledInternal(a_key);
+		INFO("Papyrus Message: {}", a_message);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Update From MCM ) --------
 	//---------------------------------------------------
 
-	void FrameworkAPI::UpdateCompletion(RE::StaticFunctionTag*) {
-
+	void FrameworkAPI::UpdateCompletion(RE::StaticFunctionTag*) 
+	{
 		VariablesAPI::Update();
-
-		CQFramework_SK::CHandler::UpdateCompletion();
-		CQFramework_DG::CHandler::UpdateCompletion();
-		CQFramework_DB::CHandler::UpdateCompletion();
-		CQFramework_CW::CHandler::UpdateCompletion();
-
-		CQFramework_Dawnstar::CHandler::UpdateCompletion();
-		CQFramework_Falkreath::CHandler::UpdateCompletion();
-		CQFramework_Markarth::CHandler::UpdateCompletion();
-		CQFramework_Morthal::CHandler::UpdateCompletion();
-		CQFramework_RavenRock::CHandler::UpdateCompletion();
-		CQFramework_Riften::CHandler::UpdateCompletion();
-		CQFramework_SkaalVillage::CHandler::UpdateCompletion();
-		CQFramework_SmallTowns::CHandler::UpdateCompletion();
-		CQFramework_Solitude::CHandler::UpdateCompletion();
-		CQFramework_TelMithryn::CHandler::UpdateCompletion();
-		CQFramework_Thirsk::CHandler::UpdateCompletion();
-		CQFramework_Whiterun::CHandler::UpdateCompletion();
-		CQFramework_Windhelm::CHandler::UpdateCompletion();
-		CQFramework_Winterhold::CHandler::UpdateCompletion();
-
-		CQFramework_CollegeOfWinterhold::CHandler::UpdateCompletion();
-		CQFramework_Companions::CHandler::UpdateCompletion();
-		CQFramework_DarkBrotherhood::CHandler::UpdateCompletion();
-		CQFramework_Dawnguard::CHandler::UpdateCompletion();
-		CQFramework_ThievesGuild::CHandler::UpdateCompletion();
-		CQFramework_Vampires::CHandler::UpdateCompletion();
-
-		CQFramework_Dungeons::CHandler::UpdateCompletion();
-		CQFramework_Misc_SK::CHandler::UpdateCompletion();
-		CQFramework_Misc_DG::CHandler::UpdateCompletion();
-		CQFramework_Misc_DB::CHandler::UpdateCompletion();
-
-		CQFramework_CC1::CHandler::UpdateCompletion();
-		CQFramework_CC2::CHandler::UpdateCompletion();
-		CQFramework_CC3::CHandler::UpdateCompletion();
-
-		CPatch_BOO::CHandler::UpdateQuestFramework();
-		CPatch_CLW::CHandler::UpdateQuestFramework();
-		CPatch_FSK::CHandler::UpdateQuestFramework();
-		CPatch_GCN::CHandler::UpdateQuestFramework();
-		CPatch_HRB::CHandler::UpdateQuestFramework();
-		CPatch_3DC::CHandler::UpdateQuestFramework();
-		CPatch_LOD::CHandler::UpdateQuestFramework();
-		CPatch_MAS::CHandler::UpdateQuestFramework();
-		CPatch_MTE::CHandler::UpdateQuestFramework();
-		CPatch_AHO::CHandler::UpdateQuestFramework();
-		CPatch_TEL::CHandler::UpdateQuestFramework();
-		CPatch_UND::CHandler::UpdateQuestFramework();
-		CPatch_VIG::CHandler::UpdateQuestFramework();
-		CPatch_WOL::CHandler::UpdateQuestFramework();
-		CPatch_WYR::CHandler::UpdateQuestFramework();
+		CQuestMaster::QuestAPI::UpdateQuestCompletion();
 	}
 
 	//---------------------------------------------------
@@ -345,11 +179,11 @@ namespace CFramework_Master {
 	//-- Framework Functions ( CC Variable Setter ) -----
 	//---------------------------------------------------
 
-	bool FrameworkAPI::CCLocationsInstalled(RE::StaticFunctionTag*)	{ return bool(CFramework_MapMa_CC::Data.data.size()); }
-	bool FrameworkAPI::CCBooksInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_Books_CC::Data.data.size());; }
-	bool FrameworkAPI::CCItemsInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
-	bool FrameworkAPI::ShouldDisplayMiscHeader(RE::StaticFunctionTag*)			{ return bool(PatchesInstalled); }
-	bool FrameworkAPI::ShouldDisplayTomeHeader(RE::StaticFunctionTag*)			{ return bool(TomesInstalled); }
+	bool FrameworkAPI::CCLocationsInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_MapMa_CC::Data.data.size()); }
+	bool FrameworkAPI::CCBooksInstalled(RE::StaticFunctionTag*)			{ return bool(CFramework_Books_CC::Data.data.size());; }
+	bool FrameworkAPI::CCItemsInstalled(RE::StaticFunctionTag*)			{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
+	bool FrameworkAPI::ShouldDisplayMiscHeader(RE::StaticFunctionTag*)	{ return bool(PatchesInstalled); }
+	bool FrameworkAPI::ShouldDisplayTomeHeader(RE::StaticFunctionTag*)	{ return bool(TomesInstalled); }
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Load Frameworks ) --------
@@ -369,86 +203,34 @@ namespace CFramework_Master {
 		CFramework_Shouts::			CHandler::UpdateFoundForms();
 
 		// Patches
-		CPatch_AHD::CHandler::UpdateFoundForms();
-		CPatch_BOO::CHandler::UpdateFoundForms();
-		CPatch_CLW::CHandler::UpdateFoundForms();
-		CPatch_FSK::CHandler::UpdateFoundForms();
-		CPatch_FOS::CHandler::UpdateFoundForms();
-		CPatch_GCN::CHandler::UpdateFoundForms();
-		CPatch_OAP::CHandler::UpdateFoundForms();
-		CPatch_HRB::CHandler::UpdateFoundForms();
-		CPatch_3DC::CHandler::UpdateFoundForms();
-		CPatch_MAS::CHandler::UpdateFoundForms();
-		CPatch_MTE::CHandler::UpdateFoundForms();
-		CPatch_AHO::CHandler::UpdateFoundForms();
-		CPatch_ST1::CHandler::UpdateFoundForms();
-		CPatch_ST2::CHandler::UpdateFoundForms();
-		CPatch_ST3::CHandler::UpdateFoundForms();
-		CPatch_TEL::CHandler::UpdateFoundForms();
-		CPatch_THU::CHandler::UpdateFoundForms();
-		CPatch_UND::CHandler::UpdateFoundForms();
-		CPatch_WOL::CHandler::UpdateFoundForms();
-		CPatch_WSN::CHandler::UpdateFoundForms();
-		CPatch_WYR::CHandler::UpdateFoundForms();
-		CPatch_VIG::CHandler::UpdateFoundForms();
-		CPatch_FSH::CHandler::UpdateFoundForms();
+		CPatch_AHD::				CHandler::UpdateFoundForms();
+		CPatch_BOO::				CHandler::UpdateFoundForms();
+		CPatch_CLW::				CHandler::UpdateFoundForms();
+		CPatch_FSK::				CHandler::UpdateFoundForms();
+		CPatch_FOS::				CHandler::UpdateFoundForms();
+		CPatch_GCN::				CHandler::UpdateFoundForms();
+		CPatch_OAP::				CHandler::UpdateFoundForms();
+		CPatch_HRB::				CHandler::UpdateFoundForms();
+		CPatch_3DC::				CHandler::UpdateFoundForms();
+		CPatch_MAS::				CHandler::UpdateFoundForms();
+		CPatch_MTE::				CHandler::UpdateFoundForms();
+		CPatch_AHO::				CHandler::UpdateFoundForms();
+		CPatch_ST1::				CHandler::UpdateFoundForms();
+		CPatch_ST2::				CHandler::UpdateFoundForms();
+		CPatch_ST3::				CHandler::UpdateFoundForms();
+		CPatch_TEL::				CHandler::UpdateFoundForms();
+		CPatch_THU::				CHandler::UpdateFoundForms();
+		CPatch_UND::				CHandler::UpdateFoundForms();
+		CPatch_WOL::				CHandler::UpdateFoundForms();
+		CPatch_WSN::				CHandler::UpdateFoundForms();
+		CPatch_WYR::				CHandler::UpdateFoundForms();
+		CPatch_VIG::				CHandler::UpdateFoundForms();
+		CPatch_FSH::				CHandler::UpdateFoundForms();
+		CPatch_SUD::				CHandler::UpdateFoundForms();
+		CPatch_CHM::				CHandler::UpdateFoundForms();
 
 		//SpellTomes
-		CPatch_SpellTomes::CHandler::UpdateFoundForms();
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Idens ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> FrameworkAPI::qGetIdenArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleIdenSet(QuestID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Names ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> FrameworkAPI::qGetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleNameSet(QuestID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Texts ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> FrameworkAPI::qGetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleTextSet(QuestID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Unique Keys ) -------
-	//---------------------------------------------------
-
-	std::vector<std::string> FrameworkAPI::qGetKeysArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleKeysSet(QuestID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Bools ) -------------
-	//---------------------------------------------------
-
-	std::vector<bool> FrameworkAPI::qGetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleBoolSet(QuestID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Radis ) -------------
-	//---------------------------------------------------
-
-	std::vector<int32_t> FrameworkAPI::qGetRadiArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		return qHandleRadiSet(QuestID(a_ID));
+		CPatch_SpellTomes::			CHandler::UpdateFoundForms();
 	}
 
 	//---------------------------------------------------
@@ -457,7 +239,9 @@ namespace CFramework_Master {
 
 	std::int32_t FrameworkAPI::GetEntries_TotalByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleTotalSet(FrameworkID(a_ID));
+		auto& value = HandleTotalSet(FrameworkID(a_ID));
+		INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		return value;
 	}
 
 	//---------------------------------------------------
@@ -466,7 +250,9 @@ namespace CFramework_Master {
 
 	std::int32_t FrameworkAPI::GetEntries_FoundByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleFoundSet(FrameworkID(a_ID));
+		auto& value = HandleFoundSet(FrameworkID(a_ID));
+		INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		return value;
 	}
 
 	//---------------------------------------------------
@@ -475,7 +261,9 @@ namespace CFramework_Master {
 
 	std::vector<RE::TESForm*> FrameworkAPI::GetFormArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleFormSet(FrameworkID(a_ID));
+		auto& array = HandleFormSet(FrameworkID(a_ID));
+		INFO("Returning form array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		return array;
 	}
 
 	//---------------------------------------------------
@@ -484,7 +272,9 @@ namespace CFramework_Master {
 
 	std::vector<std::string> FrameworkAPI::GetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleNameSet(FrameworkID(a_ID));
+		auto& array = HandleNameSet(FrameworkID(a_ID));
+		INFO("Returning name array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		return array;
 	}
 
 	//---------------------------------------------------
@@ -493,7 +283,9 @@ namespace CFramework_Master {
 
 	std::vector<std::string> FrameworkAPI::GetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleTextSet(FrameworkID(a_ID));
+		auto& array = HandleTextSet(FrameworkID(a_ID));
+		INFO("Returning text array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		return array;
 	}
 
 	//---------------------------------------------------
@@ -502,259 +294,9 @@ namespace CFramework_Master {
 
 	std::vector<bool> FrameworkAPI::GetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		return HandleBoolSet(FrameworkID(a_ID));
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Get Quest ) ------------------
-	//---------------------------------------------------
-
-	RE::TESQuest* FrameworkAPI::GetQuest(std::string a_questID) {
-
-		return static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(a_questID)) ? static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(a_questID)) : nullptr;;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( IS Completed ) ---------------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_N(std::string a_key, std::string a_questID) {
-
-		auto* quest = GetQuest(a_questID);
-		if (!quest || !quest->data.flags.any(RE::QuestFlag::kCompleted, RE::QuestFlag::kFailed)) { return false; }
-	
-		CQuestKeys_Natural.AddKey(a_key);
-		CQuestKeys_Manual.RemoveKey(a_key);
-		return true;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Is Stage Done ) --------------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_S(std::string a_key, std::string a_questID, std::int32_t a_stage) {
-
-		if (CQuestKeys_Stages.HasStage(a_key, a_stage)) {
-			CQuestKeys_Natural.AddKey(a_key);
-			CQuestKeys_Manual.RemoveKey(a_key);
-			return true;
-		}
-		return false;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Get Complete By Jarl Status )-
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_J(std::string a_key, std::string a_imp, std::string a_son) {
-
-		auto JarlScript = ScriptObject::FromForm(static_cast<RE::TESForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x087E24, "Skyrim.esm")), "FavorJarlsMakeFriendsScript");
-		if (!JarlScript) { return false; }
-
-		auto Imp = JarlScript->GetProperty(a_imp);
-		auto Son = JarlScript->GetProperty(a_son);
-		if (!Imp || !Son) { return false; }
-
-		if (Imp->GetSInt() > 0 || Son->GetSInt() > 0) {
-			CQuestKeys_Natural.AddKey(a_key);
-			CQuestKeys_Manual.RemoveKey(a_key);
-			return true;
-			
-		}
-		return false;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Get Complete By Global )------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, CRadiantEnum a_value) {
-
-		const auto* quest = GetQuest(a_questID);
-		auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_globalID);
-		int32_t value;
-
-		if (!quest || !global) { return false; }
-
-		switch (a_value)
-		{
-
-		case CRadiantEnum::kRadiant_One:
-		case CRadiantEnum::kRadiant_Fsh:
-			value = std::to_underlying(a_value);
-			break;
-	
-		case CRadiantEnum::kRadiant_Def:
-			value = CVariables::V_RadiantCounterVal;
-			break;
-
-		case CRadiantEnum::kRadiant_Bty:
-			value = CVariables::V_Radiant_BountyVal;
-			break;
-
-		case CRadiantEnum::kRadiant_COL:
-			value = CVariables::V_Radiant_CollegeVal;
-			break;
-
-		case CRadiantEnum::kRadiant_COM:
-			value = CVariables::V_Radiant_CompanionsVal;
-			break;
-
-		case CRadiantEnum::kRadiant_DBR:
-			value = CVariables::V_Radiant_DBrotherhoodVal;
-			break;
-
-		case CRadiantEnum::kRadiant_DGU:
-			value = CVariables::V_Radiant_DawnguardVal;
-			break;
-
-		case CRadiantEnum::kRadiant_THG:
-			value = CVariables::V_Radiant_ThievesGuildVal;
-			break;
-
-		case CRadiantEnum::kRadiant_VIG:
-			value = CVariables::V_Radiant_VigilantVal;
-			break;
-
-		case CRadiantEnum::kRadiant_LEG:
-			value = CVariables::V_Radiant_LegacyVal;
-			break;
-
-		default:
-			return false;
-		}
-
-		if (global->value >= value) {
-			CQuestKeys_Natural.AddKey(a_key);
-			CQuestKeys_Manual.RemoveKey(a_key);
-			return true;
-		}
-		return false;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Get Complete By Global )------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_G(std::string a_key, std::string a_questID, std::string a_globalID, int32_t a_value) {
-
-		const auto* quest = GetQuest(a_questID);
-		auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_globalID);
-
-		if (!quest || !global) { return false; }
-
-		switch (a_value)
-		{
-		case RADIANT_COLLEGE_VALUE:
-			a_value = CVariables::V_Radiant_CollegeVal;
-			break;
-
-		case RADIANT_COMPANIONS_VALUE:
-			a_value = CVariables::V_Radiant_CompanionsVal;
-			break;
-
-		case RADIANT_BROTHERHOOD_VALUE:
-			a_value = CVariables::V_Radiant_DBrotherhoodVal;
-			break;
-
-		case RADIANT_DAWNGUARD_VALUE:
-			a_value = CVariables::V_Radiant_DawnguardVal;
-			break;
-
-		case RADIANT_THIEVESGUILD_VALUE:
-			a_value = CVariables::V_Radiant_ThievesGuildVal;
-			break;
-
-		case -4:
-			a_value = CVariables::V_RadiantCounterVal;
-			break;
-
-		case RADIANT_COUNTER_VALUE:
-			a_value = CVariables::V_RadiantCounterVal;
-			break;
-
-		case RADIANT_BOUNTY_VALUE:
-			a_value = CVariables::V_Radiant_BountyVal;
-			break;
-
-		case VIGILANT_COUNTER_VALUE:
-			a_value = CVariables::V_Radiant_VigilantVal;
-			break;
-
-		case LEGACY_COUNTER_VALUE:
-			a_value = CVariables::V_Radiant_LegacyVal;
-			break;
-
-		default:
-			break;
-		}
-
-		if (global->value >= a_value) {
-			CQuestKeys_Natural.AddKey(a_key);
-			CQuestKeys_Manual.RemoveKey(a_key);
-			return true;
-		}
-		return false;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Get Stage ) ------------------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsCompleted_P(std::string a_key, std::string a_questID, std::int32_t a_stage) {
-
-		auto* quest = GetQuest(a_questID);
-		if (!quest || !quest->currentStage || quest->currentStage <= a_stage) { return false; }
-
-		CQuestKeys_Natural.AddKey(a_key);
-		CQuestKeys_Manual.RemoveKey(a_key);
-		return true;
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( MCM Getter - Status ) --------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::qIsOptionToggled(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key) {
-		return CQuestKeys_Manual.HasKey(a_key);
-	}
-
-	bool FrameworkAPI::qIsOptionToggledInternal(std::string a_key) {
-		return CQuestKeys_Manual.HasKey(a_key);
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( MCM Getter - Status ) --------
-	//---------------------------------------------------
-
-	std::int32_t FrameworkAPI::qIsOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key) {
-
-		if (CQuestKeys_Natural.HasKey(a_key)) { return -2; }
-
-		if (auto t_pos = std::ranges::find(qHandleKeysSet(QuestID(a_ID)), a_key); t_pos != qHandleKeysSet(QuestID(a_ID)).end()) {
-			return std::int32_t(qHandleBoolSet(QuestID(a_ID))[std::distance(qHandleKeysSet(QuestID(a_ID)).begin(), t_pos)]);
-		}
-		return -1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Setter - Status ) ----
-	//---------------------------------------------------
-
-	void FrameworkAPI::qSetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key) {
-
-		if (auto t_pos = std::ranges::find(qHandleKeysSet(QuestID(a_ID)), a_key); t_pos != qHandleKeysSet(QuestID(a_ID)).end()) {
-			auto b_pos = std::distance(qHandleKeysSet(QuestID(a_ID)).begin(), t_pos);
-
-			if (qHandleBoolSet(QuestID(a_ID)).at(b_pos)) {
-				qHandleBoolSet(QuestID(a_ID)).at(b_pos) = false;
-				CQuestKeys_Manual.RemoveKey(a_key);
-			}
-			else {
-				qHandleBoolSet(QuestID(a_ID)).at(b_pos) = true;
-				CQuestKeys_Manual.AddKey(a_key);
-			}
-		}
+		auto& array = HandleBoolSet(FrameworkID(a_ID));
+		INFO("Returning bool array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		return array;
 	}
 
 	//---------------------------------------------------

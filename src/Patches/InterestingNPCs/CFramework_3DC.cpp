@@ -1,107 +1,98 @@
 #include "Serialization.hpp"
 #include "CFramework_3DC.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_3DC {
+namespace CPatch_3DC 
+{
 	using namespace CFramework_Master;
 
+	CQuestData Quest1_Data[]
+	{
+		/*00*/ {"3DNPC_Main_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "DJGQuest"},
+		/*01*/ {"3DNPC_Main_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "ErevanQuest"},
+		/*02*/ {"3DNPC_Main_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "DJGQuest2"},
+		/*03*/ {"3DNPC_Main_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "AmaleeQuest"},
+		/*04*/ {"3DNPC_Main_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "hagquest"},
+		/*05*/ {"3DNPC_Main_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "RaynesGriffithQuest"},
+		/*06*/ {"3DNPC_Main_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "CWQQ2"},
+		/*07*/ {"3DNPC_Main_Quest07", CFlagEnum::kMain, CCompEnum::kStand, "AnumLaQuest"},
+		/*08*/ {"3DNPC_Main_Quest08", CFlagEnum::kMain, CCompEnum::kStand, "AmicusDialogue"},
+		/*09*/ {"3DNPC_Main_Quest09", CFlagEnum::kMain, CCompEnum::kStand, "GorrQuest"},
+		/*10*/ {"3DNPC_Main_Quest10", CFlagEnum::kMain, CCompEnum::kStand, "warrensquest"},
+		/*11*/ {"3DNPC_Main_Quest11", CFlagEnum::kMain, CCompEnum::kStand, "DialogueNair"},
+		/*12*/ {"3DNPC_Main_Quest12", CFlagEnum::kMain, CCompEnum::kStand, "ZoraQuest"},
+		/*13*/ {"3DNPC_Main_Quest13", CFlagEnum::kMain, CCompEnum::kStand, "Herranquest"},
+		/*14*/ {"3DNPC_Main_Quest14", CFlagEnum::kMain, CCompEnum::kStand, "ArilwaenQuest"},
+		/*15*/ {"3DNPC_Main_Quest15", CFlagEnum::kMain, CCompEnum::kStand, "DialogueJasparGaerston"},
+		/*16*/ {"3DNPC_Main_Quest16", CFlagEnum::kMain, CCompEnum::kStand, "RDQuest"},
+		/*17*/ {"3DNPC_Main_Quest17", CFlagEnum::kMain, CCompEnum::kStand, "AsteriaQuest"},
+		/*18*/ {"3DNPC_Main_Quest18", CFlagEnum::kMain, CCompEnum::kStand, "RumarinQuest2"},
+		/*19*/ {"3DNPC_Main_Quest19", CFlagEnum::kMain, CCompEnum::kStand, "AldiQuest"},
+		/*20*/ {"3DNPC_Main_Quest20", CFlagEnum::kMain, CCompEnum::kStand, "SvashniQuest"},
+		/*21*/ {"3DNPC_Main_Quest21", CFlagEnum::kMain, CCompEnum::kStand, "HorkerQuest"},
+		/*22*/ {"3DNPC_Main_Quest22", CFlagEnum::kMain, CCompEnum::kStand, "KjoliQuest"},
+		/*23*/ {"3DNPC_Main_Quest23", CFlagEnum::kMain, CCompEnum::kStand, "ViranyaQuest"},
+	};
+
+	CQuestData Quest2_Data[]
+	{
+		/*00*/ {"3DNPC_BOK_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ1"},
+		/*01*/ {"3DNPC_BOK_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ2"},
+		/*02*/ {"3DNPC_BOK_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ3"},
+		/*03*/ {"3DNPC_BOK_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ4"},
+		/*04*/ {"3DNPC_BOK_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ5"},
+		/*05*/ {"3DNPC_BOK_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ6"},
+		/*06*/ {"3DNPC_BOK_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "3DNPCMQ7"},
+	};
+
+	CQuestData Quest3_Data[]
+	{
+		/*00*/ {"3DNPC_DS_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue"},
+		/*01*/ {"3DNPC_DS_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue2"},
+		/*02*/ {"3DNPC_DS_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue3"},
+		/*03*/ {"3DNPC_DS_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue4"},
+		/*04*/ {"3DNPC_DS_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue5"},
+		/*05*/ {"3DNPC_DS_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "3dmcue6"},
+	};
+
+	CQuestData Quest4_Data[]
+	{
+		/*00*/ {"3DNPC_Misc_Quest00", CFlagEnum::kSide, CCompEnum::kStand, "Jurykquest"},
+		/*01*/ {"3DNPC_Misc_Quest01", CFlagEnum::kSide, CCompEnum::kStand, "Rumarinquest"},
+		/*02*/ {"3DNPC_Misc_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "Paintingquest"},
+		/*03*/ {"3DNPC_Misc_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "CarmellaSkjarnQuest"},
+		/*04*/ {"3DNPC_Misc_Quest04", CFlagEnum::kSide, CCompEnum::kStand, "DialogueAzzarian"},
+		/*05*/ {"3DNPC_Misc_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "Lurgokquest"},
+		/*06*/ {"3DNPC_Misc_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "BlackRobesQuest"},
+		/*07*/ {"3DNPC_Misc_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "Arielequest"},
+		/*08*/ {"3DNPC_Misc_Quest08", CFlagEnum::kSide, CCompEnum::kStand, "Morndasargonianquest"},
+		/*09*/ {"3DNPC_Misc_Quest09", CFlagEnum::kSide, CCompEnum::kStand, "DialogueBrakh"},
+		/*10*/ {"3DNPC_Misc_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "Beatricequest"},
+		/*11*/ {"3DNPC_Misc_Quest11", CFlagEnum::kSide, CCompEnum::kStand, "DialogueTheRelic"},
+		/*12*/ {"3DNPC_Misc_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "RobbersRefuge3DNPC"},
+		/*13*/ {"3DNPC_Misc_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "CassockQuest"},
+		/*14*/ {"3DNPC_Misc_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "Skjelquest"},
+		/*15*/ {"3DNPC_Misc_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "DialogueYtharil"},
+		/*16*/ {"3DNPC_Misc_Quest16", CFlagEnum::kSide, CCompEnum::kStand, "DialogueDarrakki"},
+		/*17*/ {"3DNPC_Misc_Quest17", CFlagEnum::kSide, CCompEnum::kStand, "Hagcursequest"},
+		/*18*/ {"3DNPC_Misc_Quest18", CFlagEnum::kSide, CCompEnum::kStand, "Vartheimquest"},
+		/*19*/ {"3DNPC_Misc_Quest19", CFlagEnum::kSide, CCompEnum::kStand, "HWSQuest"},
+		/*20*/ {"3DNPC_Misc_Quest20", CFlagEnum::kSide, CCompEnum::kStand, "DialogueRaynes"},
+		/*21*/ {"3DNPC_Misc_Quest21", CFlagEnum::kSide, CCompEnum::kStand, "DialogueJilkmar"},
+		/*22*/ {"3DNPC_Misc_Quest22", CFlagEnum::kSide, CCompEnum::kStand, "Bookquest3dnpc"},
+		/*23*/ {"3DNPC_Misc_Quest23", CFlagEnum::kSide, CCompEnum::kStand, "DialogueThriceBitten"},
+		/*24*/ {"3DNPC_Misc_Quest24", CFlagEnum::kSide, CCompEnum::kStand, "Terynnequest"},
+	};
+
+	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray };
+	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray };
+	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray };
+	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest1_QuestData[] = {
-		/*00*/ {"3DNPC_Main_Quest00_Key", "$3DNPC_Main_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest00_Data", "DJGQuest"},
-		/*01*/ {"3DNPC_Main_Quest01_Key", "$3DNPC_Main_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest01_Data", "ErevanQuest"},
-		/*02*/ {"3DNPC_Main_Quest02_Key", "$3DNPC_Main_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest02_Data", "DJGQuest2"},
-		/*03*/ {"3DNPC_Main_Quest03_Key", "$3DNPC_Main_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest03_Data", "AmaleeQuest"},
-		/*04*/ {"3DNPC_Main_Quest04_Key", "$3DNPC_Main_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest04_Data", "hagquest"},
-		/*05*/ {"3DNPC_Main_Quest05_Key", "$3DNPC_Main_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest05_Data", "RaynesGriffithQuest"},
-		/*06*/ {"3DNPC_Main_Quest06_Key", "$3DNPC_Main_Quest06_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest06_Data", "CWQQ2"},
-		/*07*/ {"3DNPC_Main_Quest07_Key", "$3DNPC_Main_Quest07_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest07_Data", "AnumLaQuest"},
-		/*08*/ {"3DNPC_Main_Quest08_Key", "$3DNPC_Main_Quest08_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest08_Data", "AmicusDialogue"},
-		/*09*/ {"3DNPC_Main_Quest09_Key", "$3DNPC_Main_Quest09_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest09_Data", "GorrQuest"},
-		/*10*/ {"3DNPC_Main_Quest10_Key", "$3DNPC_Main_Quest10_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest10_Data", "warrensquest"},
-		/*11*/ {"3DNPC_Main_Quest11_Key", "$3DNPC_Main_Quest11_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest11_Data", "DialogueNair"},
-		/*12*/ {"3DNPC_Main_Quest12_Key", "$3DNPC_Main_Quest12_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest12_Data", "ZoraQuest"},
-		/*13*/ {"3DNPC_Main_Quest13_Key", "$3DNPC_Main_Quest13_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest13_Data", "Herranquest"},
-		/*14*/ {"3DNPC_Main_Quest14_Key", "$3DNPC_Main_Quest14_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest14_Data", "ArilwaenQuest"},
-		/*15*/ {"3DNPC_Main_Quest15_Key", "$3DNPC_Main_Quest15_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest15_Data", "DialogueJasparGaerston"},
-		/*16*/ {"3DNPC_Main_Quest16_Key", "$3DNPC_Main_Quest16_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest16_Data", "RDQuest"},
-		/*17*/ {"3DNPC_Main_Quest17_Key", "$3DNPC_Main_Quest17_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest17_Data", "AsteriaQuest"},
-		/*18*/ {"3DNPC_Main_Quest18_Key", "$3DNPC_Main_Quest18_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest18_Data", "RumarinQuest2"},
-		/*19*/ {"3DNPC_Main_Quest19_Key", "$3DNPC_Main_Quest19_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest19_Data", "AldiQuest"},
-		/*20*/ {"3DNPC_Main_Quest20_Key", "$3DNPC_Main_Quest20_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest20_Data", "SvashniQuest"},
-		/*21*/ {"3DNPC_Main_Quest21_Key", "$3DNPC_Main_Quest21_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest21_Data", "HorkerQuest"},
-		/*22*/ {"3DNPC_Main_Quest22_Key", "$3DNPC_Main_Quest22_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest22_Data", "KjoliQuest"},
-		/*23*/ {"3DNPC_Main_Quest23_Key", "$3DNPC_Main_Quest23_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Main_Quest23_Data", "ViranyaQuest"},
-	};
-
-	constexpr std::size_t Quest1_StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest2_QuestData[] = {
-		/*00*/ {"3DNPC_BOK_Quest00_Key", "$3DNPC_BOK_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest00_Data", "3DNPCMQ1"},
-		/*01*/ {"3DNPC_BOK_Quest01_Key", "$3DNPC_BOK_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest01_Data", "3DNPCMQ2"},
-		/*02*/ {"3DNPC_BOK_Quest02_Key", "$3DNPC_BOK_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest02_Data", "3DNPCMQ3"},
-		/*03*/ {"3DNPC_BOK_Quest03_Key", "$3DNPC_BOK_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest03_Data", "3DNPCMQ4"},
-		/*04*/ {"3DNPC_BOK_Quest04_Key", "$3DNPC_BOK_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest04_Data", "3DNPCMQ5"},
-		/*05*/ {"3DNPC_BOK_Quest05_Key", "$3DNPC_BOK_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest05_Data", "3DNPCMQ6"},
-		/*06*/ {"3DNPC_BOK_Quest06_Key", "$3DNPC_BOK_Quest06_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_BOK_Quest06_Data", "3DNPCMQ7"},
-	};
-
-	constexpr std::size_t Quest2_StandardCompletion[] = {
-		0,1,2,3,4,5,6
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest3_QuestData[] = {
-		/*00*/ {"3DNPC_DS_Quest00_Key", "$3DNPC_DS_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest00_Data", "3dmcue"},
-		/*01*/ {"3DNPC_DS_Quest01_Key", "$3DNPC_DS_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest01_Data", "3dmcue2"},
-		/*02*/ {"3DNPC_DS_Quest02_Key", "$3DNPC_DS_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest02_Data", "3dmcue3"},
-		/*03*/ {"3DNPC_DS_Quest03_Key", "$3DNPC_DS_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest03_Data", "3dmcue4"},
-		/*04*/ {"3DNPC_DS_Quest04_Key", "$3DNPC_DS_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest04_Data", "3dmcue5"},
-		/*05*/ {"3DNPC_DS_Quest05_Key", "$3DNPC_DS_Quest05_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_DS_Quest05_Data", "3dmcue6"},
-	};
-
-	constexpr std::size_t Quest3_StandardCompletion[] = {
-		0,1,2,3,4,5
-	};
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> Quest4_QuestData[] = {
-		/*00*/ {"3DNPC_Misc_Quest00_Key", "$3DNPC_Misc_Quest00_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest00_Data", "Jurykquest"},
-		/*01*/ {"3DNPC_Misc_Quest01_Key", "$3DNPC_Misc_Quest01_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest01_Data", "Rumarinquest"},
-		/*02*/ {"3DNPC_Misc_Quest02_Key", "$3DNPC_Misc_Quest02_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest02_Data", "Paintingquest"},
-		/*03*/ {"3DNPC_Misc_Quest03_Key", "$3DNPC_Misc_Quest03_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest03_Data", "CarmellaSkjarnQuest"},
-		/*04*/ {"3DNPC_Misc_Quest04_Key", "$3DNPC_Misc_Quest04_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest04_Data", "DialogueAzzarian"},
-		/*05*/ {"3DNPC_Misc_Quest05_Key", "$3DNPC_Misc_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest05_Data", "Lurgokquest"},
-		/*06*/ {"3DNPC_Misc_Quest06_Key", "$3DNPC_Misc_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest06_Data", "BlackRobesQuest"},
-		/*07*/ {"3DNPC_Misc_Quest07_Key", "$3DNPC_Misc_Quest07_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest07_Data", "Arielequest"},
-		/*08*/ {"3DNPC_Misc_Quest08_Key", "$3DNPC_Misc_Quest08_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest08_Data", "Morndasargonianquest"},
-		/*09*/ {"3DNPC_Misc_Quest09_Key", "$3DNPC_Misc_Quest09_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest09_Data", "DialogueBrakh"},
-		/*10*/ {"3DNPC_Misc_Quest10_Key", "$3DNPC_Misc_Quest10_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest10_Data", "Beatricequest"},
-		/*11*/ {"3DNPC_Misc_Quest11_Key", "$3DNPC_Misc_Quest11_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest11_Data", "DialogueTheRelic"},
-		/*12*/ {"3DNPC_Misc_Quest12_Key", "$3DNPC_Misc_Quest12_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest12_Data", "RobbersRefuge3DNPC"},
-		/*13*/ {"3DNPC_Misc_Quest13_Key", "$3DNPC_Misc_Quest13_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest13_Data", "CassockQuest"},
-		/*14*/ {"3DNPC_Misc_Quest14_Key", "$3DNPC_Misc_Quest14_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest14_Data", "Skjelquest"},
-		/*15*/ {"3DNPC_Misc_Quest15_Key", "$3DNPC_Misc_Quest15_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest15_Data", "DialogueYtharil"},
-		/*16*/ {"3DNPC_Misc_Quest16_Key", "$3DNPC_Misc_Quest16_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest16_Data", "DialogueDarrakki"},
-		/*17*/ {"3DNPC_Misc_Quest17_Key", "$3DNPC_Misc_Quest17_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest17_Data", "Hagcursequest"},
-		/*18*/ {"3DNPC_Misc_Quest18_Key", "$3DNPC_Misc_Quest18_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest18_Data", "Vartheimquest"},
-		/*19*/ {"3DNPC_Misc_Quest19_Key", "$3DNPC_Misc_Quest19_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest19_Data", "HWSQuest"},
-		/*20*/ {"3DNPC_Misc_Quest20_Key", "$3DNPC_Misc_Quest20_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest20_Data", "DialogueRaynes"},
-		/*21*/ {"3DNPC_Misc_Quest21_Key", "$3DNPC_Misc_Quest21_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest21_Data", "DialogueJilkmar"},
-		/*22*/ {"3DNPC_Misc_Quest22_Key", "$3DNPC_Misc_Quest22_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest22_Data", "Bookquest3dnpc"},
-		/*23*/ {"3DNPC_Misc_Quest23_Key", "$3DNPC_Misc_Quest23_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest23_Data", "DialogueThriceBitten"},
-		/*24*/ {"3DNPC_Misc_Quest24_Key", "$3DNPC_Misc_Quest24_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$3DNPC_Misc_Quest24_Data", "Terynnequest"},
-	};
-
-	constexpr std::size_t Quest4_StandardCompletion[] = {
-		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
-	};
 
 	constexpr Serialization::FormArray Items = {
 	0x186CD2,0x28493D,0x1B2920,0x0DF4B8,0x1067D8,0x0DF4BA,0x0DF4BB,
@@ -124,6 +115,7 @@ namespace CPatch_3DC {
 	0x28BD0E,0x1A7F98,0x1DBB14,0x1DA7F2,0x248CAF,0x1FD608,0x1C2283,
 	0x245AA4,0x17CB26,0x1CC676,0x1D40FC,0x24E51F,0x1BD250,
 	};
+
 	// clang-format on
 
 	constexpr std::string_view modname = "3DNPC.esp";
@@ -146,103 +138,39 @@ namespace CPatch_3DC {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest1_KeysArray.clear();
-		Quest1_NameArray.clear();
-		Quest1_TextArray.clear();
-		Quest1_IdenArray.clear();
-		Quest1_RadiArray.clear();
-		Quest1_StgeArray.clear();
-
-		Quest2_KeysArray.clear();
-		Quest2_NameArray.clear();
-		Quest2_TextArray.clear();
-		Quest2_IdenArray.clear();
-		Quest2_RadiArray.clear();
-		Quest2_StgeArray.clear();
-
-		Quest3_KeysArray.clear();
-		Quest3_NameArray.clear();
-		Quest3_TextArray.clear();
-		Quest3_IdenArray.clear();
-		Quest3_RadiArray.clear();
-		Quest3_StgeArray.clear();
-
-		Quest4_KeysArray.clear();
-		Quest4_NameArray.clear();
-		Quest4_TextArray.clear();
-		Quest4_IdenArray.clear();
-		Quest4_RadiArray.clear();
-		Quest4_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest1_QuestData) {
-			Quest1_KeysArray.push_back(key);
-			Quest1_NameArray.push_back(name);
-			Quest1_RadiArray.push_back(flag);
-			Quest1_TextArray.push_back(text);
-			Quest1_IdenArray.push_back(id);
-			Quest1_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(Quest1_Data)>; i++)
+		{
+			Quest1_Data[i].init()
+				->initQuestData(&ArrayData1);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 44));
 		}
+		Quest1_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest2_QuestData) {
-			Quest2_KeysArray.push_back(key);
-			Quest2_NameArray.push_back(name);
-			Quest2_RadiArray.push_back(flag);
-			Quest2_TextArray.push_back(text);
-			Quest2_IdenArray.push_back(id);
-			Quest2_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest2_Data)>; i++)
+		{
+			Quest2_Data[i].init()
+				->initQuestData(&ArrayData2);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 45));
 		}
+		Quest2_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest3_QuestData) {
-			Quest3_KeysArray.push_back(key);
-			Quest3_NameArray.push_back(name);
-			Quest3_RadiArray.push_back(flag);
-			Quest3_TextArray.push_back(text);
-			Quest3_IdenArray.push_back(id);
-			Quest3_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest3_Data)>; i++)
+		{
+			Quest3_Data[i].init()
+				->initQuestData(&ArrayData3);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 46));
 		}
+		Quest3_BoolArray = std::vector<bool>(CArraySize, false);
 
-		for (auto& [key, name, flag, isStageDone, text, id] : Quest4_QuestData) {
-			Quest4_KeysArray.push_back(key);
-			Quest4_NameArray.push_back(name);
-			Quest4_RadiArray.push_back(flag);
-			Quest4_TextArray.push_back(text);
-			Quest4_IdenArray.push_back(id);
-			Quest4_StgeArray.push_back(isStageDone);
+		for (auto i = 0; i < std::extent_v<decltype(Quest4_Data)>; i++)
+		{
+			Quest4_Data[i].init()
+				->initQuestData(&ArrayData4);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 47));
 		}
-
-		assert(Quest1_KeysArray.size() == ArraySize);
-		assert(Quest1_IdenArray.size() == ArraySize);
-		assert(Quest1_NameArray.size() == ArraySize);
-		assert(Quest1_RadiArray.size() == ArraySize);
-		assert(Quest1_TextArray.size() == ArraySize);
-		assert(Quest1_StgeArray.size() == ArraySize);
-		Quest1_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest2_KeysArray.size() == ArraySize);
-		assert(Quest2_IdenArray.size() == ArraySize);
-		assert(Quest2_NameArray.size() == ArraySize);
-		assert(Quest2_RadiArray.size() == ArraySize);
-		assert(Quest2_TextArray.size() == ArraySize);
-		assert(Quest2_StgeArray.size() == ArraySize);
-		Quest2_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest3_KeysArray.size() == ArraySize);
-		assert(Quest3_IdenArray.size() == ArraySize);
-		assert(Quest3_NameArray.size() == ArraySize);
-		assert(Quest3_RadiArray.size() == ArraySize);
-		assert(Quest3_TextArray.size() == ArraySize);
-		assert(Quest3_StgeArray.size() == ArraySize);
-		Quest3_BoolArray = std::vector<bool>(ArraySize, false);
-
-		assert(Quest4_KeysArray.size() == ArraySize);
-		assert(Quest4_IdenArray.size() == ArraySize);
-		assert(Quest4_NameArray.size() == ArraySize);
-		assert(Quest4_RadiArray.size() == ArraySize);
-		assert(Quest4_TextArray.size() == ArraySize);
-		assert(Quest4_StgeArray.size() == ArraySize);
-		Quest4_BoolArray = std::vector<bool>(ArraySize, false);
+		Quest4_BoolArray = std::vector<bool>(CArraySize, false);
 	}
 
 	//---------------------------------------------------
@@ -257,57 +185,6 @@ namespace CPatch_3DC {
 
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest1_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest1_IdenArray.end()) { 
-			if (Quest1_StgeArray.at(std::distance(Quest1_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest1_KeysArray.at(std::distance(Quest1_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest1_IdenArray.at(std::distance(Quest1_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest2_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest2_IdenArray.end()) {
-			if (Quest2_StgeArray.at(std::distance(Quest2_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest2_KeysArray.at(std::distance(Quest2_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest2_IdenArray.at(std::distance(Quest2_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest3_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest3_IdenArray.end()) {
-			if (Quest3_StgeArray.at(std::distance(Quest3_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest3_KeysArray.at(std::distance(Quest3_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest3_IdenArray.at(std::distance(Quest3_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-
-		t_pos = std::ranges::find(Quest4_IdenArray, quest->GetFormEditorID());
-		if (t_pos != Quest4_IdenArray.end()) {
-			if (Quest4_StgeArray.at(std::distance(Quest4_IdenArray.begin(), t_pos))) {
-				CQuestKeys_Stages.AddStage(Quest4_KeysArray.at(std::distance(Quest4_IdenArray.begin(), t_pos)), a_event->stage);
-				INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest4_IdenArray.at(std::distance(Quest4_IdenArray.begin(), t_pos)));
-				return EventResult::kContinue;
-			}
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -359,11 +236,6 @@ namespace CPatch_3DC {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -494,30 +366,5 @@ namespace CPatch_3DC {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : Quest1_StandardCompletion) {
-			Quest1_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest1_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest1_KeysArray[i], Quest1_IdenArray[i]);
-		};
-
-		for (auto i : Quest2_StandardCompletion) {
-			Quest2_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest2_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest2_KeysArray[i], Quest2_IdenArray[i]);
-		};
-
-		for (auto i : Quest3_StandardCompletion) {
-			Quest3_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest3_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest3_KeysArray[i], Quest3_IdenArray[i]);
-		};
-
-		for (auto i : Quest4_StandardCompletion) {
-			Quest4_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest4_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest4_KeysArray[i], Quest4_IdenArray[i]);
-		};
 	}
 }

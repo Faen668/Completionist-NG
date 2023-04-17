@@ -38,10 +38,8 @@ namespace CPatch_AHO
 	inline std::vector<std::string>		Quest_NameArray;
 	inline std::vector<std::string>		Quest_IdenArray;
 	inline std::vector<std::string>		Quest_TextArray;
-	inline std::vector<std::string>		Quest_KeysArray;
 	inline std::vector<std::int32_t>	Quest_RadiArray;
 	inline std::vector<bool>			Quest_BoolArray;
-	inline std::vector<bool>			Quest_StgeArray;
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -49,24 +47,21 @@ namespace CPatch_AHO
 
 		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
 		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::BooksRead::Event>,
-		public RE::BSTEventSink<RE::TESQuestStageEvent> {
+		public RE::BSTEventSink<RE::BooksRead::Event>
+	{
 
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
 		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
 		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
 		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
-		EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
 
 		static void			SinkEvents();
 		static void			InjectAndCompileData();
 
 		static void			InstallFramework();
 		static void			InstallQuestFramework();
-
 		static void			UpdateFoundForms();
-		static void			UpdateQuestFramework();
 
 		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
 		static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);

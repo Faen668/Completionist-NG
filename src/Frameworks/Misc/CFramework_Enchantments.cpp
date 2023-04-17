@@ -14,7 +14,7 @@ namespace CFramework_Enchantments {
 	0x10FB77,0x10FB78,0x10FB79,0x10FB7A,0x10FB7B,0x10FB7C,0x10FB7F,0x10FB80,
 	0x10FB81,0x10FB82,0x10FB83,0x10FB85,0x10FB87,0x10FB88,0x10FB89,0x10FB76,
 	0x10FB7D,0x10FB86,0x10FB8A,0x10FB8B,0x10FB8C,0x10FB8D,0x10FB8E,0x10FB8F,
-	0x10FB90,
+	0x10FB90, 
 	};
 
 	constexpr Serialization::FormArray Forms_SA = {
@@ -31,7 +31,11 @@ namespace CFramework_Enchantments {
 
 	constexpr Serialization::FormArray Forms_VW = {
 	0x10FB91,0x10FB9D,0x10FB92,0x10FB93,0x10FB94,0x10FB95,0x10FB96,0x10FB97,
-	0x10FB98,0x10FB99,0x10FB9A,0x10FB9B,0x10FB9C,
+	0x10FB98,0x10FB99,0x10FB9A,0x10FB9B,0x10FB9C,0x040003,0x105830,0x03B0B2,
+	};
+
+	constexpr Serialization::FormArray Forms_DW = {
+	0x02C46E,
 	};
 
 	constexpr Serialization::FormArray Forms_SW = {
@@ -42,6 +46,10 @@ namespace CFramework_Enchantments {
 	0x051208,0x05142A,0x051221,0x05122E,0x05125A,0x0513EF,0x0510F1,0x05140E,
 	0x25E4D2,0x051213,0x0511E9,0x051242,0x05141E,0x051150,0x0510F9,0x25E4D5,
 	0x05115F,0x051115,0x0510FC,0x0511AE,
+	};
+
+	constexpr Serialization::FormArray Forms_NGA = {
+	0x00087E,0x0008CC,
 	};
 
 	// clang-format on
@@ -102,6 +110,13 @@ namespace CFramework_Enchantments {
 			}
 		}
 
+		for (auto i = 0; i < NGA_FormArray.size(); i++) {
+			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(NGA_FormArray[i]); enchantment && enchantment->GetKnown()) {
+				NGA_BoolArray[i] = true;
+				FoundItemData_NoShow.AddForm(enchantment);
+			}
+		}
+
 		CHandler::UpdateCounts();
 		return EventResult::kContinue;
 	}
@@ -114,8 +129,16 @@ namespace CFramework_Enchantments {
 
 		CFramework_Enchantments_VA::Data.CompileFormArray(CFramework_Enchantments::Forms_VA, "Skyrim.esm");
 		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_VW, "Skyrim.esm");
+		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_DW, "Dragonborn.esm");
+
 		CFramework_Enchantments_SA::Data.CompileFormArray(CFramework_Enchantments::Forms_SA, "Summermyst - Enchantments of Skyrim.esp");
 		CFramework_Enchantments_SW::Data.CompileFormArray(CFramework_Enchantments::Forms_SW, "Summermyst - Enchantments of Skyrim.esp");
+
+		if (Serialization::CompletionistData::IsModInstalled("ccvsvsse003-necroarts.esl"))
+		{
+			CFramework_Enchantments_NGA::Data.CompileFormArray(CFramework_Enchantments::Forms_NGA, "ccvsvsse003-necroarts.esl");
+			CFramework_Enchantments_NGA::Data.Populate(NGA_NameArray, NGA_FormArray, NGA_BoolArray, NGA_TextArray);
+		}
 
 		CFramework_Enchantments_VA::Data.Populate(VA_NameArray, VA_FormArray, VA_BoolArray, VA_TextArray);
 		CFramework_Enchantments_VW::Data.Populate(VW_NameArray, VW_FormArray, VW_BoolArray, VW_TextArray);
@@ -158,6 +181,13 @@ namespace CFramework_Enchantments {
 				FoundItemData_NoShow.AddForm(enchantment);
 			}
 		}
+
+		for (auto i = 0; i < NGA_FormArray.size(); i++) {
+			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(NGA_FormArray[i]); enchantment && (enchantment->GetKnown() || FoundItemData_NoShow.HasForm(enchantment->GetFormID()))) {
+				NGA_BoolArray[i] = true;
+				FoundItemData_NoShow.AddForm(enchantment);
+			}
+		}
 		CHandler::UpdateCounts();
 	}
 
@@ -178,5 +208,8 @@ namespace CFramework_Enchantments {
 
 		SW_EntriesTotal = SW_FormArray.size();
 		SW_EntriesFound = std::ranges::count(SW_BoolArray, true);
+
+		NGA_EntriesTotal = NGA_FormArray.size();
+		NGA_EntriesFound = std::ranges::count(NGA_BoolArray, true);
 	}
 }

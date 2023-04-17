@@ -1,318 +1,39 @@
 #pragma once
+#include "Structs.hpp"
+#include "Serialization.hpp";	
 
-#include "Serialization.hpp";
+//---------------------------------------------------
+//---------------------------------------------------
+//---------------------------------------------------
 
-struct FavorQuestData
+struct MerchantFavors
 {
-	struct Data
-	{
-		RE::FormID ID;
-		const char* FN;
-	};
-
-	Data base;
-	Data vari;
-	Data actr;
-
-	std::int32_t Stage;
-	std::int32_t Value;
-
-	const char* Global;
+	RE::FormID Merchant;
+	RE::FormID SoldForm;
+	int32_t SoldQuantity;
+	RE::TESNPC* BaseActor;
 };
 
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace FavorProcessor
-{
-	template <std::size_t N>
-	static void ProcessQuest(const RE::FormID a_formID, const FavorQuestData(&a_array)[N], std::uint16_t a_stage);
-
-	auto Register() -> void;
-}		
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor001
+namespace CQFramework_FavorQuests
 {
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler: public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
+	class CHandler final :
+		public RE::BSTEventSink<RE::TESQuestStageEvent>,
+		public RE::BSTEventSink<RE::TESContainerChangedEvent>
 	{
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
+		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;		 
+		  EventResult ProcessEvent(RE::TESContainerChangedEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource) override;
 
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
+		  static void InstallFramework();
 
-namespace Favor013
-{
-	using EventResult = RE::BSEventNotifyControl;
+		  template <std::size_t N>
+		  static void AddToArray(FavorMergedData(&a_array)[N]);
 
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor017
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor018
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor019
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor104
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor109
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor110
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor151
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor153
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor154
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor157
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor158
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor204
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-	};
-}
-
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace Favor205
-{
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final : public
-		RE::BSTEventSink<RE::TESQuestStageEvent>
-	{
-
-	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
+		  static void RegisterMerchant(RE::StaticFunctionTag*, RE::Actor*);
+		  static void UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor*);
 	};
 }

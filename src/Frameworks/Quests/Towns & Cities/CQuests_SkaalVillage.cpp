@@ -1,99 +1,43 @@
 #include "CQuests_SkaalVillage.hpp"
-#include "Frameworks/FrameworkMaster.hpp"
-#include "Serialization.hpp";
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
-namespace CQFramework_SkaalVillage {
-	using namespace CFramework_Master;
-	using namespace Serialization;
-
-	constexpr std::tuple<const char*, const char*, std::int32_t, const char*, const char*> QuestData[] = {
-	/*00*/ {"SkaalVillage_Quest00_Key", "$SkaalVillage_Quest00_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest00_Data", "DLC2SkaalVillageFreeform2"},
-	/*01*/ {"SkaalVillage_Quest01_Key", "$SkaalVillage_Quest01_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest01_Data", "DLC2WB01"},
-	/*02*/ {"SkaalVillage_Quest02_Key", "$SkaalVillage_Quest02_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest02_Data", "DLC2SV01"},
-	/*03*/ {"SkaalVillage_Quest03_Key", "$SkaalVillage_Quest03_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest03_Data", "DLC2SV02"},
-	/*04*/ {"SkaalVillage_Quest04_Key", "$SkaalVillage_Quest04_Name", SIDE_QUEST_FLAG, "$SkaalVillage_Quest04_Data", "DLC2SkaalVillageFreeform1"},
-	/*05*/ {"SkaalVillage_Quest05_Key", "$SkaalVillage_Quest05_Name", RADI_QUEST_FLAG, "$SkaalVillage_Quest05_Data", "Favor104"},
+namespace CQFramework_SkaalVillage 
+{
+	CQuestData QuestData[] {
+		{"SkaalVillage_Quest00", CFlagEnum::kSide, CCompEnum::kStage, "DLC2SkaalVillageFreeform2"},
+		{"SkaalVillage_Quest01", CFlagEnum::kSide, CCompEnum::kStand, "DLC2WB01"},
+		{"SkaalVillage_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "DLC2SV01"},
+		{"SkaalVillage_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "DLC2SV02"},
+		{"SkaalVillage_Quest04", CFlagEnum::kSide, CCompEnum::kStage, "DLC2SkaalVillageFreeform1"},
+		{"SkaalVillage_Quest05", CFlagEnum::kRadi, CCompEnum::kGlobl, "Favor104"},
 	};
 
-	constexpr std::size_t StandardCompletion[] = {
-	1,2,3,
+	CRadiantData RadiantData[]{
+		{"SkaalVillage_Quest05", CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor104Fanari" },
 	};
 
-	constexpr std::tuple<std::size_t, const char*, std::int32_t> GlobalCompletion[] = {
-	{5, "Completionist_Favor104Fanari", 1},
+	CStageData StageData[]{
+		{"SkaalVillage_Quest00", CStageEnum::kPast, 30, 0},
+		{"SkaalVillage_Quest04", CStageEnum::kPast, 20, 0},
 	};
 
-	constexpr std::pair<std::size_t, std::int32_t> StagePastCompletion[] = {
-	{ 0, 30 },
-	{ 4, 20 },
-	};
+	/*NA*/ CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallFramework() {
-		SinkEvents();
+	void CHandler::InstallFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData)
+				->initStageData(StageData)
+				->initRadiantData(RadiantData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 17));
 
-		IdenArray.clear();
-		NameArray.clear();
-		RadiArray.clear();
-		NameArray.clear();
-		KeysArray.clear();
-
-		for (auto& [Key, Name, Flag, Text, ID] : QuestData) {
-			KeysArray.push_back(Key);
-			NameArray.push_back(Name);
-			RadiArray.push_back(Flag);
-			TextArray.push_back(Text);
-			IdenArray.push_back(ID);
 		}
-
-		assert(KeysArray.size() == ArraySize);
-		assert(IdenArray.size() == ArraySize);
-		assert(NameArray.size() == ArraySize);
-		assert(RadiArray.size() == ArraySize);
-		assert(TextArray.size() == ArraySize);
-		BoolArray = std::vector<bool>(ArraySize, false);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Menu Open ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
-
-		CHandler::UpdateCompletion();
-		return EventResult::kContinue;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateCompletion() {
-
-		for (auto i : StandardCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_N(KeysArray[i], IdenArray[i]);
-		}
-
-		for (auto& [i, global, value] : GlobalCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_G(KeysArray[i], IdenArray[i], global, value);
-		}
-
-		for (auto& [i, stage] : StagePastCompletion) {
-			BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(KeysArray[i]) || FrameworkAPI::IsCompleted_P(KeysArray[i], IdenArray[i], stage);
-		}
+		BoolArray = std::vector<bool>(CArraySize, false);
 	};
-}
+};

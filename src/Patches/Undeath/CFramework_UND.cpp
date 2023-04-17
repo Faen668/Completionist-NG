@@ -1,28 +1,28 @@
 #include "Serialization.hpp"
 #include "CFramework_UND.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_UND {
+namespace CPatch_UND 
+{
 	using namespace CFramework_Master;
 
+	CQuestData QuestData[]
+	{
+		/*00*/ {"Undeath_Quest00", CFlagEnum::kMain, CCompEnum::kStand, "NecroQuest01"},
+		/*01*/ {"Undeath_Quest01", CFlagEnum::kMain, CCompEnum::kStand, "NecroQuest02"},
+		/*02*/ {"Undeath_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "NecroQuest03"},
+		/*03*/ {"Undeath_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "NecroQuest04"},
+		/*04*/ {"Undeath_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "NecroQuest05"},
+		/*05*/ {"Undeath_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "NecroBlackBookQuest01"},
+		/*06*/ {"Undeath_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "NecroLichRitualQuest"},
+	};
+
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+
 	// clang-format off
-
-	/*<Unique Key>, <Quest Name>, <Quest Type>, <Check Stage Done>, <Quest Highlight Text>, <Quest Editor ID>*/
-	constexpr std::tuple<const char*, const char*, std::int32_t, bool, const char*, const char*> QuestData[] = {
-		/*00*/ {"Undeath_Quest00_Key", "$Undeath_Quest00_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest00_Data", "NecroQuest01"},
-		/*01*/ {"Undeath_Quest01_Key", "$Undeath_Quest01_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest01_Data", "NecroQuest02"},
-		/*02*/ {"Undeath_Quest02_Key", "$Undeath_Quest02_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest02_Data", "NecroQuest03"},
-		/*03*/ {"Undeath_Quest03_Key", "$Undeath_Quest03_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest03_Data", "NecroQuest04"},
-		/*04*/ {"Undeath_Quest04_Key", "$Undeath_Quest04_Name", MAIN_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest04_Data", "NecroQuest05"},
-		/*05*/ {"Undeath_Quest05_Key", "$Undeath_Quest05_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest05_Data", "NecroBlackBookQuest01"},
-		/*06*/ {"Undeath_Quest06_Key", "$Undeath_Quest06_Name", SIDE_QUEST_FLAG, IS_STAGE_DONE_N, "$Undeath_Quest06_Data", "NecroLichRitualQuest"},
-	};
-
-	constexpr std::size_t StandardCompletion[] = {
-		0,1,2,3,4,5,6
-	};
 
 	constexpr Serialization::FormArray Books = {
 	0x26720A,0x26721D,0x1B68D5,0x002741,0x1C5C99,0x002729,
@@ -57,32 +57,16 @@ namespace CPatch_UND {
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
-	void CHandler::InstallQuestFramework() {
-
-		Quest_IdenArray.clear();
-		Quest_NameArray.clear();
-		Quest_RadiArray.clear();
-		Quest_NameArray.clear();
-		Quest_KeysArray.clear();
-		Quest_StgeArray.clear();
-
-		for (auto& [key, name, flag, isStageDone, text, id] : QuestData) {
-			Quest_KeysArray.push_back(key);
-			Quest_NameArray.push_back(name);
-			Quest_RadiArray.push_back(flag);
-			Quest_TextArray.push_back(text);
-			Quest_IdenArray.push_back(id);
-			Quest_StgeArray.push_back(isStageDone);
+	void CHandler::InstallQuestFramework()
+	{
+		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
+		{
+			QuestData[i].init()
+				->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 42));
 		}
-
-		assert(Quest_KeysArray.size() == ArraySize);
-		assert(Quest_IdenArray.size() == ArraySize);
-		assert(Quest_NameArray.size() == ArraySize);
-		assert(Quest_RadiArray.size() == ArraySize);
-		assert(Quest_TextArray.size() == ArraySize);
-		assert(Quest_StgeArray.size() == ArraySize);
-		Quest_BoolArray = std::vector<bool>(ArraySize, false);
-	}
+		Quest_BoolArray = std::vector<bool>(CArraySize, false);
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
@@ -93,30 +77,6 @@ namespace CPatch_UND {
 
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Stage Set ) --------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) {
-
-		if (!a_event || !a_event->stage) { return RE::BSEventNotifyControl::kContinue; }
-
-		const auto* quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!quest) { return EventResult::kContinue; }
-
-		auto t_pos = std::ranges::find(Quest_IdenArray, quest->GetFormEditorID());
-		if (t_pos == Quest_IdenArray.end()) { return EventResult::kContinue; }
-
-
-		if (Quest_StgeArray.at(std::distance(Quest_IdenArray.begin(), t_pos))) {
-			CQuestKeys_Stages.AddStage(Quest_KeysArray.at(std::distance(Quest_IdenArray.begin(), t_pos)), a_event->stage);
-			INFO("Added Stage {} to '{}' Serialized Map.", a_event->stage, Quest_IdenArray.at(std::distance(Quest_IdenArray.begin(), t_pos)));
-		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -155,11 +115,6 @@ namespace CPatch_UND {
 				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
 			}
 		}
-
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			CHandler::UpdateQuestFramework();
-		}
-
 		return EventResult::kContinue;
 	}
 
@@ -254,18 +209,5 @@ namespace CPatch_UND {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
-	void CHandler::UpdateQuestFramework() {
-
-		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
-
-		for (auto i : StandardCompletion) {
-			Quest_BoolArray[i] = FrameworkAPI::qIsOptionToggledInternal(Quest_KeysArray[i]) || FrameworkAPI::IsCompleted_N(Quest_KeysArray[i], Quest_IdenArray[i]);
-		}
 	}
 }

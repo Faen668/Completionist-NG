@@ -219,6 +219,7 @@ namespace Completionist_MainHUD
 			return "***";
 		}
 	}
+
 	//---------------------------------------------------
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
@@ -319,19 +320,19 @@ namespace Completionist_MainHUD
 		if (!CurrentObj) { return; }
 
 		RE::TESForm* Base = CurrentObj.get()->GetBaseObject();
-		if (!Base || !ItemIsCollectable(Base)) { return; }
+		if (!Base) { return; }
 
 		bool PrevCollected = ItemIsCollected(Base);
 
-		if (PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
-
-		auto& newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
-		auto& foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;
+		if (!ItemIsCollectable(Base) || PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
 
 		if (SKSEMessaging && SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
 			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (V_moreHudEnabled_Crosshair) };
 			SKSEMessaging->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
 		}
+
+		auto& newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
+		auto& foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;
 
 		data->text = PrevCollected ? 
 			fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, foundColour, V_CrosshairTag_Found) :

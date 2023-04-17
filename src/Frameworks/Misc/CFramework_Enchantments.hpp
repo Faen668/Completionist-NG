@@ -18,6 +18,10 @@ namespace CFramework_Enchantments_SW {
 	inline Serialization::CompletionistData Data;
 }
 
+namespace CFramework_Enchantments_NGA {
+	inline Serialization::CompletionistData Data;
+}
+
 namespace CFramework_Enchantments {
 
 	inline std::vector<std::string>		VA_NameArray;
@@ -47,6 +51,13 @@ namespace CFramework_Enchantments {
 	inline std::vector<bool>			SW_BoolArray;
 	inline std::int32_t					SW_EntriesTotal;
 	inline std::int32_t					SW_EntriesFound;
+
+	inline std::vector<std::string>		NGA_NameArray;
+	inline std::vector<std::string>		NGA_TextArray;
+	inline std::vector<RE::TESForm*>	NGA_FormArray;
+	inline std::vector<bool>			NGA_BoolArray;
+	inline std::int32_t					NGA_EntriesTotal;
+	inline std::int32_t					NGA_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

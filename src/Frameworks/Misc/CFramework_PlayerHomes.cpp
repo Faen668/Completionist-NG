@@ -69,31 +69,39 @@ namespace CFramework_PlayerHomes {
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 
-		if (!a_event || a_event->newContainer != 0x00014) { return EventResult::kContinue; }
+		if (a_event && a_event->newContainer == RE::PlayerCharacter::GetSingleton()->GetFormID())
+		{
+			auto* key = RE::TESForm::LookupByID(a_event->baseObj);
+			if (key && CFramework_PlayerHomes_VH::Data.HasForm(key))
+			{
+				for (auto& Data : Vanilla_Homes)
+				{
+					if (Data.KEY != 0) {
+						auto* Data_Key = Serialization::CompletionistData::GetFullForm(Data.KEY, Data.PROVIDER);
 
-		auto* key = RE::TESForm::LookupByID(a_event->baseObj);
-		if (!key) { return EventResult::kContinue; }
-
-		if (CFramework_PlayerHomes_VH::Data.HasForm(a_event->baseObj)) {
-			for (auto& Data : Vanilla_Homes) {
-				if (Data.KEY != 0) {
-					auto* Chk = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.KEY, Data.PROVIDER);
-					if (Chk->GetFormID() == key->GetFormID()) {
-						ProcessFoundForm(Data.IDEN);
-						return EventResult::kContinue;
+						if (Data_Key && Data_Key->GetFormID() == key->GetFormID())
+						{
+							ProcessFoundForm(Data.IDEN);
+							return EventResult::kContinue;
+						}
 					}
 				}
 				return EventResult::kContinue;
 			}
-		}
 
-		if (CFramework_PlayerHomes_PH::Data.HasForm(a_event->baseObj)) {
-			for (auto& Data : ModAdded_Homes) {
-				if (Data.KEY != 0) {
-					auto* Chk = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.KEY, Data.PROVIDER);
-					if (Chk->GetFormID() == key->GetFormID()) {
-						ProcessFoundForm(Data.IDEN);
-						return EventResult::kContinue;
+			if (key && CFramework_PlayerHomes_PH::Data.HasForm(key))
+			{
+				for (auto& Data : ModAdded_Homes)
+				{
+					if (Data.KEY != 0)
+					{
+						auto* Data_Key = Serialization::CompletionistData::GetFullForm(Data.KEY, Data.PROVIDER);
+
+						if (Data_Key && Data_Key->GetFormID() == key->GetFormID())
+						{
+							ProcessFoundForm(Data.IDEN);
+							return EventResult::kContinue;
+						}
 					}
 				}
 				return EventResult::kContinue;
@@ -144,10 +152,12 @@ namespace CFramework_PlayerHomes {
 
 	void CHandler::ProcessFoundForm(std::string a_editorID) {
 
-		if (auto t_pos = std::ranges::find(VH_QuestArray, a_editorID); t_pos != VH_QuestArray.end()) {
+		if (auto t_pos = std::ranges::find(VH_QuestArray, a_editorID); t_pos != VH_QuestArray.end()) 
+		{
 			auto b_pos = std::distance(VH_QuestArray.begin(), t_pos);
 
-			if (!FoundItemData_NoShow.HasForm(VH_FormArray[b_pos]->GetFormID())) {
+			if (!FoundItemData_NoShow.HasForm(VH_FormArray[b_pos]->GetFormID())) 
+			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, VH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
@@ -158,10 +168,12 @@ namespace CFramework_PlayerHomes {
 			VH_EntriesFound = std::ranges::count(VH_BoolArray, true);
 		}
 
-		if (auto t_pos = std::ranges::find(CH_QuestArray, a_editorID); t_pos != CH_QuestArray.end()) {
+		if (auto t_pos = std::ranges::find(CH_QuestArray, a_editorID); t_pos != CH_QuestArray.end()) 
+		{
 			auto b_pos = std::distance(CH_QuestArray.begin(), t_pos);
 
-			if (!FoundItemData_NoShow.HasForm(CH_FormArray[b_pos]->GetFormID())) {
+			if (!FoundItemData_NoShow.HasForm(CH_FormArray[b_pos]->GetFormID())) 
+			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
@@ -172,10 +184,12 @@ namespace CFramework_PlayerHomes {
 			CH_EntriesFound = std::ranges::count(CH_BoolArray, true);
 		}
 
-		if (auto t_pos = std::ranges::find(PH_QuestArray, a_editorID); t_pos != PH_QuestArray.end()) {
+		if (auto t_pos = std::ranges::find(PH_QuestArray, a_editorID); t_pos != PH_QuestArray.end()) 
+		{
 			auto b_pos = std::distance(PH_QuestArray.begin(), t_pos);
 
-			if (!FoundItemData_NoShow.HasForm(PH_FormArray[b_pos]->GetFormID())) {
+			if (!FoundItemData_NoShow.HasForm(PH_FormArray[b_pos]->GetFormID())) 
+			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, PH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
 			}
@@ -192,63 +206,59 @@ namespace CFramework_PlayerHomes {
 	//-- Framework Functions ( Form Injection ) ---------
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
-
-		VH_FormArray.clear();
-		VH_NameArray.clear();
-		VH_TextArray.clear();
-		VH_BoolArray.clear();
-		VH_QuestArray.clear();
-
-		CH_FormArray.clear();
-		CH_NameArray.clear();
-		CH_TextArray.clear();
-		CH_BoolArray.clear();
-		CH_QuestArray.clear();
-
-		PH_FormArray.clear();
-		PH_NameArray.clear();
-		PH_TextArray.clear();
-		PH_BoolArray.clear();
-		PH_QuestArray.clear();
-
-		for (auto& Data : Vanilla_Homes) {
-			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) {
+	void CHandler::InjectAndCompileData() 
+	{
+		for (auto& Data : Vanilla_Homes) 
+		{
+			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) 
+			{
 				VH_FormArray.push_back(form);
 				VH_NameArray.push_back(form->GetName());
 				VH_TextArray.push_back(Data.TEXT);
 				VH_QuestArray.push_back(Data.IDEN);
-				if (Data.KEY != 0) {
+				if (Data.KEY != 0) 
+				{
 					CFramework_PlayerHomes_VH::Data.AddForm(Data.KEY, Data.PROVIDER);
 				}
 			}
 		}
 
-		for (auto& Data : CreationClub_Homes) {
-			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) {
+		for (auto& Data : CreationClub_Homes)
+		{
+			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) 
+			{
+				continue;
+			}
+
+			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) 
+			{
 				CH_FormArray.push_back(form);
 				CH_NameArray.push_back(form->GetName());
 				CH_TextArray.push_back(Data.TEXT);
 				CH_QuestArray.push_back(Data.IDEN);
-				if (Data.KEY != 0) {
+				if (Data.KEY != 0) 
+				{
 					CFramework_PlayerHomes_CH::Data.AddForm(Data.KEY, Data.PROVIDER);
 				}
 			}
 		}
 
 
-		for (auto& Data : ModAdded_Homes) {
-
-			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) {
+		for (auto& Data : ModAdded_Homes) 
+		{
+			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) 
+			{
 				continue;
 			}
 
-			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) {
+			if (auto* form = Serialization::CompletionistData::GetFullForm<RE::TESForm>(Data.FORM, Data.FORM_PROVIDER)) 
+			{
 				PH_FormArray.push_back(form);
 				PH_NameArray.push_back(form->GetName());
 				PH_TextArray.push_back(Data.TEXT);
 				PH_QuestArray.push_back(Data.IDEN);
-				if (Data.KEY != 0) {
+				if (Data.KEY != 0) 
+				{
 					CFramework_PlayerHomes_PH::Data.AddForm(Data.KEY, Data.PROVIDER);
 				}
 			}
@@ -283,22 +293,28 @@ namespace CFramework_PlayerHomes {
 	//-- Framework Functions ( Update Found Forms ) -----
 	//---------------------------------------------------
 
-	void CHandler::UpdateFoundForms() {
-
-		for (auto i = 0; i < VH_FormArray.size(); i++) {
-			if (VH_FormArray[i] && FoundItemData_NoShow.HasForm(VH_FormArray[i]->GetFormID())) {
+	void CHandler::UpdateFoundForms() 
+	{
+		for (auto i = 0; i < VH_FormArray.size(); i++) 
+		{
+			if (VH_FormArray[i] && FoundItemData_NoShow.HasForm(VH_FormArray[i]->GetFormID())) 
+			{
 				VH_BoolArray[i] = true;
 			}
 		}
 
-		for (auto i = 0; i < CH_FormArray.size(); i++) {
-			if (CH_FormArray[i] && FoundItemData_NoShow.HasForm(CH_FormArray[i]->GetFormID())) {
+		for (auto i = 0; i < CH_FormArray.size(); i++) 
+		{
+			if (CH_FormArray[i] && FoundItemData_NoShow.HasForm(CH_FormArray[i]->GetFormID())) 
+			{
 				CH_BoolArray[i] = true;
 			}
 		}
 
-		for (auto i = 0; i < PH_FormArray.size(); i++) {
-			if (PH_FormArray[i] && FoundItemData_NoShow.HasForm(PH_FormArray[i]->GetFormID())) {
+		for (auto i = 0; i < PH_FormArray.size(); i++) 
+		{
+			if (PH_FormArray[i] && FoundItemData_NoShow.HasForm(PH_FormArray[i]->GetFormID())) 
+			{
 				PH_BoolArray[i] = true;
 			}
 		}
