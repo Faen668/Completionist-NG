@@ -52,6 +52,7 @@ namespace CFramework_PlayerHomes
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();
+		  static void			InstallSearchTerms();
 
 		  static void			UpdateFoundForms();
 		  static void			InjectAndCompileData();

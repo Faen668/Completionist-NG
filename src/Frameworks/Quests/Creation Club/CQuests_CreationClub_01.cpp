@@ -43,7 +43,7 @@ namespace CQFramework_CC1
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework()
-	{
+	{		
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()->initQuestData(&ArrayData)->initStageData(StageData);

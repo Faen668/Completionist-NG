@@ -6,7 +6,7 @@ namespace CQFramework_Misc_DB
 	CStageData StageData[] {
 		{"Misc_DB_Quest00", CStageEnum::kDone, 200, 0, },
 		{"Misc_DB_Quest02", CStageEnum::kDone, 10,	0, },
-		{"Misc_DB_Quest04", CStageEnum::kDone, 255, 0, },
+		{"Misc_DB_Quest04", CStageEnum::kDone, 30,  0, },
 		{"Misc_DB_Quest05", CStageEnum::kDone, 600, 0, },
 	};
 

@@ -55,11 +55,9 @@ namespace CQFramework_CollegeOfWinterhold
 		/*31*/ {"CollegeOfWinterhold_Quest31", CFlagEnum::kSide, CCompEnum::kGlobl, "MGR01"}, //CRF
 	};
 
-	const std::vector<std::string> CRFQuests = {
-		"FreeformWinterholdCollegeB", "MGR12", "FreeformWinterholdCollegeA", "MGRRogue", "MGR01"
-	};
-
 	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+
+	std::array<int, 5> CRFExclusions = { 21,25,27,29,31 };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -67,22 +65,22 @@ namespace CQFramework_CollegeOfWinterhold
 
 	void CHandler::InstallFramework()
 	{
-		
-		auto CRF_Installed = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
+		auto CuttingRoomFloorInstalled = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
 
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			// Handle Exclusions
-			if (!CRF_Installed && std::ranges::find(CRFQuests, QuestData[i].editor_id) != CRFQuests.end()) {
-				INFO("Excluded quest - {}", QuestData[i].editor_id); 
+			// Handle Exclusions for 'Cutting Room Floor'
+			if (!CuttingRoomFloorInstalled && std::find(CRFExclusions.begin(), CRFExclusions.end(), i) != CRFExclusions.end())
+			{
+				INFO("Excluded quest {} Due To 'Cutting Room Floor'", QuestData[i].unique_identifier);
+				continue;
 			}
-			else {
-				QuestData[i].init()
-					->initQuestData(&QuestArrays)
-					->initStageData(StageData)
-					->initRadiantData(RadiantData);
-				CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 21));
-			}
+
+			QuestData[i].init()
+				->initQuestData(&QuestArrays)
+				->initStageData(StageData)
+				->initRadiantData(RadiantData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 21));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

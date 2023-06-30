@@ -47,6 +47,7 @@ namespace CPatch_MTE
 
 	static void			SinkEvents();
 	static void			InjectAndCompileData();
+	static void			InstallSearchTerms();
 
 	static void			InstallFramework();
 	static void			InstallQuestFramework();

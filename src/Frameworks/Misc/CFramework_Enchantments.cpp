@@ -62,6 +62,7 @@ namespace CFramework_Enchantments {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -146,6 +147,34 @@ namespace CFramework_Enchantments {
 		CFramework_Enchantments_SW::Data.Populate(SW_NameArray, SW_FormArray, SW_BoolArray, SW_TextArray);
 
 		CHandler::UpdateCounts();
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : VA_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		}
+
+		for (auto& name : SA_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		}
+
+		for (auto& name : VW_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		}
+
+		for (auto& name : SW_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		}
+
+		for (auto& name : NGA_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		}
 	}
 
 	//---------------------------------------------------

@@ -50,6 +50,7 @@ namespace CFramework_PlayerHomes {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -225,8 +226,7 @@ namespace CFramework_PlayerHomes {
 
 		for (auto& Data : CreationClub_Homes)
 		{
-			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) 
-			{
+			if (!Serialization::CompletionistData::IsModInstalled(Data.MODNAME)) {
 				continue;
 			}
 
@@ -243,11 +243,9 @@ namespace CFramework_PlayerHomes {
 			}
 		}
 
-
 		for (auto& Data : ModAdded_Homes) 
 		{
-			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) 
-			{
+			if (!Serialization::CompletionistData::IsModInstalled(Data.PROVIDER)) {
 				continue;
 			}
 
@@ -269,15 +267,15 @@ namespace CFramework_PlayerHomes {
 		VH_BoolArray.resize(VH_FormArray.size());
 		VH_QuestArray.resize(VH_FormArray.size());
 
-		CH_NameArray.resize(VH_FormArray.size());
-		CH_TextArray.resize(VH_FormArray.size());
-		CH_BoolArray.resize(VH_FormArray.size());
-		CH_QuestArray.resize(VH_FormArray.size());
+		CH_NameArray.resize(CH_FormArray.size());
+		CH_TextArray.resize(CH_FormArray.size());
+		CH_BoolArray.resize(CH_FormArray.size());
+		CH_QuestArray.resize(CH_FormArray.size());
 
-		PH_NameArray.resize(VH_FormArray.size());
-		PH_TextArray.resize(VH_FormArray.size());
-		PH_BoolArray.resize(VH_FormArray.size());
-		PH_QuestArray.resize(VH_FormArray.size());
+		PH_NameArray.resize(PH_FormArray.size());
+		PH_TextArray.resize(PH_FormArray.size());
+		PH_BoolArray.resize(PH_FormArray.size());
+		PH_QuestArray.resize(PH_FormArray.size());
 
 		VH_EntriesTotal = VH_FormArray.size();
 		VH_EntriesFound = std::ranges::count(VH_BoolArray, true);
@@ -287,6 +285,24 @@ namespace CFramework_PlayerHomes {
 
 		PH_EntriesTotal = PH_FormArray.size();
 		PH_EntriesFound = std::ranges::count(PH_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : VH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		}
+
+		for (auto& name : CH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		}
+
+		for (auto& name : PH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		}
 	}
 
 	//---------------------------------------------------

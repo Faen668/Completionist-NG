@@ -63,6 +63,7 @@ namespace CPatch_FSH {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -210,6 +211,31 @@ namespace CPatch_FSH {
 
 		F_EntriesTotal = F_FormArray.size();
 		F_EntriesFound = std::ranges::count(F_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : F_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishF", std::to_underlying(EntryCategory::kFish)));
+		}
+		for (auto& name : I_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishI", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto i = 0; i < B_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(B_NameArray[i], "$MCMPageFishB", FrameworkAPI::GetBookCategoryType(B_FormArray[i])));
+		}
+		for (auto& name : A_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishL", std::to_underlying(EntryCategory::kMapM)));
+		}
+		for (auto& name : C_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishL", std::to_underlying(EntryCategory::kMapM)));
+		}
+		for (auto& name : L_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishL", std::to_underlying(EntryCategory::kMapM)));
+		}
+		for (auto& name : S_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFishL", std::to_underlying(EntryCategory::kMapM)));
+		}
 	}
 
 	//---------------------------------------------------

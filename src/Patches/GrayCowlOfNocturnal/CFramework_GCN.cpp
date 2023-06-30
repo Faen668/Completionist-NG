@@ -2,6 +2,7 @@
 #include "CFramework_GCN.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
+#include "Internal Utility/Array.hpp"
 
 #undef AddForm
 
@@ -27,7 +28,7 @@ namespace CPatch_GCN
 		{"GrayCowl_Quest06", CStageEnum::kDone, 20, 0},
 	};
 
-	/*NA*/ CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
 
 	// clang-format off
 
@@ -64,6 +65,7 @@ namespace CPatch_GCN
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
+		CHandler::InstallSearchTerms();
 		PatchesInstalled += 1;
 	}
 
@@ -247,6 +249,19 @@ namespace CPatch_GCN
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Items_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageGrayCowl", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto i = 0; i < Books_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageGrayCowl", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+		}
+		for (auto& name : MapMa_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageGrayCowl", std::to_underlying(EntryCategory::kMapM)));
+		}
 	}
 
 	//---------------------------------------------------

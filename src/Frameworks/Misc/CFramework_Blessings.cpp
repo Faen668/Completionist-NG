@@ -23,7 +23,6 @@ namespace CFramework_Blessings {
 	0x0D987D, //Stendarr
 	0x100780, //Talos
 	0x0D987B, //Zenithar
-	0x04E4D5, //Meridia
 	};
 
 	constexpr Serialization::FormArray VS_Forms_DG = {
@@ -63,6 +62,7 @@ namespace CFramework_Blessings {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -198,9 +198,17 @@ namespace CFramework_Blessings {
 
 	void CHandler::InjectAndCompileData() {
 
-		CFramework_Blessings_VS::Data.AddForm(0x03A484, "Dragonborn.esm", 0x07F163, "Wintersun - Faiths of Skyrim.esp"); // Azura
-		CFramework_Blessings_VS::Data.AddForm(0x03A484, "Dragonborn.esm", 0x2D00B0, "Wintersun - Faiths of Skyrim.esp"); // Azura
-		CFramework_Blessings_VS::Data.AddForm(0x039E34, "Dragonborn.esm", 0x09D7ED, "Wintersun - Faiths of Skyrim.esp"); // Boethiah
+		if (Serialization::CompletionistData::IsModInstalled("Wintersun - Faiths of Skyrim.esp"))
+		{
+			CFramework_Blessings_VS::Data.AddForm(0x03A484, "Dragonborn.esm", 0x07F163, "Wintersun - Faiths of Skyrim.esp"); // Azura
+			CFramework_Blessings_VS::Data.AddForm(0x03A484, "Dragonborn.esm", 0x2D00B0, "Wintersun - Faiths of Skyrim.esp"); // Azura
+			CFramework_Blessings_VS::Data.AddForm(0x039E34, "Dragonborn.esm", 0x09D7ED, "Wintersun - Faiths of Skyrim.esp"); // Boethiah
+
+			CFramework_Blessings_WS::Data.CompileFormArray(CFramework_Blessings::WS_Forms, "Wintersun - Faiths of Skyrim.esp");
+			CFramework_Blessings_WS::Data.CompileVariation(CFramework_Blessings::WS_FormV, "Wintersun - Faiths of Skyrim.esp");
+			CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
+			CHandler::AddFormsToList();
+		}
 
 		CFramework_Blessings_DS::Data.CompileFormArray(CFramework_Blessings::DS_Forms_SK, "Skyrim.esm");
 		CFramework_Blessings_VS::Data.CompileFormArray(CFramework_Blessings::VS_Forms_SK, "Skyrim.esm");
@@ -209,13 +217,6 @@ namespace CFramework_Blessings {
 
 		CFramework_Blessings_DS::Data.Populate(DS_NameArray, DS_FormArray, DS_BoolArray, DS_TextArray);
 		CFramework_Blessings_VS::Data.Populate(VS_NameArray, VS_FormArray, VS_BoolArray, VS_TextArray);
-
-		if (Serialization::CompletionistData::IsModInstalled("Wintersun - Faiths of Skyrim.esp")) {
-			CFramework_Blessings_WS::Data.CompileFormArray(CFramework_Blessings::WS_Forms, "Wintersun - Faiths of Skyrim.esp");
-			CFramework_Blessings_WS::Data.CompileVariation(CFramework_Blessings::WS_FormV, "Wintersun - Faiths of Skyrim.esp");
-			CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
-			CHandler::AddFormsToList();
-		}
 		
 		DS_EntriesTotal = DS_FormArray.size();
 		DS_EntriesFound = std::ranges::count(DS_BoolArray, true);
@@ -227,6 +228,23 @@ namespace CFramework_Blessings {
 		WS_EntriesFound = std::ranges::count(WS_BoolArray, true);
 	}
 
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : DS_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageDoomstone", std::to_underlying(EntryCategory::kStones)));
+		}
+
+		for (auto& name : VS_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
+		}
+
+		for (auto& name : WS_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
+		}
+	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Update Found Forms ) -----

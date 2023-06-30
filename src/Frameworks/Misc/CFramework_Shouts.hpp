@@ -70,6 +70,7 @@ namespace CFramework_Shouts{
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();
+		  static void			InstallSearchTerms();
 
 		  static void			UpdateFoundForms();
 		  static void			UpdateFoundFormsExt(RE::StaticFunctionTag*);
@@ -83,5 +84,10 @@ namespace CFramework_Shouts{
 		  static void			AddToArray(Section a_section, RE::FormID a_formID, std::string a_names, std::string a_texts, std::string a_Filename);
 
 		  static void			ProcessFoundForm(Section a_section, RE::FormID a_formID);
+
+		  static std::string	GetCompletedTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
+		  static std::string	GetSecondWordTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
+		  static std::string	GetFirstWordTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
+		  static std::string	GetBaseTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
 	};
 }

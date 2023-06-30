@@ -62,17 +62,29 @@ namespace CQFramework_CC2
 
 	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
 
+	std::array<int, 15> RequiemExclusions = { 3,6,9,10,13,15,18,21,25,26,29,30,32,43,45 };
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework()
 	{
+		auto RequiemInstalled = Serialization::CompletionistData::IsModInstalled("Requiem - Creation Club.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
+			// Handle Exclusions for 'Requiem'
+			if (RequiemInstalled && std::find(RequiemExclusions.begin(), RequiemExclusions.end(), i) != RequiemExclusions.end())
+			{
+				INFO("Excluded quest {} Due To 'Requiem'", QuestData[i].unique_identifier);
+				continue;
+			}
+
 			QuestData[i].init()->initQuestData(&QuestArrays)->initStageData(StageData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 5));
 		}
+
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

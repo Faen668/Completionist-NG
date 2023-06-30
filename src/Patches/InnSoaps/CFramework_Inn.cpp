@@ -1,23 +1,29 @@
 #include "Serialization.hpp"
-#include "CFramework_SUD.hpp"
+#include "CFramework_Inn.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
 
-namespace CPatch_SUD {
+namespace CPatch_INN {
 	using namespace CFramework_Master;
 
 	// clang-format off
 
+	//Normal | Dirt And Blood | Bathing In Skyrim
 	constexpr Serialization::FormArray Items = {
-	0x000800,0x000801,0x000802,0x000803,0x000804,0x000805,0x000806,
-	0x000807,0x000808,0x000809,0x00080A,0x00080B,0x00080C,0x00080D,
-	0x00080E,0x00080F,0x000810,0x000811,0x000812,0x000813,
+	0x000800,0x000801,0x000D62,0x000D63,0x000D64,0x000D66,0x000D67,0x000D69,
+	0x000D6A,0x000D6B,
+	};
+
+	// Keep It Clean
+	constexpr Serialization::FormArray ItemsKIC = {
+	0x000802,0x000803,0x000804,0x000805,0x000806,0x000807,0x000808,0x000809,
+	0x00080A,0x00080B,
 	};
 
 	// clang-format on
 
-	constexpr std::string_view modname = "SUDs.esp";
+	constexpr std::string_view modname = "Inn Soaps.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -30,6 +36,7 @@ namespace CPatch_SUD {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		PatchesInstalled += 1;
 	}
 
 	//---------------------------------------------------
@@ -48,13 +55,10 @@ namespace CPatch_SUD {
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 
-		if (!a_event || a_event->newContainer != RE::PlayerCharacter::GetSingleton()->GetFormID()) { return EventResult::kContinue; }
+		if (!a_event || a_event->newContainer != 0x00014 || !CPatch_Inn_Items::Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
 
-		if (CPatch_SUD_Items::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_SUD_Items::Data.GetBase(a_event->baseObj) ? CPatch_SUD_Items::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj);
-			return EventResult::kContinue;
-		}
+		auto base = CPatch_Inn_Items::Data.GetBase(a_event->baseObj) ? CPatch_Inn_Items::Data.GetBase(a_event->baseObj) : a_event->baseObj;
+		CHandler::ProcessFoundForm(base, a_event->baseObj, "NotifyItems");
 		return EventResult::kContinue;
 	}
 
@@ -62,37 +66,44 @@ namespace CPatch_SUD {
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID) {
+	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_variable) {
 
-		if (!FoundItemData.HasForm(a_eventID)) {
-			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SUD_Items::Data.GetForm(a_eventID)->GetName());
-			FrameworkAPI::SendNotification(msg, "NotifyItems");
-		}
+		if (a_variable == "NotifyItems") {
 
-		FoundItemData.AddForm(a_baseID);
-		for (auto var : CPatch_SUD_Items::Data.GetAllVariations()) {
-			if (CPatch_SUD_Items::Data.GetBase(var) == a_baseID) {
-				FoundItemData.AddForm(var);
+			if (!FoundItemData.HasForm(a_eventID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_Inn_Items::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::SendNotification(msg, a_variable);
 			}
+
+			FoundItemData.AddForm(a_baseID);
+			for (auto var : CPatch_Inn_Items::Data.GetAllVariations()) {
+				if (CPatch_Inn_Items::Data.GetBase(var) == a_baseID) {
+					FoundItemData.AddForm(var);
+				}
+			}
+
+
+			auto t_pos = std::ranges::find(Items_FormArray, CPatch_Inn_Items::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(Items_FormArray.begin(), t_pos);
+			Items_BoolArray[b_pos] = true;
+
+			Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
+			return;
 		}
-
-		auto t_pos = std::ranges::find(Items_FormArray, CPatch_SUD_Items::Data.GetForm(a_baseID));
-		auto b_pos = std::distance(Items_FormArray.begin(), t_pos);
-		Items_BoolArray[b_pos] = true;
-
-		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
-		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Form Injection ) ---------
 	//---------------------------------------------------
 
-	void CHandler::InjectAndCompileData() {
+	void CHandler::InjectAndCompileData() {	
+		
+		auto KeepItCleanInstalled = Serialization::CompletionistData::IsModInstalled("Keep It Clean.esp");
 
-		CPatch_SUD_Items::Data.CompileFormArray(CPatch_SUD::Items, modname);
-		CPatch_SUD_Items::Data.MergeAsCollectable();
-		CPatch_SUD_Items::Data.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
+		CPatch_Inn_Items::Data.CompileFormArray(!KeepItCleanInstalled ? CPatch_INN::Items : CPatch_INN::ItemsKIC, modname);
+		CPatch_Inn_Items::Data.MergeAsCollectable();
+
+		CPatch_Inn_Items::Data.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
@@ -101,7 +112,7 @@ namespace CPatch_SUD {
 	void CHandler::InstallSearchTerms()
 	{
 		for (auto& name : Items_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageInnSoaps", std::to_underlying(EntryCategory::kItem)));
 		}
 	}
 
@@ -114,7 +125,7 @@ namespace CPatch_SUD {
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_SUD_Items::Data);
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_Inn_Items::Data);
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();

@@ -164,9 +164,9 @@ namespace CQFramework_FavorQuests
 			const auto* questActr = CompletionistData::GetFullForm<RE::TESNPC>(a_data[idx].actr.formID, a_data[idx].actr.fileName);
 			const auto* questForm = questVari ? questVari : questBase ? questBase : nullptr;
 
-			INFO("Installed Favor Quest Array - [{}] With Actor - [{}]", (questForm && questForm->GetName()) ? questForm->GetName() : "ERROR GETTING Quest", (questActr && questActr->GetName()) ? questActr->GetName() : "ERROR GETTING ACTOR");
+			//INFO("Installed Favor Quest Array - [{}] With Actor - [{}]", (questForm && questForm->GetName()) ? questForm->GetName() : "ERROR GETTING Quest", (questActr && questActr->GetName()) ? questActr->GetName() : "ERROR GETTING ACTOR");
 		}
-		INFO(" ");
+		//INFO(" ");
 	}
 
 	void CHandler::InstallFramework()
@@ -217,7 +217,7 @@ namespace CQFramework_FavorQuests
 					auto* reference = static_cast<RE::BGSRefAlias*>(alias);
 					if (reference && reference->GetActorReference()->GetActorBase()->GetFormID() == questActr->GetFormID()) {
 						if (auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(data->Global)) {
-							INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", data->Global, questForm->GetName(), questActr->GetName());
+							//INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", data->Global, questForm->GetName(), questActr->GetName());
 							global->value++;
 						};
 					}
@@ -241,13 +241,13 @@ namespace CQFramework_FavorQuests
 
 		activeMerchant.Merchant = a_actor->GetFormID();
 		activeMerchant.BaseActor = RE::TESForm::LookupByID<RE::TESNPC>(a_actor->GetActorBase()->GetFormID());
-		INFO("Registered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
+		//INFO("Registered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
 	}
 
 	void CHandler::UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
 
 		activeMerchant = {};
-		INFO("Unregistered Merchant");
+		//INFO("Unregistered Merchant");
 	}
 
 	EventResult CHandler::ProcessEvent(RE::TESContainerChangedEvent const* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource)
@@ -258,10 +258,10 @@ namespace CQFramework_FavorQuests
 				auto* GoldForm = RE::TESForm::LookupByID(0x00000f);
 				auto* EvntForm = RE::TESForm::LookupByID(a_event->baseObj);
 
-				if (GoldForm->GetFormID() == EvntForm->GetFormID())
-				{
-					INFO("Receieved {} Gold for: {} {}. Performing NPC Lookup...", a_event->itemCount, activeMerchant.SoldQuantity, RE::TESForm::LookupByID(activeMerchant.SoldForm)->GetName());
-				}
+				//if (GoldForm->GetFormID() == EvntForm->GetFormID())
+				//{
+					//INFO("Receieved {} Gold for: {} {}. Performing NPC Lookup...", a_event->itemCount, activeMerchant.SoldQuantity, RE::TESForm::LookupByID(activeMerchant.SoldForm)->GetName());
+				//}
 
 				for (auto& [FormID, Global] : Merchant_Data) 
 				{
@@ -272,7 +272,7 @@ namespace CQFramework_FavorQuests
 
 					if (GlobalVar && LookupNPC->GetFormID() == activeMerchant.BaseActor->GetFormID()) {
 						GlobalVar->value++;
-						INFO("Incremented Global Variable for Matching Actor: {} from {} > {}", activeMerchant.BaseActor->GetName(), oldvalue, GlobalVar->value);
+						//INFO("Incremented Global Variable for Matching Actor: {} from {} > {}", activeMerchant.BaseActor->GetName(), oldvalue, GlobalVar->value);
 						return EventResult::kContinue;
 					}
 				}

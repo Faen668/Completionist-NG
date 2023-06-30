@@ -13,6 +13,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	using namespace Completionist_MainHUD;
 	using namespace CFramework_Master;
 	using namespace CVariables;
+	using namespace CLocalisation;
 	using namespace CQuestMaster;
 
 	auto t1 = std::chrono::steady_clock::now();
@@ -21,6 +22,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
 
+		LocalisationAPI::Register();
 		TextnTagsAPI::Register();
 		VariablesAPI::Register();
 

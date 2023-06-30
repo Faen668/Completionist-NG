@@ -12,6 +12,7 @@ namespace CQFramework_CC3
 		{"CC03_Quest20", CStageEnum::kDone, 20		, 0 },
 		{"CC03_Quest23", CStageEnum::kDone, 20		, 0 },
 		{"CC03_Quest26", CStageEnum::kDone, 171		, 0 },
+		{"CC03_Quest28", CStageEnum::kDone, 500		, 1000},
 		{"CC03_Quest33", CStageEnum::kDone, 20		, 0 },
 	};
 
@@ -44,7 +45,7 @@ namespace CQFramework_CC3
 		{"CC03_Quest25", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE025_StaadaQuest"},
 		{"CC03_Quest26", CFlagEnum::kMain, CCompEnum::kStage, "ccBGSSSE067_Quest"},
 		{"CC03_Quest27", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE067_Quest2"},
-		{"CC03_Quest28", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE004_Quest"},
+		{"CC03_Quest28", CFlagEnum::kMain, CCompEnum::kStage, "ccBGSSSE004_Quest"},
 		{"CC03_Quest29", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE020_Quest"},
 		{"CC03_Quest30", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE003_ZombieQuestStartEncounter"},
 		{"CC03_Quest31", CFlagEnum::kMain, CCompEnum::kStand, "ccAARSSE001ManufactoryControlQuest"},
@@ -56,18 +57,37 @@ namespace CQFramework_CC3
 
 	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
 
+	std::array<int, 4> RequiemExclusions = { 5,11,13,35 };
+	std::array<int, 9> SkyExtCExclusions = { 0,1,7,14,15,18,22,25 };
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework()
 	{
+		auto RequiemInstalled = Serialization::CompletionistData::IsModInstalled("Requiem - Creation Club.esp");
+		auto SkyExtCInstalled = Serialization::CompletionistData::IsModInstalled("Skyrim Extended Cut - Saints and Seducers.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
+			// Handle Exclusions for 'Requiem'
+			if (RequiemInstalled && std::find(RequiemExclusions.begin(), RequiemExclusions.end(), i) != RequiemExclusions.end())
+			{
+				INFO("Excluded quest {} Due To 'Requiem'", QuestData[i].unique_identifier)
+				continue;
+			}
+
+			// Handle Exclusions for 'Skyrim Extended Cut - Saints and Seducers'
+			if (SkyExtCInstalled && std::find(SkyExtCExclusions.begin(), SkyExtCExclusions.end(), i) != SkyExtCExclusions.end())
+			{
+				INFO("Excluded quest {} Due To 'Skyrim Extended Cut'", QuestData[i].unique_identifier);
+				continue;
+			}
+
 			QuestData[i].init()->initQuestData(&QuestArrays)->initStageData(StageData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 6));
 		}
-
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

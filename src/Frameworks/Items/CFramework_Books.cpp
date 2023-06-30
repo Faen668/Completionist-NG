@@ -175,6 +175,7 @@ namespace CFramework_Books {
 	0x008316A,0x001ACEA,0x00E7F31,0x00E7F33,0x00E7F34,0x003010B,0x002D513,0x0048782,
 	0x00ED033,0x001ACF7,0x001ACEB,0x001ACEC,0x001ACED,0x001B267,0x001AD05,0x00ED04E,
 	0x00E3E69,0x0072841,0x001ACCB,0x001ACCD,0x00ED031,0x001AD07,0x001ACD5,0x001B00c,
+	0x001AD03,
 	};
 
 	constexpr Serialization::FormArray Books_HS = {
@@ -234,7 +235,7 @@ namespace CFramework_Books {
 	0x009E2AF,0x00A271E,0x00A2727,0x00A271C,0x00A26FE,0x00A2707,0x010F7F3,0x010F7F4,
 	0x00A2715,0x00A26E4,0x009E2AE,0x00A26FF,0x00A2705,0x00A270E,0x00A26E2,0x00DD646,
 	0x00A2719,0x00A270F,0x009E2A8,0x00A2717,0x00A26E8,0x009E2AA,0x00A2713,0x00A26EB,
-	0x00A2725,0x00A2726,0x00A26F2,0x00A2718,0x00A2702,0x009CD54,0x009CD53,0x00B3165,
+	0x00A2725,0x00A2726,0x00A26F2,0x00A2718,0x00A2702,0x009CD54,0x009CD53,
 	0x00A2720,0x00A26E3,0x00A26FC,0x00A26E5,0x010F7F5,0x0109112,0x00A2729,0x00A271F,
 	0x00A2721,0x00A2709,0x00A270A,0x00A270B,0x00A26E6,
 	};
@@ -295,6 +296,7 @@ namespace CFramework_Books {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -642,6 +644,11 @@ namespace CFramework_Books {
 
 	void CHandler::InjectAndCompileData() {
 
+		//Cutting Room Floor
+		if (Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
+			CFramework_Tomes_SK::Data.AddForm(0x00B3165, "Skyrim.esm");
+		}
+
 		CHandler::Install_CCB();
 		CHandler::Install_CCT();
 
@@ -800,6 +807,129 @@ namespace CFramework_Books {
 
 		Books_CC_EntriesTotal = Books_CC_FormArray.size();
 		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto i = 0; i < Books_AG_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_AG_NameArray[i], "$MCMPageBooks1", FrameworkAPI::GetBookCategoryType(Books_AG_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Books_HS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_HS_NameArray[i], "$MCMPageBooks2", FrameworkAPI::GetBookCategoryType(Books_HS_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Books_TY_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_TY_NameArray[i], "$MCMPageBooks3", FrameworkAPI::GetBookCategoryType(Books_TY_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Skill_SK_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Skill_SK_NameArray[i], "$MCMPageBooks5", FrameworkAPI::GetBookCategoryType(Skill_SK_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_SK_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_SK_A_NameArray[i], "$MCMPageBooks6", FrameworkAPI::GetBookCategoryType(Tomes_SK_A_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_SK_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_SK_C_NameArray[i], "$MCMPageBooks6", FrameworkAPI::GetBookCategoryType(Tomes_SK_C_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_SK_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_SK_D_NameArray[i], "$MCMPageBooks6", FrameworkAPI::GetBookCategoryType(Tomes_SK_D_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_SK_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_SK_I_NameArray[i], "$MCMPageBooks6", FrameworkAPI::GetBookCategoryType(Tomes_SK_I_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_SK_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_SK_R_NameArray[i], "$MCMPageBooks6", FrameworkAPI::GetBookCategoryType(Tomes_SK_R_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Books_DG_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_DG_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Books_DG_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DG_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DG_A_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Tomes_DG_A_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DG_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DG_C_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Tomes_DG_C_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DG_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DG_D_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Tomes_DG_D_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DG_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DG_I_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Tomes_DG_I_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DG_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DG_R_NameArray[i], "$MCMPageBooks7", FrameworkAPI::GetBookCategoryType(Tomes_DG_R_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Books_DB_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_DB_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Books_DB_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DB_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DB_A_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Tomes_DB_A_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DB_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DB_C_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Tomes_DB_C_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DB_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DB_D_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Tomes_DB_D_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DB_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DB_I_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Tomes_DB_I_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_DB_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_DB_R_NameArray[i], "$MCMPageBooks8", FrameworkAPI::GetBookCategoryType(Tomes_DB_R_FormArray[i])));
+		}
+
+		for (auto i = 0; i < TMaps_SK_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(TMaps_SK_NameArray[i], "$MCMPageBooks4", FrameworkAPI::GetBookCategoryType(TMaps_SK_FormArray[i])));
+		}
+
+		for (auto i = 0; i < TMaps_NT_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(TMaps_NT_NameArray[i], "$MCMPageBooks4", FrameworkAPI::GetBookCategoryType(TMaps_NT_FormArray[i])));
+		}
+
+		for (auto i = 0; i < TMaps_TH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(TMaps_TH_NameArray[i], "$MCMPageBooks4", FrameworkAPI::GetBookCategoryType(TMaps_TH_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Books_CC_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_CC_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Books_CC_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_CC_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_A_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_A_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_CC_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_C_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_C_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_CC_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_D_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_D_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_CC_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_I_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_I_FormArray[i])));
+		}
+
+		for (auto i = 0; i < Tomes_CC_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_R_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_R_FormArray[i])));
+		}
 	}
 
 	//---------------------------------------------------

@@ -66,6 +66,7 @@ namespace CPatch_CHM {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -241,6 +242,22 @@ namespace CPatch_CHM {
 
 		ItmL4_EntriesTotal = ItmL4_FormArray.size();
 		ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : ItmL1_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCheese4", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : ItmL2_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCheese1", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : ItmL3_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCheese2", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : ItmL4_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCheese3", std::to_underlying(EntryCategory::kItem)));
+		}
 	}
 
 	//---------------------------------------------------

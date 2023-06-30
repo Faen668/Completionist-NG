@@ -104,6 +104,7 @@ namespace CPatch_SpellTomes {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -616,6 +617,85 @@ namespace CPatch_SpellTomes {
 			Triumvirate_R_EntriesFound = std::ranges::count(Triumvirate_R_BoolArray, true);
 
 			CFramework_Master::TomesInstalled += 1;
+		}
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto i = 0; i < Odin_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_A_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_A_FormArray[i])));
+		}
+		for (auto i = 0; i < Odin_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_C_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_C_FormArray[i])));
+		}
+		for (auto i = 0; i < Odin_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_D_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_D_FormArray[i])));
+		}
+		for (auto i = 0; i < Odin_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_I_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_I_FormArray[i])));
+		}
+		for (auto i = 0; i < Odin_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_R_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_R_FormArray[i])));
+		}
+		for (auto i = 0; i < ForgottenMagic_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_A_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_A_FormArray[i])));
+		}
+		for (auto i = 0; i < ForgottenMagic_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_C_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_C_FormArray[i])));
+		}
+		for (auto i = 0; i < ForgottenMagic_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_D_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_D_FormArray[i])));
+		}
+		for (auto i = 0; i < ForgottenMagic_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_I_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_I_FormArray[i])));
+		}
+		for (auto i = 0; i < ForgottenMagic_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_R_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_R_FormArray[i])));
+		}
+		for (auto i = 0; i < Apocalypse_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_A_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_A_FormArray[i])));
+		}
+		for (auto i = 0; i < Apocalypse_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_C_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_C_FormArray[i])));
+		}
+		for (auto i = 0; i < Apocalypse_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_D_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_D_FormArray[i])));
+		}
+		for (auto i = 0; i < Apocalypse_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_I_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_I_FormArray[i])));
+		}
+		for (auto i = 0; i < Apocalypse_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_R_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_R_FormArray[i])));
+		}
+		for (auto i = 0; i < Mysticism_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_A_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_A_FormArray[i])));
+		}
+		for (auto i = 0; i < Mysticism_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_C_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_C_FormArray[i])));
+		}
+		for (auto i = 0; i < Mysticism_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_D_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_D_FormArray[i])));
+		}
+		for (auto i = 0; i < Mysticism_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_I_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_I_FormArray[i])));
+		}
+		for (auto i = 0; i < Mysticism_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_R_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_R_FormArray[i])));
+		}
+		for (auto i = 0; i < Triumvirate_A_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_A_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_A_FormArray[i])));
+		}
+		for (auto i = 0; i < Triumvirate_C_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_C_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_C_FormArray[i])));
+		}
+		for (auto i = 0; i < Triumvirate_D_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_D_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_D_FormArray[i])));
+		}
+		for (auto i = 0; i < Triumvirate_I_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_I_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_I_FormArray[i])));
+		}
+		for (auto i = 0; i < Triumvirate_R_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_R_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_R_FormArray[i])));
 		}
 	}
 

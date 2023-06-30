@@ -47,6 +47,7 @@ namespace CPatch_MTE
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
+		CHandler::InstallSearchTerms();
 		PatchesInstalled += 1;
 	}
 
@@ -58,8 +59,11 @@ namespace CPatch_MTE
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData);
+			if (i == 4 && !Serialization::CompletionistData::IsModInstalled("LegacyoftheDragonborn.esm")) {
+				continue;
+			}
+
+			QuestData[i].init()->initQuestData(&ArrayData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 35));
 		}
 		Quest_BoolArray = std::vector<bool>(CArraySize, false);
@@ -198,6 +202,16 @@ namespace CPatch_MTE
 
 		Books_EntriesTotal = Books_FormArray.size();
 		Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Items_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageMoonpath", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto i = 0; i < Books_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageMoonpath", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+		}
 	}
 
 	//---------------------------------------------------

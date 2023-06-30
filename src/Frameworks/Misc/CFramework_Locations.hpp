@@ -94,6 +94,7 @@ namespace CFramework_MapMa
 	static void			InstallFramework();
 	static void			UpdateFoundForms();
 	static void			InjectAndCompileData();
+	static void			InstallSearchTerms();
 
 	static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section);
 	static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);

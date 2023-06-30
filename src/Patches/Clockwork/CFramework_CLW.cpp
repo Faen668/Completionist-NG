@@ -51,6 +51,7 @@ namespace CPatch_CLW {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
+		CHandler::InstallSearchTerms();
 		PatchesInstalled += 1;
 	}
 
@@ -65,7 +66,6 @@ namespace CPatch_CLW {
 			QuestData[i].init()
 				->initQuestData(&ArrayData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 32));
-
 		}
 		Quest_BoolArray = std::vector<bool>(CArraySize, false);
 	};
@@ -233,6 +233,19 @@ namespace CPatch_CLW {
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Items_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageClockwork", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto i = 0; i < Books_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageClockwork", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+		}
+		for (auto& name : MapMa_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageClockwork", std::to_underlying(EntryCategory::kMapM)));
+		}
 	}
 
 	//---------------------------------------------------

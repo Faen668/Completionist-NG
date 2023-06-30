@@ -5,18 +5,20 @@
 
 namespace CFramework_Uniques {
 	using namespace CFramework_Master;
+	using namespace CLocalisation;
 
 	// clang-format off
 
 	constexpr Serialization::FormArray A_Forms_SK = {
-	0x0F494E,0x0EAFD0,0x0EAFD3,0x0EAFD2,0x0EAFD1,0x0E1F15,0x0E1F14,0x0E1F16,0x0E1F17,
-	0x0E35D7,0x0E35D6,0x0E35D8,0x0E35D9,0x108544,0x108543,0x108545,0x108546,0x0D2845,
-	0x0D2843,0x0F9904,0x052794,0x086990,0x0C3CE6,0x05CBFE,0x0E84C1,0x10A06A,0x0940D5,
-	0x0295F3,0x0E1643,0x096D9B,0x06FE72,0x0A4DCD,0x02AC61,0x0DA750,0x0C0165,0x0F5981,
-	0x06230B,0x064B71,0x06901D,0x10EB65,0x0E41D8,0x045F96,0x0FC5BF,0x06492C,0x06492A,
-	0x06492D,0x06492E,0x0CEE6E,0x0CEE70,0x0CEE74,0x0CEE72,0x0CF8A0,0x0CF8A9,0x0CF89F,
-	0x0CF8A1,0x0B1460,0x0B145B,0x0EAD49,0x015516,0x0CEE76,0x026C3B,0x088952,0x088954,
-	0x0E0DD0,0x0E0DD2,0x0C7CBB,0x062303,0x062311,0x088956,0x088958,0x08895A,
+	0x0F494E,0x0EAFD3,0x0EAFD2,0x0EAFD1,0x0E1F15,0x0E1F14,0x0E1F16,0x0E1F17,0x0D2845,
+	0x0E35D7,0x0E35D6,0x0E35D8,0x0E35D9,0x108544,0x108543,0x108545,0x108546,0x08895A,
+	0x0D2843,0x0F9904,0x052794,0x086990,0x0C3CE6,0x0E84C1,0x10A06A,0x0940D5,0x06492A,
+	0x0295F3,0x0E1643,0x096D9B,0x06FE72,0x0A4DCD,0x0DA750,0x0F5981,0x088958,0x0CF89F,
+	0x06230B,0x064B71,0x06901D,0x10EB65,0x0E41D8,0x045F96,0x0FC5BF,0x06492C,0x088956,
+	0x06492D,0x06492E,0x0CEE6E,0x0CEE70,0x0CEE74,0x0CEE72,0x0CF8A0,0x0CF8A9,
+	0x0CF8A1,0x0B1460,0x0B145B,0x015516,0x026C3B,0x0E0DD0,0x0E0DD2,0x062311,
+	
+	
 	};
 
 	constexpr Serialization::FormArray W_Forms_SK = {
@@ -24,10 +26,10 @@ namespace CFramework_Uniques {
 	0x00C1989,0x00ECD54,0x00AB705,0x008ADFB,0x008ADFC,0x004E4EE,0x00F82FA,0x00F71DD,
 	0x00F82FC,0x007E5BB,0x006B9AD,0x004A38F,0x008FFDF,0x00B3DFA,0x0017059,0x00C0186,
 	0x0046E0B,0x0094A2B,0x0053379,0x00AB704,0x00BE25E,0x010076D,0x0068976,0x00D0758,
-	0x00DEED8,0x00233E3,0x00240D2,0x001C492,0x01019D4,0x008FFDE,0x00AE086,0x00AB85D,
-	0x00AB703,0x009FD50,0x001C4E6,0x00ECD53,0x001CB36,0x00223FB,0x0035066,0x00E57F0,
+	0x00233E3,0x00240D2,0x001C492,0x01019D4,0x008FFDE,0x00AE086,0x00AB85D,0x006EA8B,
+	0x00AB703,0x009FD50,0x00ECD53,0x001CB36,0x00223FB,0x0035066,0x00E57F0,0x00956B5,
 	0x00940D8,0x007A4FB,0x00E5F43,0x0035369,0x0040002,0x00AE085,0x0022265,0x006AF63,
-	0x005BF18,0x00B994E,0x002ACD2,0x006EA8B,0x00956B5,
+	0x00B994E,0x002ACD2,
 	};
 
 	constexpr Serialization::FormArray I_Forms_SK = {
@@ -43,7 +45,7 @@ namespace CFramework_Uniques {
 
 	constexpr Serialization::FormArray J_Forms_SK = {
 	0x0F5A1D,0x0DA735,0x0C5809,0x0D8482,0x02584C,0x0D3BDB,0x0D5047,0x0DA733,0x076F12,
-	0x06B218,0x068B83,0x0DA734,0x090E32,0x02C37B,0x024CFF,0x0DA732,0x0403A9,0x0F5A1C,
+	0x06B218,0x068B83,0x0DA734,0x090E32,0x02C37B,0x0DA732,0x0403A9,0x0F5A1C,
 	0x01CB34,0x0F6911,0x094E3E,0x0C72E8,0x02D773,0x107E2D,0x0F1B33,0x0C891D,0x0663DA,
 	0x0233D0,0x0D2328,0x0D4FF7,
 	};
@@ -53,12 +55,16 @@ namespace CFramework_Uniques {
 	0x065C37,0x065C38,0x09380D,
 	};
 
+	constexpr Serialization::FormArray Q_Forms_SK = {
+	0,
+	};
+
 	constexpr Serialization::FormArray A_Forms_DG = {
-	0x00C815,0x00C817,0x00C814,0x00575A,0x005759,0x00284D,0x011BAF,0x0047DA,0x014C03
+	0x00C815,0x00C817,0x00C814,0x00284D,0x011BAF,0x014C03
 	};
 
 	constexpr Serialization::FormArray W_Forms_DG = {
-	0x00575E,0x014555,0x000800,0x01668C,0x011BAD,0x0067CF,0x01681E,0x00CFB6,
+	0x014555,0x000800,0x01668C,0x011BAD,0x0067CF,0x00CFB6,
 	};
 
 	constexpr Serialization::FormArray I_Forms_DG = {
@@ -80,7 +86,12 @@ namespace CFramework_Uniques {
 	};
 
 	constexpr Serialization::FormArray A_Forms_DB = {
-	0x02AD33,0x02AD34,0x02AD32,0x02AD31,0x038ADD,
+	0x02AD33,0x02AD34,0x02AD32,0x02AD31,0x038ADD,0x02401A,0x02401B,0x02401C,0x02401D,
+	0x01DB97,0x01C655,0x01DB99,0x01DB98,0x01DB9B,0x01DB9A,0x03D2AF,0x02B0F9,
+	};
+
+	constexpr Serialization::FormArray J_Forms_DB = {
+	0x0275b6,0x0275b7,0x0275b9,0x0275b8,
 	};
 
 	constexpr Serialization::FormArray W_Forms_DB = {
@@ -142,14 +153,9 @@ namespace CFramework_Uniques {
 	};
 
 	constexpr Serialization::Variation I_FormV_SK[] = {
-	{ 0x063B27,{ 0x063B29 } },
 	{ 0x021EA3,{ 0x10CC6A } },
 	{ 0x03E6BB,{ 0x03E6BC, 0x08D770 } },
 	{ 0x09DFF5,{ 0x0DA74D } },
-	};
-
-	constexpr Serialization::Variation J_FormV_SK[] = {
-	{ 0x02AC60, { 0x0F82FE } },
 	};
 
 	constexpr Serialization::Variation A_FormV_DG[] = {
@@ -160,11 +166,16 @@ namespace CFramework_Uniques {
 	{ 0x0191CB,{ 0x002B29 } },
 	};
 
+	constexpr Serialization::Variation A_FormV_DB[]{
+	{ 0x039D1E,{ 0x039D20, 0x039D22 } },
+	};
+
 	constexpr Serialization::Variation W_FormV_DB[]{
 	{ 0x039FA6,{ 0x039FAC, 0x039FAD } },
 	{ 0x0397F6,{ 0x039FB1, 0x039FB4 } },
 	};
 
+	std::unordered_map<RE::TESForm*, std::string_view> HighlightForms{};
 	// clang-format on
 
 	//---------------------------------------------------
@@ -175,6 +186,7 @@ namespace CFramework_Uniques {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -197,49 +209,55 @@ namespace CFramework_Uniques {
 
 		if (CFramework_Uniques_A::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_A::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_A::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_A");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_A);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_W::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_W::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_W::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_W");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_W);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_I::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_I::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_I::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_I");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_I);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_J::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_J::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_J::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_J");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_J);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_L::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_L::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_L::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_L");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_L);
+			return EventResult::kContinue;
+		}
+
+		if (CFramework_Uniques_Q::Data.HasForm(a_event->baseObj)) {
+			auto base = CFramework_Uniques_Q::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_Q::Data.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_Q);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_CCA::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_CCA::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_CCA::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_CCA");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_CCA);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_CCI::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_CCI::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_CCI::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_CCI");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_CCI);
 			return EventResult::kContinue;
 		}
 
 		if (CFramework_Uniques_CCW::Data.HasForm(a_event->baseObj)) {
 			auto base = CFramework_Uniques_CCW::Data.GetBase(a_event->baseObj) ? CFramework_Uniques_CCW::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CFramework_Uniques_CCW");
+			CHandler::ProcessFoundForm(base, a_event->baseObj, section::kUniques_CCW);
 			return EventResult::kContinue;
 		}
 		return EventResult::kContinue;
@@ -249,13 +267,16 @@ namespace CFramework_Uniques {
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_variable) {
+	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, section kSection) {
 
-		if (a_variable == "CFramework_Uniques_A") {
-
+		switch (kSection)
+		{
+		case CFramework_Uniques::kUniques_A: 
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -270,14 +291,15 @@ namespace CFramework_Uniques {
 
 			A_BoolArray[b_pos] = true;
 			A_EntriesFound = std::ranges::count(A_BoolArray, true);
-			return;
+			break;
 		}
-
-		if (a_variable == "CFramework_Uniques_W") {
-
+			
+		case CFramework_Uniques::kUniques_W:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -292,14 +314,15 @@ namespace CFramework_Uniques {
 
 			W_BoolArray[b_pos] = true;
 			W_EntriesFound = std::ranges::count(W_BoolArray, true);
-			return;
+			break;
 		}
-
-		if (a_variable == "CFramework_Uniques_I") {
-
+			
+		case CFramework_Uniques::kUniques_I:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -314,14 +337,15 @@ namespace CFramework_Uniques {
 
 			I_BoolArray[b_pos] = true;
 			I_EntriesFound = std::ranges::count(I_BoolArray, true);
-			return;
+			break;
 		}
 
-		if (a_variable == "CFramework_Uniques_J") {
-
+		case CFramework_Uniques::kUniques_J:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -336,14 +360,15 @@ namespace CFramework_Uniques {
 
 			J_BoolArray[b_pos] = true;
 			J_EntriesFound = std::ranges::count(J_BoolArray, true);
-			return;
+			break;
 		}
 
-		if (a_variable == "CFramework_Uniques_L") {
-
+		case CFramework_Uniques::kUniques_L:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -358,14 +383,35 @@ namespace CFramework_Uniques {
 
 			L_BoolArray[b_pos] = true;
 			L_EntriesFound = std::ranges::count(L_BoolArray, true);
-			return;
+			break;
 		}
 
-		if (a_variable == "CFramework_Uniques_CCA") {
+		case CFramework_Uniques::kUniques_Q:
+		{
+			if (!FoundItemData.HasForm(a_eventID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_Q::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_Q::Data.GetForm(a_eventID)->GetName()));
+			}
 
+			FoundItemData.AddForm(a_baseID);
+			for (auto var : CFramework_Uniques_Q::Data.GetAllVariations()) {
+				if (CFramework_Uniques_Q::Data.GetBase(var) == a_baseID) {
+					FoundItemData.AddForm(var);
+				}
+			}
+
+			Q_BoolArray[std::distance(Q_FormArray.begin(), std::ranges::find(Q_FormArray, CFramework_Uniques_Q::Data.GetForm(a_baseID)))] = true;
+			Q_EntriesFound = std::ranges::count(Q_BoolArray, true);
+			break;
+		}
+
+		case CFramework_Uniques::kUniques_CCA:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -380,14 +426,15 @@ namespace CFramework_Uniques {
 
 			CCA_BoolArray[b_pos] = true;
 			CCA_EntriesFound = std::ranges::count(CCA_BoolArray, true);
-			return;
+			break;
 		}
 
-		if (a_variable == "CFramework_Uniques_CCI") {
-
+		case CFramework_Uniques::kUniques_CCI:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -402,14 +449,15 @@ namespace CFramework_Uniques {
 
 			CCI_BoolArray[b_pos] = true;
 			CCI_EntriesFound = std::ranges::count(CCI_BoolArray, true);
-			return;
+			break;
 		}
 
-		if (a_variable == "CFramework_Uniques_CCW") {
-
+		case CFramework_Uniques::kUniques_CCW:
+		{
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName()));
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -424,7 +472,11 @@ namespace CFramework_Uniques {
 
 			CCW_BoolArray[b_pos] = true;
 			CCW_EntriesFound = std::ranges::count(CCW_BoolArray, true);
-			return;
+			break;
+		}
+
+		default:
+			break;
 		}
 	}
 
@@ -435,21 +487,28 @@ namespace CFramework_Uniques {
 	void CHandler::InjectAndCompileData() {
 
 		//Cutting Room Floor
-		CFramework_Uniques_A::Data.AddForm(0x0F9649, "Skyrim.esm");
-		CFramework_Uniques_W::Data.AddForm(0x0F9648, "Skyrim.esm");
-		CFramework_Uniques_W::Data.AddForm(0x0A88C9, "Skyrim.esm");
-		CFramework_Uniques_W::Data.AddForm(0x0AE087, "Skyrim.esm");
+		if (Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
+			CFramework_Uniques_A::Data.AddForm(0x0F9649, "Skyrim.esm");
+			CFramework_Uniques_W::Data.AddForm(0x0F9648, "Skyrim.esm");
+			CFramework_Uniques_W::Data.AddForm(0x0A88C9, "Skyrim.esm");
+			CFramework_Uniques_W::Data.AddForm(0x0AE087, "Skyrim.esm");
+		}
 
 		//Creation Club
 		CHandler::Install_CCA();
 		CHandler::Install_CCI();
 		CHandler::Install_CCW();
 
+		//Handle Quest Rewards
+		CHandler::Install_QuestRewards();
+
+		//Build
 		CFramework_Uniques_A::Data.CompileFormArray(CFramework_Uniques::A_Forms_SK, "Skyrim.esm");
 		CFramework_Uniques_A::Data.CompileVariation(CFramework_Uniques::A_FormV_SK, "Skyrim.esm");
 		CFramework_Uniques_A::Data.CompileFormArray(CFramework_Uniques::A_Forms_DG, "Dawnguard.esm");
 		CFramework_Uniques_A::Data.CompileVariation(CFramework_Uniques::A_FormV_DG, "Dawnguard.esm");
 		CFramework_Uniques_A::Data.CompileFormArray(CFramework_Uniques::A_Forms_DB, "Dragonborn.esm");
+		CFramework_Uniques_A::Data.CompileVariation(CFramework_Uniques::A_FormV_DB, "Dragonborn.esm");
 
 		CFramework_Uniques_I::Data.CompileFormArray(CFramework_Uniques::I_Forms_SK, "Skyrim.esm");
 		CFramework_Uniques_I::Data.CompileVariation(CFramework_Uniques::I_FormV_SK, "Skyrim.esm");
@@ -464,8 +523,8 @@ namespace CFramework_Uniques {
 		CFramework_Uniques_W::Data.CompileVariation(CFramework_Uniques::W_FormV_DB, "Dragonborn.esm");
 		
 		CFramework_Uniques_J::Data.CompileFormArray(CFramework_Uniques::J_Forms_SK, "Skyrim.esm");
-		CFramework_Uniques_J::Data.CompileVariation(CFramework_Uniques::J_FormV_SK, "Skyrim.esm");
 		CFramework_Uniques_J::Data.CompileFormArray(CFramework_Uniques::J_Forms_DG, "Dawnguard.esm");
+		CFramework_Uniques_J::Data.CompileFormArray(CFramework_Uniques::J_Forms_DB, "Dragonborn.esm");
 		
 		CFramework_Uniques_L::Data.CompileFormArray(CFramework_Uniques::L_Forms_SK, "Skyrim.esm");
 		CFramework_Uniques_L::Data.CompileFormArray(CFramework_Uniques::L_Forms_DG, "Dawnguard.esm");
@@ -481,6 +540,7 @@ namespace CFramework_Uniques {
 		CFramework_Uniques_W::Data.MergeAsCollectable();
 		CFramework_Uniques_J::Data.MergeAsCollectable();
 		CFramework_Uniques_L::Data.MergeAsCollectable();
+		CFramework_Uniques_Q::Data.MergeAsCollectable();
 
 		CFramework_Uniques_CCA::Data.MergeAsCollectable();
 		CFramework_Uniques_CCI::Data.MergeAsCollectable();
@@ -491,11 +551,15 @@ namespace CFramework_Uniques {
 		CFramework_Uniques_W::Data.Populate(W_NameArray, W_FormArray, W_BoolArray, W_TextArray);
 		CFramework_Uniques_J::Data.Populate(J_NameArray, J_FormArray, J_BoolArray, J_TextArray);
 		CFramework_Uniques_L::Data.Populate(L_NameArray, L_FormArray, L_BoolArray, L_TextArray);
+		CFramework_Uniques_Q::Data.Populate(Q_NameArray, Q_FormArray, Q_BoolArray, Q_TextArray);
 
 		CFramework_Uniques_CCA::Data.Populate(CCA_NameArray, CCA_FormArray, CCA_BoolArray, CCA_TextArray);
 		CFramework_Uniques_CCI::Data.Populate(CCI_NameArray, CCI_FormArray, CCI_BoolArray, CCI_TextArray);
 		CFramework_Uniques_CCW::Data.Populate(CCW_NameArray, CCW_FormArray, CCW_BoolArray, CCW_TextArray);
-		
+
+		//Handle Quest Rewards Highlight Text
+		CHandler::Install_QuestRewards_Descriptions();
+
 		A_EntriesTotal = A_FormArray.size();
 		A_EntriesFound = std::ranges::count(A_BoolArray, true);
 
@@ -511,6 +575,9 @@ namespace CFramework_Uniques {
 		L_EntriesTotal = L_FormArray.size();
 		L_EntriesFound = std::ranges::count(L_BoolArray, true);
 
+		Q_EntriesTotal = Q_FormArray.size();
+		Q_EntriesFound = std::ranges::count(Q_BoolArray, true);
+
 		CCA_EntriesTotal = CCA_FormArray.size();
 		CCA_EntriesFound = std::ranges::count(CCA_BoolArray, true);
 
@@ -519,6 +586,37 @@ namespace CFramework_Uniques {
 
 		CCW_EntriesTotal = CCW_FormArray.size();
 		CCW_EntriesFound = std::ranges::count(CCW_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : A_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageArmor", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : W_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageWeapons", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : I_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageItems", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : J_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageJewelry", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : L_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : Q_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageConditionals", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : CCA_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : CCI_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : CCW_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
+		}
 	}
 
 	//---------------------------------------------------
@@ -547,6 +645,10 @@ namespace CFramework_Uniques {
 			L_BoolArray[i] = FrameworkAPI::IsItemKnown(L_FormArray[i], &CFramework_Uniques_L::Data);
 		}
 
+		for (auto i = 0; i < Q_FormArray.size(); i++) {
+			Q_BoolArray[i] = FrameworkAPI::IsItemKnown(Q_FormArray[i], &CFramework_Uniques_Q::Data);
+		}
+
 		for (auto i = 0; i < CCA_FormArray.size(); i++) {
 			CCA_BoolArray[i] = FrameworkAPI::IsItemKnown(CCA_FormArray[i], &CFramework_Uniques_CCA::Data);
 		}
@@ -573,6 +675,9 @@ namespace CFramework_Uniques {
 
 		L_EntriesTotal = L_FormArray.size();
 		L_EntriesFound = std::ranges::count(L_BoolArray, true);
+		
+		Q_EntriesTotal = Q_FormArray.size();
+		Q_EntriesFound = std::ranges::count(Q_BoolArray, true);
 
 		CCA_EntriesTotal = CCA_FormArray.size();
 		CCA_EntriesFound = std::ranges::count(CCA_BoolArray, true);
@@ -582,6 +687,65 @@ namespace CFramework_Uniques {
 
 		CCW_EntriesTotal = CCW_FormArray.size();
 		CCW_EntriesFound = std::ranges::count(CCW_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Quest Rewards ) --
+	//---------------------------------------------------
+
+	void CHandler::Install_QuestRewards() {
+
+		RE::FormID a_formID{};
+
+		//Lost to the Ages
+		a_formID = 0x000823;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x00575A, "Dawnguard.esm"); //Aetherial Crown
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x005759, "Dawnguard.esm"); //Aetherial Shield
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x00575E, "Dawnguard.esm"); //Aetherial Staff
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("AetherialRewardText"));
+
+		//A Daedra's Best Friend
+		a_formID = 0x000824;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x01C4E6, "Skyrim.esm"); //Rueful Axe
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x0D2846, "Skyrim.esm"); //Masque of Clavicus Vile
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("DeadraBestFriendRewardText"));
+
+		//Ill Met By Moonlight
+		a_formID = 0x000825;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x02AC61, "Skyrim.esm"); //Savior's Hide
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x02AC60, "Skyrim.esm"); //Ring of Hircine
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x0F82FE, "Skyrim.esm"); //Ring of Hircine (Cursed)
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("IllMetByMoonlightRewardText"));
+
+		//The Black Star
+		a_formID = 0x000826;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x063B27, "Skyrim.esm"); //Azura's Star
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x063B29, "Skyrim.esm"); //The Black Star
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("TheBlackStarRewardText"));
+
+		//No One Escapes Cidhna Mine
+		a_formID = 0x000827;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x0EAFD0, "Skyrim.esm"); //Armor of the Old Gods
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x024CFF, "Skyrim.esm"); //Silver-Blood Family Ring
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("CidhnaMineRewardText"));
+
+		//Civil War
+		a_formID = 0x000828;
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x05CBFE, "Skyrim.esm"); //General Tullius' Armor
+		CFramework_Uniques_Q::Data.AddForm(a_formID, "Completionist.esp", 0x062303, "Skyrim.esm"); //Ulfric's Clothes
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("CivilWarRewardText"));
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Get Quest Reward Text ) --
+	//---------------------------------------------------
+
+	void CHandler::Install_QuestRewards_Descriptions()
+	{
+		for (auto& [form, text] : HighlightForms) 
+		{
+			Q_TextArray[std::distance(Q_FormArray.begin(), std::ranges::find(Q_FormArray, form))] = text.data();
+		}
 	}
 
 	//---------------------------------------------------

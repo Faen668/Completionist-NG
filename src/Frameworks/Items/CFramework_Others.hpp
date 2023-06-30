@@ -76,6 +76,7 @@ namespace CFramework_Others
 		  static void			UpdateFoundForms();
 		  static void			InjectAndCompileData();
 		  static void			BuildBaranziahArrays();
+		  static void			InstallSearchTerms();
 
 		  static void			ProcessFoundForm(RE::TESObjectREFR* a_object);
 		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);

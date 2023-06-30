@@ -7,10 +7,23 @@
 
 namespace Serialization
 {
+	class tme
+	{
+	public:
+		tme(std::string& a)
+			:day{ a.substr(0,3),a.substr(8,2) }, month{ a.substr(4,3) }, year{ a.substr(20,4) }
+		{
+			tie = a.substr(11, 8);
+		}
+
+		std::string day[2]{}; std::string month{}; std::string year{};
+		std::string tie{};
+	};
+
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1003,
+		kVersion = 1004,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -732,6 +745,198 @@ namespace Serialization
 
 		std::unordered_map<std::string, std::string> data;
 	};
+
+	// new polymorphed data structure designed for Logging
+	struct CompletionistLog final : public ISerializable
+	{
+		// modifier
+		void AddDate(std::string_view a_date) noexcept
+		{
+			if (!data.contains(a_date.data())) {
+				data.try_emplace(a_date.data());
+			}
+		}
+
+		void AddLoggedEvent(std::string_view a_log) noexcept
+		{
+			auto date = GetCurrentDate();
+
+			if (HasLoggedEvent(date, a_log)) {
+				return;
+			}
+
+			AddDate(GetCurrentDate());
+
+			auto event = fmt::format("|{}|", a_log);
+			data[date.data()] += event;
+
+			INFO("Log Recorder Added Log [{}] to '{}' Serialized Date Map.", a_log, date);
+		}
+
+		void RemoveDate(std::string_view a_date) noexcept
+		{
+			if (HasDate(a_date)) {
+				data.erase(a_date.data());
+			}
+		}
+
+		void RemoveLoggedEvent(std::string_view a_date, std::string_view a_log) noexcept
+		{
+			if (HasDate(a_date)) {
+				auto event = fmt::format("|{}|", a_log);
+				DKUtil::string::replace_all(data[a_date.data()], event, {});
+			}
+		}
+
+		// accessor
+		[[nodiscard]] std::string GetCurrentDate() noexcept
+		{
+			auto rp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			std::string h(ctime(&rp));
+			tme curtime(h);
+
+			return fmt::format("{:s} {:s} {:s}", curtime.month, curtime.day[1], curtime.year);
+		}
+
+		[[nodiscard]] bool HasDate(std::string_view a_date) noexcept
+		{
+			return data.contains(a_date.data());
+		}
+
+		[[nodiscard]] bool HasLoggedEvent(std::string_view a_date, std::string_view a_log) noexcept
+		{
+			if (!HasDate(a_date)) {
+				return false;
+			}
+
+			auto event = fmt::format("|{}|", a_log);
+			return DKUtil::string::icontains(data[a_date.data()], a_log);
+		}
+
+		[[nodiscard]] std::vector<std::string> GetAllLoggedDates() noexcept
+		{
+			std::vector<std::string> list;
+
+			for (auto& x : data)
+			{
+				list.push_back(x.first);
+			}
+			return list;
+		}
+
+		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents() noexcept
+		{
+			std::vector<std::string> list;
+
+			for (auto& x : data)
+			{
+				auto raw = DKUtil::string::split(x.second, "|");
+				for (auto& r : raw) {
+					if (!r.empty()) {
+						list.push_back(fmt::format("{} {}", x.first, r));
+					}
+				}
+			}
+			return list;
+		}
+
+		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date) noexcept
+		{
+			if (!HasDate(a_date)) {
+				return {};
+			}
+
+			std::vector<std::string> list;
+			auto raw = DKUtil::string::split(data[a_date.data()], "|");
+			for (auto& r : raw) {
+				if (!r.empty()) {
+					list.push_back(fmt::format("{} {}", a_date, r));
+				}
+			}
+
+			return list;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( SKSE APIs ) ------
+		//---------------------------------------------------
+
+		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			std::size_t total = data.size();
+			if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
+				ERROR("Failed to write serialized form data: size");
+			}
+
+			auto written = 0;
+			for (auto& [key, val] : data) {
+				std::size_t keySize{ key.size() }, valSize{ val.size() };
+				if (!a_intfc->WriteRecordData(&keySize, sizeof(keySize)) ||
+					!a_intfc->WriteRecordData(&valSize, sizeof(valSize))) {
+					ERROR("Failed to write serialized form data: pair_size");
+				}
+
+				if (!a_intfc->WriteRecordData(key.data(), keySize) ||
+					!a_intfc->WriteRecordData(val.data(), valSize)) {
+					ERROR("Failed to write serialized form data: pair_data");
+				}
+
+				written++;
+			}
+
+			if (written != total) {
+				ERROR("Lost data during saving co-save!\nExpected: {}\nWritten: {}", total, written);
+			}
+
+			INFO("Saved {} to co-save with a size of - {}", a_name, total);
+		}
+
+		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
+		{
+			std::size_t total;
+			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
+				ERROR("Failed to read serialized form data: size");
+			}
+
+			auto read = 0;
+			for (auto i = 0; i < total; ++i) {
+				static std::string key, val;
+				std::size_t keySize, valSize;
+				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
+					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
+					ERROR("Failed to read serialized form data: pair_size");
+				}
+
+				key.resize(keySize);
+				val.resize(valSize);
+				if (!a_intfc->ReadRecordData(key.data(), keySize) ||
+					(valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
+					ERROR("Failed to read serialized form data: pair_data");
+				}
+
+				data.try_emplace(key, val);
+				read++;
+			}
+
+			if (read != total) {
+				INFO("Lost data while loading {} from co-save... Expected: {} Written: {}", a_name, total, read);
+			}
+
+			INFO("Loaded SKSE co-save {} with a size of - {}", a_name, data.size());
+		}
+
+		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			INFO("Reverting {} from co-save", a_name);
+			data.clear();
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( Members ) --------
+		//---------------------------------------------------
+
+		std::unordered_map<std::string, std::string> data;
+	};
 }
 
 namespace CFramework_Master
@@ -780,6 +985,8 @@ namespace Serialization
 				if (data)
 				{
 					/*Add new serialised data sets here for first load... e.g if (version < kVersion && name == "EXAMPLE DATA NAME") { continue; }*/
+					if (version < 1004 && DKUtil::string::iequals(name, "LoggingData")) { continue; }
+					
 					data->Load(a_intfc, name);
 				}
 			}

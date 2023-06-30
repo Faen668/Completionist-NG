@@ -27,6 +27,8 @@ namespace CFramework_Master
 		SetSerializableInfo(CQuestKeys_Manual);
 		SetSerializableInfo(CQuestKeys_Stages);
 
+		SetSerializableInfo(LoggingData);
+
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
 		CFramework_Others::			CHandler::InstallFramework();
@@ -65,6 +67,8 @@ namespace CFramework_Master
 		CPatch_LOD::				CHandler::InstallFramework();
 		CPatch_SUD::				CHandler::InstallFramework();
 		CPatch_CHM::				CHandler::InstallFramework();
+		CPatch_REQ::				CHandler::InstallFramework();
+		CPatch_INN::				CHandler::InstallFramework();
 
 		//SpellTomes
 		CPatch_SpellTomes::			CHandler::InstallFramework();
@@ -105,12 +109,91 @@ namespace CFramework_Master
 
 		a_vm->RegisterFunction("UpdateVariables",				"Completionist_Native", UpdateCompletion);
 		a_vm->RegisterFunction("LoadInjectedForms",				"Completionist_Native", LoadInjectedForms);
-		
+
 		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
 		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
 		a_vm->RegisterFunction("ActivateShrineByID",			"Completionist_Native", CFramework_Blessings::CHandler::ActivateShrineFromPapyrus);
 		a_vm->RegisterFunction("CheckForReferences",			"Completionist_Native", CellScanner::CHandler::CheckForReferences);
 		return true;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( MCM Quest Search ) -------
+	//---------------------------------------------------
+
+	std::vector<std::string> FrameworkAPI::SearchAndReportPage(std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType)
+	{
+		std::vector<std::string> list{};
+		auto result = 1;
+		auto process = false;
+
+		//INFO("Running Misc Search For {} with a type of {}", s_term, i_searchType);
+
+		for (auto& [name, text, Category] : CFramework_Master::CItemsDataVec)
+		{
+			if (list.size() >= i_maxResults)
+				break;
+
+			switch (i_searchType)
+			{
+			case 0: { process = DKUtil::string::icontains(name, s_term); break; }
+			case 1: { process = name.starts_with(s_term); break; }
+			case 2: { process = DKUtil::string::iequals(name, s_term); break; }
+
+			default:
+				break;
+			}
+
+			if (process) {
+				list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + text + "}{" + GetLocalisedCategory(Category) + "}{" + name + "}");
+				list.push_back(text);
+				list.push_back(name);
+				result++;
+			}
+		}
+
+		return list;
+	};
+
+	std::string FrameworkAPI::GetLocalisedCategory(int32_t ID)
+	{
+		switch (static_cast<EntryCategory>(ID))
+		{
+		case CFramework_Master::kNone: return ""; break;
+		case CFramework_Master::kItem: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Item"); break;
+		case CFramework_Master::kBook: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Book"); break;
+		case CFramework_Master::kMapM: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_MapP"); break;
+		case CFramework_Master::kShou: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Shou"); break;
+		case CFramework_Master::kEnch: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Ench"); break;
+		case CFramework_Master::kHome: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Home"); break;
+		case CFramework_Master::kPets: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Pets"); break;
+		case CFramework_Master::kClaw: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Claw"); break;
+		case CFramework_Master::kMask: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Mask"); break;
+		case CFramework_Master::kFish: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Fish"); break;
+		case CFramework_Master::kShrine: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Shrine"); break;
+		case CFramework_Master::kStones: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Stones"); break;
+		case CFramework_Master::kBarenziah: return CLocalisation::LocalisationAPI::GetLocStringByKey("Category_Barenziah"); break;
+		default:
+			break;
+		}
+
+		return "";
+	}
+
+	std::int32_t FrameworkAPI::GetBookCategoryType(RE::TESForm* a_form)
+	{
+		if (!a_form) { return 0; }
+
+		auto* book = static_cast<RE::TESObjectBOOK*>(a_form);
+		if (book) {
+			if (book && (book->GetSpell() || book->TeachesSkill())) {
+				return 0;
+			}
+
+			return 2;
+		}
+
+		return 0;
 	}
 
 	//---------------------------------------------------
@@ -129,6 +212,11 @@ namespace CFramework_Master
 	void FrameworkAPI::LogWithPlugin(RE::StaticFunctionTag*, std::string a_message) {
 
 		INFO("Papyrus Message: {}", a_message);
+	}
+
+	void FrameworkAPI::AddNewEventToLog(std::string a_log)
+	{
+		LoggingData.AddLoggedEvent(a_log);
 	}
 
 	//---------------------------------------------------
@@ -228,6 +316,8 @@ namespace CFramework_Master
 		CPatch_FSH::				CHandler::UpdateFoundForms();
 		CPatch_SUD::				CHandler::UpdateFoundForms();
 		CPatch_CHM::				CHandler::UpdateFoundForms();
+		CPatch_REQ::				CHandler::UpdateFoundForms();
+		CPatch_INN::				CHandler::UpdateFoundForms();
 
 		//SpellTomes
 		CPatch_SpellTomes::			CHandler::UpdateFoundForms();
@@ -240,7 +330,7 @@ namespace CFramework_Master
 	std::int32_t FrameworkAPI::GetEntries_TotalByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& value = HandleTotalSet(FrameworkID(a_ID));
-		INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		//INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
 		return value;
 	}
 
@@ -251,7 +341,7 @@ namespace CFramework_Master
 	std::int32_t FrameworkAPI::GetEntries_FoundByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& value = HandleFoundSet(FrameworkID(a_ID));
-		INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		//INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
 		return value;
 	}
 
@@ -262,7 +352,7 @@ namespace CFramework_Master
 	std::vector<RE::TESForm*> FrameworkAPI::GetFormArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& array = HandleFormSet(FrameworkID(a_ID));
-		INFO("Returning form array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		//INFO("Returning form array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
 		return array;
 	}
 
@@ -273,7 +363,7 @@ namespace CFramework_Master
 	std::vector<std::string> FrameworkAPI::GetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& array = HandleNameSet(FrameworkID(a_ID));
-		INFO("Returning name array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		//INFO("Returning name array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
 		return array;
 	}
 
@@ -284,7 +374,7 @@ namespace CFramework_Master
 	std::vector<std::string> FrameworkAPI::GetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& array = HandleTextSet(FrameworkID(a_ID));
-		INFO("Returning text array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		//INFO("Returning text array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
 		return array;
 	}
 
@@ -295,7 +385,7 @@ namespace CFramework_Master
 	std::vector<bool> FrameworkAPI::GetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& array = HandleBoolSet(FrameworkID(a_ID));
-		INFO("Returning bool array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		//INFO("Returning bool array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
 		return array;
 	}
 

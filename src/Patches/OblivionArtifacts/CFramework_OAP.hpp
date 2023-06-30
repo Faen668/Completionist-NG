@@ -53,6 +53,7 @@ namespace CPatch_OAP
 	static void			InstallFramework();
 	static void			UpdateFoundForms();
 	static void			InjectAndCompileData();
+	static void			InstallSearchTerms();
 
 	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
 	static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);

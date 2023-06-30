@@ -58,6 +58,7 @@ namespace CFramework_Pets
 		static void			InstallFramework();
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
+		static void			InstallSearchTerms();
 
 		static void			Framework_UpdatePetOwnership(RE::StaticFunctionTag*, std::string a_name);
 	};

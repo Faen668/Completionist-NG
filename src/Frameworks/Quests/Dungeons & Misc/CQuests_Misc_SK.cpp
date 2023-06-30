@@ -9,7 +9,7 @@ namespace CQFramework_Misc_SK
 		{"Side_SK_Quest02", CStageEnum::kPast, 19		, 0 },
 		{"Side_SK_Quest04", CStageEnum::kPast, 99		, 0 },
 		{"Side_SK_Quest05", CStageEnum::kPast, 199		, 0 },
-		{"Side_SK_Quest06", CStageEnum::kPast, 19		, 0 },
+		{"Side_SK_Quest06", CStageEnum::kDone, 20		, 0 },
 		{"Side_SK_Quest07", CStageEnum::kPast, 99		, 0 },
 		{"Side_SK_Quest08", CStageEnum::kPast, 99		, 0 },
 		{"Side_SK_Quest09", CStageEnum::kPast, 19		, 0 },

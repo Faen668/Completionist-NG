@@ -57,6 +57,7 @@ namespace CPatch_CLW
 
 	static void			SinkEvents();
 	static void			InjectAndCompileData();
+	static void			InstallSearchTerms();
 
 	static void			InstallFramework();
 	static void			InstallQuestFramework();

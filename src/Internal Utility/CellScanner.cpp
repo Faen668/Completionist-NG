@@ -45,17 +45,20 @@ namespace CellScanner
 			{
 				if (V_CellScanner_CONT) {
 					if (auto* container = ref.get()->GetBaseObject()->As<RE::TESContainer>()) {
-						container->ForEachContainerObject([&](RE::ContainerObject& entry) {
-							auto* obj = entry.obj->As<RE::TESForm>();
-							if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !refs.contains(obj)) {
-								if (a_logging) {
-									INFO("Found {} In Container - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), ref->GetFormID());
+						auto inv = ref.get()->GetInventory();
+
+						for (auto& [obj, data] : inv) {
+							if (data.first > 0 && data.second) {
+								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !refs.contains(obj)) {
+									if (a_logging) {
+										INFO("Found {} on - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), ref->GetName());
+									}
+									refs.emplace(obj);
+									cont++;
 								}
-								refs.emplace(obj);
-								cont++;
 							}
-							return RE::BSContainer::ForEachResult::kContinue;
-							});
+
+						}
 					}
 				}
 				break;

@@ -71,6 +71,7 @@ namespace CFramework_Enchantments {
 
 	static void			SinkEvents();
 	static void			InstallFramework();
+	static void			InstallSearchTerms();
 
 	static void			UpdateFoundForms();
 	static void			UpdateCounts();

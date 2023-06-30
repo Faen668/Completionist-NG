@@ -51,5 +51,6 @@ namespace CPatch_FOS
 	static void			InjectAndCompileData();
 
 	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+	static void			InstallSearchTerms();
 	};
 }

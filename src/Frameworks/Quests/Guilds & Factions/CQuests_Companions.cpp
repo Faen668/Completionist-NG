@@ -3,22 +3,22 @@
 
 namespace CQFramework_Companions 
 {
-	CRadiantData RadiantData[] {
+	CRadiantData RadiantData[]{
 		/*06*/ {"Companions_Quest06",  CRadiantEnum::kRadiant_COM,		0x01CEEE, 0, 200, "Completionist_Companions_CR01" },
-		/*07*/ {"Companions_Quest07",  CRadiantEnum::kRadiant_COM,		0x01CEEE, 0, 200, "Completionist_Companions_CR02" },
-		/*08*/ {"Companions_Quest08",  CRadiantEnum::kRadiant_COM,		0x025185, 0, 200, "Completionist_Companions_CR03" },
-		/*09*/ {"Companions_Quest09",  CRadiantEnum::kRadiant_COM,		0x025230, 0, 200, "Completionist_Companions_CR14" },
-		/*10*/ {"Companions_Quest10",  CRadiantEnum::kRadiant_COM,		0x025231, 0, 200, "Completionist_Companions_CR07" },
-		/*11*/ {"Companions_Quest11",  CRadiantEnum::kRadiant_COM,		0x02522F, 0, 200, "Completionist_Companions_CR06" },
-		/*12*/ {"Companions_Quest12",  CRadiantEnum::kRadiant_COM,		0x0C18E1, 0, 200, "Completionist_Companions_CR04" },
+		/*07*/ {"Companions_Quest07",  CRadiantEnum::kRadiant_COM,		0x025185, 0, 200, "Completionist_Companions_CR02" },
+		/*08*/ {"Companions_Quest08",  CRadiantEnum::kRadiant_COM,		0x025230, 0, 200, "Completionist_Companions_CR03" },
+		/*09*/ {"Companions_Quest09",  CRadiantEnum::kRadiant_COM,		0x0E3156, 0, 200, "Completionist_Companions_CR14" },
+		/*10*/ {"Companions_Quest10",  CRadiantEnum::kRadiant_COM,		0x025250, 0, 200, "Completionist_Companions_CR07" },
+		/*11*/ {"Companions_Quest11",  CRadiantEnum::kRadiant_COM,		0x0C18E1, 0, 200, "Completionist_Companions_CR06" },
+		/*12*/ {"Companions_Quest12",  CRadiantEnum::kRadiant_COM,		0x025231, 0, 200, "Completionist_Companions_CR04" },
 		/*13*/ {"Companions_Quest13",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Farkas" },
 		/*14*/ {"Companions_Quest14",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Vilkas" },
-		/*15*/ {"Companions_Quest15",  CRadiantEnum::kRadiant_COM,		0x025252, 0, 200, "Completionist_Companions_CR08" },
-		/*16*/ {"Companions_Quest16",  CRadiantEnum::kRadiant_DF1,		0x09D6FC, 0, 200, "Completionist_Companions_CR11" },
-		/*17*/ {"Companions_Quest17",  CRadiantEnum::kRadiant_DF1,		0x09D700, 0, 200, "Completionist_Companions_CR10" },
-		/*18*/ {"Companions_Quest18",  CRadiantEnum::kRadiant_DF1,		0x0E3145, 0, 200, "Completionist_Companions_CR09" },
-		/*19*/ {"Companions_Quest19",  CRadiantEnum::kRadiant_DF3,	0x0E3163, 0, 200, "Completionist_Companions_CR12" },
-		/*20*/ {"Companions_Quest20",  CRadiantEnum::kRadiant_COM,		0x0E3156, 0, 200, "Completionist_Companions_CR05" },
+		/*15*/ {"Companions_Quest15",  CRadiantEnum::kRadiant_COM,		0x025251, 0, 200, "Completionist_Companions_CR08" },
+		/*16*/ {"Companions_Quest16",  CRadiantEnum::kRadiant_DF1,		0x09D700, 0, 200, "Completionist_Companions_CR11" },
+		/*17*/ {"Companions_Quest17",  CRadiantEnum::kRadiant_DF1,		0x09D6FC, 0, 200, "Completionist_Companions_CR10" },
+		/*18*/ {"Companions_Quest18",  CRadiantEnum::kRadiant_DF1,		0x025252, 0, 200, "Completionist_Companions_CR09" },
+		/*19*/ {"Companions_Quest19",  CRadiantEnum::kRadiant_DF3,		0x0E3145, 0, 200, "Completionist_Companions_CR12" },
+		/*20*/ {"Companions_Quest20",  CRadiantEnum::kRadiant_COM,		0x02522F, 0, 200, "Completionist_Companions_CR05" },
 	};
 
 	CQuestData QuestData[] {
@@ -57,16 +57,22 @@ namespace CQFramework_Companions
 	{
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(GetSingleton()));
 
+		auto CuttingRoomFloorInstalled = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
+		auto MD1_Installed = Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker.esp");
+		auto MD2_Installed = Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker (Farkas only option).esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			// Handle Exclusions for CRF
-			if (!Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
-				if (i == 8) { INFO("Excluded quest - {} due to CRF being missing", QuestData[i].editor_id); continue; }
+			// Handle Exclusions for 'Cutting Room Floor'
+			if (!CuttingRoomFloorInstalled && i == 8) {
+				INFO("Excluded quest {} Due To 'Cutting Room Floor'", QuestData[i].unique_identifier);
+				continue;
 			}
 
-			// Handle Exclusions for 'Dont be a milk drinker'
-			if (i == 12 && (Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker.esp") || Serialization::CompletionistData::IsModInstalled("Companions - Don't be a Milk Drinker (Farkas only option).esp"))) {
-				INFO("Excluded quest - {} due to 'Don't be a milk drinker' being installed", QuestData[i].editor_id); continue;
+			// Handle Exclusions for 'Companions - Don't be a Milk Drinker'
+			if (i == 12 && (MD1_Installed || MD2_Installed)) {
+				INFO("Excluded quest {} Due To 'Companions - Don't be a Milk Drinker'", QuestData[i].unique_identifier);
+				continue;
 			}
 
 			QuestData[i].init()
@@ -107,7 +113,7 @@ namespace CQFramework_Companions
 		}
 
 		for (const auto& alias : quest1->aliases) {
-			if (alias && alias->aliasName == "Questgiver") {
+			if (alias && DKUtil::string::iequals(alias->aliasName, "Questgiver")) {
 
 				auto* reference = static_cast<RE::BGSRefAlias*>(alias);
 				if (reference && reference->GetActorReference()->formID == FarkasRef->formID) {

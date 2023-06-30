@@ -109,6 +109,7 @@ namespace CPatch_FSH
 		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_section);
 
 		  static void			InjectAndCompileData();;
+		  static void			InstallSearchTerms();
 		  static void			BuildFishArrays(RE::TESForm* a_form, std::string a_rod, std::string a_loc);
 
 		  static void			AddCACOFishingForms();

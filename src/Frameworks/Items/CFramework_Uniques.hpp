@@ -21,6 +21,10 @@ namespace CFramework_Uniques_L {
 	inline Serialization::CompletionistData Data;
 }
 
+namespace CFramework_Uniques_Q {
+	inline Serialization::CompletionistData Data;
+}
+
 namespace CFramework_Uniques_CCA {
 	inline Serialization::CompletionistData Data;
 }
@@ -71,6 +75,13 @@ namespace CFramework_Uniques
 	inline std::int32_t L_EntriesTotal;
 	inline std::int32_t L_EntriesFound;
 
+	inline std::vector<std::string> Q_NameArray;
+	inline std::vector<std::string> Q_TextArray;
+	inline std::vector<RE::TESForm*> Q_FormArray;
+	inline std::vector<bool> Q_BoolArray;
+	inline std::int32_t Q_EntriesTotal;
+	inline std::int32_t Q_EntriesFound;
+
 	inline std::vector<std::string> CCA_NameArray;
 	inline std::vector<std::string> CCA_TextArray;
 	inline std::vector<RE::TESForm*> CCA_FormArray;
@@ -94,6 +105,21 @@ namespace CFramework_Uniques
 
 	using EventResult = RE::BSEventNotifyControl;
 
+	enum section
+	{
+		kUniques_A,
+		kUniques_W,
+		kUniques_I,
+		kUniques_J,
+		kUniques_L,
+		kUniques_Q,
+		kUniques_CCA,
+		kUniques_CCI,
+		kUniques_CCW,
+
+		kTotal
+	};
+
 	class CHandler final :
 
 		public RE::BSTEventSink<RE::TESContainerChangedEvent> {
@@ -106,11 +132,15 @@ namespace CFramework_Uniques
 		  static void			InstallFramework();
 		  static void			UpdateFoundForms();
 		  static void			InjectAndCompileData();
+		  static void			InstallSearchTerms();
 
 		  static void			Install_CCA();
 		  static void			Install_CCI();
 		  static void			Install_CCW();
 
-		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, section kSection);
+
+		  static void			Install_QuestRewards();
+		  static void			Install_QuestRewards_Descriptions();
 	};
 }

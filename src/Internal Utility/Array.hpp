@@ -39,6 +39,8 @@
 #include "Patches/SpellTomes/CFramework_SpellTomes.hpp"
 #include "Patches/Skyrim Unique Drinks/CFramework_SUD.hpp"
 #include "Patches/Cheesemod/CFramework_Cheese.hpp"
+#include "Patches/Requiem/CFramework_REQ.hpp"
+#include "Patches/InnSoaps/CFramework_Inn.hpp"
 
 namespace ArrayHolder {
 	using namespace Serialization;
@@ -46,97 +48,74 @@ namespace ArrayHolder {
 	enum class FrameworkID : std::int32_t
 	{
 		//Items (Uniques)
-		kFramework_ARM = 0, // Unique Armor (Vanilla)
-		kFramework_WPN = 1, // Unique Weapons (Vanilla)
-		kFramework_ITM = 2, // Unique Items (Vanilla)
-		kFramework_JWY = 3, // Unique Jewelry (Vanilla)
-		kFramework_LIQ = 4, // Unique Liquor (Vanilla)
-
-		kFramework_CCA = 5, // Unique Armor (Creation Club)
-		kFramework_CCI = 6, // Unique Items (Creation Club)
-		kFramework_CCW = 7, // Unique Weapons (Creation Club)
-
-		//Items (Others)
-		kFramework_VDC = 8, // Dragon Claws (Vanilla)
-		kFramework_PDC = 9, // Dragon Claws (Patches)
+		kFramework_ARM = 0,  // Unique Armor (Vanilla)
+		kFramework_WPN = 1,  // Unique Weapons (Vanilla)
+		kFramework_ITM = 2,  // Unique Items (Vanilla)
+		kFramework_JWY = 3,  // Unique Jewelry (Vanilla)
+		kFramework_LIQ = 4,  // Unique Liquor (Vanilla)
+		kFramework_CCA = 5,  // Unique Armor (Creation Club)
+		kFramework_CCI = 6,  // Unique Items (Creation Club)
+		kFramework_CCW = 7,  // Unique Weapons (Creation Club)
+		kFramework_VDC = 8,  // Dragon Claws (Vanilla)
+		kFramework_PDC = 9,  // Dragon Claws (Patches)
 		kFramework_VDM = 10, // Dragon Priest Masks (Vanilla)
 		kFramework_PDM = 11, // Dragon Priest Masks (Patches)
 		kFramework_SBH = 12, // Stones of Barenziah
-
-		//Items (Books)
 		kFramework_BAG = 13, // Books (A-G)
 		kFramework_BHS = 14, // Books (H-S)
 		kFramework_BTY = 15, // Books (T-Y)
 		kFramework_SSK = 16, // Skill (Skyrim)
-
 		kFramework_T0A = 17, // Tomes (Skyrim)
-		kFramework_T0C = 50, // Tomes (Skyrim)
-		kFramework_T0D = 51, // Tomes (Skyrim)
-		kFramework_T0I = 52, // Tomes (Skyrim)
-		kFramework_T0R = 53, // Tomes (Skyrim)
-
 		kFramework_BDG = 18, // Books (Dawnguard)
-
 		kFramework_T1A = 19, // Tomes (Dawnguard)
-		kFramework_T1C = 54, // Tomes (Dawnguard)
-		kFramework_T1D = 55, // Tomes (Dawnguard)
-		kFramework_T1I = 56, // Tomes (Dawnguard)
-		kFramework_T1R = 57, // Tomes (Dawnguard)
-
 		kFramework_BDB = 20, // Books (Dragonborn)
-
 		kFramework_T2A = 21, // Tomes (Dragonborn)
-		kFramework_T2C = 58, // Tomes (Dragonborn)
-		kFramework_T2D = 59, // Tomes (Dragonborn)
-		kFramework_T2I = 60, // Tomes (Dragonborn)
-		kFramework_T2R = 61, // Tomes (Dragonborn)
-
 		kFramework_MSK = 22, // Treasure Maps (Skyrim)
 		kFramework_MNT = 23, // Treasure Maps (New Treasure Hunt)
 		kFramework_MTH = 24, // Treasure Maps (Treasure Hunter)
 		kFramework_CCB = 25, // Books (Creation Club)
-
 		kFramework_T3A = 26, // Tomes (Creation Club)
-		kFramework_T3C = 62, // Tomes (Creation Club)
-		kFramework_T3D = 63, // Tomes (Creation Club)
-		kFramework_T3I = 64, // Tomes (Creation Club)
-		kFramework_T3R = 65, // Tomes (Creation Club)
-
-		//Misc (Locations)
 		kFramework_MAG = 27, // Locations (A-G)
 		kFramework_MHR = 28, // Locations (H-R)
 		kFramework_MSZ = 29, // Locations (S-Z)
 		kFramework_MDG = 30, // Locations (Dawngaurd)
 		kFramework_MDB = 31, // Locations (Dragonborn)
 		kFramework_MCC = 32, // Locations (Creation Club)
-
-		//Misc (Blessings)
 		kFramework_VDS = 33, // Doomstones
 		kFramework_VSH = 34, // Shrines	(Vanilla)
 		kFramework_WSH = 35, // Shrines (Wintersun)
-
-		//Misc (Enchantments)
 		kFramework_VAE = 36, // Armor (Vanilla)
 		kFramework_NGA = 66, // Armor (Necromantic Grimoire)
 		kFramework_SAE = 37, // Armor (Summermyst)
 		kFramework_VWE = 38, // Weapons	(Vanilla)
 		kFramework_SWE = 39, // Weapons (Summermyst)
-
-		//Misc (Pets)
 		kFramework_VPS = 40, // Pets (Vanilla)
 		kFramework_POS = 41, // Pets (Pets of Skyrim)
 		kFramework_SAS = 42, // Pets (Saints & Seducers)
 		kFramework_MSC = 43, // Pets (Miscellaneous)
-
-		//Misc (Player Homes)
 		kFramework_VPH = 44, // Player Homes (Vanilla)
 		kFramework_CPH = 45, // Player Homes (Creation Club)
 		kFramework_PPH = 46, // Player Homes (Supported Mods)
-
-		//Misc (Shouts)
 		kFramework_VNS = 47, // Shouts (Vanilla)
 		kFramework_TCS = 48, // Shouts (Thunderchild)
 		kFramework_MCS = 49, // Shouts (Miscellaneous)
+		kFramework_T0C = 50, // Tomes (Skyrim)
+		kFramework_T0D = 51, // Tomes (Skyrim)
+		kFramework_T0I = 52, // Tomes (Skyrim)
+		kFramework_T0R = 53, // Tomes (Skyrim)
+		kFramework_T1C = 54, // Tomes (Dawnguard)
+		kFramework_T1D = 55, // Tomes (Dawnguard)
+		kFramework_T1I = 56, // Tomes (Dawnguard)
+		kFramework_T1R = 57, // Tomes (Dawnguard)
+		kFramework_T2C = 58, // Tomes (Dragonborn)
+		kFramework_T2D = 59, // Tomes (Dragonborn)
+		kFramework_T2I = 60, // Tomes (Dragonborn)
+		kFramework_T2R = 61, // Tomes (Dragonborn)
+		kFramework_T3C = 62, // Tomes (Creation Club)
+		kFramework_T3D = 63, // Tomes (Creation Club)
+		kFramework_T3I = 64, // Tomes (Creation Club)
+		kFramework_T3R = 65, // Tomes (Creation Club)
+		kFramework_QSR = 67, // Unique Quest Reward Items (Vanilla)
 
 		//Patches
 		kPatch_AHD_I = 200, // Additional Hearthfire Dolls
@@ -270,6 +249,15 @@ namespace ArrayHolder {
 		kPatch_CHM_2 = 327, // CheeseMod (Sliced)
 		kPatch_CHM_3 = 328, // CheeseMod (Wedges)
 		kPatch_CHM_4 = 329, // CheeseMod (Wheels)
+
+		kPatch_REQ_A = 330, // Requiem (Armor)
+		kPatch_REQ_M = 331, // Requiem (Misc)
+		kPatch_REQ_S = 332, // Requiem (Skill Books)
+		kPatch_REQ_B = 333, // Requiem (Books)
+		kPatch_REQ_T = 334, // Requiem (Spell Tomes)
+		kPatch_REQ_W = 335, // Requiem (Weapons)
+
+		kPatch_INN = 336, // Inn Soaps
 
 		kTotal,
 	};
@@ -439,6 +427,7 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_ITM>(&CFramework_Uniques::I_NameArray, &CFramework_Uniques::I_TextArray, &CFramework_Uniques::I_BoolArray, &CFramework_Uniques::I_FormArray, &CFramework_Uniques::I_EntriesFound, &CFramework_Uniques::I_EntriesTotal, &CFramework_Uniques_I::Data);
 		AttemptToAdd<FrameworkID::kFramework_JWY>(&CFramework_Uniques::J_NameArray, &CFramework_Uniques::J_TextArray, &CFramework_Uniques::J_BoolArray, &CFramework_Uniques::J_FormArray, &CFramework_Uniques::J_EntriesFound, &CFramework_Uniques::J_EntriesTotal, &CFramework_Uniques_J::Data);
 		AttemptToAdd<FrameworkID::kFramework_LIQ>(&CFramework_Uniques::L_NameArray, &CFramework_Uniques::L_TextArray, &CFramework_Uniques::L_BoolArray, &CFramework_Uniques::L_FormArray, &CFramework_Uniques::L_EntriesFound, &CFramework_Uniques::L_EntriesTotal, &CFramework_Uniques_L::Data);
+		AttemptToAdd<FrameworkID::kFramework_QSR>(&CFramework_Uniques::Q_NameArray, &CFramework_Uniques::Q_TextArray, &CFramework_Uniques::Q_BoolArray, &CFramework_Uniques::Q_FormArray, &CFramework_Uniques::Q_EntriesFound, &CFramework_Uniques::Q_EntriesTotal, &CFramework_Uniques_Q::Data);
 
 		AttemptToAdd<FrameworkID::kFramework_CCA>(&CFramework_Uniques::CCA_NameArray, &CFramework_Uniques::CCA_TextArray, &CFramework_Uniques::CCA_BoolArray, &CFramework_Uniques::CCA_FormArray, &CFramework_Uniques::CCA_EntriesFound, &CFramework_Uniques::CCA_EntriesTotal, &CFramework_Uniques_CCA::Data);
 		AttemptToAdd<FrameworkID::kFramework_CCI>(&CFramework_Uniques::CCI_NameArray, &CFramework_Uniques::CCI_TextArray, &CFramework_Uniques::CCI_BoolArray, &CFramework_Uniques::CCI_FormArray, &CFramework_Uniques::CCI_EntriesFound, &CFramework_Uniques::CCI_EntriesTotal, &CFramework_Uniques_CCI::Data);
@@ -532,6 +521,9 @@ namespace ArrayHolder {
 
 		//Patches - Aditional Hearthfire Dolls (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_AHD_I>(&CPatch_AHD::Items_NameArray, &CPatch_AHD::Items_TextArray, &CPatch_AHD::Items_BoolArray, &CPatch_AHD::Items_FormArray, &CPatch_AHD::Items_EntriesFound, &CPatch_AHD::Items_EntriesTotal, &CPatch_AHD_Items::Data);
+
+		//Patches - Inn Soaps (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_INN>(&CPatch_INN::Items_NameArray, &CPatch_INN::Items_TextArray, &CPatch_INN::Items_BoolArray, &CPatch_INN::Items_FormArray, &CPatch_INN::Items_EntriesFound, &CPatch_INN::Items_EntriesTotal, &CPatch_Inn_Items::Data);
 
 		//Patches - The Brotherhood of Old (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_BOO_I>(&CPatch_BOO::Items_NameArray, &CPatch_BOO::Items_TextArray, &CPatch_BOO::Items_BoolArray, &CPatch_BOO::Items_FormArray, &CPatch_BOO::Items_EntriesFound, &CPatch_BOO::Items_EntriesTotal, &CPatch_BOO_Items::Data);
@@ -679,11 +671,22 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriI>(&CPatch_SpellTomes::Triumvirate_I_NameArray, &CPatch_SpellTomes::Triumvirate_I_TextArray, &CPatch_SpellTomes::Triumvirate_I_BoolArray, &CPatch_SpellTomes::Triumvirate_I_FormArray, &CPatch_SpellTomes::Triumvirate_I_EntriesFound, &CPatch_SpellTomes::Triumvirate_I_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
 		AttemptToAdd<FrameworkID::kPatch_SpellTomes_TriR>(&CPatch_SpellTomes::Triumvirate_R_NameArray, &CPatch_SpellTomes::Triumvirate_R_TextArray, &CPatch_SpellTomes::Triumvirate_R_BoolArray, &CPatch_SpellTomes::Triumvirate_R_FormArray, &CPatch_SpellTomes::Triumvirate_R_EntriesFound, &CPatch_SpellTomes::Triumvirate_R_EntriesTotal, &CPatch_SpellTomes_Triumvirate::Data);
 
+		//Patches - Skyrim Unique Drinks (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_SUD_I>(&CPatch_SUD::Items_NameArray, &CPatch_SUD::Items_TextArray, &CPatch_SUD::Items_BoolArray, &CPatch_SUD::Items_FormArray, &CPatch_SUD::Items_EntriesFound, &CPatch_SUD::Items_EntriesTotal, &CPatch_SUD_Items::Data);
+		
+		//Patches - Cheese Mod (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_CHM_1>(&CPatch_CHM::ItmL1_NameArray, &CPatch_CHM::ItmL1_TextArray, &CPatch_CHM::ItmL1_BoolArray, &CPatch_CHM::ItmL1_FormArray, &CPatch_CHM::ItmL1_EntriesFound, &CPatch_CHM::ItmL1_EntriesTotal, &CPatch_CHM_ItmL1::Data);
 		AttemptToAdd<FrameworkID::kPatch_CHM_2>(&CPatch_CHM::ItmL2_NameArray, &CPatch_CHM::ItmL2_TextArray, &CPatch_CHM::ItmL2_BoolArray, &CPatch_CHM::ItmL2_FormArray, &CPatch_CHM::ItmL2_EntriesFound, &CPatch_CHM::ItmL2_EntriesTotal, &CPatch_CHM_ItmL2::Data);
 		AttemptToAdd<FrameworkID::kPatch_CHM_3>(&CPatch_CHM::ItmL3_NameArray, &CPatch_CHM::ItmL3_TextArray, &CPatch_CHM::ItmL3_BoolArray, &CPatch_CHM::ItmL3_FormArray, &CPatch_CHM::ItmL3_EntriesFound, &CPatch_CHM::ItmL3_EntriesTotal, &CPatch_CHM_ItmL3::Data);
 		AttemptToAdd<FrameworkID::kPatch_CHM_4>(&CPatch_CHM::ItmL4_NameArray, &CPatch_CHM::ItmL4_TextArray, &CPatch_CHM::ItmL4_BoolArray, &CPatch_CHM::ItmL4_FormArray, &CPatch_CHM::ItmL4_EntriesFound, &CPatch_CHM::ItmL4_EntriesTotal, &CPatch_CHM_ItmL4::Data);
+
+		//Patches - Requiem (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_REQ_A>(&CPatch_REQ::ItmL1_A_NameArray, &CPatch_REQ::ItmL1_A_TextArray, &CPatch_REQ::ItmL1_A_BoolArray, &CPatch_REQ::ItmL1_A_FormArray, &CPatch_REQ::ItmL1_A_EntriesFound, &CPatch_REQ::ItmL1_A_EntriesTotal, &CPatch_REQ_ItmL1_A::Data);
+		AttemptToAdd<FrameworkID::kPatch_REQ_M>(&CPatch_REQ::ItmL1_M_NameArray, &CPatch_REQ::ItmL1_M_TextArray, &CPatch_REQ::ItmL1_M_BoolArray, &CPatch_REQ::ItmL1_M_FormArray, &CPatch_REQ::ItmL1_M_EntriesFound, &CPatch_REQ::ItmL1_M_EntriesTotal, &CPatch_REQ_ItmL1_M::Data);
+		AttemptToAdd<FrameworkID::kPatch_REQ_S>(&CPatch_REQ::ItmL3_S_NameArray, &CPatch_REQ::ItmL3_S_TextArray, &CPatch_REQ::ItmL3_S_BoolArray, &CPatch_REQ::ItmL3_S_FormArray, &CPatch_REQ::ItmL3_S_EntriesFound, &CPatch_REQ::ItmL3_S_EntriesTotal, &CPatch_REQ_ItmL3_S::Data);
+		AttemptToAdd<FrameworkID::kPatch_REQ_B>(&CPatch_REQ::ItmL3_B_NameArray, &CPatch_REQ::ItmL3_B_TextArray, &CPatch_REQ::ItmL3_B_BoolArray, &CPatch_REQ::ItmL3_B_FormArray, &CPatch_REQ::ItmL3_B_EntriesFound, &CPatch_REQ::ItmL3_B_EntriesTotal, &CPatch_REQ_ItmL3_B::Data);
+		AttemptToAdd<FrameworkID::kPatch_REQ_T>(&CPatch_REQ::ItmL4_NameArray, &CPatch_REQ::ItmL4_TextArray, &CPatch_REQ::ItmL4_BoolArray, &CPatch_REQ::ItmL4_FormArray, &CPatch_REQ::ItmL4_EntriesFound, &CPatch_REQ::ItmL4_EntriesTotal, &CPatch_REQ_ItmL4::Data);
+		AttemptToAdd<FrameworkID::kPatch_REQ_W>(&CPatch_REQ::ItmL2_NameArray, &CPatch_REQ::ItmL2_TextArray, &CPatch_REQ::ItmL2_BoolArray, &CPatch_REQ::ItmL2_FormArray, &CPatch_REQ::ItmL2_EntriesFound, &CPatch_REQ::ItmL2_EntriesTotal, &CPatch_REQ_ItmL2::Data);
 
 		INFO("Registered {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Ssize, i_Nsize, (i_Ssize - i_Nsize));
 	}

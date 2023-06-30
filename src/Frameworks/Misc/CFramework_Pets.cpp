@@ -34,6 +34,7 @@ namespace CFramework_Pets {
 	void CHandler::InstallFramework() {
 
 		InjectAndCompileData();
+		InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -183,6 +184,29 @@ namespace CFramework_Pets {
 
 		Pets_MP_EntriesTotal = Pets_MP_FormArray.size();
 		Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Pets_VP_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		}
+
+		for (auto& name : Pets_PS_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		}
+
+		for (auto& name : Pets_SS_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		}
+
+		for (auto& name : Pets_MP_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		}
 	}
 
 	//---------------------------------------------------

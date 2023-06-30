@@ -34,7 +34,7 @@ namespace CFramework_MapMa {
 	0x001625D,0x001625E,0x001625F,0x0016370,0x00C342A,0x0016260,0x0016261,
 	0x00EE79C,0x0016262,0x001634F,0x00162AC,0x0017780,0x0016263,0x0016352,
 	0x00162CB,0x0016355,0x0016266,0x0016358,0x0016267,0x0038593,0x00F52B2,
-	0x001626A,0x001626B,0x00EF543,0x003F076,0x0017791,0x0016245,0x00EF549,
+	0x001626A,0x001626B,0x00EF543,0x003F076,0x0017791,0x00EF549,0x00D3939,
 	0x0080E56,0x001626C,0x00F6698,0x001779A,0x001635E,0x00C2EEF,0x008E03C,
 	0x002051D,0x0016224,0x00177A1,0x001626E,0x001626F,0x0016364,0x0016270,
 	0x0016367,0x00AF89B,0x0016273,0x00D3938,0x0016235,0x00EAA63,0x0016274,
@@ -47,7 +47,7 @@ namespace CFramework_MapMa {
 	0x0032875,0x001629A,0x0090595,0x001629B,0x001629C,0x001629D,0x010B2C8,
 	0x001629E,0x00B23A3,0x00B629F,0x001623D,0x00162A0,0x001629F,0x00EF570,
 	0x00D3930,0x001C390,0x0096A46,0x00162A1,0x00ECF4F,0x00162A4,0x0047875,
-	0x00162A7,0x00177CC,0x00D393C,0x00D3939,
+	0x00162A7,0x00177CC,0x00D393C,
 	};
 
 	constexpr Serialization::FormArray MapMa_SZ = {
@@ -70,7 +70,7 @@ namespace CFramework_MapMa {
 
 	constexpr Serialization::FormArray MapMa_DG = {
 	0x004BA5,0x008257,0x00BA4D,0x00D165,0x004C0F,0x002F6F,
-	0x003CFE,0x0088E0,0x00FC6C,0x008E41,0x00D0AE,0x00777E,
+	0x003CFE,0x0088E0,0x013F21,0x008E41,0x00D0AE,0x00777E,
 	0x007B23,
 	};
 
@@ -117,6 +117,7 @@ namespace CFramework_MapMa {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -277,6 +278,39 @@ namespace CFramework_MapMa {
 
 		MapMa_CC_EntriesTotal = MapMa_CC_FormArray.size();
 		MapMa_CC_EntriesFound = std::ranges::count(MapMa_CC_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : MapMa_AG_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations1", std::to_underlying(EntryCategory::kMapM)));
+		}
+
+		for (auto& name : MapMa_HR_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations2", std::to_underlying(EntryCategory::kMapM)));
+		}
+
+		for (auto& name : MapMa_SZ_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations3", std::to_underlying(EntryCategory::kMapM)));
+		}
+
+		for (auto& name : MapMa_DG_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations4", std::to_underlying(EntryCategory::kMapM)));
+		}
+
+		for (auto& name : MapMa_DB_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations5", std::to_underlying(EntryCategory::kMapM)));
+		}
+
+		for (auto& name : MapMa_CC_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations6", std::to_underlying(EntryCategory::kMapM)));
+		}
 	}
 
 	//---------------------------------------------------

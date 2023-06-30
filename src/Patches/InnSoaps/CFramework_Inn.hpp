@@ -1,11 +1,11 @@
 #pragma once
 
-namespace CPatch_SUD_Items {
+namespace CPatch_Inn_Items {
 	inline Serialization::CompletionistData Data;
 }
 
-namespace CPatch_SUD
-{	
+namespace CPatch_INN
+{
 	inline std::vector<std::string> Items_NameArray;
 	inline std::vector<std::string> Items_TextArray;
 	inline std::vector<RE::TESForm*> Items_FormArray;
@@ -29,6 +29,6 @@ namespace CPatch_SUD
 	static void			InjectAndCompileData();
 	static void			InstallSearchTerms();
 
-	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID);
+	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
 	};
 }

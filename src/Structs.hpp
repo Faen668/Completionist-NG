@@ -183,24 +183,30 @@ struct CQuestData
 	const char*			editor_id{};
 
 	// Dynamic
+	const char*		localisation_key{};
 	int32_t			array_position{};
 	CThaneData*		thane_data{};
 	CDrunkData*		drunk_data{};
 	CArrayData*		array_data{};
 	CStageData*		stage_data{};
 	CRadiantData*	radiant_data{};
-
+	std::string		search_term;
+	std::string		search_description;
+	int32_t			localisation_position;
+	
 	enum override
 	{
 		kName = 0,
 		kData = 1,
 		kEdit = 2,
+		kLocKey = 3,
 	};
 
 	// Builder Functions
 
 	auto init()
 	{
+		localisation_key = unique_identifier;
 		return this;
 	};
 
@@ -209,12 +215,14 @@ struct CQuestData
 		array_data = a_data;
 		if (!array_data) { ERROR("Unable to initialise array_data for [{}]", unique_identifier); }
 
+		SetLocalisedTranslationParameters();
+
 		array_data->editorids->push_back(editor_id);
 		array_data->types->push_back(std::to_underlying(quest_type));
-		array_data->names->push_back(fmt::format("${:s}_Name"sv, unique_identifier));
-		array_data->highlights->push_back(fmt::format("${:s}_Data"sv, unique_identifier));
+		array_data->names->push_back(fmt::format("{:s}"sv, GetSearchTerm()));
+		array_data->highlights->push_back(fmt::format("{:s}"sv, GetSearchDescription()));
 
-		array_position = std::distance(array_data->names->begin(), (std::ranges::find(array_data->names->begin(), array_data->names->end(), fmt::format("${:s}_Name"sv, unique_identifier))));
+		array_position = std::distance(array_data->names->begin(), (std::ranges::find(array_data->names->begin(), array_data->names->end(), fmt::format("{:s}"sv, GetSearchTerm()))));
 		return this;
 	};
 
@@ -266,24 +274,44 @@ struct CQuestData
 		return this;
 	}
 
-	auto override(override section, std::string text)
+	void ValidateLocalisation()
+	{
+		if (GetQuest() && !DKUtil::string::is_empty(GetQuest()->GetName()))
+		{
+			if (!DKUtil::string::iequals(GetQuest()->GetName(), search_term))
+			{
+				INFO("Localisation Validation Failed On Key {}: {} ||| {}", unique_identifier, GetQuest()->GetName(), search_term);
+			}
+		}
+	}
+
+	auto override(override section, const char* s_key)
 	{
 		switch (section)
 		{
 		case CQuestData::kName:
-			array_data->names->at(array_position) = text;
+			array_data->names->at(array_position) = s_key;
 			break;
 		case CQuestData::kData:
-			array_data->highlights->at(array_position) = text;
+			array_data->highlights->at(array_position) = s_key;
 			break;
 		case CQuestData::kEdit:
-			array_data->editorids->at(array_position) = text;
+			array_data->editorids->at(array_position) = s_key;
 			break;
-
+		case CQuestData::kLocKey:
+			localisation_key = s_key;
+			break;
 		default:
 			break;
 		}
 		return this;
+	}
+
+	void SetLocalisedTranslationParameters()
+	{
+		search_term = CLocalisation::LocalisationAPI::GetLocNameByKey(localisation_key);
+		search_description = CLocalisation::LocalisationAPI::GetLocDescriptionByKey(localisation_key);
+		return;
 	}
 
 	auto DumpToLog(int32_t idx, int32_t ID) {
@@ -354,6 +382,11 @@ struct CQuestData
 			INFO("          ~Thane Data: script state = {}", script->IsConstructed() ? "Constructed" : "Un-Constructed");
 		}
 
+		if (!search_term.empty())
+		{
+			INFO("          ~Search Data: Term = {}", GetSearchTerm());
+		}
+
 		INFO(" ");
 		return this;
 	};
@@ -387,6 +420,19 @@ struct CQuestData
 	bool HasOptionalStage()				{ return stage_data->optional_stage != 0 ? true : false; }
 	std::string GetStageLink()			{ return stage_data->link; }
 	std::string GetStageTypeString()	{ return GetStageType() == 0 ? "None" : GetStageType() == 1 ? "Past" : GetStageType() == 2 ? "Done" : ""; }
+
+	//Search Data
+	bool HasSearchData() { return !search_term.empty(); }
+
+	std::string GetSearchTerm() 
+	{
+		return !search_term.empty() ? search_term : "ERROR";
+	}
+
+	std::string GetSearchDescription()
+	{
+		return !search_description.empty() ? search_description : "ERROR";
+	}
 
 	//Radiant Data
 	bool HasRadiantData()				{ return radiant_data != nullptr; }

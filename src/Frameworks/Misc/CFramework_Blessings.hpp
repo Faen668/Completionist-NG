@@ -60,5 +60,6 @@ namespace CFramework_Blessings{
 
 		  static void			AddFormsToList();
 		  static void			ActivateShrineFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_shrine);
+		  static void			InstallSearchTerms();
 	};
 }

@@ -45,6 +45,10 @@ namespace CQuestMaster
 		  static void							qSetOptionCompleted(RE::StaticFunctionTag*, std::int32_t q_questID, std::string a_key);
 
 		  static void							Dump();
+		  static void							ValidateLocalisation();
 		  static void							qDumpQuestData(RE::StaticFunctionTag*);
+
+		  static std::vector<std::string>		SearchAndReportPage(RE::StaticFunctionTag*, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t searchType);
+		  static std::string                    GetLocalisedPageName(int32_t ID);
 	};
 }

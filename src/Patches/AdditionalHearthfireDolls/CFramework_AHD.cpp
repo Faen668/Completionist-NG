@@ -32,6 +32,7 @@ namespace CPatch_AHD {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 		PatchesInstalled += 1;
 	}
 
@@ -101,6 +102,13 @@ namespace CPatch_AHD {
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Items_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAdditionalHearthfireDolls", std::to_underlying(EntryCategory::kItem)));
+		}
 	}
 
 	//---------------------------------------------------

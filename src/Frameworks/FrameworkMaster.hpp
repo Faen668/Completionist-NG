@@ -11,10 +11,33 @@ namespace CFramework_Master
 	inline Serialization::CompletionistData FoundItemData;
 	inline Serialization::CompletionistData FoundItemData_NoShow;
 
+	inline Serialization::CompletionistLog LoggingData;
+
 	inline int PatchesInstalled;
 	inline int TomesInstalled;
 
 	inline constexpr std::int32_t ArraySize = 128;
+
+	//Name then Page
+	inline std::vector<std::tuple<std::string, std::string, int32_t>> CItemsDataVec;
+
+	enum EntryCategory
+	{
+		kNone, //Spell tomes & Skill Books
+		kItem,
+		kBook,
+		kMapM,
+		kShou,
+		kEnch,
+		kHome,
+		kPets,
+		kClaw,
+		kMask,
+		kFish,
+		kShrine,
+		kStones,
+		kBarenziah,
+	};
 
 	class FrameworkAPI 
 	{
@@ -39,6 +62,8 @@ namespace CFramework_Master
 
 		static void							LoadInjectedForms(RE::StaticFunctionTag*);
 		static void							UpdateCompletion(RE::StaticFunctionTag*);
+
+		static void							AddNewEventToLog(std::string a_log);
 		
 
 		//Items Functions
@@ -61,5 +86,9 @@ namespace CFramework_Master
 
 		static bool							IsBookKnown(RE::TESForm* a_form);
 		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
+
+		static std::vector<std::string>		SearchAndReportPage(std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t searchType);
+		static std::string					GetLocalisedCategory(int32_t);
+		static std::int32_t					GetBookCategoryType(RE::TESForm*);
 	};
 }

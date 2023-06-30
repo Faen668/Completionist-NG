@@ -24,7 +24,7 @@ namespace CQFramework_Morthal
 	};
 
 	CStageData StageData[]{
-		{"Morthal_Quest00", CStageEnum::kPast, 20, 0},
+		{"Morthal_Quest00", CStageEnum::kDone, 5, 10},
 		{"Morthal_Quest01", CStageEnum::kPast, 10, 0},
 	};
 

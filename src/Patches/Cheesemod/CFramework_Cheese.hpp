@@ -68,6 +68,7 @@ namespace CPatch_CHM
 	static void			InstallFramework();
 	static void			UpdateFoundForms();
 	static void			InjectAndCompileData();
+	static void			InstallSearchTerms();
 
 	static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, Section k_value);
 	};

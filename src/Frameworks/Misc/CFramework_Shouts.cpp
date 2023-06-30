@@ -16,6 +16,7 @@ namespace CFramework_Shouts {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -71,8 +72,8 @@ namespace CFramework_Shouts {
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
 
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
-				
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
+
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Vanilla_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
@@ -92,7 +93,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+				
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -110,7 +112,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -131,7 +134,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
+				
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Thunderchild_SH_FormArray[b_pos]->GetName());
@@ -152,7 +156,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -170,7 +175,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -191,7 +197,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Miscellaneous_SH_FormArray[b_pos]->GetName());
@@ -212,7 +219,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -230,7 +238,8 @@ namespace CFramework_Shouts {
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
 				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}";
+
+				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -287,7 +296,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[i])) {
 
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
 
 				FoundItemData_NoShow.AddForm(Vanilla_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
@@ -298,8 +307,8 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[i])) {
 
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-				
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
+
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
 				Vanilla_SH_BoolArray[i] = false;
@@ -308,13 +317,12 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[i])) {
 				
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-				
+				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
 				continue;
 			}
 
-			Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
+			Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Vanilla_SH_BoolArray[i] = false;
 		}
 
@@ -329,8 +337,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
@@ -340,8 +347,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
 				Thunderchild_SH_BoolArray[i] = false;
@@ -350,13 +356,12 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[i])) {
 
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
 				continue;
 			}
 
-			Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
+			Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Thunderchild_SH_BoolArray[i] = false;
 		}
 
@@ -371,8 +376,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
@@ -382,8 +386,7 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_Found + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
 				Miscellaneous_SH_BoolArray[i] = false;
@@ -392,13 +395,12 @@ namespace CFramework_Shouts {
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[i])) {
 
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_Found + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
-
+				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
 				continue;
 			}
 
-			Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + "{" + V_ShoutColour_New + "}" + "{" + Word1->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word2->translation.c_str() + "}" + "{" + V_ShoutColour_New + "}" + "{" + Word3->translation.c_str() + "}");
+			Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Miscellaneous_SH_BoolArray[i] = false;
 		}
 
@@ -415,11 +417,30 @@ namespace CFramework_Shouts {
 		Miscellaneous_SH_EntriesFound = std::ranges::count(Miscellaneous_SH_BoolArray, true);
 	}
 
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Vanilla_SH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		}
+
+		for (auto& name : Thunderchild_SH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		}
+
+		for (auto& name : Miscellaneous_SH_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		}
+	}
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Build Shouts Array ) -----
 	//---------------------------------------------------
 
 	void CHandler::BuildArrays() {
+		using namespace CLocalisation;
 
 		std::string SKName = "Skyrim.esm";
 		std::string DGName = "Dawnguard.esm";
@@ -430,72 +451,72 @@ namespace CFramework_Shouts {
 		std::string THName = "Thunderchild - Epic Shout Package.esp";
 		std::string FTName = "ForcefulTongue.esp";
 
-		CHandler::AddToArray(Section::kVanilla, 0x05FC77, "$MiscDataShout00", "$MiscDataShoutHighlight00", SKName); //Animal Allegiance
-		CHandler::AddToArray(Section::kVanilla, 0x07097B, "$MiscDataShout01", "$MiscDataShoutHighlight01", SKName); //Aura Whisper
-		CHandler::AddToArray(Section::kVanilla, 0x02AD09, "$MiscDataShout02", "$MiscDataShoutHighlight02", DBName); //Battle Fury
-		CHandler::AddToArray(Section::kVanilla, 0x032920, "$MiscDataShout03", "$MiscDataShoutHighlight03", SKName); //Become Ethereal
-		CHandler::AddToArray(Section::kVanilla, 0x0179D8, "$MiscDataShout04", "$MiscDataShoutHighlight04", DBName); //Bend Will
-		CHandler::AddToArray(Section::kVanilla, 0x046B8C, "$MiscDataShout05", "$MiscDataShoutHighlight05", SKName); //Call Dragon
-		CHandler::AddToArray(Section::kVanilla, 0x05196A, "$MiscDataShout06", "$MiscDataShoutHighlight06", SKName); //Call of Valor
-		CHandler::AddToArray(Section::kVanilla, 0x03CD34, "$MiscDataShout07", "$MiscDataShoutHighlight07", SKName); //Clear Skies
-		CHandler::AddToArray(Section::kVanilla, 0x0200C0, "$MiscDataShout08", "$MiscDataShoutHighlight08", DBName); //Cyclone
-		CHandler::AddToArray(Section::kVanilla, 0x070981, "$MiscDataShout09", "$MiscDataShoutHighlight09", SKName); //Disarm
-		CHandler::AddToArray(Section::kVanilla, 0x02395A, "$MiscDataShout10", "$MiscDataShoutHighlight10", SKName); //Dismay
-		CHandler::AddToArray(Section::kVanilla, 0x01DF92, "$MiscDataShout11", "$MiscDataShoutHighlight11", DBName); //Dragon Aspect
-		CHandler::AddToArray(Section::kVanilla, 0x044250, "$MiscDataShout12", "$MiscDataShoutHighlight12", SKName); //Dragonrend
-		CHandler::AddToArray(Section::kVanilla, 0x008A62, "$MiscDataShout13", "$MiscDataShoutHighlight13", DGName); //Drain Vitality
-		CHandler::AddToArray(Section::kVanilla, 0x032921, "$MiscDataShout14", "$MiscDataShoutHighlight14", SKName); //Elemental Fury
-		CHandler::AddToArray(Section::kVanilla, 0x03F9EA, "$MiscDataShout15", "$MiscDataShoutHighlight15", SKName); //Fire Breath
-		CHandler::AddToArray(Section::kVanilla, 0x05D16B, "$MiscDataShout16", "$MiscDataShoutHighlight16", SKName); //Frost Breath
-		CHandler::AddToArray(Section::kVanilla, 0x070980, "$MiscDataShout17", "$MiscDataShoutHighlight17", SKName); //Ice Form
-		CHandler::AddToArray(Section::kVanilla, 0x07097E, "$MiscDataShout18", "$MiscDataShoutHighlight18", SKName); //Kyne's Peace
-		CHandler::AddToArray(Section::kVanilla, 0x07097C, "$MiscDataShout19", "$MiscDataShoutHighlight19", SKName); //Marked for Death
-		CHandler::AddToArray(Section::kVanilla, 0x048AC9, "$MiscDataShout20", "$MiscDataShoutHighlight20", SKName); //Slow Time
-		CHandler::AddToArray(Section::kVanilla, 0x007CB6, "$MiscDataShout21", "$MiscDataShoutHighlight21", DGName); //Soul Tear
-		CHandler::AddToArray(Section::kVanilla, 0x07097D, "$MiscDataShout22", "$MiscDataShoutHighlight22", SKName); //Storm Call
-		CHandler::AddToArray(Section::kVanilla, 0x0030D2, "$MiscDataShout23", "$MiscDataShoutHighlight23", DGName); //Summon Durnehviir
-		CHandler::AddToArray(Section::kVanilla, 0x07097F, "$MiscDataShout24", "$MiscDataShoutHighlight24", SKName); //Throw Voice
-		CHandler::AddToArray(Section::kVanilla, 0x013E07, "$MiscDataShout25", "$MiscDataShoutHighlight25", SKName); //Unrelenting Force
-		CHandler::AddToArray(Section::kVanilla, 0x02F7BA, "$MiscDataShout26", "$MiscDataShoutHighlight26", SKName); //Whirlwind Sprint
+		CHandler::AddToArray(Section::kVanilla, 0x05FC77, "V_ShoutName00", "V_ShoutText00", SKName); //Animal Allegiance
+		CHandler::AddToArray(Section::kVanilla, 0x07097B, "V_ShoutName01", "V_ShoutText01", SKName); //Aura Whisper
+		CHandler::AddToArray(Section::kVanilla, 0x02AD09, "V_ShoutName02", "V_ShoutText02", DBName); //Battle Fury
+		CHandler::AddToArray(Section::kVanilla, 0x032920, "V_ShoutName03", "V_ShoutText03", SKName); //Become Ethereal
+		CHandler::AddToArray(Section::kVanilla, 0x0179D8, "V_ShoutName04", "V_ShoutText04", DBName); //Bend Will
+		CHandler::AddToArray(Section::kVanilla, 0x046B8C, "V_ShoutName05", "V_ShoutText05", SKName); //Call Dragon
+		CHandler::AddToArray(Section::kVanilla, 0x05196A, "V_ShoutName06", "V_ShoutText06", SKName); //Call of Valor
+		CHandler::AddToArray(Section::kVanilla, 0x03CD34, "V_ShoutName07", "V_ShoutText07", SKName); //Clear Skies
+		CHandler::AddToArray(Section::kVanilla, 0x0200C0, "V_ShoutName08", "V_ShoutText08", DBName); //Cyclone
+		CHandler::AddToArray(Section::kVanilla, 0x070981, "V_ShoutName09", "V_ShoutText09", SKName); //Disarm
+		CHandler::AddToArray(Section::kVanilla, 0x02395A, "V_ShoutName10", "V_ShoutText10", SKName); //Dismay
+		CHandler::AddToArray(Section::kVanilla, 0x01DF92, "V_ShoutName11", "V_ShoutText11", DBName); //Dragon Aspect
+		CHandler::AddToArray(Section::kVanilla, 0x044250, "V_ShoutName12", "V_ShoutText12", SKName); //Dragonrend
+		CHandler::AddToArray(Section::kVanilla, 0x008A62, "V_ShoutName13", "V_ShoutText13", DGName); //Drain Vitality
+		CHandler::AddToArray(Section::kVanilla, 0x032921, "V_ShoutName14", "V_ShoutText14", SKName); //Elemental Fury
+		CHandler::AddToArray(Section::kVanilla, 0x03F9EA, "V_ShoutName15", "V_ShoutText15", SKName); //Fire Breath
+		CHandler::AddToArray(Section::kVanilla, 0x05D16B, "V_ShoutName16", "V_ShoutText16", SKName); //Frost Breath
+		CHandler::AddToArray(Section::kVanilla, 0x070980, "V_ShoutName17", "V_ShoutText17", SKName); //Ice Form
+		CHandler::AddToArray(Section::kVanilla, 0x07097E, "V_ShoutName18", "V_ShoutText18", SKName); //Kyne's Peace
+		CHandler::AddToArray(Section::kVanilla, 0x07097C, "V_ShoutName19", "V_ShoutText19", SKName); //Marked for Death
+		CHandler::AddToArray(Section::kVanilla, 0x048AC9, "V_ShoutName20", "V_ShoutText20", SKName); //Slow Time
+		CHandler::AddToArray(Section::kVanilla, 0x007CB6, "V_ShoutName21", "V_ShoutText21", DGName); //Soul Tear
+		CHandler::AddToArray(Section::kVanilla, 0x07097D, "V_ShoutName22", "V_ShoutText22", SKName); //Storm Call
+		CHandler::AddToArray(Section::kVanilla, 0x0030D2, "V_ShoutName23", "V_ShoutText23", DGName); //Summon Durnehviir
+		CHandler::AddToArray(Section::kVanilla, 0x07097F, "V_ShoutName24", "V_ShoutText24", SKName); //Throw Voice
+		CHandler::AddToArray(Section::kVanilla, 0x013E07, "V_ShoutName25", "V_ShoutText25", SKName); //Unrelenting Force
+		CHandler::AddToArray(Section::kVanilla, 0x02F7BA, "V_ShoutName26", "V_ShoutText26", SKName); //Whirlwind Sprint
 
-		CHandler::AddToArray(Section::kThunderchild, 0x05EBB4, "$MiscDataShoutThunderChild00", "$MiscDataShoutHighlightThunder00", THName); //Alessia's Love
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA921, "$MiscDataShoutThunderChild01", "$MiscDataShoutHighlightThunder01", THName); //Annihilate
-		CHandler::AddToArray(Section::kThunderchild, 0x020571, "$MiscDataShoutThunderChild02", "$MiscDataShoutHighlightThunder02", THName); //Arcane Helix
-		CHandler::AddToArray(Section::kThunderchild, 0x05294B, "$MiscDataShoutThunderChild03", "$MiscDataShoutHighlightThunder03", THName); //Armageddon
-		CHandler::AddToArray(Section::kThunderchild, 0x0012D7, "$MiscDataShoutThunderChild04", "$MiscDataShoutHighlightThunder04", THName); //Curse
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA951, "$MiscDataShoutThunderChild05", "$MiscDataShoutHighlightThunder05", THName); //Dance of the Dead
-		CHandler::AddToArray(Section::kThunderchild, 0x013CB0, "$MiscDataShoutThunderChild06", "$MiscDataShoutHighlightThunder06", THName); //Earthquake
-		CHandler::AddToArray(Section::kThunderchild, 0x00541C, "$MiscDataShoutThunderChild07", "$MiscDataShoutHighlightThunder07", THName); //Essence Rip
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA94F, "$MiscDataShoutThunderChild08", "$MiscDataShoutHighlightThunder08", THName); //Evocation
-		CHandler::AddToArray(Section::kThunderchild, 0x00AAC5, "$MiscDataShoutThunderChild09", "$MiscDataShoutHighlightThunder09", THName); //Geomagnetism
-		CHandler::AddToArray(Section::kThunderchild, 0x05EBB5, "$MiscDataShoutThunderChild10", "$MiscDataShoutHighlightThunder10", THName); //Iceborn
-		CHandler::AddToArray(Section::kThunderchild, 0x027BFB, "$MiscDataShoutThunderChild11", "$MiscDataShoutHighlightThunder11", THName); //Jone's Shadow
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA935, "$MiscDataShoutThunderChild12", "$MiscDataShoutHighlightThunder12", THName); //Kingsbane
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA928, "$MiscDataShoutThunderChild13", "$MiscDataShoutHighlightThunder13", THName); //Lifestream
-		CHandler::AddToArray(Section::kThunderchild, 0x01AE61, "$MiscDataShoutThunderChild14", "$MiscDataShoutHighlightThunder14", THName); //Lightning Shield
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA93C, "$MiscDataShoutThunderChild15", "$MiscDataShoutHighlightThunder15", THName); //Oblivion
-		CHandler::AddToArray(Section::kThunderchild, 0x02817C, "$MiscDataShoutThunderChild16", "$MiscDataShoutHighlightThunder16", THName); //Phantom Decoy
-		CHandler::AddToArray(Section::kThunderchild, 0x006F61, "$MiscDataShoutThunderChild17", "$MiscDataShoutHighlightThunder17", THName); //Riftwalk
-		CHandler::AddToArray(Section::kThunderchild, 0x05EBB6, "$MiscDataShoutThunderChild18", "$MiscDataShoutHighlightThunder18", THName); //Shattersphere
-		CHandler::AddToArray(Section::kThunderchild, 0x05294A, "$MiscDataShoutThunderChild19", "$MiscDataShoutHighlightThunder19", THName); //Shor's Wrath
-		CHandler::AddToArray(Section::kThunderchild, 0x001859, "$MiscDataShoutThunderChild20", "$MiscDataShoutHighlightThunder20", THName); //Shroud of Snowfall
-		CHandler::AddToArray(Section::kThunderchild, 0x00D5FC, "$MiscDataShoutThunderChild21", "$MiscDataShoutHighlightThunder21", THName); //Speak Unto The Stars
-		CHandler::AddToArray(Section::kThunderchild, 0x016D92, "$MiscDataShoutThunderChild22", "$MiscDataShoutHighlightThunder22", THName); //Splinter Twins
-		CHandler::AddToArray(Section::kThunderchild, 0x01D462, "$MiscDataShoutThunderChild23", "$MiscDataShoutHighlightThunder23", THName); //Stormblast
-		CHandler::AddToArray(Section::kThunderchild, 0x0CA950, "$MiscDataShoutThunderChild24", "$MiscDataShoutHighlightThunder24", THName); //The Conqueror
-		CHandler::AddToArray(Section::kThunderchild, 0x01B3DD, "$MiscDataShoutThunderChild25", "$MiscDataShoutHighlightThunder25", THName); //Trueshot
-		CHandler::AddToArray(Section::kThunderchild, 0x0043A8, "$MiscDataShoutThunderChild26", "$MiscDataShoutHighlightThunder26", THName); //Wail of the Banshee
-		CHandler::AddToArray(Section::kThunderchild, 0x01FFDE, "$MiscDataShoutThunderChild27", "$MiscDataShoutHighlightThunder27", THName); //Wanderlust
-		CHandler::AddToArray(Section::kThunderchild, 0x004925, "$MiscDataShoutThunderChild28", "$MiscDataShoutHighlightThunder28", THName); //Warcry
+		CHandler::AddToArray(Section::kThunderchild, 0x05EBB4, "T_ShoutName00", "T_ShoutText00", THName); //Alessia's Love
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA921, "T_ShoutName01", "T_ShoutText01", THName); //Annihilate
+		CHandler::AddToArray(Section::kThunderchild, 0x020571, "T_ShoutName02", "T_ShoutText02", THName); //Arcane Helix
+		CHandler::AddToArray(Section::kThunderchild, 0x05294B, "T_ShoutName03", "T_ShoutText03", THName); //Armageddon
+		CHandler::AddToArray(Section::kThunderchild, 0x0012D7, "T_ShoutName04", "T_ShoutText04", THName); //Curse
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA951, "T_ShoutName05", "T_ShoutText05", THName); //Dance of the Dead
+		CHandler::AddToArray(Section::kThunderchild, 0x013CB0, "T_ShoutName06", "T_ShoutText06", THName); //Earthquake
+		CHandler::AddToArray(Section::kThunderchild, 0x00541C, "T_ShoutName07", "T_ShoutText07", THName); //Essence Rip
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA94F, "T_ShoutName08", "T_ShoutText08", THName); //Evocation
+		CHandler::AddToArray(Section::kThunderchild, 0x00AAC5, "T_ShoutName09", "T_ShoutText09", THName); //Geomagnetism
+		CHandler::AddToArray(Section::kThunderchild, 0x05EBB5, "T_ShoutName10", "T_ShoutText10", THName); //Iceborn
+		CHandler::AddToArray(Section::kThunderchild, 0x027BFB, "T_ShoutName11", "T_ShoutText11", THName); //Jone's Shadow
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA935, "T_ShoutName12", "T_ShoutText12", THName); //Kingsbane
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA928, "T_ShoutName13", "T_ShoutText13", THName); //Lifestream
+		CHandler::AddToArray(Section::kThunderchild, 0x01AE61, "T_ShoutName14", "T_ShoutText14", THName); //Lightning Shield
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA93C, "T_ShoutName15", "T_ShoutText15", THName); //Oblivion
+		CHandler::AddToArray(Section::kThunderchild, 0x02817C, "T_ShoutName16", "T_ShoutText16", THName); //Phantom Decoy
+		CHandler::AddToArray(Section::kThunderchild, 0x006F61, "T_ShoutName17", "T_ShoutText17", THName); //Riftwalk
+		CHandler::AddToArray(Section::kThunderchild, 0x05EBB6, "T_ShoutName18", "T_ShoutText18", THName); //Shattersphere
+		CHandler::AddToArray(Section::kThunderchild, 0x05294A, "T_ShoutName19", "T_ShoutText19", THName); //Shor's Wrath
+		CHandler::AddToArray(Section::kThunderchild, 0x001859, "T_ShoutName20", "T_ShoutText20", THName); //Shroud of Snowfall
+		CHandler::AddToArray(Section::kThunderchild, 0x00D5FC, "T_ShoutName21", "T_ShoutText21", THName); //Speak Unto The Stars
+		CHandler::AddToArray(Section::kThunderchild, 0x016D92, "T_ShoutName22", "T_ShoutText22", THName); //Splinter Twins
+		CHandler::AddToArray(Section::kThunderchild, 0x01D462, "T_ShoutName23", "T_ShoutText23", THName); //Stormblast
+		CHandler::AddToArray(Section::kThunderchild, 0x0CA950, "T_ShoutName24", "T_ShoutText24", THName); //The Conqueror
+		CHandler::AddToArray(Section::kThunderchild, 0x01B3DD, "T_ShoutName25", "T_ShoutText25", THName); //Trueshot
+		CHandler::AddToArray(Section::kThunderchild, 0x0043A8, "T_ShoutName26", "T_ShoutText26", THName); //Wail of the Banshee
+		CHandler::AddToArray(Section::kThunderchild, 0x01FFDE, "T_ShoutName27", "T_ShoutText27", THName); //Wanderlust
+		CHandler::AddToArray(Section::kThunderchild, 0x004925, "T_ShoutName28", "T_ShoutText28", THName); //Warcry
 	
-		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F, "$MiscDataShout_FSK_Name", "$MiscDataShout_FSK_Data", FSName);	//Champion's Spirit (Falskaar)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F,"MiscDataShout_FSK_Name", "MiscDataShout_FSK_Data", FSName);	//Champion's Spirit (Falskaar)
 
 		if (Serialization::CompletionistData::IsModInstalled("ForcefulTongue - Wyrmstooth Patch.esp")) {
-			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFTWYR_Data", FTName);	//Phantom Form (Forceful Tongue)
+			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26,"MiscDataShout_FFT_Name", "MiscDataShout_FFTWYR_Data", FTName);	//Phantom Form (Forceful Tongue)
 		}
 		else {
-			CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "$MiscDataShout_WYR_Name", "$MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
-			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "$MiscDataShout_FFT_Name", "$MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
+			CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "MiscDataShout_WYR_Name", "MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
+			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "MiscDataShout_FFT_Name", "MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
 		}
 	}
 
@@ -525,8 +546,8 @@ namespace CFramework_Shouts {
 			Vanilla_W2_FormArray.push_back(Word2);
 			Vanilla_W3_FormArray.push_back(Word3);
 
-			Vanilla_SH_NameArray.push_back(a_names);
-			Vanilla_SH_TextArray.push_back(a_texts);
+			Vanilla_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Vanilla_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_VS::Data.AddForm(Word1);
 			CFramework_Shouts_VS::Data.AddForm(Word2);
@@ -541,8 +562,8 @@ namespace CFramework_Shouts {
 			Thunderchild_W2_FormArray.push_back(Word2);
 			Thunderchild_W3_FormArray.push_back(Word3);
 
-			Thunderchild_SH_NameArray.push_back(a_names);
-			Thunderchild_SH_TextArray.push_back(a_texts);
+			Thunderchild_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Thunderchild_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_TS::Data.AddForm(Word1);
 			CFramework_Shouts_TS::Data.AddForm(Word2);
@@ -557,8 +578,8 @@ namespace CFramework_Shouts {
 			Miscellaneous_W2_FormArray.push_back(Word2);
 			Miscellaneous_W3_FormArray.push_back(Word3);
 
-			Miscellaneous_SH_NameArray.push_back(a_names);
-			Miscellaneous_SH_TextArray.push_back(a_texts);
+			Miscellaneous_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Miscellaneous_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_MS::Data.AddForm(Word1);
 			CFramework_Shouts_MS::Data.AddForm(Word2);
@@ -619,5 +640,25 @@ namespace CFramework_Shouts {
 		Miscellaneous_SH_NameArray.resize(Miscellaneous_SH_FormArray.size());
 		Miscellaneous_SH_TextArray.resize(Miscellaneous_SH_FormArray.size());
 		Miscellaneous_SH_BoolArray.resize(Miscellaneous_SH_FormArray.size());
+	}
+
+	std::string CHandler::GetCompletedTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
+	{
+		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_Found, w3->translation.c_str());
+	}
+
+	std::string CHandler::GetSecondWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
+	{
+		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
+	}
+
+	std::string CHandler::GetFirstWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
+	{
+		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
+	}
+
+	std::string CHandler::GetBaseTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
+	{
+		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_New, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
 	}
 }

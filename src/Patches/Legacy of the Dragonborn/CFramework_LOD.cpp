@@ -102,17 +102,24 @@ namespace CPatch_LOD
 
 		auto ND_Installed = Serialization::CompletionistData::IsModInstalled("KRI_DBMDelayPatch.esp");
 		auto ED_Installed = Serialization::CompletionistData::IsModInstalled("KRI_DBM_EXTRA_DelayPatch.esp");
+		auto RH_Installed = Serialization::CompletionistData::IsModInstalled("DBM_RelicHunter.esp");
+		auto MP_Installed = Serialization::CompletionistData::IsModInstalled("DBM_Moonpath_Patch.esp");
 
 		for (auto i = 0; i < std::extent_v<decltype(Quest1_Data)>; i++)
 		{
-			if (Quest1_Data[i].editor_id == "DBM_MuseumIndarysQuest" && Serialization::CompletionistData::IsModInstalled("DBM_Moonpath_Patch.esp")) {
+			// Handle Exclusions
+			if ( (i == 2 || i == 3) && !RH_Installed) {
+				continue;
+			}
+
+			if (i == 9 && MP_Installed) {
 				Quest1_Data[i].editor_id = "DBM_MoonpathIndarys";
 			}
 
 			Quest1_Data[i].init()
+				->override(Quest1_Data[i].kLocKey, fmt::format("{:s}{}"sv, Quest1_Data[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
 				->initQuestData(&ArrayData1)
-				->initRadiantData(RadiantData)
-				->override(Quest1_Data[i].kData, fmt::format("${:s}_Data{}"sv, Quest1_Data[i].GetKey(), ND_Installed ? "_ND" : ED_Installed ? "_ED" : "_VD"));
+				->initRadiantData(RadiantData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 52));
 		}
 
@@ -143,9 +150,9 @@ namespace CPatch_LOD
 		for (auto i = 0; i < std::extent_v<decltype(Quest5_Data)>; i++)
 		{
 			Quest5_Data[i].init()
+				->override(Quest5_Data[i].kLocKey, fmt::format("{:s}{}"sv, Quest5_Data[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
 				->initQuestData(&ArrayData5)
-				->initRadiantData(RadiantData)
-				->override(Quest5_Data[i].kData, fmt::format("${:s}_Data{}"sv, Quest5_Data[i].GetKey(), ND_Installed ? "_ND" : ED_Installed ? "_ED" : "_VD"));
+				->initRadiantData(RadiantData);
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest5_Data[i], Quest5_Data[i].GetName(), 56));
 		}
 

@@ -55,6 +55,7 @@ namespace CFramework_Others {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -237,11 +238,11 @@ namespace CFramework_Others {
 
 	void CHandler::InjectAndCompileData() {
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled("Helgen Reborn.esp"); Mod) {
+		if (Serialization::CompletionistData::IsModInstalled("Helgen Reborn.esp")) {
 			CFramework_Others_PC::Data.AddForm(0x11035C, "Helgen Reborn.esp");
 		}
 
-		if (const auto Mod = Serialization::CompletionistData::IsModInstalled("Wyrmstooth.esp"); Mod) {
+		if (Serialization::CompletionistData::IsModInstalled("Wyrmstooth.esp")) {
 			CFramework_Others_PC::Data.AddForm(0x27978A, "Wyrmstooth.esp");
 			CFramework_Others_PM::Data.AddForm(0x4F2E1F, "Wyrmstooth.esp");
 		}
@@ -263,6 +264,7 @@ namespace CFramework_Others {
 		BuildBaranziahArrays();
 
 		CFramework_Others_VC::Data.Populate(VC_NameArray, VC_FormArray, VC_BoolArray, VC_TextArray);
+
 		VC_EntriesTotal = VC_FormArray.size();
 		VC_EntriesFound = std::ranges::count(VC_BoolArray, true);
 
@@ -280,6 +282,25 @@ namespace CFramework_Others {
 
 		SB_EntriesTotal = SB_FormArray.size();
 		SB_EntriesFound = std::ranges::count(SB_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : VC_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageClaws", std::to_underlying(EntryCategory::kClaw)));
+		}
+		for (auto& name : PC_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageClaws", std::to_underlying(EntryCategory::kClaw)));
+		}
+		for (auto& name : VM_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageMasks", std::to_underlying(EntryCategory::kMask)));
+		}
+		for (auto& name : PM_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageMasks", std::to_underlying(EntryCategory::kMask)));
+		}
+		for (auto& name : SB_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageBarenziah", std::to_underlying(EntryCategory::kBarenziah)));
+		}
 	}
 
 	//---------------------------------------------------
@@ -358,55 +379,55 @@ namespace CFramework_Others {
 		SB_FormArray.push_back(RE::TESForm::LookupByID(0x07F962));
 		SB_FormArray.push_back(RE::TESForm::LookupByID(0x07FB4A));
 
-		SB_NameArray.push_back("$BarenziahList00");
-		SB_NameArray.push_back("$BarenziahList01");
-		SB_NameArray.push_back("$BarenziahList02");
-		SB_NameArray.push_back("$BarenziahList03");
-		SB_NameArray.push_back("$BarenziahList04");
-		SB_NameArray.push_back("$BarenziahList05");
-		SB_NameArray.push_back("$BarenziahList06");
-		SB_NameArray.push_back("$BarenziahList07");
-		SB_NameArray.push_back("$BarenziahList08");
-		SB_NameArray.push_back("$BarenziahList09");
-		SB_NameArray.push_back("$BarenziahList10");
-		SB_NameArray.push_back("$BarenziahList11");
-		SB_NameArray.push_back("$BarenziahList12");
-		SB_NameArray.push_back("$BarenziahList13");
-		SB_NameArray.push_back("$BarenziahList14");
-		SB_NameArray.push_back("$BarenziahList15");
-		SB_NameArray.push_back("$BarenziahList16");
-		SB_NameArray.push_back("$BarenziahList17");
-		SB_NameArray.push_back("$BarenziahList18");
-		SB_NameArray.push_back("$BarenziahList19");
-		SB_NameArray.push_back("$BarenziahList20");
-		SB_NameArray.push_back("$BarenziahList21");
-		SB_NameArray.push_back("$BarenziahList22");
-		SB_NameArray.push_back("$BarenziahList23");
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name00"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name01"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name02"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name03"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name04"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name05"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name06"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name07"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name08"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name09"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name10"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name11"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name12"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name13"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name14"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name15"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name16"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name17"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name18"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name19"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name20"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name21"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name22"));
+		SB_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Name23"));
 
-		SB_TextArray.push_back("$BarenziahHighlight00");
-		SB_TextArray.push_back("$BarenziahHighlight01");
-		SB_TextArray.push_back("$BarenziahHighlight02");
-		SB_TextArray.push_back("$BarenziahHighlight03");
-		SB_TextArray.push_back("$BarenziahHighlight04");
-		SB_TextArray.push_back("$BarenziahHighlight05");
-		SB_TextArray.push_back("$BarenziahHighlight06");
-		SB_TextArray.push_back("$BarenziahHighlight07");
-		SB_TextArray.push_back("$BarenziahHighlight08");
-		SB_TextArray.push_back("$BarenziahHighlight09");
-		SB_TextArray.push_back("$BarenziahHighlight10");
-		SB_TextArray.push_back("$BarenziahHighlight11");
-		SB_TextArray.push_back("$BarenziahHighlight12");
-		SB_TextArray.push_back("$BarenziahHighlight13");
-		SB_TextArray.push_back("$BarenziahHighlight14");
-		SB_TextArray.push_back("$BarenziahHighlight15");
-		SB_TextArray.push_back("$BarenziahHighlight16");
-		SB_TextArray.push_back("$BarenziahHighlight17");
-		SB_TextArray.push_back("$BarenziahHighlight18");
-		SB_TextArray.push_back("$BarenziahHighlight19");
-		SB_TextArray.push_back("$BarenziahHighlight20");
-		SB_TextArray.push_back("$BarenziahHighlight21");
-		SB_TextArray.push_back("$BarenziahHighlight22");
-		SB_TextArray.push_back("$BarenziahHighlight23");
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text00"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text01"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text02"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text03"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text04"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text05"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text06"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text07"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text08"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text09"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text10"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text11"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text12"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text13"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text14"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text15"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text16"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text17"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text18"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text19"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text20"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text21"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text22"));
+		SB_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey("Barenziah_Text23"));
 
 		SB_NameArray.resize(SB_FormArray.size());
 		SB_TextArray.resize(SB_FormArray.size());

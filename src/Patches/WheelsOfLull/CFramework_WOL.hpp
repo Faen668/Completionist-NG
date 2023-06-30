@@ -59,6 +59,7 @@ namespace CPatch_WOL
 
 		static void			SinkEvents();
 		static void			InjectAndCompileData();
+		static void			InstallSearchTerms();
 
 		static void			InstallFramework();
 		static void			InstallQuestFramework();

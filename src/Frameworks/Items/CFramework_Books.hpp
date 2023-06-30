@@ -283,6 +283,7 @@ namespace CFramework_Books
 		static void			InstallFramework();
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
+		static void			InstallSearchTerms();
 
 		static void			Install_CCB();
 		static void			Install_CCT();

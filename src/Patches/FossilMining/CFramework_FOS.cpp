@@ -56,6 +56,7 @@ namespace CPatch_FOS {
 
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
+		CHandler::InstallSearchTerms();
 	}
 
 	//---------------------------------------------------
@@ -201,6 +202,19 @@ namespace CPatch_FOS {
 
 		ItmL3_EntriesTotal = ItmL3_FormArray.size();
 		ItmL3_EntriesFound = std::ranges::count(ItmL3_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : ItmL1_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFossilMining1", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : ItmL2_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFossilMining2", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto& name : ItmL3_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageFossilMining3", std::to_underlying(EntryCategory::kItem)));
+		}
 	}
 
 	//---------------------------------------------------

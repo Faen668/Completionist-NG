@@ -57,6 +57,7 @@ namespace CPatch_MAS
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
+		CHandler::InstallSearchTerms();
 		PatchesInstalled += 1;
 	}
 
@@ -241,6 +242,19 @@ namespace CPatch_MAS
 
 		MapMa_EntriesTotal = MapMa_FormArray.size();
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	void CHandler::InstallSearchTerms()
+	{
+		for (auto& name : Items_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageMoonStar", std::to_underlying(EntryCategory::kItem)));
+		}
+		for (auto i = 0; i < Books_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageMoonStar", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+		}
+		for (auto& name : MapMa_NameArray) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageMoonStar", std::to_underlying(EntryCategory::kMapM)));
+		}
 	}
 
 	//---------------------------------------------------
