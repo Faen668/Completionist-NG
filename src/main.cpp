@@ -4,37 +4,38 @@
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Variables.hpp"
+#include "Internal Utility/MCMHandler.hpp"
+#include "Internal Utility/Settings.hpp"
+#include "Internal Utility/Localisation.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
 const SKSE::QueryInterface* g_QueryInterface = nullptr;
 
-static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
-	using namespace Completionist_MainHUD;
-	using namespace CFramework_Master;
-	using namespace CVariables;
-	using namespace CLocalisation;
-	using namespace CQuestMaster;
-
+static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) 
+{
 	auto t1 = std::chrono::steady_clock::now();
 
 	switch (message->type)
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
 
-		LocalisationAPI::Register();
-		TextnTagsAPI::Register();
-		VariablesAPI::Register();
+		CLocalisation::LocalisationAPI::Register();
+		Completionist_MainHUD::TextnTagsAPI::Register();
+		CVariables::VariablesAPI::Register();
 
-		QuestAPI::Register();
-		FrameworkAPI::Register();
+		CQuestMaster::QuestAPI::Register();
+		CFramework_Master::FrameworkAPI::Register();
+		CHCMHandler::MCMAPI::Register();
+		Settings::Main::Register();
+
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:
 
-		VariablesAPI::Update();
-		FrameworkAPI::Update();
+		CVariables::VariablesAPI::Update();
+		CFramework_Master::FrameworkAPI::Update();
 		break;
 
 	case SKSE::MessagingInterface::kPreLoadGame:
@@ -42,17 +43,17 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 
 	case SKSE::MessagingInterface::kPostLoadGame:
 
-		VariablesAPI::Update();
-		FrameworkAPI::Update();
+		CVariables::VariablesAPI::Update();
+		CFramework_Master::FrameworkAPI::Update();
 		break;
 
 	case SKSE::MessagingInterface::kPostLoad:
-		TextnTagsAPI::RegisterQuickLootListener();
+		Completionist_MainHUD::TextnTagsAPI::RegisterQuickLootListener();
 		break;
 
 	case SKSE::MessagingInterface::kPostPostLoad:
-		TextnTagsAPI::RegistermoreHUDListener();
-		TextnTagsAPI::RegisterQuickLootEEListener();
+		Completionist_MainHUD::TextnTagsAPI::RegistermoreHUDListener();
+		Completionist_MainHUD::TextnTagsAPI::RegisterQuickLootEEListener();
 		break;
 	}
 }
