@@ -148,6 +148,7 @@ namespace CFramework_Master
 				list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + text + "}{" + GetLocalisedCategory(Category) + "}{" + name + "}");
 				list.push_back(text);
 				list.push_back(name);
+				list.push_back("Misc");
 				result++;
 			}
 		}

@@ -299,7 +299,6 @@ namespace Completionist_MainHUD
 		_OnUpdateCrosshairText(a_this, a_menuName, a_type, a_data);
 
 		const auto data = a_data ? static_cast<RE::HUDData*>(a_data) : nullptr;
-		const auto crossHairRef = data ? data->crossHairRef.get() : RE::TESObjectREFRPtr();
 
 		if (!data) { return; }
 		ProcessCrosshairReference(data);
