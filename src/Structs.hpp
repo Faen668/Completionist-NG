@@ -1,6 +1,7 @@
 #pragma once
 #include "Internal Utility/ScriptObject.hpp"
 #include "Internal Utility/Variables.hpp"
+#include "Internal Utility/Localisation.hpp"
 #include "DKUtil/Utility.hpp"
 
 enum class CFlagEnum

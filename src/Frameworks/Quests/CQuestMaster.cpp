@@ -2,6 +2,7 @@
 #include "CQuestMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
+#include "Internal Utility/MCMHandler.hpp"
 
 //Quest Frameworks
 #include "Frameworks/Quests/Main Story/CQuests_MainStory_SK.hpp"
@@ -163,12 +164,12 @@ namespace CQuestMaster
 
 	std::vector<std::string> QuestAPI::SearchAndReportPage(RE::StaticFunctionTag*, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType)
 	{
-		auto maxResults = i_maxResults * 3;
+		auto maxResults = i_maxResults * 4;
 		auto process = false;
 
 		std::vector<std::string> list = CFramework_Master::FrameworkAPI::SearchAndReportPage(s_term, b_ignoreCompleted, maxResults, i_searchType);
 
-		auto result = (list.size() / 3) + 1;
+		auto result = (list.size() / 4) + 1;
 
 		INFO("Running Search For {} with a type of {}", s_term, i_searchType);
 
@@ -191,13 +192,14 @@ namespace CQuestMaster
 				list.push_back("$PageResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + GetLocalisedPageName(ID) + "}{" + data->GetName() + "}");
 				list.push_back(GetLocalisedPageName(ID));
 				list.push_back(data->GetSearchTerm());
+				list.push_back("Quest");
 				result++;
 			}
 		};
 
-		for (auto i = 0; i < list.size(); i += 3)
+		for (auto i = 0; i < list.size(); i += 4)
 		{
-			list[i].replace(list[i].find("["), 9, std::to_string(list.size() / 3));
+			list[i].replace(list[i].find("["), 9, std::to_string(list.size() / 4));
 		}
 
 		return list;
@@ -205,69 +207,13 @@ namespace CQuestMaster
 
 	std::string QuestAPI::GetLocalisedPageName(int32_t ID)
 	{
-		switch (ID)
-		{
-		case 0 : return "$MCMPageMain";
-		case 1 : return "$MCMPageMainCW";
-		case 2 : return "$MCMPageMainDG";
-		case 3 : return "$MCMPageMainDB";
-		case 4 : return "$MCMPageMainFarming";
-		case 5 : return "$MCMPageMainCreations1";
-		case 6 : return "$MCMPageMainCreations2";
-		case 7 : return "$MCMPageMainDawnstar";
-		case 8 : return "$MCMPageMainFalkreath";
-		case 9 : return "$MCMPageMainMarkarth";
-		case 10: return "$MCMPageMainMorthal";
-		case 11: return "$MCMPageMainRiften";
-		case 12: return "$MCMPageMainSolitude";
-		case 13: return "$MCMPageMainWhiterun";
-		case 14: return "$MCMPageMainWindhelm";
-		case 15: return "$MCMPageMainWinterhold";
-		case 16: return "$MCMPageMainRavenRock";
-		case 17: return "$MCMPageMainSkaal";
-		case 18: return "$MCMPageMainTelMithryn";
-		case 19: return "$MCMPageMainThirsk";
-		case 20: return "$MCMPageMainSmall";
-		case 21: return "$MCMPageMainCollege";
-		case 22: return "$MCMPageMainCompanions";
-		case 23: return "$MCMPageMainBrotherhood";
-		case 24: return "$MCMPageMainDawnguard";
-		case 25: return "$MCMPageMainThieves";
-		case 26: return "$MCMPageMainVampires";
-		case 27: return "$MCMPageMainDungeons";
-		case 28: return "$MCMPageMainMiscSide";
-		case 29: return "$MCMPageMainMiscRadi";
-		case 30: return "$MCMPageMainMiscDG";
-		case 31: return "$MCMPageMainMiscDB";
-		case 32: return "$MCMPageClockwork";
-		case 33: return "$MCMPageFalskaar";
-		case 34: return "$MCMPageHelgen";
-		case 35: return "$MCMPageMoonpath";
-		case 36: return "$MCMPageMoonStar";
-		case 37: return "$MCMPageProjectAHO";
-		case 38: return "$MCMPageTeldrynSerious";
-		case 39: return "$MCMPageLull";
-		case 40: return "$MCMPageGrayCowl";
-		case 41: return "$MCMPageWyrmstooth";
-		case 42: return "$MCMPageUndeath";
-		case 43: return "$MCMPageBrotherhood";
-		case 44: return "$MCMPage3DNPCMain";
-		case 45: return "$MCMPage3DNPCBlood";
-		case 46: return "$MCMPage3DNPCSteel";
-		case 47: return "$MCMPage3DNPCMisc";
-		case 48: return "$MCMPageVigilantMain";
-		case 49: return "$MCMPageVigilantSide";
-		case 50: return "$MCMPageVigilantMemory";
-		case 51: return "$MCMPageVigilantRadiant";
-		case 52: return "$MCMPageMuseum";
-		case 53: return "$MCMPageMisc";
-		case 54: return "$MCMPageNotes";
-		case 55: return "$MCMPageJournals";
-		case 56: return "$MCMPageExplorer";
-
-		default:
-			return "";
+		for (auto& [page, mod, id] : CHCMHandler::MainMCMPagesDefs) {
+			if (ID == id) {
+				return page;
+			}
 		}
+
+		return "";
 	}
 
 	//---------------------------------------------------
