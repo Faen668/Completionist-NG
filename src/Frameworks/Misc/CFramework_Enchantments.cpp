@@ -2,6 +2,7 @@
 #include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
+#undef GetModuleHandle
 
 namespace CFramework_Enchantments {
 
@@ -63,16 +64,194 @@ namespace CFramework_Enchantments {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
 	//---------------------------------------------------
 
-	void CHandler::SinkEvents() {
-
+	void CHandler::SinkEvents() 
+	{
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+
+		if (SKSE::WinAPI::GetModuleHandle(L"YesImSure.dll"))
+		{
+			YesImSureSettings::Load();
+			if (!*YesImSureSettings::EnchantmentLearned) {
+				auto& trampoline = SKSE::GetTrampoline();
+				_OnEnchantmentLearnt = trampoline.write_call<5>(RELOCATION_ID(50459, 51363).address() + REL::Relocate(0x1B1, 0x1B1), OnEnchantmentLearnt);
+				INFO("Enchantment Hook Installed");
+			}
+			else {
+				INFO("Enchantment Hook Not Installed");
+				auto* message = "=== Completionist === \n \n You are using 'Yes I'm Sure' but have not turned off the setting 'EnchantmentLearned' \n\n With this setting enabled, Completionist can not update enchantment tracking in real time and will default to updating when opening the MCM. \n\n You can disable the setting in the .toml file provided by 'Yes I'm Sure'.";
+				RE::DebugMessageBox(message);
+			}
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( On Enchantment Learnt ) --
+	//---------------------------------------------------
+
+	const char* CHandler::OnEnchantmentLearnt(RE::TESForm* a_form)
+	{
+		if (CFramework_Enchantments_VA::Data.HasForm(a_form)) {
+			auto base = CFramework_Enchantments_VA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_VA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
+			CHandler::ProcessFoundForm(base, section::kVanilla_A);
+			return _OnEnchantmentLearnt(a_form);
+		}
+
+		if (CFramework_Enchantments_VW::Data.HasForm(a_form)) {
+			auto base = CFramework_Enchantments_VW::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_VW::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
+			CHandler::ProcessFoundForm(base, section::kVanilla_W);
+			return _OnEnchantmentLearnt(a_form);
+		}
+
+		if (CFramework_Enchantments_SA::Data.HasForm(a_form)) {
+			auto base = CFramework_Enchantments_SA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_SA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
+			CHandler::ProcessFoundForm(base, section::kSummermyst_A);
+			return _OnEnchantmentLearnt(a_form);
+		}
+
+		if (CFramework_Enchantments_SW::Data.HasForm(a_form)) {
+			auto base = CFramework_Enchantments_SW::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_SW::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
+			CHandler::ProcessFoundForm(base, section::kSummermyst_W);
+			return _OnEnchantmentLearnt(a_form);
+		}
+
+		if (CFramework_Enchantments_NGA::Data.HasForm(a_form)) {
+			auto base = CFramework_Enchantments_NGA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_NGA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
+			CHandler::ProcessFoundForm(base, section::kNecromanticGrim);
+			return _OnEnchantmentLearnt(a_form);
+		}
+
+		return _OnEnchantmentLearnt(a_form);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Process Found Form ) -----
+	//---------------------------------------------------
+
+	void CHandler::ProcessFoundForm(RE::FormID a_baseID, section kSection) 
+	{
+		switch (kSection)
+		{
+		case kVanilla_A:
+		{
+			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_VA::Data.GetForm(a_baseID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_VA::Data.GetForm(a_baseID)->GetName());
+			}
+
+			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CFramework_Enchantments_VA::Data.GetAllVariations()) {
+				if (CFramework_Enchantments_VA::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(VA_FormArray, CFramework_Enchantments_VA::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(VA_FormArray.begin(), t_pos);
+
+			VA_BoolArray[b_pos] = true;
+			VA_EntriesFound = std::ranges::count(VA_BoolArray, true);
+			break;
+		}
+		case kVanilla_W:
+		{
+			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_VW::Data.GetForm(a_baseID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_VW::Data.GetForm(a_baseID)->GetName());
+			}
+
+			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CFramework_Enchantments_VW::Data.GetAllVariations()) {
+				if (CFramework_Enchantments_VW::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(VW_FormArray, CFramework_Enchantments_VW::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(VW_FormArray.begin(), t_pos);
+
+			VW_BoolArray[b_pos] = true;
+			VW_EntriesFound = std::ranges::count(VW_BoolArray, true);
+			break;
+		}
+		case kSummermyst_A:
+		{
+			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_SA::Data.GetForm(a_baseID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_SA::Data.GetForm(a_baseID)->GetName());
+			}
+
+			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CFramework_Enchantments_SA::Data.GetAllVariations()) {
+				if (CFramework_Enchantments_SA::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(SA_FormArray, CFramework_Enchantments_SA::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(SA_FormArray.begin(), t_pos);
+
+			SA_BoolArray[b_pos] = true;
+			SA_EntriesFound = std::ranges::count(SA_BoolArray, true);
+			break;
+		}
+		case kSummermyst_W:
+		{
+			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_SW::Data.GetForm(a_baseID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_SW::Data.GetForm(a_baseID)->GetName());
+			}
+
+			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CFramework_Enchantments_SW::Data.GetAllVariations()) {
+				if (CFramework_Enchantments_SW::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(SW_FormArray, CFramework_Enchantments_SW::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(SW_FormArray.begin(), t_pos);
+
+			SW_BoolArray[b_pos] = true;
+			SW_EntriesFound = std::ranges::count(SW_BoolArray, true);
+			break;
+		}
+		case kNecromanticGrim:
+		{
+			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_NGA::Data.GetForm(a_baseID)->GetName());
+				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_NGA::Data.GetForm(a_baseID)->GetName());
+			}
+
+			FoundItemData_NoShow.AddForm(a_baseID);
+			for (auto var : CFramework_Enchantments_NGA::Data.GetAllVariations()) {
+				if (CFramework_Enchantments_NGA::Data.GetBase(var) == a_baseID) {
+					FoundItemData_NoShow.AddForm(var);
+				}
+			}
+
+			auto t_pos = std::ranges::find(NGA_FormArray, CFramework_Enchantments_NGA::Data.GetForm(a_baseID));
+			auto b_pos = std::distance(NGA_FormArray.begin(), t_pos);
+
+			NGA_BoolArray[b_pos] = true;
+			NGA_EntriesFound = std::ranges::count(NGA_BoolArray, true);
+			break;
+		}
+		default: 
+			break;
+		}
 	}
 
 	//---------------------------------------------------

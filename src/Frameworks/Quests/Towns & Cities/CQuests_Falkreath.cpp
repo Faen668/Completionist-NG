@@ -32,7 +32,7 @@ namespace CQFramework_Falkreath
 		{"Falkreath_Quest10", "FalkreathImpGetOutofJail", "FalkreathSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -46,7 +46,7 @@ namespace CQFramework_Falkreath
 				->initQuestData(&ArrayData)
 				->initThaneData(ThaneData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 8));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 8, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

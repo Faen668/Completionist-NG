@@ -55,7 +55,7 @@ namespace CQFramework_CollegeOfWinterhold
 		/*31*/ {"CollegeOfWinterhold_Quest31", CFlagEnum::kSide, CCompEnum::kGlobl, "MGR01"}, //CRF
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	std::array<int, 5> CRFExclusions = { 21,25,27,29,31 };
 
@@ -77,10 +77,10 @@ namespace CQFramework_CollegeOfWinterhold
 			}
 
 			QuestData[i].init()
-				->initQuestData(&QuestArrays)
+				->initQuestData(&ArrayData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 21));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 21, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

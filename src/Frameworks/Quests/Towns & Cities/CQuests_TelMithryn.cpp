@@ -25,7 +25,7 @@ namespace CQFramework_TelMithryn
 		{"TelMithryn_Quest07", CStageEnum::kDone, 100, 0},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -38,7 +38,7 @@ namespace CQFramework_TelMithryn
 			QuestData[i].init()
 				->initQuestData(&ArrayData)
 				->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 18));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 18, QuestData[i].unique_identifier));
 
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);

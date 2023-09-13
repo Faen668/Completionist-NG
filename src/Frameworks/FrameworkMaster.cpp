@@ -18,17 +18,20 @@ namespace CFramework_Master
 
 	void FrameworkAPI::Register() 
 	{
+		auto& trampoline = SKSE::GetTrampoline();
+		_OnMapMarkerDiscovered = trampoline.write_call<5>(RELOCATION_ID(39663, 40750).address() + REL::Relocate(0x1CC, 0x1EC), OnMapMarkerDiscovered);
+		_OnMapMarkerAdded = trampoline.write_call<5>(RELOCATION_ID(55617, 56146).address() + REL::Relocate(0x9D, 0x9D), OnMapMarkerAdded);
+
 		SKSE::GetPapyrusInterface()->Register(FrameworkAPI::RegisterFunctions);
 
 		SetSerializableInfo(FoundItemData);
 		SetSerializableInfo(FoundItemData_NoShow);
-
 		SetSerializableInfo(CQuestKeys_Natural);
 		SetSerializableInfo(CQuestKeys_Manual);
 		SetSerializableInfo(CQuestKeys_Stages);
-
 		SetSerializableInfo(LoggingData);
 
+		CellScanner::				CHandler::AddExcludedChests();
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
 		CFramework_Others::			CHandler::InstallFramework();
@@ -69,6 +72,9 @@ namespace CFramework_Master
 		CPatch_CHM::				CHandler::InstallFramework();
 		CPatch_REQ::				CHandler::InstallFramework();
 		CPatch_INN::				CHandler::InstallFramework();
+		CPatch_JAY::				CHandler::InstallFramework();
+		CPatch_RAR::				CHandler::InstallFramework();
+		CPatch_Cloaks::				CHandler::InstallFramework();
 
 		//SpellTomes
 		CPatch_SpellTomes::			CHandler::InstallFramework();
@@ -93,15 +99,8 @@ namespace CFramework_Master
 		a_vm->RegisterFunction("GetEntries_TotalByID",			"Completionist_Native", GetEntries_TotalByID);
 		a_vm->RegisterFunction("GetEntries_FoundByID",			"Completionist_Native", GetEntries_FoundByID);
 
-		a_vm->RegisterFunction("CCItemsInstalled",				"Completionist_Native", CCItemsInstalled);
-		a_vm->RegisterFunction("CCBooksInstalled",				"Completionist_Native", CCBooksInstalled);
-		a_vm->RegisterFunction("CCLocationsInstalled",			"Completionist_Native", CCLocationsInstalled);
-
 		a_vm->RegisterFunction("IsOptionCompleted",				"Completionist_Native", IsOptionCompleted);
 		a_vm->RegisterFunction("SetOptionCompleted",			"Completionist_Native", SetOptionCompleted);
-
-		a_vm->RegisterFunction("ShouldDisplayMiscHeader",		"Completionist_Native", ShouldDisplayMiscHeader);
-		a_vm->RegisterFunction("ShouldDisplayTomeHeader",		"Completionist_Native", ShouldDisplayTomeHeader);
 
 		a_vm->RegisterFunction("GetVersion",					"Completionist_Native", GetVersion);
 		a_vm->RegisterFunction("GetHexValue",					"Completionist_Native", GetHexValue);
@@ -110,11 +109,29 @@ namespace CFramework_Master
 		a_vm->RegisterFunction("UpdateVariables",				"Completionist_Native", UpdateCompletion);
 		a_vm->RegisterFunction("LoadInjectedForms",				"Completionist_Native", LoadInjectedForms);
 
+		a_vm->RegisterFunction("GetLoggingDates",				"Completionist_Native", GetLoggingDates);
+		a_vm->RegisterFunction("GetLoggedEventsForDate",		"Completionist_Native", GetLoggedEventsForDate);
+
 		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
 		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
 		a_vm->RegisterFunction("ActivateShrineByID",			"Completionist_Native", CFramework_Blessings::CHandler::ActivateShrineFromPapyrus);
 		a_vm->RegisterFunction("CheckForReferences",			"Completionist_Native", CellScanner::CHandler::CheckForReferences);
 		return true;
+	}
+
+	std::vector<std::string> FrameworkAPI::GetLoggingDates(RE::StaticFunctionTag*)
+	{
+		auto list = LoggingData.GetAllLoggedDates();
+		std::reverse(list.begin(), list.end());
+		return list;
+	}
+
+	std::vector<std::string> FrameworkAPI::GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_time)
+	{
+		auto list = LoggingData.GetAllLoggedEvents(a_date, b_time);
+		while (list.size() > 126) { list.erase(list.begin()); }
+		std::reverse(list.begin(), list.end());
+		return list;
 	}
 
 	//---------------------------------------------------
@@ -215,9 +232,9 @@ namespace CFramework_Master
 		INFO("Papyrus Message: {}", a_message);
 	}
 
-	void FrameworkAPI::AddNewEventToLog(std::string a_log)
+	void FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::logType kType, std::string a_log)
 	{
-		LoggingData.AddLoggedEvent(a_log);
+		LoggingData.AddLoggedEvent(kType, a_log);
 	}
 
 	//---------------------------------------------------
@@ -268,60 +285,39 @@ namespace CFramework_Master
 	//-- Framework Functions ( CC Variable Setter ) -----
 	//---------------------------------------------------
 
-	bool FrameworkAPI::CCLocationsInstalled(RE::StaticFunctionTag*)		{ return bool(CFramework_MapMa_CC::Data.data.size()); }
-	bool FrameworkAPI::CCBooksInstalled(RE::StaticFunctionTag*)			{ return bool(CFramework_Books_CC::Data.data.size());; }
-	bool FrameworkAPI::CCItemsInstalled(RE::StaticFunctionTag*)			{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
-	bool FrameworkAPI::ShouldDisplayMiscHeader(RE::StaticFunctionTag*)	{ return bool(PatchesInstalled); }
-	bool FrameworkAPI::ShouldDisplayTomeHeader(RE::StaticFunctionTag*)	{ return bool(TomesInstalled); }
+	bool FrameworkAPI::CCLocationsInstalled()		{ return bool(CFramework_MapMa_CC::Data.data.size()); }
+	bool FrameworkAPI::CCBooksInstalled()			{ return bool(CFramework_Books_CC::Data.data.size());; }
+	bool FrameworkAPI::CCItemsInstalled()			{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
+	bool FrameworkAPI::ShouldDisplayMiscHeader()	{ return bool(PatchesInstalled); }
+	bool FrameworkAPI::ShouldDisplayTomeHeader()	{ return bool(TomesInstalled); }
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Load Frameworks ) --------
+	//-- Framework Events ( Load & Update Frameworks ) --
 	//---------------------------------------------------
 
-	void FrameworkAPI::Update() {
+	void FrameworkAPI::Update() 
+	{
+		AddUpdateFoundForms_Invoke();
+	}
 
-		//Frameworks
-		CFramework_Uniques::		CHandler::UpdateFoundForms();
-		CFramework_Others::			CHandler::UpdateFoundForms();
-		CFramework_Books::			CHandler::UpdateFoundForms();
-		CFramework_MapMa::			CHandler::UpdateFoundForms();
-		CFramework_Blessings::		CHandler::UpdateFoundForms();
-		CFramework_Enchantments::	CHandler::UpdateFoundForms();
-		CFramework_Pets::			CHandler::UpdateFoundForms();
-		CFramework_PlayerHomes::	CHandler::UpdateFoundForms();
-		CFramework_Shouts::			CHandler::UpdateFoundForms();
+	//---------------------------------------------------
+	//-- Framework Events ( On Marker Added ) -----------
+	//---------------------------------------------------
 
-		// Patches
-		CPatch_AHD::				CHandler::UpdateFoundForms();
-		CPatch_BOO::				CHandler::UpdateFoundForms();
-		CPatch_CLW::				CHandler::UpdateFoundForms();
-		CPatch_FSK::				CHandler::UpdateFoundForms();
-		CPatch_FOS::				CHandler::UpdateFoundForms();
-		CPatch_GCN::				CHandler::UpdateFoundForms();
-		CPatch_OAP::				CHandler::UpdateFoundForms();
-		CPatch_HRB::				CHandler::UpdateFoundForms();
-		CPatch_3DC::				CHandler::UpdateFoundForms();
-		CPatch_MAS::				CHandler::UpdateFoundForms();
-		CPatch_MTE::				CHandler::UpdateFoundForms();
-		CPatch_AHO::				CHandler::UpdateFoundForms();
-		CPatch_ST1::				CHandler::UpdateFoundForms();
-		CPatch_ST2::				CHandler::UpdateFoundForms();
-		CPatch_ST3::				CHandler::UpdateFoundForms();
-		CPatch_TEL::				CHandler::UpdateFoundForms();
-		CPatch_THU::				CHandler::UpdateFoundForms();
-		CPatch_UND::				CHandler::UpdateFoundForms();
-		CPatch_WOL::				CHandler::UpdateFoundForms();
-		CPatch_WSN::				CHandler::UpdateFoundForms();
-		CPatch_WYR::				CHandler::UpdateFoundForms();
-		CPatch_VIG::				CHandler::UpdateFoundForms();
-		CPatch_FSH::				CHandler::UpdateFoundForms();
-		CPatch_SUD::				CHandler::UpdateFoundForms();
-		CPatch_CHM::				CHandler::UpdateFoundForms();
-		CPatch_REQ::				CHandler::UpdateFoundForms();
-		CPatch_INN::				CHandler::UpdateFoundForms();
+	void FrameworkAPI::OnMapMarkerAdded(RE::TESFullName* a_form)
+	{
+		_OnMapMarkerAdded(a_form);
+		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
+	}
 
-		//SpellTomes
-		CPatch_SpellTomes::			CHandler::UpdateFoundForms();
+	//---------------------------------------------------
+	//-- Framework Events ( On Marker Discovered ) ------
+	//---------------------------------------------------
+
+	const char* FrameworkAPI::OnMapMarkerDiscovered(RE::TESFullName* a_form)
+	{
+		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
+		return _OnMapMarkerDiscovered(a_form);
 	}
 
 	//---------------------------------------------------

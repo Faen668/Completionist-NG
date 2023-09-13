@@ -27,6 +27,7 @@ namespace CPatch_MTE
 	inline std::vector<std::string>		Quest_NameArray;
 	inline std::vector<std::string>		Quest_IdenArray;
 	inline std::vector<std::string>		Quest_TextArray;
+	inline std::vector<std::string>		Quest_KeysArray;
 	inline std::vector<std::int32_t>	Quest_RadiArray;
 	inline std::vector<bool>			Quest_BoolArray;
 

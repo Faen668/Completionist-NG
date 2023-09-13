@@ -57,12 +57,12 @@ FavorMergedData Favor_109[] = {
 };
 
 FavorMergedData Favor_110[] = {
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D6E, FS_NAME}, FavorActorData{0x041fb8, SK_NAME}, 20, 1, "Completionist_Favor110Aldis"},
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D76, FS_NAME}, FavorActorData{0x0135ef, SK_NAME}, 20, 1, "Completionist_Favor110Lami" },
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D7E, FS_NAME}, FavorActorData{0x01361e, SK_NAME}, 20, 1, "Completionist_Favor110Rustleif" },
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D86, FS_NAME}, FavorActorData{0x013653, SK_NAME}, 20, 1, "Completionist_Favor110Siddgeir" },
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D6E, FS_NAME}, FavorActorData{0x01413f, SK_NAME}, 20, 1, "Completionist_Favor110Torbjorn" },
-	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000D97, FS_NAME}, FavorActorData{0x013bab, SK_NAME}, 20, 1, "Completionist_Favor110Ysolda" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d6e, FS_NAME}, FavorActorData{0x041fb8, SK_NAME}, 20, 1, "Completionist_Favor110Aldis"},
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d76, FS_NAME}, FavorActorData{0x0135ef, SK_NAME}, 20, 1, "Completionist_Favor110Lami" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d7e, FS_NAME}, FavorActorData{0x01361e, SK_NAME}, 20, 1, "Completionist_Favor110Rustleif" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d86, FS_NAME}, FavorActorData{0x013653, SK_NAME}, 20, 1, "Completionist_Favor110Siddgeir" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d6e, FS_NAME}, FavorActorData{0x01413f, SK_NAME}, 20, 1, "Completionist_Favor110Torbjorn" },
+	{ FavorQuestData{0x0CA439, SK_NAME}, FavorQuestData{0x000d97, FS_NAME}, FavorActorData{0x013bab, SK_NAME}, 20, 1, "Completionist_Favor110Ysolda" },
 };
 
 FavorMergedData Favor_151[] = {
@@ -91,11 +91,11 @@ FavorMergedData Favor_204[] = {
 };
 
 FavorMergedData Favor_205[] = {
-	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DD5, FS_NAME}, FavorActorData{0x013614, SK_NAME}, 20, 1, "Completionist_Favor205Frida"},
-	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DDE, FS_NAME}, FavorActorData{0x01329c, SK_NAME}, 20, 1, "Completionist_Favor205Noster"},
-	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DE7, FS_NAME}, FavorActorData{0x014142, SK_NAME}, 20, 1, "Completionist_Favor205Oengul"},
-	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DF0, FS_NAME}, FavorActorData{0x01403f, SK_NAME}, 20, 1, "Completionist_Favor205Roggi"},
-	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000DF9, FS_NAME}, FavorActorData{0x01364d, SK_NAME}, 20, 1, "Completionist_Favor205Runil"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000dd5, FS_NAME}, FavorActorData{0x013614, SK_NAME}, 20, 1, "Completionist_Favor205Frida"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000ddE, FS_NAME}, FavorActorData{0x01329c, SK_NAME}, 20, 1, "Completionist_Favor205Noster"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000de7, FS_NAME}, FavorActorData{0x014142, SK_NAME}, 20, 1, "Completionist_Favor205Oengul"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000df0, FS_NAME}, FavorActorData{0x01403f, SK_NAME}, 20, 1, "Completionist_Favor205Roggi"},
+	{ FavorQuestData{0x06FE37, SK_NAME}, FavorQuestData{0x000df9, FS_NAME}, FavorActorData{0x01364d, SK_NAME}, 20, 1, "Completionist_Favor205Runil"},
 };
 
 MerchantFavors activeMerchant{};
@@ -211,11 +211,16 @@ namespace CQFramework_FavorQuests
 				continue;
 			}
 
+			//INFO("Got Quest Form And Actor For {} with a matching stage of {}", questForm->GetFormEditorID(), data->Stage);
+
 			for (const auto& alias : questForm->aliases) {
-				if (alias && alias->aliasName == "QuestGiver") {
+				if (alias && (alias->aliasName == "QuestGiver" || alias->aliasName == "Questgiver")) {
+					//INFO("Got QuestGiver Alias For {}", questForm->GetFormEditorID());
 
 					auto* reference = static_cast<RE::BGSRefAlias*>(alias);
 					if (reference && reference->GetActorReference()->GetActorBase()->GetFormID() == questActr->GetFormID()) {
+						//INFO("Got Matching Alias For {}", questForm->GetFormEditorID());
+
 						if (auto* global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(data->Global)) {
 							//INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", data->Global, questForm->GetName(), questActr->GetName());
 							global->value++;

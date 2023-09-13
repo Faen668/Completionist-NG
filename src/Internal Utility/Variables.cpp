@@ -14,7 +14,7 @@ namespace CVariables {
 
 	EventResult	VariablesAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 		
-		if (a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) { 
+		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) { 
 			Update(); 
 		}
 		return EventResult::kContinue;
@@ -41,6 +41,7 @@ namespace CVariables {
 		return V_Debugging;
 	}
 
+
 	//---------------------------------------------------
 	//-- Variables Functions ( Update Properties ) ------
 	//---------------------------------------------------
@@ -49,10 +50,6 @@ namespace CVariables {
 	{ 
 		auto MCM = ScriptObject::FromForm(static_cast<RE::TESForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x00800, "Completionist.esp")), "Completionist_MCMScript");
 		if (!MCM) { ERROR("Unable To Locate Completionist.esp. Exiting..."); return; }
-
-		TCC_New = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558285, "DBM_RelicNotifications.esp");
-		TCC_FND = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558286, "DBM_RelicNotifications.esp");
-		TCC_DSP = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558287, "DBM_RelicNotifications.esp");
 
 		V_FishingSpotMarkers = true;
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "FishingSpotMarkers")) {
@@ -334,6 +331,10 @@ namespace CVariables {
 			V_Radiant_LegacyVal = prop->GetSInt();
 		}
 
+		V_Radiant_FishingVal = 4;
+		if (const auto* prop = VariablesAPI::GetProperty(MCM, "State_FishingCounterVal")) {
+			V_Radiant_FishingVal = prop->GetSInt();
+		}
 
 		V_moreHudEnabled_Crosshair = true;
 		if (const auto* prop = VariablesAPI::GetProperty(MCM, "b_moreHUDEnabled_Crosshair")) {

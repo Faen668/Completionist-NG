@@ -54,7 +54,7 @@ namespace CQFramework_SmallTowns
 		{"SmallTowns_Quest08", CStageEnum::kPast, 199,	0},
 	};
 
-	/*NA*/ CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -69,7 +69,7 @@ namespace CQFramework_SmallTowns
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initDrunkData(DrunkData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 20));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 20, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

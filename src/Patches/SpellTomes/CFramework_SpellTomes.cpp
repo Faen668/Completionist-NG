@@ -105,6 +105,7 @@ namespace CPatch_SpellTomes {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -226,6 +227,7 @@ namespace CPatch_SpellTomes {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -278,6 +280,7 @@ namespace CPatch_SpellTomes {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -329,6 +332,7 @@ namespace CPatch_SpellTomes {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -380,6 +384,7 @@ namespace CPatch_SpellTomes {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -431,6 +436,7 @@ namespace CPatch_SpellTomes {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);

@@ -51,6 +51,7 @@ namespace CFramework_PlayerHomes {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -161,6 +162,7 @@ namespace CFramework_PlayerHomes {
 			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, VH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kObtained, VH_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(VH_FormArray[b_pos]);
@@ -177,6 +179,7 @@ namespace CFramework_PlayerHomes {
 			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kObtained, CH_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(CH_FormArray[b_pos]);
@@ -193,6 +196,7 @@ namespace CFramework_PlayerHomes {
 			{
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, PH_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kObtained, PH_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(PH_FormArray[b_pos]);
