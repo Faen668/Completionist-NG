@@ -51,6 +51,7 @@ namespace CPatch_ST3 {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -108,6 +109,7 @@ namespace CPatch_ST3 {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST3_ItmL1::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST3_ItmL1::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -134,6 +136,7 @@ namespace CPatch_ST3 {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST3_ItmL2::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST3_ItmL2::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -160,6 +163,7 @@ namespace CPatch_ST3 {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST3_ItmL3::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST3_ItmL3::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -186,6 +190,7 @@ namespace CPatch_ST3 {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST3_ItmL4::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST3_ItmL4::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);

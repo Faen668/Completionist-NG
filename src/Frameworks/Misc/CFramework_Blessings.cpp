@@ -63,6 +63,7 @@ namespace CFramework_Blessings {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -136,6 +137,7 @@ namespace CFramework_Blessings {
 		if (!FoundItemData_NoShow.HasForm(a_baseID)) {
 			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, RE::TESForm::LookupByID(a_eventID)->GetName());
 			FrameworkAPI::SendNotification(msg, "NotifySpecial");
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, RE::TESForm::LookupByID(a_eventID)->GetName());
 		}
 
 		FoundItemData_NoShow.AddForm(a_baseID);

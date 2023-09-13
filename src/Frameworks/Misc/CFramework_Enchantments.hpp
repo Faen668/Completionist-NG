@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Serialization.hpp"
+#include "Internal Utility/AutoTOML.hpp"
 
 namespace CFramework_Enchantments_VA {
 	inline Serialization::CompletionistData Data;
@@ -59,6 +60,16 @@ namespace CFramework_Enchantments {
 	inline std::int32_t					NGA_EntriesTotal;
 	inline std::int32_t					NGA_EntriesFound;
 
+	enum section
+	{
+		kVanilla_A,
+		kVanilla_W,
+		kSummermyst_A,
+		kSummermyst_W,
+		kNecromanticGrim,
+		kTotal
+	};
+
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
@@ -72,11 +83,42 @@ namespace CFramework_Enchantments {
 	static void			SinkEvents();
 	static void			InstallFramework();
 	static void			InstallSearchTerms();
+	static void			ProcessFoundForm(RE::FormID a_baseID, section kSection);
 
 	static void			UpdateFoundForms();
 	static void			UpdateCounts();
 
 	static void			InjectAndCompileData();
-	
+
+	static const char* OnEnchantmentLearnt(RE::TESForm* a_form);
+	private:
+		static inline REL::Relocation<decltype(OnEnchantmentLearnt)> _OnEnchantmentLearnt;
 	};
 }
+
+#define MAKE_SETTING(a_type, a_group, a_key, a_value) \
+    inline a_type a_key { a_group##s, #a_key##s, a_value }
+
+namespace YesImSureSettings {
+	using bSetting = AutoTOML::bSetting;
+
+	inline void Load() {
+		if (std::filesystem::exists("Data/SKSE/Plugins/YesImSure.toml"s)) {
+			const auto table = toml::parse_file("Data/SKSE/Plugins/YesImSure.toml"s);
+			for (const auto& setting : AutoTOML::ISetting::get_settings()) {
+				setting->load(table);
+			}
+		}
+
+		if (std::filesystem::exists("Data/SKSE/Plugins/YesImSure/config.toml"s)) {
+			const auto table = toml::parse_file("Data/SKSE/Plugins/YesImSure/config.toml"s);
+			for (const auto& setting : AutoTOML::ISetting::get_settings()) {
+				setting->load(table);
+			}
+		}
+	}
+
+	MAKE_SETTING(bSetting, "Patches", EnchantmentLearned, false);
+}
+
+#undef MAKE_SETTING

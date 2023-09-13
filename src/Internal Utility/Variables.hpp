@@ -2,10 +2,6 @@
 
 namespace CVariables
 {
-	inline RE::BGSListForm* TCC_New;
-	inline RE::BGSListForm* TCC_FND;
-	inline RE::BGSListForm* TCC_DSP;
-
 	inline std::string 		V_ShoutColour_New;
 	inline std::string 		V_ShoutColour_Found;
 
@@ -55,6 +51,7 @@ namespace CVariables
 	inline std::int32_t		V_Radiant_BountyVal;
 	inline std::int32_t		V_Radiant_VigilantVal;
 	inline std::int32_t		V_Radiant_LegacyVal;
+	inline std::int32_t		V_Radiant_FishingVal;
 
 	inline std::string 		V_NotificationText;
 	inline std::string		V_NotificationTextShout0;

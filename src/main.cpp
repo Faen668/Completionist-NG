@@ -5,7 +5,6 @@
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Internal Utility/MCMHandler.hpp"
-#include "Internal Utility/Settings.hpp"
 #include "Internal Utility/Localisation.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
@@ -27,7 +26,6 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CQuestMaster::QuestAPI::Register();
 		CFramework_Master::FrameworkAPI::Register();
 		CHCMHandler::MCMAPI::Register();
-		Settings::Main::Register();
 
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;

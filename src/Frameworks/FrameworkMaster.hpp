@@ -20,6 +20,8 @@ namespace CFramework_Master
 
 	//Name then Page
 	inline std::vector<std::tuple<std::string, std::string, int32_t>> CItemsDataVec;
+	inline std::vector<std::function<void(const char* nam)>> _OnMapMarkerfunctions;
+	inline std::vector<std::function<void()>> _OnUpdateFoundForms;
 
 	enum EntryCategory
 	{
@@ -47,6 +49,32 @@ namespace CFramework_Master
 
 	public:
 
+		template<typename Function>
+		static void AddMapMarkerDiscovery(Function&& fn)
+		{
+			_OnMapMarkerfunctions.push_back(std::forward<Function>(fn));
+		};
+
+		template<typename Function>
+		static void AddUpdateFoundForms(Function&& fn)
+		{
+			_OnUpdateFoundForms.push_back(std::forward<Function>(fn));
+		};
+
+		static void AddMapMarkerDiscovery_Invoke(const char* nam)
+		{
+			for (auto&& fn : _OnMapMarkerfunctions) {
+				fn(nam);
+			}
+		};
+
+		static void AddUpdateFoundForms_Invoke()
+		{
+			for (auto&& fn : _OnUpdateFoundForms) {
+				fn();
+			}
+		};
+
 		//General Functions
 		static bool							RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 		static void							Register();
@@ -63,7 +91,7 @@ namespace CFramework_Master
 		static void							LoadInjectedForms(RE::StaticFunctionTag*);
 		static void							UpdateCompletion(RE::StaticFunctionTag*);
 
-		static void							AddNewEventToLog(std::string a_log);
+		static void							AddNewEventToLog(Serialization::CompletionistLog::logType kType, std::string a_log);
 		
 
 		//Items Functions
@@ -78,11 +106,11 @@ namespace CFramework_Master
 		static std::int32_t					IsOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_FrameworkID, RE::TESForm* a_form);
 		static void							SetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_FrameworkID, RE::TESForm* a_form);
 
-		static bool							CCItemsInstalled(RE::StaticFunctionTag*);
-		static bool							CCBooksInstalled(RE::StaticFunctionTag*);
-		static bool							CCLocationsInstalled(RE::StaticFunctionTag*);
-		static bool							ShouldDisplayMiscHeader(RE::StaticFunctionTag*);
-		static bool							ShouldDisplayTomeHeader(RE::StaticFunctionTag*);
+		static bool							CCItemsInstalled();
+		static bool							CCBooksInstalled();
+		static bool							CCLocationsInstalled();
+		static bool							ShouldDisplayMiscHeader();
+		static bool							ShouldDisplayTomeHeader();
 
 		static bool							IsBookKnown(RE::TESForm* a_form);
 		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
@@ -90,5 +118,14 @@ namespace CFramework_Master
 		static std::vector<std::string>		SearchAndReportPage(std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t searchType);
 		static std::string					GetLocalisedCategory(int32_t);
 		static std::int32_t					GetBookCategoryType(RE::TESForm*);
+
+		static std::vector<std::string>		GetLoggingDates(RE::StaticFunctionTag*);
+		static std::vector<std::string>		GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_time);
+
+		static const char*					OnMapMarkerDiscovered(RE::TESFullName* a_form);
+		static void							OnMapMarkerAdded(RE::TESFullName* a_form);
+	private:
+		static inline REL::Relocation<decltype(OnMapMarkerDiscovered)> _OnMapMarkerDiscovered;
+		static inline REL::Relocation<decltype(OnMapMarkerAdded)> _OnMapMarkerAdded;
 	};
 }

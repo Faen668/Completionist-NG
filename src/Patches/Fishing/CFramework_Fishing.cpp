@@ -26,7 +26,7 @@ namespace CPatch_FSH {
 
 	constexpr FormArray A_Forms = {
 	0x000F7E,0x000F64,0x000F8C,0x000F79,0x000F82,0x000F89,0x000F87,0x000F8A,
-	0x000F8B,0x000F81,0x000F80,0x000F8D,0x000F78,0x000F7F,0x000F8E,0x000F83,
+	0x000F8B,0x000F81,0x000F8D,0x000F80,0x000F78,0x000F7F,0x000F8E,0x000F83,
 	0x000F7B,0x000F8F,0x000F7D,0x000F7C,0x000F7A,
 
 	};
@@ -55,7 +55,10 @@ namespace CPatch_FSH {
 
 	void CHandler::InstallFramework() {
 
-		if (!CompletionistData::IsModInstalled(modname)) { return; }
+		if (!CompletionistData::IsModInstalled(modname)) { 
+			RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingEnabled")->value = 0;
+			return; 
+		}
 
 		RodList = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x000843, "ccbgssse001-fish.esm");
 		GlobalV = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Completionist_FishingRods");
@@ -64,6 +67,9 @@ namespace CPatch_FSH {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
 	}
 
 	//---------------------------------------------------
@@ -339,62 +345,131 @@ namespace CPatch_FSH {
 		if (a_event->menuName == RE::MapMenu::MENU_NAME) {
 
 			for (auto i = 0; i < A_FormArray.size(); i++) {
-				auto* a_marker = static_cast<RE::TESObjectREFR*>(A_FormArray[i]);
-
-				if (a_marker && CPatch_FSH_A::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-							A_BoolArray[i] = true;
-							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(A_FormArray[i]));
-						}
-					}
-				}
+				CHandler::ProcessMapMarker(A_FormArray[i], i, FishingMarkerType::kMapMa_A);
 			}
 
 			for (auto i = 0; i < C_FormArray.size(); i++) {
-				auto* a_marker = static_cast<RE::TESObjectREFR*>(C_FormArray[i]);
-
-				if (a_marker && CPatch_FSH_C::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-							C_BoolArray[i] = true;
-							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(C_FormArray[i]));
-						}
-					}
-				}
+				CHandler::ProcessMapMarker(C_FormArray[i], i, FishingMarkerType::kMapMa_C);
 			}
 
 			for (auto i = 0; i < L_FormArray.size(); i++) {
-				auto* a_marker = static_cast<RE::TESObjectREFR*>(L_FormArray[i]);
-
-				if (a_marker && CPatch_FSH_L::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-							L_BoolArray[i] = true;
-							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(L_FormArray[i]));
-						}
-					}
-				}
+				CHandler::ProcessMapMarker(L_FormArray[i], i, FishingMarkerType::kMapMa_L);
 			}
 
 			for (auto i = 0; i < S_FormArray.size(); i++) {
-				auto* a_marker = static_cast<RE::TESObjectREFR*>(S_FormArray[i]);
+				CHandler::ProcessMapMarker(S_FormArray[i], i, FishingMarkerType::kMapMa_S);
+			}
+			return EventResult::kContinue;
+		}
+		return EventResult::kContinue;
+	}
 
-				if (a_marker && CPatch_FSH_S::Data.HasForm(a_marker->GetFormID())) {
-					if (auto extraMapMarker = CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
-						if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
-							S_BoolArray[i] = true;
-							FoundItemData_NoShow.AddForm(static_cast<RE::TESObjectREFR*>(S_FormArray[i]));
-						}
-					}
+	//---------------------------------------------------
+//-- Framework Events ( Process Hooked Markers ) ----
+//---------------------------------------------------
+
+	void CHandler::ProcessHookedMarker(const char* nam)
+	{
+		for (auto i = 0; i < A_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, A_NameArray[i]) && !FoundItemData_NoShow.HasForm(A_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(A_FormArray[i], i, FishingMarkerType::kMapMa_A)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
 				}
 			}
 		}
-		A_EntriesFound = std::ranges::count(A_BoolArray, true);
-		C_EntriesFound = std::ranges::count(C_BoolArray, true);
-		L_EntriesFound = std::ranges::count(L_BoolArray, true);
-		S_EntriesFound = std::ranges::count(S_BoolArray, true);
-		return EventResult::kContinue;
+
+		for (auto i = 0; i < C_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, C_NameArray[i]) && !FoundItemData_NoShow.HasForm(C_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(C_FormArray[i], i, FishingMarkerType::kMapMa_C)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < L_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, L_NameArray[i]) && !FoundItemData_NoShow.HasForm(L_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(L_FormArray[i], i, FishingMarkerType::kMapMa_L)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < S_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, S_NameArray[i]) && !FoundItemData_NoShow.HasForm(S_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(S_FormArray[i], i, FishingMarkerType::kMapMa_S)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Process Map Marker ) -----
+	//---------------------------------------------------
+
+	bool CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, FishingMarkerType a_section) {
+
+		if (a_form && FoundItemData_NoShow.HasForm(a_form)) {
+			return false;
+		}
+
+		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+		auto valid = (a_marker && MarkerIsValid(a_marker));
+
+		if (!valid) { return false; }
+		FoundItemData_NoShow.AddForm(a_form);
+
+		switch (a_section) {
+
+		case FishingMarkerType::kMapMa_A:
+			A_BoolArray[a_pos] = true;
+			A_EntriesFound = std::ranges::count(A_BoolArray, true);
+			break;
+
+		case FishingMarkerType::kMapMa_C:
+			C_BoolArray[a_pos] = true;
+			C_EntriesFound = std::ranges::count(C_BoolArray, true);
+			break;
+
+		case FishingMarkerType::kMapMa_L:
+			L_BoolArray[a_pos] = true;
+			L_EntriesFound = std::ranges::count(L_BoolArray, true);
+			break;
+
+		case FishingMarkerType::kMapMa_S:
+			S_BoolArray[a_pos] = true;
+			S_EntriesFound = std::ranges::count(S_BoolArray, true);
+			break;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Marker Validity Check ) --
+	//---------------------------------------------------
+
+	bool CHandler::MarkerIsValid(RE::TESObjectREFR* a_marker) {
+
+		auto* mm = CompletionistData::GetMapMarkerInternal(a_marker);
+		if (!mm || !mm->mapData) { return false; }
+
+		return mm->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled();
 	}
 
 	//---------------------------------------------------
@@ -407,6 +482,7 @@ namespace CPatch_FSH {
 			if (!FoundItemData_NoShow.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_F::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kFish, CPatch_FSH_F::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData_NoShow.AddForm(a_baseID);
@@ -427,6 +503,7 @@ namespace CPatch_FSH {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_I::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_FSH_I::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -447,6 +524,13 @@ namespace CPatch_FSH {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FSH_B::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
+
+				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_FSH_B::Data.GetForm(a_eventID)); book && book->GetSpell()) {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
+				}
+				else {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_FSH_B::Data.GetForm(a_eventID)->GetName());
+				}				
 			}
 
 			FoundItemData.AddForm(a_baseID);

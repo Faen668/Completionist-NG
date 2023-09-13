@@ -6,7 +6,7 @@ constexpr auto CArraySize = 128;
 
 namespace CQuestMaster
 {
-	inline std::vector<std::tuple<CQuestData*, std::string, int32_t>> CQuestDataVec;
+	inline std::vector<std::tuple<CQuestData*, std::string, int32_t, std::string>> CQuestDataVec;
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -34,6 +34,7 @@ namespace CQuestMaster
 		  static std::vector<std::string>		qGetNameArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 		  static std::vector<std::string>		qGetTextArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 		  static std::vector<std::string>		qGetIdenArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
+		  static std::vector<std::string>		qGetKeysArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 		  static std::vector<bool>				qGetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 		  static std::vector<int32_t>			qGetRadiArrayByID(RE::StaticFunctionTag*, std::int32_t q_questID);
 

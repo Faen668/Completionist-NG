@@ -10,12 +10,13 @@ namespace CHCMHandler
 	constexpr int32_t CI_Header = -8;
 	constexpr int32_t FL_Header = -9;
 
-	inline constexpr std::array<std::tuple<const char*, const char*, int32_t>, 79> MainMCMPagesDefs =
+	inline constexpr std::array<std::tuple<const char*, const char*, int32_t>, 80> MainMCMPagesDefs =
 	{ {
 		{"$MCMPageSettings", "", -1},
 		{"$MCMPageSettings3", "", -1},
 		{"$MCMPageSettings2", "", -1},
 		{"$MCMPageSettings4", "", -1},
+		{"$MCMPageSettings5", "", -1},
 		{" ", "", -1},
 		{"$Header0", "", -1},
 		{"$MCMPageMain", "", 0},
@@ -97,7 +98,7 @@ namespace CHCMHandler
 		{"$MCMPageWyrmstooth", "Wyrmstooth.esp", 41},
 	} };
 
-	inline constexpr std::array < std::tuple < const char*, const char*, int32_t> , 106> MiscMCMPagesDefs =
+	inline constexpr std::array < std::tuple < const char*, const char*, int32_t> , 109> MiscMCMPagesDefs =
 	{ {
 		{"$Header9", "", -1},
 		{"$MCMPagePets", "", -1},
@@ -201,15 +202,18 @@ namespace CHCMHandler
 		{" ", "", MS_Header},
 		{"$Header8", "", MS_Header},
 		{"$MCMPageAdditionalHearthfireDolls", "AdditionalHearthfireDolls.esp", -1},
+		{"$MCMPageCloaksOfSkyrim", "Cloaks.esp", -1},
 		{"$MCMPageClockwork", "Clockwork.esp", -1},
 		{"$MCMPageFalskaar", "Falskaar.esm", -1},
 		{"$MCMPageHelgen", "Helgen Reborn.esp", -1},
 		{"$MCMPageInnSoaps", "Inn Soaps.esp", -1},
+		{"$MCMPageJaysusSwords", "JSwordsD.esm", -1},
 		{"$MCMPageInterestingNPCs", "3DNPC.esp", -1},
 		{"$MCMPageMoonStar", "MoonAndStar_MAS.esp", -1},
 		{"$MCMPageMoonpath", "moonpath.esp", -1},
 		{"$MCMPageOblivionArtifacts", "WZOblivionArtifacts.esp", -1},
 		{"$MCMPageProjectAHO", "Dwarfsphere.esp", -1},
+		{"$MCMPagRoyalArmory", "PrvtIRoyalArmory.esp", -1},
 		{"$MCMPageTeldrynSerious", "TSR_TeldrynSerious.esp", -1},
 		{"$MCMPageBrotherhood", "The Brotherhood of Old.esp", -1},
 		{"$MCMPageGrayCowl", "Gray Fox Cowl.esm", -1},
@@ -238,7 +242,7 @@ namespace CHCMHandler
 		static int32_t GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
 		static int32_t GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
 
-		static void BuildMCMPages();
+		static void BuildMCMPages(RE::StaticFunctionTag*);
 		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
 	};
 }

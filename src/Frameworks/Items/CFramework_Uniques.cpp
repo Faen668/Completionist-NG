@@ -187,6 +187,7 @@ namespace CFramework_Uniques {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -276,7 +277,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_A::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -299,7 +300,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_W::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -322,7 +323,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_I::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -345,7 +346,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_J::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -368,7 +369,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_L::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -391,7 +392,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_Q::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_Q::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_Q::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -411,7 +412,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_CCA::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -434,7 +435,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_CCI::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -457,7 +458,7 @@ namespace CFramework_Uniques {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(fmt::format("Collected: {:s}", CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName()));
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Uniques_CCW::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -758,6 +759,10 @@ namespace CFramework_Uniques {
 		CFramework_Uniques_CCA::Data.AddForm(0x00086B, "ccbgssse059-ba_dragonplate.esl");
 		CFramework_Uniques_CCA::Data.AddForm(0x000869, "ccbgssse059-ba_dragonplate.esl");
 		CFramework_Uniques_CCA::Data.AddForm(0x000867, "ccbgssse059-ba_dragonplate.esl");
+		CFramework_Uniques_CCA::Data.AddForm(0x000800, "ccbgssse056-ba_silver.esl");
+		CFramework_Uniques_CCA::Data.AddForm(0x000801, "ccbgssse056-ba_silver.esl");
+		CFramework_Uniques_CCA::Data.AddForm(0x000802, "ccbgssse056-ba_silver.esl");
+		CFramework_Uniques_CCA::Data.AddForm(0x000803, "ccbgssse056-ba_silver.esl");
 		CFramework_Uniques_CCA::Data.AddForm(0x000813, "ccpewsse002-armsofchaos.esl");
 		CFramework_Uniques_CCA::Data.AddForm(0x00080F, "ccpewsse002-armsofchaos.esl");
 		CFramework_Uniques_CCA::Data.AddForm(0x089EEF, "cceejsse005-cave.esm");

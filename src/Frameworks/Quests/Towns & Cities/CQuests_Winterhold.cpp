@@ -31,7 +31,7 @@ namespace CQFramework_Winterhold
 		{"Winterhold_Quest05", "WinterholdImpGetOutofJail", "WinterholdSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -48,7 +48,7 @@ namespace CQFramework_Winterhold
 				->initDrunkData(DrunkData)
 				->initRadiantData(RadiantData);
 
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 15));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 15, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

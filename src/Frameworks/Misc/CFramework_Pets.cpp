@@ -25,6 +25,11 @@ namespace CFramework_Pets {
 	0,
 	};
 
+	constexpr Serialization::FormArray WildHorses = {
+	0x00082c,0x00082d,0x00082e,0x00082f,0x000830,0x000831,0x000832
+	};
+
+	std::vector<std::pair<RE::TESForm*, RE::FormID>> WildHorsesMap{};
 	// clang-format on
 
 	//---------------------------------------------------
@@ -33,8 +38,52 @@ namespace CFramework_Pets {
 
 	void CHandler::InstallFramework() {
 
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(CHandler::GetSingleton()));
+
 		InjectAndCompileData();
 		InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Radiant Stage Set ) ------
+	//---------------------------------------------------
+
+	EventResult CHandler::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource)
+	{
+		if (!a_event || !a_event->stage || a_event-> stage != 10) {
+			return EventResult::kContinue;
+		}
+
+		const auto* equest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
+		if (!equest) {return EventResult::kContinue;}
+
+		for (auto& [form, questID] : WildHorsesMap) {
+
+			const auto* quest = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(questID, "ccbgssse034-mntuni.esl");
+
+			if (!quest || !form) {return EventResult::kContinue;}
+
+			if (quest && quest->GetFormID() == equest->GetFormID()) {
+
+				if (auto t_pos = std::ranges::find(Pets_WH_FormArray, form); t_pos != Pets_WH_FormArray.end()) {
+					auto b_pos = std::distance(Pets_WH_FormArray.begin(), t_pos);
+
+					if (!FoundItemData_NoShow.HasForm(Pets_WH_FormArray[b_pos]->GetFormID())) {
+						auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_WH_NameArray[b_pos]);
+						FrameworkAPI::SendNotification(msg, "NotifySpecial");
+						FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTamed, Pets_WH_NameArray[b_pos]);
+					}
+
+					FoundItemData_NoShow.AddForm(Pets_WH_FormArray[b_pos]);
+					Pets_WH_BoolArray[b_pos] = true;
+					Pets_WH_EntriesFound = std::ranges::count(Pets_WH_BoolArray, true);
+					return EventResult::kContinue;
+				}
+			}
+		}
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -49,6 +98,7 @@ namespace CFramework_Pets {
 			if (!FoundItemData_NoShow.HasForm(Pets_VP_FormArray[b_pos]->GetFormID())) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_VP_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, Pets_VP_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(Pets_VP_FormArray[b_pos]);
@@ -63,6 +113,7 @@ namespace CFramework_Pets {
 			if (!FoundItemData_NoShow.HasForm(Pets_PS_FormArray[b_pos]->GetFormID())) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_PS_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, Pets_PS_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(Pets_PS_FormArray[b_pos]);
@@ -77,6 +128,7 @@ namespace CFramework_Pets {
 			if (!FoundItemData_NoShow.HasForm(Pets_SS_FormArray[b_pos]->GetFormID())) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_SS_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, Pets_SS_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(Pets_SS_FormArray[b_pos]);
@@ -91,6 +143,7 @@ namespace CFramework_Pets {
 			if (!FoundItemData_NoShow.HasForm(Pets_MP_FormArray[b_pos]->GetFormID())) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Pets_MP_NameArray[b_pos]);
 				FrameworkAPI::SendNotification(msg, "NotifySpecial");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, Pets_MP_NameArray[b_pos]);
 			}
 
 			FoundItemData_NoShow.AddForm(Pets_MP_FormArray[b_pos]);
@@ -108,6 +161,7 @@ namespace CFramework_Pets {
 
 		auto PetsOfSkyrim_Installed = Serialization::CompletionistData::IsModInstalled("ccvsvsse002-pets.esl");
 		auto SaintSeducer_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse025-advdsgs.esm");
+		auto WildHorses_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse034-mntuni.esl");
 
 		auto Petcrab_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse010-petdwarvenarmoredmudcrab.esl");
 		auto PetWolf_Installed = Serialization::CompletionistData::IsModInstalled("ccbgssse036-petbwolf.esl");
@@ -161,8 +215,6 @@ namespace CFramework_Pets {
 		if (PetHund_Installed) {
 			CFramework_Pets_MP::Data.AddForm(0x000D64, "ccbgssse035-petnhound.esl");
 		}
-
-		CFramework_Pets_MP::Data.CompileFormArray(CFramework_Pets::Miscellaneous, "");
 		CFramework_Pets_MP::Data.Populate(Pets_MP_NameArray, Pets_MP_FormArray, Pets_MP_BoolArray, Pets_MP_TextArray, false);
 
 		Pets_MP_TextArray.clear();
@@ -184,6 +236,30 @@ namespace CFramework_Pets {
 
 		Pets_MP_EntriesTotal = Pets_MP_FormArray.size();
 		Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
+
+		if (WildHorses_Installed) {
+			CFramework_Pets_WH::Data.CompileFormArray(CFramework_Pets::WildHorses, "Completionist.esp");
+			CFramework_Pets_WH::Data.Populate(Pets_WH_NameArray, Pets_WH_FormArray, Pets_WH_BoolArray, Pets_WH_TextArray, true);
+			Pets_WH_TextArray.clear();
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses00{" + Pets_WH_NameArray[0] + "}{" + Pets_WH_NameArray[0] + "}"); //Black Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses01{" + Pets_WH_NameArray[1] + "}{" + Pets_WH_NameArray[1] + "}"); //Chestnut Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses02{" + Pets_WH_NameArray[2] + "}{" + Pets_WH_NameArray[2] + "}"); //Dapple Brown Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses03{" + Pets_WH_NameArray[3] + "}{" + Pets_WH_NameArray[3] + "}"); //Grey Spotted Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses04{" + Pets_WH_NameArray[4] + "}{" + Pets_WH_NameArray[4] + "}"); //Pale Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses05{" + Pets_WH_NameArray[5] + "}{" + Pets_WH_NameArray[5] + "}"); //Red Horse
+			Pets_WH_TextArray.push_back("$PetHighlightWildHorses06{" + Pets_WH_NameArray[6] + "}{" + Pets_WH_NameArray[6] + "}"); //White Spotted Horse
+
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[0], 0x000870));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[1], 0x00086D));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[2], 0x000875));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[3], 0x000871));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[4], 0x000872));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[5], 0x000873));
+			WildHorsesMap.push_back(std::make_pair(Pets_WH_FormArray[6], 0x000874));
+
+			Pets_WH_EntriesTotal = Pets_WH_FormArray.size();
+			Pets_WH_EntriesFound = std::ranges::count(Pets_WH_BoolArray, true);
+		}
 	}
 
 	void CHandler::InstallSearchTerms()
@@ -204,6 +280,11 @@ namespace CFramework_Pets {
 		}
 
 		for (auto& name : Pets_MP_NameArray)
+		{
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		}
+
+		for (auto& name : Pets_WH_NameArray)
 		{
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
@@ -239,6 +320,12 @@ namespace CFramework_Pets {
 			}
 		}
 
+		for (auto i = 0; i < Pets_WH_FormArray.size(); i++) {
+			if (FoundItemData_NoShow.HasForm(Pets_WH_FormArray[i]->GetFormID())) {
+				Pets_WH_BoolArray[i] = true;
+			}
+		}
+
 		Pets_VP_EntriesTotal = Pets_VP_FormArray.size();
 		Pets_VP_EntriesFound = std::ranges::count(Pets_VP_BoolArray, true);
 
@@ -250,5 +337,8 @@ namespace CFramework_Pets {
 
 		Pets_MP_EntriesTotal = Pets_MP_FormArray.size();
 		Pets_MP_EntriesFound = std::ranges::count(Pets_MP_BoolArray, true);
+
+		Pets_WH_EntriesTotal = Pets_WH_FormArray.size();
+		Pets_WH_EntriesFound = std::ranges::count(Pets_WH_BoolArray, true);
 	}
 }

@@ -17,6 +17,10 @@ namespace CFramework_Pets_MP {
 	inline Serialization::CompletionistData Data;
 }
 
+namespace CFramework_Pets_WH {
+	inline Serialization::CompletionistData Data;
+}
+
 namespace CFramework_Pets
 {
 	inline std::vector<std::string>		Pets_VP_NameArray;
@@ -47,19 +51,25 @@ namespace CFramework_Pets
 	inline std::int32_t					Pets_MP_EntriesTotal;
 	inline std::int32_t					Pets_MP_EntriesFound;
 
-	class CHandler {
+	inline std::vector<std::string>		Pets_WH_NameArray;
+	inline std::vector<std::string>		Pets_WH_TextArray;
+	inline std::vector<RE::TESForm*>	Pets_WH_FormArray;
+	inline std::vector<bool>			Pets_WH_BoolArray;
+	inline std::int32_t					Pets_WH_EntriesTotal;
+	inline std::int32_t					Pets_WH_EntriesFound;
 
-		using VM = RE::BSScript::Internal::VirtualMachine;
-		using StackID = RE::VMStackID;
-		using Severity = RE::BSScript::ErrorLogger::Severity;
+	using EventResult = RE::BSEventNotifyControl;
 
-	public:
+	class CHandler final :
+		public RE::BSTEventSink<RE::TESQuestStageEvent> 
+	{
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
+		EventResult			ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
 		static void			InstallFramework();
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
-
 		static void			Framework_UpdatePetOwnership(RE::StaticFunctionTag*, std::string a_name);
 	};
 }

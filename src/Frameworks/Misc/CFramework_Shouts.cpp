@@ -17,6 +17,7 @@ namespace CFramework_Shouts {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -77,6 +78,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Vanilla_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kShout, Vanilla_SH_FormArray[b_pos]->GetName());
 				}
 				
 				FoundItemData_NoShow.AddForm(Vanilla_W3_FormArray[b_pos]);
@@ -99,6 +101,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[b_pos]);
@@ -118,6 +121,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[b_pos]);
@@ -140,6 +144,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Thunderchild_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kShout, Thunderchild_SH_FormArray[b_pos]->GetName());
 				}
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W3_FormArray[b_pos]);
@@ -162,6 +167,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[b_pos]);
@@ -181,6 +187,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[b_pos]);
@@ -203,6 +210,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Miscellaneous_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kShout, Miscellaneous_SH_FormArray[b_pos]->GetName());
 				}
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W3_FormArray[b_pos]);
@@ -225,6 +233,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[b_pos]);
@@ -244,6 +253,7 @@ namespace CFramework_Shouts {
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
 				}
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[b_pos]);
@@ -450,6 +460,7 @@ namespace CFramework_Shouts {
 		std::string WYName = "Wyrmstooth.esp";
 		std::string THName = "Thunderchild - Epic Shout Package.esp";
 		std::string FTName = "ForcefulTongue.esp";
+		std::string SCName = "Stormcrown.esp";
 
 		CHandler::AddToArray(Section::kVanilla, 0x05FC77, "V_ShoutName00", "V_ShoutText00", SKName); //Animal Allegiance
 		CHandler::AddToArray(Section::kVanilla, 0x07097B, "V_ShoutName01", "V_ShoutText01", SKName); //Aura Whisper
@@ -518,6 +529,9 @@ namespace CFramework_Shouts {
 			CHandler::AddToArray(Section::kMiscellaneous, 0x30C92F, "MiscDataShout_WYR_Name", "MiscDataShout_WYR_Data", WYName);	//Phantom Form (Wyrmstooth)
 			CHandler::AddToArray(Section::kMiscellaneous, 0x000C26, "MiscDataShout_FFT_Name", "MiscDataShout_FFT_Data", FTName);	//Phantom Form (Forceful Tongue)
 		}
+
+		CHandler::AddToArray(Section::kMiscellaneous, 0x00082C, "MiscDataShout_SC1_Name", "MiscDataShout_SC1_Data", SCName);	//Lightning Breath (Stormcrown)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x000833, "MiscDataShout_SC2_Name", "MiscDataShout_SC2_Data", SCName);	//Poison Breath (Stormcrown)
 	}
 
 	//---------------------------------------------------
@@ -546,7 +560,7 @@ namespace CFramework_Shouts {
 			Vanilla_W2_FormArray.push_back(Word2);
 			Vanilla_W3_FormArray.push_back(Word3);
 
-			Vanilla_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Vanilla_SH_NameArray.push_back(Shout->GetName());
 			Vanilla_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_VS::Data.AddForm(Word1);
@@ -562,7 +576,7 @@ namespace CFramework_Shouts {
 			Thunderchild_W2_FormArray.push_back(Word2);
 			Thunderchild_W3_FormArray.push_back(Word3);
 
-			Thunderchild_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Thunderchild_SH_NameArray.push_back(Shout->GetName());
 			Thunderchild_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_TS::Data.AddForm(Word1);
@@ -578,7 +592,7 @@ namespace CFramework_Shouts {
 			Miscellaneous_W2_FormArray.push_back(Word2);
 			Miscellaneous_W3_FormArray.push_back(Word3);
 
-			Miscellaneous_SH_NameArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_names.c_str()));
+			Miscellaneous_SH_NameArray.push_back(Shout->GetName());
 			Miscellaneous_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
 
 			CFramework_Shouts_MS::Data.AddForm(Word1);

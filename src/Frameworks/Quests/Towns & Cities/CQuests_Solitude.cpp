@@ -54,7 +54,7 @@ namespace CQFramework_Solitude
 		{"Solitude_Quest22", "HaafingarImpGetOutofJail", "HaafingarSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -69,7 +69,7 @@ namespace CQFramework_Solitude
 				->initRadiantData(RadiantData)
 				->initStageData(StageData)
 				->initThaneData(ThaneData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 12));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 12, QuestData[i].unique_identifier));
 
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);

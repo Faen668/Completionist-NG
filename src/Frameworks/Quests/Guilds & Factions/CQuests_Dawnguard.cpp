@@ -27,7 +27,7 @@ namespace CQFramework_Dawnguard
 		/*08*/ {"Dawnguard_Quest08", CFlagEnum::kRadi, CCompEnum::kGlobl, "DLC1RH06"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -38,9 +38,9 @@ namespace CQFramework_Dawnguard
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&QuestArrays)
+				->initQuestData(&ArrayData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 24));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 24, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

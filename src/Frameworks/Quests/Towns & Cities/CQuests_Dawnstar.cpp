@@ -38,7 +38,7 @@ namespace CQFramework_Dawnstar
 		{"Dawnstar_Quest07", "PaleImpGetOutofJail", "PaleSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{&IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray};
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -54,7 +54,7 @@ namespace CQFramework_Dawnstar
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData)
 				->initDrunkData(DrunkData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 7));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 7, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

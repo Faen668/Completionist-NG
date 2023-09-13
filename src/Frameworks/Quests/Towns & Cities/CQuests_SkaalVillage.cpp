@@ -21,7 +21,7 @@ namespace CQFramework_SkaalVillage
 		{"SkaalVillage_Quest04", CStageEnum::kPast, 20, 0},
 	};
 
-	/*NA*/ CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -35,7 +35,7 @@ namespace CQFramework_SkaalVillage
 				->initQuestData(&ArrayData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 17));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 17, QuestData[i].unique_identifier));
 
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);

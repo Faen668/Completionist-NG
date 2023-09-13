@@ -13,7 +13,7 @@ namespace CQFramework_DB
 		/*06*/ {"Main_DB_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "DLC2MQ06"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -24,7 +24,7 @@ namespace CQFramework_DB
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()->initQuestData(&QuestArrays);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 3));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 3, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

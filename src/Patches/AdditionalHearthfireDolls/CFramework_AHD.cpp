@@ -33,6 +33,8 @@ namespace CPatch_AHD {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		PatchesInstalled += 1;
 	}
 
@@ -70,6 +72,7 @@ namespace CPatch_AHD {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_AHD_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_AHD_Items::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
