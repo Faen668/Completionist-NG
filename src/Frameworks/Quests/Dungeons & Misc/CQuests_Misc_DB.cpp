@@ -24,7 +24,7 @@ namespace CQFramework_Misc_DB
 	{"Misc_DB_Quest10", CFlagEnum::kSide,  CCompEnum::kStand, "DLC2BlackBook07Quest"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -35,9 +35,9 @@ namespace CQFramework_Misc_DB
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&QuestArrays)
+				->initQuestData(&ArrayData)
 				->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 31));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 31, QuestData[i].unique_identifier));
 
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);

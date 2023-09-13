@@ -56,6 +56,7 @@ namespace CFramework_Others {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -129,6 +130,7 @@ namespace CFramework_Others {
 		if (!FoundItemData_NoShow.HasForm(a_object->GetFormID())) {
 			auto msg = fmt::format("{:s}!"sv, CVariables::V_NotificationTextBarenziah);
 			FrameworkAPI::SendNotification(msg, "NotifySpecial");
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBarenziah, SB_NameArray[b_pos]);
 		}
 
 		FoundItemData_NoShow.AddForm(a_object->GetFormID());
@@ -148,6 +150,7 @@ namespace CFramework_Others {
 			if (!FoundItemData.HasForm(VC_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_VC::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Others_VC::Data.GetForm(VC_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(VC_baseID);
@@ -170,6 +173,7 @@ namespace CFramework_Others {
 			if (!FoundItemData.HasForm(VC_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_PC::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Others_PC::Data.GetForm(VC_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(VC_baseID);
@@ -192,6 +196,7 @@ namespace CFramework_Others {
 			if (!FoundItemData.HasForm(VC_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_VM::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Others_VM::Data.GetForm(VC_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(VC_baseID);
@@ -214,6 +219,7 @@ namespace CFramework_Others {
 			if (!FoundItemData.HasForm(VC_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Others_PM::Data.GetForm(VC_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CFramework_Others_PM::Data.GetForm(VC_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(VC_baseID);

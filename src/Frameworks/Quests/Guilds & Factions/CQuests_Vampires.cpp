@@ -26,7 +26,7 @@ namespace CQFramework_Vampires
 		/*09*/ {"Vampires_Quest09", CFlagEnum::kRadi, CCompEnum::kGlobl, "DLC1RV01"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -37,9 +37,9 @@ namespace CQFramework_Vampires
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&QuestArrays)
+				->initQuestData(&ArrayData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 26));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 26, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

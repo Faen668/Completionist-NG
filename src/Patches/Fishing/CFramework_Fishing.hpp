@@ -87,6 +87,14 @@ namespace CPatch_FSH
 	inline RE::TESGlobal* GlobalV;
 	inline RE::ControlMap* ContMap;
 
+	enum class FishingMarkerType : int32_t
+	{
+		kMapMa_A = 0,
+		kMapMa_C = 1,
+		kMapMa_L = 2,
+		kMapMa_S = 3,
+	};
+
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
@@ -107,6 +115,10 @@ namespace CPatch_FSH
 		  static void			SinkEvents();
 
 		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_section);
+
+		  static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, FishingMarkerType a_section);
+		  static void			ProcessHookedMarker(const char* nam);
+		  static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);
 
 		  static void			InjectAndCompileData();;
 		  static void			InstallSearchTerms();

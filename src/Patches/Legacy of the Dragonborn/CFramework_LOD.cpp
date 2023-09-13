@@ -84,11 +84,11 @@ namespace CPatch_LOD
 		{"LOTD_Exp_Quest14", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_SextantHandler"},
 	};
 
-	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray };
-	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray };
-	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray };
-	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray };
-	CArrayData ArrayData5{ &Quest5_IdenArray, &Quest5_NameArray, &Quest5_TextArray, &Quest5_BoolArray, &Quest5_RadiArray };
+	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray, &Quest1_KeysArray };
+	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray, &Quest2_KeysArray };
+	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray, &Quest3_KeysArray };
+	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray, &Quest4_KeysArray };
+	CArrayData ArrayData5{ &Quest5_IdenArray, &Quest5_NameArray, &Quest5_TextArray, &Quest5_BoolArray, &Quest5_RadiArray, &Quest5_KeysArray };
 
 	constexpr std::string_view modname = "LegacyoftheDragonborn.esm";
 
@@ -120,7 +120,7 @@ namespace CPatch_LOD
 				->override(Quest1_Data[i].kLocKey, fmt::format("{:s}{}"sv, Quest1_Data[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
 				->initQuestData(&ArrayData1)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 52));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 52, Quest1_Data[i].unique_identifier));
 		}
 
 		for (auto i = 0; i < std::extent_v<decltype(Quest2_Data)>; i++)
@@ -128,7 +128,7 @@ namespace CPatch_LOD
 			Quest2_Data[i].init()
 				->initQuestData(&ArrayData2)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 53));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 53, Quest2_Data[i].unique_identifier));
 		}
 
 		for (auto i = 0; i < std::extent_v<decltype(Quest3_Data)>; i++)
@@ -136,7 +136,7 @@ namespace CPatch_LOD
 			Quest3_Data[i].init()
 				->initQuestData(&ArrayData3)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 54));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 54, Quest3_Data[i].unique_identifier));
 		}
 
 		for (auto i = 0; i < std::extent_v<decltype(Quest4_Data)>; i++)
@@ -144,7 +144,7 @@ namespace CPatch_LOD
 			Quest4_Data[i].init()
 				->initQuestData(&ArrayData4)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 55));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 55, Quest4_Data[i].unique_identifier));
 		}
 
 		for (auto i = 0; i < std::extent_v<decltype(Quest5_Data)>; i++)
@@ -153,7 +153,7 @@ namespace CPatch_LOD
 				->override(Quest5_Data[i].kLocKey, fmt::format("{:s}{}"sv, Quest5_Data[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
 				->initQuestData(&ArrayData5)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest5_Data[i], Quest5_Data[i].GetName(), 56));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest5_Data[i], Quest5_Data[i].GetName(), 56, Quest5_Data[i].unique_identifier));
 		}
 
 		Quest1_BoolArray = std::vector<bool>(CArraySize, false);

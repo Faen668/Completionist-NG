@@ -30,6 +30,7 @@ namespace CPatch_SUD {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -67,6 +68,7 @@ namespace CPatch_SUD {
 		if (!FoundItemData.HasForm(a_eventID)) {
 			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SUD_Items::Data.GetForm(a_eventID)->GetName());
 			FrameworkAPI::SendNotification(msg, "NotifyItems");
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_SUD_Items::Data.GetForm(a_eventID)->GetName());
 		}
 
 		FoundItemData.AddForm(a_baseID);

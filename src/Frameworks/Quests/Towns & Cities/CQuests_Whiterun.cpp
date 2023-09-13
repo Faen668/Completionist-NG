@@ -42,7 +42,7 @@ namespace CQFramework_Whiterun
 		{"Whiterun_Quest17", "WhiterunImpGetOutofJail", "WhiterunSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -57,7 +57,7 @@ namespace CQFramework_Whiterun
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 13));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 13, QuestData[i].unique_identifier));
 
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);

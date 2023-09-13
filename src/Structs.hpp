@@ -66,6 +66,7 @@ const std::vector<std::pair<CRadiantEnum, std::string>> CRadiantEnum_Map{
 	{CRadiantEnum::kRadiant_VIG,	"Vigilant"},
 };
 
+//link - value - base - vari - stage - name - times requried
 struct CRadiantData
 {
 	const char* link;
@@ -172,6 +173,7 @@ struct CArrayData
 	std::vector<std::string>* highlights;
 	std::vector<bool>* bools;
 	std::vector<int32_t>* types;
+	std::vector<std::string>* keys;
 };
 
 //Format: CC*(Key), CFlagEnum(kType), CCompEnum(kType), CC*(editor_id)
@@ -218,12 +220,13 @@ struct CQuestData
 
 		SetLocalisedTranslationParameters();
 
+		array_data->keys->push_back(unique_identifier);
 		array_data->editorids->push_back(editor_id);
 		array_data->types->push_back(std::to_underlying(quest_type));
 		array_data->names->push_back(fmt::format("{:s}"sv, GetSearchTerm()));
 		array_data->highlights->push_back(fmt::format("{:s}"sv, GetSearchDescription()));
 
-		array_position = std::distance(array_data->names->begin(), (std::ranges::find(array_data->names->begin(), array_data->names->end(), fmt::format("{:s}"sv, GetSearchTerm()))));
+		array_position = std::distance(array_data->keys->begin(), (std::ranges::find(array_data->keys->begin(), array_data->keys->end(), fmt::format("{:s}"sv, unique_identifier))));
 		return this;
 	};
 
@@ -447,9 +450,10 @@ struct CQuestData
 	
 	RE::TESQuest* GetradiantQuest() {
 		if (radiant_data) {
-			auto* q1 = RE::TESForm::LookupByID<RE::TESQuest>(radiant_data->baseID);
-			auto* q2 = RE::TESForm::LookupByID<RE::TESQuest>(radiant_data->variID);
-			return q1 ? q1 : q2 ? q2 : nullptr;
+			auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID);
+			auto* q2 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->variID);
+			auto* q3 = RE::TESQuest::LookupByEditorID<RE::TESQuest>(editor_id);
+			return q1 ? q1 : q2 ? q2 : q3 ? q3 : nullptr;
 		}
 		return nullptr;
 	}
@@ -476,6 +480,7 @@ struct CQuestData
 		case kRadiant_THG: radiant_data->times_required = CVariables::V_Radiant_ThievesGuildVal; break;
 		case kRadiant_VIG: radiant_data->times_required = CVariables::V_Radiant_VigilantVal; break;
 		case kRadiant_LEG: radiant_data->times_required = CVariables::V_Radiant_LegacyVal; break;
+		case kRadiant_Fsh: radiant_data->times_required = CVariables::V_Radiant_FishingVal; break;
 		default: radiant_data->times_required = 1;
 		}
 	}

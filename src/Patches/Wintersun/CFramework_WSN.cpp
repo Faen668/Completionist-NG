@@ -40,6 +40,9 @@ namespace CPatch_WSN {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
 		PatchesInstalled += 1;
 	}
 
@@ -120,6 +123,12 @@ namespace CPatch_WSN {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_WSN_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_WSN_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
+				}
+				else {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_WSN_Books::Data.GetForm(a_eventID)->GetName());
+				}
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -143,6 +152,7 @@ namespace CPatch_WSN {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_WSN_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_WSN_Items::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -170,15 +180,32 @@ namespace CPatch_WSN {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
-		if (a_marker) {
+		if (a_marker && !FoundItemData_NoShow.HasForm(a_form)) {
 			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 					MapMa_BoolArray[a_pos] = true;
-					FoundItemData_NoShow.AddForm(a_marker);
+					FoundItemData_NoShow.AddForm(a_form);
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
 				}
 			}
 		}
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Process Hooked Markers ) ----
+	//---------------------------------------------------
+
+	void CHandler::ProcessHookedMarker(const char* nam)
+	{
+		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_FormArray[i])) {
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				return;
+			}
+		}
 	}
 
 	//---------------------------------------------------

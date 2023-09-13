@@ -141,8 +141,8 @@ namespace CQFramework_Misc_SK
 	};
 
 	CArrayData QuestArrays[]{
-		{&IdenArray_S, &NameArray_S, &TextArray_S, &BoolArray_S, &RadiArray_S },
-		{&IdenArray_R, &NameArray_R, &TextArray_R, &BoolArray_R, &RadiArray_R },
+		{&IdenArray_S, &NameArray_S, &TextArray_S, &BoolArray_S, &RadiArray_S, &KeysArray_S },
+		{&IdenArray_R, &NameArray_R, &TextArray_R, &BoolArray_R, &RadiArray_R, &KeysArray_R },
 	};
 
 	//---------------------------------------------------
@@ -156,7 +156,7 @@ namespace CQFramework_Misc_SK
 			QuestData_S[i].init()
 				->initQuestData(&QuestArrays[0])
 				->initStageData(StageData_S);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_S[i], QuestData_S[i].GetName(), 28));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_S[i], QuestData_S[i].GetName(), 28, QuestData_S[i].unique_identifier));
 		}
 
 		for (auto i = 0; i < std::extent_v<decltype(QuestData_R)>; i++)
@@ -165,7 +165,7 @@ namespace CQFramework_Misc_SK
 				->initQuestData(&QuestArrays[1])
 				->initStageData(StageData_R)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_R[i], QuestData_R[i].GetName(), 29));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_R[i], QuestData_R[i].GetName(), 29, QuestData_R[i].unique_identifier));
 		}
 
 		BoolArray_S = std::vector<bool>(CArraySize, false);

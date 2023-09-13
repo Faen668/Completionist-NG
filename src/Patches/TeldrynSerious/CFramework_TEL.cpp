@@ -20,7 +20,7 @@ namespace CPatch_TEL
 		{"TeldrynSerious_Quest00", CStageEnum::kDone, 30, 0},
 	};
 
-	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray, &Quest_KeysArray };
 
 	// clang-format off
 
@@ -53,6 +53,9 @@ namespace CPatch_TEL
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
 		PatchesInstalled += 1;
 	}
 
@@ -67,7 +70,7 @@ namespace CPatch_TEL
 			QuestData[i].init()
 				->initQuestData(&ArrayData)
 				->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 38));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 38, QuestData[i].unique_identifier));
 		}
 		Quest_BoolArray = std::vector<bool>(CArraySize, false);
 	};
@@ -149,6 +152,12 @@ namespace CPatch_TEL
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_TEL_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_TEL_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
+				}
+				else {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_TEL_Books::Data.GetForm(a_eventID)->GetName());
+				}
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -172,6 +181,7 @@ namespace CPatch_TEL
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_TEL_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_TEL_Items::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -199,15 +209,32 @@ namespace CPatch_TEL
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
-		if (a_marker) {
+		if (a_marker && !FoundItemData_NoShow.HasForm(a_form)) {
 			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 					MapMa_BoolArray[a_pos] = true;
-					FoundItemData_NoShow.AddForm(a_marker);
+					FoundItemData_NoShow.AddForm(a_form);
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
 				}
 			}
 		}
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Process Hooked Markers ) ----
+	//---------------------------------------------------
+
+	void CHandler::ProcessHookedMarker(const char* nam)
+	{
+		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_FormArray[i])) {
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				return;
+			}
+		}
 	}
 
 	//---------------------------------------------------

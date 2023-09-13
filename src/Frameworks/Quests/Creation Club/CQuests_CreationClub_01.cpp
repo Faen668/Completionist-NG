@@ -3,10 +3,10 @@
 
 namespace CQFramework_CC1 
 {
-	CStageData StageData[]{
-		{"CC01_Quest21", CStageEnum::kDone, 200 , 0 },
-		{"CC01_Quest22", CStageEnum::kDone, 200 , 0 },
-		{"CC01_Quest23", CStageEnum::kDone, 200 , 0 },
+	CRadiantData RadiantData[]{
+		{"CC01_Quest21",  CRadiantEnum::kRadiant_Fsh, 0x000C2F,0,200, "Completionist_Fishing_Rad2"},
+		{"CC01_Quest22",  CRadiantEnum::kRadiant_Fsh, 0x000C8C,0,200, "Completionist_Fishing_Rad3" },
+		{"CC01_Quest23",  CRadiantEnum::kRadiant_Fsh, 0x000B98,0,200, "Completionist_Fishing_Rad1" },
 	};
 
 	CQuestData QuestData[] {
@@ -31,12 +31,12 @@ namespace CQFramework_CC1
 		{"CC01_Quest18", CFlagEnum::kSide, CCompEnum::kStand, "ccBGSSSE001_Misc_Windhelm"},
 		{"CC01_Quest19", CFlagEnum::kSide, CCompEnum::kStand, "ccBGSSSE001_Misc_WhiterunPartTwo"},
 		{"CC01_Quest20", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE001_Crab_MQ4"},
-		{"CC01_Quest21", CFlagEnum::kRadi, CCompEnum::kStage, "ccBGSSSE001_Radiant_2"},
-		{"CC01_Quest22", CFlagEnum::kRadi, CCompEnum::kStage, "ccBGSSSE001_Radiant_3"},
-		{"CC01_Quest23", CFlagEnum::kRadi, CCompEnum::kStage, "ccBGSSSE001_Radiant_1"},
+		{"CC01_Quest21", CFlagEnum::kRadi, CCompEnum::kGlobl, "ccBGSSSE001_Radiant_2"},
+		{"CC01_Quest22", CFlagEnum::kRadi, CCompEnum::kGlobl, "ccBGSSSE001_Radiant_3"},
+		{"CC01_Quest23", CFlagEnum::kRadi, CCompEnum::kGlobl, "ccBGSSSE001_Radiant_1"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -46,8 +46,8 @@ namespace CQFramework_CC1
 	{		
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()->initQuestData(&ArrayData)->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 4));
+			QuestData[i].init()->initQuestData(&QuestArrays)->initRadiantData(RadiantData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 4, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

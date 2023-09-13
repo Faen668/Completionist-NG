@@ -297,6 +297,7 @@ namespace CFramework_Books {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -380,6 +381,8 @@ namespace CFramework_Books {
 		FoundItemData.AddForm(a_formID);
 
 		if (a_section == "CFramework_Books_AG") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_AG_FormArray, a_base);
 			auto b_pos = std::distance(Books_AG_FormArray.begin(), t_pos);
 
@@ -389,6 +392,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Books_HS") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_HS_FormArray, a_base);
 			auto b_pos = std::distance(Books_HS_FormArray.begin(), t_pos);
 
@@ -398,6 +403,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Books_TY") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_TY_FormArray, a_base);
 			auto b_pos = std::distance(Books_TY_FormArray.begin(), t_pos);
 
@@ -407,6 +414,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Skill_SK") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Skill_SK_FormArray, a_base);
 			auto b_pos = std::distance(Skill_SK_FormArray.begin(), t_pos);
 
@@ -416,6 +425,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_SK") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Tomes_SK_A_FormArray, a_base);
 			if (t_pos != Tomes_SK_A_FormArray.end()) {
 				auto b_pos = std::distance(Tomes_SK_A_FormArray.begin(), t_pos);
@@ -458,6 +469,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Books_DG") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_DG_FormArray, a_base);
 			auto b_pos = std::distance(Books_DG_FormArray.begin(), t_pos);
 
@@ -467,6 +480,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_DG") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Tomes_DG_A_FormArray, a_base);
 			if (t_pos != Tomes_DG_A_FormArray.end()) {
 				auto b_pos = std::distance(Tomes_DG_A_FormArray.begin(), t_pos);
@@ -509,6 +524,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Books_DB") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_DB_FormArray, a_base);
 			auto b_pos = std::distance(Books_DB_FormArray.begin(), t_pos);
 
@@ -518,6 +535,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_DB") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Tomes_DB_A_FormArray, a_base);
 			if (t_pos != Tomes_DB_A_FormArray.end()) {
 				auto b_pos = std::distance(Tomes_DB_A_FormArray.begin(), t_pos);
@@ -560,6 +579,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_TMaps_SK") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(TMaps_SK_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_SK_FormArray.begin(), t_pos);
 
@@ -569,6 +590,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_TMaps_NT") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(TMaps_NT_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_NT_FormArray.begin(), t_pos);
 
@@ -578,6 +601,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_TMaps_TH") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(TMaps_TH_FormArray, a_base);
 			auto b_pos = std::distance(TMaps_TH_FormArray.begin(), t_pos);
 
@@ -587,6 +612,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Books_CC") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Books_CC_FormArray, a_base);
 			auto b_pos = std::distance(Books_CC_FormArray.begin(), t_pos);
 
@@ -596,6 +623,8 @@ namespace CFramework_Books {
 		}
 
 		if (a_section == "CFramework_Tomes_CC") {
+			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, a_base->GetName());
+
 			auto t_pos = std::ranges::find(Tomes_CC_A_FormArray, a_base);
 			if (t_pos != Tomes_CC_A_FormArray.end()) {
 				auto b_pos = std::distance(Tomes_CC_A_FormArray.begin(), t_pos);

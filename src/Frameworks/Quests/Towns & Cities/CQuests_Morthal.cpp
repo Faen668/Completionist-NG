@@ -32,7 +32,7 @@ namespace CQFramework_Morthal
 		{"Morthal_Quest08", "HjaalmarchImpGetOutofJail", "HjaalmarchSonsGetOutofJail"},
 	};
 
-	/*NA*/ CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -47,7 +47,7 @@ namespace CQFramework_Morthal
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 10));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 10, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

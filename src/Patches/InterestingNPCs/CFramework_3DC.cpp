@@ -87,10 +87,10 @@ namespace CPatch_3DC
 		/*24*/ {"3DNPC_Misc_Quest24", CFlagEnum::kSide, CCompEnum::kStand, "Terynnequest"},
 	};
 
-	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray };
-	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray };
-	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray };
-	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray };
+	CArrayData ArrayData1{ &Quest1_IdenArray, &Quest1_NameArray, &Quest1_TextArray, &Quest1_BoolArray, &Quest1_RadiArray, &Quest1_KeysArray };
+	CArrayData ArrayData2{ &Quest2_IdenArray, &Quest2_NameArray, &Quest2_TextArray, &Quest2_BoolArray, &Quest2_RadiArray, &Quest2_KeysArray };
+	CArrayData ArrayData3{ &Quest3_IdenArray, &Quest3_NameArray, &Quest3_TextArray, &Quest3_BoolArray, &Quest3_RadiArray, &Quest3_KeysArray };
+	CArrayData ArrayData4{ &Quest4_IdenArray, &Quest4_NameArray, &Quest4_TextArray, &Quest4_BoolArray, &Quest4_RadiArray, &Quest4_KeysArray };
 
 	// clang-format off
 
@@ -132,6 +132,9 @@ namespace CPatch_3DC
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
 		PatchesInstalled += 1;
 	}
 
@@ -145,7 +148,7 @@ namespace CPatch_3DC
 		{
 			Quest1_Data[i].init()
 				->initQuestData(&ArrayData1);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 44));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest1_Data[i], Quest1_Data[i].GetName(), 44, Quest1_Data[i].unique_identifier));
 		}
 		Quest1_BoolArray = std::vector<bool>(CArraySize, false);
 
@@ -153,7 +156,7 @@ namespace CPatch_3DC
 		{
 			Quest2_Data[i].init()
 				->initQuestData(&ArrayData2);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 45));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest2_Data[i], Quest2_Data[i].GetName(), 45, Quest2_Data[i].unique_identifier));
 		}
 		Quest2_BoolArray = std::vector<bool>(CArraySize, false);
 
@@ -161,7 +164,7 @@ namespace CPatch_3DC
 		{
 			Quest3_Data[i].init()
 				->initQuestData(&ArrayData3);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 46));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest3_Data[i], Quest3_Data[i].GetName(), 46, Quest3_Data[i].unique_identifier));
 		}
 		Quest3_BoolArray = std::vector<bool>(CArraySize, false);
 
@@ -169,7 +172,7 @@ namespace CPatch_3DC
 		{
 			Quest4_Data[i].init()
 				->initQuestData(&ArrayData4);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 47));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&Quest4_Data[i], Quest4_Data[i].GetName(), 47, Quest4_Data[i].unique_identifier));
 		}
 		Quest4_BoolArray = std::vector<bool>(CArraySize, false);
 	}
@@ -251,6 +254,12 @@ namespace CPatch_3DC
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_3DC_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_3DC_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
+				}
+				else {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_3DC_Books::Data.GetForm(a_eventID)->GetName());
+				}
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -274,6 +283,7 @@ namespace CPatch_3DC
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_3DC_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_3DC_Items::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -300,16 +310,32 @@ namespace CPatch_3DC
 	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos) {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-
-		if (a_marker) {
+		if (a_marker && !FoundItemData_NoShow.HasForm(a_form)) {
 			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
 				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 					MapMa_BoolArray[a_pos] = true;
-					FoundItemData_NoShow.AddForm(a_marker);
+					FoundItemData_NoShow.AddForm(a_form);
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
 				}
 			}
 		}
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Process Hooked Markers ) ----
+	//---------------------------------------------------
+
+	void CHandler::ProcessHookedMarker(const char* nam)
+	{
+		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_FormArray[i])) {
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				return;
+			}
+		}
 	}
 
 	//---------------------------------------------------

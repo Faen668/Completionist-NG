@@ -57,6 +57,7 @@ namespace CPatch_FOS {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
@@ -108,6 +109,7 @@ namespace CPatch_FOS {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FOS_ItmL1::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_FOS_ItmL1::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -133,6 +135,7 @@ namespace CPatch_FOS {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FOS_ItmL2::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_FOS_ItmL2::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -158,6 +161,7 @@ namespace CPatch_FOS {
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_FOS_ItmL3::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyItems");
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_FOS_ItmL3::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);

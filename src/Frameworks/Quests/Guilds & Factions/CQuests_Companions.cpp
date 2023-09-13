@@ -45,7 +45,7 @@ namespace CQFramework_Companions
 		/*20*/ {"Companions_Quest20", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR05"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	CompanionsQuestData GlobalSetter{ 0x0E3163, "Skyrim.esm", "Completionist_Companions_CR13Farkas", "Completionist_Companions_CR13Vilkas" };
 
@@ -76,9 +76,9 @@ namespace CQFramework_Companions
 			}
 
 			QuestData[i].init()
-				->initQuestData(&QuestArrays)
+				->initQuestData(&ArrayData)
 				->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 22));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 22, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

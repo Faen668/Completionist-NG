@@ -15,7 +15,7 @@ namespace CHCMHandler
 
 		auto ui = RE::UI::GetSingleton();
 		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(MCMAPI::GetSingleton()));
-		BuildMCMPages();
+		BuildMCMPages(nullptr);
 	};
 
 	//---------------------------------------------------
@@ -25,6 +25,7 @@ namespace CHCMHandler
 	auto MCMAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 	{
 		a_vm->RegisterFunction("GetMCMPages", "Completionist_Native", GetMCMPages);
+		a_vm->RegisterFunction("BuildMCMPages", "Completionist_Native", BuildMCMPages);
 		a_vm->RegisterFunction("GetSkyUIMCMPositionalIndex", "Completionist_Native", GetSkyUIMCMPositionalIndex);
 		a_vm->RegisterFunction("GetMCMPageIdentifierFromName", "Completionist_Native", GetMCMPageIdentifierFromName);
 		return true;
@@ -41,7 +42,6 @@ namespace CHCMHandler
 
 		auto namearrray = ScriptObject::GetArray(ConfigBase, "_modNames");
 		if (!namearrray) { return -1; }
-
 
 		std::int32_t Idx{};
 		for (auto& name : *namearrray)
@@ -74,7 +74,7 @@ namespace CHCMHandler
 	EventResult	MCMAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 		
 		if (a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) { 
-			BuildMCMPages();
+			BuildMCMPages(nullptr);
 		}
 
 		return EventResult::kContinue;
@@ -84,7 +84,7 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	void MCMAPI::BuildMCMPages() {
+	void MCMAPI::BuildMCMPages(RE::StaticFunctionTag*) {
 
 		using namespace CFramework_Master;
 
@@ -95,12 +95,12 @@ namespace CHCMHandler
 		auto cc2 = CQFramework_CC2::NameArray.size() > 0;
 		auto cc3 = CQFramework_CC3::NameArray.size() > 0;
 		
-		auto ccB = CFramework_Master::FrameworkAPI::CCBooksInstalled(nullptr);
-		auto ccI = CFramework_Master::FrameworkAPI::CCItemsInstalled(nullptr);
-		auto ccL = CFramework_Master::FrameworkAPI::CCLocationsInstalled(nullptr);
+		auto ccB = CFramework_Master::FrameworkAPI::CCBooksInstalled();
+		auto ccI = CFramework_Master::FrameworkAPI::CCItemsInstalled();
+		auto ccL = CFramework_Master::FrameworkAPI::CCLocationsInstalled();
 
 		auto ms0 = CFramework_Master::PatchesInstalled > 0;
-		auto ms1 = CFramework_Master::FrameworkAPI::ShouldDisplayTomeHeader(nullptr);
+		auto ms1 = CFramework_Master::FrameworkAPI::ShouldDisplayTomeHeader();
 		auto ms2 = CVariables::V_FishingSpotMarkers;
 
 		for (auto& [page, mod, id] : MainMCMPagesDefs) {

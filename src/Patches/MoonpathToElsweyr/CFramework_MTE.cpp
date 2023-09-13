@@ -20,7 +20,7 @@ namespace CPatch_MTE
 		{"Moonpath_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "Anvil_armorquest"},
 	};
 
-	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray };
+	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray, &Quest_KeysArray };
 
 	// clang-format off
 
@@ -48,6 +48,8 @@ namespace CPatch_MTE
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		PatchesInstalled += 1;
 	}
 
@@ -64,7 +66,7 @@ namespace CPatch_MTE
 			}
 
 			QuestData[i].init()->initQuestData(&ArrayData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 35));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 35, QuestData[i].unique_identifier));
 		}
 		Quest_BoolArray = std::vector<bool>(CArraySize, false);
 	};
@@ -140,6 +142,12 @@ namespace CPatch_MTE
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_MTE_Books::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_MTE_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
+				}
+				else {
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_MTE_Books::Data.GetForm(a_eventID)->GetName());
+				}
 			}
 
 			FoundItemData.AddForm(a_baseID);
@@ -163,6 +171,7 @@ namespace CPatch_MTE
 			if (!FoundItemData.HasForm(a_eventID)) {
 				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_MTE_Items::Data.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, a_variable);
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_MTE_Items::Data.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);

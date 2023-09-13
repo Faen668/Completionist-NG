@@ -27,7 +27,7 @@ namespace CQFramework_SK
 		/*20*/ {"MSQ_Quest20", CFlagEnum::kMain, CCompEnum::kStand, "MQ305"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -37,8 +37,8 @@ namespace CQFramework_SK
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()->initQuestData(&QuestArrays);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 0));
+			QuestData[i].init()->initQuestData(&ArrayData);
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 0, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

@@ -41,6 +41,9 @@
 #include "Patches/Cheesemod/CFramework_Cheese.hpp"
 #include "Patches/Requiem/CFramework_REQ.hpp"
 #include "Patches/InnSoaps/CFramework_Inn.hpp"
+#include "Patches/Jaysus Swords/CFramework_Jay.hpp"
+#include "Patches/Royal Armory/CFramework_RAR.hpp"
+#include "Patches/Cloaks Of Skyrim/CFramework_Cloaks.hpp"
 
 namespace ArrayHolder {
 	using namespace Serialization;
@@ -258,6 +261,12 @@ namespace ArrayHolder {
 		kPatch_REQ_W = 335, // Requiem (Weapons)
 
 		kPatch_INN = 336, // Inn Soaps
+		kPatch_JAY = 337, // Jaysus Swords
+		kPatch_RAR = 338, // Royal Armory
+
+		kFramework_WHO = 339,	// Pets (Wild Horses)
+		kPatch_Cloaks = 340,	// Cloaks of Skyrim
+		kPatch_CloaksDP = 341,	// Cloaks of Skyrim (Dragon Priests)
 
 		kTotal,
 	};
@@ -476,7 +485,6 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_T3I>(&CFramework_Books::Tomes_CC_I_NameArray, &CFramework_Books::Tomes_CC_I_TextArray, &CFramework_Books::Tomes_CC_I_BoolArray, &CFramework_Books::Tomes_CC_I_FormArray, &CFramework_Books::Tomes_CC_I_EntriesFound, &CFramework_Books::Tomes_CC_I_EntriesTotal, &CFramework_Tomes_CC::Data);
 		AttemptToAdd<FrameworkID::kFramework_T3R>(&CFramework_Books::Tomes_CC_R_NameArray, &CFramework_Books::Tomes_CC_R_TextArray, &CFramework_Books::Tomes_CC_R_BoolArray, &CFramework_Books::Tomes_CC_R_FormArray, &CFramework_Books::Tomes_CC_R_EntriesFound, &CFramework_Books::Tomes_CC_R_EntriesTotal, &CFramework_Tomes_CC::Data);
 
-
 		//Frameworks - Misc (Locations) (Start) -------------
 		AttemptToAdd<FrameworkID::kFramework_MAG>(&CFramework_MapMa::MapMa_AG_NameArray, &CFramework_MapMa::MapMa_AG_TextArray, &CFramework_MapMa::MapMa_AG_BoolArray, &CFramework_MapMa::MapMa_AG_FormArray, &CFramework_MapMa::MapMa_AG_EntriesFound, &CFramework_MapMa::MapMa_AG_EntriesTotal, &CFramework_MapMa_AG::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_MHR>(&CFramework_MapMa::MapMa_HR_NameArray, &CFramework_MapMa::MapMa_HR_TextArray, &CFramework_MapMa::MapMa_HR_BoolArray, &CFramework_MapMa::MapMa_HR_FormArray, &CFramework_MapMa::MapMa_HR_EntriesFound, &CFramework_MapMa::MapMa_HR_EntriesTotal, &CFramework_MapMa_HR::Data, true);
@@ -502,6 +510,7 @@ namespace ArrayHolder {
 		AttemptToAdd<FrameworkID::kFramework_POS>(&CFramework_Pets::Pets_PS_NameArray, &CFramework_Pets::Pets_PS_TextArray, &CFramework_Pets::Pets_PS_BoolArray, &CFramework_Pets::Pets_PS_FormArray, &CFramework_Pets::Pets_PS_EntriesFound, &CFramework_Pets::Pets_PS_EntriesTotal, &CFramework_Pets_PS::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_SAS>(&CFramework_Pets::Pets_SS_NameArray, &CFramework_Pets::Pets_SS_TextArray, &CFramework_Pets::Pets_SS_BoolArray, &CFramework_Pets::Pets_SS_FormArray, &CFramework_Pets::Pets_SS_EntriesFound, &CFramework_Pets::Pets_SS_EntriesTotal, &CFramework_Pets_SS::Data, true);
 		AttemptToAdd<FrameworkID::kFramework_MSC>(&CFramework_Pets::Pets_MP_NameArray, &CFramework_Pets::Pets_MP_TextArray, &CFramework_Pets::Pets_MP_BoolArray, &CFramework_Pets::Pets_MP_FormArray, &CFramework_Pets::Pets_MP_EntriesFound, &CFramework_Pets::Pets_MP_EntriesTotal, &CFramework_Pets_MP::Data, true);
+		AttemptToAdd<FrameworkID::kFramework_WHO>(&CFramework_Pets::Pets_WH_NameArray, &CFramework_Pets::Pets_WH_TextArray, &CFramework_Pets::Pets_WH_BoolArray, &CFramework_Pets::Pets_WH_FormArray, &CFramework_Pets::Pets_WH_EntriesFound, &CFramework_Pets::Pets_WH_EntriesTotal, &CFramework_Pets_WH::Data, true);
 
 		//Frameworks - Misc (Player Homes) (Start) ----------
 		AttemptToAdd<FrameworkID::kFramework_VPH>(&CFramework_PlayerHomes::VH_NameArray, &CFramework_PlayerHomes::VH_TextArray, &CFramework_PlayerHomes::VH_BoolArray, &CFramework_PlayerHomes::VH_FormArray, &CFramework_PlayerHomes::VH_EntriesFound, &CFramework_PlayerHomes::VH_EntriesTotal, &CFramework_PlayerHomes_VH::Data, true);
@@ -524,6 +533,12 @@ namespace ArrayHolder {
 
 		//Patches - Inn Soaps (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_INN>(&CPatch_INN::Items_NameArray, &CPatch_INN::Items_TextArray, &CPatch_INN::Items_BoolArray, &CPatch_INN::Items_FormArray, &CPatch_INN::Items_EntriesFound, &CPatch_INN::Items_EntriesTotal, &CPatch_Inn_Items::Data);
+		
+		//Patches - Jaysus Swords (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_JAY>(&CPatch_JAY::Items_NameArray, &CPatch_JAY::Items_TextArray, &CPatch_JAY::Items_BoolArray, &CPatch_JAY::Items_FormArray, &CPatch_JAY::Items_EntriesFound, &CPatch_JAY::Items_EntriesTotal, &CPatch_Jay_Items::Data);
+
+		//Patches - Royal Armory (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_RAR>(&CPatch_RAR::Items_NameArray, &CPatch_RAR::Items_TextArray, &CPatch_RAR::Items_BoolArray, &CPatch_RAR::Items_FormArray, &CPatch_RAR::Items_EntriesFound, &CPatch_RAR::Items_EntriesTotal, &CPatch_Rar_Items::Data);
 
 		//Patches - The Brotherhood of Old (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_BOO_I>(&CPatch_BOO::Items_NameArray, &CPatch_BOO::Items_TextArray, &CPatch_BOO::Items_BoolArray, &CPatch_BOO::Items_FormArray, &CPatch_BOO::Items_EntriesFound, &CPatch_BOO::Items_EntriesTotal, &CPatch_BOO_Items::Data);
@@ -673,7 +688,11 @@ namespace ArrayHolder {
 
 		//Patches - Skyrim Unique Drinks (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_SUD_I>(&CPatch_SUD::Items_NameArray, &CPatch_SUD::Items_TextArray, &CPatch_SUD::Items_BoolArray, &CPatch_SUD::Items_FormArray, &CPatch_SUD::Items_EntriesFound, &CPatch_SUD::Items_EntriesTotal, &CPatch_SUD_Items::Data);
-		
+
+		//Patches - Cloaks of Skyrim (Start) ---------------
+		AttemptToAdd<FrameworkID::kPatch_Cloaks>(&CPatch_Cloaks::Items_NameArray, &CPatch_Cloaks::Items_TextArray, &CPatch_Cloaks::Items_BoolArray, &CPatch_Cloaks::Items_FormArray, &CPatch_Cloaks::Items_EntriesFound, &CPatch_Cloaks::Items_EntriesTotal, &CPatch_Cloaks_Items::Data);
+		AttemptToAdd<FrameworkID::kPatch_CloaksDP>(&CPatch_Cloaks::ItemsDP_NameArray, &CPatch_Cloaks::ItemsDP_TextArray, &CPatch_Cloaks::ItemsDP_BoolArray, &CPatch_Cloaks::ItemsDP_FormArray, &CPatch_Cloaks::ItemsDP_EntriesFound, &CPatch_Cloaks::ItemsDP_EntriesTotal, &CPatch_CloaksDP_Items::Data);
+
 		//Patches - Cheese Mod (Start) ---------------
 		AttemptToAdd<FrameworkID::kPatch_CHM_1>(&CPatch_CHM::ItmL1_NameArray, &CPatch_CHM::ItmL1_TextArray, &CPatch_CHM::ItmL1_BoolArray, &CPatch_CHM::ItmL1_FormArray, &CPatch_CHM::ItmL1_EntriesFound, &CPatch_CHM::ItmL1_EntriesTotal, &CPatch_CHM_ItmL1::Data);
 		AttemptToAdd<FrameworkID::kPatch_CHM_2>(&CPatch_CHM::ItmL2_NameArray, &CPatch_CHM::ItmL2_TextArray, &CPatch_CHM::ItmL2_BoolArray, &CPatch_CHM::ItmL2_FormArray, &CPatch_CHM::ItmL2_EntriesFound, &CPatch_CHM::ItmL2_EntriesTotal, &CPatch_CHM_ItmL2::Data);

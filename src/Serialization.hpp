@@ -1,4 +1,5 @@
 #include "DKUtil/Utility.hpp"
+#include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/Variables.hpp"
 #pragma once
 
@@ -7,28 +8,15 @@
 
 namespace Serialization
 {
-	class tme
-	{
-	public:
-		tme(std::string& a)
-			:day{ a.substr(0,3),a.substr(8,2) }, month{ a.substr(4,3) }, year{ a.substr(20,4) }
-		{
-			tie = a.substr(11, 8);
-		}
-
-		std::string day[2]{}; std::string month{}; std::string year{};
-		std::string tie{};
-	};
-
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1004,
+		kVersion = 1007,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
+constexpr auto DEFAULT_VARIATION_MAX = 12;
 
-#define DEFAULT_VARIATION_MAX 12
 	using FormArray = RE::FormID[];
 	using Variation = std::pair<RE::FormID, std::array<RE::FormID, DEFAULT_VARIATION_MAX>>;
 
@@ -250,12 +238,12 @@ namespace Serialization
 
 		[[nodiscard]] bool HasForm(RE::FormID a_form) const noexcept
 		{
-			return data.contains(a_form);
+			return a_form && data.contains(a_form);
 		}
 
 		[[nodiscard]] bool HasForm(RE::TESForm* a_form) const noexcept
 		{
-			return data.contains(a_form->GetFormID());
+			return a_form && data.contains(a_form->GetFormID());
 		}
 
 		//---------------------------------------------------
@@ -442,11 +430,6 @@ namespace Serialization
 				a_bools.emplace_back(status);
 			}
 
-			// assertions can be removed
-			assert(a_names.size() == zipped.size());
-			assert(a_forms.size() == zipped.size());
-			assert(a_bools.size() == zipped.size());
-
 			switch (a_opttype) {
 			case 1:
 			{
@@ -518,12 +501,6 @@ namespace Serialization
 					}
 				}
 			}
-
-			// assertions can be removed
-			assert(a_names.size() == zipped.size());
-			assert(a_forms.size() == zipped.size());
-			assert(a_bools.size() == zipped.size());
-			assert(a_texts.size() == zipped.size());
 		}
 
 		//---------------------------------------------------
@@ -749,6 +726,21 @@ namespace Serialization
 	// new polymorphed data structure designed for Logging
 	struct CompletionistLog final : public ISerializable
 	{
+		enum logType
+		{
+			kCollected,
+			kDiscovered,
+			kLearnt,
+			kObtained,
+			kBarenziah,
+			kTamed,
+			kShout,
+			kWord,
+			kFish,
+			kBook,
+			kTome,
+		};
+
 		// modifier
 		void AddDate(std::string_view a_date) noexcept
 		{
@@ -757,47 +749,75 @@ namespace Serialization
 			}
 		}
 
-		void AddLoggedEvent(std::string_view a_log) noexcept
+		void AddLoggedEvent(logType kType, std::string_view a_log) noexcept
 		{
-			auto date = GetCurrentDate();
+			time_t theTime = time(NULL);
+			struct tm* aTime = localtime(&theTime);
 
-			if (HasLoggedEvent(date, a_log)) {
+			auto hr = std::to_string(aTime->tm_hour).length() == 1 ? fmt::format("0{}", aTime->tm_hour) : std::to_string(aTime->tm_hour);
+			auto mi = std::to_string(aTime->tm_min).length() == 1 ? fmt::format("0{}", aTime->tm_min) : std::to_string(aTime->tm_min);
+
+			auto da = std::to_string(aTime->tm_mday).length() == 1 ? fmt::format("0{}", aTime->tm_mday) : std::to_string(aTime->tm_mday);
+			auto mo = std::to_string(aTime->tm_mon).length() == 1 ? fmt::format("0{}", aTime->tm_mon + 1) : std::to_string(aTime->tm_mon + 1);
+			auto yr = std::to_string(1900 + aTime->tm_year).length() == 1 ? fmt::format("0{}", 1900 + aTime->tm_year) : std::to_string(1900 + aTime->tm_year);
+			auto date = fmt::format("{}/{}/{}"sv, da, mo, yr);
+			auto time = fmt::format("{}:{}", hr, mi);
+
+			auto event = fmt::format("|{} ~ {}{}|", time, GetLogTypePrefx(kType), a_log);
+
+			if (HasLoggedEvent(date, event)) {
 				return;
 			}
 
-			AddDate(GetCurrentDate());
-
-			auto event = fmt::format("|{}|", a_log);
+			AddDate(date);
 			data[date.data()] += event;
 
 			INFO("Log Recorder Added Log [{}] to '{}' Serialized Date Map.", a_log, date);
 		}
 
-		void RemoveDate(std::string_view a_date) noexcept
-		{
-			if (HasDate(a_date)) {
-				data.erase(a_date.data());
+		std::string GetLogTypePrefx(logType kType) {
+			switch (kType)
+			{
+			case Serialization::CompletionistLog::kCollected:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Col");
+				break;
+			case Serialization::CompletionistLog::kDiscovered:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Dis");
+				break;
+			case Serialization::CompletionistLog::kLearnt:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Lea");
+				break;
+			case Serialization::CompletionistLog::kShout:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Sho");
+				break;
+			case Serialization::CompletionistLog::kWord:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Wor");
+				break;
+			case Serialization::CompletionistLog::kObtained:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Obt");
+				break;
+			case Serialization::CompletionistLog::kBarenziah:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Bar");
+				break;
+			case Serialization::CompletionistLog::kTamed:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Tam");
+				break;
+			case Serialization::CompletionistLog::kFish:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Fis");
+				break;
+			case Serialization::CompletionistLog::kBook:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Boo");
+				break;
+			case Serialization::CompletionistLog::kTome:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Tom");
+				break;
+			default:
+				break;
 			}
-		}
-
-		void RemoveLoggedEvent(std::string_view a_date, std::string_view a_log) noexcept
-		{
-			if (HasDate(a_date)) {
-				auto event = fmt::format("|{}|", a_log);
-				DKUtil::string::replace_all(data[a_date.data()], event, {});
-			}
+			return std::string{};
 		}
 
 		// accessor
-		[[nodiscard]] std::string GetCurrentDate() noexcept
-		{
-			auto rp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			std::string h(ctime(&rp));
-			tme curtime(h);
-
-			return fmt::format("{:s} {:s} {:s}", curtime.month, curtime.day[1], curtime.year);
-		}
-
 		[[nodiscard]] bool HasDate(std::string_view a_date) noexcept
 		{
 			return data.contains(a_date.data());
@@ -840,7 +860,7 @@ namespace Serialization
 			return list;
 		}
 
-		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date) noexcept
+		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date, bool b_time) noexcept
 		{
 			if (!HasDate(a_date)) {
 				return {};
@@ -850,7 +870,7 @@ namespace Serialization
 			auto raw = DKUtil::string::split(data[a_date.data()], "|");
 			for (auto& r : raw) {
 				if (!r.empty()) {
-					list.push_back(fmt::format("{} {}", a_date, r));
+					list.push_back(b_time ? fmt::format("{}", r) : fmt::format("{}", r.substr(8)));
 				}
 			}
 
@@ -943,6 +963,11 @@ namespace CFramework_Master
 {
 	extern Serialization::CompletionistData FoundItemData;
 	extern Serialization::CompletionistData ExcludedCellData;
+	extern Serialization::CompletionistData FoundItemData_NoShow;
+	extern Serialization::CompletionistKey CQuestKeys_Natural;
+	extern Serialization::CompletionistKey CQuestKeys_Manual;
+	extern Serialization::CompletionistKey CQuestKeys_Stages;
+	extern Serialization::CompletionistLog LoggingData;
 }
 
 namespace Serialization
@@ -985,9 +1010,43 @@ namespace Serialization
 				if (data)
 				{
 					/*Add new serialised data sets here for first load... e.g if (version < kVersion && name == "EXAMPLE DATA NAME") { continue; }*/
-					if (version < 1004 && DKUtil::string::iequals(name, "LoggingData")) { continue; }
-					
+					if (version < 1006 && DKUtil::string::iequals(name, "LoggingData")) { 
+						INFO("Skipping loading of Logging Data.");
+						continue; 
+					}
+
 					data->Load(a_intfc, name);
+
+					if (version < 1007 && DKUtil::string::iequals(name, "LoggingData"))
+					{
+						int i = 0;
+						int x = LoggingData.data.size();
+
+						while (i < x) {
+							std::unordered_map<const std::string, std::string>::iterator it = LoggingData.data.begin();
+
+							// Iterating over the map using Iterator till map end.
+							while (it != LoggingData.data.end()) {
+								if (it->first.find("/08/2023") != std::string::npos) {
+									INFO("Correcting Completion Log Date: {}", it->first);
+
+									std::string newNode = it->first;
+									DKUtil::string::replace_all(newNode, "/08/2023", "/09/2023");
+
+									auto node = LoggingData.data.extract(it->first);
+									if (node) {
+										node.key() = newNode;
+										LoggingData.data.insert(std::move(node));
+									}
+								}
+
+								INFO("Correcting Invalid Formats on event: {}", it->first);
+								DKUtil::string::replace_all(it->second, ":  ", ": ");
+								it++;
+							}
+							i++;
+						}
+					}
 				}
 			}
 

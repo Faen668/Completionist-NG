@@ -55,7 +55,7 @@ namespace CQFramework_CC3
 		{"CC03_Quest35", CFlagEnum::kMain, CCompEnum::kStand, "ccMTYSSE002_Quest"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray };
+	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	std::array<int, 4> RequiemExclusions = { 5,11,13,35 };
 	std::array<int, 9> SkyExtCExclusions = { 0,1,7,14,15,18,22,25 };
@@ -86,7 +86,7 @@ namespace CQFramework_CC3
 			}
 
 			QuestData[i].init()->initQuestData(&QuestArrays)->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 6));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 6, QuestData[i].unique_identifier));
 		}
 		BoolArray = std::vector<bool>(CArraySize, false);
 	};

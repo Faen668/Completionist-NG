@@ -3,11 +3,50 @@
 #include "CellScanner.hpp"
 #include "Variables.hpp"
 
+constexpr std::array<std::pair<RE::FormID, const char*>, 1> ExcludedChests = {
+	{{0x0009C0, "cceejsse003-hollow.esl"}, // Shadowfoot Sanctum Test Urn
+} };
+
 namespace CellScanner
 {
 	using namespace CFramework_Master;
 	using namespace Serialization;
 	using namespace CVariables;
+
+	//---------------------------------------------------
+	//-- Add Excluded CHests ----------------------------
+	//---------------------------------------------------
+
+	void CellScanner::CHandler::AddExcludedChests() {
+
+		for (auto& [chest, file] : ExcludedChests) {
+			auto* cont = CompletionistData::GetFullForm<RE::TESObjectREFR>(chest, file);
+			if (cont) {
+				INFO("Got Container");
+				AddMerchantChest(cont);
+			}
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Build Merchant Chest List ----------------------
+	//---------------------------------------------------
+
+	void CellScanner::CHandler::BuildMerchantChestData(RE::TESObjectCELL* cell, const RE::TESObjectCELL::RUNTIME_DATA rtd)
+	{	
+		for (auto& ref : rtd.references) {
+			if (!ref || !ref.get() || !ref->GetBaseObject() || ref.get()->GetBaseObject()->GetFormType() != RE::FormType::NPC || ref.get() == RE::PlayerCharacter::GetSingleton() || ref->IsDeleted() || ref->IsDisabled()) {
+				continue;
+			}
+
+			auto* NPC = ref->As<RE::Actor>();
+			if (NPC && NPC->GetVendorFaction() && (NPC->GetVendorFaction()->IsVendor() || NPC->GetVendorFaction()->OffersServices())) {
+				if (auto* chest = NPC->GetVendorFaction()->vendorData.merchantContainer; chest != nullptr) {
+					AddMerchantChest(chest);
+				};
+			}
+		}
+	}
 
 	//---------------------------------------------------
 	//-- Collectability Functions -----------------------
@@ -22,6 +61,21 @@ namespace CellScanner
 	}
 
 	//---------------------------------------------------
+	//-- Vendor Chest Functions -------------------------
+	//---------------------------------------------------
+
+	void CellScanner::CHandler::AddMerchantChest(RE::TESObjectREFR* a_chest) {
+
+		if (std::find(MerchantChests.begin(), MerchantChests.end(), a_chest) == MerchantChests.end()) {
+			MerchantChests.push_back(a_chest);
+		}
+	}
+
+	bool CellScanner::CHandler::IsMerchantChest(RE::TESObjectREFR* a_chest) {
+		return std::find(MerchantChests.begin(), MerchantChests.end(), a_chest) != MerchantChests.end();
+	}
+
+	//---------------------------------------------------
 	//-- Cell Scanner Function --------------------------
 	//---------------------------------------------------
 
@@ -32,6 +86,9 @@ namespace CellScanner
 		if (!cell || !cell->IsInteriorCell()) { return; }
 
 		const auto& rtd = cell->GetRuntimeData();
+		AddExcludedChests();
+		BuildMerchantChestData(cell, rtd);
+
 		int32_t cont = 0, loos = 0, npcs = 0;
 		refs.clear();
 
@@ -43,16 +100,15 @@ namespace CellScanner
 			switch (ref.get()->GetBaseObject()->GetFormType()) {
 			case RE::FormType::Container:
 			{
-				if (V_CellScanner_CONT) {
+				if (V_CellScanner_CONT && !IsMerchantChest(ref.get())) {
 					if (auto* container = ref.get()->GetBaseObject()->As<RE::TESContainer>()) {
 						auto inv = ref.get()->GetInventory();
 
 						for (auto& [obj, data] : inv) {
 							if (data.first > 0 && data.second) {
 								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !refs.contains(obj)) {
-									if (a_logging) {
-										INFO("Found {} on - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), ref->GetName());
-									}
+									//RE::PlayerCharacter::GetSingleton()->MoveTo(ref.get());
+									INFO("Found container item {} with formID {} ", obj->GetName(), obj->GetLocalFormID());
 									refs.emplace(obj);
 									cont++;
 								}
@@ -63,6 +119,7 @@ namespace CellScanner
 				}
 				break;
 			}
+
 			case RE::FormType::NPC:
 			{
 				if (V_CellScanner_NPCS) {
@@ -79,9 +136,7 @@ namespace CellScanner
 						for (auto& [obj, data] : inv) {
 							if (data.first > 0 && data.second) {
 								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !refs.contains(obj)) {
-									if (a_logging) {
-										INFO("Found {} on - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), NPC->GetName());
-									}
+									INFO("Found NPC Item: {} on - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), NPC->GetName());
 									refs.emplace(obj);
 									npcs++;
 								}
@@ -92,13 +147,12 @@ namespace CellScanner
 				}
 				break;
 			}
+
 			default:
 				if (V_CellScanner_REFS) {
 					auto* obj = ref->GetBaseObject();
 					if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !refs.contains(obj)) {
-						if (a_logging) {
-							INFO("Found {}", RE::TESForm::LookupByID(obj->GetFormID())->GetName());
-						}
+						INFO("Found loose item: {} with formID {} ", obj->GetName(), obj->GetLocalFormID());
 						refs.emplace(ref->GetBaseObject());
 						loos++;
 					}

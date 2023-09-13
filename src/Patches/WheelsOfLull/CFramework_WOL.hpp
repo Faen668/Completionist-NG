@@ -39,6 +39,7 @@ namespace CPatch_WOL
 	inline std::vector<std::string>		Quest_NameArray;
 	inline std::vector<std::string>		Quest_IdenArray;
 	inline std::vector<std::string>		Quest_TextArray;
+	inline std::vector<std::string>		Quest_KeysArray;
 	inline std::vector<std::int32_t>	Quest_RadiArray;
 	inline std::vector<bool>			Quest_BoolArray;
 
@@ -65,6 +66,7 @@ namespace CPatch_WOL
 		static void			InstallQuestFramework();
 		static void			UpdateFoundForms();
 
+		static void			ProcessHookedMarker(const char* nam);
 		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
 		static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);
 	};

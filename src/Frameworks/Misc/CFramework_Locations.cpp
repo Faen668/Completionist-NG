@@ -118,6 +118,9 @@ namespace CFramework_MapMa {
 		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
+
+		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
 	}
 
 	//---------------------------------------------------
@@ -128,6 +131,79 @@ namespace CFramework_MapMa {
 
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Process Hooked Markers ) ----
+	//---------------------------------------------------
+
+	void CHandler::ProcessHookedMarker(const char* nam)
+	{	
+		for (auto i = 0; i < MapMa_AG_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_AG_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_AG_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_AG_FormArray[i], i, MapMa_Sec::kMapMa_AG)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < MapMa_HR_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_HR_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_HR_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_HR_FormArray[i], i, MapMa_Sec::kMapMa_HR)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < MapMa_SZ_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_SZ_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_SZ_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_SZ_FormArray[i], i, MapMa_Sec::kMapMa_SZ)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < MapMa_DG_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_DG_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_DG_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_DG_FormArray[i], i, MapMa_Sec::kMapMa_DG)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < MapMa_DB_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_DB_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_DB_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_DB_FormArray[i], i, MapMa_Sec::kMapMa_DB)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
+
+		for (auto i = 0; i < MapMa_CC_FormArray.size(); i++) {
+			if (DKUtil::string::iequals(nam, MapMa_CC_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_CC_FormArray[i])) {
+				if (CHandler::ProcessMapMarker(MapMa_CC_FormArray[i], i, MapMa_Sec::kMapMa_CC)) {
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
+					return;
+				}
+			}
+		}
 	}
 
 	//---------------------------------------------------
@@ -169,12 +245,17 @@ namespace CFramework_MapMa {
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section) {
+	bool CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section) {
+
+		if (a_form && FoundItemData_NoShow.HasForm(a_form)) {
+			return false;
+		}
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-		if (!a_marker || !MarkerIsValid(a_marker)) { return; }
-
-		FoundItemData_NoShow.AddForm(a_marker);
+		auto valid = (a_marker && MarkerIsValid(a_marker));
+		
+		if (!valid) { INFO("Marker is not valid"); return false; }
+		FoundItemData_NoShow.AddForm(a_form);
 
 		switch (a_section) {
 
@@ -211,6 +292,8 @@ namespace CFramework_MapMa {
 		default:
 			break;
 		}	
+
+		return true;
 	}
 
 	//---------------------------------------------------
@@ -372,13 +455,5 @@ namespace CFramework_MapMa {
 
 		MapMa_CC_EntriesTotal = MapMa_CC_FormArray.size();
 		MapMa_CC_EntriesFound = std::ranges::count(MapMa_CC_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Locations ) ---
-	//---------------------------------------------------
-
-	void CHandler::Install_CCM() {
-
 	}
 }
