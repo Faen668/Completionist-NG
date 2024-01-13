@@ -1,35 +1,16 @@
 #pragma once
-
-namespace CPatch_FSH_F {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_I {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_B {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_A {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_C {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_L {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_FSH_S {
-	inline Serialization::CompletionistData Data;
-}
+#define ProcessFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, Serialization::CompletionistData data, std::vector<RE::TESForm*> forms, std::vector<bool>* bools, std::int32_t* found, Serialization::CompletionistLog::logType eventHandle
 
 namespace CPatch_FSH
 {
+	inline Serialization::CompletionistData FishData;
+	inline Serialization::CompletionistData ItemData;
+	inline Serialization::CompletionistData BookData;
+	inline Serialization::CompletionistData MapsDataA;
+	inline Serialization::CompletionistData MapsDataC;
+	inline Serialization::CompletionistData MapsDataL;
+	inline Serialization::CompletionistData MapsDataS;
+
 	inline std::vector<std::string>		F_NameArray;
 	inline std::vector<std::string>		F_TextArray;
 	inline std::vector<RE::TESForm*>	F_FormArray;
@@ -83,10 +64,6 @@ namespace CPatch_FSH
 	inline std::vector<std::string> temprod{};
 	inline std::vector<RE::TESForm*> tempfsh{};
 
-	inline RE::BGSListForm* RodList;
-	inline RE::TESGlobal* GlobalV;
-	inline RE::ControlMap* ContMap;
-
 	enum class FishingMarkerType : int32_t
 	{
 		kMapMa_A = 0,
@@ -95,36 +72,28 @@ namespace CPatch_FSH
 		kMapMa_S = 3,
 	};
 
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final :
-		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
-		public RE::BSTEventSink<RE::BooksRead::Event>,
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::TESEquipEvent> {
-
+	class CHandler
+	{
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
-		  EventResult			ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>*) override;
-		  EventResult			ProcessEvent(const RE::BooksRead::Event* a_event, RE::BSTEventSource<RE::BooksRead::Event>*) override;
-		  EventResult			ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
+		static void			InstallFramework();
+		static void			UpdateFoundForms();
 
-		  static void			InstallFramework();
-		  static void			UpdateFoundForms();
-		  static void			SinkEvents();
+		static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
+		static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, FishingMarkerType a_section, bool from_hook);
+		static void			ProcessHookedMarker(const char* nam);
+		static void			ProcessCaughtFishFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_form);
+		static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);
 
-		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_section);
+		static void			InjectAndCompileData();;
+		static void			InstallSearchTerms();
+		static void			BuildFishArrays(RE::TESForm* a_form, std::string a_rod, std::string a_loc);
 
-		  static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, FishingMarkerType a_section);
-		  static void			ProcessHookedMarker(const char* nam);
-		  static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);
+		static void			AddCACOFishingForms();
 
-		  static void			InjectAndCompileData();;
-		  static void			InstallSearchTerms();
-		  static void			BuildFishArrays(RE::TESForm* a_form, std::string a_rod, std::string a_loc);
-
-		  static void			AddCACOFishingForms();
+		static void			OnBooksReadEvent(RE::BooksRead::Event const* a_event);
+		static void			OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
+		static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 	};
 
 }

@@ -4,11 +4,11 @@
 namespace CQFramework_CC2 
 {
 	CStageData StageData[] {
-		{"CC02_Quest07", CStageEnum::kDone, 40		, 0 },
-		{"CC02_Quest27", CStageEnum::kDone, 30		, 0 },
-		{"CC02_Quest31", CStageEnum::kDone, 100		, 0 },
-		{"CC02_Quest33", CStageEnum::kDone, 30		, 0 },
-		{"CC02_Quest39", CStageEnum::kDone, 1000	, 0 },
+		{"CC02_Quest07", CStageEnum::kDone, 40},
+		{"CC02_Quest27", CStageEnum::kDone, 30},
+		{"CC02_Quest31", CStageEnum::kDone, 100},
+		{"CC02_Quest33", CStageEnum::kDone, 30},
+		{"CC02_Quest39", CStageEnum::kDone, 1000},
 	};
 
 	CQuestData QuestData[] {
@@ -60,8 +60,6 @@ namespace CQFramework_CC2
 		{"CC02_Quest45", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE056_Quest"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	std::array<int, 15> RequiemExclusions = { 3,6,9,10,13,15,18,21,25,26,29,30,32,43,45 };
 
 	//---------------------------------------------------
@@ -81,10 +79,13 @@ namespace CQFramework_CC2
 				continue;
 			}
 
-			QuestData[i].init()->initQuestData(&QuestArrays)->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 5, QuestData[i].unique_identifier));
+			auto quest = static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(QuestData[i].editor_id));
+			if (quest)
+			{
+				QuestData[i].init()->initStageData(StageData)->finalize();
+				CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 5, QuestData[i].unique_identifier));
+				QuestsInstalled++;
+			}
 		}
-
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

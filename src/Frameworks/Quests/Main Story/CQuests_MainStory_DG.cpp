@@ -20,8 +20,6 @@ namespace CQFramework_DG
 		/*13*/ {"Main_DG_Quest13", CFlagEnum::kMain, CCompEnum::kStand, "DLC1VQ08"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -30,9 +28,8 @@ namespace CQFramework_DG
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()->initQuestData(&QuestArrays);
+			QuestData[i].init()->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 2, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

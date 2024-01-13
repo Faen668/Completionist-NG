@@ -1,5 +1,6 @@
 #include "Serialization.hpp"
 #include "CFramework_ST1.hpp"
+#include "Internal Utility/Events.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
@@ -43,166 +44,67 @@ namespace CPatch_ST1 {
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-
-		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || a_event->newContainer != 0x00014) { return EventResult::kContinue; }
+		if (a_event->newContainer != 0x00014) { return; }
 
-		if (CPatch_ST1_ItmL1::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_ST1_ItmL1::Data.GetBase(a_event->baseObj) ? CPatch_ST1_ItmL1::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CPatch_ST1_ItmL1");
-			return EventResult::kContinue;
+		if (ItemData1.HasForm(a_event->baseObj)) {
+			auto base = ItemData1.GetBase(a_event->baseObj) ? ItemData1.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData1, ItmL1_FormArray, &ItmL1_BoolArray, &ItmL1_EntriesFound, log::kCollected, "NotifyItems");
+			return;
 		}
 
-		if (CPatch_ST1_ItmL2::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_ST1_ItmL2::Data.GetBase(a_event->baseObj) ? CPatch_ST1_ItmL2::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CPatch_ST1_ItmL2");
-			return EventResult::kContinue;
+		if (ItemData2.HasForm(a_event->baseObj)) {
+			auto base = ItemData2.GetBase(a_event->baseObj) ? ItemData2.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData2, ItmL2_FormArray, &ItmL2_BoolArray, &ItmL2_EntriesFound, log::kCollected, "NotifyItems");
+			return;
 		}
 
-		if (CPatch_ST1_ItmL3::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_ST1_ItmL3::Data.GetBase(a_event->baseObj) ? CPatch_ST1_ItmL3::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CPatch_ST1_ItmL3");
-			return EventResult::kContinue;
+		if (ItemData3.HasForm(a_event->baseObj)) {
+			auto base = ItemData3.GetBase(a_event->baseObj) ? ItemData3.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData3, ItmL3_FormArray, &ItmL3_BoolArray, &ItmL3_EntriesFound, log::kCollected, "NotifyItems");
+			return;
 		}
 
-		if (CPatch_ST1_ItmL4::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_ST1_ItmL4::Data.GetBase(a_event->baseObj) ? CPatch_ST1_ItmL4::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, "CPatch_ST1_ItmL4");
-			return EventResult::kContinue;
+		if (ItemData4.HasForm(a_event->baseObj)) {
+			auto base = ItemData4.GetBase(a_event->baseObj) ? ItemData4.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData4, ItmL4_FormArray, &ItmL4_BoolArray, &ItmL4_EntriesFound, log::kCollected, "NotifyItems");
+			return;
 		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_variable) {
+	void CHandler::ProcessFoundForm(ProcessFoundFormArgs, std::string a_section) {
 
-		if (a_variable == "CPatch_ST1_ItmL1") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST1_ItmL1::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST1_ItmL1::Data.GetForm(a_eventID)->GetName());
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_ST1_ItmL1::Data.GetAllVariations()) {
-				if (CPatch_ST1_ItmL1::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL1_FormArray, CPatch_ST1_ItmL1::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL1_FormArray.begin(), t_pos);
-			ItmL1_BoolArray[b_pos] = true;
-
-			ItmL1_EntriesFound = std::ranges::count(ItmL1_BoolArray, true);
-			return;
+		if (!FoundItemData.HasForm(a_eventID)) {
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, data.GetForm(a_eventID)->GetName());
+			FrameworkAPI::SendNotification(msg, a_section);
+			FrameworkAPI::AddNewEventToLog(eventHandle, data.GetForm(a_eventID)->GetName());
 		}
 
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (a_variable == "CPatch_ST1_ItmL2") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST1_ItmL2::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST1_ItmL2::Data.GetForm(a_eventID)->GetName());
+		FoundItemData.AddForm(a_baseID);
+		for (auto var : data.GetAllVariations()) {
+			if (data.GetBase(var) == a_baseID) {
+				FoundItemData.AddForm(var);
 			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_ST1_ItmL2::Data.GetAllVariations()) {
-				if (CPatch_ST1_ItmL2::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL2_FormArray, CPatch_ST1_ItmL2::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL2_FormArray.begin(), t_pos);
-			ItmL2_BoolArray[b_pos] = true;
-
-			ItmL2_EntriesFound = std::ranges::count(ItmL2_BoolArray, true);
-			return;
 		}
 
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (a_variable == "CPatch_ST1_ItmL3") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST1_ItmL3::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST1_ItmL3::Data.GetForm(a_eventID)->GetName());
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_ST1_ItmL3::Data.GetAllVariations()) {
-				if (CPatch_ST1_ItmL3::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL3_FormArray, CPatch_ST1_ItmL3::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL3_FormArray.begin(), t_pos);
-			ItmL3_BoolArray[b_pos] = true;
-
-			ItmL3_EntriesFound = std::ranges::count(ItmL3_BoolArray, true);
-			return;
-		}
-
-		//---------------------------------------------------
-		//---------------------------------------------------
-
-		if (a_variable == "CPatch_ST1_ItmL4") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_ST1_ItmL4::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_ST1_ItmL4::Data.GetForm(a_eventID)->GetName());
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_ST1_ItmL4::Data.GetAllVariations()) {
-				if (CPatch_ST1_ItmL4::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL4_FormArray, CPatch_ST1_ItmL4::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL4_FormArray.begin(), t_pos);
-			ItmL4_BoolArray[b_pos] = true;
-
-			ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
-			return;
-		}
+		bools->at(std::distance(forms.begin(), std::ranges::find(forms, data.GetForm(a_baseID)))) = true;
+		*found = std::ranges::count(*bools, true);
 	}
 
 	//---------------------------------------------------
@@ -211,20 +113,20 @@ namespace CPatch_ST1 {
 
 	void CHandler::InjectAndCompileData() {
 
-		CPatch_ST1_ItmL1::Data.CompileFormArray(CPatch_ST1::ItmL1, modname);
-		CPatch_ST1_ItmL2::Data.CompileFormArray(CPatch_ST1::ItmL2, modname);
-		CPatch_ST1_ItmL3::Data.CompileFormArray(CPatch_ST1::ItmL3, modname);
-		CPatch_ST1_ItmL4::Data.CompileFormArray(CPatch_ST1::ItmL4, modname);
+		ItemData1.CompileFormArray(CPatch_ST1::ItmL1, modname);
+		ItemData2.CompileFormArray(CPatch_ST1::ItmL2, modname);
+		ItemData3.CompileFormArray(CPatch_ST1::ItmL3, modname);
+		ItemData4.CompileFormArray(CPatch_ST1::ItmL4, modname);
 
-		CPatch_ST1_ItmL1::Data.MergeAsCollectable();
-		CPatch_ST1_ItmL2::Data.MergeAsCollectable();
-		CPatch_ST1_ItmL3::Data.MergeAsCollectable();
-		CPatch_ST1_ItmL4::Data.MergeAsCollectable();
+		ItemData1.MergeAsCollectable();
+		ItemData2.MergeAsCollectable();
+		ItemData3.MergeAsCollectable();
+		ItemData4.MergeAsCollectable();
 
-		CPatch_ST1_ItmL1::Data.Populate(ItmL1_NameArray, ItmL1_FormArray, ItmL1_BoolArray, ItmL1_TextArray);
-		CPatch_ST1_ItmL2::Data.Populate(ItmL2_NameArray, ItmL2_FormArray, ItmL2_BoolArray, ItmL2_TextArray);
-		CPatch_ST1_ItmL3::Data.Populate(ItmL3_NameArray, ItmL3_FormArray, ItmL3_BoolArray, ItmL3_TextArray);
-		CPatch_ST1_ItmL4::Data.Populate(ItmL4_NameArray, ItmL4_FormArray, ItmL4_BoolArray, ItmL4_TextArray);
+		ItemData1.Populate(ItmL1_NameArray, ItmL1_FormArray, ItmL1_BoolArray, ItmL1_TextArray);
+		ItemData2.Populate(ItmL2_NameArray, ItmL2_FormArray, ItmL2_BoolArray, ItmL2_TextArray);
+		ItemData3.Populate(ItmL3_NameArray, ItmL3_FormArray, ItmL3_BoolArray, ItmL3_TextArray);
+		ItemData4.Populate(ItmL4_NameArray, ItmL4_FormArray, ItmL4_BoolArray, ItmL4_TextArray);
 
 		ItmL1_EntriesTotal = ItmL1_FormArray.size();
 		ItmL1_EntriesFound = std::ranges::count(ItmL1_BoolArray, true);
@@ -239,19 +141,23 @@ namespace CPatch_ST1 {
 		ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
+
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : ItmL1_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < ItmL1_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL1_FormArray[i], ItmL1_NameArray[i], "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
 		}
-		for (auto& name : ItmL2_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < ItmL2_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL2_FormArray[i], ItmL2_NameArray[i], "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
 		}
-		for (auto& name : ItmL3_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < ItmL3_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL3_FormArray[i], ItmL3_NameArray[i], "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
 		}
-		for (auto& name : ItmL4_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < ItmL4_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL4_FormArray[i], ItmL4_NameArray[i], "$MCMPageSUT1", std::to_underlying(EntryCategory::kItem)));
 		}
 	}
 
@@ -264,19 +170,19 @@ namespace CPatch_ST1 {
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < ItmL1_FormArray.size(); i++) {
-			ItmL1_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_FormArray[i], &CPatch_ST1_ItmL1::Data);
+			ItmL1_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_FormArray[i], &ItemData1);
 		}
 
 		for (auto i = 0; i < ItmL2_FormArray.size(); i++) {
-			ItmL2_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL2_FormArray[i], &CPatch_ST1_ItmL2::Data);
+			ItmL2_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL2_FormArray[i], &ItemData2);
 		}
 
 		for (auto i = 0; i < ItmL3_FormArray.size(); i++) {
-			ItmL3_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL3_FormArray[i], &CPatch_ST1_ItmL3::Data);
+			ItmL3_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL3_FormArray[i], &ItemData3);
 		}
 
 		for (auto i = 0; i < ItmL4_FormArray.size(); i++) {
-			ItmL4_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL4_FormArray[i], &CPatch_ST1_ItmL4::Data);
+			ItmL4_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL4_FormArray[i], &ItemData4);
 		}
 
 		ItmL1_EntriesTotal = ItmL1_FormArray.size();

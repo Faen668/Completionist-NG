@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Serialization.hpp";
-
 struct BountyQuestData
 {
 	RE::FormID VBQ_ID;
@@ -10,14 +8,10 @@ struct BountyQuestData
 	const std::array<RE::FormID, 9> FQS_ID;
 	const char* FQS_FN;
 
-	const char* Global;
+	const char* Quest_Key;
 };
 
-//---------------------------------------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-namespace BountyProcessor
+namespace CQFramework_Bounties
 {
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -28,9 +22,8 @@ namespace BountyProcessor
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
 		  EventResult ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  static void Sink();
-
+		  
+		  static void InstallFramework();
 		  static void ProcessQuest(const RE::FormID a_quest, const std::uint16_t a_stage);
-
 	};
 }

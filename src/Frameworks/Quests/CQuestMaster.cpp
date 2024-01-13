@@ -36,10 +36,9 @@
 #include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_SK.hpp"
 #include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_DG.hpp"
 #include "Frameworks/Quests/Dungeons & Misc/CQuests_Misc_DB.hpp"
-
-#include "Frameworks/Quests/Radiant & Favors/Radiant Quests Manager.hpp"
-#include "Frameworks/Quests/Radiant & Favors/Quests_Favors.hpp"
-
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Favors.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Bounties.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Beggars.hpp"
 
 namespace CQuestMaster
 {
@@ -90,7 +89,8 @@ namespace CQuestMaster
 		CQFramework_Misc_DB::CHandler::InstallFramework();
 
 		//Quests (Radiant Handler)
-		Quest_Manager::Install();
+		CQFramework_Beggars::CHandler::InstallFramework();
+		CQFramework_Bounties::CHandler::InstallFramework();
 		CQFramework_FavorQuests::CHandler::InstallFramework();
 	}
 
@@ -101,12 +101,11 @@ namespace CQuestMaster
 	auto QuestAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 	{
 		a_vm->RegisterFunction("qDumpQuestData",		"Completionist_Native", qDumpQuestData);
-		a_vm->RegisterFunction("qGetNameArrayByID",		"Completionist_Native", qGetNameArrayByID);
-		a_vm->RegisterFunction("qGetTextArrayByID",		"Completionist_Native", qGetTextArrayByID);
-		a_vm->RegisterFunction("qGetIdenArrayByID",		"Completionist_Native", qGetIdenArrayByID);
-		a_vm->RegisterFunction("qGetBoolArrayByID",		"Completionist_Native", qGetBoolArrayByID);
-		a_vm->RegisterFunction("qGetRadiArrayByID",		"Completionist_Native", qGetRadiArrayByID);
-		a_vm->RegisterFunction("qGetKeysArrayByID",		"Completionist_Native", qGetKeysArrayByID);
+		a_vm->RegisterFunction("qGetNameArrayByName",	"Completionist_Native", qGetNameArrayByID);
+		a_vm->RegisterFunction("qGetTextArrayByName",	"Completionist_Native", qGetTextArrayByID);
+		a_vm->RegisterFunction("qGetIdenArrayByName",	"Completionist_Native", qGetIdenArrayByID);
+		a_vm->RegisterFunction("qGetRadiArrayByName",	"Completionist_Native", qGetRadiArrayByID);
+		a_vm->RegisterFunction("qGetKeysArrayByName",	"Completionist_Native", qGetKeysArrayByID);
 
 		a_vm->RegisterFunction("qIsOptionToggled",		"Completionist_Native",	qIsOptionToggled);		// Returns true if completed manually.
 		a_vm->RegisterFunction("qIsOptionCompleted",	"Completionist_Native",	qIsOptionCompleted);	// Returns true if completed by any natural means.
@@ -116,6 +115,7 @@ namespace CQuestMaster
 		a_vm->RegisterFunction("UnRegisterMerchant",	"Completionist_Native", CQFramework_FavorQuests::CHandler::UnRegisterMerchant);
 
 		a_vm->RegisterFunction("SearchAndReportPage",	"Completionist_Native", SearchAndReportPage);
+		a_vm->RegisterFunction("qGetTimesCompletedVsTimesRequiredText", "Completionist_Native", qGetTimesCompletedVsTimesRequiredText);
 
 		return true;
 	}
@@ -133,24 +133,39 @@ namespace CQuestMaster
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(QuestAPI::GetSingleton()));
 	};
 
-	void QuestAPI::qDumpQuestData(RE::StaticFunctionTag*)
+	//---------------------------------------------------
+	//-- Quest Functions ( Add Quest Data ) -------------
+	//---------------------------------------------------
+
+	void QuestAPI::AddQuestData(CQuestData* a_data, std::string a_name, int32_t a_ID, std::string a_key) 
 	{
-		Dump();
+		CQuestDataVec.push_back(std::make_tuple(a_data, a_name, a_ID, a_key));
 	}
 
 	//---------------------------------------------------
 	//-- Quest Functions ( Dump Quest Data ) ------------
 	//---------------------------------------------------
 
-	void QuestAPI::Dump()
+	void QuestAPI::qDumpQuestData(RE::StaticFunctionTag*)
 	{
 		int32_t idx = 0;
 
 		for (auto& [data, name, ID, key] : CQuestMaster::CQuestDataVec) {
 			data->DumpToLog(idx, ID);
+
+			auto count = CFramework_Master::RadiantCountData.GetCount(key);
+			if (count > 0)
+			{
+				INFO("Times Completed = {}", count)
+			}
+
 			idx++;
 		};
-	};
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Dump Quest Data ) ------------
+	//---------------------------------------------------
 
 	void QuestAPI::ValidateLocalisation()
 	{
@@ -190,6 +205,11 @@ namespace CQuestMaster
 			}
 
 			if (process) {
+					
+				if (b_ignoreCompleted && (CFramework_Master::CQuestKeys_Manual.HasKey(key) || CFramework_Master::CQuestKeys_Natural.HasKey(key))) {
+					continue;
+				}
+
 				list.push_back("$PageResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + GetLocalisedPageName(ID) + "}{" + data->GetName() + "}");
 				list.push_back(GetLocalisedPageName(ID));
 				list.push_back(data->GetSearchTerm());
@@ -206,9 +226,19 @@ namespace CQuestMaster
 		return list;
 	};
 
+	//---------------------------------------------------
+	//-- Quest Functions ( MCM Quest Search ) -----------
+	//---------------------------------------------------
+
 	std::string QuestAPI::GetLocalisedPageName(int32_t ID)
 	{
 		for (auto& [page, mod, id] : CHCMHandler::MainMCMPagesDefs) {
+			if (ID == id) {
+				return page;
+			}
+		}
+
+		for (auto& [page, mod, id] : CHCMHandler::MainPatchesMCMPagesDefs) {
 			if (ID == id) {
 				return page;
 			}
@@ -225,7 +255,10 @@ namespace CQuestMaster
 	{
 		if (a_event && a_event->menuName == RE::JournalMenu::MENU_NAME && a_event->opening)
 		{
-			QuestAPI::UpdateQuestCompletion();
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
+				data->is_completed = IsQuestCompleted(data);
+			};
 		}
 		return EventResult::kContinue;
 	};
@@ -233,32 +266,100 @@ namespace CQuestMaster
 	//---------------------------------------------------
 	//-- Quest Events ( On Radiant Stage Set ) ----------
 	//---------------------------------------------------
-
+	
 	EventResult QuestAPI::ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource)
-	{
-		if (!a_event || !a_event->stage) {
+	{	
+		if (!a_event || !a_event->stage) 
+		{
 			return EventResult::kContinue;
 		}
 
 		const auto* equest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		if (!equest) {
+		if (!equest)
+		{
 			return EventResult::kContinue;
 		}
 
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (data->HasRadiantData()) {
-				const auto* bquest = data->GetradiantQuest();
+		for (auto& [data, name, ID, key] : CQuestDataVec) 
+		{
+			const auto* cquest = data->GetQuest();
+			if (!cquest || data->ShouldProcess() == CQuestProcessor::kExcluded || (cquest && cquest->GetFormID() != equest->GetFormID()))
+			{
+				continue;
+			}
 
-				if (a_event->stage == data->radiant_data->stage) {
-					if (bquest && bquest->GetFormID() == equest->GetFormID()) {
-						data->GetGlobal()->value++;
-						INFO("Incremening global value on {} to {} for quest {}", data->GetKey(), data->GetGlobal()->value, equest->GetName());
-						return EventResult::kContinue;
-					}
+			if (!data->HasRadiantData() && !CFramework_Master::CQuestKeys_Natural.HasKey(data->GetKey()))
+			{
+				CheckForCompletionFromStageEvent(data, a_event->stage);
+			};
+
+			if (data->HasRadiantData() && a_event->stage == data->radiant_data->stage)
+			{
+				CFramework_Master::RadiantCountData.IncreaseCount(data->GetKey(), 1);
+				//INFO("Incremening times completed on {} for quest [{}]", data->GetKey(), equest->GetName());
+
+				if ((!CFramework_Master::CQuestKeys_Natural.HasKey(data->GetKey())) && (CFramework_Master::RadiantCountData.GetCount(data->GetKey()) >= data->GetRadiantTimesRequired()))
+				{
+					data->is_completed = true;
+					CFramework_Master::CQuestKeys_Natural.AddKey(data->GetKey());
+					CFramework_Master::CQuestKeys_Manual.RemoveKey(data->GetKey());
+					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kQuestComplete, data->GetName());
+					//INFO("Setting {} to completed status for quest [{}]", data->GetKey(), equest->GetName());
+					return EventResult::kContinue;
 				}
+				return EventResult::kContinue;
 			}
 		}
 		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Get Quest Data ) -------------
+	//---------------------------------------------------
+
+	void QuestAPI::CheckForCompletionFromStageEvent(CQuestData* data, int32_t a_stage)
+	{
+		bool is_complete = false;
+		switch (data->completion_type)
+		{
+		case CCompEnum::kStand: { is_complete = IsQuestCompletedNaturally(data); break; }
+		case CCompEnum::kThane: { is_complete = IsThaneOfHold(data); break; }
+		case CCompEnum::kFavor: { is_complete = IsFavorCompleted(data); break; }
+		case CCompEnum::kStage: { is_complete = IsStageDoneOrPast(data); break; }
+		default: break;
+		}
+
+		//INFO("Checking {} at stage {} - {}", data->GetKey(), a_stage, is_complete);
+
+		if (is_complete) {
+
+			if (DKUtil::string::iequals(data->GetKey(), "MSQ_Quest05")) {
+				auto* _data = GetQuestDataByKey("Whiterun_Quest17");
+				CheckForCompletionFromStageEvent(_data, a_stage);
+			};
+
+			data->is_completed = true;
+			CFramework_Master::RadiantCountData.IncreaseCount(data->GetKey(), 1);
+			CFramework_Master::CQuestKeys_Natural.AddKey(data->GetKey());
+			CFramework_Master::CQuestKeys_Manual.RemoveKey(data->GetKey());
+			CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kQuestComplete, data->GetName());
+			//INFO("Setting {} to completed status for quest [{}]", data->GetKey(), data->GetName());
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Get Quest Data ) -------------
+	//---------------------------------------------------
+
+	CQuestData* QuestAPI::GetQuestDataByKey(std::string a_key)
+	{
+		for (auto& [data, name, ID, key] : CQuestDataVec) {
+			if (DKUtil::string::iequals(a_key, key))
+			{
+				return data;
+			}
+		}
+		return nullptr;
 	}
 
 	//---------------------------------------------------
@@ -269,114 +370,20 @@ namespace CQuestMaster
 	{
 		if (a_event && a_event->baseObj && a_event->oldContainer == RE::PlayerCharacter::GetSingleton()->GetFormID())
 		{
-			for (auto& [data, name, ID, key] : CQuestDataVec) {
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
 				ProcessDrunkardQuest(data->drunk_data, a_event->baseObj, a_event->newContainer, RE::MenuTopicManager::GetSingleton()->speaker.get().get());
-			}
-		}
+			};
+		};
 		return EventResult::kContinue;
 	};
-
-	//---------------------------------------------------
-	//-- Quest Events ( On Menu Open ) ------------------
-	//---------------------------------------------------
-
-	void QuestAPI::UpdateQuestCompletion()
-	{
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			data->array_data->bools->at(data->array_position) = IsQuestCompleted(data);
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Idens ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> QuestAPI::qGetIdenArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->editorids;
-			}
-		}
-		return {};
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Names ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> QuestAPI::qGetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->names;
-			}
-		}
-		return {};
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Texts ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> QuestAPI::qGetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->highlights;
-			}
-		}
-		return {};
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Texts ) -------------
-	//---------------------------------------------------
-
-	std::vector<std::string> QuestAPI::qGetKeysArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->keys;
-			}
-		}
-		return {};
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Bools ) -------------
-	//---------------------------------------------------
-
-	std::vector<bool> QuestAPI::qGetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->bools;
-			}
-		}
-		return {};
-	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Radis ) -------------
-	//---------------------------------------------------
-
-	std::vector<int32_t> QuestAPI::qGetRadiArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
-
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (ID == a_ID) {
-				return *data->array_data->types;
-			}
-		}
-		return {};
-	}
 
 	//---------------------------------------------------
 	//-- Quest Functions ( Update Drunk Completion ) ----
 	//---------------------------------------------------
 
 	void QuestAPI::ProcessDrunkardQuest(CDrunkData* a_data, RE::FormID a_base, RE::FormID a_container, RE::TESObjectREFR* a_speaker)
-	{	
+	{
 		if (!a_data || !a_base || !a_container || !a_speaker) { return; }
 
 		auto* drunk_list = static_cast<RE::BGSListForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(a_data->listID, a_data->file_name));
@@ -389,28 +396,138 @@ namespace CQuestMaster
 
 		if (a_speaker == drunk_actr && a_container == drunk_actr->GetFormID())
 		{
-			if (auto* var = RE::TESForm::LookupByEditorID<RE::TESGlobal>(a_data->globalvariable))
-			{
-				var->value++;
-				INFO("Incrementing Global Variable Value for {}", drunk_actr->GetName());
-			}
+			CFramework_Master::RadiantCountData.IncreaseCount(a_data->link, 1);
+			CQuestMaster::QuestAPI::CheckForRadiantQuestCompletion(a_data->link);
 		}
 	}
 
 	//---------------------------------------------------
-	//-- Quest Functions ( Update Quest Completion ) ----
+	//-- Quest Functions ( Getter - Idens ) -------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetIdenArrayByID(RE::StaticFunctionTag*, std::string a_page)
+	{
+		std::vector<std::string> list{};
+		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec) 
+			{
+				if (ID == a_ID && data->GetQuest()) {
+					list.push_back(data->editor_id);
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Names ) -------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetNameArrayByID(RE::StaticFunctionTag*, std::string a_page) 
+	{
+		std::vector<std::string> list{};
+		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
+				if (ID == a_ID && data->GetQuest()) {
+					list.push_back(data->GetName());
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Texts ) -------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetTextArrayByID(RE::StaticFunctionTag*, std::string a_page)
+	{
+		std::vector<std::string> list{};
+		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
+				if (ID == a_ID && data->GetQuest()) {
+					list.push_back(data->GetHighlight());
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Radiant Texts ) -----
+	//---------------------------------------------------
+
+	std::string QuestAPI::qGetTimesCompletedVsTimesRequiredText(RE::StaticFunctionTag*, std::string a_key)
+	{
+		for (auto& [data, name, ID, key] : CQuestDataVec) {
+			if (DKUtil::string::iequals(a_key, key))
+			{
+				return data->HasRadiantData() ? fmt::format("Completed {} / {} Times.", std::to_string(CFramework_Master::RadiantCountData.GetCount(key)), std::to_string(data->GetRadiantTimesRequired())) : std::string{};
+			}
+		}
+		return std::string{};
+	};
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Texts ) -------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetKeysArrayByID(RE::StaticFunctionTag*, std::string a_page)
+	{
+		std::vector<std::string> list{};
+		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
+				if (ID == a_ID && data->GetQuest()) {
+					list.push_back(data->GetKey());
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Radis ) -------------
+	//---------------------------------------------------
+
+	std::vector<int32_t> QuestAPI::qGetRadiArrayByID(RE::StaticFunctionTag*, std::string a_page)
+	{
+		std::vector<int32_t> list{};
+		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec)
+			{
+				if (ID == a_ID && data->GetQuest()) {
+					list.push_back(data->GetType());
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
 	//---------------------------------------------------
 
 	bool QuestAPI::IsQuestCompleted(CQuestData* a_data)
 	{
+		auto TimesCompleted = CFramework_Master::RadiantCountData.GetCount(a_data->GetKey());
 		auto is_complete = false;
 
 		switch (a_data->completion_type)
 		{
-		case CCompEnum::kStand: { is_complete = a_data->GetQuest() && a_data->GetQuest()->data.flags.any(RE::QuestFlag::kCompleted, RE::QuestFlag::kFailed); break; }
-		case CCompEnum::kThane: { is_complete = a_data->IsThane(); break; }
-		case CCompEnum::kGlobl: { is_complete = a_data->GetGlobal()->value >= a_data->radiant_data->times_required; break; }
-		case CCompEnum::kStage: { is_complete = IsStageDoneOrPast(a_data); break; }
+		case CCompEnum::kStand: { is_complete = TimesCompleted > 0 || IsQuestCompletedNaturally(a_data); break; }
+		case CCompEnum::kThane: { is_complete = TimesCompleted > 0 || IsThaneOfHold(a_data); break; }
+		case CCompEnum::kGlobl: { is_complete = TimesCompleted >= a_data->GetRadiantTimesRequired(); break; }
+		case CCompEnum::kFavor: { is_complete = TimesCompleted > 0 || IsFavorCompleted(a_data); break; }
+		case CCompEnum::kStage: { is_complete = TimesCompleted > 0 || IsStageDoneOrPast(a_data); break; }
+		case CCompEnum::kCiWar: { is_complete = TimesCompleted > 0; break; }
 		default: break;
 		}
 
@@ -419,12 +536,11 @@ namespace CQuestMaster
 			CFramework_Master::CQuestKeys_Manual.RemoveKey(a_data->GetKey());
 			return true;
 		}
-
 		return CFramework_Master::CQuestKeys_Manual.HasKey(a_data->GetKey());;
 	}
 
 	//---------------------------------------------------
-	//-- Quest Functions ( Is Stage Done ) --------------
+	//-- Quest Functions ( Completion Checks ) ----------
 	//---------------------------------------------------
 
 	bool QuestAPI::IsStageDoneOrPast(CQuestData* a_data)
@@ -437,6 +553,10 @@ namespace CQuestMaster
 		}
 	}
 
+	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
+	//---------------------------------------------------
+
 	bool QuestAPI::IsStageDone(RE::TESQuest* a_quest, int32_t a_stage)
 	{
 		using func_t = decltype(IsStageDone);
@@ -445,18 +565,60 @@ namespace CQuestMaster
 	}
 
 	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
+	//---------------------------------------------------
+
+	bool QuestAPI::IsQuestCompletedNaturally(CQuestData* a_data)
+	{
+		return a_data->GetQuest() && a_data->GetQuest()->data.flags.any(RE::QuestFlag::kCompleted, RE::QuestFlag::kFailed);
+	};
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
+	//---------------------------------------------------
+
+	bool QuestAPI::IsFavorCompleted(CQuestData* a_data)
+	{
+		return a_data->HasFavorData() && a_data->GetActor() && !a_data->GetActor()->IsInFaction(a_data->GetActorFaction());
+	};
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
+	//---------------------------------------------------
+
+	bool QuestAPI::IsThaneOfHold(CQuestData* a_data)
+	{
+		return a_data->HasThaneData() && (IsStageDone(a_data->GetQuest(), a_data->thane_data->stage) || a_data->IsThane());
+	};
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Completion Checks ) ----------
+	//---------------------------------------------------
+
+	void QuestAPI::CheckForRadiantQuestCompletion(std::string a_key)
+	{
+		if (!CFramework_Master::CQuestKeys_Natural.HasKey(a_key))
+		{
+			for (auto& [data, name, ID, key] : CQuestDataVec) {
+				if (DKUtil::string::iequals(a_key, key) && data->HasRadiantData() && CFramework_Master::RadiantCountData.GetCount(key) >= data->GetRadiantTimesRequired())
+				{
+					data->is_completed = true;
+					CFramework_Master::CQuestKeys_Natural.AddKey(key);
+					CFramework_Master::CQuestKeys_Manual.RemoveKey(key);
+					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kQuestComplete, data->GetName());
+					return;
+				}
+			}
+		}
+	}
+
+	//---------------------------------------------------
 	//-- Quest Functions ( MCM Getter - Status ) --------
 	//---------------------------------------------------
 
 	bool QuestAPI::qIsOptionToggled(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key)
 	{
-		for (auto& [data, name, ID, key] : CQuestDataVec) {
-			if (DKUtil::string::iequals(a_key, key)) {
-				return CFramework_Master::CQuestKeys_Manual.HasKey(key);
-			}
-		}
-
-		return false;
+		return CFramework_Master::CQuestKeys_Manual.HasKey(a_key);
 	}
 
 	//---------------------------------------------------
@@ -471,9 +633,22 @@ namespace CQuestMaster
 			{
 				if (CFramework_Master::CQuestKeys_Natural.HasKey(key))
 				{
-					return -2;
+					if (data->completion_type != CCompEnum::kGlobl) {
+						return 2;
+					}
+					else
+					{
+						//Fix for when changing radiant requirements at run-time.
+						return data->GetRadiantTimesRequired() <= CFramework_Master::RadiantCountData.GetCount(key) ? 2 : 0;
+					}
 				}
-				return std::int32_t(data->IsCompleted());
+
+				if (CFramework_Master::CQuestKeys_Manual.HasKey(key))
+				{
+					return 1;
+				}
+
+				return 0;
 			}
 		}
 		return -1;
@@ -483,7 +658,7 @@ namespace CQuestMaster
 	//-- Quest Functions ( MCM Setter - Status ) --------
 	//---------------------------------------------------
 
-	void QuestAPI::qSetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key)
+	void QuestAPI::qSetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, std::string a_key, bool b_completed)
 	{
 		for (auto& [data, name, ID, key] : CQuestDataVec)
 		{

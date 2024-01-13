@@ -1,0 +1,8 @@
+copy completionist_english.txt completionist_czech.txt
+copy completionist_english.txt completionist_french.txt
+copy completionist_english.txt completionist_german.txt
+copy completionist_english.txt completionist_italian.txt
+copy completionist_english.txt completionist_japanese.txt
+copy completionist_english.txt completionist_polish.txt
+copy completionist_english.txt completionist_russian.txt
+copy completionist_english.txt completionist_spanish.txt

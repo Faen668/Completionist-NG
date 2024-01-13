@@ -9,19 +9,17 @@ namespace CQFramework_SkaalVillage
 		{"SkaalVillage_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "DLC2SV01"},
 		{"SkaalVillage_Quest03", CFlagEnum::kSide, CCompEnum::kStand, "DLC2SV02"},
 		{"SkaalVillage_Quest04", CFlagEnum::kSide, CCompEnum::kStage, "DLC2SkaalVillageFreeform1"},
-		{"SkaalVillage_Quest05", CFlagEnum::kRadi, CCompEnum::kGlobl, "Favor104"},
+		{"SkaalVillage_Quest05", CFlagEnum::kRadi, CCompEnum::kFavor, "Favor104"},
 	};
 
-	CRadiantData RadiantData[]{
-		{"SkaalVillage_Quest05", CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor104Fanari" },
+	CFavorData FavorData[]{
+		{"SkaalVillage_Quest05", 0x06FD64, "Skyrim.esm", 0x018fc5, "Dragonborn.esm", CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
 		{"SkaalVillage_Quest00", CStageEnum::kPast, 30, 0},
 		{"SkaalVillage_Quest04", CStageEnum::kPast, 20, 0},
 	};
-
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -32,12 +30,9 @@ namespace CQFramework_SkaalVillage
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData)
-				->initRadiantData(RadiantData);
+				->initStageData(StageData)->initFavorData(FavorData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 17, QuestData[i].unique_identifier));
 
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

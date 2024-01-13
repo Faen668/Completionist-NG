@@ -1,5 +1,6 @@
 #include "Serialization.hpp"
 #include "CFramework_SUD.hpp"
+#include "Internal Utility/Events.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
 #undef AddForm
@@ -27,63 +28,47 @@ namespace CPatch_SUD {
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-
-		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || a_event->newContainer != RE::PlayerCharacter::GetSingleton()->GetFormID()) { return EventResult::kContinue; }
+		if (a_event->newContainer != 0x00014 || !ItemData.HasForm(a_event->baseObj)) { return; }
 
-		if (CPatch_SUD_Items::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_SUD_Items::Data.GetBase(a_event->baseObj) ? CPatch_SUD_Items::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj);
-			return EventResult::kContinue;
-		}
-		return EventResult::kContinue;
+		auto base = ItemData.GetBase(a_event->baseObj) ? ItemData.GetBase(a_event->baseObj) : a_event->baseObj;
+		CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData, Items_FormArray, &Items_BoolArray, &Items_EntriesFound, log::kCollected, "NotifyItems");
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID) {
+	void CHandler::ProcessFoundForm(ProcessFoundFormArgs, std::string a_section) {
 
 		if (!FoundItemData.HasForm(a_eventID)) {
-			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SUD_Items::Data.GetForm(a_eventID)->GetName());
-			FrameworkAPI::SendNotification(msg, "NotifyItems");
-			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_SUD_Items::Data.GetForm(a_eventID)->GetName());
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, data.GetForm(a_eventID)->GetName());
+			FrameworkAPI::SendNotification(msg, a_section);
+			FrameworkAPI::AddNewEventToLog(eventHandle, data.GetForm(a_eventID)->GetName());
 		}
 
 		FoundItemData.AddForm(a_baseID);
-		for (auto var : CPatch_SUD_Items::Data.GetAllVariations()) {
-			if (CPatch_SUD_Items::Data.GetBase(var) == a_baseID) {
+		for (auto var : data.GetAllVariations()) {
+			if (data.GetBase(var) == a_baseID) {
 				FoundItemData.AddForm(var);
 			}
 		}
 
-		auto t_pos = std::ranges::find(Items_FormArray, CPatch_SUD_Items::Data.GetForm(a_baseID));
-		auto b_pos = std::distance(Items_FormArray.begin(), t_pos);
-		Items_BoolArray[b_pos] = true;
-
-		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
-		return;
+		bools->at(std::distance(forms.begin(), std::ranges::find(forms, data.GetForm(a_baseID)))) = true;
+		*found = std::ranges::count(*bools, true);
 	}
 
 	//---------------------------------------------------
@@ -92,18 +77,22 @@ namespace CPatch_SUD {
 
 	void CHandler::InjectAndCompileData() {
 
-		CPatch_SUD_Items::Data.CompileFormArray(CPatch_SUD::Items, modname);
-		CPatch_SUD_Items::Data.MergeAsCollectable();
-		CPatch_SUD_Items::Data.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
+		ItemData.CompileFormArray(CPatch_SUD::Items, modname);
+		ItemData.MergeAsCollectable();
+		ItemData.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
+
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : Items_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < Items_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Items_FormArray[i], Items_NameArray[i], "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
 		}
 	}
 
@@ -116,7 +105,7 @@ namespace CPatch_SUD {
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_SUD_Items::Data);
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &ItemData);
 		}
 
 		Items_EntriesTotal = Items_FormArray.size();

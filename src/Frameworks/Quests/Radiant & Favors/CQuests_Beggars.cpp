@@ -1,34 +1,43 @@
-#include "Quests_Beggars.hpp"
 #include "Serialization.hpp"
+#include "CQuests_Beggars.hpp"
+#include "Frameworks/Quests/CQuestMaster.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
 
 using namespace Serialization;
 
-#define var_name(var_name)  #var_name
+constexpr std::tuple<RE::FormID, const char*, const char*> Begggars[] =
+{
+	{0x1B138, "Windhelm_Quest18",	"Skyrim.esm" },
+	{0x2C90F, "Whiterun_Quest14",	"Skyrim.esm" },
+	{0x1F325, "Markarth_Quest21",	"Skyrim.esm" },
+	{0x198DC, "Solitude_Quest18",	"Skyrim.esm" },
+	{0x44A8D, "Riften_Quest27",		"Skyrim.esm" },
+	{0x03F5E, "Whiterun_Quest15",	"Hearthfires.esm" },
+	{0x19E24, "SmallTowns_Quest18",	"Skyrim.esm" },
+	{0x198BD, "Solitude_Quest19",	"Skyrim.esm" },
+	{0x1B122, "Windhelm_Quest19",	"Skyrim.esm" },
+	{0x44A8E, "Riften_Quest28",		"Skyrim.esm" },
+	{0x1A636, "Solitude_Quest20",	"Skyrim.esm" },
+};
 
 struct activatedBeggar 
 {
 	RE::Actor* Actor;
-	RE::TESGlobal* Global;
-	const char* GlobalName;
+	const char* quest_key;
 };
 
 activatedBeggar curspeaker = {};
 
-namespace BeggarQuests
+namespace CQFramework_Beggars
 {
-	constexpr std::tuple<RE::FormID, const char*, const char*> Begggars[] = 
-	{
-		{0x1B138, "Completionist_FavorBeggarAngrenor",	"Skyrim.esm" },
-		{0x2C90F, "Completionist_FavorBeggarBrenuin",	"Skyrim.esm" },
-		{0x1F325, "Completionist_FavorBeggarDegaine",	"Skyrim.esm" },
-		{0x198DC, "Completionist_FavorBeggarDervenin",	"Skyrim.esm" },
-		{0x44A8D, "Completionist_FavorBeggarEdda",		"Skyrim.esm" },
-		{0x03F5E, "Completionist_FavorBeggarLucia",		"Hearthfires.esm" },
-		{0x19E24, "Completionist_FavorBeggarNarfi",		"Skyrim.esm" },
-		{0x198BD, "Completionist_FavorBeggarNoster",	"Skyrim.esm" },
-		{0x1B122, "Completionist_FavorBeggarSilda",		"Skyrim.esm" },
-		{0x44A8E, "Completionist_FavorBeggarSnilf",		"Skyrim.esm" },
-		{0x1A636, "Completionist_FavorBeggarSvari",		"Skyrim.esm" },
+	//---------------------------------------------------
+	//-- Framework Functions ( Register Events ) --------
+	//---------------------------------------------------
+
+	void CHandler::InstallFramework() {
+		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
+		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESActivateEvent>*>(CHandler::GetSingleton()));
 	};
 
 	//---------------------------------------------------
@@ -39,13 +48,13 @@ namespace BeggarQuests
 	{
 		if (a_actor)
 		{
-			for (auto& [formID, global, fileName] : Begggars)
+			for (auto& [formID, quest_key, fileName] : Begggars)
 			{
 				auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
 
 				if (Beggar && Beggar->GetFormID() == a_actor->GetFormID())
 				{
-					curspeaker = activatedBeggar{ Beggar, RE::TESForm::LookupByEditorID<RE::TESGlobal>(global), global };
+					curspeaker = activatedBeggar{ Beggar, quest_key };
 					break;
 				}
 			}
@@ -65,9 +74,9 @@ namespace BeggarQuests
 
 		CHandler::EvaluateActivatedReference(a_event->objectActivated.get()->As<RE::Actor>());
 
-		if (curspeaker.Actor && curspeaker.Global && curspeaker.GlobalName)
+		if (curspeaker.Actor && curspeaker.quest_key)
 		{
-			INFO("{} is a valid beggar with paired variable [{}]", curspeaker.Actor->GetName(), curspeaker.GlobalName);
+			INFO("{} is a valid beggar with paired quest key [{}]", curspeaker.Actor->GetName(), curspeaker.quest_key);
 		}
 
 		return EventResult::kContinue;
@@ -84,16 +93,15 @@ namespace BeggarQuests
 			return EventResult::kContinue; 
 		}
 
-		if (curspeaker.Actor && curspeaker.Global && curspeaker.GlobalName)
+		if (curspeaker.Actor && curspeaker.quest_key)
 		{
 			if (a_event->newContainer == curspeaker.Actor->GetFormID())
 			{
-				curspeaker.Global->value++;
-				INFO("Updated [{}] to a value of {} for {} ", curspeaker.GlobalName, curspeaker.Global->value, curspeaker.Actor->GetName());
+				CFramework_Master::RadiantCountData.IncreaseCount(curspeaker.quest_key, 1);
+				CQuestMaster::QuestAPI::CheckForRadiantQuestCompletion(curspeaker.quest_key);
 			}
 			curspeaker = {};
 		}
-
 		return EventResult::kContinue;
 	}
 }

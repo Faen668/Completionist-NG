@@ -16,8 +16,6 @@ namespace CQFramework_Thirsk
 	CStageData StageData[]{
 		{"Thirsk_Quest06", CStageEnum::kDone, 100, 0},
 	};
-	
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -27,12 +25,9 @@ namespace CQFramework_Thirsk
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData);
+			QuestData[i].init()->initStageData(StageData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 19, QuestData[i].unique_identifier));
 
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

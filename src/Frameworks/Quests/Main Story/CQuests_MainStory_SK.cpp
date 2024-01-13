@@ -9,7 +9,7 @@ namespace CQFramework_SK
 		/*02*/ {"MSQ_Quest02", CFlagEnum::kMain, CCompEnum::kStand, "MQ101"},
 		/*03*/ {"MSQ_Quest03", CFlagEnum::kMain, CCompEnum::kStand, "MQ102"},
 		/*04*/ {"MSQ_Quest04", CFlagEnum::kMain, CCompEnum::kStand, "MQ103"},
-		/*05*/ {"MSQ_Quest05", CFlagEnum::kMain, CCompEnum::kStand, "MQ104"},
+		/*05*/ {"MSQ_Quest05", CFlagEnum::kMain, CCompEnum::kStage, "MQ104"},
 		/*06*/ {"MSQ_Quest06", CFlagEnum::kMain, CCompEnum::kStand, "MQ105"},
 		/*07*/ {"MSQ_Quest07", CFlagEnum::kMain, CCompEnum::kStand, "MQ105Ustengrav"},
 		/*08*/ {"MSQ_Quest08", CFlagEnum::kMain, CCompEnum::kStand, "MQ106"},
@@ -27,7 +27,10 @@ namespace CQFramework_SK
 		/*20*/ {"MSQ_Quest20", CFlagEnum::kMain, CCompEnum::kStand, "MQ305"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
+	//Completed Based on stage to also complete the whiterun thane quest.
+	CStageData StageData[]{
+		{"MSQ_Quest05", CStageEnum::kDone, 200},
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -37,9 +40,8 @@ namespace CQFramework_SK
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()->initQuestData(&ArrayData);
+			QuestData[i].init()->initStageData(StageData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 0, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

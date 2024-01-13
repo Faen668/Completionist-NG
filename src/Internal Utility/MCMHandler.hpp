@@ -10,7 +10,10 @@ namespace CHCMHandler
 	constexpr int32_t CI_Header = -8;
 	constexpr int32_t FL_Header = -9;
 
-	inline constexpr std::array<std::tuple<const char*, const char*, int32_t>, 80> MainMCMPagesDefs =
+	inline std::vector<std::tuple<std::string, std::string, uint32_t>> MainPatchesMCMPagesDefs{};
+	inline std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint32_t, bool, bool, bool>> MiscPatchesMCMPagesDefs{};
+
+	inline std::vector<std::tuple<const char*, const char*, int32_t>> MainMCMPagesDefs =
 	{ {
 		{"$MCMPageSettings", "", -1},
 		{"$MCMPageSettings3", "", -1},
@@ -98,7 +101,7 @@ namespace CHCMHandler
 		{"$MCMPageWyrmstooth", "Wyrmstooth.esp", 41},
 	} };
 
-	inline constexpr std::array < std::tuple < const char*, const char*, int32_t> , 109> MiscMCMPagesDefs =
+	inline std::vector< std::tuple<const char*, const char*, int32_t>> MiscMCMPagesDefs =
 	{ {
 		{"$Header9", "", -1},
 		{"$MCMPagePets", "", -1},
@@ -159,13 +162,18 @@ namespace CHCMHandler
 		{"$MCMPageAEnchantments", "", -1},
 		{"$MCMPageWEnchantments", "", -1},
 
+		{" ", "SL01AmuletsSkyrim.esp", -1},
+		{"$HeaderAmuletsofSkyrim", "SL01AmuletsSkyrim.esp", -1},
+		{"$MCMPageAmuletsofSkyrim1", "SL01AmuletsSkyrim.esp", -1},
+		{"$MCMPageAmuletsofSkyrim2", "SL01AmuletsSkyrim.esp", -1},
+		{"$MCMPageAmuletsofSkyrim3", "SL01AmuletsSkyrim.esp", -1},
+
 		{" ", "yumcheese.esp", -1},
 		{"$HeaderCheeseMod", "yumcheese.esp", -1},
 		{"$MCMPageCheese1", "yumcheese.esp", -1},
 		{"$MCMPageCheese2", "yumcheese.esp", -1},
 		{"$MCMPageCheese3", "yumcheese.esp", -1},
 		{"$MCMPageCheese4", "yumcheese.esp", -1},
-
 
 		{" ", "ccbgssse001-fish.esm", -1},
 		{"$HeaderFishing", "ccbgssse001-fish.esm", -1},
@@ -202,10 +210,12 @@ namespace CHCMHandler
 		{" ", "", MS_Header},
 		{"$Header8", "", MS_Header},
 		{"$MCMPageAdditionalHearthfireDolls", "AdditionalHearthfireDolls.esp", -1},
+		{"$MCMPageBadGremlins", "BGCollectables.esp", -1 },
 		{"$MCMPageCloaksOfSkyrim", "Cloaks.esp", -1},
 		{"$MCMPageClockwork", "Clockwork.esp", -1},
 		{"$MCMPageFalskaar", "Falskaar.esm", -1},
 		{"$MCMPageHelgen", "Helgen Reborn.esp", -1},
+		{"$MCMPageICOW", "CollegeOfWinterholdImmersive.esp", -1 },
 		{"$MCMPageInnSoaps", "Inn Soaps.esp", -1},
 		{"$MCMPageJaysusSwords", "JSwordsD.esm", -1},
 		{"$MCMPageInterestingNPCs", "3DNPC.esp", -1},
@@ -216,6 +226,7 @@ namespace CHCMHandler
 		{"$MCMPagRoyalArmory", "PrvtIRoyalArmory.esp", -1},
 		{"$MCMPageTeldrynSerious", "TSR_TeldrynSerious.esp", -1},
 		{"$MCMPageBrotherhood", "The Brotherhood of Old.esp", -1},
+		{"$MCMPageTTB", "ArtifactsOfBoethiah.esp", -1 },
 		{"$MCMPageGrayCowl", "Gray Fox Cowl.esm", -1},
 		{"$MCMPageLull", "WheelsOfLull.esp", -1},
 		{"$MCMPageThunderchild", "Thunderchild - Epic Shout Package.esp", -1},
@@ -241,8 +252,17 @@ namespace CHCMHandler
 
 		static int32_t GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
 		static int32_t GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
-
+		static bool GetHeaderRequired(RE::StaticFunctionTag*, std::string mcmpage, int32_t header);
 		static void BuildMCMPages(RE::StaticFunctionTag*);
+		static void AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
+		static void AddMiscPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint32_t, bool, bool, bool>>);
+		static int32_t GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string MCMPage);
+
+		static int32_t GetValidMiscPatchPageIDForItems(RE::StaticFunctionTag*, std::string MCMPage);
+		static int32_t GetValidMiscPatchPageIDForBooks(RE::StaticFunctionTag*, std::string MCMPage);
+		static int32_t GetValidMiscPatchPageIDForMapMa(RE::StaticFunctionTag*, std::string MCMPage);
+
+		static bool IsSettingsPage(RE::StaticFunctionTag*, std::string MCMPage);
 		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
 	};
 }

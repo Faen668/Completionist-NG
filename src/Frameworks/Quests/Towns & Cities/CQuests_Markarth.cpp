@@ -9,7 +9,7 @@ namespace CQFramework_Markarth
 		{"Markarth_Quest01", CFlagEnum::kSide, CCompEnum::kStage, "WIAddItem07"},
 		{"Markarth_Quest02", CFlagEnum::kSide, CCompEnum::kStage, "FreeformMarkarthN"},
 		{"Markarth_Quest03", CFlagEnum::kSide, CCompEnum::kStage, "FreeformMarkarthD"},
-		{"Markarth_Quest04", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor151"},
+		{"Markarth_Quest04", CFlagEnum::kSide, CCompEnum::kFavor, "Favor151"},
 		{"Markarth_Quest05", CFlagEnum::kSide, CCompEnum::kStage, "FreeformMarkarthE"},
 		{"Markarth_Quest06", CFlagEnum::kSide, CCompEnum::kStage, "FreeformMarkarthO"},
 		{"Markarth_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "MS02"},
@@ -22,25 +22,28 @@ namespace CQFramework_Markarth
 		{"Markarth_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "dunNchuandZelQst"},
 		{"Markarth_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "DA11Intro"},
 		{"Markarth_Quest16", CFlagEnum::kSide, CCompEnum::kStand, "DA11"},
-		{"Markarth_Quest17", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor013"},
-		{"Markarth_Quest18", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor001"},
-		{"Markarth_Quest19", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor157"},
-		{"Markarth_Quest20", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor017"},
+		{"Markarth_Quest17", CFlagEnum::kSide, CCompEnum::kFavor, "Favor013"},
+		{"Markarth_Quest18", CFlagEnum::kSide, CCompEnum::kFavor, "Favor001"},
+		{"Markarth_Quest19", CFlagEnum::kSide, CCompEnum::kFavor, "Favor157"},
+		{"Markarth_Quest20", CFlagEnum::kSide, CCompEnum::kFavor, "Favor017"},
 		{"Markarth_Quest21", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsBeggars"},
 		{"Markarth_Quest22", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsDrunks"},
 		{"Markarth_Quest23", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsDrunks"},
-		{"Markarth_Quest24", CFlagEnum::kSide, CCompEnum::kThane, "FavorJarlsMakeFriends"},
+		{"Markarth_Quest24", CFlagEnum::kSide, CCompEnum::kThane, "Favor250"},
+	};
+
+	CFavorData FavorData[]{
+		{"Markarth_Quest04", 0x06C825, "Skyrim.esm", 0x01339f, "Skyrim.esm", CQuestProcessor::kExcluded},
+		{"Markarth_Quest17", 0x0CA20A, "Skyrim.esm", 0x0133ae, "Skyrim.esm", CQuestProcessor::kExcluded},
+		{"Markarth_Quest18", 0x0403B1, "Skyrim.esm", 0x09a7a8, "Skyrim.esm", CQuestProcessor::kExcluded},
+		{"Markarth_Quest19", 0x04B766, "Skyrim.esm", 0x01339f, "Skyrim.esm", CQuestProcessor::kExcluded},
+		{"Markarth_Quest20", 0x0CA213, "Skyrim.esm", 0x013390, "Skyrim.esm", CQuestProcessor::kExcluded},
 	};
 
 	CRadiantData RadiantData[]{
-		{"Markarth_Quest04",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor151Igmund" },
-		{"Markarth_Quest17",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor013Omluag" },
-		{"Markarth_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor001Banning" },
-		{"Markarth_Quest19",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor157Igmund" },
-		{"Markarth_Quest20",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor017Cosnach" },
-		{"Markarth_Quest21",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarDegaine" },
-		{"Markarth_Quest22",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorDrunksDegaine" },
-		{"Markarth_Quest23",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorDrunksCosnach" },
+		{"Markarth_Quest21",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"Markarth_Quest22",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"Markarth_Quest23",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
@@ -56,15 +59,13 @@ namespace CQFramework_Markarth
 	};
 
 	CDrunkData DrunkData[]{
-		{"Markarth_Quest22", 0x0072EA2, 0x001F325, "Skyrim.esm", "Completionist_FavorDrunksDegaine" },
-		{"Markarth_Quest23", 0x0072EA2, 0x00198FA, "Skyrim.esm", "Completionist_FavorDrunksCosnach" },
+		{"Markarth_Quest22", 0x0072EA2, 0x001F325, "Skyrim.esm", CQuestProcessor::kExcluded},
+		{"Markarth_Quest23", 0x0072EA2, 0x00198FA, "Skyrim.esm", CQuestProcessor::kExcluded},
 	};
 
 	CThaneData ThaneData[]{
 		{"Markarth_Quest24", "ReachImpGetOutofJail", "ReachSonsGetOutofJail"},
 	};
-
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -75,13 +76,13 @@ namespace CQFramework_Markarth
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&ArrayData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData)
-				->initDrunkData(DrunkData);
+				->initDrunkData(DrunkData)
+				->initFavorData(FavorData)
+				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 9, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

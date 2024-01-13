@@ -1,5 +1,6 @@
 #include "Serialization.hpp"
 #include "CFramework_WYR.hpp"
+#include "Internal Utility/Events.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 
@@ -28,9 +29,9 @@ namespace CPatch_WYR
 		{"Wyrmstooth_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "WTWrapMeUp"},
 		{"Wyrmstooth_Quest15", CFlagEnum::kSide, CCompEnum::kStand, "WTBlindRobbersCache"},
 		{"Wyrmstooth_Quest16", CFlagEnum::kSide, CCompEnum::kStand, "WTElmeraFavor"},
+		{"Wyrmstooth_Quest17", CFlagEnum::kSide, CCompEnum::kStand, "WTTheNakedNord"},
+		
 	};
-
-	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray, &Quest_KeysArray };
 
 	// clang-format off
 
@@ -69,13 +70,16 @@ namespace CPatch_WYR
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallQuestFramework();
 		CHandler::InstallSearchTerms();
 
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
+
+		CEvents::EventHandler::RegisterForEvent_OnBooksReadEvent(CHandler::OnBooksReadEvent);
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(CHandler::OnMenuOpenCloseEvent);
+		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 		PatchesInstalled += 1;
 	}
 
@@ -87,144 +91,92 @@ namespace CPatch_WYR
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData);
+			QuestData[i].init()->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 41, QuestData[i].unique_identifier));
 		}
-		Quest_BoolArray = std::vector<bool>(CArraySize, false);
 	};
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
-
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-
-		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || a_event->newContainer != 0x00014 || !CPatch_WYR_Items::Data.HasForm(a_event->baseObj)) { return EventResult::kContinue; }
+		if (a_event->newContainer != 0x00014 || !ItemData.HasForm(a_event->baseObj)) { return; }
 
-		auto base = CPatch_WYR_Items::Data.GetBase(a_event->baseObj) ? CPatch_WYR_Items::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-		CHandler::ProcessFoundForm(base, a_event->baseObj, "NotifyItems");
-		return EventResult::kContinue;
+		auto base = ItemData.GetBase(a_event->baseObj) ? ItemData.GetBase(a_event->baseObj) : a_event->baseObj;
+		CHandler::ProcessFoundForm(base, a_event->baseObj, ItemData, Items_FormArray, &Items_BoolArray, &Items_EntriesFound, log::kCollected, "NotifyItems");
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( Books Read ) ----------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) {
+	void CHandler::OnBooksReadEvent(RE::BooksRead::Event const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || !CPatch_WYR_Books::Data.HasForm(a_event->book->GetFormID())) { return RE::BSEventNotifyControl::kContinue; }
+		if (!BookData.HasForm(a_event->book->GetFormID())) { return; }
 
-		auto base = CPatch_WYR_Books::Data.GetBase(a_event->book->GetFormID()) ? CPatch_WYR_Books::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-		CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), "NotifyBooks");
-		return EventResult::kContinue;
+		auto base = BookData.GetBase(a_event->book->GetFormID()) ? BookData.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), BookData, Books_FormArray, &Books_BoolArray, &Books_EntriesFound, FrameworkAPI::GetBookLogType(a_event->book), "NotifyBooks");
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Menu Open ) --------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
+	void CHandler::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
-
-		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening && CPatch_WYR_Books::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening && BookData.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 			if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-				auto base = CPatch_WYR_Books::Data.GetBase(target) ? CPatch_WYR_Books::Data.GetBase(target) : target;
-				CHandler::ProcessFoundForm(base, target, "NotifyBooks");
-				return EventResult::kContinue;
+				auto base = BookData.GetBase(target) ? BookData.GetBase(target) : target;
+				CHandler::ProcessFoundForm(base, target, BookData, Books_FormArray, &Books_BoolArray, &Books_EntriesFound, log::kBook, "NotifyBooks");
+				return;
 			}
-			return EventResult::kContinue;
+			return;
 		}
 
 		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
 
 			for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i, false);
 			}
 		}
-		return EventResult::kContinue;
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_variable) {
+	void CHandler::ProcessFoundForm(ProcessFoundFormArgs, std::string a_section) {
 
-		if (a_variable == "NotifyBooks") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_WYR_Books::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, a_variable);
-				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_WYR_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
-				}
-				else {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_WYR_Books::Data.GetForm(a_eventID)->GetName());
-				}
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_WYR_Books::Data.GetAllVariations()) {
-				if (CPatch_WYR_Books::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(Books_FormArray, CPatch_WYR_Books::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(Books_FormArray.begin(), t_pos);
-			Books_BoolArray[b_pos] = true;
-
-			Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
-			return;
+		if (!FoundItemData.HasForm(a_eventID)) {
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, data.GetForm(a_eventID)->GetName());
+			FrameworkAPI::SendNotification(msg, a_section);
+			FrameworkAPI::AddNewEventToLog(eventHandle, data.GetForm(a_eventID)->GetName());
 		}
 
-		if (a_variable == "NotifyItems") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_WYR_Items::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, a_variable);
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_WYR_Items::Data.GetForm(a_eventID)->GetName());
+		FoundItemData.AddForm(a_baseID);
+		for (auto var : data.GetAllVariations()) {
+			if (data.GetBase(var) == a_baseID) {
+				FoundItemData.AddForm(var);
 			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_WYR_Items::Data.GetAllVariations()) {
-				if (CPatch_WYR_Items::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(Items_FormArray, CPatch_WYR_Items::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(Items_FormArray.begin(), t_pos);
-			Items_BoolArray[b_pos] = true;
-
-			Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
-			return;
 		}
+
+		bools->at(std::distance(forms.begin(), std::ranges::find(forms, data.GetForm(a_baseID)))) = true;
+		*found = std::ranges::count(*bools, true);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos) {
+	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, bool from_hook) {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
@@ -233,9 +185,12 @@ namespace CPatch_WYR
 				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 					MapMa_BoolArray[a_pos] = true;
 					FoundItemData_NoShow.AddForm(a_form);
-					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
+					if (from_hook)
+					{
+						auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
+						FrameworkAPI::SendNotification(msg, "NotifySpecial");
+						FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
+					}
 				}
 			}
 		}
@@ -250,7 +205,7 @@ namespace CPatch_WYR
 	{
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
 			if (DKUtil::string::iequals(nam, MapMa_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_FormArray[i])) {
-				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i, true);
 				return;
 			}
 		}
@@ -262,16 +217,16 @@ namespace CPatch_WYR
 
 	void CHandler::InjectAndCompileData() {
 
-		CPatch_WYR_Items::Data.CompileFormArray(CPatch_WYR::Items, modname);
-		CPatch_WYR_Books::Data.CompileFormArray(CPatch_WYR::Books, modname);
-		CPatch_WYR_MapMa::Data.CompileFormArray(CPatch_WYR::MapMa, modname);
+		ItemData.CompileFormArray(CPatch_WYR::Items, modname);
+		BookData.CompileFormArray(CPatch_WYR::Books, modname);
+		MapsData.CompileFormArray(CPatch_WYR::MapMa, modname);
 
-		CPatch_WYR_Items::Data.MergeAsCollectable();
-		CPatch_WYR_Books::Data.MergeAsCollectable();
+		ItemData.MergeAsCollectable();
+		BookData.MergeAsCollectable();
 
-		CPatch_WYR_Items::Data.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
-		CPatch_WYR_Books::Data.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray, false, 1);
-		CPatch_WYR_MapMa::Data.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, false, 2);
+		ItemData.Populate(Items_NameArray, Items_FormArray, Items_BoolArray, Items_TextArray);
+		BookData.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray, false, 1);
+		MapsData.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, false, 2);
 
 		Items_EntriesTotal = Items_FormArray.size();
 		Items_EntriesFound = std::ranges::count(Items_BoolArray, true);
@@ -283,16 +238,20 @@ namespace CPatch_WYR
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
+
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : Items_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageWyrmstooth", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < Items_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Items_FormArray[i], Items_NameArray[i], "$MCMPageWyrmstooth", std::to_underlying(EntryCategory::kItem)));
 		}
 		for (auto i = 0; i < Books_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageWyrmstooth", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_FormArray[i], Books_NameArray[i], "$MCMPageWyrmstooth", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
 		}
-		for (auto& name : MapMa_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageWyrmstooth", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_FormArray[i], MapMa_NameArray[i], "$MCMPageWyrmstooth", std::to_underlying(EntryCategory::kMapM)));
 		}
 	}
 
@@ -305,7 +264,7 @@ namespace CPatch_WYR
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
 		for (auto i = 0; i < Items_FormArray.size(); i++) {
-			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &CPatch_WYR_Items::Data);
+			Items_BoolArray[i] = FrameworkAPI::IsItemKnown(Items_FormArray[i], &ItemData);
 		}
 
 		for (auto i = 0; i < Books_FormArray.size(); i++) {

@@ -4,18 +4,18 @@
 namespace CQFramework_ThievesGuild 
 {
 	CRadiantData RadiantData[]{
-		/*22*/ {"ThievesGuild_Quest22",  CRadiantEnum::kRadiant_THG, 0x060990, 0x000000, 200, "Completionist_TGR_Bedlam" },
-		/*23*/ {"ThievesGuild_Quest23",  CRadiantEnum::kRadiant_THG, 0x02893B, 0x000000, 200, "Completionist_TGR_Burglary" },
-		/*24*/ {"ThievesGuild_Quest24",  CRadiantEnum::kRadiant_THG, 0x028922, 0x000000, 200, "Completionist_TGR_Fishing" },
-		/*25*/ {"ThievesGuild_Quest25",  CRadiantEnum::kRadiant_THG, 0x02893E, 0x000000, 200, "Completionist_TGR_Heist" },
-		/*26*/ {"ThievesGuild_Quest26",  CRadiantEnum::kRadiant_THG, 0x06098E, 0x000000, 200, "Completionist_TGR_Numbers" },
-		/*27*/ {"ThievesGuild_Quest27",  CRadiantEnum::kRadiant_THG, 0x015D24, 0x000000, 200, "Completionist_TGR_Shill" },
-		/*28*/ {"ThievesGuild_Quest28",  CRadiantEnum::kRadiant_THG, 0x028936, 0x000000, 200, "Completionist_TGR_Sweep" },
+		/*22*/ {"ThievesGuild_Quest22", CRadiantEnum::kRadiant_THG, 0x060990, 0x000000, 200},
+		/*23*/ {"ThievesGuild_Quest23", CRadiantEnum::kRadiant_THG, 0x02893B, 0x000000, 200},
+		/*24*/ {"ThievesGuild_Quest24", CRadiantEnum::kRadiant_THG, 0x028922, 0x000000, 200},
+		/*25*/ {"ThievesGuild_Quest25", CRadiantEnum::kRadiant_THG, 0x02893E, 0x000000, 200},
+		/*26*/ {"ThievesGuild_Quest26", CRadiantEnum::kRadiant_THG, 0x06098E, 0x000000, 200},
+		/*27*/ {"ThievesGuild_Quest27", CRadiantEnum::kRadiant_THG, 0x015D24, 0x000000, 200},
+		/*28*/ {"ThievesGuild_Quest28", CRadiantEnum::kRadiant_THG, 0x028936, 0x000000, 200},
 	};
 
 	CStageData StageData[]{
-		{"ThievesGuild_Quest15", CStageEnum::kPast, 199, 0},
-		{"ThievesGuild_Quest16", CStageEnum::kPast, 199, 0},
+		{"ThievesGuild_Quest15", CStageEnum::kDone, 200, 0},
+		{"ThievesGuild_Quest16", CStageEnum::kDone, 200, 0},
 	};
 
 	CQuestData QuestData[]
@@ -51,8 +51,6 @@ namespace CQFramework_ThievesGuild
 		/*28*/ {"ThievesGuild_Quest28", CFlagEnum::kRadi, CCompEnum::kGlobl, "TGRHC"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -61,12 +59,8 @@ namespace CQFramework_ThievesGuild
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData)
-				->initRadiantData(RadiantData);
+			QuestData[i].init()->initStageData(StageData)->initRadiantData(RadiantData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 25, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

@@ -4,9 +4,9 @@
 namespace CQFramework_CC1 
 {
 	CRadiantData RadiantData[]{
-		{"CC01_Quest21",  CRadiantEnum::kRadiant_Fsh, 0x000C2F,0,200, "Completionist_Fishing_Rad2"},
-		{"CC01_Quest22",  CRadiantEnum::kRadiant_Fsh, 0x000C8C,0,200, "Completionist_Fishing_Rad3" },
-		{"CC01_Quest23",  CRadiantEnum::kRadiant_Fsh, 0x000B98,0,200, "Completionist_Fishing_Rad1" },
+		{"CC01_Quest21", CRadiantEnum::kRadiant_Fsh, 0x000C2F,0,200},
+		{"CC01_Quest22", CRadiantEnum::kRadiant_Fsh, 0x000C8C,0,200},
+		{"CC01_Quest23", CRadiantEnum::kRadiant_Fsh, 0x000B98,0,200},
 	};
 
 	CQuestData QuestData[] {
@@ -36,19 +36,21 @@ namespace CQFramework_CC1
 		{"CC01_Quest23", CFlagEnum::kRadi, CCompEnum::kGlobl, "ccBGSSSE001_Radiant_1"},
 	};
 
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework()
-	{		
+	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()->initQuestData(&QuestArrays)->initRadiantData(RadiantData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 4, QuestData[i].unique_identifier));
+			auto quest = static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(QuestData[i].editor_id));
+			if (quest)
+			{
+				QuestData[i].init()->initRadiantData(RadiantData)->finalize();
+				CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 4, QuestData[i].unique_identifier));
+				QuestsInstalled++;
+			}
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

@@ -4,16 +4,16 @@
 namespace CQFramework_CC3 
 {
 	CStageData StageData[] {
-		{"CC03_Quest09", CStageEnum::kDone, 10		, 0 },
-		{"CC03_Quest15", CStageEnum::kDone, 25		, 0 },
-		{"CC03_Quest16", CStageEnum::kDone, 40		, 0 },
-		{"CC03_Quest19", CStageEnum::kDone, 100		, 0 },
-		{"CC03_Quest20", CStageEnum::kDone, 20		, 0 },
-		{"CC03_Quest20", CStageEnum::kDone, 20		, 0 },
-		{"CC03_Quest23", CStageEnum::kDone, 20		, 0 },
-		{"CC03_Quest26", CStageEnum::kDone, 171		, 0 },
-		{"CC03_Quest28", CStageEnum::kDone, 500		, 1000},
-		{"CC03_Quest33", CStageEnum::kDone, 20		, 0 },
+		{"CC03_Quest09", CStageEnum::kDone, 10},
+		{"CC03_Quest15", CStageEnum::kDone, 25},
+		{"CC03_Quest16", CStageEnum::kDone, 40},
+		{"CC03_Quest19", CStageEnum::kDone, 100},
+		{"CC03_Quest20", CStageEnum::kDone, 20},
+		{"CC03_Quest20", CStageEnum::kDone, 20},
+		{"CC03_Quest23", CStageEnum::kDone, 20},
+		{"CC03_Quest26", CStageEnum::kDone, 171},
+		{"CC03_Quest28", CStageEnum::kDone, 500, 1000},
+		{"CC03_Quest33", CStageEnum::kDone, 20},
 	};
 
 	CQuestData QuestData[] {
@@ -54,9 +54,6 @@ namespace CQFramework_CC3
 		{"CC03_Quest34", CFlagEnum::kMain, CCompEnum::kStand, "ccBGSSSE016_UmbraMainQuest"},
 		{"CC03_Quest35", CFlagEnum::kMain, CCompEnum::kStand, "ccMTYSSE002_Quest"},
 	};
-
-	CArrayData QuestArrays{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	std::array<int, 4> RequiemExclusions = { 5,11,13,35 };
 	std::array<int, 9> SkyExtCExclusions = { 0,1,7,14,15,18,22,25 };
 
@@ -75,7 +72,7 @@ namespace CQFramework_CC3
 			if (RequiemInstalled && std::find(RequiemExclusions.begin(), RequiemExclusions.end(), i) != RequiemExclusions.end())
 			{
 				INFO("Excluded quest {} Due To 'Requiem'", QuestData[i].unique_identifier)
-				continue;
+					continue;
 			}
 
 			// Handle Exclusions for 'Skyrim Extended Cut - Saints and Seducers'
@@ -85,9 +82,13 @@ namespace CQFramework_CC3
 				continue;
 			}
 
-			QuestData[i].init()->initQuestData(&QuestArrays)->initStageData(StageData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 6, QuestData[i].unique_identifier));
+			auto quest = static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(QuestData[i].editor_id));
+			if (quest)
+			{
+				QuestData[i].init()->initStageData(StageData)->finalize();
+				CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 6, QuestData[i].unique_identifier));
+				QuestsInstalled++;
+			}
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

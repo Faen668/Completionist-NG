@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SKSE\API.h>
-
-namespace BeggarQuests
+namespace CQFramework_Beggars
 {
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -16,13 +14,7 @@ namespace BeggarQuests
 		EventResult ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
 		EventResult	ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override;
 
+		static void	InstallFramework();
 		static void EvaluateActivatedReference(RE::Actor* a_actor);
-
-		static void	Register() {
-
-			auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-			ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-			ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESActivateEvent>*>(CHandler::GetSingleton()));
-		};
 	};
 }

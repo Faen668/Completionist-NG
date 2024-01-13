@@ -1,24 +1,25 @@
 #include "CQuests_Companions.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
 
 namespace CQFramework_Companions 
 {
 	CRadiantData RadiantData[]{
-		/*06*/ {"Companions_Quest06",  CRadiantEnum::kRadiant_COM,		0x01CEEE, 0, 200, "Completionist_Companions_CR01" },
-		/*07*/ {"Companions_Quest07",  CRadiantEnum::kRadiant_COM,		0x025185, 0, 200, "Completionist_Companions_CR02" },
-		/*08*/ {"Companions_Quest08",  CRadiantEnum::kRadiant_COM,		0x025230, 0, 200, "Completionist_Companions_CR03" },
-		/*09*/ {"Companions_Quest09",  CRadiantEnum::kRadiant_COM,		0x0E3156, 0, 200, "Completionist_Companions_CR14" },
-		/*10*/ {"Companions_Quest10",  CRadiantEnum::kRadiant_COM,		0x025250, 0, 200, "Completionist_Companions_CR07" },
-		/*11*/ {"Companions_Quest11",  CRadiantEnum::kRadiant_COM,		0x0C18E1, 0, 200, "Completionist_Companions_CR06" },
-		/*12*/ {"Companions_Quest12",  CRadiantEnum::kRadiant_COM,		0x025231, 0, 200, "Completionist_Companions_CR04" },
-		/*13*/ {"Companions_Quest13",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Farkas" },
-		/*14*/ {"Companions_Quest14",  CRadiantEnum::kRadiant_DF1,		0,		  0, -1,  "Completionist_Companions_CR13Vilkas" },
-		/*15*/ {"Companions_Quest15",  CRadiantEnum::kRadiant_COM,		0x025251, 0, 200, "Completionist_Companions_CR08" },
-		/*16*/ {"Companions_Quest16",  CRadiantEnum::kRadiant_DF1,		0x09D700, 0, 200, "Completionist_Companions_CR11" },
-		/*17*/ {"Companions_Quest17",  CRadiantEnum::kRadiant_DF1,		0x09D6FC, 0, 200, "Completionist_Companions_CR10" },
-		/*18*/ {"Companions_Quest18",  CRadiantEnum::kRadiant_DF1,		0x025252, 0, 200, "Completionist_Companions_CR09" },
-		/*19*/ {"Companions_Quest19",  CRadiantEnum::kRadiant_DF3,		0x0E3145, 0, 200, "Completionist_Companions_CR12" },
-		/*20*/ {"Companions_Quest20",  CRadiantEnum::kRadiant_COM,		0x02522F, 0, 200, "Completionist_Companions_CR05" },
+		/*06*/ {"Companions_Quest06",  CRadiantEnum::kRadiant_COM, 0x01CEEE, 0, 200},
+		/*07*/ {"Companions_Quest07",  CRadiantEnum::kRadiant_COM, 0x025185, 0, 200},
+		/*08*/ {"Companions_Quest08",  CRadiantEnum::kRadiant_COM, 0x025230, 0, 200},
+		/*09*/ {"Companions_Quest09",  CRadiantEnum::kRadiant_COM, 0x0E3156, 0, 200},
+		/*10*/ {"Companions_Quest10",  CRadiantEnum::kRadiant_COM, 0x025250, 0, 200},
+		/*11*/ {"Companions_Quest11",  CRadiantEnum::kRadiant_COM, 0x0C18E1, 0, 200},
+		/*12*/ {"Companions_Quest12",  CRadiantEnum::kRadiant_COM, 0x025231, 0, 200},
+		/*13*/ {"Companions_Quest13",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, CQuestProcessor::kExcluded},
+		/*14*/ {"Companions_Quest14",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, CQuestProcessor::kExcluded},
+		/*15*/ {"Companions_Quest15",  CRadiantEnum::kRadiant_COM, 0x025251, 0, 200},
+		/*16*/ {"Companions_Quest16",  CRadiantEnum::kRadiant_DF1, 0x09D700, 0, 200},
+		/*17*/ {"Companions_Quest17",  CRadiantEnum::kRadiant_DF1, 0x09D6FC, 0, 200},
+		/*18*/ {"Companions_Quest18",  CRadiantEnum::kRadiant_DF1, 0x025252, 0, 200},
+		/*19*/ {"Companions_Quest19",  CRadiantEnum::kRadiant_DF3, 0x0E3145, 0, 200},
+		/*20*/ {"Companions_Quest20",  CRadiantEnum::kRadiant_COM, 0x02522F, 0, 200},
 	};
 
 	CQuestData QuestData[] {
@@ -44,10 +45,6 @@ namespace CQFramework_Companions
 		/*19*/ {"Companions_Quest19", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR12"},
 		/*20*/ {"Companions_Quest20", CFlagEnum::kRadi, CCompEnum::kGlobl, "CR05"},
 	};
-
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
-	CompanionsQuestData GlobalSetter{ 0x0E3163, "Skyrim.esm", "Completionist_Companions_CR13Farkas", "Completionist_Companions_CR13Vilkas" };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -75,12 +72,9 @@ namespace CQFramework_Companions
 				continue;
 			}
 
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initRadiantData(RadiantData);
+			QuestData[i].init()->initRadiantData(RadiantData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 22, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 
 	//---------------------------------------------------
@@ -94,21 +88,16 @@ namespace CQFramework_Companions
 		}
 
 		const auto* quest1 = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID);
-		const auto* quest2 = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(GlobalSetter.QuestID, GlobalSetter.QuestFN);
+		const auto* quest2 = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(0x0E3163, "Skyrim.esm");
 		
 		if (!quest1 || !quest2 || quest1->GetFormID() != quest2->GetFormID()) { 
 			return EventResult::kContinue; 
 		}
 
-		auto* farkasGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>(GlobalSetter.Global1);
-		auto* vilkasGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>(GlobalSetter.Global2);
+		auto* FarkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A693, "Skyrim.esm");
+		auto* VilkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A695, "Skyrim.esm");
 
-		INFO("Companions global setter got quest - [{}]", quest1->GetName());
-
-		auto* FarkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A693, GlobalSetter.QuestFN);
-		auto* VilkasRef = RE::TESDataHandler::GetSingleton()->LookupForm<RE::Actor>(0x01A695, GlobalSetter.QuestFN);
-
-		if (!FarkasRef || !VilkasRef || !farkasGlobal || !vilkasGlobal) {
+		if (!FarkasRef || !VilkasRef) {
 			return EventResult::kContinue;
 		}
 
@@ -117,14 +106,14 @@ namespace CQFramework_Companions
 
 				auto* reference = static_cast<RE::BGSRefAlias*>(alias);
 				if (reference && reference->GetActorReference()->formID == FarkasRef->formID) {
-					farkasGlobal->value++;
-					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", GlobalSetter.Global1, quest1->GetName(), FarkasRef->GetName());
+					CFramework_Master::RadiantCountData.IncreaseCount("Companions_Quest13", 1);
+					CQuestMaster::QuestAPI::CheckForRadiantQuestCompletion("Companions_Quest13");
 					return EventResult::kContinue;
 				}
 
 				if (reference && reference->GetActorReference()->formID == VilkasRef->formID) {
-					vilkasGlobal->value++;
-					INFO("Incrememnting Completion Count On Global - [{}] For Quest - [{}] With Actor - [{}]", GlobalSetter.Global2, quest1->GetName(), VilkasRef->GetName());
+					CFramework_Master::RadiantCountData.IncreaseCount("Companions_Quest14", 1);
+					CQuestMaster::QuestAPI::CheckForRadiantQuestCompletion("Companions_Quest14");
 					return EventResult::kContinue;
 				}
 			}

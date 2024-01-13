@@ -2,17 +2,15 @@
 
 namespace CQFramework_CW
 {	
-	inline std::vector<std::string>		NameArray;
-	inline std::vector<std::string>		IdenArray;
-	inline std::vector<std::string>		TextArray;
-	inline std::vector<std::string>		KeysArray;
-	inline std::vector<std::int32_t>	RadiArray;
-	inline std::vector<bool>			BoolArray;
-
-	class CHandler
+	using EventResult = RE::BSEventNotifyControl;
+	class CHandler : public RE::BSTEventSink<RE::TESQuestStageEvent>
 	{
 	public:
 		static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+
+		EventResult	ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;		
+		
+		static RE::BGSLocation* GetAliasLocation(RE::TESQuest* a_quest, uint32_t alias_id);
 		static void InstallFramework();
 	};
 }

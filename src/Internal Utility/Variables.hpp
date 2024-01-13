@@ -52,6 +52,7 @@ namespace CVariables
 	inline std::int32_t		V_Radiant_VigilantVal;
 	inline std::int32_t		V_Radiant_LegacyVal;
 	inline std::int32_t		V_Radiant_FishingVal;
+	inline std::int32_t		V_Radiant_BladesVal;
 
 	inline std::string 		V_NotificationText;
 	inline std::string		V_NotificationTextShout0;
@@ -74,9 +75,21 @@ namespace CVariables
 	inline bool				V_CellScanner_NUMB;
 	inline bool				V_CellScanner_DETA;
 
+	inline bool				V_CellScanner_ExcludeBooks;
+	inline bool				V_CellScanner_ExcludeArmor;
+	inline bool				V_CellScanner_ExcludeWeapons;
+	inline bool				V_CellScanner_ExcludeAlchemy;
+	inline bool				V_CellScanner_ExcludeMiscItems;
+	inline std::int32_t		V_CellScanner_ScanRange;
+
 	inline bool				V_FishingSpotMarkers;
 
 	inline bool				V_Debugging;
+
+	inline RE::BGSListForm* TCC_New;
+	inline RE::BGSListForm* TCC_FND;
+	inline RE::BGSListForm* TCC_DSP;
+	inline bool				TCC_Mode = false;
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -93,7 +106,8 @@ namespace CVariables
 		  static void Register();
 		  static void Update();
 
+		  static void SetFrameworkQuest(RE::StaticFunctionTag*, RE::TESQuest* a_quest);
 		  static bool IsDebuggingEnabled();
-		  static RE::BSScript::Variable* GetProperty(ScriptObjectPtr mcm, const char* a_prop);
+		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
 	};
 }

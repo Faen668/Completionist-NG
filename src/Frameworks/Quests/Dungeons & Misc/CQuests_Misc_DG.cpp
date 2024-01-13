@@ -4,10 +4,10 @@
 namespace CQFramework_Misc_DG 
 {
 	CStageData StageData[]{
-	{"Misc_DG_Quest00", CStageEnum::kDone, 60,  0, },
-	{"Misc_DG_Quest01", CStageEnum::kDone, 200,	0, },
-	{"Misc_DG_Quest03", CStageEnum::kDone, 255, 0, },
-	{"Misc_DG_Quest04", CStageEnum::kDone, 255, 0, },
+	{"Misc_DG_Quest00", CStageEnum::kDone, 60},
+	{"Misc_DG_Quest01", CStageEnum::kDone, 200},
+	{"Misc_DG_Quest03", CStageEnum::kDone, 255},
+	{"Misc_DG_Quest04", CStageEnum::kDone, 255},
 	};
 
 	CQuestData QuestData[] {
@@ -18,8 +18,6 @@ namespace CQFramework_Misc_DG
 	{"Misc_DG_Quest04", CFlagEnum::kSide,  CCompEnum::kStage, "DLC01SoulCairnHorseQuest2"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -28,11 +26,8 @@ namespace CQFramework_Misc_DG
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData);
+			QuestData[i].init()->initStageData(StageData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 30, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

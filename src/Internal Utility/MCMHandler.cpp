@@ -28,7 +28,17 @@ namespace CHCMHandler
 		a_vm->RegisterFunction("BuildMCMPages", "Completionist_Native", BuildMCMPages);
 		a_vm->RegisterFunction("GetSkyUIMCMPositionalIndex", "Completionist_Native", GetSkyUIMCMPositionalIndex);
 		a_vm->RegisterFunction("GetMCMPageIdentifierFromName", "Completionist_Native", GetMCMPageIdentifierFromName);
+		a_vm->RegisterFunction("GetValidMainPatchPageID", "Completionist_Native", GetValidMainPatchPageID);
+		a_vm->RegisterFunction("GetValidMiscPatchPageIDForItems", "Completionist_Native", GetValidMiscPatchPageIDForItems);
+		a_vm->RegisterFunction("GetValidMiscPatchPageIDForBooks", "Completionist_Native", GetValidMiscPatchPageIDForBooks);
+		a_vm->RegisterFunction("GetValidMiscPatchPageIDForMapMa", "Completionist_Native", GetValidMiscPatchPageIDForMapMa);
+		a_vm->RegisterFunction("IsSettingsPage", "Completionist_Native", IsSettingsPage);
+		a_vm->RegisterFunction("GetHeaderRequired", "Completionist_Native", GetHeaderRequired);
 		return true;
+	}
+
+	bool MCMAPI::IsSettingsPage(RE::StaticFunctionTag*, std::string a_page) {
+		return a_page == "" || a_page == " " || DKUtil::string::icontains(a_page, "MCMPageSettings") || DKUtil::string::icontains(a_page, "Header");
 	}
 
 	//---------------------------------------------------
@@ -56,11 +66,22 @@ namespace CHCMHandler
 		return -1;
 	}
 
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
 	std::int32_t MCMAPI::GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage)
 	{
 		for (auto& [page, mod, id] : MainMCMPagesDefs) {
 
 			if (strcmp(page, MCMPage.c_str()) == 0) {
+				return id;
+			}
+		}
+
+		for (auto& [page, mod, id] : MainPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), MCMPage.c_str()) == 0) {
 				return id;
 			}
 		}
@@ -84,6 +105,92 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
+	void MCMAPI::AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>> defs) {
+
+		MainPatchesMCMPagesDefs = defs;
+
+		for (auto& [page, mod, id] : defs) {
+			INFO("Quest Page Definition Added: {} - {} - {}", page, mod, id);
+		}
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	void MCMAPI::AddMiscPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint32_t, bool, bool, bool>> defs) {
+
+		MiscPatchesMCMPagesDefs = defs;
+
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : defs) {
+			INFO("Misc Page Definition Added: {} - {} - {} - {} - {}", page, mod, ItemsID, BooksID, MapMaID);
+		}
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int32_t MCMAPI::GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string a_page) {
+
+		for (auto& [page, mod, id] : MainPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), a_page.c_str()) == 0) {
+				return id;
+			}
+		}
+		return -1;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int32_t MCMAPI::GetValidMiscPatchPageIDForItems(RE::StaticFunctionTag*, std::string a_page) {
+
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : MiscPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), a_page.c_str()) == 0) {
+				return ItemsID;
+			}
+		}
+		return -1;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int32_t MCMAPI::GetValidMiscPatchPageIDForBooks(RE::StaticFunctionTag*, std::string a_page) {
+
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : MiscPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), a_page.c_str()) == 0) {
+				return BooksID;
+			}
+		}
+		return -1;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int32_t MCMAPI::GetValidMiscPatchPageIDForMapMa(RE::StaticFunctionTag*, std::string a_page) {
+
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : MiscPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), a_page.c_str()) == 0) {
+				return MapMaID;
+			}
+		}
+		return -1;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
 	void MCMAPI::BuildMCMPages(RE::StaticFunctionTag*) {
 
 		using namespace CFramework_Master;
@@ -91,9 +198,9 @@ namespace CHCMHandler
 		MainMCMPages.clear();
 		MiscMCMPages.clear();
 
-		auto cc1 = CQFramework_CC1::NameArray.size() > 0;
-		auto cc2 = CQFramework_CC2::NameArray.size() > 0;
-		auto cc3 = CQFramework_CC3::NameArray.size() > 0;
+		auto cc1 = CQFramework_CC1::QuestsInstalled > 0;
+		auto cc2 = CQFramework_CC2::QuestsInstalled > 0;
+		auto cc3 = CQFramework_CC3::QuestsInstalled > 0;
 		
 		auto ccB = CFramework_Master::FrameworkAPI::CCBooksInstalled();
 		auto ccI = CFramework_Master::FrameworkAPI::CCItemsInstalled();
@@ -116,6 +223,22 @@ namespace CHCMHandler
 			MainMCMPages.push_back(page);
 		}
 
+		if (MainPatchesMCMPagesDefs.size() > 0)
+		{
+			MainMCMPages.push_back(" ");
+			MainMCMPages.push_back("$HeaderU");
+		}
+
+		for (auto& [page, mod, id] : MainPatchesMCMPagesDefs) {
+
+			if (!DKUtil::string::is_empty(mod.c_str()) && !Serialization::CompletionistData::IsModInstalled(mod)) {
+				INFO("ERROR ON PAGE DEFINITIONS");
+				continue;
+			}
+
+			MainMCMPages.push_back(page);
+		}
+
 		for (auto& [page, mod, id] : MiscMCMPagesDefs) {
 
 			if ((id == CB_Header && !ccB) || (id == CL_Header && !ccL) || (id == ST_Header && !ms1) || (id == CI_Header && !ccI) || (id == FL_Header && !ms2) || (id == MS_Header && !ms0) ) {
@@ -123,6 +246,22 @@ namespace CHCMHandler
 			}
 
 			if (!DKUtil::string::is_empty(mod) && !Serialization::CompletionistData::IsModInstalled(mod)) {
+				continue;
+			}
+
+			MiscMCMPages.push_back(page);
+		}
+
+		if (MiscPatchesMCMPagesDefs.size() > 0)
+		{
+			MiscMCMPages.push_back(" ");
+			MiscMCMPages.push_back("$HeaderU");
+		}
+
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : MiscPatchesMCMPagesDefs) {
+
+			if (!DKUtil::string::is_empty(mod.c_str()) && !Serialization::CompletionistData::IsModInstalled(mod)) {
+				INFO("ERROR ON PAGE DEFINITIONS");
 				continue;
 			}
 
@@ -142,5 +281,29 @@ namespace CHCMHandler
 		case 1: return MiscMCMPages; break;
 		default: return std::vector<std::string>{}; break;
 		}
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	bool MCMAPI::GetHeaderRequired(RE::StaticFunctionTag*, std::string mcmpage, int32_t header)
+	{
+		for (auto& [page, mod, ItemsID, BooksID, MapMaID, itemsReq, booksReq, mapmaReq] : MiscPatchesMCMPagesDefs) {
+
+			if (strcmp(page.c_str(), mcmpage.c_str()) == 0) 
+			{
+				switch (header)
+				{
+				case 0: return itemsReq; break;
+				case 1: return booksReq; break;
+				case 2: return mapmaReq; break;
+
+				default:
+					return false; break;
+				}
+			}
+		}
+		return false;
 	}
 }

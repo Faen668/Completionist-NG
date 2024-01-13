@@ -254,7 +254,7 @@ namespace CFramework_MapMa {
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 		auto valid = (a_marker && MarkerIsValid(a_marker));
 		
-		if (!valid) { INFO("Marker is not valid"); return false; }
+		if (!valid) { return false; }
 		FoundItemData_NoShow.AddForm(a_form);
 
 		switch (a_section) {
@@ -294,6 +294,21 @@ namespace CFramework_MapMa {
 		}	
 
 		return true;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Marker Cleared Check ) ---
+	//---------------------------------------------------
+
+	bool CHandler::MarkerIsCleared(RE::StaticFunctionTag*, RE::TESForm* a_form) {
+		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+
+		if (a_marker) {			
+			auto* location = a_marker->GetEditorLocation1();
+			return location && (location->IsCleared() || location->everCleared);
+		}
+
+		return false;
 	}
 
 	//---------------------------------------------------
@@ -365,34 +380,23 @@ namespace CFramework_MapMa {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : MapMa_AG_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations1", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_AG_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_AG_FormArray[i], MapMa_AG_NameArray[i], "$MCMPageLocations1", std::to_underlying(EntryCategory::kMapM)));
 		}
-
-		for (auto& name : MapMa_HR_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations2", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_HR_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_HR_FormArray[i], MapMa_HR_NameArray[i], "$MCMPageLocations2", std::to_underlying(EntryCategory::kMapM)));
 		}
-
-		for (auto& name : MapMa_SZ_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations3", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_SZ_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_SZ_FormArray[i], MapMa_SZ_NameArray[i], "$MCMPageLocations3", std::to_underlying(EntryCategory::kMapM)));
 		}
-
-		for (auto& name : MapMa_DG_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations4", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_DG_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_DG_FormArray[i], MapMa_DG_NameArray[i], "$MCMPageLocations4", std::to_underlying(EntryCategory::kMapM)));
 		}
-
-		for (auto& name : MapMa_DB_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations5", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_DB_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_DB_FormArray[i], MapMa_DB_NameArray[i], "$MCMPageLocations5", std::to_underlying(EntryCategory::kMapM)));
 		}
-
-		for (auto& name : MapMa_CC_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageLocations6", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_CC_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_CC_FormArray[i], MapMa_CC_NameArray[i], "$MCMPageLocations6", std::to_underlying(EntryCategory::kMapM)));
 		}
 	}
 
