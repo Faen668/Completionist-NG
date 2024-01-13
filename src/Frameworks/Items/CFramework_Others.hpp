@@ -1,28 +1,14 @@
 #pragma once
 #include "Serialization.hpp"
-
-namespace CFramework_Others_VC {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_PC {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_VM {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_PM {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Others_SB {
-	inline Serialization::CompletionistData Data;
-}
+#define ProcessFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, Serialization::CompletionistData data, std::vector<RE::TESForm*> forms, std::vector<bool>* bools, std::int32_t* found, Serialization::CompletionistLog::logType eventHandle
 
 namespace CFramework_Others
 {
+	inline Serialization::CompletionistData ItemDataVC;
+	inline Serialization::CompletionistData ItemDataPC;
+	inline Serialization::CompletionistData ItemDataVM;
+	inline Serialization::CompletionistData ItemDataPM;
+	inline Serialization::CompletionistData ItemDataSB;
 
 	inline std::vector<std::string> VC_NameArray;
 	inline std::vector<std::string> VC_TextArray;
@@ -59,26 +45,20 @@ namespace CFramework_Others
 	inline std::int32_t SB_EntriesTotal;
 	inline std::int32_t SB_EntriesFound;
 
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
-		public RE::BSTEventSink<RE::TESActivateEvent> {
-
+	class CHandler
+	{
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
-		  EventResult			ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override;
+		static void			InstallFramework();
+		static void			UpdateFoundForms();
+		static void			InjectAndCompileData();
+		static void			BuildBaranziahArrays();
+		static void			InstallSearchTerms();
 
-		  static void			SinkEvents();
-		  static void			InstallFramework();
-		  static void			UpdateFoundForms();
-		  static void			InjectAndCompileData();
-		  static void			BuildBaranziahArrays();
-		  static void			InstallSearchTerms();
+		static void			ProcessFoundForm(RE::TESObjectREFR* a_object);
+		static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
 
-		  static void			ProcessFoundForm(RE::TESObjectREFR* a_object);
-		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+		static void			OnActivateEvent(RE::TESActivateEvent const* a_event);
+		static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 	};
 }

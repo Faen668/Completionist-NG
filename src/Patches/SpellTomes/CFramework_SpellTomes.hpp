@@ -1,38 +1,12 @@
 #pragma once
 
-namespace CPatch_SpellTomes_Apocalypse {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_SpellTomes_Odin {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_SpellTomes_Mysticism {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_SpellTomes_ForgottenMagic {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_SpellTomes_Triumvirate {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CPatch_SpellTomes
 {	
-
-	enum class patchID : int32_t
-	{
-		kpatch_Apocalypse = 0,
-		kpatch_ForgottenMagic = 1,
-		kpatch_Mysticism = 2,
-		kpatch_Odin = 3,
-		kpatch_Triumvirate = 4,
-
-		kTotal,
-	};
+	inline Serialization::CompletionistData BookDataA;
+	inline Serialization::CompletionistData BookDataO;
+	inline Serialization::CompletionistData BookDataM;
+	inline Serialization::CompletionistData BookDataF;
+	inline Serialization::CompletionistData BookDataT;
 
 	inline std::vector<std::string> Odin_A_NameArray;
 	inline std::vector<std::string> Odin_A_TextArray;
@@ -209,19 +183,21 @@ namespace CPatch_SpellTomes
 	inline std::int32_t Triumvirate_R_EntriesTotal;
 	inline std::int32_t Triumvirate_R_EntriesFound;
 
-	using EventResult = RE::BSEventNotifyControl;
+	enum class patchID : int32_t
+	{
+		kpatch_Apocalypse = 0,
+		kpatch_ForgottenMagic = 1,
+		kpatch_Mysticism = 2,
+		kpatch_Odin = 3,
+		kpatch_Triumvirate = 4,
 
-	class CHandler final :
+		kTotal,
+	};
 
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::BooksRead::Event> {
-
+	class CHandler
+	{
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
-		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
-
-		static void			SinkEvents();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
 
@@ -229,5 +205,7 @@ namespace CPatch_SpellTomes
 		static void			UpdateFoundForms();
 
 		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, patchID a_patch);
+		static void			OnBooksReadEvent(RE::BooksRead::Event const* a_event);
+		static void			OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 	};
 }

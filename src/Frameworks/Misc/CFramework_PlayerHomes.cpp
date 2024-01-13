@@ -293,19 +293,14 @@ namespace CFramework_PlayerHomes {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : VH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		for (auto i = 0; i < VH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VH_FormArray[i], VH_NameArray[i], "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
 		}
-
-		for (auto& name : CH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		for (auto i = 0; i < CH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(CH_FormArray[i], CH_NameArray[i], "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
 		}
-
-		for (auto& name : PH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
+		for (auto i = 0; i < PH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(PH_FormArray[i], PH_NameArray[i], "$MCMPageHouses", std::to_underlying(EntryCategory::kHome)));
 		}
 	}
 

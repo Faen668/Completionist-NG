@@ -4,12 +4,12 @@
 namespace CQFramework_Vampires 
 {
 	CRadiantData RadiantData[]{
-		/*04*/ {"Vampires_Quest04",  CRadiantEnum::kRadiant_DGU, 0x005702, 0x000000, 255, "Completionist_DLC1RV05" },
-		/*05*/ {"Vampires_Quest05",  CRadiantEnum::kRadiant_DGU, 0x0050B9, 0x000000, 255, "Completionist_DLC1RV02" },
-		/*06*/ {"Vampires_Quest06",  CRadiantEnum::kRadiant_DGU, 0x0050BD, 0x000000, 255, "Completionist_DLC1RV03" },
-		/*07*/ {"Vampires_Quest07",  CRadiantEnum::kRadiant_DGU, 0x00A29C, 0x000000, 255, "Completionist_DLC1RV07" },
-		/*08*/ {"Vampires_Quest08",  CRadiantEnum::kRadiant_DGU, 0x0056FD, 0x000000, 255, "Completionist_DLC1RV04" },
-		/*09*/ {"Vampires_Quest09",  CRadiantEnum::kRadiant_DGU, 0x004C1B, 0x000000, 255, "Completionist_DLC1RV01" },
+		/*04*/ {"Vampires_Quest04", CRadiantEnum::kRadiant_DGU, 0x005702, 0, 255},
+		/*05*/ {"Vampires_Quest05", CRadiantEnum::kRadiant_DGU, 0x0050B9, 0, 255},
+		/*06*/ {"Vampires_Quest06", CRadiantEnum::kRadiant_DGU, 0x0050BD, 0, 255},
+		/*07*/ {"Vampires_Quest07", CRadiantEnum::kRadiant_DGU, 0x00A29C, 0, 255},
+		/*08*/ {"Vampires_Quest08", CRadiantEnum::kRadiant_DGU, 0x0056FD, 0, 255},
+		/*09*/ {"Vampires_Quest09", CRadiantEnum::kRadiant_DGU, 0x004C1B, 0, 255},
 	};
 
 	CQuestData QuestData[]
@@ -26,8 +26,6 @@ namespace CQFramework_Vampires
 		/*09*/ {"Vampires_Quest09", CFlagEnum::kRadi, CCompEnum::kGlobl, "DLC1RV01"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -36,11 +34,8 @@ namespace CQFramework_Vampires
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initRadiantData(RadiantData);
+			QuestData[i].init()->initRadiantData(RadiantData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 26, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

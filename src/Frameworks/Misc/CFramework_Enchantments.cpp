@@ -12,7 +12,7 @@ namespace CFramework_Enchantments {
 
 	constexpr Serialization::FormArray Forms_VA = {
 	0x10FB70,0x10FB71,0x10FB7E,0x10FB84,0x10FB72,0x10FB73,0x10FB74,0x10FB75,
-	0x10FB77,0x10FB78,0x10FB79,0x10FB7A,0x10FB7B,0x10FB7C,0x10FB7F,0x10FB80,
+	0x10FB77,0x10FB78,0x10FB79,0x10FB7A,0x10FB7C,0x10FB7F,0x10FB80,
 	0x10FB81,0x10FB82,0x10FB83,0x10FB85,0x10FB87,0x10FB88,0x10FB89,0x10FB76,
 	0x10FB7D,0x10FB86,0x10FB8A,0x10FB8B,0x10FB8C,0x10FB8D,0x10FB8E,0x10FB8F,
 	0x10FB90, 
@@ -89,6 +89,12 @@ namespace CFramework_Enchantments {
 				auto* message = "=== Completionist === \n \n You are using 'Yes I'm Sure' but have not turned off the setting 'EnchantmentLearned' \n\n With this setting enabled, Completionist can not update enchantment tracking in real time and will default to updating when opening the MCM. \n\n You can disable the setting in the .toml file provided by 'Yes I'm Sure'.";
 				RE::DebugMessageBox(message);
 			}
+		}
+		else
+		{
+			auto& trampoline = SKSE::GetTrampoline();
+			_OnEnchantmentLearnt = trampoline.write_call<5>(RELOCATION_ID(50459, 51363).address() + REL::Relocate(0x1B1, 0x1B1), OnEnchantmentLearnt);
+			INFO("Enchantment Hook Installed");
 		}
 	}
 
@@ -307,6 +313,11 @@ namespace CFramework_Enchantments {
 
 	void CHandler::InjectAndCompileData() {
 
+		if (!Serialization::CompletionistData::IsModInstalled("Thaumaturgy.esp"))
+		{
+			CFramework_Enchantments_VA::Data.AddForm(0x10FB7B);
+		}
+
 		CFramework_Enchantments_VA::Data.CompileFormArray(CFramework_Enchantments::Forms_VA, "Skyrim.esm");
 		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_VW, "Skyrim.esm");
 		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_DW, "Dragonborn.esm");
@@ -330,29 +341,20 @@ namespace CFramework_Enchantments {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : VA_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		for (auto i = 0; i < VA_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VA_FormArray[i], VA_NameArray[i], "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
-
-		for (auto& name : SA_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		for (auto i = 0; i < SA_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SA_FormArray[i], SA_NameArray[i], "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
-
-		for (auto& name : VW_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		for (auto i = 0; i < VW_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VW_FormArray[i], VW_NameArray[i], "$MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
-
-		for (auto& name : SW_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		for (auto i = 0; i < SW_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SW_FormArray[i], SW_NameArray[i], "$MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
-
-		for (auto& name : NGA_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
+		for (auto i = 0; i < NGA_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(NGA_FormArray[i], NGA_NameArray[i], "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
 	}
 

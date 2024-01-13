@@ -9,7 +9,7 @@ namespace CQFramework_Solitude
 		{"Solitude_Quest01", CFlagEnum::kSide, CCompEnum::kStage, "SolitudeFreeform07"},
 		{"Solitude_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "BardsCollegeLute"},
 		{"Solitude_Quest03", CFlagEnum::kSide, CCompEnum::kStage, "SolitudeFreeform02"},
-		{"Solitude_Quest04", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor109"},
+		{"Solitude_Quest04", CFlagEnum::kSide, CCompEnum::kFavor, "Favor109"},
 		{"Solitude_Quest05", CFlagEnum::kSide, CCompEnum::kStand, "MS07"},
 		{"Solitude_Quest06", CFlagEnum::kSide, CCompEnum::kStage, "SolitudeFreeform01"},
 		{"Solitude_Quest07", CFlagEnum::kSide, CCompEnum::kStand, "BardsCollegeFlute"},
@@ -20,25 +20,28 @@ namespace CQFramework_Solitude
 		{"Solitude_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "DA15"},
 		{"Solitude_Quest13", CFlagEnum::kSide, CCompEnum::kStage, "SolitudeFreeform06"},
 		{"Solitude_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "MS06"},
-		{"Solitude_Quest15", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor013"},
-		{"Solitude_Quest16", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor205"},
-		{"Solitude_Quest17", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor104"},
+		{"Solitude_Quest15", CFlagEnum::kSide, CCompEnum::kFavor, "Favor013"},
+		{"Solitude_Quest16", CFlagEnum::kSide, CCompEnum::kFavor, "Favor205"},
+		{"Solitude_Quest17", CFlagEnum::kSide, CCompEnum::kFavor, "Favor104"},
 		{"Solitude_Quest18", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsBeggars"},
 		{"Solitude_Quest19", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsBeggars"},
 		{"Solitude_Quest20", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsBeggars"},
-		{"Solitude_Quest21", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor110"},
-		{"Solitude_Quest22", CFlagEnum::kSide, CCompEnum::kThane, "FavorJarlsMakeFriends"},
+		{"Solitude_Quest21", CFlagEnum::kSide, CCompEnum::kFavor, "Favor110"},
+		{"Solitude_Quest22", CFlagEnum::kSide, CCompEnum::kThane, "Favor252"},
+	};
+
+	CFavorData FavorData[]{
+		/*04*/ {"Solitude_Quest04", 0x04214B, "Skyrim.esm", 0x0132aa, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*15*/ {"Solitude_Quest15", 0x0CA20A, "Skyrim.esm", 0x01329d, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*16*/ {"Solitude_Quest16", 0x04D6DA, "Skyrim.esm", 0x01329c, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*17*/ {"Solitude_Quest17", 0x06FD64, "Skyrim.esm", 0x01325f, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*21*/ {"Solitude_Quest21", 0x0CA43B, "Skyrim.esm", 0x041fb8, "Skyrim.esm", CQuestProcessor::kExcluded},
 	};
 
 	CRadiantData RadiantData[]{
-		/*04*/ {"Solitude_Quest04",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor109Sybille" },
-		/*15*/ {"Solitude_Quest15",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor013OctieveSan" },
-		/*16*/ {"Solitude_Quest16",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor205Noster" },
-		/*17*/ {"Solitude_Quest17",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor104Ahtar" },
-		/*18*/ {"Solitude_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarDervenin" },
-		/*19*/ {"Solitude_Quest19",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarNoster" },
-		/*20*/ {"Solitude_Quest20",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarSvari" },
-		/*21*/ {"Solitude_Quest21",  CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor110Aldis" },
+		/*18*/ {"Solitude_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		/*19*/ {"Solitude_Quest19",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		/*20*/ {"Solitude_Quest20",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
@@ -54,8 +57,6 @@ namespace CQFramework_Solitude
 		{"Solitude_Quest22", "HaafingarImpGetOutofJail", "HaafingarSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -65,13 +66,13 @@ namespace CQFramework_Solitude
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&ArrayData)
 				->initRadiantData(RadiantData)
 				->initStageData(StageData)
-				->initThaneData(ThaneData);
+				->initThaneData(ThaneData)
+				->initFavorData(FavorData)
+				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 12, QuestData[i].unique_identifier));
 
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

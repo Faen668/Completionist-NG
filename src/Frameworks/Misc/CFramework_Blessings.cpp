@@ -232,19 +232,14 @@ namespace CFramework_Blessings {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : DS_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageDoomstone", std::to_underlying(EntryCategory::kStones)));
+		for (auto i = 0; i < DS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(DS_FormArray[i], DS_NameArray[i], "$MCMPageDoomstone", std::to_underlying(EntryCategory::kStones)));
 		}
-
-		for (auto& name : VS_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
+		for (auto i = 0; i < VS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VS_FormArray[i], VS_NameArray[i], "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
 		}
-
-		for (auto& name : WS_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
+		for (auto i = 0; i < WS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(WS_FormArray[i], WS_NameArray[i], "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
 		}
 	}
 

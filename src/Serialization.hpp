@@ -1,3 +1,4 @@
+#include "Structs.hpp"
 #include "DKUtil/Utility.hpp"
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/Variables.hpp"
@@ -11,11 +12,11 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1007,
+		kVersion = 1011,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
-constexpr auto DEFAULT_VARIATION_MAX = 12;
+constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 	using FormArray = RE::FormID[];
 	using Variation = std::pair<RE::FormID, std::array<RE::FormID, DEFAULT_VARIATION_MAX>>;
@@ -41,22 +42,16 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 		//---------------------------------------------------
 
 		[[nodiscard]] static bool IsModInstalled(std::string_view a_modname) noexcept
-		{
-			for (auto& file : RE::TESDataHandler::GetSingleton()->compiledFileCollection.files)
-			{
-				if (file && DKUtil::string::iequals(file->fileName, a_modname.data())) {
-					return true;
-				}	
+		{	
+			auto* handler = RE::TESDataHandler::GetSingleton();
+			if (!handler) {
+				return false;
 			}
 
-			for (auto& file : RE::TESDataHandler::GetSingleton()->compiledFileCollection.smallFiles)
-			{
-				if (file && DKUtil::string::iequals(file->fileName, a_modname.data())) {
-					return true;
-				}
-			}
-
-			return false;
+			auto* file1 = handler->LookupModByName(a_modname);
+			auto* file2 = handler->LookupLoadedModByName(a_modname);
+			auto* file3 = handler->LookupLoadedLightModByName(a_modname);
+			return file1 || file2 || file3;
 		}
 
 		//---------------------------------------------------
@@ -88,6 +83,86 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 			}
 
 			return a_marker->extraList.GetByType<RE::ExtraMapMarker>();
+		}
+
+		[[nodiscard]] static std::string GetMapMarkerName(RE::TESForm* a_form)
+		{
+			if (!a_form) {
+				return "";
+			}
+
+			auto a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+			if (!a_marker->extraList.HasType<RE::ExtraMapMarker>()) {
+				return "";
+			}
+
+			return a_marker->extraList.GetByType<RE::ExtraMapMarker>()->mapData->locationName.fullName.c_str();
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
+		[[nodiscard]] static auto IsFormExcludable(RE::TESObjectREFR* a_form) noexcept
+		{
+			return a_form && a_form->GetFile(0) && !GetFormIDHexString(a_form).starts_with("FF");
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
+		[[nodiscard]] static std::string GetFormIDHexString(RE::TESObjectREFR* a_form) noexcept
+		{
+			auto idx = GetModIndexFromForm(a_form);
+			auto fID = fmt::format("{:x}", a_form->GetFormID());
+			std::string pID = "";
+
+			if (fID.contains(idx))
+			{
+				pID = fmt::format(" - [{:s}]"sv, fID.substr(fID.find(idx) + idx.length()));
+			}
+
+			return std::format("{:08X}{:s}", a_form->GetFormID(), pID);
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
+		[[nodiscard]] static std::string GetFormOwner(RE::TESObjectREFR* a_form) noexcept
+		{
+			if (!a_form || !a_form->GetFile(0))
+			{
+				return "";
+			};
+
+			auto idx = GetModIndexFromForm(a_form);
+			return fmt::format("{:s}{:s}", a_form->GetFile(0)->GetFilename(), idx == "0" ? "" : fmt::format(" - [{:s}]",idx));
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
+		[[nodiscard]] static std::string GetModIndexFromForm(RE::TESObjectREFR* a_form) noexcept
+		{
+			if (!a_form || !a_form->GetFile(0))
+			{
+				return "";
+			};
+
+			return fmt::format("{:x}", a_form->GetFile(0)->GetPartialIndex());
+		}
+		
+		//---------------------------------------------------
+		//-- Utility Functions ( Has Keyword String ) -------
+		//---------------------------------------------------
+
+		[[nodiscard]] static auto HasKeywordString(RE::TESForm* a_form, const char* a_keyword) noexcept
+		{
+			const auto keywordForm = a_form->As<RE::BGSKeywordForm>();
+			return keywordForm && keywordForm->HasKeywordString(a_keyword);
 		}
 
 		//---------------------------------------------------
@@ -199,18 +274,20 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 		//Overload To Pass Through FormID With Base File And (1) Variation From A Seperate File (Also used to add variations to existing base files)
 		void AddForm(RE::FormID a_base, std::string_view a_bfilename, RE::FormID a_vari, std::string a_mfilename) noexcept
 		{
-			if (!IsModInstalled(a_bfilename) || !RE::TESDataHandler::GetSingleton()) {
+			auto* handler = RE::TESDataHandler::GetSingleton();
+
+			if (!IsModInstalled(a_bfilename) || !handler) {
 				INFO("Unable to Install {} from {} as {} is not installed.", a_vari, a_mfilename, a_bfilename);
 				return;
 			}
 
-			if (!IsModInstalled(a_mfilename) || !RE::TESDataHandler::GetSingleton()) {
+			if (!IsModInstalled(a_mfilename) || !handler) {
 				INFO("Unable to Install {} from {} as {} is not installed.", a_vari, a_mfilename, a_mfilename);
 				return;
 			}
 
-			auto base = RE::TESDataHandler::GetSingleton()->LookupFormID(a_base, a_bfilename);
-			auto vari = RE::TESDataHandler::GetSingleton()->LookupFormID(a_vari, a_mfilename);
+			auto base = handler->LookupFormID(a_base, a_bfilename);
+			auto vari = handler->LookupFormID(a_vari, a_mfilename);
 
 			if (!base || !vari || (HasForm(base) && HasForm(vari))) {
 				return;
@@ -739,6 +816,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 			kFish,
 			kBook,
 			kTome,
+			kQuestComplete,
 		};
 
 		// modifier
@@ -811,10 +889,31 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 			case Serialization::CompletionistLog::kTome:
 				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Tom");
 				break;
+			case Serialization::CompletionistLog::kQuestComplete:
+				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Qst");
+				break;
 			default:
 				break;
 			}
 			return std::string{};
+		}
+
+		std::string_view GetEntryTypeByLogPrefx(std::string_view entry, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc) {
+			using loc = CLocalisation::LocalisationAPI;
+
+			if (entry.contains(loc::GetLocStringByKey("LogPrefix_Qst"))) {
+				return qc;
+			}
+
+			if (entry.contains(loc::GetLocStringByKey("LogPrefix_Col"))) {
+				return ic;
+			}
+
+			if (entry.contains(loc::GetLocStringByKey("LogPrefix_Boo")) || entry.contains(loc::GetLocStringByKey("LogPrefix_Tom"))) {
+				return bc;
+			}
+
+			return sc;
 		}
 
 		// accessor
@@ -834,13 +933,14 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 		}
 
 		[[nodiscard]] std::vector<std::string> GetAllLoggedDates() noexcept
-		{
+		{		
 			std::vector<std::string> list;
 
 			for (auto& x : data)
 			{
 				list.push_back(x.first);
 			}
+
 			return list;
 		}
 
@@ -860,7 +960,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 			return list;
 		}
 
-		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date, bool b_time) noexcept
+		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date, bool b_prefix, bool b_colour, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc) noexcept
 		{
 			if (!HasDate(a_date)) {
 				return {};
@@ -869,11 +969,21 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 			std::vector<std::string> list;
 			auto raw = DKUtil::string::split(data[a_date.data()], "|");
 			for (auto& r : raw) {
-				if (!r.empty()) {
-					list.push_back(b_time ? fmt::format("{}", r) : fmt::format("{}", r.substr(8)));
+				if (!r.empty()) 
+				{
+					std::string x{};
+					auto colourprefix = !b_colour ? "" : GetEntryTypeByLogPrefx(r, qc, ic, bc, sc);
+
+					x = b_prefix ? fmt::format("{}", r) : fmt::format("{}", r.substr(r.find_first_of("~ ") + 2));
+
+					if (b_colour)
+					{
+						x = fmt::format("<font color='{}'>{}{}", colourprefix.data(), x, "</font>");
+					}
+
+					list.push_back(x);
 				}
 			}
-
 			return list;
 		}
 
@@ -957,6 +1067,377 @@ constexpr auto DEFAULT_VARIATION_MAX = 12;
 
 		std::unordered_map<std::string, std::string> data;
 	};
+
+	// new polymorphed data structure designed for Logging how many times quests have been completed
+	struct CompletionistRadiantCounter final : public ISerializable
+	{
+		void AddKey(std::string_view a_key) noexcept
+		{
+			if (!HasKey(a_key)) {
+				data.try_emplace(a_key.data());
+			}
+		}
+
+		// accessor
+		[[nodiscard]] bool HasKey(std::string_view a_key) noexcept
+		{
+			return data.contains(a_key.data());
+		}
+
+		void RemoveKey(std::string_view a_key) noexcept
+		{
+			if (HasKey(a_key)) {
+				data.erase(a_key.data());
+			}
+		}
+
+		void IncreaseCount(std::string_view a_key, int32_t value) noexcept
+		{
+			if (!HasKey(a_key)) {
+				AddKey(a_key);
+			}
+
+			data[a_key.data()]++;
+			INFO("Radiant Quest Handler Incremented key {} to a value of: {}", a_key, data[a_key.data()]);
+		}
+
+		void SetCount(std::string_view a_key, int32_t value) noexcept
+		{
+			if (!HasKey(a_key)) {
+				AddKey(a_key);
+			}
+
+			data[a_key.data()] = value;
+			INFO("Radiant Quest Handler set key {} to a value of: {}", a_key, data[a_key.data()]);
+		}
+
+		void DecreaseCount(std::string_view a_key, int32_t value) noexcept
+		{
+			if (!HasKey(a_key)) {
+				return;
+			}
+
+			if (data[a_key.data()] == 0) {
+				return;
+			}
+
+			data[a_key.data()]--;
+			INFO("Radiant Quest Handler Decreased key {} to a value of: {}", a_key, data[a_key.data()]);
+		}
+
+		void ResetCount(std::string_view a_key) noexcept
+		{
+			if (!HasKey(a_key)) {
+				return;
+			}
+
+			data[a_key.data()] = 0;
+			INFO("Radiant Quest Handler reset key {} to a value of: {}", a_key, data[a_key.data()]);
+		}
+
+		// accessor
+		[[nodiscard]] int32_t GetCount(std::string_view a_key) noexcept
+		{
+			return HasKey(a_key.data()) ? data[a_key.data()] : 0;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( SKSE APIs ) ------
+		//---------------------------------------------------
+
+		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			std::size_t total = data.size();
+			if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
+				ERROR("Failed to write serialized form data: size");
+			}
+
+			auto written = 0;
+			for (auto& [key, val] : data) {
+				std::size_t keySize{ key.size() };
+
+				if (!a_intfc->WriteRecordData(&keySize, sizeof(keySize))) {
+					ERROR("Failed to write serialized data: keysize");
+				}
+
+				if (!a_intfc->WriteRecordData(key.data(), keySize) || !a_intfc->WriteRecordData(val)) {
+					ERROR("Failed to write serialized form data: pair_data");
+				}
+
+				written++;
+			}
+
+			if (written != total) {
+				ERROR("Lost data during saving co-save!\nExpected: {}\nWritten: {}", total, written);
+			}
+
+			INFO("Saved {} to co-save with a size of - {}", a_name, total);
+		}
+
+		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
+		{
+			std::size_t total;
+			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
+				ERROR("Failed to read serialized form data: size");
+			}
+
+			auto read = 0;
+			for (auto i = 0; i < total; ++i) {
+				static std::string key;
+				static int32_t val;
+
+				std::size_t keySize;
+				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize))) {
+					ERROR("Failed to read serialized form data: keysize");
+				}
+
+				key.resize(keySize);
+				if (!a_intfc->ReadRecordData(key.data(), keySize) || (!a_intfc->ReadRecordData(val))) {
+					ERROR("Failed to read serialized form data: pair_data");
+				}
+
+				data.try_emplace(key, val);
+				read++;
+			}
+
+			if (read != total) {
+				INFO("Lost data while loading {} from co-save... Expected: {} Written: {}", a_name, total, read);
+			}
+
+			INFO("Loaded SKSE co-save {} with a size of - {}", a_name, data.size());
+		}
+
+		virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+		{
+			INFO("Reverting {} from co-save", a_name);
+			data.clear();
+		}
+
+		//---------------------------------------------------
+		//-- Completionist Serialization ( Members ) --------
+		//---------------------------------------------------
+
+		std::unordered_map<std::string, int32_t> data;
+	};
+
+	// new polymorphed data structure designed for holding excluded object references from the cell scanner.
+	struct CompletionistExcludedReferences final : public ISerializable
+	{
+
+	void AddReference(RE::FormID a_formID, std::string_view a_name, RE::FormID a_cell) noexcept
+	{
+		if (!HasReference(a_formID)) {
+			data.try_emplace(a_formID, std::make_pair(a_name.data(), a_cell));
+			INFO("Added Reference with new size of {}", data.size());
+		}
+	}
+
+	void AddReference(RE::TESObjectREFR* a_reference, std::string_view a_name, RE::FormID a_cell) noexcept
+	{
+		if (!HasReference(a_reference->GetFormID())) {
+			data.try_emplace(a_reference->GetFormID(), std::make_pair(fmt::format("{:s}{:s}"s, a_name.data(), "."), a_cell));
+			INFO("Added Reference with new size of {}", data.size());
+			INFO("Excluded Chest For: {}", a_name.data());
+		}
+	}
+
+	// accessor
+	[[nodiscard]] bool HasReference(RE::FormID a_formID) noexcept
+	{
+		return data.contains(a_formID);
+	}
+
+	void RemoveReference(RE::FormID a_formID) noexcept
+	{
+		if (HasReference(a_formID)) {
+			data.erase(a_formID);
+			INFO("Erased Reference with new size of {}", data.size());
+		}
+	}
+
+	[[nodiscard]] RE::TESObjectREFR* GetReference(RE::FormID a_formID) noexcept
+	{
+		return static_cast<RE::TESObjectREFR*>(RE::TESObjectREFR::LookupByID(a_formID));
+	}
+
+	// accessor
+	[[nodiscard]] bool IsSameCell(RE::FormID a_loc1, RE::FormID a_loc2) noexcept
+	{
+		return a_loc1 == a_loc2;
+	}
+
+	// accessor
+	[[nodiscard]] bool HasActorInSameCellAsForm(RE::TESObjectREFR* a_actor) noexcept
+	{	
+		const auto* cell = RE::PlayerCharacter::GetSingleton()->GetParentCell();
+		if (!cell) {
+			return false;
+		}
+		
+		const auto& rtd = cell->GetRuntimeData();
+		for (auto& ref : rtd.references) 
+		{
+			if (ref && ref.get() && ref.get()->GetFormID() == a_actor->GetFormID()) 
+			{
+				return true;
+			}
+		}  
+
+		return false;
+	}
+
+	[[nodiscard]] bool ShouldInclude(RE::FormID a_formID, RE::FormID a_loc1, RE::FormID a_loc2) noexcept
+	{
+		auto* refr = GetReference(a_formID);
+		if (!refr) { return false; }
+
+		return refr->As<RE::Actor>() ? HasActorInSameCellAsForm(refr) : IsSameCell(a_loc1, a_loc2);
+	}
+
+	std::vector<std::string> GetReferenceFormIDs(RE::FormID a_cell)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [formID, pair] : data)
+		{
+			if (ShouldInclude(formID, a_cell, pair.second))
+			{
+				list.push_back(std::format("{:08X}", formID));
+			}
+		}
+		return list;
+	}
+
+	std::vector<std::string> GetReferenceNames(RE::FormID a_cell)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [formID, pair] : data)
+		{
+			if (ShouldInclude(formID, a_cell, pair.second))
+			{
+				list.push_back(pair.first);
+			}
+		}
+		return list;
+	}
+
+	std::vector<RE::TESObjectREFR*> GetReferenceForms(RE::FormID a_cell)
+	{
+		std::vector<RE::TESObjectREFR*> list{};
+
+		for (auto& [formID, pair] : data)
+		{
+			if (ShouldInclude(formID, a_cell, pair.second))
+			{
+				auto* ref = static_cast<RE::TESObjectREFR*>(RE::TESObjectREFR::LookupByID(formID));
+
+				if (ref)
+				{
+					list.push_back(ref);
+				}
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist Serialization ( SKSE APIs ) ------
+	//---------------------------------------------------
+
+	virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+	{
+		std::size_t total = data.size();
+		if (!a_intfc->WriteRecordData(&total, sizeof(total))) {
+			ERROR("Failed to write serialized form data: size");
+		}
+
+		auto written = 0;
+		for (auto& [formID, pair] : data) {
+
+			std::size_t refNameSize{ pair.first.size() }, locationSize{ sizeof(pair.second) };
+			if (!a_intfc->WriteRecordData(&refNameSize, sizeof(refNameSize)) || !a_intfc->WriteRecordData(&locationSize, sizeof(locationSize))) {
+				ERROR("Failed to write serialized form data: pair_size");
+			}
+
+			if (!a_intfc->WriteRecordData(pair.first.data(), refNameSize) || !a_intfc->WriteRecordData(&pair.second, locationSize)) {
+				ERROR("Failed to write serialized form data: pair_data");
+			}
+
+			if (!a_intfc->WriteRecordData(&formID, sizeof(formID))) {
+				ERROR("Failed to write serialized form data: formID");
+			}
+
+			written++;
+		}
+
+		if (written != total) {
+			ERROR("Lost data during saving co-save!\nExpected: {}\nWritten: {}", total, written);
+		}
+
+		INFO("Saved {} to co-save with a size of - {}", a_name, total);
+	}
+
+	virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
+	{
+		std::size_t total;
+		if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
+			ERROR("Failed to read serialized form data: size");
+		}
+
+		auto read = 0;
+		for (auto i = 0; i < total; ++i)
+		{
+			static RE::FormID formID;
+			static RE::FormID cellID;
+			static std::string refName;
+			std::size_t refNameSize, locationSize;
+			if (!a_intfc->ReadRecordData(&refNameSize, sizeof(refNameSize)) || !a_intfc->ReadRecordData(&locationSize, sizeof(locationSize))) {
+				ERROR("Failed to read serialized form data: pair_size");
+			}
+
+			refName.resize(refNameSize);
+			if (!a_intfc->ReadRecordData(refName.data(), refNameSize) || (!a_intfc->ReadRecordData(&cellID, locationSize))) {
+				ERROR("Failed to read serialized form data: pair_data");
+			}
+
+			if (!a_intfc->ReadRecordData(&formID, sizeof(formID))) {
+				ERROR("Failed to read serialized form data: formID");
+			}
+
+			if (!formID || !a_intfc->ResolveFormID(formID, formID)) {
+				INFO("Failed to resolve formID {}", std::format("{:08X}", formID));
+				continue;
+			}
+
+			if (!cellID || !a_intfc->ResolveFormID(cellID, cellID)) {
+				INFO("Failed to resolve formID {}", std::format("{:08X}", cellID));
+				continue;
+			}
+
+			data.try_emplace(formID, std::make_pair(refName, cellID));
+			read++;
+		}
+
+		if (read != total) {
+			INFO("Lost data while loading {} from co-save... Expected: {} Written: {}", a_name, total, read);
+		}
+
+		INFO("Loaded {} from co-save with a size of - {}", a_name, data.size());
+	}
+
+	virtual void Revert([[maybe_unused]] SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept
+	{
+		INFO("Reverting {} from co-save", a_name);
+		data.clear();
+	}
+
+	//---------------------------------------------------
+	//-- Completionist Serialization ( Members ) --------
+	//---------------------------------------------------
+
+	std::map<RE::FormID, std::pair<std::string, RE::FormID>> data;
+	};
 }
 
 namespace CFramework_Master
@@ -968,7 +1449,7 @@ namespace CFramework_Master
 	extern Serialization::CompletionistKey CQuestKeys_Manual;
 	extern Serialization::CompletionistKey CQuestKeys_Stages;
 	extern Serialization::CompletionistLog LoggingData;
-}
+};
 
 namespace Serialization
 {
@@ -996,6 +1477,7 @@ namespace Serialization
 	static void LoadCallback([[maybe_unused]] SKSE::SerializationInterface* a_intfc) noexcept
 	{
 		using namespace CFramework_Master;
+
 		std::uint32_t type, version, length;
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
 			if (type != kHeader) {
@@ -1013,6 +1495,21 @@ namespace Serialization
 					if (version < 1006 && DKUtil::string::iequals(name, "LoggingData")) { 
 						INFO("Skipping loading of Logging Data.");
 						continue; 
+					}
+
+					if (version < 1008 && DKUtil::string::iequals(name, "RadiantCountData")) {
+						INFO("Skipping loading of Radiant Count Data.");
+						continue;
+					}
+
+					if (version < 1011 && DKUtil::string::iequals(name, "ExcludedCellScannerRefs")) {
+						INFO("Skipping loading of Excluded Cell Scanner Refs.");
+						continue;
+					}
+
+					if (version < 1011 && DKUtil::string::iequals(name, "ExcludedMerchantContainers")) {
+						INFO("Skipping loading of Excluded Merchant Containers.");
+						continue;
 					}
 
 					data->Load(a_intfc, name);

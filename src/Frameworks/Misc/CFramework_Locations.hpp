@@ -99,5 +99,6 @@ namespace CFramework_MapMa
 	static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section);
 	static void			ProcessHookedMarker(const char* nam);
 	static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);
+	static bool			MarkerIsCleared(RE::StaticFunctionTag*, RE::TESForm* a_form);
 	};
 }

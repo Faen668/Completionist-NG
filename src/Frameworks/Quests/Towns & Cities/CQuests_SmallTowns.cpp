@@ -27,19 +27,19 @@ namespace CQFramework_SmallTowns
 	};
 
 	CRadiantData RadiantData[]{
-	{"SmallTowns_Quest10",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor_ChopWoodHod" },
-	{"SmallTowns_Quest11",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor_ChopWoodHorgeir" },
-	{"SmallTowns_Quest12",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor_ChopWoodTembaWideArm" },
-	{"SmallTowns_Quest13",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorHarvestAzzada" },
-	{"SmallTowns_Quest14",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorHarvestBoti" },
-	{"SmallTowns_Quest15",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorHarvestLemkil" },
-	{"SmallTowns_Quest16",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorHarvestReldith" },
-	{"SmallTowns_Quest17",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorDrunksEmbry" },
-	{"SmallTowns_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarNarfi" },
+		{"SmallTowns_Quest10",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest11",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest12",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest13",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest14",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest15",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest16",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest17",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
 	CDrunkData DrunkData[]{
-		{"SmallTowns_Quest17", 0x0072EA2, 0x003550C, "Skyrim.esm", "Completionist_FavorDrunksEmbry"},
+		{"SmallTowns_Quest17", 0x0072EA2, 0x003550C, "Skyrim.esm", CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
@@ -54,8 +54,6 @@ namespace CQFramework_SmallTowns
 		{"SmallTowns_Quest08", CStageEnum::kPast, 199,	0},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -65,12 +63,11 @@ namespace CQFramework_SmallTowns
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&ArrayData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
-				->initDrunkData(DrunkData);
+				->initDrunkData(DrunkData)
+				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 20, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

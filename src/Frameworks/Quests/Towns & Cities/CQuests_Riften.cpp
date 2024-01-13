@@ -22,7 +22,7 @@ namespace CQFramework_Riften
 		{"Riften_Quest15", CFlagEnum::kSide, CCompEnum::kStage, "FreeformRiften22"},
 		{"Riften_Quest16", CFlagEnum::kSide, CCompEnum::kStage, "FreeformRiften10"},
 		{"Riften_Quest17", CFlagEnum::kSide, CCompEnum::kStand, "FreeformRiften01"},
-		{"Riften_Quest18", CFlagEnum::kSide, CCompEnum::kThane, "FavorJarlsMakeFriends"},
+		{"Riften_Quest18", CFlagEnum::kSide, CCompEnum::kThane, "FreeformRiftenThane"},
 		{"Riften_Quest19", CFlagEnum::kSide, CCompEnum::kStage, "RelationshipMarriage"},
 		{"Riften_Quest20", CFlagEnum::kSide, CCompEnum::kStand, "T02"},
 		{"Riften_Quest21", CFlagEnum::kSide, CCompEnum::kStage, "FreeformRiften02"},
@@ -36,8 +36,8 @@ namespace CQFramework_Riften
 	};
 
 	CRadiantData RadiantData[]{
-		{"Riften_Quest27", CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarEdda"},
-		{"Riften_Quest28", CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_FavorBeggarSnilf"},
+		{"Riften_Quest27", CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"Riften_Quest28", CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
@@ -66,10 +66,8 @@ namespace CQFramework_Riften
 	};
 
 	CThaneData ThaneData[]{
-		{"Riften_Quest18", "RiftImpGetOutofJail", "RiftSonsGetOutofJail"},
+		{"Riften_Quest18", "RiftImpGetOutofJail", "RiftSonsGetOutofJail", 200},
 	};
-
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -79,13 +77,8 @@ namespace CQFramework_Riften
 	{
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData)
-				->initRadiantData(RadiantData)
-				->initThaneData(ThaneData);
+			QuestData[i].init()->initStageData(StageData)->initRadiantData(RadiantData)->initThaneData(ThaneData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 11, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

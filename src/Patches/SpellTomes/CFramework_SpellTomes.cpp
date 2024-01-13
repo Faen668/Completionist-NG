@@ -1,4 +1,5 @@
 #include "Serialization.hpp"
+#include "Internal Utility/Events.hpp"
 #include "CFramework_Spelltomes.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
@@ -102,116 +103,100 @@ namespace CPatch_SpellTomes {
 
 	void CHandler::InstallFramework() {
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		
-		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
-
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
 	//-- Framework Events ( Books Read ) ----------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) {
+	void CHandler::OnBooksReadEvent(RE::BooksRead::Event const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
-
-		if (CPatch_SpellTomes_Apocalypse::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_SpellTomes_Apocalypse::Data.GetBase(a_event->book->GetFormID()) ? CPatch_SpellTomes_Apocalypse::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		if (BookDataA.HasForm(a_event->book->GetFormID())) {
+			auto base = BookDataA.GetBase(a_event->book->GetFormID()) ? BookDataA.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
 			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), patchID::kpatch_Apocalypse);
-			return EventResult::kContinue;
+			return;
 		}
 
-		if (CPatch_SpellTomes_ForgottenMagic::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_SpellTomes_ForgottenMagic::Data.GetBase(a_event->book->GetFormID()) ? CPatch_SpellTomes_ForgottenMagic::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		if (BookDataF.HasForm(a_event->book->GetFormID())) {
+			auto base = BookDataF.GetBase(a_event->book->GetFormID()) ? BookDataF.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
 			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), patchID::kpatch_ForgottenMagic);
-			return EventResult::kContinue;
+			return;
 		}
 
-		if (CPatch_SpellTomes_Mysticism::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_SpellTomes_Mysticism::Data.GetBase(a_event->book->GetFormID()) ? CPatch_SpellTomes_Mysticism::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		if (BookDataM.HasForm(a_event->book->GetFormID())) {
+			auto base = BookDataM.GetBase(a_event->book->GetFormID()) ? BookDataM.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
 			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), patchID::kpatch_Mysticism);
-			return EventResult::kContinue;
+			return;
 		}
 
-		if (CPatch_SpellTomes_Odin::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_SpellTomes_Odin::Data.GetBase(a_event->book->GetFormID()) ? CPatch_SpellTomes_Odin::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		if (BookDataO.HasForm(a_event->book->GetFormID())) {
+			auto base = BookDataO.GetBase(a_event->book->GetFormID()) ? BookDataO.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
 			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), patchID::kpatch_Odin);
-			return EventResult::kContinue;
+			return;
 		}
 
-		if (CPatch_SpellTomes_Triumvirate::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_SpellTomes_Triumvirate::Data.GetBase(a_event->book->GetFormID()) ? CPatch_SpellTomes_Triumvirate::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		if (BookDataT.HasForm(a_event->book->GetFormID())) {
+			auto base = BookDataT.GetBase(a_event->book->GetFormID()) ? BookDataT.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
 			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), patchID::kpatch_Triumvirate);
-			return EventResult::kContinue;
+			return;
 		}
 
-		return EventResult::kContinue;
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Menu Open ) --------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
+	void CHandler::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
 		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening) {
 	
-			if (CPatch_SpellTomes_Apocalypse::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (BookDataA.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-					auto base = CPatch_SpellTomes_Apocalypse::Data.GetBase(target) ? CPatch_SpellTomes_Apocalypse::Data.GetBase(target) : target;
+					auto base = BookDataA.GetBase(target) ? BookDataA.GetBase(target) : target;
 					CHandler::ProcessFoundForm(base, target, patchID::kpatch_Apocalypse);
-					return EventResult::kContinue;
+					return;
 				}
 			}
 
-			if (CPatch_SpellTomes_ForgottenMagic::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (BookDataF.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-					auto base = CPatch_SpellTomes_ForgottenMagic::Data.GetBase(target) ? CPatch_SpellTomes_ForgottenMagic::Data.GetBase(target) : target;
+					auto base = BookDataF.GetBase(target) ? BookDataF.GetBase(target) : target;
 					CHandler::ProcessFoundForm(base, target, patchID::kpatch_ForgottenMagic);
-					return EventResult::kContinue;
+					return;
 				}
 			}
 
-			if (CPatch_SpellTomes_Mysticism::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (BookDataM.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-					auto base = CPatch_SpellTomes_Mysticism::Data.GetBase(target) ? CPatch_SpellTomes_Mysticism::Data.GetBase(target) : target;
+					auto base = BookDataM.GetBase(target) ? BookDataM.GetBase(target) : target;
 					CHandler::ProcessFoundForm(base, target, patchID::kpatch_Mysticism);
-					return EventResult::kContinue;
+					return;
 				}
 			}
 
-			if (CPatch_SpellTomes_Odin::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (BookDataO.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-					auto base = CPatch_SpellTomes_Odin::Data.GetBase(target) ? CPatch_SpellTomes_Odin::Data.GetBase(target) : target;
+					auto base = BookDataO.GetBase(target) ? BookDataO.GetBase(target) : target;
 					CHandler::ProcessFoundForm(base, target, patchID::kpatch_Odin);
-					return EventResult::kContinue;
+					return;
 				}
 			}
 
-			if (CPatch_SpellTomes_Triumvirate::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+			if (BookDataT.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-					auto base = CPatch_SpellTomes_Triumvirate::Data.GetBase(target) ? CPatch_SpellTomes_Triumvirate::Data.GetBase(target) : target;
+					auto base = BookDataT.GetBase(target) ? BookDataT.GetBase(target) : target;
 					CHandler::ProcessFoundForm(base, target, patchID::kpatch_Triumvirate);
-					return EventResult::kContinue;
+					return;
 				}
 			}
 		}
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -225,14 +210,14 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Apocalypse: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, BookDataA.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, BookDataA.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
 
-			auto t_pos = std::ranges::find(Apocalypse_A_FormArray, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_baseID));
+			auto t_pos = std::ranges::find(Apocalypse_A_FormArray, BookDataA.GetForm(a_baseID));
 			if (t_pos != Apocalypse_A_FormArray.end()) {
 				auto b_pos = std::distance(Apocalypse_A_FormArray.begin(), t_pos);
 				Apocalypse_A_BoolArray[b_pos] = true;
@@ -240,7 +225,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Apocalypse_C_FormArray, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Apocalypse_C_FormArray, BookDataA.GetForm(a_baseID));
 			if (t_pos != Apocalypse_C_FormArray.end()) {
 				auto b_pos = std::distance(Apocalypse_C_FormArray.begin(), t_pos);
 				Apocalypse_C_BoolArray[b_pos] = true;
@@ -248,7 +233,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Apocalypse_D_FormArray, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Apocalypse_D_FormArray, BookDataA.GetForm(a_baseID));
 			if (t_pos != Apocalypse_D_FormArray.end()) {
 				auto b_pos = std::distance(Apocalypse_D_FormArray.begin(), t_pos);
 				Apocalypse_D_BoolArray[b_pos] = true;
@@ -256,7 +241,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Apocalypse_I_FormArray, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Apocalypse_I_FormArray, BookDataA.GetForm(a_baseID));
 			if (t_pos != Apocalypse_I_FormArray.end()) {
 				auto b_pos = std::distance(Apocalypse_I_FormArray.begin(), t_pos);
 				Apocalypse_I_BoolArray[b_pos] = true;
@@ -264,7 +249,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Apocalypse_R_FormArray, CPatch_SpellTomes_Apocalypse::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Apocalypse_R_FormArray, BookDataA.GetForm(a_baseID));
 			if (t_pos != Apocalypse_R_FormArray.end()) {
 				auto b_pos = std::distance(Apocalypse_R_FormArray.begin(), t_pos);
 				Apocalypse_R_BoolArray[b_pos] = true;
@@ -278,14 +263,14 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_ForgottenMagic: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, BookDataF.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, BookDataF.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
 
-			auto t_pos = std::ranges::find(ForgottenMagic_A_FormArray, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_baseID));
+			auto t_pos = std::ranges::find(ForgottenMagic_A_FormArray, BookDataF.GetForm(a_baseID));
 			if (t_pos != ForgottenMagic_A_FormArray.end()) {
 				auto b_pos = std::distance(ForgottenMagic_A_FormArray.begin(), t_pos);
 				ForgottenMagic_A_BoolArray[b_pos] = true;
@@ -293,7 +278,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(ForgottenMagic_C_FormArray, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(ForgottenMagic_C_FormArray, BookDataF.GetForm(a_baseID));
 			if (t_pos != ForgottenMagic_C_FormArray.end()) {
 				auto b_pos = std::distance(ForgottenMagic_C_FormArray.begin(), t_pos);
 				ForgottenMagic_C_BoolArray[b_pos] = true;
@@ -301,7 +286,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(ForgottenMagic_D_FormArray, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(ForgottenMagic_D_FormArray, BookDataF.GetForm(a_baseID));
 			if (t_pos != ForgottenMagic_D_FormArray.end()) {
 				auto b_pos = std::distance(ForgottenMagic_D_FormArray.begin(), t_pos);
 				ForgottenMagic_D_BoolArray[b_pos] = true;
@@ -309,7 +294,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(ForgottenMagic_I_FormArray, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(ForgottenMagic_I_FormArray, BookDataF.GetForm(a_baseID));
 			if (t_pos != ForgottenMagic_I_FormArray.end()) {
 				auto b_pos = std::distance(ForgottenMagic_I_FormArray.begin(), t_pos);
 				ForgottenMagic_I_BoolArray[b_pos] = true;
@@ -317,7 +302,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(ForgottenMagic_R_FormArray, CPatch_SpellTomes_ForgottenMagic::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(ForgottenMagic_R_FormArray, BookDataF.GetForm(a_baseID));
 			if (t_pos != ForgottenMagic_R_FormArray.end()) {
 				auto b_pos = std::distance(ForgottenMagic_R_FormArray.begin(), t_pos);
 				ForgottenMagic_R_BoolArray[b_pos] = true;
@@ -330,14 +315,14 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Mysticism: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, BookDataM.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Mysticism::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, BookDataM.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
 
-			auto t_pos = std::ranges::find(Mysticism_A_FormArray, CPatch_SpellTomes_Mysticism::Data.GetForm(a_baseID));
+			auto t_pos = std::ranges::find(Mysticism_A_FormArray, BookDataM.GetForm(a_baseID));
 			if (t_pos != Mysticism_A_FormArray.end()) {
 				auto b_pos = std::distance(Mysticism_A_FormArray.begin(), t_pos);
 				Mysticism_A_BoolArray[b_pos] = true;
@@ -345,7 +330,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Mysticism_C_FormArray, CPatch_SpellTomes_Mysticism::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Mysticism_C_FormArray, BookDataM.GetForm(a_baseID));
 			if (t_pos != Mysticism_C_FormArray.end()) {
 				auto b_pos = std::distance(Mysticism_C_FormArray.begin(), t_pos);
 				Mysticism_C_BoolArray[b_pos] = true;
@@ -353,7 +338,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Mysticism_D_FormArray, CPatch_SpellTomes_Mysticism::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Mysticism_D_FormArray, BookDataM.GetForm(a_baseID));
 			if (t_pos != Mysticism_D_FormArray.end()) {
 				auto b_pos = std::distance(Mysticism_D_FormArray.begin(), t_pos);
 				Mysticism_D_BoolArray[b_pos] = true;
@@ -361,7 +346,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Mysticism_I_FormArray, CPatch_SpellTomes_Mysticism::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Mysticism_I_FormArray, BookDataM.GetForm(a_baseID));
 			if (t_pos != Mysticism_I_FormArray.end()) {
 				auto b_pos = std::distance(Mysticism_I_FormArray.begin(), t_pos);
 				Mysticism_I_BoolArray[b_pos] = true;
@@ -369,7 +354,7 @@ namespace CPatch_SpellTomes {
 				break;
 			}
 
-			t_pos = std::ranges::find(Mysticism_R_FormArray, CPatch_SpellTomes_Mysticism::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Mysticism_R_FormArray, BookDataM.GetForm(a_baseID));
 			if (t_pos != Mysticism_R_FormArray.end()) {
 				auto b_pos = std::distance(Mysticism_R_FormArray.begin(), t_pos);
 				Mysticism_R_BoolArray[b_pos] = true;
@@ -382,14 +367,14 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Odin: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, BookDataO.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Odin::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, BookDataO.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
 
-			auto t_pos = std::ranges::find(Odin_A_FormArray, CPatch_SpellTomes_Odin::Data.GetForm(a_baseID));
+			auto t_pos = std::ranges::find(Odin_A_FormArray, BookDataO.GetForm(a_baseID));
 			if (t_pos != Odin_A_FormArray.end()) {
 				auto b_pos = std::distance(Odin_A_FormArray.begin(), t_pos);
 				Odin_A_BoolArray[b_pos] = true;
@@ -397,7 +382,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Odin_C_FormArray, CPatch_SpellTomes_Odin::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Odin_C_FormArray, BookDataO.GetForm(a_baseID));
 			if (t_pos != Odin_C_FormArray.end()) {
 				auto b_pos = std::distance(Odin_C_FormArray.begin(), t_pos);
 				Odin_C_BoolArray[b_pos] = true;
@@ -405,7 +390,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Odin_D_FormArray, CPatch_SpellTomes_Odin::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Odin_D_FormArray, BookDataO.GetForm(a_baseID));
 			if (t_pos != Odin_D_FormArray.end()) {
 				auto b_pos = std::distance(Odin_D_FormArray.begin(), t_pos);
 				Odin_D_BoolArray[b_pos] = true;
@@ -413,7 +398,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Odin_I_FormArray, CPatch_SpellTomes_Odin::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Odin_I_FormArray, BookDataO.GetForm(a_baseID));
 			if (t_pos != Odin_I_FormArray.end()) {
 				auto b_pos = std::distance(Odin_I_FormArray.begin(), t_pos);
 				Odin_I_BoolArray[b_pos] = true;
@@ -421,7 +406,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Odin_R_FormArray, CPatch_SpellTomes_Odin::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Odin_R_FormArray, BookDataO.GetForm(a_baseID));
 			if (t_pos != Odin_R_FormArray.end()) {
 				auto b_pos = std::distance(Odin_R_FormArray.begin(), t_pos);
 				Odin_R_BoolArray[b_pos] = true;
@@ -434,14 +419,14 @@ namespace CPatch_SpellTomes {
 		case CPatch_SpellTomes::patchID::kpatch_Triumvirate: {
 
 			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
+				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, BookDataT.GetForm(a_eventID)->GetName());
 				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_eventID)->GetName());
+				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, BookDataT.GetForm(a_eventID)->GetName());
 			}
 
 			FoundItemData.AddForm(a_baseID);
 
-			auto t_pos = std::ranges::find(Triumvirate_A_FormArray, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_baseID));
+			auto t_pos = std::ranges::find(Triumvirate_A_FormArray, BookDataT.GetForm(a_baseID));
 			if (t_pos != Triumvirate_A_FormArray.end()) {
 				auto b_pos = std::distance(Triumvirate_A_FormArray.begin(), t_pos);
 				Triumvirate_A_BoolArray[b_pos] = true;
@@ -449,7 +434,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Triumvirate_C_FormArray, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Triumvirate_C_FormArray, BookDataT.GetForm(a_baseID));
 			if (t_pos != Triumvirate_C_FormArray.end()) {
 				auto b_pos = std::distance(Triumvirate_C_FormArray.begin(), t_pos);
 				Triumvirate_C_BoolArray[b_pos] = true;
@@ -457,7 +442,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Triumvirate_D_FormArray, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Triumvirate_D_FormArray, BookDataT.GetForm(a_baseID));
 			if (t_pos != Triumvirate_D_FormArray.end()) {
 				auto b_pos = std::distance(Triumvirate_D_FormArray.begin(), t_pos);
 				Triumvirate_D_BoolArray[b_pos] = true;
@@ -465,7 +450,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Triumvirate_I_FormArray, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Triumvirate_I_FormArray, BookDataT.GetForm(a_baseID));
 			if (t_pos != Triumvirate_I_FormArray.end()) {
 				auto b_pos = std::distance(Triumvirate_I_FormArray.begin(), t_pos);
 				Triumvirate_I_BoolArray[b_pos] = true;
@@ -473,7 +458,7 @@ namespace CPatch_SpellTomes {
 				return;
 			}
 
-			t_pos = std::ranges::find(Triumvirate_R_FormArray, CPatch_SpellTomes_Triumvirate::Data.GetForm(a_baseID));
+			t_pos = std::ranges::find(Triumvirate_R_FormArray, BookDataT.GetForm(a_baseID));
 			if (t_pos != Triumvirate_R_FormArray.end()) {
 				auto b_pos = std::distance(Triumvirate_R_FormArray.begin(), t_pos);
 				Triumvirate_R_BoolArray[b_pos] = true;
@@ -496,13 +481,13 @@ namespace CPatch_SpellTomes {
 
 		if (Serialization::CompletionistData::IsModInstalled(filename_Apocalypse)) {
 
-			CPatch_SpellTomes_Apocalypse::Data.CompileFormArray(CPatch_SpellTomes::Apocalypse_Tomes, filename_Apocalypse);
-			CPatch_SpellTomes_Apocalypse::Data.MergeAsCollectable();
-			CPatch_SpellTomes_Apocalypse::Data.PopulateSpellTomes(Apocalypse_A_NameArray, Apocalypse_A_FormArray, Apocalypse_A_BoolArray, Apocalypse_A_TextArray, RE::ActorValue::kAlteration);
-			CPatch_SpellTomes_Apocalypse::Data.PopulateSpellTomes(Apocalypse_C_NameArray, Apocalypse_C_FormArray, Apocalypse_C_BoolArray, Apocalypse_C_TextArray, RE::ActorValue::kConjuration);
-			CPatch_SpellTomes_Apocalypse::Data.PopulateSpellTomes(Apocalypse_D_NameArray, Apocalypse_D_FormArray, Apocalypse_D_BoolArray, Apocalypse_D_TextArray, RE::ActorValue::kDestruction);
-			CPatch_SpellTomes_Apocalypse::Data.PopulateSpellTomes(Apocalypse_I_NameArray, Apocalypse_I_FormArray, Apocalypse_I_BoolArray, Apocalypse_I_TextArray, RE::ActorValue::kIllusion);
-			CPatch_SpellTomes_Apocalypse::Data.PopulateSpellTomes(Apocalypse_R_NameArray, Apocalypse_R_FormArray, Apocalypse_R_BoolArray, Apocalypse_R_TextArray, RE::ActorValue::kRestoration);
+			BookDataA.CompileFormArray(CPatch_SpellTomes::Apocalypse_Tomes, filename_Apocalypse);
+			BookDataA.MergeAsCollectable();
+			BookDataA.PopulateSpellTomes(Apocalypse_A_NameArray, Apocalypse_A_FormArray, Apocalypse_A_BoolArray, Apocalypse_A_TextArray, RE::ActorValue::kAlteration);
+			BookDataA.PopulateSpellTomes(Apocalypse_C_NameArray, Apocalypse_C_FormArray, Apocalypse_C_BoolArray, Apocalypse_C_TextArray, RE::ActorValue::kConjuration);
+			BookDataA.PopulateSpellTomes(Apocalypse_D_NameArray, Apocalypse_D_FormArray, Apocalypse_D_BoolArray, Apocalypse_D_TextArray, RE::ActorValue::kDestruction);
+			BookDataA.PopulateSpellTomes(Apocalypse_I_NameArray, Apocalypse_I_FormArray, Apocalypse_I_BoolArray, Apocalypse_I_TextArray, RE::ActorValue::kIllusion);
+			BookDataA.PopulateSpellTomes(Apocalypse_R_NameArray, Apocalypse_R_FormArray, Apocalypse_R_BoolArray, Apocalypse_R_TextArray, RE::ActorValue::kRestoration);
 
 			Apocalypse_A_EntriesTotal = Apocalypse_A_FormArray.size();
 			Apocalypse_C_EntriesTotal = Apocalypse_C_FormArray.size();
@@ -521,13 +506,13 @@ namespace CPatch_SpellTomes {
 
 		if (Serialization::CompletionistData::IsModInstalled(filename_ForgottenMagic)) {
 
-			CPatch_SpellTomes_ForgottenMagic::Data.CompileFormArray(CPatch_SpellTomes::ForgottenMagic_Tomes, filename_ForgottenMagic);
-			CPatch_SpellTomes_ForgottenMagic::Data.MergeAsCollectable();
-			CPatch_SpellTomes_ForgottenMagic::Data.PopulateSpellTomes(ForgottenMagic_A_NameArray, ForgottenMagic_A_FormArray, ForgottenMagic_A_BoolArray, ForgottenMagic_A_TextArray, RE::ActorValue::kAlteration);
-			CPatch_SpellTomes_ForgottenMagic::Data.PopulateSpellTomes(ForgottenMagic_C_NameArray, ForgottenMagic_C_FormArray, ForgottenMagic_C_BoolArray, ForgottenMagic_C_TextArray, RE::ActorValue::kConjuration);
-			CPatch_SpellTomes_ForgottenMagic::Data.PopulateSpellTomes(ForgottenMagic_D_NameArray, ForgottenMagic_D_FormArray, ForgottenMagic_D_BoolArray, ForgottenMagic_D_TextArray, RE::ActorValue::kDestruction);
-			CPatch_SpellTomes_ForgottenMagic::Data.PopulateSpellTomes(ForgottenMagic_I_NameArray, ForgottenMagic_I_FormArray, ForgottenMagic_I_BoolArray, ForgottenMagic_I_TextArray, RE::ActorValue::kIllusion);
-			CPatch_SpellTomes_ForgottenMagic::Data.PopulateSpellTomes(ForgottenMagic_R_NameArray, ForgottenMagic_R_FormArray, ForgottenMagic_R_BoolArray, ForgottenMagic_R_TextArray, RE::ActorValue::kRestoration);
+			BookDataF.CompileFormArray(CPatch_SpellTomes::ForgottenMagic_Tomes, filename_ForgottenMagic);
+			BookDataF.MergeAsCollectable();
+			BookDataF.PopulateSpellTomes(ForgottenMagic_A_NameArray, ForgottenMagic_A_FormArray, ForgottenMagic_A_BoolArray, ForgottenMagic_A_TextArray, RE::ActorValue::kAlteration);
+			BookDataF.PopulateSpellTomes(ForgottenMagic_C_NameArray, ForgottenMagic_C_FormArray, ForgottenMagic_C_BoolArray, ForgottenMagic_C_TextArray, RE::ActorValue::kConjuration);
+			BookDataF.PopulateSpellTomes(ForgottenMagic_D_NameArray, ForgottenMagic_D_FormArray, ForgottenMagic_D_BoolArray, ForgottenMagic_D_TextArray, RE::ActorValue::kDestruction);
+			BookDataF.PopulateSpellTomes(ForgottenMagic_I_NameArray, ForgottenMagic_I_FormArray, ForgottenMagic_I_BoolArray, ForgottenMagic_I_TextArray, RE::ActorValue::kIllusion);
+			BookDataF.PopulateSpellTomes(ForgottenMagic_R_NameArray, ForgottenMagic_R_FormArray, ForgottenMagic_R_BoolArray, ForgottenMagic_R_TextArray, RE::ActorValue::kRestoration);
 
 			ForgottenMagic_A_EntriesTotal = ForgottenMagic_A_FormArray.size();
 			ForgottenMagic_C_EntriesTotal = ForgottenMagic_C_FormArray.size();
@@ -546,13 +531,13 @@ namespace CPatch_SpellTomes {
 
 		if (Serialization::CompletionistData::IsModInstalled(filename_Mysticism)) {
 
-			CPatch_SpellTomes_Mysticism::Data.CompileFormArray(CPatch_SpellTomes::Mysticism_Tomes, filename_Mysticism);
-			CPatch_SpellTomes_Mysticism::Data.MergeAsCollectable();
-			CPatch_SpellTomes_Mysticism::Data.PopulateSpellTomes(Mysticism_A_NameArray, Mysticism_A_FormArray, Mysticism_A_BoolArray, Mysticism_A_TextArray, RE::ActorValue::kAlteration);
-			CPatch_SpellTomes_Mysticism::Data.PopulateSpellTomes(Mysticism_C_NameArray, Mysticism_C_FormArray, Mysticism_C_BoolArray, Mysticism_C_TextArray, RE::ActorValue::kConjuration);
-			CPatch_SpellTomes_Mysticism::Data.PopulateSpellTomes(Mysticism_D_NameArray, Mysticism_D_FormArray, Mysticism_D_BoolArray, Mysticism_D_TextArray, RE::ActorValue::kDestruction);
-			CPatch_SpellTomes_Mysticism::Data.PopulateSpellTomes(Mysticism_I_NameArray, Mysticism_I_FormArray, Mysticism_I_BoolArray, Mysticism_I_TextArray, RE::ActorValue::kIllusion);
-			CPatch_SpellTomes_Mysticism::Data.PopulateSpellTomes(Mysticism_R_NameArray, Mysticism_R_FormArray, Mysticism_R_BoolArray, Mysticism_R_TextArray, RE::ActorValue::kRestoration);
+			BookDataM.CompileFormArray(CPatch_SpellTomes::Mysticism_Tomes, filename_Mysticism);
+			BookDataM.MergeAsCollectable();
+			BookDataM.PopulateSpellTomes(Mysticism_A_NameArray, Mysticism_A_FormArray, Mysticism_A_BoolArray, Mysticism_A_TextArray, RE::ActorValue::kAlteration);
+			BookDataM.PopulateSpellTomes(Mysticism_C_NameArray, Mysticism_C_FormArray, Mysticism_C_BoolArray, Mysticism_C_TextArray, RE::ActorValue::kConjuration);
+			BookDataM.PopulateSpellTomes(Mysticism_D_NameArray, Mysticism_D_FormArray, Mysticism_D_BoolArray, Mysticism_D_TextArray, RE::ActorValue::kDestruction);
+			BookDataM.PopulateSpellTomes(Mysticism_I_NameArray, Mysticism_I_FormArray, Mysticism_I_BoolArray, Mysticism_I_TextArray, RE::ActorValue::kIllusion);
+			BookDataM.PopulateSpellTomes(Mysticism_R_NameArray, Mysticism_R_FormArray, Mysticism_R_BoolArray, Mysticism_R_TextArray, RE::ActorValue::kRestoration);
 
 			Mysticism_A_EntriesTotal = Mysticism_A_FormArray.size();
 			Mysticism_C_EntriesTotal = Mysticism_C_FormArray.size();
@@ -573,17 +558,17 @@ namespace CPatch_SpellTomes {
 
 			if (!Serialization::CompletionistData::IsModInstalled(filename_Apocalypse)) {
 				for (auto& formid : Odin_Crossover_Tomes) {
-					CPatch_SpellTomes_Odin::Data.AddForm(formid, filename_Odin);
+					BookDataO.AddForm(formid, filename_Odin);
 				}
 			}
 
-			CPatch_SpellTomes_Odin::Data.CompileFormArray(CPatch_SpellTomes::Odin_Tomes, filename_Odin);
-			CPatch_SpellTomes_Odin::Data.MergeAsCollectable();
-			CPatch_SpellTomes_Odin::Data.PopulateSpellTomes(Odin_A_NameArray, Odin_A_FormArray, Odin_A_BoolArray, Odin_A_TextArray, RE::ActorValue::kAlteration);
-			CPatch_SpellTomes_Odin::Data.PopulateSpellTomes(Odin_C_NameArray, Odin_C_FormArray, Odin_C_BoolArray, Odin_C_TextArray, RE::ActorValue::kConjuration);
-			CPatch_SpellTomes_Odin::Data.PopulateSpellTomes(Odin_D_NameArray, Odin_D_FormArray, Odin_D_BoolArray, Odin_D_TextArray, RE::ActorValue::kDestruction);
-			CPatch_SpellTomes_Odin::Data.PopulateSpellTomes(Odin_I_NameArray, Odin_I_FormArray, Odin_I_BoolArray, Odin_I_TextArray, RE::ActorValue::kIllusion);
-			CPatch_SpellTomes_Odin::Data.PopulateSpellTomes(Odin_R_NameArray, Odin_R_FormArray, Odin_R_BoolArray, Odin_R_TextArray, RE::ActorValue::kRestoration);
+			BookDataO.CompileFormArray(CPatch_SpellTomes::Odin_Tomes, filename_Odin);
+			BookDataO.MergeAsCollectable();
+			BookDataO.PopulateSpellTomes(Odin_A_NameArray, Odin_A_FormArray, Odin_A_BoolArray, Odin_A_TextArray, RE::ActorValue::kAlteration);
+			BookDataO.PopulateSpellTomes(Odin_C_NameArray, Odin_C_FormArray, Odin_C_BoolArray, Odin_C_TextArray, RE::ActorValue::kConjuration);
+			BookDataO.PopulateSpellTomes(Odin_D_NameArray, Odin_D_FormArray, Odin_D_BoolArray, Odin_D_TextArray, RE::ActorValue::kDestruction);
+			BookDataO.PopulateSpellTomes(Odin_I_NameArray, Odin_I_FormArray, Odin_I_BoolArray, Odin_I_TextArray, RE::ActorValue::kIllusion);
+			BookDataO.PopulateSpellTomes(Odin_R_NameArray, Odin_R_FormArray, Odin_R_BoolArray, Odin_R_TextArray, RE::ActorValue::kRestoration);
 
 			Odin_A_EntriesTotal = Odin_A_FormArray.size();
 			Odin_C_EntriesTotal = Odin_C_FormArray.size();
@@ -602,13 +587,13 @@ namespace CPatch_SpellTomes {
 
 		if (Serialization::CompletionistData::IsModInstalled(filename_Triumvirate)) {
 
-			CPatch_SpellTomes_Triumvirate::Data.CompileFormArray(CPatch_SpellTomes::Triumvirate_Tomes, filename_Triumvirate);
-			CPatch_SpellTomes_Triumvirate::Data.MergeAsCollectable();
-			CPatch_SpellTomes_Triumvirate::Data.PopulateSpellTomes(Triumvirate_A_NameArray, Triumvirate_A_FormArray, Triumvirate_A_BoolArray, Triumvirate_A_TextArray, RE::ActorValue::kAlteration);
-			CPatch_SpellTomes_Triumvirate::Data.PopulateSpellTomes(Triumvirate_C_NameArray, Triumvirate_C_FormArray, Triumvirate_C_BoolArray, Triumvirate_C_TextArray, RE::ActorValue::kConjuration);
-			CPatch_SpellTomes_Triumvirate::Data.PopulateSpellTomes(Triumvirate_D_NameArray, Triumvirate_D_FormArray, Triumvirate_D_BoolArray, Triumvirate_D_TextArray, RE::ActorValue::kDestruction);
-			CPatch_SpellTomes_Triumvirate::Data.PopulateSpellTomes(Triumvirate_I_NameArray, Triumvirate_I_FormArray, Triumvirate_I_BoolArray, Triumvirate_I_TextArray, RE::ActorValue::kIllusion);
-			CPatch_SpellTomes_Triumvirate::Data.PopulateSpellTomes(Triumvirate_R_NameArray, Triumvirate_R_FormArray, Triumvirate_R_BoolArray, Triumvirate_R_TextArray, RE::ActorValue::kRestoration);
+			BookDataT.CompileFormArray(CPatch_SpellTomes::Triumvirate_Tomes, filename_Triumvirate);
+			BookDataT.MergeAsCollectable();
+			BookDataT.PopulateSpellTomes(Triumvirate_A_NameArray, Triumvirate_A_FormArray, Triumvirate_A_BoolArray, Triumvirate_A_TextArray, RE::ActorValue::kAlteration);
+			BookDataT.PopulateSpellTomes(Triumvirate_C_NameArray, Triumvirate_C_FormArray, Triumvirate_C_BoolArray, Triumvirate_C_TextArray, RE::ActorValue::kConjuration);
+			BookDataT.PopulateSpellTomes(Triumvirate_D_NameArray, Triumvirate_D_FormArray, Triumvirate_D_BoolArray, Triumvirate_D_TextArray, RE::ActorValue::kDestruction);
+			BookDataT.PopulateSpellTomes(Triumvirate_I_NameArray, Triumvirate_I_FormArray, Triumvirate_I_BoolArray, Triumvirate_I_TextArray, RE::ActorValue::kIllusion);
+			BookDataT.PopulateSpellTomes(Triumvirate_R_NameArray, Triumvirate_R_FormArray, Triumvirate_R_BoolArray, Triumvirate_R_TextArray, RE::ActorValue::kRestoration);
 
 			Triumvirate_A_EntriesTotal = Triumvirate_A_FormArray.size();
 			Triumvirate_C_EntriesTotal = Triumvirate_C_FormArray.size();
@@ -626,82 +611,86 @@ namespace CPatch_SpellTomes {
 		}
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
+
 	void CHandler::InstallSearchTerms()
 	{
 		for (auto i = 0; i < Odin_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_A_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_A_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_A_FormArray[i], Odin_A_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_A_FormArray[i])));
 		}
 		for (auto i = 0; i < Odin_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_C_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_C_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_C_FormArray[i], Odin_C_NameArray[i], "$MCMPageTomes_Odin1", FrameworkAPI::GetBookCategoryType(Odin_C_FormArray[i])));
 		}
 		for (auto i = 0; i < Odin_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_D_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_D_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_D_FormArray[i], Odin_D_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_D_FormArray[i])));
 		}
 		for (auto i = 0; i < Odin_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_I_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_I_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_I_FormArray[i], Odin_I_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_I_FormArray[i])));
 		}
 		for (auto i = 0; i < Odin_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_R_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_R_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Odin_R_FormArray[i], Odin_R_NameArray[i], "$MCMPageTomes_Odin2", FrameworkAPI::GetBookCategoryType(Odin_R_FormArray[i])));
 		}
 		for (auto i = 0; i < ForgottenMagic_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_A_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_A_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_A_FormArray[i], ForgottenMagic_A_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_A_FormArray[i])));
 		}
 		for (auto i = 0; i < ForgottenMagic_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_C_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_C_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_C_FormArray[i], ForgottenMagic_C_NameArray[i], "$MCMPageTomes_ForgottenMagic1", FrameworkAPI::GetBookCategoryType(ForgottenMagic_C_FormArray[i])));
 		}
 		for (auto i = 0; i < ForgottenMagic_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_D_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_D_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_D_FormArray[i], ForgottenMagic_D_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_D_FormArray[i])));
 		}
 		for (auto i = 0; i < ForgottenMagic_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_I_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_I_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_I_FormArray[i], ForgottenMagic_I_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_I_FormArray[i])));
 		}
 		for (auto i = 0; i < ForgottenMagic_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_R_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_R_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ForgottenMagic_R_FormArray[i], ForgottenMagic_R_NameArray[i], "$MCMPageTomes_ForgottenMagic2", FrameworkAPI::GetBookCategoryType(ForgottenMagic_R_FormArray[i])));
 		}
 		for (auto i = 0; i < Apocalypse_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_A_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_A_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_A_FormArray[i], Apocalypse_A_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_A_FormArray[i])));
 		}
 		for (auto i = 0; i < Apocalypse_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_C_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_C_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_C_FormArray[i], Apocalypse_C_NameArray[i], "$MCMPageTomes_Apocalypse1", FrameworkAPI::GetBookCategoryType(Apocalypse_C_FormArray[i])));
 		}
 		for (auto i = 0; i < Apocalypse_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_D_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_D_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_D_FormArray[i], Apocalypse_D_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_D_FormArray[i])));
 		}
 		for (auto i = 0; i < Apocalypse_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_I_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_I_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_I_FormArray[i], Apocalypse_I_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_I_FormArray[i])));
 		}
 		for (auto i = 0; i < Apocalypse_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_R_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_R_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Apocalypse_R_FormArray[i], Apocalypse_R_NameArray[i], "$MCMPageTomes_Apocalypse2", FrameworkAPI::GetBookCategoryType(Apocalypse_R_FormArray[i])));
 		}
 		for (auto i = 0; i < Mysticism_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_A_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_A_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_A_FormArray[i], Mysticism_A_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_A_FormArray[i])));
 		}
 		for (auto i = 0; i < Mysticism_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_C_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_C_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_C_FormArray[i], Mysticism_C_NameArray[i], "$MCMPageTomes_Mysticism1", FrameworkAPI::GetBookCategoryType(Mysticism_C_FormArray[i])));
 		}
 		for (auto i = 0; i < Mysticism_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_D_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_D_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_D_FormArray[i], Mysticism_D_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_D_FormArray[i])));
 		}
 		for (auto i = 0; i < Mysticism_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_I_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_I_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_I_FormArray[i], Mysticism_I_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_I_FormArray[i])));
 		}
 		for (auto i = 0; i < Mysticism_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_R_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_R_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Mysticism_R_FormArray[i], Mysticism_R_NameArray[i], "$MCMPageTomes_Mysticism2", FrameworkAPI::GetBookCategoryType(Mysticism_R_FormArray[i])));
 		}
 		for (auto i = 0; i < Triumvirate_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_A_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_A_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_A_FormArray[i], Triumvirate_A_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_A_FormArray[i])));
 		}
 		for (auto i = 0; i < Triumvirate_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_C_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_C_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_C_FormArray[i], Triumvirate_C_NameArray[i], "$MCMPageTomes_Triumvirate1", FrameworkAPI::GetBookCategoryType(Triumvirate_C_FormArray[i])));
 		}
 		for (auto i = 0; i < Triumvirate_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_D_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_D_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_D_FormArray[i], Triumvirate_D_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_D_FormArray[i])));
 		}
 		for (auto i = 0; i < Triumvirate_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_I_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_I_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_I_FormArray[i], Triumvirate_I_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_I_FormArray[i])));
 		}
 		for (auto i = 0; i < Triumvirate_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_R_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_R_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Triumvirate_R_FormArray[i], Triumvirate_R_NameArray[i], "$MCMPageTomes_Triumvirate2", FrameworkAPI::GetBookCategoryType(Triumvirate_R_FormArray[i])));
 		}
 	}
 

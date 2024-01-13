@@ -6,6 +6,8 @@
 #include "Internal Utility/Variables.hpp"
 #include "Internal Utility/MCMHandler.hpp"
 #include "Internal Utility/Localisation.hpp"
+#include "Internal Utility/PatchListener.hpp"
+#include "Internal Utility/Events.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
@@ -19,19 +21,18 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 	{
 	case SKSE::MessagingInterface::kDataLoaded:
 
+		CEvents::EventHandler::RegisterEvents();
 		CLocalisation::LocalisationAPI::Register();
 		Completionist_MainHUD::TextnTagsAPI::Register();
-		CVariables::VariablesAPI::Register();
-
+		CVariables::VariablesAPI::Register(); 
 		CQuestMaster::QuestAPI::Register();
+		CExternalPatchHandler::CHandler::Register();
 		CFramework_Master::FrameworkAPI::Register();
 		CHCMHandler::MCMAPI::Register();
-
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
 
 	case SKSE::MessagingInterface::kNewGame:
-
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		break;
@@ -40,7 +41,6 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
-
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		break;

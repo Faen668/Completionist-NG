@@ -1,5 +1,6 @@
 #include "Serialization.hpp"
 #include "CFramework_UND.hpp"
+#include "Internal Utility/Events.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 
@@ -20,15 +21,12 @@ namespace CPatch_UND
 		/*06*/ {"Undeath_Quest06", CFlagEnum::kSide, CCompEnum::kStand, "NecroLichRitualQuest"},
 	};
 
-	CArrayData ArrayData{ &Quest_IdenArray, &Quest_NameArray, &Quest_TextArray, &Quest_BoolArray, &Quest_RadiArray, &Quest_KeysArray };
-
 	// clang-format off
 
 	constexpr Serialization::FormArray Books = {
 	0x26720A,0x26721D,0x1B68D5,0x002741,0x1C5C99,0x002729,
 	0x00272A,0x00272B,0x002CDD,0x010264,0x0509A2,0x04435D,
 	0x0492BB,0x00F10A,0x0509A3,0x04BA6D,0x0F73C4,0x04BA6C,
-	0x05839E,
 	};
 
 	constexpr Serialization::FormArray MapMa = {
@@ -38,6 +36,7 @@ namespace CPatch_UND
 	// clang-format on
 
 	constexpr std::string_view modname = "Undeath.esp";
+	constexpr std::string_view classical_lichdom = "UndeathFixes.esp";
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
@@ -47,122 +46,84 @@ namespace CPatch_UND
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
-		CHandler::InstallQuestFramework();
 		CHandler::InstallSearchTerms();
 
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		FrameworkAPI::AddMapMarkerDiscovery(ProcessHookedMarker);
+
+		CEvents::EventHandler::RegisterForEvent_OnBooksReadEvent(CHandler::OnBooksReadEvent);
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(CHandler::OnMenuOpenCloseEvent);
 		PatchesInstalled += 1;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install Framework ) ------
-	//---------------------------------------------------
-
-	void CHandler::InstallQuestFramework()
-	{
-		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
-		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData);
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 42, QuestData[i].unique_identifier));
-		}
-		Quest_BoolArray = std::vector<bool>(CArraySize, false);
-	};
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
-
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( Books Read ) ----------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) {
+	void CHandler::OnBooksReadEvent(RE::BooksRead::Event const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || !CPatch_UND_Books::Data.HasForm(a_event->book->GetFormID())) { return RE::BSEventNotifyControl::kContinue; }
+		if (!BookData.HasForm(a_event->book->GetFormID())) { return; }
 
-		auto base = CPatch_UND_Books::Data.GetBase(a_event->book->GetFormID()) ? CPatch_UND_Books::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-		CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), "NotifyBooks");
-		return EventResult::kContinue;
+		auto base = BookData.GetBase(a_event->book->GetFormID()) ? BookData.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+		CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), BookData, Books_FormArray, &Books_BoolArray, &Books_EntriesFound, FrameworkAPI::GetBookLogType(a_event->book), "NotifyBooks");
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Menu Open ) --------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
+	void CHandler::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
-
-		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening && CPatch_UND_Books::Data.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
+		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening && BookData.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) {
 			if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
-				auto base = CPatch_UND_Books::Data.GetBase(target) ? CPatch_UND_Books::Data.GetBase(target) : target;
-				CHandler::ProcessFoundForm(base, target, "NotifyBooks");
-				return EventResult::kContinue;
+				auto base = BookData.GetBase(target) ? BookData.GetBase(target) : target;
+				CHandler::ProcessFoundForm(base, target, BookData, Books_FormArray, &Books_BoolArray, &Books_EntriesFound, log::kBook, "NotifyBooks");
+				return;
 			}
-			return EventResult::kContinue;
+			return;
 		}
 
 		if (a_event->menuName == RE::MapMenu::MENU_NAME && a_event->opening) {
 
 			for (auto i = 0; i < MapMa_FormArray.size(); i++) {
-				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i, false);
 			}
 		}
-		return EventResult::kContinue;
+		return;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, std::string a_variable) {
+	void CHandler::ProcessFoundForm(ProcessFoundFormArgs, std::string a_section) {
 
-		if (a_variable == "NotifyBooks") {
-
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_UND_Books::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, a_variable);
-				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_UND_Books::Data.GetForm(a_eventID)); book && book->GetSpell()) {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
-				}
-				else {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_UND_Books::Data.GetForm(a_eventID)->GetName());
-				}
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_UND_Books::Data.GetAllVariations()) {
-				if (CPatch_UND_Books::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(Books_FormArray, CPatch_UND_Books::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(Books_FormArray.begin(), t_pos);
-			Books_BoolArray[b_pos] = true;
-
-			Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
-			return;
+		if (!FoundItemData.HasForm(a_eventID)) {
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, data.GetForm(a_eventID)->GetName());
+			FrameworkAPI::SendNotification(msg, a_section);
+			FrameworkAPI::AddNewEventToLog(eventHandle, data.GetForm(a_eventID)->GetName());
 		}
+
+		FoundItemData.AddForm(a_baseID);
+		for (auto var : data.GetAllVariations()) {
+			if (data.GetBase(var) == a_baseID) {
+				FoundItemData.AddForm(var);
+			}
+		}
+
+		bools->at(std::distance(forms.begin(), std::ranges::find(forms, data.GetForm(a_baseID)))) = true;
+		*found = std::ranges::count(*bools, true);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos) {
+	void CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, bool from_hook) {
 
 		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
 
@@ -171,9 +132,12 @@ namespace CPatch_UND
 				if (extraMapMarker->mapData->flags.all(RE::MapMarkerData::Flag::kVisible, RE::MapMarkerData::Flag::kCanTravelTo) && !a_marker->IsDisabled()) {
 					MapMa_BoolArray[a_pos] = true;
 					FoundItemData_NoShow.AddForm(a_form);
-					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
+					if (from_hook)
+					{
+						auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, MapMa_NameArray[a_pos]);
+						FrameworkAPI::SendNotification(msg, "NotifySpecial");
+						FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, MapMa_NameArray[a_pos]);
+					}
 				}
 			}
 		}
@@ -188,7 +152,7 @@ namespace CPatch_UND
 	{
 		for (auto i = 0; i < MapMa_FormArray.size(); i++) {
 			if (DKUtil::string::iequals(nam, MapMa_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_FormArray[i])) {
-				CHandler::ProcessMapMarker(MapMa_FormArray[i], i);
+				CHandler::ProcessMapMarker(MapMa_FormArray[i], i, true);
 				return;
 			}
 		}
@@ -200,13 +164,17 @@ namespace CPatch_UND
 
 	void CHandler::InjectAndCompileData() {
 
-		CPatch_UND_Books::Data.CompileFormArray(CPatch_UND::Books, modname);
-		CPatch_UND_MapMa::Data.CompileFormArray(CPatch_UND::MapMa, modname);
+		if (!Serialization::CompletionistData::IsModInstalled(classical_lichdom)) {
+			BookData.AddForm(0x05839E, modname);
+		};
 
-		CPatch_UND_Books::Data.MergeAsCollectable();
+		BookData.CompileFormArray(CPatch_UND::Books, modname);
+		MapsData.CompileFormArray(CPatch_UND::MapMa, modname);
 
-		CPatch_UND_Books::Data.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray, false, 1);
-		CPatch_UND_MapMa::Data.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, false, 2);
+		BookData.MergeAsCollectable();
+
+		BookData.Populate(Books_NameArray, Books_FormArray, Books_BoolArray, Books_TextArray, false, 1);
+		MapsData.Populate(MapMa_NameArray, MapMa_FormArray, MapMa_BoolArray, MapMa_TextArray, false, 2);
 
 		Books_EntriesTotal = Books_FormArray.size();
 		Books_EntriesFound = std::ranges::count(Books_BoolArray, true);
@@ -215,13 +183,17 @@ namespace CPatch_UND
 		MapMa_EntriesFound = std::ranges::count(MapMa_BoolArray, true);
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
+
 	void CHandler::InstallSearchTerms()
 	{
 		for (auto i = 0; i < Books_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_NameArray[i], "$MCMPageUndeath", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_FormArray[i], Books_NameArray[i], "$MCMPageUndeath", FrameworkAPI::GetBookCategoryType(Books_FormArray[i])));
 		}
-		for (auto& name : MapMa_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageUndeath", std::to_underlying(EntryCategory::kMapM)));
+		for (auto i = 0; i < MapMa_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_FormArray[i], MapMa_NameArray[i], "$MCMPageUndeath", std::to_underlying(EntryCategory::kMapM)));
 		}
 	}
 

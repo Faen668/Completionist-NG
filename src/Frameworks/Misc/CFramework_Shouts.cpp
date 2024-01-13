@@ -34,7 +34,7 @@ namespace CFramework_Shouts {
 
 	EventResult CHandler::ProcessEvent(const RE::TESSpellCastEvent* a_event, RE::BSTEventSource<RE::TESSpellCastEvent>*) {
 
-		if (!a_event || !a_event->spell || a_event->object != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
+		if (!a_event || !a_event->spell || a_event->object.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
 
 		if (CFramework_Shouts_VS::Data.HasForm(a_event->spell)) {
 			ProcessFoundForm(Section::kVanilla, a_event->spell);
@@ -429,19 +429,14 @@ namespace CFramework_Shouts {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : Vanilla_SH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		for (auto i = 0; i < Vanilla_SH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Vanilla_SH_FormArray[i], Vanilla_SH_NameArray[i], "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
 		}
-
-		for (auto& name : Thunderchild_SH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		for (auto i = 0; i < Thunderchild_SH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Thunderchild_SH_FormArray[i], Thunderchild_SH_NameArray[i], "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
 		}
-
-		for (auto& name : Miscellaneous_SH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
+		for (auto i = 0; i < Miscellaneous_SH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Miscellaneous_SH_FormArray[i], Miscellaneous_SH_NameArray[i], "$MCMPageShouts", std::to_underlying(EntryCategory::kShou)));
 		}
 	}
 

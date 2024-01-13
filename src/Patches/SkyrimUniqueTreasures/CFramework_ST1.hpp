@@ -1,23 +1,13 @@
 #pragma once
-
-namespace CPatch_ST1_ItmL1 {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST1_ItmL2 {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST1_ItmL3 {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_ST1_ItmL4 {
-	inline Serialization::CompletionistData Data;
-}
+#define ProcessFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, Serialization::CompletionistData data, std::vector<RE::TESForm*> forms, std::vector<bool>* bools, std::int32_t* found, Serialization::CompletionistLog::logType eventHandle
 
 namespace CPatch_ST1 
 {	
+	inline Serialization::CompletionistData ItemData1;
+	inline Serialization::CompletionistData ItemData2;
+	inline Serialization::CompletionistData ItemData3;
+	inline Serialization::CompletionistData ItemData4;
+
 	inline std::vector<std::string> ItmL1_NameArray;
 	inline std::vector<std::string> ItmL1_TextArray;
 	inline std::vector<RE::TESForm*> ItmL1_FormArray;
@@ -45,23 +35,17 @@ namespace CPatch_ST1
 	inline std::vector<bool> ItmL4_BoolArray;
 	inline std::int32_t ItmL4_EntriesTotal;
 	inline std::int32_t ItmL4_EntriesFound;
-	
-	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESContainerChangedEvent> {
-
+	class CHandler
+	{
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
-
-		static void			SinkEvents();
 		static void			InstallFramework();
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
 
-		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
+		static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
+		static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 	};
 }

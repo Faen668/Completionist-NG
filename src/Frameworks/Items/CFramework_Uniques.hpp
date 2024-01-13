@@ -1,44 +1,19 @@
-#pragma once
 #include "Serialization.hpp"
 
-namespace CFramework_Uniques_A {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_W {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_I {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_J {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_L {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_Q {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_CCA {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_CCI {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Uniques_CCW {
-	inline Serialization::CompletionistData Data;
-}
+#pragma once
+#define ProcessFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, Serialization::CompletionistData data, std::vector<RE::TESForm*> forms, std::vector<bool>* bools, std::int32_t* found, Serialization::CompletionistLog::logType eventHandle
 
 namespace CFramework_Uniques
 {
+	inline Serialization::CompletionistData ItemDataA;
+	inline Serialization::CompletionistData ItemDataW;
+	inline Serialization::CompletionistData ItemDataI;
+	inline Serialization::CompletionistData ItemDataJ;
+	inline Serialization::CompletionistData ItemDataL;
+	inline Serialization::CompletionistData ItemDataQ;
+	inline Serialization::CompletionistData ItemDataCCA;
+	inline Serialization::CompletionistData ItemDataCCI;
+	inline Serialization::CompletionistData ItemDataCCW;
 
 	inline std::vector<std::string> A_NameArray;
 	inline std::vector<std::string> A_TextArray;
@@ -103,44 +78,22 @@ namespace CFramework_Uniques
 	inline std::int32_t CCW_EntriesTotal;
 	inline std::int32_t CCW_EntriesFound;
 
-	using EventResult = RE::BSEventNotifyControl;
-
-	enum section
+	class CHandler
 	{
-		kUniques_A,
-		kUniques_W,
-		kUniques_I,
-		kUniques_J,
-		kUniques_L,
-		kUniques_Q,
-		kUniques_CCA,
-		kUniques_CCI,
-		kUniques_CCW,
-
-		kTotal
-	};
-
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESContainerChangedEvent> {
-
 		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		  EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
+		static void			InstallFramework();
+		static void			UpdateFoundForms();
+		static void			InjectAndCompileData();
+		static void			InstallSearchTerms();
 
-		  static void			SinkEvents();
-		  static void			InstallFramework();
-		  static void			UpdateFoundForms();
-		  static void			InjectAndCompileData();
-		  static void			InstallSearchTerms();
+		static void			Install_CCA();
+		static void			Install_CCI();
+		static void			Install_CCW();
 
-		  static void			Install_CCA();
-		  static void			Install_CCI();
-		  static void			Install_CCW();
-
-		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, section kSection);
-
-		  static void			Install_QuestRewards();
-		  static void			Install_QuestRewards_Descriptions();
+		static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
+		static void			Install_QuestRewards();
+		static void			Install_QuestRewards_Descriptions();
+		static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 	};
 }

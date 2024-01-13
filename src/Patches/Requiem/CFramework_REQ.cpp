@@ -1,4 +1,5 @@
 #include "Serialization.hpp"
+#include "Internal Utility/Events.hpp"
 #include "CFramework_REQ.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 
@@ -10,7 +11,7 @@ namespace CPatch_REQ {
 	// clang-format off
 	
 	// Armor
-	constexpr Serialization::FormArray ItmL1_A = {
+	constexpr Serialization::FormArray Armor = {
 		0x000D6B,0x003E01,0x003E02,0x003E03,0x0A1167,0x0A1168,0x0A1169,0x0A116A,0x0BED17,0x43FE4C,
 		0x45D3AB,0xAD36E1,0xAD3AFF,0xAD3B00,0xAD3B3E,0xAD8CA9,0xAD8CAA,0xAD8CAB,0xAD8CAD,0xADDD76,
 		0xADDD77,0xADDD78,0xADDD81,0xADDD82,0xADDD83,0xADDD84,0xADDD85,0xADDD86,0xADDD87,0xADDD88,
@@ -20,30 +21,30 @@ namespace CPatch_REQ {
 	};
 
 	// Misc
-	constexpr Serialization::FormArray ItmL1_M = {
+	constexpr Serialization::FormArray Misc = {
 		0x04FEBC, 0x04FEC0,0x21025A,
 	};
 
 	// Weapons
-	constexpr Serialization::FormArray ItmL2 = {
+	constexpr Serialization::FormArray Weapon = {
 		0x044BFD,0x0731D3,0x0801CC,0x094B3F,0x0AB005,0x169B46,0x1AA25A,0x1AA25B,0x1AA25D,0x1AA260,
 		0x1AA261,0x1AA262,0x1AA263,0x352150,0x372455,0x447573,0x5CBCA7,0xADDD6D,0xADDD6E,
 	};
 
 	// General Books
-	constexpr Serialization::FormArray ItmL3_B = {
+	constexpr Serialization::FormArray Book = {
 		0x05CBC7,0x05CBCA,0x05CBD4,0x05CBD7,0x05CBDA,0x05CBDC,0x05CBDE,0x05CBE0,0x069947,0x06BA1A,
 		0x06BA1D,0x06BA21,0x085D6C,0x08850D,0x0A8863,0x0AB007,0x0C6ADC,0x35B997,0x4BBD05,0x4CAABF,
 		0xAD36E8,0xAD3748,0xAD374B,0xAD38D2,
 	};
 
 	// Skill Books
-	constexpr Serialization::FormArray ItmL3_S = {
+	constexpr Serialization::FormArray SkillBook = {
 		0x4BBCC5,0x4BBCCB,
 	};
 
 	// Spell Tomes
-	constexpr Serialization::FormArray ItmL4 = {
+	constexpr Serialization::FormArray SpellTome = {
 		0x02D142,0x02D143,0x02D145,0x02D147,0x02D148,0x02FC87,0x02FC88,0x02FC89,0x02FC8A,0x02FC8B,
 		0x02FC8C,0x02FC8D,0x02FC8E,0x02FC8F,0x02FC90,0x02FC91,0x02FC92,0x02FC93,0x02FC94,0x02FC95,
 		0x02FC96,0x02FC97,0x02FC98,0x02FC99,0x02FC9A,0x02FC9B,0x02FC9C,0x02FC9D,0x02FC9E,0x02FC9F,
@@ -68,243 +69,121 @@ namespace CPatch_REQ {
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		CHandler::SinkEvents();
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Sink Event ) -------------
-	//---------------------------------------------------
-
-	void CHandler::SinkEvents() {
-
-		RE::BooksRead::GetEventSource()->AddEventSink(CHandler::GetSingleton());
-
-		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(CHandler::GetSingleton()));
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( Books Read ) ----------------
-	//---------------------------------------------------
-
-	EventResult CHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) {
-
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
-
-		if (CPatch_REQ_ItmL3_S::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_REQ_ItmL3_S::Data.GetBase(a_event->book->GetFormID()) ? CPatch_REQ_ItmL3_S::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), section::k_ItmL3S);
-			return EventResult::kContinue;
-		}
-
-		if (CPatch_REQ_ItmL3_B::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_REQ_ItmL3_B::Data.GetBase(a_event->book->GetFormID()) ? CPatch_REQ_ItmL3_B::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), section::k_ItmL3B);
-			return EventResult::kContinue;
-		}
-
-		if (CPatch_REQ_ItmL4::Data.HasForm(a_event->book->GetFormID())) {
-			auto base = CPatch_REQ_ItmL4::Data.GetBase(a_event->book->GetFormID()) ? CPatch_REQ_ItmL4::Data.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
-			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), section::k_ItmL4);
-			return EventResult::kContinue;
-		}
-		return EventResult::kContinue;
+		CEvents::EventHandler::RegisterForEvent_OnBooksReadEvent(CHandler::OnBooksReadEvent);
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(CHandler::OnMenuOpenCloseEvent);
+		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 	}
 
 	//---------------------------------------------------
 	//-- Framework Events ( On Item Added ) -------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
+	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
 
-		if (!a_event || a_event->newContainer != 0x00014) { return EventResult::kContinue; }
+		if (a_event->newContainer != 0x00014)
+		{
+			if (ItemDataA.HasForm(a_event->baseObj)) {
+				auto base = ItemDataA.GetBase(a_event->baseObj) ? ItemDataA.GetBase(a_event->baseObj) : a_event->baseObj;
+				CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataA, Armor_FormArray, &Armor_BoolArray, &Armor_EntriesFound, log::kCollected, "NotifyItems");
+				return;
+			}
 
-		if (CPatch_REQ_ItmL1_A::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_REQ_ItmL1_A::Data.GetBase(a_event->baseObj) ? CPatch_REQ_ItmL1_A::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, section::k_ItmL1A);
-			return EventResult::kContinue;
+			if (ItemDataW.HasForm(a_event->baseObj)) {
+				auto base = ItemDataW.GetBase(a_event->baseObj) ? ItemDataW.GetBase(a_event->baseObj) : a_event->baseObj;
+				CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataW, Weapon_FormArray, &Weapon_BoolArray, &Weapon_EntriesFound, log::kCollected, "NotifyItems");
+				return;
+			}
+
+			if (ItemDataM.HasForm(a_event->baseObj)) {
+				auto base = ItemDataM.GetBase(a_event->baseObj) ? ItemDataM.GetBase(a_event->baseObj) : a_event->baseObj;
+				CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataM, Misc_FormArray, &Misc_BoolArray, &Misc_EntriesFound, log::kCollected, "NotifyItems");
+				return;
+			}
+
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Books Read ) ----------------
+	//---------------------------------------------------
+
+	void CHandler::OnBooksReadEvent(RE::BooksRead::Event const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
+
+		if (ItemDataB.HasForm(a_event->book->GetFormID())) {
+			auto base = ItemDataB.GetBase(a_event->book->GetFormID()) ? ItemDataB.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), ItemDataB, Book_FormArray, &Book_BoolArray, &Book_EntriesFound, FrameworkAPI::GetBookLogType(a_event->book), "NotifyBooks");
+			return;
 		}
 
-		if (CPatch_REQ_ItmL1_M::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_REQ_ItmL1_M::Data.GetBase(a_event->baseObj) ? CPatch_REQ_ItmL1_M::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, section::k_ItmL1M);
-			return EventResult::kContinue;
+		if (ItemDataS.HasForm(a_event->book->GetFormID())) {
+			auto base = ItemDataS.GetBase(a_event->book->GetFormID()) ? ItemDataS.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), ItemDataS, SkillBook_FormArray, &SkillBook_BoolArray, &SkillBook_EntriesFound, FrameworkAPI::GetBookLogType(a_event->book), "NotifyBooks");
+			return;
 		}
 
-		if (CPatch_REQ_ItmL2::Data.HasForm(a_event->baseObj)) {
-			auto base = CPatch_REQ_ItmL2::Data.GetBase(a_event->baseObj) ? CPatch_REQ_ItmL2::Data.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, section::k_ItmL2);
-			return EventResult::kContinue;
+		if (ItemDataT.HasForm(a_event->book->GetFormID())) {
+			auto base = ItemDataT.GetBase(a_event->book->GetFormID()) ? ItemDataT.GetBase(a_event->book->GetFormID()) : a_event->book->GetFormID();
+			CHandler::ProcessFoundForm(base, a_event->book->GetFormID(), ItemDataT, SpellTome_FormArray, &SpellTome_BoolArray, &SpellTome_EntriesFound, FrameworkAPI::GetBookLogType(a_event->book), "NotifyBooks");
+			return;
 		}
-		return EventResult::kContinue;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Menu Open ) --------------
+	//---------------------------------------------------
+
+	void CHandler::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
+
+		if (a_event->menuName == RE::BookMenu::MENU_NAME && a_event->opening)
+		{
+			if (ItemDataB.HasForm(RE::BookMenu::GetTargetForm()->GetFormID())) 
+			{
+				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
+					auto base = ItemDataB.GetBase(target) ? ItemDataB.GetBase(target) : target;
+					CHandler::ProcessFoundForm(base, target, ItemDataB, Book_FormArray, &Book_BoolArray, &Book_EntriesFound, log::kBook, "NotifyBooks");
+					return;
+				}
+			}
+
+			if (ItemDataS.HasForm(RE::BookMenu::GetTargetForm()->GetFormID()))
+			{
+				if (auto target = RE::BookMenu::GetTargetForm()->GetFormID(); target) {
+					auto base = ItemDataS.GetBase(target) ? ItemDataS.GetBase(target) : target;
+					CHandler::ProcessFoundForm(base, target, ItemDataS, SkillBook_FormArray, &SkillBook_BoolArray, &SkillBook_EntriesFound, log::kBook, "NotifyBooks");
+					return;
+				}
+			}
+			return;
+		}
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, section k_section) {
+	void CHandler::ProcessFoundForm(ProcessFoundFormArgs, std::string a_section) {
 
-		switch (k_section)
-		{
-		case CPatch_REQ::k_ItmL1A: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL1_A::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_REQ_ItmL1_A::Data.GetForm(a_eventID)->GetName());
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL1_A::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL1_A::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL1_A_FormArray, CPatch_REQ_ItmL1_A::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL1_A_FormArray.begin(), t_pos);
-			ItmL1_A_BoolArray[b_pos] = true;
-			ItmL1_A_EntriesFound = std::ranges::count(ItmL1_A_BoolArray, true);
-			break;
+		if (!FoundItemData.HasForm(a_eventID)) {
+			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, data.GetForm(a_eventID)->GetName());
+			FrameworkAPI::SendNotification(msg, a_section);
+			FrameworkAPI::AddNewEventToLog(eventHandle, data.GetForm(a_eventID)->GetName());
 		}
 
-		case CPatch_REQ::k_ItmL1M: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL1_M::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_REQ_ItmL1_M::Data.GetForm(a_eventID)->GetName());
+		FoundItemData.AddForm(a_baseID);
+		for (auto var : data.GetAllVariations()) {
+			if (data.GetBase(var) == a_baseID) {
+				FoundItemData.AddForm(var);
 			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL1_M::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL1_M::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL1_M_FormArray, CPatch_REQ_ItmL1_M::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL1_M_FormArray.begin(), t_pos);
-			ItmL1_M_BoolArray[b_pos] = true;
-			ItmL1_M_EntriesFound = std::ranges::count(ItmL1_M_BoolArray, true);
-			break;
 		}
 
-
-		case CPatch_REQ::k_ItmL2: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL2::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyItems");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, CPatch_REQ_ItmL2::Data.GetForm(a_eventID)->GetName());
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL2::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL2::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL2_FormArray, CPatch_REQ_ItmL2::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL2_FormArray.begin(), t_pos);
-			ItmL2_BoolArray[b_pos] = true;
-
-			ItmL2_EntriesFound = std::ranges::count(ItmL2_BoolArray, true);
-			break;
-		}
-
-		case CPatch_REQ::k_ItmL3S: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL3_S::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_REQ_ItmL3_S::Data.GetForm(a_eventID)); book && book->GetSpell()) {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
-				}
-				else {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_REQ_ItmL3_S::Data.GetForm(a_eventID)->GetName());
-				}
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL3_S::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL3_S::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL3_S_FormArray, CPatch_REQ_ItmL3_S::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL3_S_FormArray.begin(), t_pos);
-			ItmL3_S_BoolArray[b_pos] = true;
-
-			ItmL3_S_EntriesFound = std::ranges::count(ItmL3_S_BoolArray, true);
-			break;
-		}
-
-		case CPatch_REQ::k_ItmL3B: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL3_B::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_REQ_ItmL3_B::Data.GetForm(a_eventID)); book && book->GetSpell()) {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
-				}
-				else {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_REQ_ItmL3_B::Data.GetForm(a_eventID)->GetName());
-				}
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL3_B::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL3_B::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL3_B_FormArray, CPatch_REQ_ItmL3_B::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL3_B_FormArray.begin(), t_pos);
-			ItmL3_B_BoolArray[b_pos] = true;
-
-			ItmL3_B_EntriesFound = std::ranges::count(ItmL3_B_BoolArray, true);
-			break;
-		}
-
-		case CPatch_REQ::k_ItmL4: {
-			if (!FoundItemData.HasForm(a_eventID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CPatch_REQ_ItmL4::Data.GetForm(a_eventID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifyBooks");
-				if (auto* book = static_cast<RE::TESObjectBOOK*>(CPatch_REQ_ItmL4::Data.GetForm(a_eventID)); book && book->GetSpell()) {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, book->GetName());
-				}
-				else {
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, CPatch_REQ_ItmL4::Data.GetForm(a_eventID)->GetName());
-				}
-			}
-
-			FoundItemData.AddForm(a_baseID);
-			for (auto var : CPatch_REQ_ItmL4::Data.GetAllVariations()) {
-				if (CPatch_REQ_ItmL4::Data.GetBase(var) == a_baseID) {
-					FoundItemData.AddForm(var);
-				}
-			}
-
-
-			auto t_pos = std::ranges::find(ItmL4_FormArray, CPatch_REQ_ItmL4::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(ItmL4_FormArray.begin(), t_pos);
-			ItmL4_BoolArray[b_pos] = true;
-
-			ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
-			break;
-		}
-
-		default:
-			break;
-		}
+		bools->at(std::distance(forms.begin(), std::ranges::find(forms, data.GetForm(a_baseID)))) = true;
+		*found = std::ranges::count(*bools, true);
 	}
 
 	//---------------------------------------------------
@@ -313,71 +192,73 @@ namespace CPatch_REQ {
 
 	void CHandler::InjectAndCompileData() {
 
-		CPatch_REQ_ItmL1_A::Data.CompileFormArray(CPatch_REQ::ItmL1_A, modname);
-		CPatch_REQ_ItmL1_M::Data.CompileFormArray(CPatch_REQ::ItmL1_M, modname);
+		ItemDataA.CompileFormArray(CPatch_REQ::Armor, modname);
+		ItemDataM.CompileFormArray(CPatch_REQ::Misc, modname);
 
-		CPatch_REQ_ItmL3_S::Data.CompileFormArray(CPatch_REQ::ItmL3_S, modname);
-		CPatch_REQ_ItmL3_B::Data.CompileFormArray(CPatch_REQ::ItmL3_B, modname);
+		ItemDataS.CompileFormArray(CPatch_REQ::SkillBook, modname);
+		ItemDataB.CompileFormArray(CPatch_REQ::Book, modname);
 
-		CPatch_REQ_ItmL2::Data.CompileFormArray(CPatch_REQ::ItmL2, modname);
-		CPatch_REQ_ItmL4::Data.CompileFormArray(CPatch_REQ::ItmL4, modname);
+		ItemDataW.CompileFormArray(CPatch_REQ::Weapon, modname);
+		ItemDataT.CompileFormArray(CPatch_REQ::SpellTome, modname);
 
-		CPatch_REQ_ItmL1_A::Data.MergeAsCollectable();
-		CPatch_REQ_ItmL1_M::Data.MergeAsCollectable();
+		ItemDataA.MergeAsCollectable();
+		ItemDataM.MergeAsCollectable();
 
-		CPatch_REQ_ItmL3_S::Data.MergeAsCollectable();
-		CPatch_REQ_ItmL3_B::Data.MergeAsCollectable();
+		ItemDataS.MergeAsCollectable();
+		ItemDataB.MergeAsCollectable();
 
-		CPatch_REQ_ItmL2::Data.MergeAsCollectable();
-		CPatch_REQ_ItmL4::Data.MergeAsCollectable();
+		ItemDataW.MergeAsCollectable();
+		ItemDataT.MergeAsCollectable();
 
-		CPatch_REQ_ItmL1_A::Data.Populate(ItmL1_A_NameArray, ItmL1_A_FormArray, ItmL1_A_BoolArray, ItmL1_A_TextArray);
-		CPatch_REQ_ItmL1_M::Data.Populate(ItmL1_M_NameArray, ItmL1_M_FormArray, ItmL1_M_BoolArray, ItmL1_M_TextArray);
+		ItemDataA.Populate(Armor_NameArray, Armor_FormArray, Armor_BoolArray, Armor_TextArray);
+		ItemDataM.Populate(Misc_NameArray, Misc_FormArray, Misc_BoolArray, Misc_TextArray);
 
-		CPatch_REQ_ItmL3_S::Data.Populate(ItmL3_S_NameArray, ItmL3_S_FormArray, ItmL3_S_BoolArray, ItmL3_S_TextArray, false, 1);
-		CPatch_REQ_ItmL3_B::Data.Populate(ItmL3_B_NameArray, ItmL3_B_FormArray, ItmL3_B_BoolArray, ItmL3_B_TextArray, false, 1);
+		ItemDataS.Populate(SkillBook_NameArray, SkillBook_FormArray, SkillBook_BoolArray, SkillBook_TextArray, false, 1);
+		ItemDataB.Populate(Book_NameArray, Book_FormArray, Book_BoolArray, Book_TextArray, false, 1);
 
-		CPatch_REQ_ItmL2::Data.Populate(ItmL2_NameArray, ItmL2_FormArray, ItmL2_BoolArray, ItmL2_TextArray);
-		CPatch_REQ_ItmL4::Data.Populate(ItmL4_NameArray, ItmL4_FormArray, ItmL4_BoolArray, ItmL4_TextArray, false, 1);
+		ItemDataW.Populate(Weapon_NameArray, Weapon_FormArray, Weapon_BoolArray, Weapon_TextArray);
+		ItemDataT.Populate(SpellTome_NameArray, SpellTome_FormArray, SpellTome_BoolArray, SpellTome_TextArray, false, 1);
 
-		ItmL1_A_EntriesTotal = ItmL1_A_FormArray.size();
-		ItmL1_A_EntriesFound = std::ranges::count(ItmL1_A_BoolArray, true);
+		Armor_EntriesTotal = Armor_FormArray.size();
+		Armor_EntriesFound = std::ranges::count(Armor_BoolArray, true);
 
-		ItmL1_M_EntriesTotal = ItmL1_M_FormArray.size();
-		ItmL1_M_EntriesFound = std::ranges::count(ItmL1_M_BoolArray, true);
+		Misc_EntriesTotal = Misc_FormArray.size();
+		Misc_EntriesFound = std::ranges::count(Misc_BoolArray, true);
 
-		ItmL3_S_EntriesTotal = ItmL3_S_FormArray.size();
-		ItmL3_S_EntriesFound = std::ranges::count(ItmL3_S_BoolArray, true);
+		SkillBook_EntriesTotal = SkillBook_FormArray.size();
+		SkillBook_EntriesFound = std::ranges::count(SkillBook_BoolArray, true);
 
-		ItmL3_B_EntriesTotal = ItmL3_B_FormArray.size();
-		ItmL3_B_EntriesFound = std::ranges::count(ItmL3_B_BoolArray, true);
+		Book_EntriesTotal = Book_FormArray.size();
+		Book_EntriesFound = std::ranges::count(Book_BoolArray, true);
 
-		ItmL2_EntriesTotal = ItmL2_FormArray.size();
-		ItmL2_EntriesFound = std::ranges::count(ItmL2_BoolArray, true);
+		Weapon_EntriesTotal = Weapon_FormArray.size();
+		Weapon_EntriesFound = std::ranges::count(Weapon_BoolArray, true);
 	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Install Search Terms ) ---
+	//---------------------------------------------------
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : ItmL1_A_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageRequiem1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < Armor_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Armor_FormArray[i], Armor_NameArray[i], "$MCMPageRequiem1", std::to_underlying(EntryCategory::kItem)));
 		}
-		for (auto& name : ItmL1_M_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageRequiem1", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < Misc_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Misc_FormArray[i], Misc_NameArray[i], "$MCMPageRequiem1", std::to_underlying(EntryCategory::kItem)));
 		}
-		for (auto i = 0; i < ItmL3_S_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL3_S_NameArray[i], "$MCMPageRequiem2", FrameworkAPI::GetBookCategoryType(ItmL3_S_FormArray[i])));
+		for (auto i = 0; i < SkillBook_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SkillBook_FormArray[i], SkillBook_NameArray[i], "$MCMPageRequiem2", FrameworkAPI::GetBookCategoryType(SkillBook_FormArray[i])));
 		}
-		for (auto i = 0; i < ItmL3_B_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL3_B_NameArray[i], "$MCMPageRequiem2", FrameworkAPI::GetBookCategoryType(ItmL3_B_FormArray[i])));
+		for (auto i = 0; i < Book_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Book_FormArray[i], Book_NameArray[i], "$MCMPageRequiem2", FrameworkAPI::GetBookCategoryType(Book_FormArray[i])));
 		}
-		for (auto i = 0; i < ItmL4_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(ItmL4_NameArray[i], "$MCMPageRequiem3", FrameworkAPI::GetBookCategoryType(ItmL4_FormArray[i])));
+		for (auto i = 0; i < SpellTome_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SpellTome_FormArray[i], SpellTome_NameArray[i], "$MCMPageRequiem3", FrameworkAPI::GetBookCategoryType(SpellTome_FormArray[i])));
 		}
-
-		for (auto& name : ItmL2_NameArray) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPageRequiem4", std::to_underlying(EntryCategory::kItem)));
+		for (auto i = 0; i < Weapon_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Weapon_FormArray[i], Weapon_NameArray[i], "$MCMPageRequiem4", std::to_underlying(EntryCategory::kItem)));
 		}
-
 	}
 
 	//---------------------------------------------------
@@ -388,46 +269,46 @@ namespace CPatch_REQ {
 
 		if (!Serialization::CompletionistData::IsModInstalled(modname)) { return; }
 
-		for (auto i = 0; i < ItmL1_A_FormArray.size(); i++) {
-			ItmL1_A_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_A_FormArray[i], &CPatch_REQ_ItmL1_A::Data);
+		for (auto i = 0; i < Armor_FormArray.size(); i++) {
+			Armor_BoolArray[i] = FrameworkAPI::IsItemKnown(Armor_FormArray[i], &ItemDataA);
 		}
 
-		for (auto i = 0; i < ItmL1_M_FormArray.size(); i++) {
-			ItmL1_M_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL1_M_FormArray[i], &CPatch_REQ_ItmL1_M::Data);
+		for (auto i = 0; i < Misc_FormArray.size(); i++) {
+			Misc_BoolArray[i] = FrameworkAPI::IsItemKnown(Misc_FormArray[i], &ItemDataM);
 		}
 
-		for (auto i = 0; i < ItmL3_S_FormArray.size(); i++) {
-			ItmL3_S_BoolArray[i] = FrameworkAPI::IsBookKnown(ItmL3_S_FormArray[i]);
+		for (auto i = 0; i < SkillBook_FormArray.size(); i++) {
+			SkillBook_BoolArray[i] = FrameworkAPI::IsBookKnown(SkillBook_FormArray[i]);
 		}
 
-		for (auto i = 0; i < ItmL3_B_FormArray.size(); i++) {
-			ItmL3_B_BoolArray[i] = FrameworkAPI::IsBookKnown(ItmL3_B_FormArray[i]);
+		for (auto i = 0; i < Book_FormArray.size(); i++) {
+			Book_BoolArray[i] = FrameworkAPI::IsBookKnown(Book_FormArray[i]);
 		}
 
-		for (auto i = 0; i < ItmL2_FormArray.size(); i++) {
-			ItmL2_BoolArray[i] = FrameworkAPI::IsItemKnown(ItmL2_FormArray[i], &CPatch_REQ_ItmL2::Data);
+		for (auto i = 0; i < Weapon_FormArray.size(); i++) {
+			Weapon_BoolArray[i] = FrameworkAPI::IsItemKnown(Weapon_FormArray[i], &ItemDataW);
 		}
 
-		for (auto i = 0; i < ItmL4_FormArray.size(); i++) {
-			ItmL4_BoolArray[i] = FrameworkAPI::IsBookKnown(ItmL4_FormArray[i]);
+		for (auto i = 0; i < SpellTome_FormArray.size(); i++) {
+			SpellTome_BoolArray[i] = FrameworkAPI::IsBookKnown(SpellTome_FormArray[i]);
 		}
 
-		ItmL1_A_EntriesTotal = ItmL1_A_FormArray.size();
-		ItmL1_A_EntriesFound = std::ranges::count(ItmL1_A_BoolArray, true);
+		Armor_EntriesTotal = Armor_FormArray.size();
+		Armor_EntriesFound = std::ranges::count(Armor_BoolArray, true);
 
-		ItmL1_M_EntriesTotal = ItmL1_M_FormArray.size();
-		ItmL1_M_EntriesFound = std::ranges::count(ItmL1_M_BoolArray, true);
+		Misc_EntriesTotal = Misc_FormArray.size();
+		Misc_EntriesFound = std::ranges::count(Misc_BoolArray, true);
 
-		ItmL3_S_EntriesTotal = ItmL3_S_FormArray.size();
-		ItmL3_S_EntriesFound = std::ranges::count(ItmL3_S_BoolArray, true);
+		SkillBook_EntriesTotal = SkillBook_FormArray.size();
+		SkillBook_EntriesFound = std::ranges::count(SkillBook_BoolArray, true);
 
-		ItmL3_B_EntriesTotal = ItmL3_B_FormArray.size();
-		ItmL3_B_EntriesFound = std::ranges::count(ItmL3_B_BoolArray, true);
+		Book_EntriesTotal = Book_FormArray.size();
+		Book_EntriesFound = std::ranges::count(Book_BoolArray, true);
 
-		ItmL2_EntriesTotal = ItmL2_FormArray.size();
-		ItmL2_EntriesFound = std::ranges::count(ItmL2_BoolArray, true);
+		Weapon_EntriesTotal = Weapon_FormArray.size();
+		Weapon_EntriesFound = std::ranges::count(Weapon_BoolArray, true);
 
-		ItmL4_EntriesTotal = ItmL4_FormArray.size();
-		ItmL4_EntriesFound = std::ranges::count(ItmL4_BoolArray, true);
+		SpellTome_EntriesTotal = SpellTome_FormArray.size();
+		SpellTome_EntriesFound = std::ranges::count(SpellTome_BoolArray, true);
 	}
 }

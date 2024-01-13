@@ -5,12 +5,14 @@
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
+#include "Internal Utility/PatchListener.hpp"
 
 namespace CFramework_Master 
 {
 	using namespace CVariables;
 	using namespace ArrayHolder;
 	using namespace Serialization;
+	using namespace CExternalPatchHandler;
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Master Registration ) ----
@@ -30,8 +32,10 @@ namespace CFramework_Master
 		SetSerializableInfo(CQuestKeys_Manual);
 		SetSerializableInfo(CQuestKeys_Stages);
 		SetSerializableInfo(LoggingData);
+		SetSerializableInfo(RadiantCountData);
+		SetSerializableInfo(ExcludedCellScannerRefs);
+		SetSerializableInfo(ExcludedMerchantContainers);
 
-		CellScanner::				CHandler::AddExcludedChests();
 		//Frameworks
 		CFramework_Uniques::		CHandler::InstallFramework();
 		CFramework_Others::			CHandler::InstallFramework();
@@ -75,9 +79,19 @@ namespace CFramework_Master
 		CPatch_JAY::				CHandler::InstallFramework();
 		CPatch_RAR::				CHandler::InstallFramework();
 		CPatch_Cloaks::				CHandler::InstallFramework();
+		CPatch_ICOW::				CHandler::InstallFramework();
+		CPatch_TTB::				CHandler::InstallFramework();
+		CPatch_BGC::				CHandler::InstallFramework();
+		CPatch_AOS::				CHandler::InstallFramework();
 
 		//SpellTomes
 		CPatch_SpellTomes::			CHandler::InstallFramework();
+
+		//Custom Patches
+		for (auto& cls : CExternalPatchHandler::Get())
+		{ 
+			cls->InstallFramework();
+		};
 
 		//Register Arrays
 		ArrayHolder::RegisterArrays();
@@ -89,8 +103,9 @@ namespace CFramework_Master
 
 	auto FrameworkAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 	{
-		a_vm->RegisterFunction("LogWithPlugin",					"Completionist_Native", LogWithPlugin);
+		a_vm->RegisterFunction("SetFrameworkQuest", "Completionist_Native", CVariables::VariablesAPI::SetFrameworkQuest);
 
+		a_vm->RegisterFunction("LogWithPlugin",					"Completionist_Native", LogWithPlugin);
 		a_vm->RegisterFunction("GetFormArrayByID",				"Completionist_Native", GetFormArrayByID);
 		a_vm->RegisterFunction("GetNameArrayByID",				"Completionist_Native", GetNameArrayByID);
 		a_vm->RegisterFunction("GetBoolArrayByID",				"Completionist_Native", GetBoolArrayByID);
@@ -106,7 +121,7 @@ namespace CFramework_Master
 		a_vm->RegisterFunction("GetHexValue",					"Completionist_Native", GetHexValue);
 		a_vm->RegisterFunction("SendNotification",				"Completionist_Native", SendNotificationExt);
 
-		a_vm->RegisterFunction("UpdateVariables",				"Completionist_Native", UpdateCompletion);
+		a_vm->RegisterFunction("UpdateVariables",				"Completionist_Native", UpdateVariables);
 		a_vm->RegisterFunction("LoadInjectedForms",				"Completionist_Native", LoadInjectedForms);
 
 		a_vm->RegisterFunction("GetLoggingDates",				"Completionist_Native", GetLoggingDates);
@@ -115,20 +130,96 @@ namespace CFramework_Master
 		a_vm->RegisterFunction("Framework_UpdatePetOwnership",	"Completionist_Native", CFramework_Pets::CHandler::Framework_UpdatePetOwnership);
 		a_vm->RegisterFunction("Framework_UpdateShouts",		"Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
 		a_vm->RegisterFunction("ActivateShrineByID",			"Completionist_Native", CFramework_Blessings::CHandler::ActivateShrineFromPapyrus);
+
 		a_vm->RegisterFunction("CheckForReferences",			"Completionist_Native", CellScanner::CHandler::CheckForReferences);
+		a_vm->RegisterFunction("GetValidItemReferences",		"Completionist_Native", CellScanner::CHandler::GetValidItemReferences);
+		a_vm->RegisterFunction("GetValidItemReferenceNames",	"Completionist_Native", CellScanner::CHandler::GetValidItemReferenceNames);
+		a_vm->RegisterFunction("GetValidItemReferenceTypes",	"Completionist_Native", CellScanner::CHandler::GetValidItemReferenceTypes);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceFormID", "Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceFormID);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceOwner",	"Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceOwner);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceIndex",	"Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceIndex);
+		a_vm->RegisterFunction("GetReferenceFormIDs",			"Completionist_Native", CellScanner::CHandler::GetReferenceFormIDs);
+		a_vm->RegisterFunction("GetReferenceNames",				"Completionist_Native", CellScanner::CHandler::GetReferenceNames);
+		a_vm->RegisterFunction("GetObjectReferences",			"Completionist_Native", CellScanner::CHandler::GetObjectReferences);
+		a_vm->RegisterFunction("isCellExcluded",				"Completionist_Native", CellScanner::CHandler::isCellExcluded);
+		
+		a_vm->RegisterFunction("ExcludeReference",				"Completionist_Native", CellScanner::CHandler::ExcludeReference);
+		a_vm->RegisterFunction("RemoveExcludedReference",		"Completionist_Native", CellScanner::CHandler::RemoveExcludedReference);
+
+		a_vm->RegisterFunction("MapMarkerIsCleared",			"Completionist_Native", CFramework_MapMa::CHandler::MarkerIsCleared);
+
+		a_vm->RegisterFunction("SetFishCaught",					"Completionist_Native", CPatch_FSH::CHandler::ProcessCaughtFishFromPapyrus);
+		a_vm->RegisterFunction("IsItemKnownExternal",			"Completionist_Native", IsItemKnownExternal);
+		a_vm->RegisterFunction("IsInActualMenuMode",			"Completionist_Native", IsInActualMenuMode);
+		
 		return true;
 	}
 
+	//---------------------------------------------------
+	//-- Framework Functions (Logging Functions ) -------
+	//---------------------------------------------------
+
 	std::vector<std::string> FrameworkAPI::GetLoggingDates(RE::StaticFunctionTag*)
 	{
-		auto list = LoggingData.GetAllLoggedDates();
+		std::vector<std::string> list = LoggingData.GetAllLoggedDates();
+		std::sort(list.begin(), list.end(), compare_dates);
 		std::reverse(list.begin(), list.end());
 		return list;
 	}
 
-	std::vector<std::string> FrameworkAPI::GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_time)
+	//---------------------------------------------------
+	//-- Framework Functions (IsInActualMenuMode ) ------
+	//---------------------------------------------------
+
+	bool FrameworkAPI::IsInActualMenuMode(RE::StaticFunctionTag*)
 	{
-		auto list = LoggingData.GetAllLoggedEvents(a_date, b_time);
+		auto map = RE::ControlMap::GetSingleton();
+		return !map->IsMovementControlsEnabled();
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions (Logging Functions ) -------
+	//---------------------------------------------------
+
+	bool FrameworkAPI::compare_dates(std::string a, std::string b)
+	{
+		// Comparing the years
+		std::string yr1 = a.substr(6, 4);
+		std::string yr2 = b.substr(6, 4);
+		if (yr1.compare(yr2) != 0)
+		{
+			if (yr1.compare(yr2) < 0)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		// Comparing the months
+		std::string mo1 = a.substr(3, 2);
+		std::string mo2 = b.substr(3, 2);
+		if (mo1.compare(mo2) != 0)
+		{
+			if (mo1.compare(mo2) < 0)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		// Comparing the days
+		std::string da1 = a.substr(0, 2);
+		std::string da2 = b.substr(0, 2);
+		return da1.compare(da2) < 0;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions (Logging Functions ) -------
+	//---------------------------------------------------
+
+	std::vector<std::string> FrameworkAPI::GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_prefix, bool b_colour, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc)
+	{
+		auto list = LoggingData.GetAllLoggedEvents(a_date, b_prefix, b_colour, qc, ic, bc, sc);
 		while (list.size() > 126) { list.erase(list.begin()); }
 		std::reverse(list.begin(), list.end());
 		return list;
@@ -146,7 +237,7 @@ namespace CFramework_Master
 
 		//INFO("Running Misc Search For {} with a type of {}", s_term, i_searchType);
 
-		for (auto& [name, text, Category] : CFramework_Master::CItemsDataVec)
+		for (auto& [form, name, mcmPage, Category] : CFramework_Master::CItemsDataVec)
 		{
 			if (list.size() >= i_maxResults)
 				break;
@@ -161,9 +252,14 @@ namespace CFramework_Master
 				break;
 			}
 
-			if (process) {
-				list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + text + "}{" + GetLocalisedCategory(Category) + "}{" + name + "}");
-				list.push_back(text);
+			if (process) 
+			{
+				if (b_ignoreCompleted && (FoundItemData.HasForm(form) || FoundItemData_NoShow.HasForm(form))) {
+					continue;
+				}
+
+				list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + mcmPage + "}{" + GetLocalisedCategory(Category) + "}{" + name + "}");
+				list.push_back(mcmPage);
 				list.push_back(name);
 				list.push_back("Misc");
 				result++;
@@ -237,14 +333,22 @@ namespace CFramework_Master
 		LoggingData.AddLoggedEvent(kType, a_log);
 	}
 
+	Serialization::CompletionistLog::logType FrameworkAPI::GetBookLogType(RE::TESForm* a_form)
+	{
+		if (auto* book = static_cast<RE::TESObjectBOOK*>(a_form); book && book->GetSpell()) {
+			return Serialization::CompletionistLog::logType::kTome;
+		}
+
+		return Serialization::CompletionistLog::logType::kBook;
+	}
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Update From MCM ) --------
 	//---------------------------------------------------
 
-	void FrameworkAPI::UpdateCompletion(RE::StaticFunctionTag*) 
+	void FrameworkAPI::UpdateVariables(RE::StaticFunctionTag*) 
 	{
 		VariablesAPI::Update();
-		CQuestMaster::QuestAPI::UpdateQuestCompletion();
 	}
 
 	//---------------------------------------------------
@@ -287,7 +391,7 @@ namespace CFramework_Master
 
 	bool FrameworkAPI::CCLocationsInstalled()		{ return bool(CFramework_MapMa_CC::Data.data.size()); }
 	bool FrameworkAPI::CCBooksInstalled()			{ return bool(CFramework_Books_CC::Data.data.size());; }
-	bool FrameworkAPI::CCItemsInstalled()			{ return bool(CFramework_Uniques_CCA::Data.data.size()) || bool(CFramework_Uniques_CCI::Data.data.size()) || bool(CFramework_Uniques_CCW::Data.data.size()); }
+	bool FrameworkAPI::CCItemsInstalled()			{ return bool(CFramework_Uniques::ItemDataCCA.data.size()) || bool(CFramework_Uniques::ItemDataCCI.data.size()) || bool(CFramework_Uniques::ItemDataCCW.data.size()); }
 	bool FrameworkAPI::ShouldDisplayMiscHeader()	{ return bool(PatchesInstalled); }
 	bool FrameworkAPI::ShouldDisplayTomeHeader()	{ return bool(TomesInstalled); }
 
@@ -298,6 +402,11 @@ namespace CFramework_Master
 	void FrameworkAPI::Update() 
 	{
 		AddUpdateFoundForms_Invoke();
+
+		for (auto& cls : CExternalPatchHandler::CustomItemsPatches)
+		{
+			cls->UpdateFoundForms();
+		};
 	}
 
 	//---------------------------------------------------
@@ -308,6 +417,11 @@ namespace CFramework_Master
 	{
 		_OnMapMarkerAdded(a_form);
 		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
+
+		for (auto& cls : CExternalPatchHandler::CustomItemsPatches)
+		{
+			cls->ProcessHookedMarker(a_form->GetFullName());
+		};
 	}
 
 	//---------------------------------------------------
@@ -317,6 +431,11 @@ namespace CFramework_Master
 	const char* FrameworkAPI::OnMapMarkerDiscovered(RE::TESFullName* a_form)
 	{
 		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
+		for (auto& cls : CExternalPatchHandler::CustomItemsPatches)
+		{
+			cls->ProcessHookedMarker(a_form->GetFullName());
+		};
+
 		return _OnMapMarkerDiscovered(a_form);
 	}
 
@@ -326,8 +445,8 @@ namespace CFramework_Master
 
 	std::int32_t FrameworkAPI::GetEntries_TotalByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& value = HandleTotalSet(FrameworkID(a_ID));
-		//INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		auto& value = HandleTotalSet(a_ID);
+		//INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(a_ID), value);
 		return value;
 	}
 
@@ -337,8 +456,8 @@ namespace CFramework_Master
 
 	std::int32_t FrameworkAPI::GetEntries_FoundByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& value = HandleFoundSet(FrameworkID(a_ID));
-		//INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(FrameworkID(a_ID)), value);
+		auto& value = HandleFoundSet(a_ID);
+		//INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(a_ID), value);
 		return value;
 	}
 
@@ -348,8 +467,8 @@ namespace CFramework_Master
 
 	std::vector<RE::TESForm*> FrameworkAPI::GetFormArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& array = HandleFormSet(FrameworkID(a_ID));
-		//INFO("Returning form array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		auto& array = HandleFormSet(a_ID);
+		//INFO("Returning form array for framework {} with a size of: {}", std::to_underlying(a_ID), array.size());
 		return array;
 	}
 
@@ -359,8 +478,8 @@ namespace CFramework_Master
 
 	std::vector<std::string> FrameworkAPI::GetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& array = HandleNameSet(FrameworkID(a_ID));
-		//INFO("Returning name array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		auto& array = HandleNameSet(a_ID);
+		//INFO("Returning name array for framework {} with a size of: {}", std::to_underlying(a_ID), array.size());
 		return array;
 	}
 
@@ -370,8 +489,8 @@ namespace CFramework_Master
 
 	std::vector<std::string> FrameworkAPI::GetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& array = HandleTextSet(FrameworkID(a_ID));
-		//INFO("Returning text array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		auto& array = HandleTextSet(a_ID);
+		//INFO("Returning text array for framework {} with a size of: {}", std::to_underlying(a_ID), array.size());
 		return array;
 	}
 
@@ -381,8 +500,8 @@ namespace CFramework_Master
 
 	std::vector<bool> FrameworkAPI::GetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
-		auto& array = HandleBoolSet(FrameworkID(a_ID));
-		//INFO("Returning bool array for framework {} with a size of: {}", std::to_underlying(FrameworkID(a_ID)), array.size());
+		auto& array = HandleBoolSet(a_ID);
+		//INFO("Returning bool array for framework {} with a size of: {}", std::to_underlying(a_ID), array.size());
 		return array;
 	}
 
@@ -391,9 +510,8 @@ namespace CFramework_Master
 	//---------------------------------------------------
 
 	std::int32_t FrameworkAPI::IsOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, RE::TESForm* a_form) {
-
-		if (auto t_pos = std::ranges::find(HandleFormSet(FrameworkID(a_ID)), a_form); t_pos != HandleFormSet(FrameworkID(a_ID)).end()) {
-			return std::int32_t(HandleBoolSet(FrameworkID(a_ID))[std::distance(HandleFormSet(FrameworkID(a_ID)).begin(), t_pos)]);
+		if (auto t_pos = std::ranges::find(HandleFormSet(a_ID), a_form); t_pos != HandleFormSet(a_ID).end()) {
+			return std::int32_t(HandleBoolSet(a_ID)[std::distance(HandleFormSet(a_ID).begin(), t_pos)]);
 		}
 		return -1;
 	}
@@ -404,42 +522,42 @@ namespace CFramework_Master
 
 	void FrameworkAPI::SetOptionCompleted(RE::StaticFunctionTag*, std::int32_t a_ID, RE::TESForm* a_form) {
 
-		if (auto t_pos = std::ranges::find(HandleFormSet(FrameworkID(a_ID)), a_form); t_pos != HandleFormSet(FrameworkID(a_ID)).end()) {
-			auto b_pos = std::distance(HandleFormSet(FrameworkID(a_ID)).begin(), t_pos);
+		if (auto t_pos = std::ranges::find(HandleFormSet(a_ID), a_form); t_pos != HandleFormSet(a_ID).end()) {
+			auto b_pos = std::distance(HandleFormSet(a_ID).begin(), t_pos);
 
-			if (HandleBoolSet(FrameworkID(a_ID)).at(b_pos)) {
-				HandleBoolSet(FrameworkID(a_ID)).at(b_pos) = false;
+			if (HandleBoolSet(a_ID).at(b_pos)) {
+				HandleBoolSet(a_ID).at(b_pos) = false;
 
-				if (HandleNoShow(FrameworkID(a_ID))) { FoundItemData_NoShow.RemoveForm(HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()); }
-				else { FoundItemData.RemoveForm(HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()); }
+				if (HandleNoShow(a_ID)) { FoundItemData_NoShow.RemoveForm(HandleFormSet(a_ID).at(b_pos)->GetFormID()); }
+				else { FoundItemData.RemoveForm(HandleFormSet(a_ID).at(b_pos)->GetFormID()); }
 
-				for (auto var : HandleDataSet(FrameworkID(a_ID)).GetAllVariations()) {
-					if (HandleDataSet(FrameworkID(a_ID)).GetBase(var) == HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()) {
+				for (auto var : HandleDataSet(a_ID).GetAllVariations()) {
+					if (HandleDataSet(a_ID).GetBase(var) == HandleFormSet(a_ID).at(b_pos)->GetFormID()) {
 						
-						if (HandleNoShow(FrameworkID(a_ID))) { FoundItemData_NoShow.RemoveForm(var); }
+						if (HandleNoShow(a_ID)) { FoundItemData_NoShow.RemoveForm(var); }
 						else { FoundItemData.RemoveForm(var); }
 
 					}
 				}
 			}
 			else {
-				HandleBoolSet(FrameworkID(a_ID)).at(b_pos) = true;
+				HandleBoolSet(a_ID).at(b_pos) = true;
 
-				if (HandleNoShow(FrameworkID(a_ID))) { FoundItemData_NoShow.AddForm(HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()); }
-				else { FoundItemData.AddForm(HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()); }
+				if (HandleNoShow(a_ID)) { FoundItemData_NoShow.AddForm(HandleFormSet(a_ID).at(b_pos)->GetFormID()); }
+				else { FoundItemData.AddForm(HandleFormSet(a_ID).at(b_pos)->GetFormID()); }
 
-				for (auto var : HandleDataSet(FrameworkID(a_ID)).GetAllVariations()) {
-					if (HandleDataSet(FrameworkID(a_ID)).GetBase(var) == HandleFormSet(FrameworkID(a_ID)).at(b_pos)->GetFormID()) {
+				for (auto var : HandleDataSet(a_ID).GetAllVariations()) {
+					if (HandleDataSet(a_ID).GetBase(var) == HandleFormSet(a_ID).at(b_pos)->GetFormID()) {
 						
-						if (HandleNoShow(FrameworkID(a_ID))) { FoundItemData_NoShow.AddForm(var); }
+						if (HandleNoShow(a_ID)) { FoundItemData_NoShow.AddForm(var); }
 						else { FoundItemData.AddForm(var); }
 
 					}
 				}
 			}
 
-			HandleTotalSet(FrameworkID(a_ID)) = HandleFormSet(FrameworkID(a_ID)).size();
-			HandleFoundSet(FrameworkID(a_ID)) = std::ranges::count(HandleBoolSet(FrameworkID(a_ID)), true);
+			HandleTotalSet(a_ID) = HandleFormSet(a_ID).size();
+			HandleFoundSet(a_ID) = std::ranges::count(HandleBoolSet(a_ID), true);
 		}
 	}
 
@@ -458,6 +576,15 @@ namespace CFramework_Master
 		}
 
 		return FoundItemData.HasForm(itm);
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Is Item Known ) ----------
+	//---------------------------------------------------
+
+	bool FrameworkAPI::IsItemKnownExternal(RE::StaticFunctionTag*, RE::TESForm* a_form) 
+	{
+		return a_form && (FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID()));
 	}
 
 	//---------------------------------------------------

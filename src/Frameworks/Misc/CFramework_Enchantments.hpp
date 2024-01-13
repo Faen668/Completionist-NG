@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Serialization.hpp"
-#include "Internal Utility/AutoTOML.hpp"
+#include "Import/AutoTOML.hpp"
 
 namespace CFramework_Enchantments_VA {
 	inline Serialization::CompletionistData Data;
@@ -117,7 +117,6 @@ namespace YesImSureSettings {
 			}
 		}
 	}
-
 	MAKE_SETTING(bSetting, "Patches", EnchantmentLearned, false);
 }
 

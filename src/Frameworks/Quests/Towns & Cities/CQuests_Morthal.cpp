@@ -9,18 +9,21 @@ namespace CQFramework_Morthal
 		/*02*/ {"Morthal_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "MS14"},
 		/*03*/ {"Morthal_Quest03", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsChopWood"},
 		/*04*/ {"Morthal_Quest04", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsChopWood"},
-		/*05*/ {"Morthal_Quest05", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor001"},
-		/*06*/ {"Morthal_Quest06", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor017"},
-		/*07*/ {"Morthal_Quest07", CFlagEnum::kSide, CCompEnum::kGlobl, "Favor110"},
-		/*08*/ {"Morthal_Quest08", CFlagEnum::kSide, CCompEnum::kThane, "FavorJarlsMakeFriends"}
+		/*05*/ {"Morthal_Quest05", CFlagEnum::kSide, CCompEnum::kFavor, "Favor001"},
+		/*06*/ {"Morthal_Quest06", CFlagEnum::kSide, CCompEnum::kFavor, "Favor017"},
+		/*07*/ {"Morthal_Quest07", CFlagEnum::kSide, CCompEnum::kFavor, "Favor110"},
+		/*08*/ {"Morthal_Quest08", CFlagEnum::kSide, CCompEnum::kThane, "Favor255"}
+	};
+
+	CFavorData FavorData[]{
+		/*05*/ {"Morthal_Quest05", 0x0403B1, "Skyrim.esm", 0x0135ec, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*06*/ {"Morthal_Quest06", 0x0CA213, "Skyrim.esm", 0x0135e8, "Skyrim.esm", CQuestProcessor::kExcluded},
+		/*07*/ {"Morthal_Quest07", 0x0CA43B, "Skyrim.esm", 0x0135ef, "Skyrim.esm", CQuestProcessor::kExcluded},
 	};
 
 	CRadiantData RadiantData[]{
-		/*03*/ {"Morthal_Quest03", CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor_ChopWoodHroggar" },
-		/*04*/ {"Morthal_Quest04", CRadiantEnum::kRadiant_Def, 0, 0, 0, "Completionist_Favor_ChopWoodJorgen"  },
-		/*05*/ {"Morthal_Quest05", CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor001Idgrod"		  },
-		/*06*/ {"Morthal_Quest06", CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor017Benor"		  },
-		/*07*/ {"Morthal_Quest07", CRadiantEnum::kRadiant_DF1, 0, 0, 0, "Completionist_Favor110Lami"		  },
+		/*03*/ {"Morthal_Quest03", CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		/*04*/ {"Morthal_Quest04", CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
 	CStageData StageData[]{
@@ -32,8 +35,6 @@ namespace CQFramework_Morthal
 		{"Morthal_Quest08", "HjaalmarchImpGetOutofJail", "HjaalmarchSonsGetOutofJail"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -43,12 +44,12 @@ namespace CQFramework_Morthal
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()
-				->initQuestData(&ArrayData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
-				->initThaneData(ThaneData);
+				->initThaneData(ThaneData)
+				->initFavorData(FavorData)
+				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 10, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

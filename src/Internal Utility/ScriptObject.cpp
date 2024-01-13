@@ -1,28 +1,32 @@
 #include "ScriptObject.hpp"
 #include "FormUtil.hpp"
 
-auto ScriptObject::FromForm(RE::TESForm* a_form, const std::string& a_scriptName)
--> ScriptObjectPtr
+auto ScriptObject::FromForm(RE::TESForm* a_form, const std::string& a_scriptName) -> ScriptObjectPtr
 {
-	if (!a_form) {
-		INFO("Cannot retrieve script object from a None form."sv);
+	if (!a_form) 
+	{
+		ERROR("Cannot retrieve script object from a None form."sv);
 		return nullptr;
 	}
-	const auto skyrimVM = RE::SkyrimVM::GetSingleton();
-	auto vm = skyrimVM ? skyrimVM->impl : nullptr;
-	if (!vm) {
-		return nullptr;
+
+	auto papyrusVM = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+	if (!papyrusVM) 
+	{
+		ERROR("ScriptObject: Unable To Obtain Papyrus VM.")
 	}
+
 	auto typeID = static_cast<RE::VMTypeID>(a_form->GetFormType());
-	auto handle = skyrimVM->handlePolicy.GetHandleForObject(typeID, a_form);
-
+	auto handle = papyrusVM->handlePolicy->GetHandleForObject(typeID, a_form);
+	
 	ScriptObjectPtr object;
-	vm->FindBoundObject(handle, a_scriptName.c_str(), object);
+	papyrusVM->FindBoundObject(handle, a_scriptName.c_str(), object);
 
-	if (!object) {
+	if (!object) 
+	{
 		std::string formIdentifier = FormUtil::GetIdentifierFromForm(a_form);
-		INFO("Script {} is not attached to form. {}"sv, a_scriptName, formIdentifier);
+		ERROR("ScriptObject: Script {} is not attached to form [{}]"sv, a_scriptName, formIdentifier);
 	}
+
 	return object;
 }
 
@@ -143,10 +147,7 @@ auto ScriptObject::GetArray(ScriptObjectPtr a_object, std::string_view a_variabl
 	return variable ? variable->GetArray() : nullptr;
 }
 
-void ScriptObject::RegisterForModEvent(
-	ScriptObjectPtr a_object,
-	RE::BSFixedString a_eventName,
-	RE::BSFixedString a_callbackName)
+void ScriptObject::RegisterForModEvent(ScriptObjectPtr a_object, RE::BSFixedString a_eventName, RE::BSFixedString a_callbackName) 
 {
 	const auto skyrimVM = RE::SkyrimVM::GetSingleton();
 	const auto vm = skyrimVM ? skyrimVM->impl : nullptr;

@@ -10,6 +10,11 @@ enum class CFlagEnum
 	kSide = 1,
 	kRadi = 2,
 };
+const std::vector<std::pair<CFlagEnum, std::string>> CFlagEnum_Map{
+	{CFlagEnum::kMain,	"Main"},
+	{CFlagEnum::kSide,	"Side"},
+	{CFlagEnum::kRadi,	"Radiant"},
+};
 
 enum class CCompEnum
 {
@@ -17,6 +22,16 @@ enum class CCompEnum
 	kStage = 1,
 	kGlobl = 2,
 	kThane = 3,
+	kFavor = 4,
+	kCiWar = 5,
+};
+const std::vector<std::pair<CCompEnum, std::string>> CCompEnum_Map{
+	{CCompEnum::kStand,	"Standard"},
+	{CCompEnum::kStage,	"By Stage"},
+	{CCompEnum::kGlobl,	"As Radiant"},
+	{CCompEnum::kThane,	"Thane Quest"},
+	{CCompEnum::kFavor,	"Favor Quest"},
+	{CCompEnum::kCiWar,	"Civil War"},
 };
 
 enum class CStageEnum
@@ -24,6 +39,21 @@ enum class CStageEnum
 	kNone = 0,
 	kPast = 1,
 	kDone = 2,
+};
+const std::vector<std::pair<CStageEnum, std::string>> CStageEnum_Map{
+	{CStageEnum::kNone,	"No Stage"},
+	{CStageEnum::kPast,	"Stage Past"},
+	{CStageEnum::kDone,	"Stage Done"},
+};
+
+enum class CQuestProcessor
+{
+	kIncluded = 0,
+	kExcluded = 1,
+};
+const std::vector<std::pair<CQuestProcessor, std::string>> CQuestProcessor_Map{
+	{CQuestProcessor::kIncluded, "Included"},
+	{CQuestProcessor::kExcluded, "Excluded"},
 };
 
 enum class CRadiantEnum
@@ -35,16 +65,20 @@ enum class CRadiantEnum
 	kRadiant_DF4 = 4,
 	kRadiant_DF5 = 5,
 	kRadiant_DF6 = 6,
-	kRadiant_Fsh = 7,
-	kRadiant_Def = 8,
-	kRadiant_Bty = 9,
-	kRadiant_COL = 10,
-	kRadiant_COM = 11,
-	kRadiant_DBR = 12,
-	kRadiant_DGU = 13,
-	kRadiant_THG = 14,
-	kRadiant_LEG = 15,
-	kRadiant_VIG = 16,
+	kRadiant_DF7 = 7,
+	kRadiant_DF8 = 8,
+	kRadiant_DF9 = 9,
+	kRadiant_Fsh = 10,
+	kRadiant_Def = 11,
+	kRadiant_Bty = 12,
+	kRadiant_COL = 13,
+	kRadiant_COM = 14,
+	kRadiant_DBR = 15,
+	kRadiant_DGU = 16,
+	kRadiant_THG = 17,
+	kRadiant_LEG = 18,
+	kRadiant_VIG = 19,
+	kRadiant_BLD = 20,
 };
 const std::vector<std::pair<CRadiantEnum, std::string>> CRadiantEnum_Map{
 	{CRadiantEnum::kRadiant_Non,	"None"},
@@ -54,6 +88,9 @@ const std::vector<std::pair<CRadiantEnum, std::string>> CRadiantEnum_Map{
 	{CRadiantEnum::kRadiant_DF4,	"Four"},
 	{CRadiantEnum::kRadiant_DF5,	"Five"},
 	{CRadiantEnum::kRadiant_DF6,	"Six"},
+	{CRadiantEnum::kRadiant_DF7,	"Seven"},
+	{CRadiantEnum::kRadiant_DF8,	"Eight"},
+	{CRadiantEnum::kRadiant_DF9,	"Nine"},
 	{CRadiantEnum::kRadiant_Fsh,	"Fishing"},
 	{CRadiantEnum::kRadiant_Def,	"Default"},
 	{CRadiantEnum::kRadiant_Bty,	"Bounty"},
@@ -64,30 +101,44 @@ const std::vector<std::pair<CRadiantEnum, std::string>> CRadiantEnum_Map{
 	{CRadiantEnum::kRadiant_THG,	"Thieves Guild"},
 	{CRadiantEnum::kRadiant_LEG,	"Legacy of the Dragonborn"},
 	{CRadiantEnum::kRadiant_VIG,	"Vigilant"},
+	{CRadiantEnum::kRadiant_BLD,	"The Blades"},
 };
 
 //link - value - base - vari - stage - name - times requried
 struct CRadiantData
 {
-	const char* link;
+	std::string link{};
+	CRadiantEnum value{};
+	RE::FormID baseID{};
+	RE::FormID variID{};
+	int32_t stage{};
 
-	CRadiantEnum value;
-	RE::FormID baseID;
-	RE::FormID variID;
-	int32_t stage;
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
+};
 
-	const char* name;
+//Faction, Faction File, Actor, Actor File
+struct CFavorData 
+{
+	const char* link{};
+	RE::FormID faction{};
+	const char* faction_provider{};
+	RE::FormID actor{};
+	const char* actor_provider{};
 
-	int32_t times_required;
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
 };
 
 struct CStageData
 {
-	const char* link;
-
+	std::string link;
 	CStageEnum type;
 	int32_t stage;
-	int32_t optional_stage;
+	int32_t optional_stage = 0;
+
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
 };
 
 struct CThaneData
@@ -95,47 +146,27 @@ struct CThaneData
 	const char* link;
 	const char* Sons;
 	const char* Imps;
+	int32_t stage = 25;
+
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
 };
 
 struct CDrunkData
 {
 	const char* link;
-
 	RE::FormID listID;
 	RE::FormID formID;
-
 	const char* file_name;
-	const char* globalvariable;
-};
 
-struct FavorQuestData
-{
-	RE::FormID formID;
-	const char* fileName;
-};
-
-struct FavorActorData
-{
-	RE::FormID formID;
-	const char* fileName;
-};
-
-struct FavorMergedData
-{
-	FavorQuestData base;
-	FavorQuestData vari;
-	FavorActorData actr;
-
-	std::int32_t Stage;
-	std::int32_t Value;
-
-	const char* Global;
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
 };
 
 struct FavorMerchantData
 {
 	RE::FormID formID;
-	const char* Global;
+	const char* quest_key;
 };
 
 struct PlayerHomesData
@@ -154,81 +185,95 @@ struct PlayerHomesData
 	const char* MODNAME;
 };
 
-struct CompanionsQuestData
+struct CCivilWarData
 {
-	RE::FormID QuestID;
-	const char* QuestFN;
+	const char* link;
+	RE::FormID location;
 
-	const char* Global1;
-	const char* Global2;
-
-	std::int32_t Value;
-	std::int32_t Stage;
-};
-
-struct CArrayData
-{
-	std::vector<std::string>* editorids;
-	std::vector<std::string>* names;
-	std::vector<std::string>* highlights;
-	std::vector<bool>* bools;
-	std::vector<int32_t>* types;
-	std::vector<std::string>* keys;
+	//Should this quest be included in the quest stage processor
+	std::optional<CQuestProcessor> process = std::nullopt;
 };
 
 //Format: CC*(Key), CFlagEnum(kType), CCompEnum(kType), CC*(editor_id)
 struct CQuestData
 {
 	// Static
-	const char*			unique_identifier{};
-	const CFlagEnum		quest_type{};
-	const CCompEnum		completion_type{};
-	const char*			editor_id{};
+	std::string		unique_identifier{};
+	CFlagEnum		quest_type{};
+	CCompEnum		completion_type{};
+	std::string		editor_id{};
 
-	// Dynamic
-	const char*		localisation_key{};
-	int32_t			array_position{};
+	// Dynamic Types
 	CThaneData*		thane_data{};
 	CDrunkData*		drunk_data{};
-	CArrayData*		array_data{};
 	CStageData*		stage_data{};
 	CRadiantData*	radiant_data{};
-	std::string		search_term;
-	std::string		search_description;
-	int32_t			localisation_position;
-	
+	CFavorData*		favor_data{};
+	CCivilWarData*	civil_war_data{};
+
+	// Dynamic Strings
+	std::string		localisation_key{};
+	std::string		search_term{};
+	std::string		search_description{};
+
+	// Dynamic Bools
+	CQuestProcessor should_process{};
+	bool			is_completed{};
+
+	//Override Enum & Map
 	enum override
 	{
 		kName = 0,
 		kData = 1,
 		kEdit = 2,
 		kLocKey = 3,
+		kProcess = 4,
+	};
+	const std::vector<std::pair<override, std::string>> override_Map{
+		{override::kName,	"Quest Name"},
+		{override::kData,	"Highlight Text"},
+		{override::kEdit,	"EditorID"},
+		{override::kLocKey,	"Localisation Key"},
+		{override::kProcess,"Quest Processor"},
 	};
 
 	// Builder Functions
-
 	auto init()
 	{
+		should_process = CQuestProcessor::kIncluded;
 		localisation_key = unique_identifier;
 		return this;
 	};
 
-	auto initQuestData(CArrayData* a_data) 
-	{
-		array_data = a_data;
-		if (!array_data) { ERROR("Unable to initialise array_data for [{}]", unique_identifier); }
-
-		SetLocalisedTranslationParameters();
-
-		array_data->keys->push_back(unique_identifier);
-		array_data->editorids->push_back(editor_id);
-		array_data->types->push_back(std::to_underlying(quest_type));
-		array_data->names->push_back(fmt::format("{:s}"sv, GetSearchTerm()));
-		array_data->highlights->push_back(fmt::format("{:s}"sv, GetSearchDescription()));
-
-		array_position = std::distance(array_data->keys->begin(), (std::ranges::find(array_data->keys->begin(), array_data->keys->end(), fmt::format("{:s}"sv, unique_identifier))));
+	auto set_editorID(std::string a_string) {
+		editor_id = a_string;
 		return this;
-	};
+	}
+
+	auto set_quest_type(CFlagEnum a_type) {
+		quest_type = a_type;
+		return this;
+	}
+
+	auto set_completion_type(CCompEnum a_type) {
+		completion_type = a_type;
+		return this;
+	}
+
+	auto set_name(std::string a_string) {
+		search_term = a_string;
+		return this;
+	}
+
+	auto set_highlight(std::string a_string) {
+		search_description = a_string;
+		return this;
+	}
+
+	auto finalize() {
+		SetLocalisedTranslationParameters();
+		return this;
+	}
 
 	template <std::size_t N>
 	auto initThaneData(CThaneData(&a_data)[N])
@@ -237,6 +282,26 @@ struct CQuestData
 			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
 				thane_data = &a_data[idx];
 				if (!thane_data) { ERROR("Unable to initialise thane_data for [{}]", unique_identifier); }
+
+				if (thane_data->process) { 
+					should_process = thane_data->process.value(); 
+				}
+			}
+		}
+		return this;
+	}
+
+	template <std::size_t N>
+	auto initCivilWarData(CCivilWarData(&a_data)[N])
+	{
+		for (auto idx = 0; idx < N; ++idx) {
+			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
+				civil_war_data = &a_data[idx];
+				if (!civil_war_data) { ERROR("Unable to initialise civil_war_data for [{}]", unique_identifier); }
+
+				if (civil_war_data->process) {
+					should_process = civil_war_data->process.value();
+				}
 			}
 		}
 		return this;
@@ -249,6 +314,10 @@ struct CQuestData
 			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
 				drunk_data = &a_data[idx];
 				if (!drunk_data) { ERROR("Unable to initialise drunk_data for [{}]", unique_identifier); }
+
+				if (drunk_data->process) {
+					should_process = drunk_data->process.value();
+				}
 			}
 		}
 		return this;
@@ -261,8 +330,18 @@ struct CQuestData
 			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
 				stage_data = &a_data[idx];
 				if (!stage_data) { ERROR("Unable to initialise stage_data for [{}]", unique_identifier); }
+
+				if (stage_data->process) {
+					should_process = stage_data->process.value();
+				}
 			}
 		}
+		return this;
+	}
+
+	auto initPatchStageData(CStageData* a_data) {
+		stage_data = a_data;
+		if (!stage_data) { ERROR("Unable to initialise stage_data for [{}]", unique_identifier); }
 		return this;
 	}
 
@@ -273,6 +352,28 @@ struct CQuestData
 			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
 				radiant_data = &a_data[idx];
 				if (!radiant_data) { ERROR("Unable to initialise radiant_data for [{}]", unique_identifier); }
+
+				if (radiant_data->process) {
+					should_process = radiant_data->process.value();
+				}
+			}
+		}
+		return this;
+	}
+
+	auto initPatchRadiantData(CRadiantData* a_data) {
+		radiant_data = a_data;
+		if (!radiant_data) { ERROR("Unable to initialise radiant_data for [{}]", unique_identifier); }
+		return this;
+	}
+
+	template <std::size_t N>
+	auto initFavorData(CFavorData(&a_data)[N])
+	{
+		for (auto idx = 0; idx < N; ++idx) {
+			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
+				favor_data = &a_data[idx];
+				if (!favor_data) { ERROR("Unable to initialise favor_data for [{}]", unique_identifier); }
 			}
 		}
 		return this;
@@ -294,13 +395,13 @@ struct CQuestData
 		switch (section)
 		{
 		case CQuestData::kName:
-			array_data->names->at(array_position) = s_key;
+			search_term = s_key;
 			break;
 		case CQuestData::kData:
-			array_data->highlights->at(array_position) = s_key;
+			search_description = s_key;
 			break;
 		case CQuestData::kEdit:
-			array_data->editorids->at(array_position) = s_key;
+			editor_id = s_key;
 			break;
 		case CQuestData::kLocKey:
 			localisation_key = s_key;
@@ -313,46 +414,175 @@ struct CQuestData
 
 	void SetLocalisedTranslationParameters()
 	{
-		search_term = CLocalisation::LocalisationAPI::GetLocNameByKey(localisation_key);
-		search_description = CLocalisation::LocalisationAPI::GetLocDescriptionByKey(localisation_key);
+		search_term = CLocalisation::LocalisationAPI::GetLocNameByKey(localisation_key.c_str());
+		search_description = CLocalisation::LocalisationAPI::GetLocDescriptionByKey(localisation_key.c_str());
 		return;
 	}
 
-	auto DumpToLog(int32_t idx, int32_t ID) {
-		
-		if ((completion_type == CCompEnum::kGlobl && !radiant_data) || (completion_type != CCompEnum::kGlobl && radiant_data)) {
-			ERROR("Radiant Error on quest {}", GetKey());
+	// Getters & Setters
+	std::string GetKey()					{ return fmt::format("{:s}"sv, unique_identifier); }
+	
+	RE::TESQuest* GetQuest() 
+	{				
+		if (HasRadiantData()) { return GetradiantQuest(); } return static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(editor_id));
+	}
+
+	std::string GetName()					{ return search_term; }
+	std::string GetEditorID()				{ return editor_id; }
+	std::string GetHighlight()				{ return search_description; }
+
+	CQuestProcessor ShouldProcess()			{ return should_process;  }
+	int32_t GetQuestProcessorType()			{ return std::to_underlying(should_process); }
+	std::string GetQuestProcessorTypeString() { for (auto& [value, string] : CQuestProcessor_Map) { if (value == should_process) { return string; } } return ""; }
+
+
+	int32_t GetType()						{ return std::to_underlying(quest_type); }
+	std::string GetTypeString()				{ for (auto& [value, string] : CFlagEnum_Map) { if (value == quest_type) { return string; } } return ""; }
+	
+	int32_t GetCompletionType()				{ return std::to_underlying(completion_type); }
+	std::string GetCompletionTypeString()	{ for (auto& [value, string] : CCompEnum_Map) { if (value == completion_type) { return string; } } return ""; }
+
+	bool IsCompleted()						{ return is_completed; }
+	void Switch()							{ is_completed = !is_completed; }
+
+	// Stage Data
+	bool HasStageData()						{ return stage_data != nullptr; }
+	int32_t GetStage()						{ return stage_data->stage; }
+	CStageEnum GetStageTypeEnum()			{ return stage_data->type; }
+	int32_t GetOptionalStage()				{ return stage_data->optional_stage; }
+	bool HasOptionalStage()					{ return stage_data->optional_stage != 0 ? true : false; }
+	std::string GetStageLink()				{ return stage_data->link; }
+	int32_t GetStageType()					{ return std::to_underlying(stage_data->type); }
+	std::string GetStageTypeString()		{ for (auto& [value, string] : CStageEnum_Map) { if (value == stage_data->type) { return string; } } return ""; }
+
+	//Search Data
+	bool HasSearchData()					{ return !search_term.empty(); }
+
+	std::string GetSearchTerm()				{ return !search_term.empty() ? search_term : "ERROR"; }
+	std::string GetSearchDescription()		{ return !search_description.empty() ? search_description : "ERROR"; }
+
+	//Civil War Data
+	bool HasCivilWarData()					{ return civil_war_data != nullptr; }
+	RE::BGSLocation* GetCivilWarLocation()	{ return GetFullForm<RE::BGSLocation>(civil_war_data->location, "Skyrim.esm"); }
+
+	//Favor Data
+	bool HasFavorData()						{ return favor_data != nullptr; }
+	std::string GetFavorLink()				{ return favor_data->link; }
+	RE::TESNPC* GetActor()					{ return GetFullForm<RE::TESNPC>(favor_data->actor, favor_data->actor_provider); }
+	RE::TESFaction* GetActorFaction()		{ return GetFullForm<RE::TESFaction>(favor_data->faction, favor_data->faction_provider); }
+
+	//Thane Data
+	bool HasThaneData()						{ return thane_data != nullptr; }
+	bool IsThane()							{ auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript"); if (!script) { return false; } return script->GetProperty(thane_data->Imps)->GetSInt() > 0 || script->GetProperty(thane_data->Sons)->GetSInt() > 0; }
+
+	//Radiant Data
+	bool HasRadiantData()					{ return radiant_data != nullptr; }
+	int32_t GetRadiantType()				{ return std::to_underlying(radiant_data->value); }
+	std::string GetRadiantLink()			{ return radiant_data->link; }
+	std::string GetRadiantTypeString()		{ for (auto& [value, string] : CRadiantEnum_Map) { if (value == radiant_data->value) { return string; } } return ""; }
+	RE::FormID GetRadiantBaseFormID()		{ return radiant_data->baseID;  }
+	RE::FormID GetRadiantVariFormID()		{ return radiant_data->variID; }
+	CRadiantEnum GetRadiantTypeEnum()		{ return radiant_data->value; }
+	
+	RE::TESQuest* GetradiantQuest() {
+		if (radiant_data) {
+			auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID);
+			auto* q2 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->variID);
+			auto* q3 = RE::TESQuest::LookupByEditorID<RE::TESQuest>(editor_id);
+			return q1 ? q1 : q2 ? q2 : q3 ? q3 : nullptr;
 		}
+		return nullptr;
+	}
 
-		if ((completion_type == CCompEnum::kStage && !stage_data) || (completion_type != CCompEnum::kStage && stage_data)) {
-			ERROR("Stage Error on quest {}", GetKey());
-		}
+	int32_t GetRadiantTimesRequired()
+	{
+		using enum CRadiantEnum;
 
-		if ((completion_type == CCompEnum::kThane && !thane_data) || (completion_type != CCompEnum::kThane && thane_data)) {
-			ERROR("Thane Error on quest {}", GetKey());
-		}
-
-		if (completion_type == CCompEnum::kStand && (thane_data || stage_data || radiant_data)) {
-			ERROR("Enum Type Error on quest {}", GetKey());
-		}
-
-		INFO("Quest {}: [{} Initialised at position {} with ID:", idx, GetKey(), array_position);
-		INFO("~~~UUID: {}", ID);
-		INFO("~~~Name: {}", GetName());
-		INFO("~~~Data: {}", GetHighlight());
-		INFO("~~~EditorID: {}", GetEditorID());
-
-		if (array_data)
+		if (!radiant_data)
 		{
-			INFO("          ~Array Data: editorID = {}", GetEditorID());
-			INFO("          ~Array Data: type = {}[{}]", GetTypeString(), GetType());
-			INFO("          ~Array Data: name = {}", GetName());
-			INFO("          ~Array Data: data = {}", GetHighlight());
+			return 1;
+		};
+
+		switch (radiant_data->value)
+		{
+		case kRadiant_DF1: return 1; break;
+		case kRadiant_DF2: return 2; break;
+		case kRadiant_DF3: return 3; break;
+		case kRadiant_DF4: return 4; break;
+		case kRadiant_DF5: return 5; break;
+		case kRadiant_DF6: return 6; break;
+		case kRadiant_DF7: return 7; break;
+		case kRadiant_DF8: return 8; break;
+		case kRadiant_DF9: return 9; break;
+		case kRadiant_Def: return CVariables::V_Radiant_FavorVal; break;
+		case kRadiant_Bty: return CVariables::V_Radiant_BountyVal; break;
+		case kRadiant_COL: return CVariables::V_Radiant_CollegeVal; break;
+		case kRadiant_COM: return CVariables::V_Radiant_CompanionsVal; break;
+		case kRadiant_DBR: return CVariables::V_Radiant_DBrotherhoodVal; break;
+		case kRadiant_DGU: return CVariables::V_Radiant_DawnguardVal; break;
+		case kRadiant_THG: return CVariables::V_Radiant_ThievesGuildVal; break;
+		case kRadiant_VIG: return CVariables::V_Radiant_VigilantVal; break;
+		case kRadiant_LEG: return CVariables::V_Radiant_LegacyVal; break;
+		case kRadiant_Fsh: return CVariables::V_Radiant_FishingVal; break;
+		case kRadiant_BLD: return CVariables::V_Radiant_BladesVal; break;
+		default: return 1;
+		};
+	};
+
+	template <typename T = RE::TESForm>
+	[[nodiscard]] static T* GetFullForm(RE::FormID a_form, const char* a_filename) noexcept
+	{
+		auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(a_form, a_filename);
+		return form ? form->As<T>() : nullptr;
+	}
+
+	auto DumpToLog(int32_t idx, int32_t ID) {
+
+		switch (completion_type)
+		{
+		case CCompEnum::kStand:
+			if (thane_data || stage_data || radiant_data || favor_data || civil_war_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		case CCompEnum::kStage:
+			if (!stage_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		case CCompEnum::kGlobl:
+			if (!radiant_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		case CCompEnum::kThane:
+			if (!thane_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		case CCompEnum::kFavor:
+			if (!favor_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		case CCompEnum::kCiWar:
+			if (!civil_war_data) {
+				ERROR("completion_type Error on quest {}", unique_identifier);
+			};
+			break;
+		default:
+			break;
 		}
+
+		INFO("Quest {}: [{} Initialised with ID: {}", idx, GetKey(), ID);
+		INFO("          ~Quest Data: editorID = {}", GetEditorID());
+		INFO("          ~Quest Data: type = {}[{}]", GetTypeString(), GetType());
+		INFO("          ~Quest Data: name = {}", GetName());
+		INFO("          ~Quest Data: data = {}", GetHighlight());
+		INFO("          ~Quest Data: process = {}[{}]", GetQuestProcessorTypeString(), GetQuestProcessorType());
 
 		if (stage_data)
 		{
-			INFO("          ~Stage Data: link = {}", GetStageLink());
 			INFO("          ~Stage Data: type = {}[{}]", GetStageTypeString(), GetStageType());
 			INFO("          ~Stage Data: stage = {}", GetStage());
 			INFO("          ~Stage Data: optional stage = {}", GetOptionalStage());
@@ -360,11 +590,20 @@ struct CQuestData
 
 		if (radiant_data)
 		{
-			INFO("          ~Radiant Data: link = {}", GetRadiantLink());
 			INFO("          ~Radiant Data: type = {}[{}]", GetRadiantTypeString(), GetRadiantType());
 			INFO("          ~Radiant Data: base formID = {}", GetRadiantBaseFormID());
 			INFO("          ~Radiant Data: vari formID = {}", GetRadiantVariFormID());
-			INFO("          ~Radiant Data: global name = {}", GetRadiantGlobalname());
+			INFO("          ~Radiant Data: quest stage = {}", radiant_data->stage);
+			INFO("          ~Radiant Data: quest valid = {}", GetradiantQuest() ? "True" : "False");
+		}
+
+		if (favor_data)
+		{
+			INFO("          ~Favor Data: link = {}", GetFavorLink());
+			INFO("          ~Favor Data: faction = {}", GetActorFaction()->GetFormID());
+			INFO("          ~Favor Data: faction owner = {}", favor_data->faction_provider);
+			INFO("          ~Favor Data: actor = {}", GetActor()->GetName());
+			INFO("          ~Favor Data: actor owner = {}", favor_data->actor_provider);
 		}
 
 		if (drunk_data)
@@ -373,14 +612,14 @@ struct CQuestData
 			INFO("          ~Drunk Data: npc formID = {}", drunk_data->formID);
 			INFO("          ~Drunk Data: npc Owner = {}", drunk_data->file_name);
 			INFO("          ~Drunk Data: list formID = {}", drunk_data->listID);
-			INFO("          ~Drunk Data: global name = {}", drunk_data->globalvariable);
 		}
 
 		if (thane_data)
 		{
-			auto script = ScriptObject::FromForm(static_cast<RE::TESForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x087E24, "Skyrim.esm")), "FavorJarlsMakeFriendsScript");
+			auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript");
 
 			INFO("          ~Thane Data: link = {}", thane_data->link);
+			INFO("          ~Thane Data: stage = {}", thane_data->stage);
 			INFO("          ~Thane Data: Imp = [{} - {}]", thane_data->Imps, script->GetProperty(thane_data->Imps)->GetSInt());
 			INFO("          ~Thane Data: Son = [{} - {}]", thane_data->Sons, script->GetProperty(thane_data->Sons)->GetSInt());
 			INFO("          ~Thane Data: script state = {}", script->IsConstructed() ? "Constructed" : "Un-Constructed");
@@ -394,94 +633,4 @@ struct CQuestData
 		INFO(" ");
 		return this;
 	};
-
-	// Getters & Setters
-	std::string		GetKey()			{ return fmt::format("{:s}"sv, unique_identifier); }
-	RE::TESQuest*	GetQuest()			{ return static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(editor_id)); }
-	RE::TESGlobal*	GetGlobal()			{ UpdateRadiantValues(); return RE::TESForm::LookupByEditorID<RE::TESGlobal>(radiant_data->name); }
-	
-	int32_t GetType()					{ return array_data->types->at(array_position);}
-	std::string GetName()				{ return array_data->names->at(array_position); }
-	std::string GetEditorID()			{ return array_data->editorids->at(array_position); }
-	std::string GetHighlight()			{ return array_data->highlights->at(array_position); }
-	std::string GetTypeString()			{ return GetType() == 0 ? "Main" : GetType() == 1 ? "Side" : GetType() == 2 ? "Radiant" : ""; }
-
-	bool IsThane() {
-		auto script = ScriptObject::FromForm(static_cast<RE::TESForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(0x087E24, "Skyrim.esm")), "FavorJarlsMakeFriendsScript");
-		if (!script) { return false; }
-
-		return script->GetProperty(thane_data->Imps)->GetSInt() > 0 || script->GetProperty(thane_data->Sons)->GetSInt() > 0;
-	}
-
-	bool IsCompleted()					{ return array_data->bools->at(array_position); }	
-	void Switch()						{ array_data->bools->at(array_position) = !array_data->bools->at(array_position); }
-
-	// Stage Data
-	int32_t GetStage()					{ return stage_data->stage; }
-	int32_t GetStageType()				{ return std::to_underlying(stage_data->type); }
-	CStageEnum GetStageTypeEnum()		{ return stage_data->type; }
-	int32_t GetOptionalStage()			{ return stage_data->optional_stage; }
-	bool HasOptionalStage()				{ return stage_data->optional_stage != 0 ? true : false; }
-	std::string GetStageLink()			{ return stage_data->link; }
-	std::string GetStageTypeString()	{ return GetStageType() == 0 ? "None" : GetStageType() == 1 ? "Past" : GetStageType() == 2 ? "Done" : ""; }
-
-	//Search Data
-	bool HasSearchData() { return !search_term.empty(); }
-
-	std::string GetSearchTerm() 
-	{
-		return !search_term.empty() ? search_term : "ERROR";
-	}
-
-	std::string GetSearchDescription()
-	{
-		return !search_description.empty() ? search_description : "ERROR";
-	}
-
-	//Radiant Data
-	bool HasRadiantData()				{ return radiant_data != nullptr; }
-	int32_t GetRadiantType()			{ return std::to_underlying(radiant_data->value); }
-	std::string GetRadiantLink()		{ return radiant_data->link; }
-	std::string GetRadiantTypeString()	{ for (auto& [value, string] : CRadiantEnum_Map) { if (value == radiant_data->value) { return string; } } return ""; }
-	std::string GetRadiantGlobalname()	{ return radiant_data->name; }
-	RE::FormID GetRadiantBaseFormID()	{ return radiant_data->baseID;  }
-	RE::FormID GetRadiantVariFormID()	{ return radiant_data->variID; }
-	CRadiantEnum GetRadiantTypeEnum()	{ return radiant_data->value; }
-	
-	RE::TESQuest* GetradiantQuest() {
-		if (radiant_data) {
-			auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID);
-			auto* q2 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->variID);
-			auto* q3 = RE::TESQuest::LookupByEditorID<RE::TESQuest>(editor_id);
-			return q1 ? q1 : q2 ? q2 : q3 ? q3 : nullptr;
-		}
-		return nullptr;
-	}
-
-	void UpdateRadiantValues()
-	{
-		if (!radiant_data) { return; }
-
-		switch (radiant_data->value)
-		{
-		using enum CRadiantEnum;
-		case kRadiant_DF1: radiant_data->times_required = 1; break;
-		case kRadiant_DF2: radiant_data->times_required = 2; break;
-		case kRadiant_DF3: radiant_data->times_required = 3; break;
-		case kRadiant_DF4: radiant_data->times_required = 4; break;
-		case kRadiant_DF5: radiant_data->times_required = 5; break;
-		case kRadiant_DF6: radiant_data->times_required = 6; break;
-		case kRadiant_Def: radiant_data->times_required = CVariables::V_Radiant_FavorVal; break;
-		case kRadiant_Bty: radiant_data->times_required = CVariables::V_Radiant_BountyVal; break;
-		case kRadiant_COL: radiant_data->times_required = CVariables::V_Radiant_CollegeVal; break;
-		case kRadiant_COM: radiant_data->times_required = CVariables::V_Radiant_CompanionsVal; break;
-		case kRadiant_DBR: radiant_data->times_required = CVariables::V_Radiant_DBrotherhoodVal; break;
-		case kRadiant_DGU: radiant_data->times_required = CVariables::V_Radiant_DawnguardVal; break;
-		case kRadiant_THG: radiant_data->times_required = CVariables::V_Radiant_ThievesGuildVal; break;
-		case kRadiant_VIG: radiant_data->times_required = CVariables::V_Radiant_VigilantVal; break;
-		case kRadiant_LEG: radiant_data->times_required = CVariables::V_Radiant_LegacyVal; break;
-		case kRadiant_Fsh: radiant_data->times_required = CVariables::V_Radiant_FishingVal; break;
-		default: radiant_data->times_required = 1;
-		}
-	}
 };

@@ -2,7 +2,7 @@
 #include "Serialization.hpp"
 #include "Variables.hpp"
 #include "mainHUD.hpp"
-#include "QuickLootAPI.h"
+#include "Import/QuickLootAPI.h"
 
 #undef GetModuleHandle
 
@@ -342,21 +342,36 @@ namespace Completionist_MainHUD
 	//-- Collectability Functions -----------------------
 	//---------------------------------------------------
 
-	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) {
-		return CompletionistData::CheckIsCollectable(a_formID);
+	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) 
+	{
+		return CVariables::TCC_Mode ? TCC_New->HasForm(a_formID) : CompletionistData::CheckIsCollectable(a_formID);
 	}
 
 	// Override
-	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) {
-		return CompletionistData::CheckIsCollectable(a_form->GetFormID());
+	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) 
+	{
+		return CVariables::TCC_Mode ? TCC_New->HasForm(a_form) : CompletionistData::CheckIsCollectable(a_form->GetFormID());
 	}
+	RE::TESObjectREFR* my{};
 
 	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { 
-		return FoundItemData.HasForm(a_formID) || FoundItemData_NoShow.HasForm(a_formID); 
+		return CVariables::TCC_Mode ? TCC_DSP->HasForm(a_formID) : FoundItemData.HasForm(a_formID) || FoundItemData_NoShow.HasForm(a_formID);
 	}
 
 	// Override
-	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) { 
-		return FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
+	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) 
+	{ 
+		return  CVariables::TCC_Mode ? TCC_DSP->HasForm(a_form) : FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
+	}
+
+	bool TextnTagsAPI::ItemIsFound(RE::FormID a_formID) 
+	{
+		return CVariables::TCC_Mode ? TCC_FND->HasForm(a_formID) : false;
+	}
+
+	// Override
+	bool TextnTagsAPI::ItemIsFound(RE::TESForm* a_form)
+	{
+		return CVariables::TCC_Mode ? TCC_FND->HasForm(a_form) : false;
 	}
 }

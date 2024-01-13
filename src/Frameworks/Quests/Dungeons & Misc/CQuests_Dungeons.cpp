@@ -4,15 +4,15 @@
 namespace CQFramework_Dungeons 
 {
 	CStageData StageData[]{
-		{"Dungeons_Quest00", CStageEnum::kDone, 254		, 0 },
-		{"Dungeons_Quest06", CStageEnum::kDone, 100		, 0 },
-		{"Dungeons_Quest09", CStageEnum::kDone, 81		, 0 },
-		{"Dungeons_Quest10", CStageEnum::kDone, 100		, 0 },
-		{"Dungeons_Quest13", CStageEnum::kDone, 30		, 0 },
-		{"Dungeons_Quest14", CStageEnum::kDone, 30		, 0 },
-		{"Dungeons_Quest15", CStageEnum::kDone, 20		, 30 },
-		{"Dungeons_Quest19", CStageEnum::kDone, 20		, 0 },
-		{"Dungeons_Quest21", CStageEnum::kDone, 100		, 0 },
+		{"Dungeons_Quest00", CStageEnum::kDone, 254},
+		{"Dungeons_Quest06", CStageEnum::kDone, 100},
+		{"Dungeons_Quest09", CStageEnum::kDone, 81},
+		{"Dungeons_Quest10", CStageEnum::kDone, 100},
+		{"Dungeons_Quest13", CStageEnum::kDone, 30},
+		{"Dungeons_Quest14", CStageEnum::kDone, 30},
+		{"Dungeons_Quest15", CStageEnum::kDone, 20, 30 },
+		{"Dungeons_Quest19", CStageEnum::kDone, 20},
+		{"Dungeons_Quest21", CStageEnum::kDone, 100},
 	};
 
 	CQuestData QuestData[] {
@@ -40,8 +40,6 @@ namespace CQFramework_Dungeons
 		{"Dungeons_Quest21", CFlagEnum::kSide, CCompEnum::kStage, "dunYngolBarrowQST"},
 	};
 
-	CArrayData ArrayData{ &IdenArray, &NameArray, &TextArray, &BoolArray, &RadiArray, &KeysArray };
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
@@ -50,11 +48,8 @@ namespace CQFramework_Dungeons
 	{	
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
-			QuestData[i].init()
-				->initQuestData(&ArrayData)
-				->initStageData(StageData);
+			QuestData[i].init()->initStageData(StageData)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 27, QuestData[i].unique_identifier));
 		}
-		BoolArray = std::vector<bool>(CArraySize, false);
 	};
 };

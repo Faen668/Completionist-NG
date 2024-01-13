@@ -264,29 +264,20 @@ namespace CFramework_Pets {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto& name : Pets_VP_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		for (auto i = 0; i < Pets_VP_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Pets_VP_FormArray[i], Pets_VP_NameArray[i], "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
-
-		for (auto& name : Pets_PS_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		for (auto i = 0; i < Pets_PS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Pets_PS_FormArray[i], Pets_PS_NameArray[i], "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
-
-		for (auto& name : Pets_SS_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		for (auto i = 0; i < Pets_SS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Pets_SS_FormArray[i], Pets_SS_NameArray[i], "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
-
-		for (auto& name : Pets_MP_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		for (auto i = 0; i < Pets_MP_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Pets_MP_FormArray[i], Pets_MP_NameArray[i], "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
-
-		for (auto& name : Pets_WH_NameArray)
-		{
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(name, "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
+		for (auto i = 0; i < Pets_WH_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Pets_WH_FormArray[i], Pets_WH_NameArray[i], "$MCMPagePets", std::to_underlying(EntryCategory::kPets)));
 		}
 	}
 

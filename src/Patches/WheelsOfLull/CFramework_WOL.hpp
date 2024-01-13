@@ -1,19 +1,11 @@
 #pragma once
+#define ProcessFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, Serialization::CompletionistData data, std::vector<RE::TESForm*> forms, std::vector<bool>* bools, std::int32_t* found, Serialization::CompletionistLog::logType eventHandle
 
-namespace CPatch_WOL_Items {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_WOL_Books {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_WOL_MapMa {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CPatch_WOL 
-{	
+namespace CPatch_WOL
+{
+	inline Serialization::CompletionistData ItemData;
+	inline Serialization::CompletionistData BookData;
+	inline Serialization::CompletionistData MapsData;
 
 	inline std::vector<std::string> Items_NameArray;
 	inline std::vector<std::string> Items_TextArray;
@@ -36,38 +28,24 @@ namespace CPatch_WOL
 	inline std::int32_t MapMa_EntriesTotal;
 	inline std::int32_t MapMa_EntriesFound;
 
-	inline std::vector<std::string>		Quest_NameArray;
-	inline std::vector<std::string>		Quest_IdenArray;
-	inline std::vector<std::string>		Quest_TextArray;
-	inline std::vector<std::string>		Quest_KeysArray;
-	inline std::vector<std::int32_t>	Quest_RadiArray;
-	inline std::vector<bool>			Quest_BoolArray;
-
-	using EventResult = RE::BSEventNotifyControl;
-
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::BooksRead::Event>
+	class CHandler
 	{
 
-		public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
+	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-		EventResult			ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override;
-		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
-		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		  static void			InjectAndCompileData();
+		  static void			InstallSearchTerms();
 
-		static void			SinkEvents();
-		static void			InjectAndCompileData();
-		static void			InstallSearchTerms();
+		  static void			InstallFramework();
+		  static void			InstallQuestFramework();
+		  static void			UpdateFoundForms();
 
-		static void			InstallFramework();
-		static void			InstallQuestFramework();
-		static void			UpdateFoundForms();
+		  static void			ProcessHookedMarker(const char* nam);
+		  static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
+		  static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, bool from_hook);
 
-		static void			ProcessHookedMarker(const char* nam);
-		static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_curID, std::string a_variable);
-		static void			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos);
+		  static void			OnBooksReadEvent(RE::BooksRead::Event const* a_event);
+		  static void			OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
+		  static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 	};
 }
