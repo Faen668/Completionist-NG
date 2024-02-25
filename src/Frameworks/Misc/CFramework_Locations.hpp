@@ -22,10 +22,6 @@ namespace CFramework_MapMa_DB {
 	inline Serialization::CompletionistData Data;
 }
 
-namespace CFramework_MapMa_CC {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_MapMa 
 {	
 	inline std::vector<std::string>			MapMa_AG_NameArray;
@@ -63,13 +59,6 @@ namespace CFramework_MapMa
 	inline std::int32_t						MapMa_DB_EntriesTotal;
 	inline std::int32_t						MapMa_DB_EntriesFound;
 
-	inline std::vector<std::string>			MapMa_CC_NameArray;
-	inline std::vector<std::string>			MapMa_CC_TextArray;
-	inline std::vector<RE::TESForm*>		MapMa_CC_FormArray;
-	inline std::vector<bool>				MapMa_CC_BoolArray;
-	inline std::int32_t						MapMa_CC_EntriesTotal;
-	inline std::int32_t						MapMa_CC_EntriesFound;
-
 	enum class MapMa_Sec : int32_t
 	{
 		kMapMa_AG = 0,
@@ -77,7 +66,6 @@ namespace CFramework_MapMa
 		kMapMa_SZ = 2,
 		kMapMa_DG = 3,
 		kMapMa_DB = 4,
-		kMapMa_CC = 5,
 	};
 
 	using EventResult = RE::BSEventNotifyControl;

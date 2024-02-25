@@ -35,6 +35,7 @@ String Property notificationTextCellScan6 = "Items In Containers" Auto Hidden
 ;-- Variables ---------------------------------------
 
 Completionist_MCMScript2 Property CompMCM2 Auto
+Completionist_MCMScript3 Property COmpMCM3 Auto
 Completionist_UpdateScript Property CompVer Auto
 Completionist_QuestsScript Property CompQst Auto
 
@@ -134,14 +135,15 @@ Int Property State_CustomColourVal_N_HUD_Menus = -1 Auto Hidden
 String Property State_CustomColourString_N_HUD_Menus = "Enter Decimal" Auto Hidden
 
 String Property State_SearchTermString = "Enter Search Term..." Auto Hidden
-bool b_SearchIgnoreCompleted
-bool property b_SearchHighlightQuest auto hidden
+bool property b_SearchIgnoreCompleted Auto Hidden
+bool property b_SearchHighlightQuest Auto Hidden
 String Property SearchJumpPage Auto Hidden
 String Property SearchedMCMMenu Auto Hidden										   
 String Property SearchedEntry Auto Hidden
-Int i_SearchMaxResults = 30
+Int property i_SearchMaxResults = 30 Auto Hidden
 
 String[] SearchType
+Int State_SearchQueryType
 Int Property i_SearchTypeChoice = 0 Auto Hidden
 String s_SearchType = "$SearchTypeChoice01"
 
@@ -153,7 +155,7 @@ Int Property DG_Faction_Choice = 0 Auto Hidden
 
 String[] HelgenReborn_Faction
 int State_Menu_Faction3
-int property HR_Faction_Choice = 0 auto hidden
+int property HR_Faction_Choice = 0 Auto Hidden
 
 String[] Legacy_Faction
 int State_Menu_Faction4
@@ -172,17 +174,21 @@ int State_ShortcutsMenu2
 String Property MiscJumpPage Auto Hidden
 Int Property MiscMCMPagesChoice = 0 Auto Hidden
 
+int State_ShortcutsMenu3
+String Property UnofficialJumpPage Auto Hidden
+Int Property UnofficialMCMPagesChoice = 0 Auto Hidden
+
 string[] State_AutomaticCompletionView_List
 int State_CompletionView
-int property State_AutomaticCompletionView_Choice = 0 auto hidden
+int property State_AutomaticCompletionView_Choice = 0 Auto Hidden
 
 string[] State_ManualCompletionView_List
 int State_ManualCompletionView
-int property State_ManualCompletionView_Choice = 0 auto hidden
+int property State_ManualCompletionView_Choice = 0 Auto Hidden
 
 string[] State_MiscCompletionView_List
 int State_MiscCompletionView
-int property State_MiscCompletionView_Choice = 0 auto hidden
+int property State_MiscCompletionView_Choice = 0 Auto Hidden
 
 Bool Property bDebug = False Auto Hidden
 Bool Property NotifyItems = True Auto Hidden
@@ -190,6 +196,8 @@ Bool Property NotifyBooks = True Auto Hidden
 Bool Property NotifySpecial = True Auto Hidden
 Bool Property NotifyStartup = True Auto Hidden
 Bool Property NotifyMissable = True Auto Hidden
+
+Bool Property TreatBooksAsItems = False Auto Hidden
 
 Bool bGivenProcessingInfo
 Bool AutoLoaded
@@ -237,13 +245,13 @@ String[] OptionKeys
 String[] OptionIden
 Int[] OptionSlot
 Int[] OptionRadi
-Int Property OptionIndx = 0 auto Hidden
+Int Property OptionIndx = 0 Auto Hidden
 
-String[] Property NameArray auto hidden
-String[] Property TextArray auto hidden
-String[] Property IdenArray auto hidden
-String[] Property KeysArray auto hidden
-Int[] Property RadiArray auto hidden
+String[] Property NameArray Auto Hidden
+String[] Property TextArray Auto Hidden
+String[] Property IdenArray Auto Hidden
+String[] Property KeysArray Auto Hidden
+Int[] Property RadiArray Auto Hidden
 	
 String[] Y_Completed_Main_Name
 String[] Y_Completed_Main_Text
@@ -290,6 +298,13 @@ Bool Property bCellScanner_NPCS = False Auto Hidden
 Bool Property bCellScanner_DETA = False Auto Hidden
 Bool Property bCellScanner_NUMB = True Auto Hidden
 
+Bool Property bCellScanner_Pinning_Enabled = True Auto Hidden
+Bool Property bCellScanner_Pinning_Marker = True Auto Hidden
+Bool Property bCellScanner_Pinning_Effect = True Auto Hidden
+
+Int State_CellScanner_Pinning_Sound
+Int Property CellScanner_Pinning_Sound_Choice = 0 Auto Hidden
+string[] CellScanner_Pinning_Sound_List
 
 Bool Property bCellScanner_ExcludeAlchemy = False Auto Hidden
 Bool Property bCellScanner_ExcludeArmor = False Auto Hidden
@@ -320,11 +335,30 @@ ReferenceAlias Property Completionist_ItemFinder_Type Auto
 ObjectReference Property CompletionistItemString Auto
 ObjectReference Property CompletionistTypeString Auto
 
+String Property TargetName Auto Hidden
+String Property TargetType Auto Hidden
+Form Property TargetForm Auto Hidden
+Form Property LastTargettedForm Auto Hidden
+
+Quest Property Completionist_PinnedItemFinder_Quest Auto
+ReferenceAlias Property Completionist_PinnedItemFinder_Item Auto
+ReferenceAlias Property Completionist_PinnedItemFinder_Name Auto
+ReferenceAlias Property Completionist_PinnedItemFinder_Type Auto
+ObjectReference Property CompletionistPinnedItemString Auto
+ObjectReference Property CompletionistPinnedTypeString Auto
+
+ObjectReference Property PinnedRefr Auto Hidden
+String Property PinnedName Auto Hidden
+String Property PinnedType Auto Hidden
+Form Property PinnedForm Auto Hidden
+
 Bool Property bCellScanner_MARK Auto Hidden
+Formlist Property Completionist_PinnedItemSoundList Auto
 
 float keyHoldDuration
 
-ObjectReference Property lastReference auto hidden
+ObjectReference Property lastReference Auto Hidden
+Bool Property bCellScanner_UseClosestReference = True Auto Hidden
 
 ;---------------------------------------------------
 ;-- START OF CODE ----------------------------------
@@ -334,7 +368,7 @@ Event OnConfigInit()
 	
 	if (!AutoLoaded)
 		AutoLoadConfig()
-	endif
+	endIf
 	
 	UnRegisterForAllKeys()
 EndEvent
@@ -367,6 +401,81 @@ Bool Function IsMenuModeActive()
 EndFunction
 
 ;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+Function ClearQuestTarget()
+	Completionist_ItemFinder_Item.Clear()
+	Completionist_ItemFinder_Name.Clear()
+	Completionist_ItemFinder_Type.Clear()
+	TargetName = ""
+	TargetType = ""
+	TargetForm = None
+endfunction
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+Function ClearPinnedTarget(Bool a_userDisabled)
+	(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).StopGlow()
+	Completionist_PinnedItemFinder_Item.Clear()
+	Completionist_PinnedItemFinder_Name.Clear()
+	Completionist_PinnedItemFinder_Type.Clear()
+	PinnedName = ""
+	PinnedType = ""
+	
+	if (a_userDisabled)
+		PinnedForm = None
+	endIf
+endfunction
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+String Function GetPinnedItemName()
+	if (!PinnedForm || !bCellScanner_Pinning_Enabled)
+		return "No Active Pin..."
+	endIf
+	
+	return PinnedForm.GetName()
+endFunction
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+Function SwitchPinnedTarget(Form a_form, String a_name)
+	ClearPinnedTarget(true)
+	
+	if (!a_form)
+		Return
+	endIf
+	
+	PinnedForm = a_form
+	PinnedName = a_name
+	
+	if (HasPinnedFormInCell(PlayerRef.GetParentCell(), PinnedForm))
+		PinnedRefr = GetPinnedReferenceRefr(PinnedForm)
+		PinnedName = GetPinnedReferenceName(PinnedForm)
+		PinnedType = GetPinnedReferenceType(PinnedForm)
+
+		CompletionistPinnedItemString.GetBaseObject().SetName(PinnedName)
+		CompletionistPinnedTypeString.GetBaseObject().SetName(PinnedType)
+	
+		Completionist_PinnedItemFinder_Item.ForceRefTo(PinnedRefr)
+		Completionist_PinnedItemFinder_Name.ForceRefTo(CompletionistPinnedItemString)
+		Completionist_PinnedItemFinder_Type.ForceRefTo(CompletionistPinnedTypeString)
+		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
+		
+		if (bCellScanner_Pinning_Marker)
+			Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
+		endIf
+	endIf
+endfunction
+
+;---------------------------------------------------
 ;-- Events -----------------------------------------
 ;---------------------------------------------------
 
@@ -374,7 +483,7 @@ Event OnKeyDown(Int KeyCode)
 	
 	if (IsInMenuMode() || IsInActualMenuMode() || IsMenuModeActive() )
 		return
-	endif 
+	endIf 
 
 	if (KeyCode == ExcludeReferenceKey)
 		ObjectReference curRef = Completionist_ItemFinder_Item.GetReference() as ObjectReference
@@ -382,80 +491,95 @@ Event OnKeyDown(Int KeyCode)
 		if (!curRef)
 			SendNotification(GetLocStringByKeyExt("CellScanner_NoReference"), ColourString, NotificationColourEnabled)
 			return
-		endif
+		endIf
 
 		SendNotification(GetLocStringByKeyExt("CellScanner_ExcludeSuccess"), ColourString, NotificationColourEnabled)
 		ExcludeReference(curRef, curRef.GetParentCell())
-		Completionist_ItemFinder_Item.Clear()
-		Completionist_ItemFinder_Name.Clear()
-		Completionist_ItemFinder_Type.Clear()
+		ClearQuestTarget()
 		Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
 		return
-	endif
+	endIf
 
 	if (KeyCode == ReferenceKey)
-
 		ObjectReference curRef = Completionist_ItemFinder_Item.GetReference() as ObjectReference
-		if (curRef)
-			Completionist_ItemFinder_Item.Clear()
-			Completionist_ItemFinder_Name.Clear()
-			Completionist_ItemFinder_Type.Clear()
-			Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
+		ObjectReference pinRef = Completionist_PinnedItemFinder_Item.GetReference() as ObjectReference
+		if (curRef || pinRef)
+			if (curRef)
+				ClearQuestTarget()
+				Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, False)
+			endIf
+
+			if (pinRef)
+				ClearPinnedTarget(false)
+				Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, False, False)
+			endIf
 			return
-		endif
+		endIf
 
 		cell curCell = PlayerRef.GetParentCell()
 
 		if (!curCell)
 			return
-		endif
+		endIf
 
 		if (Completionist_ExcludedCells.HasForm(curCell) || isCellExcluded(curCell))
 			SendNotification(GetLocStringByKeyExt("CellScanner_ExcludedCell"), ColourString, NotificationColourEnabled)
 			return
-		endif
-		
+		endIf
+			
 		if (!bCellScanner_MARK)
 			CheckForReferences(curCell, false, true)
-			return
-		endif
-		
-		Completionist_ItemFinder_Item.Clear()
-		Completionist_ItemFinder_Name.Clear()
-		Completionist_ItemFinder_Type.Clear()
-		Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
-		
-		ObjectReference[] references = GetValidItemReferences(curCell)
-		if (references.length > 0)
-			String[] names = GetValidItemReferenceNames()
-			String[] types = GetValidItemReferenceTypes()
+		Else
+			ClearQuestTarget()
+			ClearPinnedTarget(false)
 
-			int Idx = Utility.RandomInt(0, references.length - 1)
-			if references.length > 1
-				while references[Idx] == lastReference
-					Idx = Utility.RandomInt(0, references.length - 1)
-				endWhile
-			endif
+			Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
+			Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
+			
+			curRef = GetTargetReferenceRefr(curCell, LastTargettedForm)
+			if (!curRef)
+				if (curCell.IsInterior())
+					SendNotification(curCell.GetName() + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
+				else
+					SendNotification(GetLocStringByKeyExt("CellScanner_ExteriorCellPrefix") + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
+				endIf
+				return
+			endIf
 
-			if (references[Idx])
-				lastReference = references[Idx]
-				CompletionistItemString.GetBaseObject().SetName(names[Idx])
-				CompletionistTypeString.GetBaseObject().SetName(types[Idx])
-				
-				Completionist_ItemFinder_Item.ForceRefTo(references[Idx])
-				Completionist_ItemFinder_Name.ForceRefTo(CompletionistItemString)
-				Completionist_ItemFinder_Type.ForceRefTo(CompletionistTypeString)
-				
-				Completionist_ItemFinder_Quest.SetObjectiveCompleted(10, False)	
-				Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
-			EndIf
-		else
-			if (curCell.IsInterior())
-				SendNotification(curCell.GetName() + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
-			else
-				SendNotification(GetLocStringByKeyExt("CellScanner_ExteriorCellPrefix") + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
-			endif
-		endif
+			TargetForm = GetTargetReferenceForm()
+			TargetName = GetTargetReferenceName()
+			TargetType = GetTargetReferenceType()
+			LastTargettedForm = TargetForm
+
+			CompletionistItemString.GetBaseObject().SetName(TargetName)
+			CompletionistTypeString.GetBaseObject().SetName(TargetType)
+			
+			Completionist_ItemFinder_Item.ForceRefTo(curRef)
+			Completionist_ItemFinder_Name.ForceRefTo(CompletionistItemString)
+			Completionist_ItemFinder_Type.ForceRefTo(CompletionistTypeString)
+			Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
+		endIf
+		
+		pinRef = Completionist_PinnedItemFinder_Item.GetReference() as ObjectReference
+		if (!pinRef)
+			if (HasPinnedFormInCell(curCell, PinnedForm))
+				PinnedRefr = GetPinnedReferenceRefr(PinnedForm)
+				PinnedName = GetPinnedReferenceName(PinnedForm)
+				PinnedType = GetPinnedReferenceType(PinnedForm)
+
+				CompletionistPinnedItemString.GetBaseObject().SetName(PinnedName)
+				CompletionistPinnedTypeString.GetBaseObject().SetName(PinnedType)
+			
+				Completionist_PinnedItemFinder_Item.ForceRefTo(PinnedRefr)
+				Completionist_PinnedItemFinder_Name.ForceRefTo(CompletionistPinnedItemString)
+				Completionist_PinnedItemFinder_Type.ForceRefTo(CompletionistPinnedTypeString)
+
+				if (bCellScanner_Pinning_Marker)
+					Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
+				endIf
+				(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
+			endIf
+		endIf
 	endIf
 	
 	if (KeyCode == ExcludeKey)
@@ -464,21 +588,59 @@ Event OnKeyDown(Int KeyCode)
 			Int x = CompletionistExcludedCellsMessage.Show()
 			if (x == 0)
 				Completionist_ExcludedCells.AddForm(curCell as Cell)
-			endif
-		endif
-	endif
+			endIf
+		endIf
+	endIf
 EndEvent
 
 ;---------------------------------------------------
 ;-- Events -----------------------------------------
 ;---------------------------------------------------
 
+Function ResetMarkerOnLoad()
+	ObjectReference curRef = Completionist_ItemFinder_Item.GetReference() as ObjectReference
+	if (curRef)
+		Completionist_ItemFinder_Name.Clear()
+		Completionist_ItemFinder_Type.Clear()
+
+		CompletionistItemString.GetBaseObject().SetName(TargetName)
+		CompletionistTypeString.GetBaseObject().SetName(TargetType)
+
+		Completionist_ItemFinder_Name.ForceRefTo(CompletionistItemString)
+		Completionist_ItemFinder_Type.ForceRefTo(CompletionistTypeString)
+		return
+	endIf
+
+	ObjectReference pinRef = Completionist_PinnedItemFinder_Item.GetReference() as ObjectReference
+	if (pinRef)
+		Completionist_PinnedItemFinder_Name.Clear()
+		Completionist_PinnedItemFinder_Type.Clear()
+
+		CompletionistPinnedItemString.GetBaseObject().SetName(PinnedName)
+		CompletionistPinnedTypeString.GetBaseObject().SetName(PinnedType)
+
+		Completionist_PinnedItemFinder_Name.ForceRefTo(CompletionistPinnedItemString)
+		Completionist_PinnedItemFinder_Type.ForceRefTo(CompletionistPinnedTypeString)
+		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
+		return
+	endIf
+endFunction
+
+;---------------------------------------------------
+;-- Events -----------------------------------------
+;---------------------------------------------------
+
 Event OnConfigOpen()
+
+	pages = GetMCMPages(0)
+	CompMCM2.pages = GetMCMPages(1)
+	CompMCM3.pages = GetMCMPages(2)
+	
 	if (bShortCutActive) && (MainJumpPage != "")
 		if (ShowMessage("$JumpMessage{" + MainJumpPage + "}", true, "$ConfirmYes", "$ConfirmNo"))
 			Jump(MainJumpPage, 0)
-		endif
-	endif
+		endIf
+	endIf
 EndEvent
 
 ;---------------------------------------------------
@@ -516,8 +678,8 @@ Event OnPageReset(String page)
 			CompQst._Build_Quests(CurrentPage)
 		else
 			self.ShowMessage("$BusyMessage", false, "$ConfirmY")
-		endif
-	endif
+		endIf
+	endIf
 EndEvent
 
 ;---------------------------------------------------
@@ -529,36 +691,36 @@ Event OnOptionHighlight(Int val)
 	if (val == OID_OverRide_G_Name)
 		SetInfoText("$State_OverRide_G_Name_Info")	
 		return
-	endif
+	endIf
 
 	if (val == OID_OverRide_N_Name)
 		SetInfoText("$State_OverRide_N_Name_Info")	
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		SetInfoText("$ModNotificationsCustomInfoG_Crosshair")	
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_N_HUD_Crosshair)
 		SetInfoText("$ModNotificationsCustomInfoN_Crosshair")	
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_G_HUD_Menus)
 		SetInfoText("$ModNotificationsCustomInfoG_Menus")	
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_N_HUD_Menus)
 		SetInfoText("$ModNotificationsCustomInfoN_Menus")	
 		return
-	endif
+	endIf
 
 	if (val == OID_SearhTerm)
 		SetInfoText("$State_SearchTerm_Info")
-	endif
+	endIf
 EndEvent
 
 ;---------------------------------------------------
@@ -570,12 +732,12 @@ Event OnOptionInputOpen(Int val)
 	if (val == OID_OverRide_G_Name)
 		SetInputDialogStartText(State_OverRide_G_Name_String)
 		return
-	endif
+	endIf
 
 	if (val == OID_OverRide_N_Name)
 		SetInputDialogStartText(State_OverRide_N_Name_String)
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		SetInputDialogStartText(State_CustomColourString_G_HUD_Crosshair)
@@ -599,7 +761,7 @@ Event OnOptionInputOpen(Int val)
 
 	if (val == OID_SearhTerm)
 		SetInputDialogStartText(State_SearchTermString)
-	endif
+	endIf
 EndEvent
 
 ;---------------------------------------------------
@@ -611,12 +773,12 @@ Event OnOptionInputAccept(Int val, String HexString)
 	if (val == OID_OverRide_G_Name)
 		OverRide_G_Name(HexString)
 		return
-	endif
+	endIf
 
 	if (val == OID_OverRide_N_Name)
 		OverRide_N_Name(HexString)
 		return
-	endif
+	endIf
 
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		OverRide_G_Colour_Crosshair(HexString)
@@ -652,27 +814,34 @@ Function Jump(string sString = "", int jumpType = 0)
 
 	if (sString != "")
 		SetTitleText(sString)
-	endif
+	endIf
 	
 	if (jumpType == 0)
 		SendModEvent("SKICP_pageSelected", pages[pages.Find(MainJumpPage)], pages.Find(MainJumpPage))
 		return
-	endif
+	endIf
 
 	if (jumpType == 1)
 		if (SearchedMCMMenu == "Misc" && CompMCM2.pages.Find(SearchJumpPage) != -1)
 			SendModEvent("SKICP_modSelected", 0, GetSkyUIMCMPositionalIndex("Completionist: Tracker (Misc)"))
 			SendModEvent("SKICP_pageSelected", SearchJumpPage, CompMCM2.pages.Find(SearchJumpPage))
 			return
-		endif
-		
+		endIf
+
+		if (SearchedMCMMenu == "Misc" && CompMCM3.pages.Find(SearchJumpPage) != -1)
+			COmpMCM3.SearchActive = true
+			SendModEvent("SKICP_modSelected", 0, GetSkyUIMCMPositionalIndex("Completionist: Tracker (Patches)"))
+			SendModEvent("SKICP_pageSelected", SearchJumpPage, CompMCM3.pages.Find(SearchJumpPage))
+			return
+		endIf
+
 		SendModEvent("SKICP_pageSelected", SearchJumpPage, pages.Find(SearchJumpPage))
 		return
-	endif
+	endIf
 
 	if (jumpType == 2)
 		SendModEvent("SKICP_pageSelected", pages[pages.Find(currentpage)], pages.Find(currentpage))
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -683,13 +852,13 @@ Function ProcessSearchResults(String term)
 	if (GetStringLength(term) < 3)
 		ShowMessage("$ResultsMessageErrorOnLength", false)
 		return
-	endif
+	endIf
 	
 	string[] results = SearchAndReportPage(term, b_SearchIgnoreCompleted, i_SearchMaxResults, i_SearchTypeChoice);
 	
 	if (!results.length)
 		ShowMessage("$ResultsMessage{" + term + "}", false)
-	endif
+	endIf
 	
 	int x = 0
 	while (x < results.length)
@@ -699,7 +868,7 @@ Function ProcessSearchResults(String term)
 			SearchedMCMMenu = results[x + 3]					   
 			Jump(SearchJumpPage, 1)
 			return
-		endif
+		endIf
 		x += 4
 	endWhile
 endFunction
@@ -774,7 +943,13 @@ function Build_Menus()
 	SearchType[0] = "$SearchTypeChoice01"
 	SearchType[1] = "$SearchTypeChoice02"
 	SearchType[2] = "$SearchTypeChoice03"
-	
+
+;---------------------------------------------------
+
+	CellScanner_Pinning_Sound_List = New String[3]
+	CellScanner_Pinning_Sound_List[0] = "$CellScannerSoundList0"
+	CellScanner_Pinning_Sound_List[1] = "$CellScannerSoundList1"
+	CellScanner_Pinning_Sound_List[2] = "$CellScannerSoundList2"
 ;---------------------------------------------------
 	
 	Int x = 0	
@@ -808,7 +983,7 @@ function Build_Menus()
 	if (Game.GetModByName("Vigilant.esm") != 255)
 		Radiant_Quests[x] = "$RadiantChoice06"
 		x += 1
-	endif
+	endIf
 	
 ;---------------------------------------------------
 	
@@ -819,7 +994,7 @@ function Build_Menus()
 		Legacy_Faction[2] = "$MenuChoice06"
 		if Game.GetModByName("DBM_RelicHunter.esp") != 255
 			Legacy_Faction[3] = "$MenuChoice07"
-		endif
+		endIf
 	endIf
 
 ;---------------------------------------------------
@@ -839,10 +1014,24 @@ String function GetEnabledStatus(Bool bValue)
 
 	if (bValue)
 		Return "$Enabled"
-	endif
+	endIf
 
 	Return "$Disabled"
 EndFunction
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+String function GetClosestReferenceEnabledStatus(Bool bValue)
+
+	if (bValue)
+		Return "$Closest"
+	endIf
+
+	Return "$Random"
+EndFunction
+
 
 ;---------------------------------------------------
 ;-- Functions --------------------------------------
@@ -887,10 +1076,11 @@ function Build_Page_Settings()
 
 		elseif (Radiant_Quests_String == "$RadiantChoice11")
 			AddSliderOptionST("State_TheBladesCounter", 	"$State_TheBladesCounterText",		State_BladesCounterVal, "{0}", 0)
-		endif
+		endIf
 		
 		AddEmptyOption()
 		OID_SearhTerm = AddInputOption("$State_SearchTerm_Text", State_SearchTermString, 0)
+		AddTextOptionST("TreatBooksAsItemsState", "$TreatBooksAsItemsState_Text", GetEnabledStatus(TreatBooksAsItems), 0)
 		AddTextOptionST("State_Debugging", "$State_DebuggingText", GetEnabledStatus(bDebug), 0)
 		
 		AddEmptyOption()
@@ -900,12 +1090,12 @@ function Build_Page_Settings()
 			AddMenuOptionST("State_Menu_Faction3", 	"$HRFaction", 			HelgenReborn_Faction[HR_Faction_Choice])
 		else
 			AddTextOption("$HRFaction", "$NOFaction", 0)
-		endif
+		endIf
 		if (Game.GetModByName("LegacyoftheDragonborn.esm") != 255)
 			AddMenuOptionST("State_Menu_Faction4", "$LDFaction", 			Legacy_Faction[Legacy_Faction_Choice])
 		else
 			AddTextOption("$LDFaction", "$NOFaction", 0)
-		endif	
+		endIf	
 		
 		if (bDebug)
 			AddEmptyOption()
@@ -913,7 +1103,7 @@ function Build_Page_Settings()
 			AddTextOptionST("DumpQuestData", "Dump Quest Data", "Dump", 0)
 			AddTextOption("(Thunderchild Stamina State: (" + (((Game.GetPlayer().GetActorValue("Stamina") as Float / Game.GetPlayer().GetBaseActorValue("Stamina") as Float * 100 as Float)  as Int) as String) + "%)", "", 0)
 			AddTextOption("(Colours = Hex: " + ColourString + " Int: " + IndexColour + ")", "", 0)
-		endif
+		endIf
 		
 		SetCursorPosition(1)		
 		AddHeaderOption("")
@@ -922,13 +1112,14 @@ function Build_Page_Settings()
 		AddEmptyOption()
 		AddTextOption("", "$ModVersion{ " + CompVer.ModVersion + "}", 0)
 		AddTextOption("", "$DLLVersion{ " + Completionist_Native.GetVersion() + "}", 0)
+		AddTextOption("", "$PatchesInstalled{ " + Completionist_Native.GetPatchCount() + "}", 0)
 		AddEmptyOption()
 		AddHeaderOption("$State_ProfileHead")
 		AddTextOptionST("State_ProfileSave", 			"$State_ProfileText1", 			GetConfigSaveString(), 0)
 		AddTextOptionST("State_ProfileLoad", 			"$State_ProfileText1", 			GetConfigLoadString(), 0)
 		AddTextOptionST("State_ProfileReset",			"$State_ProfileText2", 			"$State_ProfileText3", 0)	
 
-	endif
+	endIf
 EndFunction
 			
 ;---------------------------------------------------
@@ -955,8 +1146,9 @@ function Build_Page_Settings2()
 			AddTextOptionST("State_FishingSpotMarkers",		"$State_FishingSpotMarkers_Text", 	GetEnabledStatus(FishingSpotMarkers),  1)
 		else
 			AddTextOptionST("State_FishingSpotMarkers",		"$State_FishingSpotMarkers_Text", 	GetEnabledStatus(FishingSpotMarkers),  0)
-		endif
+		endIf
 		
+		AddEmptyOption()
 		AddEmptyOption()
 		AddHeaderOption("$MCMPageSettingsHeader3")
 		AddTextOptionST("State_SearchIgnoreCompleted", "$State_SearchIgnoreCompleted_Text", GetEnabledStatus(b_SearchIgnoreCompleted), 0)
@@ -981,7 +1173,7 @@ function Build_Page_Settings2()
 		Else
 			AddColorOptionST("CompletionLog_QuestsTextColourState", 	"$CompletionLog_QuestsTextColourText", 	CompletionLog_QuestsTextColourVal, 0)
 			AddColorOptionST("CompletionLog_ItemsTextColourState",  	"$CompletionLog_ItemsTextColourText", 	CompletionLog_ItemsTextColourVal, 0)
-		EndIf
+		endIf
 		SetCursorPosition(1)
 		
 		AddHeaderOption("")
@@ -991,18 +1183,20 @@ function Build_Page_Settings2()
 			AddColorOptionST("ModNotificationsColour",  "$ModNotificationsColour", 			IndexColour, 0)
 		else
 			AddColorOptionST("ModNotificationsColour",  "$ModNotificationsColour", 			IndexColour, 1)
-		endif
+		endIf
 		AddEmptyOption()
 		
 		AddHeaderOption("$State_ShortcutsHead")
 		AddTextOptionST("State_Shortcuts", 	 			"$State_ShortcutsText",			GetEnabledStatus(bShortCutActive), 	0)
 		if (bShortCutActive)
-			AddMenuOptionST("State_ShortcutsMenu1",  	"$State_ShortcutsMainText",		pages[MainMCMPagesChoice], 	0)
-			AddMenuOptionST("State_ShortcutsMenu2", 	"$State_ShortcutsMiscText",		CompMCM2.pages[MiscMCMPagesChoice], 	0)
+			AddMenuOptionST("State_ShortcutsMenu1",  	"$State_ShortcutsMainText",			pages[MainMCMPagesChoice], 	0)
+			AddMenuOptionST("State_ShortcutsMenu2", 	"$State_ShortcutsMiscText",			CompMCM2.pages[MiscMCMPagesChoice], 	0)
+			AddMenuOptionST("State_ShortcutsMenu3", 	"$State_ShortcutsUnofficialText",	CompMCM3.pages[UnofficialMCMPagesChoice], 	0)
 		else			
-			AddMenuOptionST("State_ShortcutsMenu1",  	"$State_ShortcutsMainText",		pages[MainMCMPagesChoice], 	1)
-			AddMenuOptionST("State_ShortcutsMenu2", 	"$State_ShortcutsMiscText",		CompMCM2.pages[MiscMCMPagesChoice], 	1)
-		endif
+			AddMenuOptionST("State_ShortcutsMenu1",  	"$State_ShortcutsMainText",			pages[MainMCMPagesChoice], 	1)
+			AddMenuOptionST("State_ShortcutsMenu2", 	"$State_ShortcutsMiscText",			CompMCM2.pages[MiscMCMPagesChoice], 	1)
+			AddMenuOptionST("State_ShortcutsMenu3", 	"$State_ShortcutsUnofficialText",	CompMCM3.pages[UnofficialMCMPagesChoice], 	1)
+		endIf
 		
 		AddEmptyOption()
 		AddHeaderOption("")
@@ -1028,8 +1222,8 @@ function Build_Page_Settings2()
 		Else
 			AddColorOptionST("CompletionLog_BooksTextColourState", 		"$CompletionLog_BooksTextColourText", 		CompletionLog_BooksTextColourVal, 0)
 			AddColorOptionST("CompletionLog_SpecialTextColourState",  	"$CompletionLog_SpecialTextColourText", 	CompletionLog_SpecialTextColourVal, 0)
-		EndIf
-	endif
+		endIf
+	endIf
 EndFunction
 
 ;---------------------------------------------------
@@ -1077,7 +1271,7 @@ function Build_Page_Settings3()
 		AddHeaderOption("")
 		AddTextOptionST("State_quickLootEnabled", 	 	"$State_quickLootEnabled_Text", GetEnabledStatus(b_quickLoot_Enabled),  	0)
 		AddEmptyOption()
-	endif
+	endIf
 EndFunction
 
 ;---------------------------------------------------
@@ -1090,7 +1284,7 @@ function Build_Page_Settings4()
 	ExcPos = New Int[128]
 	ExcRef = New Int[128]
 	ExcForms = New Form[128]
-	
+
 	int arrPos = 0
 	int idx = 0
 	
@@ -1120,6 +1314,26 @@ function Build_Page_Settings4()
 		curPos += 2		
 
 		SetCursorPosition(curPos)
+		AddHeaderOption("$CellScanner_SettingsHeader5")
+		curPos += 2
+		
+		SetCursorPosition(curPos)
+		AddTextOptionST("CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Text", GetEnabledStatus(bCellScanner_Pinning_Enabled), 0)
+		curPos += 2	
+
+		SetCursorPosition(curPos)
+		AddTextOptionST("CellScanner_Setting_Pinning_Marker", 	"$CellScanner_Setting_Pinning_Marker_Text", GetEnabledStatus(bCellScanner_Pinning_Marker), ((!bCellScanner_Pinning_Enabled)) as int)
+		curPos += 2	
+
+		SetCursorPosition(curPos)
+		AddTextOption("$CellScanner_CurrentPin", GetPinnedItemName(), ((!bCellScanner_Pinning_Enabled)) as int)
+		curPos += 2	
+		
+		SetCursorPosition(curPos)
+		AddEmptyOption()
+		curPos += 2	
+
+		SetCursorPosition(curPos)
 		AddHeaderOption("$CellScanner_SettingsHeader2")
 		curPos += 2		
 
@@ -1141,7 +1355,7 @@ function Build_Page_Settings4()
 
 		SetCursorPosition(curPos)
 		AddEmptyOption()
-		curPos += 2				
+		curPos += 2		
 
 		SetCursorPosition(curPos)
 		AddHeaderOption("$CellScanner_SettingsHeader4")
@@ -1186,8 +1400,8 @@ function Build_Page_Settings4()
 
 			if (curPos % 2 != 0)
 				curPos += 1
-			endif
-		endif
+			endIf
+		endIf
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		
 		SetCursorPosition(curPos)
@@ -1216,7 +1430,7 @@ function Build_Page_Settings4()
 				idx += 1
 				arrPos += 1
 			endWhile
-		endif
+		endIf
 		
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		SetCursorPosition(1)
@@ -1227,32 +1441,37 @@ function Build_Page_Settings4()
 			AddTextOptionST("CellScanner_Setting_EXRF", 	"$CellScanner_Setting_EXRF_Text", "", 0)
 		else
 			AddTextOption("$CellScanner_Setting_EXRF_TextERROR", "", 1)
-		endif
+		endIf
+		AddEmptyOption()
+
+		AddHeaderOption("")
+		AddMenuOptionST("State_CellScanner_Pinning_Sound", "$CellScanner_Pinning_Sound_Text", CellScanner_Pinning_Sound_List[CellScanner_Pinning_Sound_Choice], ((!bCellScanner_Pinning_Enabled)) as int)
+		AddTextOptionST("CellScanner_Setting_Pinning_Effect", 	"$CellScanner_Setting_Pinning_Effect_Text", GetEnabledStatus(bCellScanner_Pinning_Effect), ((!bCellScanner_Pinning_Enabled)) as int)
+		AddTextOptionST("CellScanner_Setting_Pinning_ClearPin", "", "$CellScanner_Setting_Pinning_ClearPin_Text", ((!bCellScanner_Pinning_Enabled)) as int)
 		AddEmptyOption()
 
 		AddHeaderOption("")
 		AddTextOptionST("CellScanner_Setting_NUMB", 	"$CellScanner_Setting_NUMB_Text",		GetEnabledStatus(bCellScanner_NUMB), 0)
 		AddTextOptionST("CellScanner_Setting_DETA", 	"$CellScanner_Setting_DETA_Text",		GetEnabledStatus(bCellScanner_DETA), 0)
 		AddTextOptionST("CellScanner_Setting_Quest", 	"$CellScanner_Setting_Quest_Text",		GetEnabledStatus(bCellScanner_MARK), 0)
-
-		if (PlayerRef.GetParentCell().IsInterior())
-			AddTextOptionST("CellScanner_Setting_EXCL", 	"$CellScanner_Setting_EXCL_Text{" + PlayerRef.GetParentCell().GetName() + "}", "", 0)
-		else
-			AddTextOption("$CellScanner_Setting_EXCL_TextERROR", "", 1)
-		endif
+		AddTextOptionST("CellScanner_UseClosestReferenceState", "$CellScanner_USeClosestReferenceState_Text", GetClosestReferenceEnabledStatus(bCellScanner_UseClosestReference), ((!bCellScanner_MARK)) as int)
 		AddEmptyOption()
 		
 		AddHeaderOption("")
 		AddTextOptionST("CellScanner_Setting_ExcludeMiscItems", 	"$CellScanner_Setting_ExcludeMiscItems_Text",		GetEnabledStatus(bCellScanner_ExcludeMiscItems), 0)
 		AddTextOptionST("CellScanner_Setting_ExcludeWeapons", 	"$CellScanner_Setting_ExcludeWeapons_Text",		GetEnabledStatus(bCellScanner_ExcludeWeapons), 0)
-		AddEmptyOption()
+		if (PlayerRef.GetParentCell().IsInterior())
+			AddTextOptionST("CellScanner_Setting_EXCL", 	"$CellScanner_Setting_EXCL_Text{" + PlayerRef.GetParentCell().GetName() + "}", "", 0)
+		else
+			AddTextOption("$CellScanner_Setting_EXCL_TextERROR", "", 1)
+		endIf
 		AddEmptyOption()
 		
 		AddHeaderOption("")
 		
 		SetCursorPosition(curPos + 1)
 		AddHeaderOption("")
-	endif
+	endIf
 EndFunction
 
 ;---------------------------------------------------
@@ -1263,7 +1482,7 @@ int function Min(int first, int second)
 
 	if first < second
 		return first
-	endif
+	endIf
 
 	return second
 endfunction
@@ -1298,8 +1517,8 @@ function Build_Page_Settings5()
 				x += 1
 				y += 1
 			endWhile
-		EndIf
-	endif
+		endIf
+	endIf
 EndFunction
 
 ;---------------------------------------------------
@@ -1342,7 +1561,7 @@ Function GetColourStatus(String quest_name, String quest_key = "", bool search_q
 		SearchedMCMMenu = ""			  
 		OptionSlot[OptionIndx] = AddTextOption("$SearchResult{" + "#FFD966" + "}{" + quest_name + "}", "", 0)
 		return
-	endif
+	endIf
 	
 	if (qIsOptionToggled(CompQst.CurrentQuestID, quest_key))		
 		if (State_ManualCompletionView_Choice == 0)
@@ -1354,7 +1573,7 @@ Function GetColourStatus(String quest_name, String quest_key = "", bool search_q
 		
 		elseif (State_ManualCompletionView_Choice == 2)
 			OptionSlot[OptionIndx] = AddTextOption("<font color='" + State_ManualCompletionColourString + "'>" + quest_name + "</font>", "", 0)
-		endif
+		endIf
 	else
 		if (State_AutomaticCompletionView_Choice == 0)
 			OptionSlot[OptionIndx] = AddToggleOption("<font color='" + State_AutomaticCompletionColourString + "'>" + quest_name + "</font>", True, 0)
@@ -1364,8 +1583,8 @@ Function GetColourStatus(String quest_name, String quest_key = "", bool search_q
 		
 		elseif (State_AutomaticCompletionView_Choice == 2)
 			OptionSlot[OptionIndx] = AddTextOption("<font color='" + State_AutomaticCompletionColourString + "'>" + quest_name + "</font>", "", 0)
-		endif
-	endif
+		endIf
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -1440,7 +1659,7 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 				SetCursorPosition(posLeft)
 				AddTextOption("$BuildPage09", "", 0)
 				posLeft += 2
-			endif
+			endIf
 		else
 			While Index < NameArr.length && NameArr[Index] != ""
 				SetCursorPosition(posLeft)
@@ -1449,7 +1668,7 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 					GetColourStatus(NameArr[Index], KeysArr[Index], true)
 				else
 					OptionSlot[OptionIndx] = AddTextOption(NameArr[Index], "", 0)
-				endif
+				endIf
 				
 				OptionName[OptionIndx] = NameArr[Index]
 				OptionText[OptionIndx] = TextArr[Index]
@@ -1459,7 +1678,7 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 				posLeft += 2
 				Index += 1
 			EndWhile
-		endif
+		endIf
 	Else
 		posRight += intPos * 2
 		SetCursorPosition(posRight)
@@ -1479,7 +1698,7 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 				SetCursorPosition(posRight)
 				AddTextOption("$BuildPage10", "", 0)
 				posRight += 2
-			endif
+			endIf
 		else
 			While Index < NameArr.length && NameArr[Index] != ""
 				SetCursorPosition(posRight)
@@ -1492,8 +1711,8 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 				posRight += 2
 				Index += 1
 			EndWhile
-		endif
-	endif
+		endIf
+	endIf
 EndFunction
 
 ;---------------------------------------------------
@@ -1609,7 +1828,7 @@ function LoadPage()
 				iTotal += 1
 				iFound += 1
 				
-			endif
+			endIf
 			
 		else
 		
@@ -1646,8 +1865,8 @@ function LoadPage()
 				N_Completed_Radi_Val += 1
 				iTotal += 1
 				
-			endif
-		endif
+			endIf
+		endIf
 		
 		Index += 1
 	EndWhile	
@@ -1664,7 +1883,7 @@ String function Get_OptionKeys(Int val)
 	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return OptionKeys[Index]
-	endif
+	endIf
 		
 	Return ""
 EndFunction
@@ -1678,7 +1897,7 @@ String function Get_OptionName(Int val)
 	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return OptionName[Index]
-	endif
+	endIf
 		
 	Return ""
 EndFunction
@@ -1692,7 +1911,7 @@ String function Get_OptionText(Int val)
 	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return OptionText[Index]
-	endif
+	endIf
 		
 	Return ""
 EndFunction
@@ -1706,7 +1925,7 @@ String function Get_OptionDebug(Int val)
 	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return "EditorID - [" + OptionIden[Index] + "] \n Name Set - [" + OptionName[index] + "] \n Data Set - [" + OptionText[index] + "] \n Key - [" + OptionKeys[index] + "]"
-	endif
+	endIf
 		
 	Return ""
 EndFunction
@@ -1720,7 +1939,7 @@ String function Get_OptionIden(Int val)
 	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return OptionIden[Index]
-	endif
+	endIf
 		
 	Return ""
 EndFunction
@@ -1733,7 +1952,7 @@ String function GetConfigSaveString()
 	
 	if papyrusutil.GetScriptVersion() > 31
 		return "$SavePreset"
-	endif
+	endIf
 	
 	return "$PapUtilError"
 endFunction	
@@ -1746,7 +1965,7 @@ String function GetConfigLoadString()
 
 	if papyrusutil.GetScriptVersion() > 31
 		return "$LoadPreset"
-	endif
+	endIf
 	
 	return "$PapUtilError"
 endFunction	
@@ -1873,16 +2092,19 @@ Function Begin_Config_Save()
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeMiscItems", bCellScanner_ExcludeMiscItems as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeWeapons", bCellScanner_ExcludeWeapons as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!iCellScanner_Range", iCellScanner_Range)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_UseClosestReference", bCellScanner_UseClosestReference as Int)
 
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int)
 		
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int)
+
 		jsonutil.Save("../CompletionistData/Profiles/CompConfig", false)
 		if IsInMenuMode()
 			ShowMessage("$ProfileSaveSuccessMenu")
 			ForcePageReset()
-		endif
+		endIf
 	else
 		ShowMessage("$PapUtilError")
 		ForcePageReset()
@@ -1905,7 +2127,7 @@ Function Begin_Config_Load()
 					SendNotification("$ProfileLoadCorrupt", ColourString, NotificationColourEnabled)
 					Begin_Config_Default()
 					return 
-				endif
+				endIf
 			endIf
 			
 			;;Search Settings
@@ -2028,6 +2250,7 @@ Function Begin_Config_Load()
 			bCellScanner_REFS = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_REFS", bCellScanner_REFS as Int))
 			bCellScanner_MARK = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_MARK", bCellScanner_MARK as Int))
 			iCellScanner_Range = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!iCellScanner_Range", iCellScanner_Range))
+			bCellScanner_UseClosestReference = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_UseClosestReference", bCellScanner_UseClosestReference as Int))
 
 			bCellScanner_ExcludeAlchemy = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeAlchemy", bCellScanner_ExcludeAlchemy as Int))
 			bCellScanner_ExcludeArmor = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeArmor", bCellScanner_ExcludeArmor as Int))
@@ -2038,25 +2261,27 @@ Function Begin_Config_Load()
 			b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
 			b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
 			b_quickLoot_Enabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int))
+
+			TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
 	
 			jsonutil.Load("../CompletionistData/Profiles/CompConfig")
 			if IsInMenuMode()
 				ShowMessage("$ProfileLoadSuccessMenu")
 				ForcePageReset()
-			endif
+			endIf
 		else
 			if IsInMenuMode()
 				ShowMessage("$ProfileLoadMissingMenu")
 				ForcePageReset()
 			else
 				Begin_Config_Default()
-			endif
-		endif
+			endIf
+		endIf
 	else
 		if IsInMenuMode()
 			ShowMessage("$PapUtilError")
 			ForcePageReset()
-		endif
+		endIf
 	endIf
 EndFunction	
 
@@ -2188,6 +2413,7 @@ function AutoLoadConfig()
 		bCellScanner_REFS = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_REFS", bCellScanner_REFS as Int))
 		bCellScanner_MARK = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_MARK", bCellScanner_MARK as Int))
 		iCellScanner_Range = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!iCellScanner_Range", iCellScanner_Range))
+		bCellScanner_UseClosestReference = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_UseClosestReference", bCellScanner_UseClosestReference as Int))
 
 		bCellScanner_ExcludeAlchemy = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeAlchemy", bCellScanner_ExcludeAlchemy as Int))
 		bCellScanner_ExcludeArmor = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeArmor", bCellScanner_ExcludeArmor as Int))
@@ -2198,13 +2424,15 @@ function AutoLoadConfig()
 		b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
 		b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
 		b_quickLoot_Enabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int))
-			
+		
+		TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
+
 		jsonutil.Load("../CompletionistData/Profiles/CompConfig")
 		SendNotification("$ProfileLoadSuccess", ColourString, NotificationColourEnabled)
 	else
 		Begin_Config_Default()
 		SendNotification("$ProfileLoadMissing", ColourString, NotificationColourEnabled)
-	endif
+	endIf
 	AutoLoaded = True
 endFunction
 
@@ -2236,6 +2464,7 @@ Function Begin_Config_Default()
 	NotifySpecial = True
 	NotifyStartup = True
 	NotifyMissable = True
+	TreatBooksAsItems = False
 	
 	State_MarkerDetectionVal = 1500
 	State_RadiantCounterVal = 5
@@ -2330,7 +2559,7 @@ Function Begin_Config_Default()
 	else
 		FishingSpotMarkers = True
 		Completionist_FishingSpot_Marker.Enable()
-	endif
+	endIf
 	
 	bCellScanner_CONT = True
 	bCellScanner_DETA = False
@@ -2344,14 +2573,15 @@ Function Begin_Config_Default()
 	bCellScanner_ExcludeBooks = False
 	bCellScanner_ExcludeMiscItems = False
 	bCellScanner_ExcludeWeapons = False
-			
+	bCellScanner_UseClosestReference = True
+
 	b_moreHUDEnabled_Crosshair = True
 	b_moreHUDEnabled_Menus = True
 	b_quickLoot_Enabled = True
 			
 	if IsInMenuMode()
 		ForcePageReset()
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -2366,7 +2596,7 @@ state State_ProfileReset
 			SetTitleText("$LoadDefaultTitleText") 
 			Begin_Config_Default()
 			UpdateVariables()
-		endif
+		endIf
 	EndEvent
 
 	Event OnHighlightST()
@@ -2594,6 +2824,36 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+State State_ShortcutsMenu3 ; MENU
+
+	Event OnMenuOpenST()
+		SetMenuDialogStartIndex(UnofficialMCMPagesChoice)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(CompMCM3.pages)
+	EndEvent
+					
+	Event OnMenuAcceptST(Int Index)
+		UnofficialMCMPagesChoice = Index
+		SetMenuOptionValueST(State_ShortcutsMenu2, CompMCM3.pages[UnofficialMCMPagesChoice])
+		UnofficialJumpPage = CompMCM3.pages[UnofficialMCMPagesChoice]
+		ForcePageReset()
+	EndEvent
+
+	Event OnDefaultST()
+		UnofficialMCMPagesChoice = 0
+		SetMenuOptionValueST(CompMCM3.pages[UnofficialMCMPagesChoice])
+		UnofficialJumpPage = CompMCM3.pages[UnofficialMCMPagesChoice]
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("$State_ShortcutsUnofficialInfo")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 State State_CompletionView ; MENU
 
 	Event OnMenuOpenST()
@@ -2766,7 +3026,7 @@ State State_SearchQueryType ; MENU
 	Event OnMenuAcceptST(Int index)
 		i_SearchTypeChoice = Index
 		s_SearchType = SearchType[i_SearchTypeChoice]
-		SetMenuOptionValueST(State_Radiant_Quests, SearchType[i_SearchTypeChoice])
+		SetMenuOptionValueST(State_SearchQueryType, SearchType[i_SearchTypeChoice])
 		ForcePageReset()
 	EndEvent
 
@@ -2819,6 +3079,28 @@ State DumpQuestData
 	Event OnHighlightST()
 
 		SetInfoText("$DumpToLog")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state TreatBooksAsItemsState
+
+	Event OnSelectST()
+		TreatBooksAsItems = !TreatBooksAsItems
+		SetTextOptionValueST(GetEnabledStatus(TreatBooksAsItems))
+	EndEvent
+	
+	Event OnDefaultST()
+		TreatBooksAsItems = False
+		SetTextOptionValueST(GetEnabledStatus(TreatBooksAsItems))
+	EndEvent
+
+	Event OnHighlightST()
+
+		SetInfoText("$TreatBooksAsItemsState_Info")
 	EndEvent
 endState
 
@@ -2923,7 +3205,7 @@ state State_FishingSpotMarkers
 			Completionist_FishingSpot_Marker.Enable()
 		else
 		Completionist_FishingSpot_Marker.Disable()
-		endif
+		endIf
 
 		SetTextOptionValueST(GetEnabledStatus(FishingSpotMarkers))
 		UpdateVariables()
@@ -2937,7 +3219,7 @@ state State_FishingSpotMarkers
 		else
 			Completionist_FishingSpot_Marker.Enable()
 			FishingSpotMarkers = True
-		endif
+		endIf
 		SetTextOptionValueST(GetEnabledStatus(FishingSpotMarkers))
 		UpdateVariables()
 		BuildMCMPages()
@@ -3067,6 +3349,25 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+state CellScanner_USeClosestReferenceState
+
+	Event OnSelectST()
+		bCellScanner_UseClosestReference = !bCellScanner_UseClosestReference
+		SetTextOptionValueST(GetClosestReferenceEnabledStatus(bCellScanner_UseClosestReference))
+		ForcePageReset()
+	EndEvent
+	
+	Event OnDefaultST()
+		bCellScanner_UseClosestReference = True
+		SetTextOptionValueST(GetClosestReferenceEnabledStatus(bCellScanner_UseClosestReference))
+		ForcePageReset()
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 state CompletionLog_PrefixEnabledState
 
 	Event OnSelectST()
@@ -3117,7 +3418,7 @@ state CompletionLog_BooksTextColourState
 		if (bDebug)
 			SetInfoText("$CompletionLog_BooksTextColourInfo" + "\n" + CompletionLog_BooksTextColourVal + "\n" + CompletionLog_BooksTextColourString)
 			Return
-		endif
+		endIf
 		SetInfoText("$CompletionLog_BooksTextColourInfo")
 	endEvent
 endState
@@ -3152,7 +3453,7 @@ state CompletionLog_ItemsTextColourState
 		if (bDebug)
 			SetInfoText("$CompletionLog_ItemsTextColourInfo" + "\n" + CompletionLog_ItemsTextColourVal + "\n" + CompletionLog_ItemsTextColourString)
 			Return
-		endif
+		endIf
 		SetInfoText("$CompletionLog_ItemsTextColourInfo")
 	endEvent
 endState
@@ -3187,7 +3488,7 @@ state CompletionLog_QuestsTextColourState
 		if (bDebug)
 			SetInfoText("$CompletionLog_QuestsTextColourInfo" + "\n" + CompletionLog_QuestsTextColourVal + "\n" + CompletionLog_QuestsTextColourString)
 			Return
-		endif
+		endIf
 		SetInfoText("$CompletionLog_QuestsTextColourInfo")
 	endEvent
 endState
@@ -3222,7 +3523,7 @@ state CompletionLog_SpecialTextColourState
 		if (bDebug)
 			SetInfoText("$CompletionLog_SpecialTextColourInfo" + "\n" + CompletionLog_SpecialTextColourVal + "\n" + CompletionLog_SpecialTextColourString)
 			Return
-		endif
+		endIf
 		SetInfoText("$CompletionLog_SpecialTextColourInfo")
 	endEvent
 endState
@@ -3837,6 +4138,8 @@ State State_MarkerDetectionCancel
 		LocMarker.MoveToMyEditorLocation()
 		CompMCM2.CurMarker = ""
 		CompMCM2.CurLocation = None	
+		CompMCM3.CurMarker = ""
+		CompMCM3.CurLocation = None	
 	EndEvent
 
 	Event OnHighlightST()
@@ -3898,7 +4201,7 @@ Function OverRide_G_Name(String InputString)
 	else
 		State_OverRide_G_Name_String = "Got It!"
 		SetInputOptionValue(OID_OverRide_G_Name, InputString)
-	endif
+	endIf
 endFunction
 
 Function OverRide_N_Name(String InputString)
@@ -3909,7 +4212,7 @@ Function OverRide_N_Name(String InputString)
 	else
 		State_OverRide_N_Name_String = "Need It!"
 		SetInputOptionValue(OID_OverRide_N_Name, InputString)
-	endif
+	endIf
 endFunction
 
 Function Search(String InputString)
@@ -3920,7 +4223,7 @@ Function Search(String InputString)
 	else
 		State_SearchTermString = "Enter Search Term..."
 		SetInputOptionValue(OID_SearhTerm, InputString)
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -4065,7 +4368,7 @@ Function OverRide_G_Colour_Crosshair(String HexString)
 		else
 			ShowMessage("$ColourClear2")
 			b_CustomColour_G_HUD_Crosshair = False
-		endif
+		endIf
 	endIf
 		
 	if (HexString != "Enter Decimal") && (HexString != "Clear")
@@ -4073,7 +4376,7 @@ Function OverRide_G_Colour_Crosshair(String HexString)
 		if ((HexString as Int) == 0)
 			ShowMessage("$ColourError")
 			return
-		endif
+		endIf
 		
 		b_CustomColour_G_HUD_Crosshair = True
 		
@@ -4083,7 +4386,7 @@ Function OverRide_G_Colour_Crosshair(String HexString)
 		SetInputOptionValue(OID_CustomColour_G_HUD_Crosshair, GetFontOption(State_CustomColourString_G_HUD_Crosshair, b_CustomColour_G_HUD_Crosshair))
 		ForcePageReset()
 		
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -4104,7 +4407,7 @@ Function OverRide_N_Colour_Crosshair(String HexString)
 		else
 			ShowMessage("$ColourClear2")
 			b_CustomColour_N_HUD_Crosshair = False
-		endif
+		endIf
 	endIf
 		
 	if (HexString != "Enter Decimal") && (HexString != "Clear")
@@ -4112,7 +4415,7 @@ Function OverRide_N_Colour_Crosshair(String HexString)
 		if ((HexString as Int) == 0)
 			ShowMessage("$ColourError")
 			return
-		endif
+		endIf
 		
 		b_CustomColour_N_HUD_Crosshair = True
 		
@@ -4122,7 +4425,7 @@ Function OverRide_N_Colour_Crosshair(String HexString)
 		SetInputOptionValue(OID_CustomColour_N_HUD_Crosshair, GetFontOption(State_CustomColourString_N_HUD_Crosshair, b_CustomColour_N_HUD_Crosshair))
 		ForcePageReset()
 		
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -4143,7 +4446,7 @@ Function OverRide_G_Colour_Menus(String HexString)
 		else
 			ShowMessage("$ColourClear2")
 			b_CustomColour_G_HUD_Menus = False
-		endif
+		endIf
 	endIf
 		
 	if (HexString != "Enter Decimal") && (HexString != "Clear")
@@ -4151,7 +4454,7 @@ Function OverRide_G_Colour_Menus(String HexString)
 		if ((HexString as Int) == 0)
 			ShowMessage("$ColourError")
 			return
-		endif
+		endIf
 		
 		b_CustomColour_G_HUD_Menus = True
 		
@@ -4161,7 +4464,7 @@ Function OverRide_G_Colour_Menus(String HexString)
 		SetInputOptionValue(OID_CustomColour_G_HUD_Menus, GetFontOption(State_CustomColourString_G_HUD_Menus, b_CustomColour_G_HUD_Menus))
 		ForcePageReset()
 		
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -4182,7 +4485,7 @@ Function OverRide_N_Colour_Menus(String HexString)
 		else
 			ShowMessage("$ColourClear2")
 			b_CustomColour_N_HUD_Menus = False
-		endif
+		endIf
 	endIf
 		
 	if (HexString != "Enter Decimal") && (HexString != "Clear")
@@ -4190,7 +4493,7 @@ Function OverRide_N_Colour_Menus(String HexString)
 		if ((HexString as Int) == 0)
 			ShowMessage("$ColourError")
 			return
-		endif
+		endIf
 		
 		b_CustomColour_N_HUD_Menus = True
 		
@@ -4200,7 +4503,7 @@ Function OverRide_N_Colour_Menus(String HexString)
 		SetInputOptionValue(OID_CustomColour_N_HUD_Menus, GetFontOption(State_CustomColourString_N_HUD_Menus, b_CustomColour_N_HUD_Menus))
 		ForcePageReset()
 		
-	endif
+	endIf
 endFunction
 
 ;---------------------------------------------------
@@ -4305,18 +4608,19 @@ state CellScanner_Setting_Quest
 			Completionist_ItemFinder_Name.Clear()
 			Completionist_ItemFinder_Type.Clear()
 			Completionist_ItemFinder_Quest.SetObjectiveDisplayed(10, False, True)
-		endif
+		endIf
 		
 		SetTextOptionValueST(GetEnabledStatus(bCellScanner_MARK))
+		ForcePageReset()
 	EndEvent
 	
 	Event OnDefaultST()
 		bCellScanner_MARK = True
 		SetTextOptionValueST(GetEnabledStatus(bCellScanner_MARK))
+		ForcePageReset()
 	EndEvent
 
 	Event OnHighlightST()
-
 		SetInfoText("$CellScanner_Setting_Quest_Info")
 	EndEvent
 endState
@@ -4530,6 +4834,110 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+state CellScanner_Setting_Pinning_Enabled
+
+	Event OnSelectST()
+		bCellScanner_Pinning_Enabled = !bCellScanner_Pinning_Enabled
+
+		if (!bCellScanner_Pinning_Enabled)
+			ClearPinnedTarget(true)
+		else
+			(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
+		endIf
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Enabled))
+		ForcePageReset()
+	EndEvent
+	
+	Event OnDefaultST()
+		bCellScanner_Pinning_Enabled = True
+		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Enabled))
+		ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("$CellScanner_Setting_Pinning_Enabled_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state CellScanner_Setting_Pinning_ClearPin
+
+	Event OnSelectST()
+		ClearPinnedTarget(true)
+		ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("$CellScanner_Setting_Pinning_ClearPin_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state CellScanner_Setting_Pinning_Marker
+
+	Event OnSelectST()
+		bCellScanner_Pinning_Marker = !bCellScanner_Pinning_Marker
+
+		if (bCellScanner_Pinning_Enabled && bCellScanner_Pinning_Marker)
+			if (Completionist_PinnedItemFinder_Item.GetReference())
+				Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
+			endIf
+		else
+			if (Completionist_PinnedItemFinder_Item.GetReference())
+				Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, False, False)
+			endIf
+		endIf		
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Marker))
+	EndEvent
+	
+	Event OnDefaultST()
+		bCellScanner_Pinning_Marker = True
+		if (Completionist_PinnedItemFinder_Item.GetReference())
+			Completionist_PinnedItemFinder_Quest.SetObjectiveDisplayed(10, True, True)
+		endIf		
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Marker))
+	EndEvent
+
+	Event OnHighlightST()
+
+		SetInfoText("$CellScanner_Setting_Pinning_Marker_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state CellScanner_Setting_Pinning_Effect
+
+	Event OnSelectST()
+		bCellScanner_Pinning_Effect = !bCellScanner_Pinning_Effect
+		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).UpdateGlowParameters(bCellScanner_Pinning_Effect)
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Effect))
+	EndEvent
+	
+	Event OnDefaultST()
+		bCellScanner_Pinning_Effect = True
+		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).UpdateGlowParameters(bCellScanner_Pinning_Effect)
+		SetTextOptionValueST(GetEnabledStatus(bCellScanner_Pinning_Effect))
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("$CellScanner_Setting_Pinning_Effect_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 state CellScanner_Setting_NUMB
 
 	Event OnSelectST()
@@ -4552,6 +4960,37 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+state State_CellScanner_Pinning_Sound
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(CellScanner_Pinning_Sound_Choice)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(CellScanner_Pinning_Sound_List)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		CellScanner_Pinning_Sound_Choice = Index
+		SetMenuOptionValueST(State_CellScanner_Pinning_Sound, CellScanner_Pinning_Sound_List[CellScanner_Pinning_Sound_Choice])		
+		;/if (CellScanner_Pinning_Sound_Choice > 0)
+			((Completionist_PinnedItemSoundList.GetAt(CellScanner_Pinning_Sound_Choice)) as sound).PlayAndWait(Game.GetPlayer())
+		endIf/;	
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		CellScanner_Pinning_Sound_Choice = 0
+		SetMenuOptionValueST(State_CellScanner_Pinning_Sound, CellScanner_Pinning_Sound_List[CellScanner_Pinning_Sound_Choice])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$CellScanner_Pinning_Sound_Info")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 state CellScanner_Setting_EXCL
 
 	Event OnSelectST()
@@ -4562,7 +5001,7 @@ state CellScanner_Setting_EXCL
 				Completionist_ExcludedCells.AddForm(curCell as Cell)
 				ForcePageReset()
 			endIf
-		endif
+		endIf
 	EndEvent
 	
 	Event OnHighlightST()
@@ -4588,8 +5027,8 @@ State ExcludedCellState
 						ForcePageReset()
 						return
 					endIf
-				endif
-			endif
+				endIf
+			endIf
 
 			if ExcRef[Index] == 1			
 				If (ExcForms[Index] as ObjectReference)					
@@ -4598,9 +5037,9 @@ State ExcludedCellState
 						ForcePageReset()
 						return
 					endIf
-				endif
-			endif		 
-		endif
+				endIf
+			endIf		 
+		endIf
 	endEvent
 	
 	Event OnOptionHighlight(Int val)
@@ -4608,12 +5047,12 @@ State ExcludedCellState
 		if (Index != -1)
 			if ExcRef[Index] == 0
 				SetInfoText("$CellScanner_Setting_EXCL_Highlight")
-			endif
+			endIf
 
 			if ExcRef[Index] == 1
 				SetInfoText("$CellScanner_Setting_EXRF_Highlight")
-			endif
-		endif
+			endIf
+		endIf
 	endEvent
 endState
 
@@ -4633,7 +5072,7 @@ state CellScanner_Setting_EXRF
 			a_message = "$CellScanner_Setting_EXRF_Message4{" + curRef.GetDisplayName() + "}{" + curRef.GetDisplayName() + "}{" + curRef.GetDisplayName() + "}"
 		Else
 			a_message = "$CellScanner_Setting_EXRF_Message1{" + curRef.GetDisplayName() + "}"
-		endif 
+		endIf 
 					
 		if (ShowMessage(a_message, true, "$ConfirmYes", "$ConfirmNo"))
 			ExcludeReference(curRef, curRef.GetParentCell())
@@ -4669,7 +5108,7 @@ State CheckForReferences_State1
 			endIf
 			
 			return
-		endif
+		endIf
 
 		if (ConflictControl != "")
 			if (ShowMessage("$CheckForReferences_Msg1{" + ConflictControl + "}", true, "$ConfirmYes", "$ConfirmNo"))
@@ -4682,7 +5121,7 @@ State CheckForReferences_State1
 			endIf
 			
 			return
-		endif
+		endIf
 
 
 		UnregisterForKey(ReferenceKey)
@@ -4716,7 +5155,7 @@ State CheckForReferences_State2
 			endIf
 			
 			return
-		endif
+		endIf
 
 		if (ConflictControl != "")
 			if (ShowMessage("$CheckForReferences_Msg1{" + ConflictControl + "}", true, "$ConfirmYes", "$ConfirmNo"))
@@ -4729,7 +5168,7 @@ State CheckForReferences_State2
 			endIf
 			
 			return
-		endif
+		endIf
 
 
 		UnregisterForKey(ExcludeKey)
@@ -4763,7 +5202,7 @@ State CheckForReferences_State3
 			endIf
 			
 			return
-		endif
+		endIf
 
 		if (ConflictControl != "")
 			if (ShowMessage("$CheckForReferences_Msg1{" + ConflictControl + "}", true, "$ConfirmYes", "$ConfirmNo"))
@@ -4776,7 +5215,7 @@ State CheckForReferences_State3
 			endIf
 			
 			return
-		endif
+		endIf
 
 
 		UnregisterForKey(ExcludeReferenceKey)
@@ -4802,38 +5241,38 @@ State Quest_TrackingState
 		String quest_name = Get_OptionName(val)
 		if (quest_keys == "")
 			return
-		endif	
+		endIf	
 	
 		Int status = qIsOptionCompleted(CompQst.CurrentQuestID, quest_keys)
 
 		if (status == -1)
 			ShowMessage("Unable to find entry in array", false, "Ok")
-		endif 
+		endIf 
 
 		if (status == 0)
 			if ShowMessage("$ConfirmCompleteQ{" + quest_name + "}", True, "$ConfirmY", "$ConfirmN")
 				qSetOptionCompleted(CompQst.CurrentQuestID, quest_keys, true)
 				Jump("$ProcessingTitle", 2)
 			endIf
-		endif 
+		endIf 
 
 		if (status == 1)
 			if ShowMessage("$RemoveCompletedQ{" + quest_name + "}", True, "$ConfirmY", "$ConfirmN")
 				qSetOptionCompleted(CompQst.CurrentQuestID, quest_keys, false)
 				Jump("$ProcessingTitle", 2)
 			endIf
-		endif 
+		endIf 
 
 		if (status == 2)
 			ShowMessage("$DebugNoMove", false, "$ConfirmY")
-		endif		
+		endIf		
 	endEvent
 	
 	Event OnOptionHighlight(Int val)
 		if (bDebug)
 			SetInfoText(Get_OptionDebug(val))
 			return
-		endif
+		endIf
 		SetInfoText(Get_OptionText(val))
 	endEvent
 endState

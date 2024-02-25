@@ -3,6 +3,10 @@ Scriptname Completionist_ItemScript extends ReferenceAlias
 ReferenceAlias Property name Auto
 ReferenceAlias Property type Auto
 
+;---------------------------------------------------
+;-- Function ---------------------------------------
+;---------------------------------------------------
+
 Event OnActivate(ObjectReference akActionRef)
 	
 	if (akActionRef)
@@ -10,20 +14,21 @@ Event OnActivate(ObjectReference akActionRef)
 	endif
 EndEvent
 
+;---------------------------------------------------
+;-- Function ---------------------------------------
+;---------------------------------------------------
+
 Event OnCellDetach()
 	ClearReferences(true)
 EndEvent
 
-Function ClearReferences(bool abFailed)
+;---------------------------------------------------
+;-- Function ---------------------------------------
+;---------------------------------------------------
 
-	if (abFailed)
-		GetOwningQuest().SetObjectiveFailed(10, true)
-	else
-		GetOwningQuest().SetObjectiveCompleted(10, true)
-	endif
+Function ClearReferences(bool abFailed)
 	
 	GetOwningQuest().SetObjectiveDisplayed(10, False, True)
-
 	Clear()
 	name.Clear()
 	type.Clear()

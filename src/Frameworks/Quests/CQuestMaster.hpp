@@ -54,5 +54,13 @@ namespace CQuestMaster
 		  static std::string                    GetLocalisedPageName(int32_t ID);
 		  static CQuestData* GetQuestDataByKey(std::string a_key);
 		  static void							AddQuestData(CQuestData* a_data, std::string a_name, int32_t a_ID, std::string a_key);
+
+		  static std::vector<std::string>		qGetMiscQuestIdenArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);
+		  static std::vector<std::string>		qGetMiscQuestKeysArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);
+		  static std::vector<std::string>		qGetMiscQuestNameArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);
+		  static std::vector<std::string>		qGetMiscQuestTextArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);
+		  static std::vector<int32_t>			qGetMiscQuestRadiArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);
+
+		  static std::pair<int32_t, int32_t>	qGetQuestCompletionTotals(std::vector<CQuestData*> data);
 	};
 };

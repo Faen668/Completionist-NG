@@ -5,14 +5,6 @@ namespace CFramework_PlayerHomes_VH {
 	inline Serialization::CompletionistData Data;
 }
 
-namespace CFramework_PlayerHomes_CH {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_PlayerHomes_PH {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_PlayerHomes
 {
 	inline std::vector<std::string>		VH_NameArray;
@@ -22,22 +14,6 @@ namespace CFramework_PlayerHomes
 	inline std::vector<bool>			VH_BoolArray;
 	inline std::int32_t					VH_EntriesTotal;
 	inline std::int32_t					VH_EntriesFound;
-
-	inline std::vector<std::string>		CH_NameArray;
-	inline std::vector<std::string>		CH_TextArray;
-	inline std::vector<RE::TESForm*>	CH_FormArray;
-	inline std::vector<std::string>		CH_QuestArray;
-	inline std::vector<bool>			CH_BoolArray;
-	inline std::int32_t					CH_EntriesTotal;
-	inline std::int32_t					CH_EntriesFound;
-
-	inline std::vector<std::string>		PH_NameArray;
-	inline std::vector<std::string>		PH_TextArray;
-	inline std::vector<RE::TESForm*>	PH_FormArray;
-	inline std::vector<std::string>		PH_QuestArray;
-	inline std::vector<bool>			PH_BoolArray;
-	inline std::int32_t					PH_EntriesTotal;
-	inline std::int32_t					PH_EntriesFound;
 
 	using EventResult = RE::BSEventNotifyControl;
 

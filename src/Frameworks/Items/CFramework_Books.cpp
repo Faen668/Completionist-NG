@@ -1,6 +1,7 @@
 #include "Serialization.hpp"
 #include "CFramework_Books.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Internal Utility/Events.hpp"
 
 #undef AddForm
 
@@ -130,28 +131,6 @@ namespace CFramework_TMaps_TH {
 	bool ProcessForm(RE::FormID a_formID) {
 		if (CFramework_TMaps_TH::Data.HasForm(a_formID)) {
 			CFramework_Books::CHandler::ProcessFoundForm(a_formID, CFramework_TMaps_TH::Data.GetForm(a_formID), "CFramework_TMaps_TH");
-			return true;
-		}
-		return false;
-	}
-}
-
-namespace CFramework_Books_CC {
-
-	bool ProcessForm(RE::FormID a_formID) {
-		if (CFramework_Books_CC::Data.HasForm(a_formID)) {
-			CFramework_Books::CHandler::ProcessFoundForm(a_formID, CFramework_Books_CC::Data.GetForm(a_formID), "CFramework_Books_CC");
-			return true;
-		}
-		return false;
-	}
-}
-
-namespace CFramework_Tomes_CC {
-
-	bool ProcessForm(RE::FormID a_formID) {
-		if (CFramework_Tomes_CC::Data.HasForm(a_formID)) {
-			CFramework_Books::CHandler::ProcessFoundForm(a_formID, CFramework_Tomes_CC::Data.GetForm(a_formID), "CFramework_Tomes_CC");
 			return true;
 		}
 		return false;
@@ -298,6 +277,7 @@ namespace CFramework_Books {
 		CHandler::InjectAndCompileData();
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
+		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 	}
 
 	//---------------------------------------------------
@@ -313,8 +293,27 @@ namespace CFramework_Books {
 	}
 
 	//---------------------------------------------------
-	//-- Framework Events ( Books Read ) ----------------
+	//-- Framework Events ( On Item Added ) -------------
 	//---------------------------------------------------
+
+	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
+		using log = Serialization::CompletionistLog::logType;
+
+		if (a_event->newContainer != 0x00014 || !CVariables::V_TreatBooksAsItems) { return; }
+
+		if (CFramework_Books_AG::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Books_HS::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Books_TY::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Skill_SK::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Tomes_SK::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Books_DG::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Tomes_DG::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Books_DB::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_Tomes_DB::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_TMaps_SK::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_TMaps_NT::ProcessForm(a_event->baseObj)) { return; };
+		if (CFramework_TMaps_TH::ProcessForm(a_event->baseObj)) { return; };
+	}
 
 	EventResult CHandler::ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) {
 
@@ -332,8 +331,6 @@ namespace CFramework_Books {
 		if (CFramework_TMaps_SK::ProcessForm(a_event->book->GetFormID())) { return EventResult::kContinue; };
 		if (CFramework_TMaps_NT::ProcessForm(a_event->book->GetFormID())) { return EventResult::kContinue; };
 		if (CFramework_TMaps_TH::ProcessForm(a_event->book->GetFormID())) { return EventResult::kContinue; };
-		if (CFramework_Books_CC::ProcessForm(a_event->book->GetFormID())) { return EventResult::kContinue; };
-		if (CFramework_Tomes_CC::ProcessForm(a_event->book->GetFormID())) { return EventResult::kContinue; };
 		return EventResult::kContinue;
 	}
 
@@ -359,8 +356,6 @@ namespace CFramework_Books {
 				if (CFramework_TMaps_SK::ProcessForm(target)) { return EventResult::kContinue; };
 				if (CFramework_TMaps_NT::ProcessForm(target)) { return EventResult::kContinue; };
 				if (CFramework_TMaps_TH::ProcessForm(target)) { return EventResult::kContinue; };
-				if (CFramework_Books_CC::ProcessForm(target)) { return EventResult::kContinue; };
-				if (CFramework_Tomes_CC::ProcessForm(target)) { return EventResult::kContinue; };
 			}
 			return EventResult::kContinue;
 		}
@@ -611,61 +606,6 @@ namespace CFramework_Books {
 			TMaps_TH_EntriesFound = std::ranges::count(TMaps_TH_BoolArray, true);
 			return;
 		}
-
-		if (a_section == "CFramework_Books_CC") {
-			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kBook, a_base->GetName());
-
-			auto t_pos = std::ranges::find(Books_CC_FormArray, a_base);
-			auto b_pos = std::distance(Books_CC_FormArray.begin(), t_pos);
-
-			Books_CC_BoolArray[b_pos] = true;
-			Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
-			return;
-		}
-
-		if (a_section == "CFramework_Tomes_CC") {
-			FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kTome, a_base->GetName());
-
-			auto t_pos = std::ranges::find(Tomes_CC_A_FormArray, a_base);
-			if (t_pos != Tomes_CC_A_FormArray.end()) {
-				auto b_pos = std::distance(Tomes_CC_A_FormArray.begin(), t_pos);
-				Tomes_CC_A_BoolArray[b_pos] = true;
-				Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
-				return;
-			}
-
-			t_pos = std::ranges::find(Tomes_CC_C_FormArray, a_base);
-			if (t_pos != Tomes_CC_C_FormArray.end()) {
-				auto b_pos = std::distance(Tomes_CC_C_FormArray.begin(), t_pos);
-				Tomes_CC_C_BoolArray[b_pos] = true;
-				Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
-				return;
-			}
-
-			t_pos = std::ranges::find(Tomes_CC_D_FormArray, a_base);
-			if (t_pos != Tomes_CC_D_FormArray.end()) {
-				auto b_pos = std::distance(Tomes_CC_D_FormArray.begin(), t_pos);
-				Tomes_CC_D_BoolArray[b_pos] = true;
-				Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
-				return;
-			}
-
-			t_pos = std::ranges::find(Tomes_CC_I_FormArray, a_base);
-			if (t_pos != Tomes_CC_I_FormArray.end()) {
-				auto b_pos = std::distance(Tomes_CC_I_FormArray.begin(), t_pos);
-				Tomes_CC_I_BoolArray[b_pos] = true;
-				Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
-				return;
-			}
-
-			t_pos = std::ranges::find(Tomes_CC_R_FormArray, a_base);
-			if (t_pos != Tomes_CC_R_FormArray.end()) {
-				auto b_pos = std::distance(Tomes_CC_R_FormArray.begin(), t_pos);
-				Tomes_CC_R_BoolArray[b_pos] = true;
-				Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
-				return;
-			}
-		}
 	}
 
 	//---------------------------------------------------
@@ -678,9 +618,6 @@ namespace CFramework_Books {
 		if (Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
 			CFramework_Tomes_SK::Data.AddForm(0x00B3165, "Skyrim.esm");
 		}
-
-		CHandler::Install_CCB();
-		CHandler::Install_CCT();
 
 		//Spell Tomes (Skyrim)
 		CFramework_Tomes_SK::Data.CompileFormArray(CFramework_Books::Tomes_SK, "Skyrim.esm");
@@ -745,27 +682,6 @@ namespace CFramework_Books {
 		Tomes_DB_I_EntriesFound = std::ranges::count(Tomes_DB_I_BoolArray, true);
 		Tomes_DB_R_EntriesFound = std::ranges::count(Tomes_DB_R_BoolArray, true);
 
-		//Spell Tomes (Creation Club)
-		CFramework_Tomes_CC::Data.CompileFormArray(CFramework_Books::Tomes_CC, "");
-		CFramework_Tomes_CC::Data.MergeAsCollectable();
-		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_A_NameArray, Tomes_CC_A_FormArray, Tomes_CC_A_BoolArray, Tomes_CC_A_TextArray, RE::ActorValue::kAlteration);
-		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_C_NameArray, Tomes_CC_C_FormArray, Tomes_CC_C_BoolArray, Tomes_CC_C_TextArray, RE::ActorValue::kConjuration);
-		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_D_NameArray, Tomes_CC_D_FormArray, Tomes_CC_D_BoolArray, Tomes_CC_D_TextArray, RE::ActorValue::kDestruction);
-		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_I_NameArray, Tomes_CC_I_FormArray, Tomes_CC_I_BoolArray, Tomes_CC_I_TextArray, RE::ActorValue::kIllusion);
-		CFramework_Tomes_CC::Data.PopulateSpellTomes(Tomes_CC_R_NameArray, Tomes_CC_R_FormArray, Tomes_CC_R_BoolArray, Tomes_CC_R_TextArray, RE::ActorValue::kRestoration);
-
-		Tomes_CC_A_EntriesTotal = Tomes_CC_A_FormArray.size();
-		Tomes_CC_C_EntriesTotal = Tomes_CC_C_FormArray.size();
-		Tomes_CC_D_EntriesTotal = Tomes_CC_D_FormArray.size();
-		Tomes_CC_I_EntriesTotal = Tomes_CC_I_FormArray.size();
-		Tomes_CC_R_EntriesTotal = Tomes_CC_R_FormArray.size();
-
-		Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
-		Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
-		Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
-		Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
-		Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
-
 		//Books
 		CFramework_Books_AG::Data.CompileFormArray(CFramework_Books::Books_AG, "Skyrim.esm");
 		CFramework_Books_HS::Data.CompileFormArray(CFramework_Books::Books_HS, "Skyrim.esm");
@@ -774,7 +690,6 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.CompileFormArray(CFramework_Books::Books_DG, "Dawnguard.esm");
 		CFramework_Books_DB::Data.CompileFormArray(CFramework_Books::Books_DB, "Dragonborn.esm");
 		CFramework_TMaps_SK::Data.CompileFormArray(CFramework_Books::TMaps_SK, "Skyrim.esm");
-		CFramework_Books_CC::Data.CompileFormArray(CFramework_Books::Books_CC, "");
 
 		CFramework_Books_AG::Data.MergeAsCollectable();
 		CFramework_Books_HS::Data.MergeAsCollectable();
@@ -783,7 +698,6 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.MergeAsCollectable();
 		CFramework_Books_DB::Data.MergeAsCollectable();
 		CFramework_TMaps_SK::Data.MergeAsCollectable();
-		CFramework_Books_CC::Data.MergeAsCollectable();
 
 		CFramework_Books_AG::Data.Populate(Books_AG_NameArray, Books_AG_FormArray, Books_AG_BoolArray, Books_AG_TextArray, false, 1);
 		CFramework_Books_HS::Data.Populate(Books_HS_NameArray, Books_HS_FormArray, Books_HS_BoolArray, Books_HS_TextArray, false, 1);
@@ -792,10 +706,11 @@ namespace CFramework_Books {
 		CFramework_Books_DG::Data.Populate(Books_DG_NameArray, Books_DG_FormArray, Books_DG_BoolArray, Books_DG_TextArray, false, 1);
 		CFramework_Books_DB::Data.Populate(Books_DB_NameArray, Books_DB_FormArray, Books_DB_BoolArray, Books_DB_TextArray, false, 1);
 		CFramework_TMaps_SK::Data.Populate(TMaps_SK_NameArray, TMaps_SK_FormArray, TMaps_SK_BoolArray, TMaps_SK_TextArray, false, 1);
-		CFramework_Books_CC::Data.Populate(Books_CC_NameArray, Books_CC_FormArray, Books_CC_BoolArray, Books_CC_TextArray, false, 1);
 
 		if (Serialization::CompletionistData::IsModInstalled("treasure_hunt.esp"))
 		{
+			CFramework_Master::InstalledPatchesForMCMDisplay++;
+
 			CFramework_TMaps_NT::Data.CompileFormArray(CFramework_Books::TMaps_NT, "treasure_hunt.esp");
 			CFramework_TMaps_NT::Data.MergeAsCollectable();
 			CFramework_TMaps_NT::Data.Populate(TMaps_NT_NameArray, TMaps_NT_FormArray, TMaps_NT_BoolArray, TMaps_NT_TextArray, false, 1);
@@ -806,6 +721,8 @@ namespace CFramework_Books {
 
 		if (Serialization::CompletionistData::IsModInstalled("TreasureHunter.esp"))
 		{
+			CFramework_Master::InstalledPatchesForMCMDisplay++;
+
 			CFramework_TMaps_TH::Data.CompileFormArray(CFramework_Books::TMaps_TH, "TreasureHunter.esp");
 			CFramework_TMaps_TH::Data.MergeAsCollectable();
 			CFramework_TMaps_TH::Data.Populate(TMaps_TH_NameArray, TMaps_TH_FormArray, TMaps_TH_BoolArray, TMaps_TH_TextArray, false, 1);
@@ -834,9 +751,6 @@ namespace CFramework_Books {
 
 		TMaps_SK_EntriesTotal = TMaps_SK_FormArray.size();
 		TMaps_SK_EntriesFound = std::ranges::count(TMaps_SK_BoolArray, true);
-
-		Books_CC_EntriesTotal = Books_CC_FormArray.size();
-		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -939,30 +853,6 @@ namespace CFramework_Books {
 
 		for (auto i = 0; i < TMaps_TH_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(TMaps_TH_FormArray[i], TMaps_TH_NameArray[i], "$MCMPageBooks4", FrameworkAPI::GetBookCategoryType(TMaps_TH_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Books_CC_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Books_CC_FormArray[i], Books_CC_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Books_CC_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Tomes_CC_A_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_A_FormArray[i], Tomes_CC_A_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_A_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Tomes_CC_C_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_C_FormArray[i], Tomes_CC_C_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_C_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Tomes_CC_D_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_D_FormArray[i], Tomes_CC_D_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_D_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Tomes_CC_I_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_I_FormArray[i], Tomes_CC_I_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_I_FormArray[i])));
-		}
-
-		for (auto i = 0; i < Tomes_CC_R_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Tomes_CC_R_FormArray[i], Tomes_CC_R_NameArray[i], "$MCMPageBooksCC", FrameworkAPI::GetBookCategoryType(Tomes_CC_R_FormArray[i])));
 		}
 	}
 
@@ -1071,39 +961,6 @@ namespace CFramework_Books {
 		Tomes_DB_I_EntriesFound = std::ranges::count(Tomes_DB_I_BoolArray, true);
 		Tomes_DB_R_EntriesFound = std::ranges::count(Tomes_DB_R_BoolArray, true);
 
-		//Spell Tomes (Creation Club)
-		for (auto i = 0; i < Tomes_CC_A_FormArray.size(); i++) {
-			Tomes_CC_A_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_A_FormArray[i]);
-		}
-
-		for (auto i = 0; i < Tomes_CC_C_FormArray.size(); i++) {
-			Tomes_CC_C_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_C_FormArray[i]);
-		}
-
-		for (auto i = 0; i < Tomes_CC_D_FormArray.size(); i++) {
-			Tomes_CC_D_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_D_FormArray[i]);
-		}
-
-		for (auto i = 0; i < Tomes_CC_I_FormArray.size(); i++) {
-			Tomes_CC_I_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_I_FormArray[i]);
-		}
-
-		for (auto i = 0; i < Tomes_CC_R_FormArray.size(); i++) {
-			Tomes_CC_R_BoolArray[i] = FrameworkAPI::IsBookKnown(Tomes_CC_R_FormArray[i]);
-		}
-
-		Tomes_CC_A_EntriesTotal = Tomes_CC_A_FormArray.size();
-		Tomes_CC_C_EntriesTotal = Tomes_CC_C_FormArray.size();
-		Tomes_CC_D_EntriesTotal = Tomes_CC_D_FormArray.size();
-		Tomes_CC_I_EntriesTotal = Tomes_CC_I_FormArray.size();
-		Tomes_CC_R_EntriesTotal = Tomes_CC_R_FormArray.size();
-
-		Tomes_CC_A_EntriesFound = std::ranges::count(Tomes_CC_A_BoolArray, true);
-		Tomes_CC_C_EntriesFound = std::ranges::count(Tomes_CC_C_BoolArray, true);
-		Tomes_CC_D_EntriesFound = std::ranges::count(Tomes_CC_D_BoolArray, true);
-		Tomes_CC_I_EntriesFound = std::ranges::count(Tomes_CC_I_BoolArray, true);
-		Tomes_CC_R_EntriesFound = std::ranges::count(Tomes_CC_R_BoolArray, true);
-
 		//Books
 		for (auto i = 0; i < Books_AG_FormArray.size(); i++) {
 			Books_AG_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_AG_FormArray[i]);
@@ -1141,10 +998,6 @@ namespace CFramework_Books {
 			TMaps_TH_BoolArray[i] = FrameworkAPI::IsBookKnown(TMaps_TH_FormArray[i]);
 		}
 
-		for (auto i = 0; i < Books_CC_FormArray.size(); i++) {
-			Books_CC_BoolArray[i] = FrameworkAPI::IsBookKnown(Books_CC_FormArray[i]);
-		}
-
 		Books_AG_EntriesTotal = Books_AG_FormArray.size();
 		Books_AG_EntriesFound = std::ranges::count(Books_AG_BoolArray, true);
 
@@ -1171,86 +1024,5 @@ namespace CFramework_Books {
 
 		TMaps_TH_EntriesTotal = TMaps_TH_FormArray.size();
 		TMaps_TH_EntriesFound = std::ranges::count(TMaps_TH_BoolArray, true);
-
-		Books_CC_EntriesTotal = Books_CC_FormArray.size();
-		Books_CC_EntriesFound = std::ranges::count(Books_CC_BoolArray, true);
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Books ) -------
-	//---------------------------------------------------
-
-	void CHandler::Install_CCB() {
-
-		CFramework_Books_CC::Data.AddForm(0x00085B, "ccbgssse063-ba_ebony.esl");			// The Crimson Dirks, v1
-		CFramework_Books_CC::Data.AddForm(0x000824, "ccbgssse056-ba_silver.esl");			// The Crimson Dirks, v2
-		CFramework_Books_CC::Data.AddForm(0x00081A, "ccbgssse050-ba_daedric.esl");			// The Crimson Dirks, v3
-		CFramework_Books_CC::Data.AddForm(0x000819, "ccbgssse050-ba_daedric.esl");			// Death of a Crimson Dirk
-		CFramework_Books_CC::Data.AddForm(0x000819, "ccbgssse060-ba_dragonscale.esl");		// The Crimson Dirks, v4
-		CFramework_Books_CC::Data.AddForm(0x000847, "ccbgssse051-ba_daedricmail.esl");		// The Crimson Dirks, v5
-		CFramework_Books_CC::Data.AddForm(0x000839, "ccbgssse055-ba_orcishscaled.esl");		// The Crimson Dirks, v6
-		CFramework_Books_CC::Data.AddForm(0x000828, "ccbgssse064-ba_elven.esl");			// The Crimson Dirks, v7
-		CFramework_Books_CC::Data.AddForm(0x000821, "ccbgssse062-ba_dwarvenmail.esl");		// The Crimson Dirks, v8
-		CFramework_Books_CC::Data.AddForm(0x00081A, "ccbgssse061-ba_dwarven.esl");			// The Crimson Dirks, v9
-		CFramework_Books_CC::Data.AddForm(0x000809, "ccbgssse031-advcyrus.esm");			// The Restless
-		CFramework_Books_CC::Data.AddForm(0x0008A2, "cctwbsse001-puzzledungeon.esm");		// Forgotten Seasons, v1
-		CFramework_Books_CC::Data.AddForm(0x00083D, "ccedhsse003-redguard.esl");			// The Alik'r
-		CFramework_Books_CC::Data.AddForm(0x0008D3, "ccedhsse003-redguard.esl");			// The Ebon Arm
-		CFramework_Books_CC::Data.AddForm(0x000AEC, "ccbgssse025-advdsgs.esm");				// Heretical Thoughts
-		CFramework_Books_CC::Data.AddForm(0x000AEE, "ccbgssse025-advdsgs.esm");				// Saints and Seducers
-		CFramework_Books_CC::Data.AddForm(0x000B97, "ccbgssse025-advdsgs.esm");				// The Blessings of Sheogorath
-		CFramework_Books_CC::Data.AddForm(0x000804, "ccbgssse045-hasedoki.esl");			// The Light and the Dark
-		CFramework_Books_CC::Data.AddForm(0x000805, "ccbgssse045-hasedoki.esl");			// Arkay the Enemy
-		CFramework_Books_CC::Data.AddForm(0x000839, "ccbgssse045-hasedoki.esl");			// To Raise the Living
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Tomes ) -------
-	//---------------------------------------------------
-
-	void CHandler::Install_CCT() {
-
-		CFramework_Tomes_CC::Data.AddForm(0x000815, "ccbgssse014-spellpack01.esl");		// Spell Tome: Unbounded Flames
-		CFramework_Tomes_CC::Data.AddForm(0x000816, "ccbgssse014-spellpack01.esl");		// Spell Tome: Unbounded Freezing
-		CFramework_Tomes_CC::Data.AddForm(0x000817, "ccbgssse014-spellpack01.esl");		// Spell Tome: Unbounded Storms
-		CFramework_Tomes_CC::Data.AddForm(0x000818, "ccbgssse014-spellpack01.esl");		// Spell Tome: Paralysis Rune
-		CFramework_Tomes_CC::Data.AddForm(0x000861, "ccbgssse014-spellpack01.esl");		// Spell Tome: Pride of Hirstaang
-		CFramework_Tomes_CC::Data.AddForm(0x000862, "ccbgssse014-spellpack01.esl");		// Spell Tome: Elemental Flare
-		CFramework_Tomes_CC::Data.AddForm(0x000863, "ccbgssse014-spellpack01.esl");		// Spell Tome: Elemental Bolt
-		CFramework_Tomes_CC::Data.AddForm(0x000864, "ccbgssse014-spellpack01.esl");		// Spell Tome: Elemental Burst
-		CFramework_Tomes_CC::Data.AddForm(0x000865, "ccbgssse014-spellpack01.esl");		// Spell Tome: Elemental Blast
-		CFramework_Tomes_CC::Data.AddForm(0x000866, "ccbgssse014-spellpack01.esl");		// Spell Tome: Orum's Aquatic Escape
-		CFramework_Tomes_CC::Data.AddForm(0x000867, "ccbgssse014-spellpack01.esl");		// Spell Tome: Fenrik's Welcome
-		CFramework_Tomes_CC::Data.AddForm(0x000868, "ccbgssse014-spellpack01.esl");		// Spell Tome: Mara's Wrath
-		CFramework_Tomes_CC::Data.AddForm(0x000869, "ccbgssse014-spellpack01.esl");		// Spell Tome: Choking Grasp
-		CFramework_Tomes_CC::Data.AddForm(0x00086A, "ccbgssse014-spellpack01.esl");		// Spell Tome: Strangulation
-		CFramework_Tomes_CC::Data.AddForm(0x00086B, "ccbgssse014-spellpack01.esl");		// Spell Tome: Hangman's Noose
-		CFramework_Tomes_CC::Data.AddForm(0x00086C, "ccbgssse014-spellpack01.esl");		// Spell Tome: Touch of Death
-		CFramework_Tomes_CC::Data.AddForm(0x000816, "ccbgssse002-exoticarrows.esl");	// Spell Tome: Bound Quiver
-		CFramework_Tomes_CC::Data.AddForm(0x00082B, "ccbgssse002-exoticarrows.esl");	// Spell Tome: Telekinesis Arrows
-		CFramework_Tomes_CC::Data.AddForm(0x000889, "ccvsvsse003-necroarts.esl");		// Spell Tome: Banish Undead
-		CFramework_Tomes_CC::Data.AddForm(0x00088A, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Undying Ghost
-		CFramework_Tomes_CC::Data.AddForm(0x00088B, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Ancient Deathpriest
-		CFramework_Tomes_CC::Data.AddForm(0x00088C, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Skeleton Minion
-		CFramework_Tomes_CC::Data.AddForm(0x00088D, "ccvsvsse003-necroarts.esl");		// Spell Tome: Necromancer's Ritual
-		CFramework_Tomes_CC::Data.AddForm(0x00088E, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Cursed Spectre
-		CFramework_Tomes_CC::Data.AddForm(0x00088F, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Haunting Spirit
-		CFramework_Tomes_CC::Data.AddForm(0x000890, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Tomb Guardian
-		CFramework_Tomes_CC::Data.AddForm(0x000891, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Bone Colossus
-		CFramework_Tomes_CC::Data.AddForm(0x000892, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Skeleton Warlock
-		CFramework_Tomes_CC::Data.AddForm(0x000893, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Skeleton Champion
-		CFramework_Tomes_CC::Data.AddForm(0x000894, "ccvsvsse003-necroarts.esl");		// Spell Tome: Conjure Skeleton Marksman
-		CFramework_Tomes_CC::Data.AddForm(0x000896, "ccvsvsse003-necroarts.esl");		// Spell Tome: Soul Split
-		CFramework_Tomes_CC::Data.AddForm(0x00086E, "ccbgssse003-zombies.esl");			// Spell Tome: Conjure Zombie
-		CFramework_Tomes_CC::Data.AddForm(0x00086F, "ccbgssse003-zombies.esl");			// Spell Tome: Conjure Foul Zombie
-		CFramework_Tomes_CC::Data.AddForm(0x000870, "ccbgssse003-zombies.esl");			// Spell Tome: Conjure Putrid Zombie
-		CFramework_Tomes_CC::Data.AddForm(0x000871, "ccbgssse003-zombies.esl");			// Spell Tome: Conjure Malignant Zombie
-		CFramework_Tomes_CC::Data.AddForm(0x000AF0, "ccbgssse025-advdsgs.esm");			// Spell Tome: Conjure Golden Saint Archer
-		CFramework_Tomes_CC::Data.AddForm(0x000AFD, "ccbgssse025-advdsgs.esm");			// Spell Tome: Conjure Golden Saint Warrior
-		CFramework_Tomes_CC::Data.AddForm(0x000B0C, "ccbgssse025-advdsgs.esm");			// Spell Tome: Conjure Dark Seducer Archer
-		CFramework_Tomes_CC::Data.AddForm(0x000B63, "ccbgssse025-advdsgs.esm");			// Spell Tome: Conjure Dark Seducer Warrior
-		CFramework_Tomes_CC::Data.AddForm(0x19D3F9, "ccbgssse025-advdsgs.esm");			// Spell Tome: Conjure Staada
-		CFramework_Tomes_CC::Data.AddForm(0x000B64, "ccbgssse067-daedinv.esm");			// Spell Tome: Conjure Daedric Horse
-		CFramework_Tomes_CC::Data.AddForm(0x147D93, "ccbgssse067-daedinv.esm");			// Spell Tome: Conjure Ayleid Lich
 	}
 }

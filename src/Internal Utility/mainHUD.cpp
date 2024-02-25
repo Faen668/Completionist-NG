@@ -1,4 +1,5 @@
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Internal Utility/Events.hpp"
 #include "Serialization.hpp"
 #include "Variables.hpp"
 #include "mainHUD.hpp"
@@ -37,6 +38,19 @@ namespace Completionist_MainHUD
 
 	CompletionistRequest s_messagefrommoreHUD{};
 	CompletionistRequestEE s_messagefromQuickLootEE{};
+
+	//---------------------------------------------------
+	//-- Install Hooks for Main HUD & Inventory Items ---
+	//---------------------------------------------------
+
+	void TextnTagsAPI::Register() {
+
+		auto& trampoline = SKSE::GetTrampoline();
+		_OnUpdateCrosshairText = CEvents::EventHandler::RegisterUpdateCrosshairHook(&OnUpdateCrosshairText);
+		_OnUpdateInventoryText = CEvents::EventHandler::RegisterUpdateInventoryNameHook(&OnUpdateInventoryText);
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
+		CEvents::EventHandler::RegisterUpdateCraftingMenuHook();
+	};
 
 	//---------------------------------------------------
 	//-- QuickLoot EE Support ---------------------------
@@ -158,30 +172,12 @@ namespace Completionist_MainHUD
 	}
 
 	//---------------------------------------------------
-	//-- Install Hooks for Main HUD & Inventory Items ---
-	//---------------------------------------------------
-
-	void TextnTagsAPI::Register() {
-
-		auto& trampoline = SKSE::GetTrampoline();
-		_OnUpdateCrosshairText = trampoline.write_call<5>(RELOCATION_ID(39535, 40621).address() + REL::Relocate(0x289, 0x280), OnUpdateCrosshairText);
-		_OnUpdateInventoryText = trampoline.write_branch<5>(RELOCATION_ID(50926, 51803).address() + REL::Relocate(0x4, 0x4), OnUpdateInventoryText);
-
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(TextnTagsAPI::GetSingleton()));
-	}
-
-	//---------------------------------------------------
 	//-- Events ( Update Variables & Clear Garbage ) ----
 	//---------------------------------------------------
 
-	EventResult TextnTagsAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!a_event) { return RE::BSEventNotifyControl::kContinue; }
+	void TextnTagsAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
 
 		if (!a_event->opening) { garbageDump.clear(); }
-
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -196,6 +192,25 @@ namespace Completionist_MainHUD
 		}
 
 		return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), ItemIsCollected(a_this->object));
+	}
+
+	//---------------------------------------------------
+	//-- Object Processing For Inventory Items ----------
+	//---------------------------------------------------
+
+	const char* TextnTagsAPI::OnUpdateCraftingText(RE::TESForm* a_this)
+	{
+		if (!a_this || !a_this->GetName())
+		{
+			return "";
+		}
+
+		if (!ItemIsCollectable(a_this))
+		{
+			return a_this->GetName();
+		}
+
+		return OnUpdateInventoryName(a_this->GetName(), ItemIsCollected(a_this));
 	}
 
 	//---------------------------------------------------
@@ -323,12 +338,14 @@ namespace Completionist_MainHUD
 
 		bool PrevCollected = ItemIsCollected(Base);
 
-		if (!ItemIsCollectable(Base) || PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
+		if (!ItemIsCollectable(Base)) { return; }
 
 		if (SKSEMessaging && SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
 			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (V_moreHudEnabled_Crosshair) };
 			SKSEMessaging->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
 		}
+
+		if (PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
 
 		auto& newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
 		auto& foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;

@@ -4,6 +4,19 @@
 #include "Internal Utility/Localisation.hpp"
 #include "DKUtil/Utility.hpp"
 
+enum class CMiscPatchType
+{
+	kItems = 0,
+	kBooks = 1,
+	kLocations = 2,
+	kEnchantments = 3,
+	kShouts = 4,
+	kQuests = 5,
+	kFish = 6,
+	kPlayerHomes = 7,
+	kPets = 8,
+};
+
 enum class CFlagEnum
 {
 	kMain = 0,
@@ -25,6 +38,7 @@ enum class CCompEnum
 	kFavor = 4,
 	kCiWar = 5,
 };
+
 const std::vector<std::pair<CCompEnum, std::string>> CCompEnum_Map{
 	{CCompEnum::kStand,	"Standard"},
 	{CCompEnum::kStage,	"By Stage"},
@@ -185,6 +199,33 @@ struct PlayerHomesData
 	const char* MODNAME;
 };
 
+enum class PlayerHomesDataStructType
+{
+	kQuest = 0,
+	kKey = 1,
+};
+
+struct PlayerHomesDataStruct
+{
+	PlayerHomesDataStructType type;
+	int32_t stage;
+	int32_t optional_stage;
+	RE::FormID formID;
+};
+
+enum class PetsDataStructType
+{
+	kActivate = 0,
+	kQuest = 1,
+};
+
+struct PetsDataStruct
+{
+	PetsDataStructType type;
+	int32_t stage;
+	RE::FormID formID;
+};
+
 struct CCivilWarData
 {
 	const char* link;
@@ -220,6 +261,12 @@ struct CQuestData
 	CQuestProcessor should_process{};
 	bool			is_completed{};
 
+	// For patches
+	std::string		mcmPage{};
+	bool			official{};
+	bool			isNative{};
+	bool			log_install{};
+
 	//Override Enum & Map
 	enum override
 	{
@@ -229,6 +276,7 @@ struct CQuestData
 		kLocKey = 3,
 		kProcess = 4,
 	};
+
 	const std::vector<std::pair<override, std::string>> override_Map{
 		{override::kName,	"Quest Name"},
 		{override::kData,	"Highlight Text"},
@@ -238,14 +286,21 @@ struct CQuestData
 	};
 
 	// Builder Functions
-	auto init()
+	auto init(bool a_native = true, bool a_official = false, std::optional<std::string> a_page = std::nullopt)
 	{
+		isNative	= a_native;
+		official	= a_official;
+
+		if (a_page.has_value()) {
+			mcmPage = a_page.value();
+		}
+
 		should_process = CQuestProcessor::kIncluded;
 		localisation_key = unique_identifier;
 		return this;
 	};
 
-	auto set_editorID(std::string a_string) {
+	auto set_editorID(const std::string& a_string) {
 		editor_id = a_string;
 		return this;
 	}
@@ -260,12 +315,12 @@ struct CQuestData
 		return this;
 	}
 
-	auto set_name(std::string a_string) {
+	auto set_name(const std::string& a_string) {
 		search_term = a_string;
 		return this;
 	}
 
-	auto set_highlight(std::string a_string) {
+	auto set_highlight(const std::string& a_string) {
 		search_description = a_string;
 		return this;
 	}
@@ -379,17 +434,32 @@ struct CQuestData
 		return this;
 	}
 
-	void ValidateLocalisation()
+	// Localisation
+	void SetLocalisedTranslationParameters()
 	{
-		if (GetQuest() && !DKUtil::string::is_empty(GetQuest()->GetName()))
-		{
-			if (!DKUtil::string::iequals(GetQuest()->GetName(), search_term))
-			{
-				INFO("Localisation Validation Failed On Key {}: {} ||| {}", unique_identifier, GetQuest()->GetName(), search_term);
-			}
+		if (isNative || official) {
+			search_term = GET_LOC_NAME_BY_KEY(localisation_key.c_str());
+			search_description = GET_LOC_DESCRIPTION_BY_KEY(localisation_key.c_str());
 		}
 	}
 
+	void ValidateLocalisation() const
+	{
+		auto* quest = GetQuest();
+		if (!quest || DKUtil::string::is_empty(quest->GetName()))
+		{
+			// No quest or quest name is empty, nothing to validate
+			return;
+		}
+
+		if (!DKUtil::string::iequals(quest->GetName(), search_term))
+		{
+			// Log validation failure
+			INFO("Localisation Validation Failed On Key {}: {} ||| {}", GetKey(), quest->GetName(), GetName());
+		}
+	}
+
+	// Override base members
 	auto override(override section, const char* s_key)
 	{
 		switch (section)
@@ -412,128 +482,157 @@ struct CQuestData
 		return this;
 	}
 
-	void SetLocalisedTranslationParameters()
+	// Quest Aquirement
+	template <typename T = RE::TESForm>
+	[[nodiscard]] static T* GetFullForm(RE::FormID a_form, const char* a_filename) noexcept
 	{
-		search_term = CLocalisation::LocalisationAPI::GetLocNameByKey(localisation_key.c_str());
-		search_description = CLocalisation::LocalisationAPI::GetLocDescriptionByKey(localisation_key.c_str());
-		return;
+		auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(a_form, a_filename);
+		return form ? form->As<T>() : nullptr;
 	}
 
 	// Getters & Setters
-	std::string GetKey()					{ return fmt::format("{:s}"sv, unique_identifier); }
-	
-	RE::TESQuest* GetQuest() 
-	{				
-		if (HasRadiantData()) { return GetradiantQuest(); } return static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(editor_id));
+	auto GetKey()					const -> std::string		{ return fmt::format("{:s}"sv, unique_identifier); }
+	auto GetQuest()					const -> RE::TESQuest*		{ if (HasRadiantData()) { return GetradiantQuest(); } return static_cast<RE::TESQuest*>(RE::TESForm::LookupByEditorID(editor_id)); }
+	auto GetName()					const -> std::string		{ return search_term; }
+	auto GetEditorID()				const -> std::string		{ return editor_id; }
+	auto GetHighlight()				const -> std::string		{ return search_description; }
+	auto ShouldProcess()			const -> CQuestProcessor	{ return should_process; }
+	auto GetQuestProcessorType()	const -> int32_t			{ return std::to_underlying(should_process); }
+	auto GetCompletionType()		const -> int32_t			{ return std::to_underlying(completion_type); }
+	auto GetCompletionTypeString()	const -> std::string		{ for (const auto& [value, string] : CCompEnum_Map) { if (value == completion_type) { return string; } } return ""; }
+	auto GetType()					const -> int32_t			{ return std::to_underlying(quest_type); }
+	auto GetTypeString()			const -> std::string		{ for (auto& [value, string] : CFlagEnum_Map) { if (value == quest_type) { return string; } } return ""; }
+	bool IsCompleted()				const						{ return is_completed; }
+	void Switch()												{ is_completed = !is_completed; }
+
+	auto GetQuestProcessorTypeString() const -> std::string {
+		for (const auto& [value, string] : CQuestProcessor_Map) {
+			if (value == should_process) {
+				return string;
+			}
+		}
+		return "";
 	}
-
-	std::string GetName()					{ return search_term; }
-	std::string GetEditorID()				{ return editor_id; }
-	std::string GetHighlight()				{ return search_description; }
-
-	CQuestProcessor ShouldProcess()			{ return should_process;  }
-	int32_t GetQuestProcessorType()			{ return std::to_underlying(should_process); }
-	std::string GetQuestProcessorTypeString() { for (auto& [value, string] : CQuestProcessor_Map) { if (value == should_process) { return string; } } return ""; }
-
-
-	int32_t GetType()						{ return std::to_underlying(quest_type); }
-	std::string GetTypeString()				{ for (auto& [value, string] : CFlagEnum_Map) { if (value == quest_type) { return string; } } return ""; }
-	
-	int32_t GetCompletionType()				{ return std::to_underlying(completion_type); }
-	std::string GetCompletionTypeString()	{ for (auto& [value, string] : CCompEnum_Map) { if (value == completion_type) { return string; } } return ""; }
-
-	bool IsCompleted()						{ return is_completed; }
-	void Switch()							{ is_completed = !is_completed; }
 
 	// Stage Data
-	bool HasStageData()						{ return stage_data != nullptr; }
-	int32_t GetStage()						{ return stage_data->stage; }
-	CStageEnum GetStageTypeEnum()			{ return stage_data->type; }
-	int32_t GetOptionalStage()				{ return stage_data->optional_stage; }
-	bool HasOptionalStage()					{ return stage_data->optional_stage != 0 ? true : false; }
-	std::string GetStageLink()				{ return stage_data->link; }
-	int32_t GetStageType()					{ return std::to_underlying(stage_data->type); }
-	std::string GetStageTypeString()		{ for (auto& [value, string] : CStageEnum_Map) { if (value == stage_data->type) { return string; } } return ""; }
-
-	//Search Data
-	bool HasSearchData()					{ return !search_term.empty(); }
-
-	std::string GetSearchTerm()				{ return !search_term.empty() ? search_term : "ERROR"; }
-	std::string GetSearchDescription()		{ return !search_description.empty() ? search_description : "ERROR"; }
-
-	//Civil War Data
-	bool HasCivilWarData()					{ return civil_war_data != nullptr; }
-	RE::BGSLocation* GetCivilWarLocation()	{ return GetFullForm<RE::BGSLocation>(civil_war_data->location, "Skyrim.esm"); }
-
-	//Favor Data
-	bool HasFavorData()						{ return favor_data != nullptr; }
-	std::string GetFavorLink()				{ return favor_data->link; }
-	RE::TESNPC* GetActor()					{ return GetFullForm<RE::TESNPC>(favor_data->actor, favor_data->actor_provider); }
-	RE::TESFaction* GetActorFaction()		{ return GetFullForm<RE::TESFaction>(favor_data->faction, favor_data->faction_provider); }
-
-	//Thane Data
-	bool HasThaneData()						{ return thane_data != nullptr; }
-	bool IsThane()							{ auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript"); if (!script) { return false; } return script->GetProperty(thane_data->Imps)->GetSInt() > 0 || script->GetProperty(thane_data->Sons)->GetSInt() > 0; }
-
-	//Radiant Data
-	bool HasRadiantData()					{ return radiant_data != nullptr; }
-	int32_t GetRadiantType()				{ return std::to_underlying(radiant_data->value); }
-	std::string GetRadiantLink()			{ return radiant_data->link; }
-	std::string GetRadiantTypeString()		{ for (auto& [value, string] : CRadiantEnum_Map) { if (value == radiant_data->value) { return string; } } return ""; }
-	RE::FormID GetRadiantBaseFormID()		{ return radiant_data->baseID;  }
-	RE::FormID GetRadiantVariFormID()		{ return radiant_data->variID; }
-	CRadiantEnum GetRadiantTypeEnum()		{ return radiant_data->value; }
 	
-	RE::TESQuest* GetradiantQuest() {
-		if (radiant_data) {
-			auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID);
-			auto* q2 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->variID);
-			auto* q3 = RE::TESQuest::LookupByEditorID<RE::TESQuest>(editor_id);
-			return q1 ? q1 : q2 ? q2 : q3 ? q3 : nullptr;
+	auto GetStage()					const -> int32_t			{ return stage_data ? stage_data->stage : 0; }
+	auto GetStageTypeEnum()			const -> CStageEnum			{ return stage_data ? stage_data->type : CStageEnum::kNone; }
+	auto GetOptionalStage()			const -> int32_t			{ return stage_data ? stage_data->optional_stage : 0; }
+	auto GetStageLink()				const -> std::string		{ return stage_data ? stage_data->link : "ERROR"; }
+	auto GetStageType()				const -> int32_t			{ return stage_data ? std::to_underlying(stage_data->type) : 0; }
+	bool HasStageData()				const						{ return stage_data != nullptr; }
+	bool HasOptionalStage()			const						{ return GetOptionalStage() != 0; }
+	
+	auto GetStageTypeString() const -> std::string {
+		for (const auto& [value, string] : CStageEnum_Map) {
+			if (value == GetStageTypeEnum()) {
+				return string;
+			}
 		}
-		return nullptr;
+		return "";
 	}
 
-	int32_t GetRadiantTimesRequired()
+	//Search Data
+	bool HasSearchData()			const						{ return !search_term.empty(); }
+	auto GetSearchTerm()			const -> std::string		{ return !search_term.empty() ? search_term : "ERROR"; }
+	auto GetSearchDescription()		const -> std::string		{ return !search_description.empty() ? search_description : "ERROR"; }
+
+	//Civil War Data
+	bool HasCivilWarData()			const						{ return civil_war_data != nullptr; }
+	auto GetCivilWarLocation()		const -> RE::BGSLocation*	{ return GetFullForm<RE::BGSLocation>(civil_war_data->location, "Skyrim.esm"); }
+
+	//Favor Data
+	bool HasFavorData()				const						{ return favor_data != nullptr; }
+	auto GetFavorLink()				const -> std::string		{ return favor_data ? favor_data->link : "ERROR"; }
+	auto GetActor()					const -> RE::TESNPC*		{ return HasFavorData() ? GetFullForm<RE::TESNPC>(favor_data->actor, favor_data->actor_provider) : nullptr; }
+	auto GetActorFaction()			const -> RE::TESFaction*	{ return HasFavorData() ? GetFullForm<RE::TESFaction>(favor_data->faction, favor_data->faction_provider) : nullptr; }
+
+	//Thane Data
+	bool HasThaneData()				const { return thane_data != nullptr; }
+	bool IsThane() const {
+		if (!thane_data) {
+			return false;
+		}
+
+		auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript");
+
+		if (!script) {
+			return false;
+		}
+
+		auto* impsProperty = script->GetProperty(thane_data->Imps);
+		auto* sonsProperty = script->GetProperty(thane_data->Sons);
+
+		if (!impsProperty || !sonsProperty) {
+			return false;
+		}
+
+		return impsProperty->GetSInt() > 0 || sonsProperty->GetSInt() > 0;
+	}
+
+	//Radiant Data
+	bool HasRadiantData()					const { return radiant_data != nullptr; }
+	auto GetRadiantType()					const -> int32_t { return std::to_underlying(radiant_data->value); }
+	auto GetRadiantLink()					const -> std::string { return radiant_data->link; }
+	auto GetRadiantBaseFormID()				const -> RE::FormID { return radiant_data->baseID; }
+	auto GetRadiantVariFormID()				const -> RE::FormID { return radiant_data->variID; }
+	auto GetRadiantTypeEnum()				const -> CRadiantEnum { return radiant_data->value; }
+
+	auto GetRadiantTypeString()	const -> std::string {
+		for (const auto& [value, string] : CRadiantEnum_Map) {
+			if (value == radiant_data->value) {
+				return string;
+			}
+		}
+		return "";
+	}
+
+	auto GetradiantQuest() const -> RE::TESQuest* {
+		if (radiant_data) {
+			if (auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID); q1) {
+				return q1;
+			}
+			if (auto* q2 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->variID); q2) {
+				return q2;
+			}
+		}
+		return RE::TESQuest::LookupByEditorID<RE::TESQuest>(editor_id);
+	}
+
+	auto GetRadiantTimesRequired() const -> int32_t
 	{
 		using enum CRadiantEnum;
 
 		if (!radiant_data)
 		{
 			return 1;
-		};
+		}
 
 		switch (radiant_data->value)
 		{
-		case kRadiant_DF1: return 1; break;
-		case kRadiant_DF2: return 2; break;
-		case kRadiant_DF3: return 3; break;
-		case kRadiant_DF4: return 4; break;
-		case kRadiant_DF5: return 5; break;
-		case kRadiant_DF6: return 6; break;
-		case kRadiant_DF7: return 7; break;
-		case kRadiant_DF8: return 8; break;
-		case kRadiant_DF9: return 9; break;
-		case kRadiant_Def: return CVariables::V_Radiant_FavorVal; break;
-		case kRadiant_Bty: return CVariables::V_Radiant_BountyVal; break;
-		case kRadiant_COL: return CVariables::V_Radiant_CollegeVal; break;
-		case kRadiant_COM: return CVariables::V_Radiant_CompanionsVal; break;
-		case kRadiant_DBR: return CVariables::V_Radiant_DBrotherhoodVal; break;
-		case kRadiant_DGU: return CVariables::V_Radiant_DawnguardVal; break;
-		case kRadiant_THG: return CVariables::V_Radiant_ThievesGuildVal; break;
-		case kRadiant_VIG: return CVariables::V_Radiant_VigilantVal; break;
-		case kRadiant_LEG: return CVariables::V_Radiant_LegacyVal; break;
-		case kRadiant_Fsh: return CVariables::V_Radiant_FishingVal; break;
-		case kRadiant_BLD: return CVariables::V_Radiant_BladesVal; break;
+		case kRadiant_DF1: return 1;
+		case kRadiant_DF2: return 2;
+		case kRadiant_DF3: return 3;
+		case kRadiant_DF4: return 4;
+		case kRadiant_DF5: return 5;
+		case kRadiant_DF6: return 6;
+		case kRadiant_DF7: return 7;
+		case kRadiant_DF8: return 8;
+		case kRadiant_DF9: return 9;
+		case kRadiant_Fsh: return CVariables::V_Radiant_FishingVal;
+		case kRadiant_Def: return CVariables::V_Radiant_FavorVal;
+		case kRadiant_Bty: return CVariables::V_Radiant_BountyVal;
+		case kRadiant_COL: return CVariables::V_Radiant_CollegeVal;
+		case kRadiant_COM: return CVariables::V_Radiant_CompanionsVal;
+		case kRadiant_DBR: return CVariables::V_Radiant_DBrotherhoodVal;
+		case kRadiant_DGU: return CVariables::V_Radiant_DawnguardVal;
+		case kRadiant_THG: return CVariables::V_Radiant_ThievesGuildVal;
+		case kRadiant_LEG: return CVariables::V_Radiant_LegacyVal;
+		case kRadiant_VIG: return CVariables::V_Radiant_VigilantVal;
+		case kRadiant_BLD: return CVariables::V_Radiant_BladesVal;
 		default: return 1;
-		};
-	};
-
-	template <typename T = RE::TESForm>
-	[[nodiscard]] static T* GetFullForm(RE::FormID a_form, const char* a_filename) noexcept
-	{
-		auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(a_form, a_filename);
-		return form ? form->As<T>() : nullptr;
+		}
 	}
 
 	auto DumpToLog(int32_t idx, int32_t ID) {
@@ -627,7 +726,10 @@ struct CQuestData
 
 		if (!search_term.empty())
 		{
-			INFO("          ~Search Data: Term = {}", GetSearchTerm());
+			INFO("          ~Search Data: Term       = {}", GetSearchTerm());
+			INFO("          ~Search Data: MCM Page   = {}", mcmPage);
+			INFO("          ~Search Data: official   = {}", official);
+			INFO("          ~Search Data: Native     = {}", isNative);
 		}
 
 		INFO(" ");

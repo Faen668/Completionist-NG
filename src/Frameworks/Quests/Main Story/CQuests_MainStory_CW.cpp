@@ -1,6 +1,7 @@
 #include "CQuests_MainStory_CW.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Internal Utility/Events.hpp"
 
 namespace CQFramework_CW 
 {
@@ -85,7 +86,7 @@ namespace CQFramework_CW
 	RE::BGSLocation* CHandler::GetAliasLocation(RE::TESQuest* a_quest, uint32_t alias_id)
 	{
 		using func_t = decltype(&GetAliasLocation);
-		REL::Relocation<func_t> func{ RELOCATION_ID(24538, 25067) };
+		REL::Relocation<func_t> func{ GetAliasLocAddress };
 		return a_quest ? func(a_quest, alias_id) : nullptr;
 	}
 

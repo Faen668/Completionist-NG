@@ -86,27 +86,6 @@ namespace CFramework_MapMa {
 	0x0143E6,0x0143CD,0x0143E7,0x0143CF,
 	};
 
-	constexpr Serialization::FormArray MapMa_CC = {0};
-
-	constexpr std::array<std::pair<RE::FormID, const char*>, 15> CC_LocationsVector = 
-	{{
-		{0x00085C, "ccbgssse059-ba_dragonplate.esl"},
-		{0x127259, "cceejsse005-cave.esm"},
-		{0x000F74, "ccbgssse031-advcyrus.esm"},
-		{0x000B63, "ccvsvsse004-beafarmer.esl"},
-		{0x0038D6, "cctwbsse001-puzzledungeon.esm"},
-		{0x0BC826, "ccasvsse001-almsivi.esm"},
-		{0x000B86, "ccbgssse005-goldbrand.esl"},
-		{0x000AFF, "cceejsse004-hall.esl"},
-		{0x000FA2, "cceejsse002-tower.esl"},
-		{0x070E0A, "ccafdsse001-dwesanctuary.esm"},
-		{0x000F72, "cceejsse003-hollow.esl"},
-		{0x1D67E3, "ccbgssse067-daedinv.esm"},
-		{0x1D67E4, "ccbgssse067-daedinv.esm"},
-		{0x000B8A, "cceejsse001-hstead.esm"},
-		{0x00CD93, "ccbgssse016-umbra.esm"}
-	}};
-
 	// clang-format on
 
 	//---------------------------------------------------
@@ -193,17 +172,6 @@ namespace CFramework_MapMa {
 				}
 			}
 		}
-
-		for (auto i = 0; i < MapMa_CC_FormArray.size(); i++) {
-			if (DKUtil::string::iequals(nam, MapMa_CC_NameArray[i]) && !FoundItemData_NoShow.HasForm(MapMa_CC_FormArray[i])) {
-				if (CHandler::ProcessMapMarker(MapMa_CC_FormArray[i], i, MapMa_Sec::kMapMa_CC)) {
-					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, nam);
-					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, nam);
-					return;
-				}
-			}
-		}
 	}
 
 	//---------------------------------------------------
@@ -232,10 +200,6 @@ namespace CFramework_MapMa {
 
 		for (auto i = 0; i < MapMa_DB_FormArray.size(); i++) {
 			CHandler::ProcessMapMarker(MapMa_DB_FormArray[i], i, MapMa_Sec::kMapMa_DB);
-		}
-
-		for (auto i = 0; i < MapMa_CC_FormArray.size(); i++) {
-			CHandler::ProcessMapMarker(MapMa_CC_FormArray[i], i, MapMa_Sec::kMapMa_CC);
 		}
 
 		return EventResult::kContinue;
@@ -284,11 +248,6 @@ namespace CFramework_MapMa {
 			MapMa_DB_EntriesFound = std::ranges::count(MapMa_DB_BoolArray, true);
 			break;
 
-		case MapMa_Sec::kMapMa_CC:
-			MapMa_CC_BoolArray[a_pos] = true;
-			MapMa_CC_EntriesFound = std::ranges::count(MapMa_CC_BoolArray, true);
-			break;
-
 		default:
 			break;
 		}	
@@ -329,14 +288,6 @@ namespace CFramework_MapMa {
 
 	void CHandler::InjectAndCompileData() 
 	{
-		// Install Creation Club Locations
-		for (auto& [formID, filename] : CC_LocationsVector)
-		{
-			if (CompletionistData::IsModInstalled(filename)) {
-				CFramework_MapMa_CC::Data.AddForm(formID, filename);
-			}
-		};
-
 		// Install Cutting Room Floor Locations
 		if (CompletionistData::IsModInstalled("Cutting Room Floor.esp")) {
 			CFramework_MapMa_AG::Data.AddForm(0x012BF7, "Cutting Room Floor.esp");
@@ -350,14 +301,12 @@ namespace CFramework_MapMa {
 		
 		CFramework_MapMa_DG::Data.CompileFormArray(CFramework_MapMa::MapMa_DG, "Dawnguard.esm");
 		CFramework_MapMa_DB::Data.CompileFormArray(CFramework_MapMa::MapMa_DB, "Dragonborn.esm");
-		CFramework_MapMa_CC::Data.CompileFormArray(CFramework_MapMa::MapMa_CC, "");
 
 		CFramework_MapMa_AG::Data.Populate(MapMa_AG_NameArray, MapMa_AG_FormArray, MapMa_AG_BoolArray, MapMa_AG_TextArray, false, 2);
 		CFramework_MapMa_HR::Data.Populate(MapMa_HR_NameArray, MapMa_HR_FormArray, MapMa_HR_BoolArray, MapMa_HR_TextArray, false, 2);
 		CFramework_MapMa_SZ::Data.Populate(MapMa_SZ_NameArray, MapMa_SZ_FormArray, MapMa_SZ_BoolArray, MapMa_SZ_TextArray, false, 2);
 		CFramework_MapMa_DG::Data.Populate(MapMa_DG_NameArray, MapMa_DG_FormArray, MapMa_DG_BoolArray, MapMa_DG_TextArray, false, 2);
 		CFramework_MapMa_DB::Data.Populate(MapMa_DB_NameArray, MapMa_DB_FormArray, MapMa_DB_BoolArray, MapMa_DB_TextArray, false, 2);
-		CFramework_MapMa_CC::Data.Populate(MapMa_CC_NameArray, MapMa_CC_FormArray, MapMa_CC_BoolArray, MapMa_CC_TextArray, false, 2);
 
 		MapMa_AG_EntriesTotal = MapMa_AG_FormArray.size();
 		MapMa_AG_EntriesFound = std::ranges::count(MapMa_AG_BoolArray, true);
@@ -373,9 +322,6 @@ namespace CFramework_MapMa {
 
 		MapMa_DB_EntriesTotal = MapMa_DB_FormArray.size();
 		MapMa_DB_EntriesFound = std::ranges::count(MapMa_DB_BoolArray, true);
-
-		MapMa_CC_EntriesTotal = MapMa_CC_FormArray.size();
-		MapMa_CC_EntriesFound = std::ranges::count(MapMa_CC_BoolArray, true);
 	}
 
 	void CHandler::InstallSearchTerms()
@@ -394,9 +340,6 @@ namespace CFramework_MapMa {
 		}
 		for (auto i = 0; i < MapMa_DB_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_DB_FormArray[i], MapMa_DB_NameArray[i], "$MCMPageLocations5", std::to_underlying(EntryCategory::kMapM)));
-		}
-		for (auto i = 0; i < MapMa_CC_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(MapMa_CC_FormArray[i], MapMa_CC_NameArray[i], "$MCMPageLocations6", std::to_underlying(EntryCategory::kMapM)));
 		}
 	}
 
@@ -436,12 +379,6 @@ namespace CFramework_MapMa {
 			}
 		}
 
-		for (auto i = 0; i < MapMa_CC_FormArray.size(); i++) {
-			if (FoundItemData_NoShow.HasForm(MapMa_CC_FormArray[i]->GetFormID())) {
-				MapMa_CC_BoolArray[i] = true;
-			}
-		}
-
 		MapMa_AG_EntriesTotal = MapMa_AG_FormArray.size();
 		MapMa_AG_EntriesFound = std::ranges::count(MapMa_AG_BoolArray, true);
 
@@ -456,8 +393,5 @@ namespace CFramework_MapMa {
 
 		MapMa_DB_EntriesTotal = MapMa_DB_FormArray.size();
 		MapMa_DB_EntriesFound = std::ranges::count(MapMa_DB_BoolArray, true);
-
-		MapMa_CC_EntriesTotal = MapMa_CC_FormArray.size();
-		MapMa_CC_EntriesFound = std::ranges::count(MapMa_CC_BoolArray, true);
 	}
 }

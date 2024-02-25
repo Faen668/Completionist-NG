@@ -18,6 +18,8 @@ namespace Completionist_MainHUD
 
 		EventResult	ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
+		static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
+
 		static void Register();
 
 		static void RegisterQuickLootListener();
@@ -40,12 +42,12 @@ namespace Completionist_MainHUD
 
 		static bool ItemIsFound(RE::FormID a_formID);
 		static bool ItemIsFound(RE::TESForm* a_form);
+		static std::string GetPrefix(int32_t a_variable);
 
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
 		static const char* OnUpdateInventoryName(const char* a_this, bool a_displayTag);
-
-		static std::string GetPrefix(int32_t a_variable);
+		static const char* OnUpdateCraftingText(RE::TESForm* a_this);
 
 	private:
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;

@@ -2,6 +2,9 @@
 
 namespace CVariables
 {
+	inline std::vector<RE::TESObjectREFR*> collection_containers;
+	inline bool				V_UseThreeStepTracking;
+
 	inline std::string 		V_ShoutColour_New;
 	inline std::string 		V_ShoutColour_Found;
 
@@ -74,6 +77,7 @@ namespace CVariables
 	inline bool				V_CellScanner_NPCS;
 	inline bool				V_CellScanner_NUMB;
 	inline bool				V_CellScanner_DETA;
+	inline bool				V_CellScanner_Closest;
 
 	inline bool				V_CellScanner_ExcludeBooks;
 	inline bool				V_CellScanner_ExcludeArmor;
@@ -83,8 +87,10 @@ namespace CVariables
 	inline std::int32_t		V_CellScanner_ScanRange;
 
 	inline bool				V_FishingSpotMarkers;
-
+	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
+
+	inline int32_t			V_Bittercup_Path;
 
 	inline RE::BGSListForm* TCC_New;
 	inline RE::BGSListForm* TCC_FND;

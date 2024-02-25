@@ -1,5 +1,6 @@
 #include "Variables.hpp"
 #include "ScriptObject.hpp"
+#include "DKUtil/Utility.hpp"
 
 static ScriptObjectPtr MCM;
 
@@ -90,6 +91,11 @@ namespace CVariables {
 			INFO("[Update] Script Pointer Not Set.");
 		};
 
+		V_TreatBooksAsItems = true;
+		if (const auto* prop = VariablesAPI::GetProperty("TreatBooksAsItems")) {
+			V_TreatBooksAsItems = prop->GetBool();
+		}
+
 		V_FishingSpotMarkers = true;
 		if (const auto* prop = VariablesAPI::GetProperty("FishingSpotMarkers")) {
 			V_FishingSpotMarkers = prop->GetBool();
@@ -118,6 +124,11 @@ namespace CVariables {
 		V_CellScanner_DETA = true;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_DETA")) {
 			V_CellScanner_DETA = prop->GetBool();
+		}
+
+		V_CellScanner_Closest = true;
+		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_UseClosestReference")) {
+			V_CellScanner_Closest = prop->GetBool();
 		}
 
 		V_CellScanner_ExcludeAlchemy = false;
@@ -428,6 +439,11 @@ namespace CVariables {
 		V_Debugging = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bDebug")) {
 			V_Debugging = prop->GetBool();
+		}
+
+		V_Bittercup_Path = 0;
+		if (const auto* prop = VariablesAPI::GetProperty("Bittercup_Path_Choice")) {
+			V_Bittercup_Path = prop->GetSInt();
 		}
 	}
 }

@@ -1,0 +1,23 @@
+﻿----------------------------------------------------------------------------
+-- To change the localised text simply change the text after the single '|'
+-- Keys can be renamed to whatever you want but remember to update the ini.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+-KEYS							Translation
+----------------------------------------------------------------------------
+cTranslate_MCMName				|Some MCM Name
+cTranslate_MCMGroupName			|None
+
+cTranslate_MultiPageName1		|Items & General Books:
+cTranslate_MultiPageName2		|Enchantments & Shouts:
+
+cTranslate_SectionHeader1L		|Items:
+cTranslate_SectionHeader1R		|Found
+
+cTranslate_SectionHeader2L		|Books:
+cTranslate_SectionHeader2R		|Read
+
+cTranslate_SectionHeader2L		|Locations:
+cTranslate_SectionHeader2R		|Discovered
+

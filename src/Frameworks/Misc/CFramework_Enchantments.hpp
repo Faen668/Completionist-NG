@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Serialization.hpp"
-#include "Import/AutoTOML.hpp"
 
 namespace CFramework_Enchantments_VA {
 	inline Serialization::CompletionistData Data;
@@ -16,10 +15,6 @@ namespace CFramework_Enchantments_SA {
 }
 
 namespace CFramework_Enchantments_SW {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Enchantments_NGA {
 	inline Serialization::CompletionistData Data;
 }
 
@@ -53,20 +48,12 @@ namespace CFramework_Enchantments {
 	inline std::int32_t					SW_EntriesTotal;
 	inline std::int32_t					SW_EntriesFound;
 
-	inline std::vector<std::string>		NGA_NameArray;
-	inline std::vector<std::string>		NGA_TextArray;
-	inline std::vector<RE::TESForm*>	NGA_FormArray;
-	inline std::vector<bool>			NGA_BoolArray;
-	inline std::int32_t					NGA_EntriesTotal;
-	inline std::int32_t					NGA_EntriesFound;
-
 	enum section
 	{
 		kVanilla_A,
 		kVanilla_W,
 		kSummermyst_A,
 		kSummermyst_W,
-		kNecromanticGrim,
 		kTotal
 	};
 
@@ -74,50 +61,25 @@ namespace CFramework_Enchantments {
 
 	class CHandler final :
 
-	public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
-	 EventResult		ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+		  EventResult		ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
-	static void			SinkEvents();
-	static void			InstallFramework();
-	static void			InstallSearchTerms();
-	static void			ProcessFoundForm(RE::FormID a_baseID, section kSection);
+		  static void			SinkEvents();
+		  static void			InstallFramework();
+		  static void			InstallSearchTerms();
+		  static void			ProcessFoundForm(RE::FormID a_baseID, section kSection);
 
-	static void			UpdateFoundForms();
-	static void			UpdateCounts();
+		  static void			UpdateFoundForms();
+		  static void			UpdateCounts();
+		  static void			InjectAndCompileData();
 
-	static void			InjectAndCompileData();
-
-	static const char* OnEnchantmentLearnt(RE::TESForm* a_form);
+		  static void			ProcessEnchantment(RE::EnchantmentItem* a_ench);
+		  static void			OnEnchantmentLearnt_Compat(const char* a_fmt, RE::EnchantmentItem* a_ench);
+		  static const char*	OnEnchantmentLearnt_Legacy(RE::EnchantmentItem* a_ench);
 	private:
-		static inline REL::Relocation<decltype(OnEnchantmentLearnt)> _OnEnchantmentLearnt;
+		static inline REL::Relocation<decltype(OnEnchantmentLearnt_Legacy)> _OnEnchantmentLearnt;
 	};
-}
-
-#define MAKE_SETTING(a_type, a_group, a_key, a_value) \
-    inline a_type a_key { a_group##s, #a_key##s, a_value }
-
-namespace YesImSureSettings {
-	using bSetting = AutoTOML::bSetting;
-
-	inline void Load() {
-		if (std::filesystem::exists("Data/SKSE/Plugins/YesImSure.toml"s)) {
-			const auto table = toml::parse_file("Data/SKSE/Plugins/YesImSure.toml"s);
-			for (const auto& setting : AutoTOML::ISetting::get_settings()) {
-				setting->load(table);
-			}
-		}
-
-		if (std::filesystem::exists("Data/SKSE/Plugins/YesImSure/config.toml"s)) {
-			const auto table = toml::parse_file("Data/SKSE/Plugins/YesImSure/config.toml"s);
-			for (const auto& setting : AutoTOML::ISetting::get_settings()) {
-				setting->load(table);
-			}
-		}
-	}
-	MAKE_SETTING(bSetting, "Patches", EnchantmentLearned, false);
-}
-
-#undef MAKE_SETTING
+};

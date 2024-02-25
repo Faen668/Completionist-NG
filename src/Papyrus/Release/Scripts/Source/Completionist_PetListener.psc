@@ -14,7 +14,7 @@ Event OnUpdate()
 	
 	if (_Critter.GetActorReference() && _Critter.GetActorReference().GetActorBase() != AdoptedCritter)
 		AdoptedCritter = _Critter.GetActorReference().GetActorBase()
-		Framework_UpdatePetOwnership(AdoptedCritter.GetName())
+		Framework_UpdatePetOwnership(AdoptedCritter)
 	endif
 	
 	RegisterForSingleUpdate(3)

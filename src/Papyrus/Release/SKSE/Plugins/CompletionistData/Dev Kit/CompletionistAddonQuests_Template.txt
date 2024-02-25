@@ -1,0 +1,13 @@
+﻿----------------------------------------------------------------------------
+-- To change the localised text simply change the text after the single '|'
+-- Keys can be renamed to whatever you want but remember to update the ini.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+-KEYS							Translation
+----------------------------------------------------------------------------
+cTranslate_MCMName				|Some MCM Name
+
+cTranslate_QuestName00			|Some Quest Name
+cTranslate_QuestText00			|Some Quest Highlight Information
+

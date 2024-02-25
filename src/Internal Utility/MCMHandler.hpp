@@ -1,18 +1,10 @@
 #pragma once
+#include "MiscPatchStruct.hpp"
 
 namespace CHCMHandler
 {
-	constexpr int32_t CC_Header = -3;
-	constexpr int32_t MS_Header = -4;
-	constexpr int32_t ST_Header = -5;
-	constexpr int32_t CB_Header = -6;
-	constexpr int32_t CL_Header = -7;
-	constexpr int32_t CI_Header = -8;
-	constexpr int32_t FL_Header = -9;
-
+	inline std::vector<std::pair<std::string, CMiscPatchGroupData*>> CustomPatches{};	
 	inline std::vector<std::tuple<std::string, std::string, uint32_t>> MainPatchesMCMPagesDefs{};
-	inline std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint32_t, bool, bool, bool>> MiscPatchesMCMPagesDefs{};
-
 	inline std::vector<std::tuple<const char*, const char*, int32_t>> MainMCMPagesDefs =
 	{ {
 		{"$MCMPageSettings", "", -1},
@@ -26,11 +18,6 @@ namespace CHCMHandler
 		{"$MCMPageMainCW", "", 1},
 		{"$MCMPageMainDG", "", 2},
 		{"$MCMPageMainDB", "", 3},
-		{" ", "", -1},
-		{"$Header1", "", CC_Header},
-		{"$MCMPageMainFarming", "", 4},
-		{"$MCMPageMainCreations1", "", 5},
-		{"$MCMPageMainCreations2", "", 6},
 		{" ", "", -1},
 		{"$Header2", "", -1},
 		{"$MCMPageMainDawnstar", "", 7},
@@ -70,35 +57,6 @@ namespace CHCMHandler
 		{"$MCMPageMisc", "LegacyoftheDragonborn.esm", 53},
 		{"$MCMPageNotes", "LegacyoftheDragonborn.esm", 54},
 		{"$MCMPageJournals", "LegacyoftheDragonborn.esm", 55},
-
-		{" ", "3DNPC.esp", -1},
-		{"$Header6", "3DNPC.esp", -1},
-		{"$MCMPage3DNPCMain", "3DNPC.esp", 44},
-		{"$MCMPage3DNPCBlood", "3DNPC.esp", 45},
-		{"$MCMPage3DNPCSteel", "3DNPC.esp", 46},
-		{"$MCMPage3DNPCMisc", "3DNPC.esp", 47},
-
-		{" ", "Vigilant.esm", -1},
-		{"$Header7", "Vigilant.esm", -1},
-		{"$MCMPageVigilantMain", "Vigilant.esm", 48},
-		{"$MCMPageVigilantSide", "Vigilant.esm", 49},
-		{"$MCMPageVigilantMemory", "Vigilant.esm", 50},
-		{"$MCMPageVigilantRadiant", "Vigilant.esm", 51},
-
-		{" ", "", MS_Header},
-		{"$Header8", "", MS_Header},
-		{"$MCMPageClockwork", "Clockwork.esp", 32},
-		{"$MCMPageFalskaar", "Falskaar.esm", 33},
-		{"$MCMPageHelgen", "Helgen Reborn.esp", 34},
-		{"$MCMPageMoonpath", "moonpath.esp", 35},
-		{"$MCMPageMoonStar", "MoonAndStar_MAS.esp", 36},
-		{"$MCMPageProjectAHO", "Dwarfsphere.esp", 37},
-		{"$MCMPageTeldrynSerious", "TSR_TeldrynSerious.esp", 38},
-		{"$MCMPageBrotherhood", "The Brotherhood of Old.esp", 43},
-		{"$MCMPageLull", "WheelsOfLull.esp", 39},
-		{"$MCMPageGrayCowl", "Gray Fox Cowl.esm", 40},
-		{"$MCMPageUndeath", "Undeath.esp", 42},
-		{"$MCMPageWyrmstooth", "Wyrmstooth.esp", 41},
 	} };
 
 	inline std::vector< std::tuple<const char*, const char*, int32_t>> MiscMCMPagesDefs =
@@ -112,7 +70,8 @@ namespace CHCMHandler
 		{"$MCMPageShrines", "", -1},
 		{"$MCMPageDoomstone", "", -1},
 		{"$MCMPageBarenziah", "", -1},
-		
+		{"$MCMPageKillCounts", "", -1},
+
 		{" ", "", -1},
 		{"$HeaderLocations", "", -1},
 		{"$MCMPageLocations1", "", -1},
@@ -120,7 +79,6 @@ namespace CHCMHandler
 		{"$MCMPageLocations3", "", -1},
 		{"$MCMPageLocations4", "", -1},
 		{"$MCMPageLocations5", "", -1},
-		{"$MCMPageLocations6", "", CL_Header},
 		
 		{" ", "", -1},
 		{"$HeaderBooks", "", -1},
@@ -132,20 +90,6 @@ namespace CHCMHandler
 		{"$MCMPageBooks6", "", -1},
 		{"$MCMPageBooks7", "", -1},
 		{"$MCMPageBooks8", "", -1},
-		{"$MCMPageBooksCC", "", CB_Header},
-		
-		{" ", "", ST_Header},
-		{"$HeaderPatchedTomes", "", ST_Header},
-		{"$MCMPageTomes_Apocalypse1", "Apocalypse - Magic of Skyrim.esp", -1},
-		{"$MCMPageTomes_Apocalypse2", "Apocalypse - Magic of Skyrim.esp", -1},
-		{"$MCMPageTomes_ForgottenMagic1", "ForgottenMagic_Redone.esp", -1},
-		{"$MCMPageTomes_ForgottenMagic2", "ForgottenMagic_Redone.esp", -1},
-		{"$MCMPageTomes_Mysticism1", "MysticismMagic.esp", -1},
-		{"$MCMPageTomes_Mysticism2", "MysticismMagic.esp", -1},
-		{"$MCMPageTomes_Odin1", "Odin - Skyrim Magic Overhaul.esp", -1},
-		{"$MCMPageTomes_Odin2", "Odin - Skyrim Magic Overhaul.esp", -1},
-		{"$MCMPageTomes_Triumvirate1", "Triumvirate - Mage Archetypes.esp", -1},
-		{"$MCMPageTomes_Triumvirate2", "Triumvirate - Mage Archetypes.esp", -1},
 		
 		{" ", "", -1},
 		{"$HeaderItems", "", -1},
@@ -155,88 +99,16 @@ namespace CHCMHandler
 		{"$MCMPageLiquor", "", -1},
 		{"$MCMPageWeapons", "", -1},
 		{"$MCMPageConditionals", "", -1},
-		{"$MCMPageCCItems", "", CI_Header},
 
 		{" ", "", -1},
 		{"$HeaderEnchantments", "", -1},
 		{"$MCMPageAEnchantments", "", -1},
 		{"$MCMPageWEnchantments", "", -1},
-
-		{" ", "SL01AmuletsSkyrim.esp", -1},
-		{"$HeaderAmuletsofSkyrim", "SL01AmuletsSkyrim.esp", -1},
-		{"$MCMPageAmuletsofSkyrim1", "SL01AmuletsSkyrim.esp", -1},
-		{"$MCMPageAmuletsofSkyrim2", "SL01AmuletsSkyrim.esp", -1},
-		{"$MCMPageAmuletsofSkyrim3", "SL01AmuletsSkyrim.esp", -1},
-
-		{" ", "yumcheese.esp", -1},
-		{"$HeaderCheeseMod", "yumcheese.esp", -1},
-		{"$MCMPageCheese1", "yumcheese.esp", -1},
-		{"$MCMPageCheese2", "yumcheese.esp", -1},
-		{"$MCMPageCheese3", "yumcheese.esp", -1},
-		{"$MCMPageCheese4", "yumcheese.esp", -1},
-
-		{" ", "ccbgssse001-fish.esm", -1},
-		{"$HeaderFishing", "ccbgssse001-fish.esm", -1},
-		{"$MCMPageFishF", "ccbgssse001-fish.esm", -1},
-		{"$MCMPageFishI", "ccbgssse001-fish.esm", -1},
-		{"$MCMPageFishB", "ccbgssse001-fish.esm", -1},
-		{"$MCMPageFishL", "ccbgssse001-fish.esm", FL_Header},
-
-		{" ", "Fossilsyum.esp", -1},
-		{"$HeaderFossils", "Fossilsyum.esp", -1},
-		{"$MCMPageFossilMining1", "Fossilsyum.esp", -1},
-		{"$MCMPageFossilMining2", "Fossilsyum.esp", -1},
-		{"$MCMPageFossilMining3", "Fossilsyum.esp", -1},
-		
-		{" ", "Requiem.esp", -1},
-		{"$HeaderRequiem", "Requiem.esp", -1},
-		{"$MCMPageRequiem1", "Requiem.esp", -1},
-		{"$MCMPageRequiem2", "Requiem.esp", -1},
-		{"$MCMPageRequiem3", "Requiem.esp", -1},
-		{"$MCMPageRequiem4", "Requiem.esp", -1},
-
-		{" ", "SkyrimsUniqueTreasures.esp", -1},
-		{"$HeaderSUT", "SkyrimsUniqueTreasures.esp", -1},
-		{"$MCMPageSUT1", "SkyrimsUniqueTreasures.esp", -1},
-		{"$MCMPageSUT2", "SkyrimsUniqueTreasures.esp", -1},
-		{"$MCMPageSUT3", "SkyrimsUniqueTreasures.esp", -1},
-
-		{" ", "Vigilant.esm", -1},
-		{"$HeaderVIG", "Vigilant.esm", -1},
-		{"$MCMPageVIG1", "Vigilant.esm", -1},
-		{"$MCMPageVIG2", "Vigilant.esm", -1},
-		{"$MCMPageVIG3", "Vigilant.esm", -1},
-
-		{" ", "", MS_Header},
-		{"$Header8", "", MS_Header},
-		{"$MCMPageAdditionalHearthfireDolls", "AdditionalHearthfireDolls.esp", -1},
-		{"$MCMPageBadGremlins", "BGCollectables.esp", -1 },
-		{"$MCMPageCloaksOfSkyrim", "Cloaks.esp", -1},
-		{"$MCMPageClockwork", "Clockwork.esp", -1},
-		{"$MCMPageFalskaar", "Falskaar.esm", -1},
-		{"$MCMPageHelgen", "Helgen Reborn.esp", -1},
-		{"$MCMPageICOW", "CollegeOfWinterholdImmersive.esp", -1 },
-		{"$MCMPageInnSoaps", "Inn Soaps.esp", -1},
-		{"$MCMPageJaysusSwords", "JSwordsD.esm", -1},
-		{"$MCMPageInterestingNPCs", "3DNPC.esp", -1},
-		{"$MCMPageMoonStar", "MoonAndStar_MAS.esp", -1},
-		{"$MCMPageMoonpath", "moonpath.esp", -1},
-		{"$MCMPageOblivionArtifacts", "WZOblivionArtifacts.esp", -1},
-		{"$MCMPageProjectAHO", "Dwarfsphere.esp", -1},
-		{"$MCMPagRoyalArmory", "PrvtIRoyalArmory.esp", -1},
-		{"$MCMPageTeldrynSerious", "TSR_TeldrynSerious.esp", -1},
-		{"$MCMPageBrotherhood", "The Brotherhood of Old.esp", -1},
-		{"$MCMPageTTB", "ArtifactsOfBoethiah.esp", -1 },
-		{"$MCMPageGrayCowl", "Gray Fox Cowl.esm", -1},
-		{"$MCMPageLull", "WheelsOfLull.esp", -1},
-		{"$MCMPageThunderchild", "Thunderchild - Epic Shout Package.esp", -1},
-		{"$MCMPageUndeath", "Undeath.esp", -1},
-		{"$MCMPageWintersun", "Wintersun - Faiths of Skyrim.esp", -1},
-		{"$MCMPageWyrmstooth", "Wyrmstooth.esp", -1},
 	} };
 
 	inline std::vector<std::string> MainMCMPages{};
 	inline std::vector<std::string> MiscMCMPages{};
+	inline std::vector<std::string> PatchPages{};
 
 	using EventResult = RE::BSEventNotifyControl;
 
@@ -245,24 +117,52 @@ namespace CHCMHandler
 
 		public: [[nodiscard]] static MCMAPI* GetSingleton() { static MCMAPI singleton; return &singleton; }
 
-		static void Register();
-		static bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+		static void						Register();
+		static bool						RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
-		EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
+		EventResult						ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
 
-		static int32_t GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
-		static int32_t GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
-		static bool GetHeaderRequired(RE::StaticFunctionTag*, std::string mcmpage, int32_t header);
-		static void BuildMCMPages(RE::StaticFunctionTag*);
-		static void AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
-		static void AddMiscPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint32_t, bool, bool, bool>>);
-		static int32_t GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string MCMPage);
+		static int32_t					GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
+		static int32_t					GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
+		static void						BuildMCMPages(RE::StaticFunctionTag*);
+		static void						AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
+		static void						AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatchGroupData*>> defs);
+		
+		static int32_t					GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string MCMPage);
+		static std::vector<std::string> GetPageConfiguration(RE::StaticFunctionTag*, std::string mcmpage, int32_t pageNumber);
 
-		static int32_t GetValidMiscPatchPageIDForItems(RE::StaticFunctionTag*, std::string MCMPage);
-		static int32_t GetValidMiscPatchPageIDForBooks(RE::StaticFunctionTag*, std::string MCMPage);
-		static int32_t GetValidMiscPatchPageIDForMapMa(RE::StaticFunctionTag*, std::string MCMPage);
-
-		static bool IsSettingsPage(RE::StaticFunctionTag*, std::string MCMPage);
+		static bool						IsSettingsPage(RE::StaticFunctionTag*, std::string MCMPage);
 		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
+
+		static int32_t					GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage);
+		static bool						IsMultiPage(RE::StaticFunctionTag*, std::string MCMPage);
+		static int32_t					GetMultiPageCount(RE::StaticFunctionTag*, std::string MCMPage);
+		static std::vector<std::string> GetMultiPageSplashScreenConfig(RE::StaticFunctionTag*, std::string mcmpage);
+
+		static int32_t					GetTotalEntriesForPage(RE::StaticFunctionTag*, std::string a_page);
+		static int32_t					GetTotalEntriesFoundForPage(RE::StaticFunctionTag*, std::string a_page);
+		static int32_t					GetPageNumberForForm(RE::StaticFunctionTag*, std::string a_page, std::string a_name);
+		static int32_t					GetPageNumberForSection(RE::StaticFunctionTag*, std::string a_page, std::string a_name);
+
+		static int32_t					GetActivePage(RE::StaticFunctionTag*, std::string a_page);
+		static void						SetActivePage(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
+
+		static int32_t					GetDefaultPage(RE::StaticFunctionTag*, std::string a_page);
+		static void						SetDefaultPage(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
+
+		static std::vector<std::string> GetSearchHistory(RE::StaticFunctionTag*, std::string a_page);
+		static void						ClearSearchHistory(RE::StaticFunctionTag*, std::string a_page);
+		static void						AddSearchTerm(RE::StaticFunctionTag*, std::string a_page, std::string a_value);
+
+		static bool						GetUseDefaultPage(RE::StaticFunctionTag*, std::string a_page);
+		static void						SetUseDefaultPage(RE::StaticFunctionTag*, std::string a_page, bool a_value);
+		static void						ResetPageSettings(RE::StaticFunctionTag*, std::string a_page);
+		static std::string				GetActivePageName(RE::StaticFunctionTag*, int32_t activePage, std::string mcmpage);
+
+		static void						DisplayOfficialPatches();
+		static void						DisplayUnOfficialPatches();
+		static void						DisplayCreationClubPatches();
+		static std::vector<std::string> SearchMultiPage(RE::StaticFunctionTag*, std::string a_page, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType);
+		static std::string				GetSectionNameForForm(std::string a_page, std::string a_name, bool incPageNumber);
 	};
 }

@@ -47,7 +47,7 @@ Int[] Function qGetRadiArrayByName(String a_page) Global Native
 String function qGetTimesCompletedVsTimesRequiredText(String a_key) Global Native
 
 ; Updates Pet Ownership and Shouut Completion in the DLL Frameworks.
-Function Framework_UpdatePetOwnership(String a_petname) Global Native
+Function Framework_UpdatePetOwnership(ActorBase a_actorBase) Global Native
 Function Framework_UpdateShouts() Global Native
 
 ;Print Message from Plugin with colour formatting.
@@ -61,9 +61,17 @@ Function ActivateShrineByID(Form a_form) Global Native
 
 ;Checks the current cell for collectable items.
 Function CheckForReferences(Cell a_cell, bool b_log, bool b_notify) Global Native
-ObjectReference[] Function GetValidItemReferences(Cell a_cell) Global Native
-String[] Function GetValidItemReferenceNames() Global Native
-String[] Function GetValidItemReferenceTypes() Global Native
+ObjectReference Function GetTargetReferenceRefr(Cell a_cell, Form a_lastForm) Global Native
+String Function GetTargetReferenceType() Global Native
+String Function GetTargetReferenceName() Global Native
+Form Function GetTargetReferenceForm() Global Native
+
+Bool Function HasPinnedFormInCell(Cell a_cell, Form a_form) Global Native
+Bool Function IsItemPinnable(Form a_form) Global Native
+ObjectReference Function GetPinnedReferenceRefr(Form a_form) Global Native
+String Function GetPinnedReferenceType(Form a_form) Global Native
+String Function GetPinnedReferenceName(Form a_form) Global Native
+
 String Function GetQuestMarkerReferenceFormID(ObjectReference a_ref) Global Native
 String Function GetQuestMarkerReferenceOwner(ObjectReference a_ref) Global Native
 String Function GetQuestMarkerReferenceIndex(ObjectReference a_ref) Global Native
@@ -79,9 +87,6 @@ bool Function isCellExcluded(cell a_cell) Global Native
 
 ;Forces the DLL to load changed varaibles.
 Function UpdateVariables() Global Native
-
-;Procs DLL to check late loaders and add support for dynamically injected forms.
-Function LoadInjectedForms() Global Native
 
 ; Dumps all quest data to completionist log.
 Function qDumpQuestData() Global Native
@@ -113,8 +118,45 @@ Int Function GetValidMainPatchPageID(string mcmpage) Global Native
 Int Function GetValidMiscPatchPageIDForItems(string mcmpage) Global Native
 Int Function GetValidMiscPatchPageIDForBooks(string mcmpage) Global Native
 Int Function GetValidMiscPatchPageIDForMapMa(string mcmpage) Global Native
+Int Function GetValidMiscPatchPageIDForEncha(string mcmpage) Global Native
+String[] Function GetPageConfiguration(string mcmpage, int pageNumber) Global Native
+String[] Function SearchMultiPage(string page, string query, bool ignoreCompleted = false, int maxResults, int searchType) Global Native
+
+Int Function GetQuestID(string mcmpage, int activePage) Global Native
+Int Function GetMultiPageCount(string mcmpage) Global Native
+bool function IsMultiPage(string mcmpage) Global Native
+
+Int Function GetTotalEntriesForPage(string mcmpage) Global Native
+Int Function GetTotalEntriesFoundForPage(string mcmpage) Global Native
+Int Function GetPageNumberForForm(string mcmpage, string formName) Global Native
+Int FUnction GetPageNumberForSection(string mcmpage, string sectionName) Global Native
+
+String[] Function qGetMiscQuestNameArrayByID(int patchID) Global Native
+String[] Function qGetMiscQuestTextArrayByID(int patchID) Global Native
+String[] Function qGetMiscQuestIdenArrayByID(int patchID) Global Native
+Int[] Function qGetMiscQuestRadiArrayByID(int patchID) Global Native
+String[] Function qGetMiscQuestKeysArrayByID(int patchID) Global Native
+
+Int Function GetActivePage(string mcmpage) Global Native
+Function SetActivePage(string mcmpage, int a_value) Global Native
+
+Int Function GetDefaultPage(string mcmpage) Global Native
+Function SetDefaultPage(string mcmpage, int a_value) Global Native
+
+Bool Function GetUseDefaultPage(string mcmpage) Global Native
+Function SetUseDefaultPage(string mcmpage, bool a_value) Global Native
+Function ResetPageSettings(string mcmpage) Global Native
+
+Function AddSearchTerm(string mcmpage, string a_value) Global Native
+String[] Function GetSearchHistory(string mcmpage) Global Native
+Function ClearSearchHistory(string mcmpage) Global Native
+
+String[] Function GetMultiPageSplashScreenConfig(string mcmpage) Global Native
+
 bool function IsSettingsPage(string mcmpage) Global Native
 bool function GetHeaderRequired(string mcmpage, int header) Global Native
+string function GetHeader(string mcmpage, int header, bool _left) Global Native
+string function GetActivePageName(int activePage, string mcmpage) Global Native
 
 ; return the length of the string
 int Function GetStringLength(string s) Global Native
@@ -127,3 +169,12 @@ bool Function MapMarkerIsCleared(form a_marker) Global Native
 bool Function IsItemKnownExternal(form a_form) Global Native
 
 Function SetFishCaught(form a_fish) Global Native
+
+String[] Function GetPlayerKillNames()  Global Native
+int Function GetPlayerKillCount(string a_name)  Global Native
+Function ResetPlayerKill(string a_name)  Global Native
+Function RemovePlayerKill(string a_name)  Global Native
+string Function GetDeathString(string a_name)  Global Native
+string Function GetCombinedKillString(string a_name)  Global Native
+
+int function GetPatchCount() Global Native

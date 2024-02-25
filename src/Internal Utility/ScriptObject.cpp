@@ -30,6 +30,21 @@ auto ScriptObject::FromForm(RE::TESForm* a_form, const std::string& a_scriptName
 	return object;
 }
 
+auto ScriptObject::FromForm(RE::BGSRefAlias* a_form, const std::string& a_scriptName) -> ScriptObjectPtr
+{
+	if (!a_form) { return nullptr; }
+
+	auto papyrusVM = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+	if (!papyrusVM) { return nullptr; }
+
+	auto handle = papyrusVM->handlePolicy->GetHandleForObject(a_form->VMTYPEID, a_form);
+	if (!handle) { return nullptr; }
+
+	ScriptObjectPtr object;
+	papyrusVM->FindBoundObject(handle, a_scriptName.c_str(), object);
+	return object ? object : nullptr;
+}
+
 auto ScriptObject::GetVariable(ScriptObjectPtr a_object, std::string_view a_variableName)
 -> RE::BSScript::Variable*
 {

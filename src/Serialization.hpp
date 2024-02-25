@@ -12,7 +12,7 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1011,
+		kVersion = 1017,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -78,6 +78,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			if (!a_marker) {
 				return nullptr;
 			}
+
 			if (!a_marker->extraList.HasType<RE::ExtraMapMarker>()) {
 				return nullptr;
 			}
@@ -130,6 +131,15 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		//-- Utility Functions ( Get FormID Hex String ) ----
 		//---------------------------------------------------
 
+		[[nodiscard]] static std::string GetFormIDHexString(RE::TESForm* a_form) noexcept
+		{
+			return std::format("{:08X}", a_form->GetFormID());
+		}
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
 		[[nodiscard]] static std::string GetFormOwner(RE::TESObjectREFR* a_form) noexcept
 		{
 			if (!a_form || !a_form->GetFile(0))
@@ -145,7 +155,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		//-- Utility Functions ( Get FormID Hex String ) ----
 		//---------------------------------------------------
 
-		[[nodiscard]] static std::string GetModIndexFromForm(RE::TESObjectREFR* a_form) noexcept
+		[[nodiscard]] static std::string GetModIndexFromForm(const RE::TESObjectREFR* a_form) noexcept
 		{
 			if (!a_form || !a_form->GetFile(0))
 			{
@@ -154,7 +164,21 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 			return fmt::format("{:x}", a_form->GetFile(0)->GetPartialIndex());
 		}
-		
+
+		//---------------------------------------------------
+		//-- Utility Functions ( Get FormID Hex String ) ----
+		//---------------------------------------------------
+
+		[[nodiscard]] static std::string GetModIndexFromForm(RE::TESForm* a_form) noexcept
+		{
+			if (!a_form || !a_form->GetFile(0))
+			{
+				return "";
+			};
+
+			return fmt::format("{:x}", a_form->GetFile(0)->GetPartialIndex());
+		}
+
 		//---------------------------------------------------
 		//-- Utility Functions ( Has Keyword String ) -------
 		//---------------------------------------------------
@@ -173,7 +197,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		{
 			static DKUtil::enumeration<RE::ActorValue, std::uint32_t> actorValueNameTbl{};
 
-			auto rawName = actorValueNameTbl.value_name(a_val);
+			auto rawName = actorValueNameTbl.to_string(a_val);
 
 			for (auto i = 0; i < rawName.length(); ++i) {
 				if (std::isupper(rawName[i])) {
@@ -324,10 +348,64 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		//---------------------------------------------------
+		//-- Completionist Data Functions ( Player Hits ) ---
+		//---------------------------------------------------
+
+		void AddTarget(RE::FormID a_form, RE::FormID a_weapon) noexcept
+		{
+			if (!a_form) {
+				return;
+			}
+			data.try_emplace(a_form, a_weapon);
+		}
+
+		void AddTarget(RE::TESForm* a_form, RE::TESForm* a_weapon) noexcept
+		{
+			if (!a_form || !a_form->GetFormID()) {
+				return;
+			}
+			data.try_emplace(a_form->GetFormID(), a_weapon->GetFormID());
+		}
+
+		[[nodiscard]] bool HasTargetRegistered(RE::FormID a_form) const noexcept
+		{
+			return HasForm(a_form);
+		}
+
+		[[nodiscard]] bool HasTargetRegistered(RE::TESForm* a_form) const noexcept
+		{
+			return HasForm(a_form);
+		}
+
+		void UpdateTargetWeapon(RE::TESForm* a_form, RE::TESForm* a_weapon) noexcept
+		{
+			if (HasForm(a_form)) {
+				data[a_form->GetFormID()] = a_weapon->GetFormID();
+			};
+		};
+
+		void UpdateTargetWeapon(RE::FormID a_form, RE::FormID a_weapon) noexcept
+		{
+			if (HasForm(a_form)) {
+				data[a_form] = a_weapon;
+			};
+		};
+
+		void RemoveTarget(RE::FormID a_form) noexcept
+		{
+			RemoveForm(a_form);
+		}
+
+		[[nodiscard]] RE::TESForm* GetTargetWeapon(RE::TESForm* a_form) noexcept
+		{
+			return HasForm(a_form) ? RE::TESForm::LookupByID(data[a_form->GetFormID()]) : nullptr;
+		}
+
+		//---------------------------------------------------
 		//-- Completionist Data Functions ( Get Form ) ------
 		//---------------------------------------------------
 
-		[[nodiscard]] RE::TESForm* GetForm(RE::FormID a_form) noexcept
+		[[nodiscard]] RE::TESForm* GetForm(RE::FormID a_form) const noexcept
 		{
 			return HasForm(a_form) ? RE::TESForm::LookupByID(a_form) : nullptr;
 		}
@@ -479,9 +557,9 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 			using zipped_t = std::pair<std::string, std::pair<RE::TESForm*, bool>>;
 
-			auto bases = GetAllBases() |
-				std::views::filter([&](auto f) { return GetForm(f) && GetForm(f)->GetName(); }) |
-				std::views::transform([&](auto f) {
+			auto bases = GetAllBases() 
+				| std::views::filter([&](auto f) { return GetForm(f) && GetForm(f)->GetName(); }) 
+				| std::views::transform([&](auto f) {
 				std::string name = GetForm(f)->GetName();
 
 				if (auto* marker = GetForm<RE::TESObjectREFR>(f); marker && a_opttype == 2) {
@@ -512,7 +590,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			{
 				for (auto* form : a_forms) {
 					auto* book = static_cast<RE::TESObjectBOOK*>(form);
-					if (book && book->GetSpell()) {		
+					if (book && book->GetSpell()) {
 						a_texts.push_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSpell()->GetAssociatedSkill()) + "}{" + book->GetSpell()->GetName() + "}");
 					}
 					else if (book && book->TeachesSkill()) {
@@ -682,7 +760,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		{
 			if (HasKey(a_key)) {
 				auto stage = fmt::format("|{}|", a_stage);
-				DKUtil::string::replace_all(data[a_key.data()], stage, {});
+				data[a_key.data()] = DKUtil::string::replace_nth_occurrence(data[a_key.data()], 0, stage, {});
 			}
 		}
 
@@ -771,8 +849,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 				key.resize(keySize);
 				val.resize(valSize);
-				if (!a_intfc->ReadRecordData(key.data(), keySize) ||
-					(valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
+				if (!a_intfc->ReadRecordData(key.data(), keySize) || (valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
 					ERROR("Failed to read serialized form data: pair_data");
 				}
 
@@ -857,40 +934,40 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			switch (kType)
 			{
 			case Serialization::CompletionistLog::kCollected:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Col");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Col");
 				break;
 			case Serialization::CompletionistLog::kDiscovered:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Dis");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Dis");
 				break;
 			case Serialization::CompletionistLog::kLearnt:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Lea");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Lea");
 				break;
 			case Serialization::CompletionistLog::kShout:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Sho");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Sho");
 				break;
 			case Serialization::CompletionistLog::kWord:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Wor");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Wor");
 				break;
 			case Serialization::CompletionistLog::kObtained:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Obt");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Obt");
 				break;
 			case Serialization::CompletionistLog::kBarenziah:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Bar");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Bar");
 				break;
 			case Serialization::CompletionistLog::kTamed:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Tam");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Tam");
 				break;
 			case Serialization::CompletionistLog::kFish:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Fis");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Fis");
 				break;
 			case Serialization::CompletionistLog::kBook:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Boo");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Boo");
 				break;
 			case Serialization::CompletionistLog::kTome:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Tom");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Tom");
 				break;
 			case Serialization::CompletionistLog::kQuestComplete:
-				return CLocalisation::LocalisationAPI::GetLocStringByKey("LogPrefix_Qst");
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Qst");
 				break;
 			default:
 				break;
@@ -1228,7 +1305,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 	{
 		if (!HasReference(a_formID)) {
 			data.try_emplace(a_formID, std::make_pair(a_name.data(), a_cell));
-			INFO("Added Reference with new size of {}", data.size());
 		}
 	}
 
@@ -1236,13 +1312,12 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 	{
 		if (!HasReference(a_reference->GetFormID())) {
 			data.try_emplace(a_reference->GetFormID(), std::make_pair(fmt::format("{:s}{:s}"s, a_name.data(), "."), a_cell));
-			INFO("Added Reference with new size of {}", data.size());
 			INFO("Excluded Chest For: {}", a_name.data());
 		}
 	}
 
 	// accessor
-	[[nodiscard]] bool HasReference(RE::FormID a_formID) noexcept
+	[[nodiscard]] bool HasReference(RE::FormID a_formID) const noexcept
 	{
 		return data.contains(a_formID);
 	}
@@ -1251,7 +1326,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 	{
 		if (HasReference(a_formID)) {
 			data.erase(a_formID);
-			INFO("Erased Reference with new size of {}", data.size());
 		}
 	}
 
@@ -1438,7 +1512,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 	std::map<RE::FormID, std::pair<std::string, RE::FormID>> data;
 	};
-}
+};
 
 namespace CFramework_Master
 {
@@ -1512,6 +1586,21 @@ namespace Serialization
 						continue;
 					}
 
+					if (version < 1013 && DKUtil::string::iequals(name, "PatchSettings")) {
+						INFO("Skipping loading of Patch Page Settings.");
+						continue;
+					}
+
+					if (version < 1016 && DKUtil::string::iequals(name, "PlayerHits")) {
+						INFO("Skipping loading of Player hits.");
+						continue;
+					}
+
+					if (version < 1017 && DKUtil::string::iequals(name, "PlayerKills")) {
+						INFO("Skipping loading of Player Kills.");
+						continue;
+					}
+
 					data->Load(a_intfc, name);
 
 					if (version < 1007 && DKUtil::string::iequals(name, "LoggingData"))
@@ -1528,7 +1617,7 @@ namespace Serialization
 									INFO("Correcting Completion Log Date: {}", it->first);
 
 									std::string newNode = it->first;
-									DKUtil::string::replace_all(newNode, "/08/2023", "/09/2023");
+									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/08/2023", "/09/2023");
 
 									auto node = LoggingData.data.extract(it->first);
 									if (node) {
@@ -1538,7 +1627,7 @@ namespace Serialization
 								}
 
 								INFO("Correcting Invalid Formats on event: {}", it->first);
-								DKUtil::string::replace_all(it->second, ":  ", ": ");
+								it->second = DKUtil::string::replace_nth_occurrence(it->second, 0, ":  ", ": ");
 								it++;
 							}
 							i++;
