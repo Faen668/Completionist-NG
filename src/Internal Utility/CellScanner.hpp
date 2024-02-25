@@ -1,10 +1,9 @@
 #pragma once
 
 //Array used to hold data for references that should not be included when scanning.
-constexpr std::array<std::tuple<RE::FormID, const char*, const char*>, 10> ExcludedModAddedReferences =
+constexpr std::array<std::tuple<RE::FormID, const char*, const char*>, 28> ExcludedModAddedReferences =
 {{
 	{0x0009C0, "cceejsse003-hollow.esl", "Shadowfoot Sanctum Test Urn"},							// Shadowfoot Sanctum
-
 	{0x1223DF, "ccbgssse001-fish.esm", "Fishing Vendor Chest - Belethor's General Goods"},			// Fishing Creation
 	{0x173B66, "ccbgssse001-fish.esm", "Fishing Vendor Chest - Gray Pine Goods"},					// Fishing Creation
 	{0x173B67, "ccbgssse001-fish.esm", "Fishing Vendor Chest - Bits and Pieces"},					// Fishing Creation
@@ -14,7 +13,24 @@ constexpr std::array<std::tuple<RE::FormID, const char*, const char*>, 10> Exclu
 	{0x173B6C, "ccbgssse001-fish.esm", "Fishing Vendor Chest - Pawned Prawn"},						// Fishing Creation
 	{0x345c0e, "LKVM Main House.esp", "Test Chest"},												// Lakeview Manor As It Should Be
 	{0x27a88f, "LKVM Cellar and Exterior.esp", "Test Chest"},										// Lakeview Manor As It Should Be - Cellar Addon
-
+	{0x2d4912, "Vigilant.esm", "Hidden Chest"},														// Vigilant
+	{0x04C743, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C744, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C745, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C746, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C748, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C749, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x04C74A, "Traveling Merchant Caravans.esp", "Merchant Chest"},								// Traveling Merchant Caravans
+	{0x2F38F5, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - AmrasMerchantChest
+	{0x2F38F8, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - AmrasMerchantChest
+	{0x2F38FB, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - AmrasMerchantChest
+	{0x0DBDB1, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x23C0DA, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x23C0DB, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x23C0DC, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x23C0DD, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x23C0DE, "3DNPC.esp", "Merchant Chest"},														// 3DNPC - MerchantFalkreathApprentice
+	{0x01DE83, "SL01AmuletsSkyrim.esp", "Merchant Chest"},											// AOS - SL00MerchantGenericAmuletChest
 }};
 
 //Array used to hold data for references that should not be included when scanning.
@@ -54,16 +70,12 @@ namespace CellScanner
 	{
 	public:
 		static void CheckForReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, bool b_logging, bool b_notify);
-		static std::vector<RE::TESObjectREFR*> GetValidItemReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
-		static std::vector<std::string> GetValidItemReferenceNames(RE::StaticFunctionTag*);
-		static std::vector<std::string> GetValidItemReferenceTypes(RE::StaticFunctionTag*);
 		static std::string GetFormType(RE::TESForm* a_form);
 
-		static void AddExcludedReference(RE::TESObjectREFR* a_chest);
+		static void ExcludeAllVendorChests();
 		static void AddExcludedReferencesFromMods();
 		static bool IsExcludedFormType(RE::TESForm* a_form);
 		static bool IsReferenceExcluded(RE::TESObjectREFR* a_chest);
-		static void ExcludeMerchantChests(RE::TESObjectCELL* cell, const RE::TESObjectCELL::RUNTIME_DATA rtd);
 
 		static std::string GetQuestMarkerReferenceFormID(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 		static std::string GetQuestMarkerReferenceOwner(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
@@ -71,12 +83,36 @@ namespace CellScanner
 		static void ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* cell);
 		static void RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 
+		//For Excluded References
 		static std::vector<RE::TESObjectREFR*> GetObjectReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 		static std::vector<std::string> GetReferenceFormIDs(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 		static std::vector<std::string> GetReferenceNames(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 
+		//For Retrieving The Targetted Reference.
+		static bool HasPinnedFormInCell(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, RE::TESForm* a_form);
+		static bool IsItemPinnable(RE::StaticFunctionTag*, RE::TESForm* a_form);
+
+		static std::string	GetPinnedReferenceType(RE::StaticFunctionTag*, RE::TESForm* a_form);
+		static std::string	GetPinnedReferenceName(RE::StaticFunctionTag*, RE::TESForm* a_form);
+		static RE::TESObjectREFR* GetPinnedReferenceRefr(RE::StaticFunctionTag*, RE::TESForm* a_form);
+
+		static RE::TESForm* GetTargetReferenceForm(RE::StaticFunctionTag*);
+		static std::string	GetTargetReferenceType(RE::StaticFunctionTag*);
+		static std::string	GetTargetReferenceName(RE::StaticFunctionTag*);
+		static RE::TESObjectREFR* GetTargetReferenceRefr(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell, RE::TESForm* a_lastForm);
+
+		
+
 		static bool isCellExcluded(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 		static void ScanCell(RE::TESObjectCELL* cell, bool b_logging, bool b_notify);
+
+		static int GetRandomIndex(const int32_t size)
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<int> dist(0, (size - 1));
+			return dist(gen);
+		}
 	private:
 		static bool ItemIsCollectable(RE::TESForm* a_form);
 		static bool ItemIsCollected(RE::TESForm* a_form);

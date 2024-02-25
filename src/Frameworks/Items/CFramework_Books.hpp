@@ -48,14 +48,6 @@ namespace CFramework_TMaps_TH {
 	inline Serialization::CompletionistData Data;
 }
 
-namespace CFramework_Books_CC {
-	inline Serialization::CompletionistData Data;
-}
-
-namespace CFramework_Tomes_CC {
-	inline Serialization::CompletionistData Data;
-}
-
 namespace CFramework_Books
 {	
 	inline std::vector<std::string>		Books_AG_NameArray;
@@ -226,48 +218,6 @@ namespace CFramework_Books
 	inline std::int32_t					TMaps_TH_EntriesTotal;
 	inline std::int32_t					TMaps_TH_EntriesFound;
 
-	inline std::vector<std::string>		Books_CC_NameArray;
-	inline std::vector<std::string>		Books_CC_TextArray;
-	inline std::vector<RE::TESForm*>	Books_CC_FormArray;
-	inline std::vector<bool>			Books_CC_BoolArray;
-	inline std::int32_t					Books_CC_EntriesTotal;
-	inline std::int32_t					Books_CC_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_A_NameArray;
-	inline std::vector<std::string>		Tomes_CC_A_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_A_FormArray;
-	inline std::vector<bool>			Tomes_CC_A_BoolArray;
-	inline std::int32_t					Tomes_CC_A_EntriesTotal;
-	inline std::int32_t					Tomes_CC_A_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_C_NameArray;
-	inline std::vector<std::string>		Tomes_CC_C_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_C_FormArray;
-	inline std::vector<bool>			Tomes_CC_C_BoolArray;
-	inline std::int32_t					Tomes_CC_C_EntriesTotal;
-	inline std::int32_t					Tomes_CC_C_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_D_NameArray;
-	inline std::vector<std::string>		Tomes_CC_D_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_D_FormArray;
-	inline std::vector<bool>			Tomes_CC_D_BoolArray;
-	inline std::int32_t					Tomes_CC_D_EntriesTotal;
-	inline std::int32_t					Tomes_CC_D_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_I_NameArray;
-	inline std::vector<std::string>		Tomes_CC_I_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_I_FormArray;
-	inline std::vector<bool>			Tomes_CC_I_BoolArray;
-	inline std::int32_t					Tomes_CC_I_EntriesTotal;
-	inline std::int32_t					Tomes_CC_I_EntriesFound;
-
-	inline std::vector<std::string>		Tomes_CC_R_NameArray;
-	inline std::vector<std::string>		Tomes_CC_R_TextArray;
-	inline std::vector<RE::TESForm*>	Tomes_CC_R_FormArray;
-	inline std::vector<bool>			Tomes_CC_R_BoolArray;
-	inline std::int32_t					Tomes_CC_R_EntriesTotal;
-	inline std::int32_t					Tomes_CC_R_EntriesFound;
-
 	using EventResult = RE::BSEventNotifyControl;
 
 	class CHandler final :
@@ -279,15 +229,12 @@ namespace CFramework_Books
 		EventResult			ProcessEvent(RE::BooksRead::Event const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BooksRead::Event>* a_eventSource) override;
 		EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
+		static void			OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event);
 		static void			SinkEvents();
 		static void			InstallFramework();
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
-
-		static void			Install_CCB();
-		static void			Install_CCT();
-
 		static void			ProcessFoundForm(RE::FormID a_formID, RE::TESForm* a_base, std::string a_section);
 	};
 }

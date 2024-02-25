@@ -3,15 +3,14 @@
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Internal Utility/MCMHandler.hpp"
+#include "Internal Utility/Events.hpp"
+#include "Internal Utility/PatchListener.hpp"
 
 //Quest Frameworks
 #include "Frameworks/Quests/Main Story/CQuests_MainStory_SK.hpp"
 #include "Frameworks/Quests/Main Story/CQuests_MainStory_CW.hpp"
 #include "Frameworks/Quests/Main Story/CQuests_MainStory_DG.hpp"
 #include "Frameworks/Quests/Main Story/CQuests_MainStory_DB.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_01.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_02.hpp"
-#include "Frameworks/Quests/Creation Club/CQuests_CreationClub_03.hpp"
 #include "Frameworks/Quests/Towns & Cities/CQuests_Dawnstar.hpp"
 #include "Frameworks/Quests/Towns & Cities/CQuests_Falkreath.hpp"
 #include "Frameworks/Quests/Towns & Cities/CQuests_Markarth.hpp"
@@ -39,6 +38,7 @@
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Favors.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Bounties.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Beggars.hpp"
+#include "Frameworks/Quests/Patches/CQuests_Patches.hpp"
 
 namespace CQuestMaster
 {
@@ -52,11 +52,6 @@ namespace CQuestMaster
 		CQFramework_CW::CHandler::InstallFramework();
 		CQFramework_DG::CHandler::InstallFramework();
 		CQFramework_DB::CHandler::InstallFramework();
-
-		//Quests (Creation Club)
-		CQFramework_CC1::CHandler::InstallFramework();
-		CQFramework_CC2::CHandler::InstallFramework();
-		CQFramework_CC3::CHandler::InstallFramework();
 
 		//Quests (Towns & Cities)
 		CQFramework_Dawnstar::CHandler::InstallFramework();
@@ -92,6 +87,9 @@ namespace CQuestMaster
 		CQFramework_Beggars::CHandler::InstallFramework();
 		CQFramework_Bounties::CHandler::InstallFramework();
 		CQFramework_FavorQuests::CHandler::InstallFramework();
+
+		//Quests (Patches)
+		CQFramework_Patches::CHandler::InstallFramework();
 	}
 
 	//---------------------------------------------------
@@ -117,6 +115,11 @@ namespace CQuestMaster
 		a_vm->RegisterFunction("SearchAndReportPage",	"Completionist_Native", SearchAndReportPage);
 		a_vm->RegisterFunction("qGetTimesCompletedVsTimesRequiredText", "Completionist_Native", qGetTimesCompletedVsTimesRequiredText);
 
+		a_vm->RegisterFunction("qGetMiscQuestIdenArrayByID", "Completionist_Native", qGetMiscQuestIdenArrayByID);
+		a_vm->RegisterFunction("qGetMiscQuestKeysArrayByID", "Completionist_Native", qGetMiscQuestKeysArrayByID);
+		a_vm->RegisterFunction("qGetMiscQuestNameArrayByID", "Completionist_Native", qGetMiscQuestNameArrayByID);
+		a_vm->RegisterFunction("qGetMiscQuestTextArrayByID", "Completionist_Native", qGetMiscQuestTextArrayByID);
+		a_vm->RegisterFunction("qGetMiscQuestRadiArrayByID", "Completionist_Native", qGetMiscQuestRadiArrayByID);
 		return true;
 	}
 
@@ -210,10 +213,20 @@ namespace CQuestMaster
 					continue;
 				}
 
-				list.push_back("$PageResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + GetLocalisedPageName(ID) + "}{" + data->GetName() + "}");
-				list.push_back(GetLocalisedPageName(ID));
-				list.push_back(data->GetSearchTerm());
-				list.push_back("Quest");
+				if (!data->isNative)
+				{
+					list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + data->mcmPage + "}{" + GET_LOC_STRING_BY_KEY("Category_Quest") + "}{" + name + "}");
+					list.push_back(data->mcmPage);
+					list.push_back(data->GetSearchTerm());
+					list.push_back("Misc");
+				}
+				else
+				{
+					list.push_back("$PageResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + GetLocalisedPageName(ID) + "}{" + data->GetName() + "}");
+					list.push_back(GetLocalisedPageName(ID));
+					list.push_back(data->GetSearchTerm());
+					list.push_back("Quest");
+				}
 				result++;
 			}
 		};
@@ -408,6 +421,7 @@ namespace CQuestMaster
 	std::vector<std::string> QuestAPI::qGetIdenArrayByID(RE::StaticFunctionTag*, std::string a_page)
 	{
 		std::vector<std::string> list{};
+
 		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec) 
@@ -424,9 +438,10 @@ namespace CQuestMaster
 	//-- Quest Functions ( Getter - Names ) -------------
 	//---------------------------------------------------
 
-	std::vector<std::string> QuestAPI::qGetNameArrayByID(RE::StaticFunctionTag*, std::string a_page) 
+	std::vector<std::string> QuestAPI::qGetNameArrayByID(RE::StaticFunctionTag*, std::string a_page)
 	{
 		std::vector<std::string> list{};
+
 		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
@@ -446,6 +461,7 @@ namespace CQuestMaster
 	std::vector<std::string> QuestAPI::qGetTextArrayByID(RE::StaticFunctionTag*, std::string a_page)
 	{
 		std::vector<std::string> list{};
+
 		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
@@ -480,6 +496,7 @@ namespace CQuestMaster
 	std::vector<std::string> QuestAPI::qGetKeysArrayByID(RE::StaticFunctionTag*, std::string a_page)
 	{
 		std::vector<std::string> list{};
+
 		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
@@ -499,6 +516,7 @@ namespace CQuestMaster
 	std::vector<int32_t> QuestAPI::qGetRadiArrayByID(RE::StaticFunctionTag*, std::string a_page)
 	{
 		std::vector<int32_t> list{};
+
 		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
@@ -510,6 +528,108 @@ namespace CQuestMaster
 		}
 		return list;
 	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Radis ) -------------
+	//---------------------------------------------------
+
+	std::vector<int32_t> QuestAPI::qGetMiscQuestRadiArrayByID(RE::StaticFunctionTag*, int32_t a_patchID)
+	{
+		std::vector<int32_t> list{};
+
+		for (auto& [data, name, ID, key] : CQuestDataVec)
+		{
+			if (ID == a_patchID && data->GetQuest()) {
+				list.push_back(data->GetType());
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Keys ) --------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetMiscQuestKeysArrayByID(RE::StaticFunctionTag*, int32_t a_patchID)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [data, name, ID, key] : CQuestDataVec)
+		{
+			if (ID == a_patchID && data->GetQuest()) {
+				list.push_back(data->GetKey());
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Keys ) --------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetMiscQuestNameArrayByID(RE::StaticFunctionTag*, int32_t a_patchID)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [data, name, ID, key] : CQuestDataVec)
+		{
+			if (ID == a_patchID && data->GetQuest()) {
+				list.push_back(data->GetName());
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Keys ) --------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetMiscQuestTextArrayByID(RE::StaticFunctionTag*, int32_t a_patchID)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [data, name, ID, key] : CQuestDataVec)
+		{
+			if (ID == a_patchID && data->GetQuest()) {
+				list.push_back(data->GetHighlight());
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Keys ) --------------
+	//---------------------------------------------------
+
+	std::vector<std::string> QuestAPI::qGetMiscQuestIdenArrayByID(RE::StaticFunctionTag*, int32_t a_patchID)
+	{
+		std::vector<std::string> list{};
+
+		for (auto& [data, name, ID, key] : CQuestDataVec)
+		{
+			if (ID == a_patchID && data->GetQuest()) {
+				list.push_back(data->GetEditorID());
+			}
+		}
+		return list;
+	}
+
+	//---------------------------------------------------
+	//-- Quest Functions ( Getter - Totals ) ------------
+	//---------------------------------------------------
+
+	std::pair<int32_t, int32_t>	QuestAPI::qGetQuestCompletionTotals(std::vector<CQuestData*> data) {
+
+		std::pair<int32_t, int32_t> totals{};
+
+		for (auto& q : data)
+		{
+			totals.first += IsQuestCompleted(q) ? 1 : 0;
+			totals.second += q->GetQuest() ? 1 : 0;
+		};
+
+		return totals;
+	};
 
 	//---------------------------------------------------
 	//-- Quest Functions ( Completion Checks ) ----------
@@ -560,7 +680,7 @@ namespace CQuestMaster
 	bool QuestAPI::IsStageDone(RE::TESQuest* a_quest, int32_t a_stage)
 	{
 		using func_t = decltype(IsStageDone);
-		REL::Relocation<func_t> func{ RELOCATION_ID(24483, 25011) };
+		REL::Relocation<func_t> func{ IsStageDoneAddress };
 		return a_quest && func(a_quest, a_stage);
 	}
 

@@ -46,10 +46,10 @@ Function DoVersioning() ;Initial versioning on a new game.
 	endif
 	
 	GetSKSEVersion()
-	fVMajor = 3
-	fVMinor = 9
+	fVMajor = 4
+	fVMinor = 0
 	fVPatch = 0
-	fVTweak = 9
+	fVTweak = 0
 	fVersion = (fVMajor * 1000) + (fVMinor * 100) + (fVPatch * 10) + (fVTweak)
 	ModVersion = (fVMajor + "." + fVMinor + "." + fVPatch + "." + fVTweak)
 	
@@ -64,10 +64,10 @@ endFunction
 Function CheckVersioning() ;Versioning ran from OnPlayerLoadGame()
 	
 	GetSKSEVersion()
-	curVMajor = 3
-	curVMinor = 9
+	curVMajor = 4
+	curVMinor = 0
 	curVPatch = 0
-	curVTweak = 9
+	curVTweak = 0
 	curVersion = (curVMajor * 1000) + (curVMinor * 100) + (curVPatch * 10) + (curVTweak)
 	
 	While IsInMenuMode()
@@ -93,7 +93,7 @@ Function UpdateKicker()
 		return
 	endif
 
-	if (fVersion < 3909)
+	if (fVersion < 4000)
 		fVMajor = curVMajor
 		fVMinor = curVMinor
 		fVPatch = curVPatch

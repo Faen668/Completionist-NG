@@ -10,10 +10,8 @@ namespace CFramework_Uniques
 	inline Serialization::CompletionistData ItemDataI;
 	inline Serialization::CompletionistData ItemDataJ;
 	inline Serialization::CompletionistData ItemDataL;
+	inline Serialization::CompletionistData ItemDataSUDS;
 	inline Serialization::CompletionistData ItemDataQ;
-	inline Serialization::CompletionistData ItemDataCCA;
-	inline Serialization::CompletionistData ItemDataCCI;
-	inline Serialization::CompletionistData ItemDataCCW;
 
 	inline std::vector<std::string> A_NameArray;
 	inline std::vector<std::string> A_TextArray;
@@ -50,33 +48,19 @@ namespace CFramework_Uniques
 	inline std::int32_t L_EntriesTotal;
 	inline std::int32_t L_EntriesFound;
 
+	inline std::vector<std::string> SUDS_NameArray;
+	inline std::vector<std::string> SUDS_TextArray;
+	inline std::vector<RE::TESForm*> SUDS_FormArray;
+	inline std::vector<bool> SUDS_BoolArray;
+	inline std::int32_t SUDS_EntriesTotal;
+	inline std::int32_t SUDS_EntriesFound;
+
 	inline std::vector<std::string> Q_NameArray;
 	inline std::vector<std::string> Q_TextArray;
 	inline std::vector<RE::TESForm*> Q_FormArray;
 	inline std::vector<bool> Q_BoolArray;
 	inline std::int32_t Q_EntriesTotal;
 	inline std::int32_t Q_EntriesFound;
-
-	inline std::vector<std::string> CCA_NameArray;
-	inline std::vector<std::string> CCA_TextArray;
-	inline std::vector<RE::TESForm*> CCA_FormArray;
-	inline std::vector<bool> CCA_BoolArray;
-	inline std::int32_t CCA_EntriesTotal;
-	inline std::int32_t CCA_EntriesFound;
-
-	inline std::vector<std::string> CCI_NameArray;
-	inline std::vector<std::string> CCI_TextArray;
-	inline std::vector<RE::TESForm*> CCI_FormArray;
-	inline std::vector<bool> CCI_BoolArray;
-	inline std::int32_t CCI_EntriesTotal;
-	inline std::int32_t CCI_EntriesFound;
-
-	inline std::vector<std::string> CCW_NameArray;
-	inline std::vector<std::string> CCW_TextArray;
-	inline std::vector<RE::TESForm*> CCW_FormArray;
-	inline std::vector<bool> CCW_BoolArray;
-	inline std::int32_t CCW_EntriesTotal;
-	inline std::int32_t CCW_EntriesFound;
 
 	class CHandler
 	{
@@ -86,10 +70,6 @@ namespace CFramework_Uniques
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
-
-		static void			Install_CCA();
-		static void			Install_CCI();
-		static void			Install_CCW();
 
 		static void			ProcessFoundForm(ProcessFoundFormArgs, std::string a_section);
 		static void			Install_QuestRewards();

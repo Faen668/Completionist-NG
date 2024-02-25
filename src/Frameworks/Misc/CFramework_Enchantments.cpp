@@ -1,5 +1,8 @@
 #include "CFramework_Enchantments.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "Internal Utility/PatchListener.hpp"
+#include "Internal Utility/Events.hpp"
+#include "DKUtil/Hook.hpp"
 
 #undef AddForm
 #undef GetModuleHandle
@@ -76,66 +79,79 @@ namespace CFramework_Enchantments {
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
 
-		if (SKSE::WinAPI::GetModuleHandle(L"YesImSure.dll"))
-		{
-			YesImSureSettings::Load();
-			if (!*YesImSureSettings::EnchantmentLearned) {
-				auto& trampoline = SKSE::GetTrampoline();
-				_OnEnchantmentLearnt = trampoline.write_call<5>(RELOCATION_ID(50459, 51363).address() + REL::Relocate(0x1B1, 0x1B1), OnEnchantmentLearnt);
-				INFO("Enchantment Hook Installed");
-			}
-			else {
-				INFO("Enchantment Hook Not Installed");
-				auto* message = "=== Completionist === \n \n You are using 'Yes I'm Sure' but have not turned off the setting 'EnchantmentLearned' \n\n With this setting enabled, Completionist can not update enchantment tracking in real time and will default to updating when opening the MCM. \n\n You can disable the setting in the .toml file provided by 'Yes I'm Sure'.";
-				RE::DebugMessageBox(message);
-			}
+		std::uintptr_t base = REL::RelocationID(50459, 51363).address();
+		auto& trampoline = SKSE::GetTrampoline();
+
+		if (SKSE::WinAPI::GetModuleHandle(L"YesImSure.dll") &&
+			*RE::stl::adjust_pointer<dku::Hook::OpCode>(AsPointer(base), REL::Relocate(0x1A6, 0x1A6)) == dku::Hook::NOP) {
+			auto offset = REL::Relocate(0x1B4, 0x1B4);
+			auto func = base + offset;
+			trampoline.write_call<6>(func, OnEnchantmentLearnt_Compat);
+			INFO("Installed Yes Im Sure Hook");
 		}
-		else
-		{
-			auto& trampoline = SKSE::GetTrampoline();
-			_OnEnchantmentLearnt = trampoline.write_call<5>(RELOCATION_ID(50459, 51363).address() + REL::Relocate(0x1B1, 0x1B1), OnEnchantmentLearnt);
-			INFO("Enchantment Hook Installed");
+		else {
+			auto offset = REL::Relocate(0x1B1, 0x1B1);
+			auto func = base + offset;
+			_OnEnchantmentLearnt = trampoline.write_call<5>(func, OnEnchantmentLearnt_Legacy);
+			INFO("Installed Legacy Enchantment Hook");
 		}
+
+		INFO("No Hook Installed");
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( On Enchantment Learnt ) --
 	//---------------------------------------------------
 
-	const char* CHandler::OnEnchantmentLearnt(RE::TESForm* a_form)
+	void CHandler::OnEnchantmentLearnt_Compat(const char* a_fmt, RE::EnchantmentItem* a_ench) {
+		ProcessEnchantment(a_ench);
+		INFO("Processing {}", a_ench->GetName());
+	};
+
+	//---------------------------------------------------
+	//-- Framework Functions ( On Enchantment Learnt ) --
+	//---------------------------------------------------
+
+	const char* CHandler::OnEnchantmentLearnt_Legacy(RE::EnchantmentItem* a_ench) {
+
+		ProcessEnchantment(a_ench);
+		INFO("Processing {}", a_ench->GetName());
+
+		return _OnEnchantmentLearnt(a_ench);
+	};
+
+	//---------------------------------------------------
+	//-- Framework Functions ( On Enchantment Learnt ) --
+	//---------------------------------------------------
+
+	void CHandler::ProcessEnchantment(RE::EnchantmentItem* a_form)
 	{
 		if (CFramework_Enchantments_VA::Data.HasForm(a_form)) {
 			auto base = CFramework_Enchantments_VA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_VA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
 			CHandler::ProcessFoundForm(base, section::kVanilla_A);
-			return _OnEnchantmentLearnt(a_form);
 		}
 
 		if (CFramework_Enchantments_VW::Data.HasForm(a_form)) {
 			auto base = CFramework_Enchantments_VW::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_VW::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
 			CHandler::ProcessFoundForm(base, section::kVanilla_W);
-			return _OnEnchantmentLearnt(a_form);
 		}
 
 		if (CFramework_Enchantments_SA::Data.HasForm(a_form)) {
 			auto base = CFramework_Enchantments_SA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_SA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
 			CHandler::ProcessFoundForm(base, section::kSummermyst_A);
-			return _OnEnchantmentLearnt(a_form);
 		}
 
 		if (CFramework_Enchantments_SW::Data.HasForm(a_form)) {
 			auto base = CFramework_Enchantments_SW::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_SW::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
 			CHandler::ProcessFoundForm(base, section::kSummermyst_W);
-			return _OnEnchantmentLearnt(a_form);
 		}
 
-		if (CFramework_Enchantments_NGA::Data.HasForm(a_form)) {
-			auto base = CFramework_Enchantments_NGA::Data.GetBase(a_form->GetFormID()) ? CFramework_Enchantments_NGA::Data.GetBase(a_form->GetFormID()) : a_form->GetFormID();
-			CHandler::ProcessFoundForm(base, section::kNecromanticGrim);
-			return _OnEnchantmentLearnt(a_form);
-		}
-
-		return _OnEnchantmentLearnt(a_form);
-	}
+		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
+			for (auto& [pageName, patchData] : groups->GetPatches()) {
+				patchData->OnEnchantmentLearnt(a_form);
+			};
+		};
+	};
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
@@ -233,28 +249,6 @@ namespace CFramework_Enchantments {
 			SW_EntriesFound = std::ranges::count(SW_BoolArray, true);
 			break;
 		}
-		case kNecromanticGrim:
-		{
-			if (!FoundItemData_NoShow.HasForm(a_baseID)) {
-				auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, CFramework_Enchantments_NGA::Data.GetForm(a_baseID)->GetName());
-				FrameworkAPI::SendNotification(msg, "NotifySpecial");
-				FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kLearnt, CFramework_Enchantments_NGA::Data.GetForm(a_baseID)->GetName());
-			}
-
-			FoundItemData_NoShow.AddForm(a_baseID);
-			for (auto var : CFramework_Enchantments_NGA::Data.GetAllVariations()) {
-				if (CFramework_Enchantments_NGA::Data.GetBase(var) == a_baseID) {
-					FoundItemData_NoShow.AddForm(var);
-				}
-			}
-
-			auto t_pos = std::ranges::find(NGA_FormArray, CFramework_Enchantments_NGA::Data.GetForm(a_baseID));
-			auto b_pos = std::distance(NGA_FormArray.begin(), t_pos);
-
-			NGA_BoolArray[b_pos] = true;
-			NGA_EntriesFound = std::ranges::count(NGA_BoolArray, true);
-			break;
-		}
 		default: 
 			break;
 		}
@@ -296,13 +290,6 @@ namespace CFramework_Enchantments {
 			}
 		}
 
-		for (auto i = 0; i < NGA_FormArray.size(); i++) {
-			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(NGA_FormArray[i]); enchantment && enchantment->GetKnown()) {
-				NGA_BoolArray[i] = true;
-				FoundItemData_NoShow.AddForm(enchantment);
-			}
-		}
-
 		CHandler::UpdateCounts();
 		return EventResult::kContinue;
 	}
@@ -322,14 +309,13 @@ namespace CFramework_Enchantments {
 		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_VW, "Skyrim.esm");
 		CFramework_Enchantments_VW::Data.CompileFormArray(CFramework_Enchantments::Forms_DW, "Dragonborn.esm");
 
+		if (Serialization::CompletionistData::IsModInstalled("Summermyst - Enchantments of Skyrim.esp"))
+		{
+			CFramework_Master::InstalledPatchesForMCMDisplay++;
+		}
+
 		CFramework_Enchantments_SA::Data.CompileFormArray(CFramework_Enchantments::Forms_SA, "Summermyst - Enchantments of Skyrim.esp");
 		CFramework_Enchantments_SW::Data.CompileFormArray(CFramework_Enchantments::Forms_SW, "Summermyst - Enchantments of Skyrim.esp");
-
-		if (Serialization::CompletionistData::IsModInstalled("ccvsvsse003-necroarts.esl"))
-		{
-			CFramework_Enchantments_NGA::Data.CompileFormArray(CFramework_Enchantments::Forms_NGA, "ccvsvsse003-necroarts.esl");
-			CFramework_Enchantments_NGA::Data.Populate(NGA_NameArray, NGA_FormArray, NGA_BoolArray, NGA_TextArray);
-		}
 
 		CFramework_Enchantments_VA::Data.Populate(VA_NameArray, VA_FormArray, VA_BoolArray, VA_TextArray);
 		CFramework_Enchantments_VW::Data.Populate(VW_NameArray, VW_FormArray, VW_BoolArray, VW_TextArray);
@@ -352,9 +338,6 @@ namespace CFramework_Enchantments {
 		}
 		for (auto i = 0; i < SW_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SW_FormArray[i], SW_NameArray[i], "$MCMPageWEnchantments", std::to_underlying(EntryCategory::kEnch)));
-		}
-		for (auto i = 0; i < NGA_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(NGA_FormArray[i], NGA_NameArray[i], "$MCMPageAEnchantments", std::to_underlying(EntryCategory::kEnch)));
 		}
 	}
 
@@ -391,13 +374,6 @@ namespace CFramework_Enchantments {
 				FoundItemData_NoShow.AddForm(enchantment);
 			}
 		}
-
-		for (auto i = 0; i < NGA_FormArray.size(); i++) {
-			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(NGA_FormArray[i]); enchantment && (enchantment->GetKnown() || FoundItemData_NoShow.HasForm(enchantment->GetFormID()))) {
-				NGA_BoolArray[i] = true;
-				FoundItemData_NoShow.AddForm(enchantment);
-			}
-		}
 		CHandler::UpdateCounts();
 	}
 
@@ -418,8 +394,5 @@ namespace CFramework_Enchantments {
 
 		SW_EntriesTotal = SW_FormArray.size();
 		SW_EntriesFound = std::ranges::count(SW_BoolArray, true);
-
-		NGA_EntriesTotal = NGA_FormArray.size();
-		NGA_EntriesFound = std::ranges::count(NGA_BoolArray, true);
 	}
 }

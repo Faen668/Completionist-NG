@@ -129,6 +129,13 @@ event OnPageReset(string page)
 	OptionObjR = New ObjectReference[128]
 
 	if (!Completionist_Busy.GetValue())
+
+		if (CurrentPage == "$MCMPageKillCounts")
+			GoToState("KillCounts")
+			BuildKillCountPage()
+			return
+		endif
+
 		Select_Page()
 	else
 		self.ShowMessage("$BusyMessage", false, "$ConfirmY")
@@ -143,6 +150,70 @@ Event OnOptionHighlight(Int val)
 	
 	SetInfoText(GetHighlightText(val, Get_Option_Name(val)))
 EndEvent
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+Function BuildKillCountPage()
+	SetCursorFillMode(LEFT_TO_RIGHT)
+	OptionIndx = 0
+
+	AddHeaderOption("Kill Counts")
+	AddHeaderOption("")
+
+	string[] kills = GetPlayerKillNames()
+
+	if (kills.length == 0)
+		AddTextOption("Nothing to see yet...", "", 0)
+		AddTextOption("Go murder something!", "", 0)
+		return
+	endif
+
+	int Idx = 0
+	while Idx < kills.length
+		OptionSlot[OptionIndx] = AddTextOption(kills[Idx], GetCombinedKillString(kills[Idx]), 0)
+		OptionName[OptionIndx] = kills[Idx]
+		Idx += 1
+		OptionIndx += 1
+	endwhile
+endFunction
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+State KillCounts
+
+	Event OnOptionSelect(Int val)
+		String Name = Get_Option_Name(val)
+		
+		if (Name == "")
+			return
+		endif
+
+		if (GetPlayerKillCount(Name) > 0)
+			if ShowMessage("$ResetKill{" + Name + "}", True, "$ConfirmY", "$ConfirmN")
+				ResetPlayerKill(Name)
+				ForcePageReset()
+			endif
+		else
+			if ShowMessage("$RemoveKill{" + Name + "}", True, "$ConfirmY", "$ConfirmN")
+				RemovePlayerKill(Name)
+				ForcePageReset()
+			endif
+		endif
+	endEvent
+
+	Event OnOptionHighlight(Int val)
+		String Name = Get_Option_Name(val)
+	
+		if (Name == "")
+			return
+		endif
+		SetInfoText(GetDeathString(Name))
+	endevent
+endState
 
 ;---------------------------------------------------
 ;-- Functions --------------------------------------
@@ -392,7 +463,7 @@ endFunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_1Entry(int a_frameworkID_a, string a_header_a, string a_header_b, int a_loc_a = 0)
+Function DisplayPage_1Entry(int a_frameworkID_a, string a_header_a, string a_header_b, int a_loc_a = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a)
 
@@ -400,7 +471,11 @@ Function DisplayPage_1Entry(int a_frameworkID_a, string a_header_a, string a_hea
 	SetCursorPosition(PagePIndex)
 	AddHeaderOption(a_header_a)
 	PagePIndex += 1
-	AddHeaderOption(a_header_b + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+	if (!_local)
+		AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_b)
+	else
+		AddHeaderOption(a_header_b + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+	endif
 	PagePIndex += 1	
 	
 	PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
@@ -410,7 +485,7 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_2Entry(int a_frameworkID_a, int a_frameworkID_b, string a_header_a, string a_header_b, string a_header_c, string a_header_d, int a_loc_a = 0, int a_loc_b = 0)
+Function DisplayPage_2Entry(int a_frameworkID_a, int a_frameworkID_b, string a_header_a, string a_header_b, string a_header_c, string a_header_d, int a_loc_a = 0, int a_loc_b = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a, a_frameworkID_b)
 	
@@ -420,7 +495,11 @@ Function DisplayPage_2Entry(int a_frameworkID_a, int a_frameworkID_b, string a_h
 	if (FormArray_A) && (FormArray_A[0] != "")
 		AddHeaderOption(a_header_a)
 		PagePIndex += 1
-		AddHeaderOption(a_header_c + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_c)
+		else
+			AddHeaderOption(a_header_c + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
 		InsertPageBreak()
@@ -430,7 +509,11 @@ Function DisplayPage_2Entry(int a_frameworkID_a, int a_frameworkID_b, string a_h
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_b)
 		PagePIndex += 1
-		AddHeaderOption(a_header_d + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_B + "/" + EntriesTotal_B + " " + a_header_d)
+		else
+			AddHeaderOption(a_header_d + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		endif
 		PagePIndex += 1
 		PopulatePage(FormArray_B, NameArray_B, TextArray_B, BoolArray_B, a_frameworkID_b, a_loc_b)
 		InsertPageBreak()
@@ -441,7 +524,7 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_3Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0)
+Function DisplayPage_3Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a, a_frameworkID_b, a_frameworkID_c)
 	
@@ -451,7 +534,11 @@ Function DisplayPage_3Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 	if (FormArray_A) && (FormArray_A[0])
 		AddHeaderOption(a_header_a)
 		PagePIndex += 1
-		AddHeaderOption(a_header_d + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_d)
+		else
+			AddHeaderOption(a_header_d + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
 		InsertPageBreak()
@@ -461,7 +548,11 @@ Function DisplayPage_3Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_b)
 		PagePIndex += 1
-		AddHeaderOption(a_header_e + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_B + "/" + EntriesTotal_B + " " + a_header_e)
+		else
+			AddHeaderOption(a_header_e + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		endif
 		PagePIndex += 1
 		PopulatePage(FormArray_B, NameArray_B, TextArray_B, BoolArray_B, a_frameworkID_b, a_loc_b)
 		InsertPageBreak()
@@ -471,7 +562,11 @@ Function DisplayPage_3Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_c)
 		PagePIndex += 1
-		AddHeaderOption(a_header_f + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_C + "/" + EntriesTotal_C + " " + a_header_f)
+		else
+			AddHeaderOption(a_header_f + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_C, NameArray_C, TextArray_C, BoolArray_C, a_frameworkID_c, a_loc_c)
 	endif
@@ -481,7 +576,7 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0)
+Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a, a_frameworkID_b, a_frameworkID_c, a_frameworkID_d)
 	
@@ -491,7 +586,11 @@ Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 	if (FormArray_A) && (FormArray_A[0])
 		AddHeaderOption(a_header_a)
 		PagePIndex += 1
-		AddHeaderOption(a_header_e + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_e)
+		else
+			AddHeaderOption(a_header_e + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
 		InsertPageBreak()
@@ -501,7 +600,11 @@ Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_b)
 		PagePIndex += 1
-		AddHeaderOption(a_header_f + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_B + "/" + EntriesTotal_B + " " + a_header_f)
+		else
+			AddHeaderOption(a_header_f + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		endif
 		PagePIndex += 1
 		PopulatePage(FormArray_B, NameArray_B, TextArray_B, BoolArray_B, a_frameworkID_b, a_loc_b)
 		InsertPageBreak()
@@ -511,7 +614,11 @@ Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_c)
 		PagePIndex += 1
-		AddHeaderOption(a_header_g + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_C + "/" + EntriesTotal_C + " " + a_header_g)
+		else
+			AddHeaderOption(a_header_g + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_C, NameArray_C, TextArray_C, BoolArray_C, a_frameworkID_c, a_loc_c)
 		InsertPageBreak()
@@ -521,7 +628,11 @@ Function DisplayPage_4Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_d)
 		PagePIndex += 1
-		AddHeaderOption(a_header_h + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_D + "/" + EntriesTotal_D + " " + a_header_h)
+		else
+			AddHeaderOption(a_header_h + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_D, NameArray_D, TextArray_D, BoolArray_D, a_frameworkID_d, a_loc_d)
 	endif
@@ -531,7 +642,7 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, int a_frameworkID_e, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, string a_header_i, string a_header_j, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0, int a_loc_e = 0)
+Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, int a_frameworkID_e, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, string a_header_i, string a_header_j, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0, int a_loc_e = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a, a_frameworkID_b, a_frameworkID_c, a_frameworkID_d, a_frameworkID_e)
 	
@@ -541,7 +652,11 @@ Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 	if (FormArray_A) && (FormArray_A[0])
 		AddHeaderOption(a_header_a)
 		PagePIndex += 1
-		AddHeaderOption(a_header_f + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_f)
+		else
+			AddHeaderOption(a_header_f + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
 		InsertPageBreak()
@@ -551,7 +666,11 @@ Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_b)
 		PagePIndex += 1
-		AddHeaderOption(a_header_g + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_B + "/" + EntriesTotal_B + " " + a_header_g)
+		else
+			AddHeaderOption(a_header_g + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		endif
 		PagePIndex += 1
 		PopulatePage(FormArray_B, NameArray_B, TextArray_B, BoolArray_B, a_frameworkID_b, a_loc_b)
 		InsertPageBreak()
@@ -561,7 +680,11 @@ Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_c)
 		PagePIndex += 1
-		AddHeaderOption(a_header_h + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_C + "/" + EntriesTotal_C + " " + a_header_h)
+		else
+			AddHeaderOption(a_header_h + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_C, NameArray_C, TextArray_C, BoolArray_C, a_frameworkID_c, a_loc_c)
 		InsertPageBreak()
@@ -571,7 +694,11 @@ Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_d)
 		PagePIndex += 1
-		AddHeaderOption(a_header_i + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_D + "/" + EntriesTotal_D + " " + a_header_i)
+		else
+			AddHeaderOption(a_header_i + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_D, NameArray_D, TextArray_D, BoolArray_D, a_frameworkID_d, a_loc_d)
 		InsertPageBreak()
@@ -581,7 +708,11 @@ Function DisplayPage_5Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_e)
 		PagePIndex += 1
-		AddHeaderOption(a_header_j + "{" + EntriesFound_E + "}{" + EntriesTotal_E + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_E + "/" + EntriesTotal_E + " " + a_header_j)
+		else
+			AddHeaderOption(a_header_j + "{" + EntriesFound_E + "}{" + EntriesTotal_E + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_E, NameArray_E, TextArray_E, BoolArray_E, a_frameworkID_e, a_loc_e)
 	endif
@@ -591,7 +722,7 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, int a_frameworkID_e, int a_frameworkID_f, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, string a_header_i, string a_header_j, string a_header_k, string a_header_l, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0, int a_loc_e = 0, int a_loc_f = 0)
+Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_frameworkID_c, int a_frameworkID_d, int a_frameworkID_e, int a_frameworkID_f, string a_header_a, string a_header_b, string a_header_c, string a_header_d, string a_header_e, string a_header_f, string a_header_g, string a_header_h, string a_header_i, string a_header_j, string a_header_k, string a_header_l, int a_loc_a = 0, int a_loc_b = 0, int a_loc_c = 0, int a_loc_d = 0, int a_loc_e = 0, int a_loc_f = 0, bool _local = true)
 	
 	LoadArrays(a_frameworkID_a, a_frameworkID_b, a_frameworkID_c, a_frameworkID_d, a_frameworkID_e, a_frameworkID_f)
 	
@@ -601,7 +732,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 	if (FormArray_A) && (FormArray_A[0])
 		AddHeaderOption(a_header_a)
 		PagePIndex += 1
-		AddHeaderOption(a_header_g + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_A + "/" + EntriesTotal_A + " " + a_header_g)
+		else
+			AddHeaderOption(a_header_g + "{" + EntriesFound_A + "}{" + EntriesTotal_A + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_A, NameArray_A, TextArray_A, BoolArray_A, a_frameworkID_a, a_loc_a)
 		InsertPageBreak()
@@ -611,7 +746,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_b)
 		PagePIndex += 1
-		AddHeaderOption(a_header_h + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_B + "/" + EntriesTotal_B + " " + a_header_h)
+		else
+			AddHeaderOption(a_header_h + "{" + EntriesFound_B + "}{" + EntriesTotal_B + "}")
+		endif
 		PagePIndex += 1
 		PopulatePage(FormArray_B, NameArray_B, TextArray_B, BoolArray_B, a_frameworkID_b, a_loc_b)
 		InsertPageBreak()
@@ -621,7 +760,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_c)
 		PagePIndex += 1
-		AddHeaderOption(a_header_i + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_C + "/" + EntriesTotal_C + " " + a_header_i)
+		else
+			AddHeaderOption(a_header_i + "{" + EntriesFound_C + "}{" + EntriesTotal_C + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_C, NameArray_C, TextArray_C, BoolArray_C, a_frameworkID_c, a_loc_c)
 		InsertPageBreak()
@@ -631,7 +774,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_d)
 		PagePIndex += 1
-		AddHeaderOption(a_header_j + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_D + "/" + EntriesTotal_D + " " + a_header_j)
+		else
+			AddHeaderOption(a_header_j + "{" + EntriesFound_D + "}{" + EntriesTotal_D + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_D, NameArray_D, TextArray_D, BoolArray_D, a_frameworkID_d, a_loc_d)
 		InsertPageBreak()
@@ -641,7 +788,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_e)
 		PagePIndex += 1
-		AddHeaderOption(a_header_k + "{" + EntriesFound_E + "}{" + EntriesTotal_E + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_E + "/" + EntriesTotal_E + " " + a_header_k)
+		else
+			AddHeaderOption(a_header_k + "{" + EntriesFound_E + "}{" + EntriesTotal_E + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_E, NameArray_E, TextArray_E, BoolArray_E, a_frameworkID_e, a_loc_e)
 		InsertPageBreak()
@@ -651,7 +802,11 @@ Function DisplayPage_6Entry(int a_frameworkID_a, int a_frameworkID_b, int a_fram
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(a_header_f)
 		PagePIndex += 1
-		AddHeaderOption(a_header_l + "{" + EntriesFound_F + "}{" + EntriesTotal_F + "}")
+		if (!_local)
+			AddHeaderOption(EntriesFound_F + "/" + EntriesTotal_F + " " + a_header_l)
+		else
+			AddHeaderOption(a_header_l + "{" + EntriesFound_F + "}{" + EntriesTotal_F + "}")
+		endif
 		PagePIndex += 1	
 		PopulatePage(FormArray_F, NameArray_F, TextArray_F, BoolArray_F, a_frameworkID_f, a_loc_f)
 		InsertPageBreak()
@@ -703,12 +858,6 @@ function Select_Page()
 		
 	elseif (CurrentPage == "$MCMPageConditionals")
 		DisplayPage_1Entry(67, "$PageHeaderConditionals1", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageCCItems")
-		DisplayPage_3Entry(05, 06, 07, "$PageHeaderGenericA", "$PageHeaderGenericI", "$PageHeaderGenericW", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
@@ -778,12 +927,6 @@ function Select_Page()
 
 ;---------------------------------------------------
 ;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooksCC")
-		DisplayPage_6Entry(25, 26, 62, 63, 64, 65, "$PageHeaderBooks1", "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
 		
 	elseif (CurrentPage == "$MCMPageLocations1")
 		DisplayPage_1Entry(27, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
@@ -815,12 +958,6 @@ function Select_Page()
 ;---------------------------------------------------
 ;---------------------------------------------------
 
-	elseif (CurrentPage == "$MCMPageLocations6")
-		DisplayPage_1Entry(32, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
 	elseif (CurrentPage == "$MCMPageDoomstone")
 		DisplayPage_1Entry(33, "$PageHeaderDoomstone1", "$PageHeaderGenericFoundL")
 		
@@ -834,7 +971,7 @@ function Select_Page()
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageAEnchantments")
-		DisplayPage_3Entry(36, 66, 37, "$PageHeaderAEnchantments", "$PageHeaderNEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
+		DisplayPage_2Entry(36, 37, "$PageHeaderAEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
 	
 ;---------------------------------------------------
 ;---------------------------------------------------
@@ -846,13 +983,13 @@ function Select_Page()
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPagePets")
-		DisplayPage_5Entry(40, 41, 42, 43, 339, "$PageHeaderPets1", "$PageHeaderPets2", "$PageHeaderPets3", "$PageHeaderPets4", "$PageHeaderPets5", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO")
+		DisplayPage_1Entry(40, "$PageHeaderPets1", "$PageHeaderGenericFoundO")
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageHouses")
-		DisplayPage_3Entry(44, 45, 46, "$PageHeaderHouses1", "$PageHeaderHouses2","$PageHeaderHouses3", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO", "$PageHeaderGenericFoundO")
+		DisplayPage_1Entry(44, "$PageHeaderHouses1", "$PageHeaderGenericFoundO")
 
 ;---------------------------------------------------
 ;---------------------------------------------------
@@ -860,379 +997,20 @@ function Select_Page()
 	elseif (CurrentPage == "$MCMPageShouts")
 		GoToState("State_NoSelect")
 		DisplayPage_3Entry(47, 48, 49, "$PageHeaderShouts1", "$PageHeaderShouts2","$PageHeaderShouts3", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")	
-
-;---------------------------------------------------
-;---------------------------------------------------
-	
-	elseif (CurrentPage == "$MCMPageAdditionalHearthfireDolls")
-		DisplayPage_1Entry(200, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBrotherhood")
-		DisplayPage_3Entry(201, 202, 203, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageClockwork")
-		DisplayPage_3Entry(204, 205, 206, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-	
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFalskaar")
-		DisplayPage_3Entry(207, 208, 209, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFossilMining1")
-		DisplayPage_1Entry(210, "$PageHeaderFossilsC", "$PageHeaderGenericFoundF")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFossilMining2")
-		DisplayPage_1Entry(211, "$PageHeaderFossilsU", "$PageHeaderGenericFoundF")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFossilMining3")
-		DisplayPage_1Entry(212, "$PageHeaderFossilsR", "$PageHeaderGenericFoundF")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageGrayCowl")
-		DisplayPage_3Entry(213, 214, 215, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageOblivionArtifacts")
-		DisplayPage_3Entry(216, 217, 218, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageHelgen")
-		DisplayPage_3Entry(219, 220, 221, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageInterestingNPCs")
-		DisplayPage_3Entry(222, 223, 224, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageMoonStar")
-		DisplayPage_3Entry(225, 226, 227, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageMoonpath")
-		DisplayPage_2Entry(228, 229, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageProjectAHO")
-		DisplayPage_3Entry(230, 231, 232, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageSUT1")
-		DisplayPage_4Entry(233, 234, 235, 236, "$PageHeaderSUTJA", "$PageHeaderSUTPL", "$PageHeaderSUTFI", "$PageHeaderSUTIN", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageSUT2")
-		DisplayPage_4Entry(237, 238, 239, 240, "$PageHeaderSUTSK", "$PageHeaderSUTGL", "$PageHeaderSUTGE", "$PageHeaderSUTWI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageSUT3")
-		DisplayPage_4Entry(241, 242, 243, 244, "$PageHeaderSUTWE", "$PageHeaderSUTAL", "$PageHeaderSUTGO", "$PageHeaderSUTCO", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFishF")
-		DisplayPage_1Entry(245, "$PageHeaderFish", "$PageHeaderGenericFoundC")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFishI")
-		DisplayPage_1Entry(246, "$PageHeaderItems1", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFishB")
-		DisplayPage_1Entry(247, "$PageHeaderBooks1", "$PageHeaderGenericFoundB")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageFishL")
-		DisplayPage_4Entry(248, 249, 250, 251, "$PageHeaderFishingA", "$PageHeaderFishingC", "$PageHeaderFishingL", "$PageHeaderFishingS", "$PageHeaderGenericFoundL", "$PageHeaderGenericFoundL", "$PageHeaderGenericFoundL", "$PageHeaderGenericFoundL", 1, 1, 1, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTeldrynSerious")
-		DisplayPage_3Entry(252, 253, 254, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageThunderchild")
-		DisplayPage_3Entry(255, 256, 257, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageUndeath")
-		DisplayPage_2Entry(258, 259, "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 1)
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageLull")
-		DisplayPage_3Entry(260, 261, 262, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageWintersun")
-		DisplayPage_3Entry(263, 264, 265, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageWyrmstooth")
-		DisplayPage_3Entry(266, 267, 268, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)	
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageVIG1")
-		DisplayPage_1Entry(269, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageVIG2")
-		DisplayPage_1Entry(270, "$PageHeaderGenericB", "$PageHeaderGenericFoundB")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageVIG3")
-		DisplayPage_1Entry(271, "$PageHeaderGenericL", "$PageHeaderGenericFoundL")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Apocalypse1")
-		DisplayPage_2Entry(300, 301, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Apocalypse2")
-		DisplayPage_3Entry(302, 303, 304, "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageTomes_Odin1")
-		DisplayPage_2Entry(305, 306, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageTomes_Odin2")
-		DisplayPage_3Entry(307, 308, 309, "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Mysticism1")
-		DisplayPage_2Entry(310, 311, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Mysticism2")
-		DisplayPage_3Entry(312, 313, 314, "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_ForgottenMagic1")
-		DisplayPage_2Entry(315, 316, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_ForgottenMagic2")
-		DisplayPage_3Entry(317, 318, 319, "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Triumvirate1")
-		DisplayPage_2Entry(320, 321, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTomes_Triumvirate2")
-		DisplayPage_3Entry(322, 323, 324, "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-	
-	elseif (CurrentPage == "$MCMPageCheese1")
-		DisplayPage_1Entry(327, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-
-	elseif (CurrentPage == "$MCMPageCheese2")
-		DisplayPage_1Entry(328, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-
-	elseif (CurrentPage == "$MCMPageCheese3")
-		DisplayPage_1Entry(329, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-
-	elseif (CurrentPage == "$MCMPageCheese4")
-		DisplayPage_1Entry(326, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageRequiem1")
-		DisplayPage_2Entry(331, 330, "$PageHeaderGenericI", "$PageHeaderGenericA", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-	elseif (CurrentPage == "$MCMPageRequiem2")
-		DisplayPage_2Entry(332, 333, "$PageHeaderGenericS", "$PageHeaderGenericB", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundB")
-		
-	elseif (CurrentPage == "$MCMPageRequiem3")
-		DisplayPage_1Entry(334, "$PageHeaderGenericT", "$PageHeaderGenericFoundS")
-
-	elseif (CurrentPage == "$MCMPageRequiem4")
-		DisplayPage_1Entry(335, "$PageHeaderGenericW", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageInnSoaps")
-		DisplayPage_1Entry(336, "$PageHeaderGenericI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageJaysusSwords")
-		DisplayPage_1Entry(337, "$PageHeaderGenericW", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPagRoyalArmory")
-		DisplayPage_1Entry(338, "$PageHeaderGenericW", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageCloaksOfSkyrim")
-		DisplayPage_2Entry(340, 341, "$PageHeaderCloaks1", "$PageHeaderCloaks2", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageICOW")
-		DisplayPage_4Entry(342, 343, 344, 345, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericS", "$PageHeaderGenericT", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundS")		
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageTTB")
-		DisplayPage_3Entry(346, 347, 348, "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)		
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBadGremlins")
-		DisplayPage_4Entry(349, 350, 351, 352, "$PageHeaderBGC1", "$PageHeaderBGC2", "$PageHeaderBGC3", "$PageHeaderBGC4", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", 0, 0, 0, 0)		
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageAmuletsofSkyrim1")
-		DisplayPage_3Entry(353, 354, 355, "$PageHeaderAOS1", "$PageHeaderAOS2", "$PageHeaderAOS3", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", 0, 0, 0)		
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageAmuletsofSkyrim2")
-		DisplayPage_4Entry(356, 357, 358, 359, "$PageHeaderAOS4", "$PageHeaderAOS5", "$PageHeaderAOS6", "$PageHeaderAOS7", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", 0, 0, 0, 0)	
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageAmuletsofSkyrim3")
-		DisplayPage_5Entry(360, 361, 362 ,363 ,364, "$PageHeaderAOS8", "$PageHeaderAOS9", "$PageHeaderAOS10", "$PageHeaderAOS11", "$PageHeaderAOS12", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI", 0, 0, 0, 0, 0)	
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	else
-		if (!IsSettingsPage(CurrentPage))
-			
-			if (GetHeaderRequired(CurrentPage, 0)) && (GetHeaderRequired(CurrentPage, 1)) && (GetHeaderRequired(CurrentPage, 2))
-				DisplayPage_3Entry(GetValidMiscPatchPageIDForItems(CurrentPage), GetValidMiscPatchPageIDForBooks(CurrentPage), GetValidMiscPatchPageIDForMapMa(CurrentPage), "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 0, 1)
-				Return
-			endif
-
-			if (GetHeaderRequired(CurrentPage, 0)) && (GetHeaderRequired(CurrentPage, 1))
-				DisplayPage_2Entry(GetValidMiscPatchPageIDForItems(CurrentPage), GetValidMiscPatchPageIDForBooks(CurrentPage), "$PageHeaderGenericI", "$PageHeaderGenericB", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundB", 0, 0)
-				Return
-			endif
-
-			if (GetHeaderRequired(CurrentPage, 0)) && (GetHeaderRequired(CurrentPage, 2))
-				DisplayPage_2Entry(GetValidMiscPatchPageIDForItems(CurrentPage), GetValidMiscPatchPageIDForMapMa(CurrentPage), "$PageHeaderGenericI", "$PageHeaderGenericL", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundL", 0, 1)
-				Return
-			endif			
-
-			if (GetHeaderRequired(CurrentPage, 1)) && (GetHeaderRequired(CurrentPage, 2))
-				DisplayPage_2Entry(GetValidMiscPatchPageIDForBooks(CurrentPage), GetValidMiscPatchPageIDForMapMa(CurrentPage), "$PageHeaderGenericB", "$PageHeaderGenericL", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundL", 0, 1)
-				Return
-			endif
-
-			if (GetHeaderRequired(CurrentPage, 0))
-				DisplayPage_1Entry(GetValidMiscPatchPageIDForItems(CurrentPage), "$PageHeaderGenericI", "$PageHeaderGenericFoundI", 0)
-				Return
-			endif
-
-			if (GetHeaderRequired(CurrentPage, 1))
-				DisplayPage_1Entry(GetValidMiscPatchPageIDForBooks(CurrentPage), "$PageHeaderGenericB", "$PageHeaderGenericFoundB", 0)
-				Return
-			endif
-
-			if (GetHeaderRequired(CurrentPage, 2))
-				DisplayPage_1Entry(GetValidMiscPatchPageIDForMapMa(CurrentPage), "$PageHeaderGenericL", "$PageHeaderGenericFoundL", 1)
-				Return
-			endif			
-		endif
 	endif
 EndFunction	
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+int Function GetIntValue(string value)
+	if value == "true"
+		return 1
+	endif
+
+	return 0
+endfunction
 
 ;---------------------------------------------------
 ;-- States -----------------------------------------
@@ -1251,6 +1029,7 @@ State Framework_TrackingState
 	Event OnOptionSelect(Int val)
 		
 		Form OptnForm = Get_Option_Form(val)
+		String OptnName = Get_Option_Name(val)
 		Int FrameworkID = Get_Option_frID(val)
 
 		if (FrameworkID == FrameworkLocationID)
@@ -1268,22 +1047,26 @@ State Framework_TrackingState
 			return
 		endIf
 		
-		Int status = IsOptionCompleted(FrameworkID, OptnForm)
-		if (status == 1)
-			if ShowMessage("$RemoveCompleted{" + OptnForm.GetName() + "}", True, "$ConfirmY", "$ConfirmN")
-				SetTitleText("$ProcessingTitle")	
-				SetOptionCompleted(FrameworkID, OptnForm)
-				Jump("$ProcessingTitle", 2)
-			endIf
-		elseif (status == 0)
-			if ShowMessage("$ConfirmComplete{" + OptnForm.GetName() + "}", True, "$ConfirmY", "$ConfirmN")
-				SetTitleText("$ProcessingTitle")	
-				SetOptionCompleted(FrameworkID, OptnForm)
-				Jump("$ProcessingTitle", 2)
-			endIf
-		elseif (status == -1)
-			ShowMessage("Unable to find entry in array", false, "Ok")
-		endif			
+		if CompMCM.bCellScanner_Pinning_Enabled && IsItemPinnable(OptnForm) && ShowMessage("$SetPinned{" + OptnName + "}", True, "$ConfirmY", "$ConfirmN")
+			CompMCM.SwitchPinnedTarget(OptnForm, OptnName)
+		else
+			Int status = IsOptionCompleted(FrameworkID, OptnForm)
+			if (status == 1)
+				if ShowMessage("$RemoveCompleted{" + OptnForm.GetName() + "}", True, "$ConfirmY", "$ConfirmN")
+					SetTitleText("$ProcessingTitle")	
+					SetOptionCompleted(FrameworkID, OptnForm)
+					Jump("$ProcessingTitle", 2)
+				endIf
+			elseif (status == 0)
+				if ShowMessage("$ConfirmComplete{" + OptnForm.GetName() + "}", True, "$ConfirmY", "$ConfirmN")
+					SetTitleText("$ProcessingTitle")	
+					SetOptionCompleted(FrameworkID, OptnForm)
+					Jump("$ProcessingTitle", 2)
+				endIf
+			elseif (status == -1)
+				ShowMessage("Unable to find entry in array", false, "Ok")
+			endif
+		endif
 		
 	endEvent
 endState

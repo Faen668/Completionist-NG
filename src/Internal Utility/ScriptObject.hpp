@@ -3,6 +3,7 @@
 namespace ScriptObject
 {
 	auto FromForm(RE::TESForm* a_form, const std::string& a_scriptName)->ScriptObjectPtr;
+	auto FromForm(RE::BGSRefAlias* a_form, const std::string& a_scriptName)->ScriptObjectPtr;
 
 	auto GetVariable(ScriptObjectPtr a_object, std::string_view a_variableName)
 		->RE::BSScript::Variable*;

@@ -58,6 +58,12 @@ namespace CFramework_Uniques {
 	0x065C37,0x065C38,0x09380D,
 	};
 
+	constexpr Serialization::FormArray L_Forms_SUDS = {
+	0x000800,0x000801,0x000802,0x000803,0x000804,0x000805,0x000806,
+	0x000807,0x000808,0x000809,0x00080A,0x00080B,0x00080C,0x00080D,
+	0x00080E,0x00080F,0x000810,0x000811,0x000812,0x000813,
+	};
+
 	constexpr Serialization::FormArray Q_Forms_SK = {
 	0,
 	};
@@ -191,6 +197,10 @@ namespace CFramework_Uniques {
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
+
+		if (Serialization::CompletionistData::IsModInstalled("SUDs.esp")) {
+			CFramework_Master::InstalledPatchesForMCMDisplay++;
+		}
 	}
 
 	//---------------------------------------------------
@@ -232,27 +242,15 @@ namespace CFramework_Uniques {
 			return;
 		}
 
+		if (ItemDataSUDS.HasForm(a_event->baseObj)) {
+			auto base = ItemDataSUDS.GetBase(a_event->baseObj) ? ItemDataSUDS.GetBase(a_event->baseObj) : a_event->baseObj;
+			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataSUDS, SUDS_FormArray, &SUDS_BoolArray, &SUDS_EntriesFound, log::kCollected, "NotifyItems");
+			return;
+		}
+
 		if (ItemDataQ.HasForm(a_event->baseObj)) {
 			auto base = ItemDataQ.GetBase(a_event->baseObj) ? ItemDataQ.GetBase(a_event->baseObj) : a_event->baseObj;
 			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataQ, Q_FormArray, &Q_BoolArray, &Q_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataCCA.HasForm(a_event->baseObj)) {
-			auto base = ItemDataCCA.GetBase(a_event->baseObj) ? ItemDataCCA.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataCCA, CCA_FormArray, &CCA_BoolArray, &CCA_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataCCI.HasForm(a_event->baseObj)) {
-			auto base = ItemDataCCI.GetBase(a_event->baseObj) ? ItemDataCCI.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataCCI, CCI_FormArray, &CCI_BoolArray, &CCI_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataCCW.HasForm(a_event->baseObj)) {
-			auto base = ItemDataCCW.GetBase(a_event->baseObj) ? ItemDataCCW.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataCCW, CCW_FormArray, &CCW_BoolArray, &CCW_EntriesFound, log::kCollected, "NotifyItems");
 			return;
 		}
 	}
@@ -294,11 +292,6 @@ namespace CFramework_Uniques {
 			ItemDataW.AddForm(0x0AE087, "Skyrim.esm");
 		}
 
-		//Creation Club
-		CHandler::Install_CCA();
-		CHandler::Install_CCI();
-		CHandler::Install_CCW();
-
 		//Handle Quest Rewards
 		CHandler::Install_QuestRewards();
 
@@ -331,10 +324,7 @@ namespace CFramework_Uniques {
 		ItemDataL.CompileFormArray(CFramework_Uniques::L_Forms_DG, "Dawnguard.esm");
 		ItemDataL.CompileFormArray(CFramework_Uniques::L_Forms_HF, "HearthFires.esm");
 		ItemDataL.CompileFormArray(CFramework_Uniques::L_Forms_DB, "Dragonborn.esm");
-
-		ItemDataCCA.CompileFormArray(CFramework_Uniques::A_Forms_CC, "");
-		ItemDataCCI.CompileFormArray(CFramework_Uniques::I_Forms_CC, "");
-		ItemDataCCW.CompileFormArray(CFramework_Uniques::W_Forms_CC, "");
+		ItemDataSUDS.CompileFormArray(CFramework_Uniques::L_Forms_SUDS, "SUDs.esp");
 
 		ItemDataA.MergeAsCollectable();
 		ItemDataI.MergeAsCollectable();
@@ -342,10 +332,7 @@ namespace CFramework_Uniques {
 		ItemDataJ.MergeAsCollectable();
 		ItemDataL.MergeAsCollectable();
 		ItemDataQ.MergeAsCollectable();
-
-		ItemDataCCA.MergeAsCollectable();
-		ItemDataCCI.MergeAsCollectable();
-		ItemDataCCW.MergeAsCollectable();
+		ItemDataSUDS.MergeAsCollectable();
 
 		ItemDataA.Populate(A_NameArray, A_FormArray, A_BoolArray, A_TextArray);
 		ItemDataI.Populate(I_NameArray, I_FormArray, I_BoolArray, I_TextArray);
@@ -353,10 +340,7 @@ namespace CFramework_Uniques {
 		ItemDataJ.Populate(J_NameArray, J_FormArray, J_BoolArray, J_TextArray);
 		ItemDataL.Populate(L_NameArray, L_FormArray, L_BoolArray, L_TextArray);
 		ItemDataQ.Populate(Q_NameArray, Q_FormArray, Q_BoolArray, Q_TextArray);
-
-		ItemDataCCA.Populate(CCA_NameArray, CCA_FormArray, CCA_BoolArray, CCA_TextArray);
-		ItemDataCCI.Populate(CCI_NameArray, CCI_FormArray, CCI_BoolArray, CCI_TextArray);
-		ItemDataCCW.Populate(CCW_NameArray, CCW_FormArray, CCW_BoolArray, CCW_TextArray);
+		ItemDataSUDS.Populate(SUDS_NameArray, SUDS_FormArray, SUDS_BoolArray, SUDS_TextArray);
 
 		//Handle Quest Rewards Highlight Text
 		CHandler::Install_QuestRewards_Descriptions();
@@ -376,17 +360,11 @@ namespace CFramework_Uniques {
 		L_EntriesTotal = L_FormArray.size();
 		L_EntriesFound = std::ranges::count(L_BoolArray, true);
 
+		SUDS_EntriesTotal = SUDS_FormArray.size();
+		SUDS_EntriesFound = std::ranges::count(SUDS_BoolArray, true);
+
 		Q_EntriesTotal = Q_FormArray.size();
 		Q_EntriesFound = std::ranges::count(Q_BoolArray, true);
-
-		CCA_EntriesTotal = CCA_FormArray.size();
-		CCA_EntriesFound = std::ranges::count(CCA_BoolArray, true);
-
-		CCI_EntriesTotal = CCI_FormArray.size();
-		CCI_EntriesFound = std::ranges::count(CCI_BoolArray, true);
-
-		CCW_EntriesTotal = CCW_FormArray.size();
-		CCW_EntriesFound = std::ranges::count(CCW_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -410,17 +388,11 @@ namespace CFramework_Uniques {
 		for (auto i = 0; i < L_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(L_FormArray[i], L_NameArray[i], "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
 		}
+		for (auto i = 0; i < SUDS_NameArray.size(); i++) {
+			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SUDS_FormArray[i], SUDS_NameArray[i], "$MCMPageLiquor", std::to_underlying(EntryCategory::kItem)));
+		}
 		for (auto i = 0; i < Q_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(Q_FormArray[i], Q_NameArray[i], "$MCMPageConditionals", std::to_underlying(EntryCategory::kItem)));
-		}
-		for (auto i = 0; i < CCA_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(CCA_FormArray[i], CCA_NameArray[i], "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
-		}
-		for (auto i = 0; i < CCI_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(CCI_FormArray[i], CCI_NameArray[i], "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
-		}
-		for (auto i = 0; i < CCW_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(CCW_FormArray[i], CCW_NameArray[i], "$MCMPageCCItems", std::to_underlying(EntryCategory::kItem)));
 		}
 	}
 
@@ -450,20 +422,12 @@ namespace CFramework_Uniques {
 			L_BoolArray[i] = FrameworkAPI::IsItemKnown(L_FormArray[i], &ItemDataL);
 		}
 
+		for (auto i = 0; i < SUDS_FormArray.size(); i++) {
+			SUDS_BoolArray[i] = FrameworkAPI::IsItemKnown(SUDS_FormArray[i], &ItemDataSUDS);
+		}
+
 		for (auto i = 0; i < Q_FormArray.size(); i++) {
 			Q_BoolArray[i] = FrameworkAPI::IsItemKnown(Q_FormArray[i], &ItemDataQ);
-		}
-
-		for (auto i = 0; i < CCA_FormArray.size(); i++) {
-			CCA_BoolArray[i] = FrameworkAPI::IsItemKnown(CCA_FormArray[i], &ItemDataCCA);
-		}
-
-		for (auto i = 0; i < CCI_FormArray.size(); i++) {
-			CCI_BoolArray[i] = FrameworkAPI::IsItemKnown(CCI_FormArray[i], &ItemDataCCI);
-		}
-
-		for (auto i = 0; i < CCW_FormArray.size(); i++) {
-			CCW_BoolArray[i] = FrameworkAPI::IsItemKnown(CCW_FormArray[i], &ItemDataCCW);
 		}
 
 		A_EntriesTotal = A_FormArray.size();
@@ -480,18 +444,12 @@ namespace CFramework_Uniques {
 
 		L_EntriesTotal = L_FormArray.size();
 		L_EntriesFound = std::ranges::count(L_BoolArray, true);
-		
+
+		SUDS_EntriesTotal = SUDS_FormArray.size();
+		SUDS_EntriesFound = std::ranges::count(SUDS_BoolArray, true);
+
 		Q_EntriesTotal = Q_FormArray.size();
 		Q_EntriesFound = std::ranges::count(Q_BoolArray, true);
-
-		CCA_EntriesTotal = CCA_FormArray.size();
-		CCA_EntriesFound = std::ranges::count(CCA_BoolArray, true);
-
-		CCI_EntriesTotal = CCI_FormArray.size();
-		CCI_EntriesFound = std::ranges::count(CCI_BoolArray, true);
-
-		CCW_EntriesTotal = CCW_FormArray.size();
-		CCW_EntriesFound = std::ranges::count(CCW_BoolArray, true);
 	}
 
 	//---------------------------------------------------
@@ -507,38 +465,38 @@ namespace CFramework_Uniques {
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x00575A, "Dawnguard.esm"); //Aetherial Crown
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x005759, "Dawnguard.esm"); //Aetherial Shield
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x00575E, "Dawnguard.esm"); //Aetherial Staff
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("AetherialRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("AetherialRewardText"));
 
 		//A Daedra's Best Friend
 		a_formID = 0x000824;
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x01C4E6, "Skyrim.esm"); //Rueful Axe
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x0D2846, "Skyrim.esm"); //Masque of Clavicus Vile
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("DeadraBestFriendRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("DeadraBestFriendRewardText"));
 
 		//Ill Met By Moonlight
 		a_formID = 0x000825;
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x02AC61, "Skyrim.esm"); //Savior's Hide
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x02AC60, "Skyrim.esm"); //Ring of Hircine
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x0F82FE, "Skyrim.esm"); //Ring of Hircine (Cursed)
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("IllMetByMoonlightRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("IllMetByMoonlightRewardText"));
 
 		//The Black Star
 		a_formID = 0x000826;
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x063B27, "Skyrim.esm"); //Azura's Star
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x063B29, "Skyrim.esm"); //The Black Star
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("TheBlackStarRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("TheBlackStarRewardText"));
 
 		//No One Escapes Cidhna Mine
 		a_formID = 0x000827;
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x0EAFD0, "Skyrim.esm"); //Armor of the Old Gods
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x024CFF, "Skyrim.esm"); //Silver-Blood Family Ring
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("CidhnaMineRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("CidhnaMineRewardText"));
 
 		//Civil War
 		a_formID = 0x000828;
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x05CBFE, "Skyrim.esm"); //General Tullius' Armor
 		ItemDataQ.AddForm(a_formID, "Completionist.esp", 0x062303, "Skyrim.esm"); //Ulfric's Clothes
-		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), LocalisationAPI::GetLocStringByKey("CivilWarRewardText"));
+		HighlightForms.emplace(Serialization::CompletionistData::GetFullForm(a_formID, "Completionist.esp"), GET_LOC_STRING_BY_KEY("CivilWarRewardText"));
 	}
 
 	//---------------------------------------------------
@@ -551,130 +509,5 @@ namespace CFramework_Uniques {
 		{
 			Q_TextArray[std::distance(Q_FormArray.begin(), std::ranges::find(Q_FormArray, form))] = text.data();
 		}
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Armor ) -------
-	//---------------------------------------------------
-
-	void CHandler::Install_CCA() {
-
-		ItemDataCCA.AddForm(0x000823, "ccbgssse051-ba_daedricmail.esl");
-		ItemDataCCA.AddForm(0x00086B, "ccbgssse059-ba_dragonplate.esl");
-		ItemDataCCA.AddForm(0x000869, "ccbgssse059-ba_dragonplate.esl");
-		ItemDataCCA.AddForm(0x000867, "ccbgssse059-ba_dragonplate.esl");
-		ItemDataCCA.AddForm(0x000800, "ccbgssse056-ba_silver.esl");
-		ItemDataCCA.AddForm(0x000801, "ccbgssse056-ba_silver.esl");
-		ItemDataCCA.AddForm(0x000802, "ccbgssse056-ba_silver.esl");
-		ItemDataCCA.AddForm(0x000803, "ccbgssse056-ba_silver.esl");
-		ItemDataCCA.AddForm(0x000813, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCA.AddForm(0x00080F, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCA.AddForm(0x089EEF, "cceejsse005-cave.esm");
-		ItemDataCCA.AddForm(0x000D62, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCA.AddForm(0x00084F, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCA.AddForm(0x000D61, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCA.AddForm(0x000850, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCA.AddForm(0x00089E, "ccbgssse031-advcyrus.esm");
-		ItemDataCCA.AddForm(0x00089B, "ccbgssse031-advcyrus.esm");
-		ItemDataCCA.AddForm(0x000800, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000801, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000802, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000803, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000804, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000805, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000806, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000807, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000808, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x000809, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCA.AddForm(0x00088F, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000892, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x00089F, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000890, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000894, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000895, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000893, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCA.AddForm(0x000CCF, "ccrmssse001-necrohouse.esl");
-		ItemDataCCA.AddForm(0x000D3D, "ccrmssse001-necrohouse.esl");
-		ItemDataCCA.AddForm(0x15E949, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x15E948, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x00081F, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x000821, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x000820, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x000822, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x0C1929, "ccasvsse001-almsivi.esm");
-		ItemDataCCA.AddForm(0x000807, "ccbgssse005-goldbrand.esl");
-		ItemDataCCA.AddForm(0x000D63, "ccbgssse021-lordsmail.esl");
-		ItemDataCCA.AddForm(0x000804, "ccbgssse021-lordsmail.esl");
-		ItemDataCCA.AddForm(0x00092B, "ccbgssse041-netchleather.esl");
-		ItemDataCCA.AddForm(0x000AE4, "ccbgssse025-advdsgs.esm");
-		ItemDataCCA.AddForm(0x183E63, "ccbgssse025-advdsgs.esm");
-		ItemDataCCA.AddForm(0x19D389, "ccbgssse025-advdsgs.esm");
-		ItemDataCCA.AddForm(0x000D63, "ccbgssse008-wraithguard.esl");
-		ItemDataCCA.AddForm(0x000813, "ccbgssse069-contest.esl");
-		ItemDataCCA.AddForm(0x000D62, "ccbgssse020-graycowl.esl");
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Items ) -------
-	//---------------------------------------------------
-
-	void CHandler::Install_CCI() {
-
-		ItemDataCCI.AddForm(0x000814, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCI.AddForm(0x000815, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCI.AddForm(0x000816, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCI.AddForm(0x000868, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCI.AddForm(0x000867, "ccffbsse001-imperialdragon.esl");
-		ItemDataCCI.AddForm(0x03326A, "cctwbsse001-puzzledungeon.esm");
-		ItemDataCCI.AddForm(0x00080A, "ccbgssse005-goldbrand.esl");
-		ItemDataCCI.AddForm(0x12DD3A, "ccbgssse025-advdsgs.esm");
-		ItemDataCCI.AddForm(0x12DD3B, "ccbgssse025-advdsgs.esm");
-		ItemDataCCI.AddForm(0x12DD3C, "ccbgssse025-advdsgs.esm");
-		ItemDataCCI.AddForm(0x183E61, "ccbgssse025-advdsgs.esm");
-		ItemDataCCI.AddForm(0x00080F, "ccbgssse019-staffofsheogorath.esl");
-		ItemDataCCI.AddForm(0x00080E, "ccbgssse019-staffofsheogorath.esl");
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Install CC Weapons ) -----
-	//---------------------------------------------------
-
-	void CHandler::Install_CCW() {
-
-		ItemDataCCW.AddForm(0x00080D, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCW.AddForm(0x00080B, "ccpewsse002-armsofchaos.esl");
-		ItemDataCCW.AddForm(0x000807, "ccbgssse038-bowofshadows.esl");
-		ItemDataCCW.AddForm(0x000D63, "ccbgssse007-chrysamere.esl");
-		ItemDataCCW.AddForm(0x000C92, "ccbgssse013-dawnfang.esl");
-		ItemDataCCW.AddForm(0x000D63, "ccbgssse013-dawnfang.esl");
-		ItemDataCCW.AddForm(0x000A4B, "ccbgssse031-advcyrus.esm");
-		ItemDataCCW.AddForm(0x000D63, "ccbgssse031-advcyrus.esm");
-		ItemDataCCW.AddForm(0x00080C, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCW.AddForm(0x00080D, "ccmtysse001-knightsofthenine.esl");
-		ItemDataCCW.AddForm(0x000CF2, "ccrmssse001-necrohouse.esl");
-		ItemDataCCW.AddForm(0x057384, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x000C28, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x13101E, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x13101B, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x11CBF0, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x00083A, "ccasvsse001-almsivi.esm");
-		ItemDataCCW.AddForm(0x000D61, "ccbgssse005-goldbrand.esl");
-		ItemDataCCW.AddForm(0x000803, "ccbgssse068-bloodfall.esl");
-		ItemDataCCW.AddForm(0x0008D6, "ccedhsse003-redguard.esl");
-		ItemDataCCW.AddForm(0x000D63, "ccbgssse004-ruinsedge.esl");
-		ItemDataCCW.AddForm(0x000BE3, "ccbgssse025-advdsgs.esm");
-		ItemDataCCW.AddForm(0x00083B, "ccbgssse025-advdsgs.esm");
-		ItemDataCCW.AddForm(0x000D62, "ccbgssse018-shadowrend.esl", 0x000D63);
-		ItemDataCCW.AddForm(0x000806, "ccbgssse045-hasedoki.esl");
-		ItemDataCCW.AddForm(0x000801, "ccbgssse019-staffofsheogorath.esl");
-		ItemDataCCW.AddForm(0x000D62, "ccbgssse019-staffofsheogorath.esl");
-		ItemDataCCW.AddForm(0x000D62, "ccbgssse006-stendarshammer.esl");
-		ItemDataCCW.AddForm(0x000801, "ccbgssse008-wraithguard.esl");
-		ItemDataCCW.AddForm(0x000B5E, "ccbgssse067-daedinv.esm");
-		ItemDataCCW.AddForm(0x147D9F, "ccbgssse067-daedinv.esm");
-		ItemDataCCW.AddForm(0x000B5F, "ccbgssse067-daedinv.esm");
-		ItemDataCCW.AddForm(0x000815, "ccbgssse069-contest.esl");
-		ItemDataCCW.AddForm(0x000850, "ccbgssse020-graycowl.esl");
-		ItemDataCCW.AddForm(0x000D62, "ccbgssse016-umbra.esm");
 	}
 }

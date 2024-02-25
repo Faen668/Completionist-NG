@@ -1,7 +1,7 @@
 #include "Internal Utility/Variables.hpp"
 #include "CFramework_Shouts.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-
+#include "Internal Utility/PatchListener.hpp"
 #undef AddForm
 
 namespace CFramework_Shouts {
@@ -35,6 +35,12 @@ namespace CFramework_Shouts {
 	EventResult CHandler::ProcessEvent(const RE::TESSpellCastEvent* a_event, RE::BSTEventSource<RE::TESSpellCastEvent>*) {
 
 		if (!a_event || !a_event->spell || a_event->object.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
+
+		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
+			for (auto& [pageName, patchData] : groups->GetPatches()) {
+				patchData->ProcessLearntWord(a_event->spell);
+			};
+		};
 
 		if (CFramework_Shouts_VS::Data.HasForm(a_event->spell)) {
 			ProcessFoundForm(Section::kVanilla, a_event->spell);
@@ -286,6 +292,12 @@ namespace CFramework_Shouts {
 		
 		VariablesAPI::Update();
 		CHandler::UpdateFoundForms();
+
+		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
+			for (auto& [pageName, patchData] : groups->GetPatches()) {
+				patchData->UpdateFoundForms();
+			};
+		};
 	}
 
 	//---------------------------------------------------
@@ -556,7 +568,7 @@ namespace CFramework_Shouts {
 			Vanilla_W3_FormArray.push_back(Word3);
 
 			Vanilla_SH_NameArray.push_back(Shout->GetName());
-			Vanilla_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
+			Vanilla_SH_TextArray.push_back(GET_LOC_STRING_BY_KEY(a_texts.c_str()));
 
 			CFramework_Shouts_VS::Data.AddForm(Word1);
 			CFramework_Shouts_VS::Data.AddForm(Word2);
@@ -572,7 +584,7 @@ namespace CFramework_Shouts {
 			Thunderchild_W3_FormArray.push_back(Word3);
 
 			Thunderchild_SH_NameArray.push_back(Shout->GetName());
-			Thunderchild_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
+			Thunderchild_SH_TextArray.push_back(GET_LOC_STRING_BY_KEY(a_texts.c_str()));
 
 			CFramework_Shouts_TS::Data.AddForm(Word1);
 			CFramework_Shouts_TS::Data.AddForm(Word2);
@@ -588,7 +600,7 @@ namespace CFramework_Shouts {
 			Miscellaneous_W3_FormArray.push_back(Word3);
 
 			Miscellaneous_SH_NameArray.push_back(Shout->GetName());
-			Miscellaneous_SH_TextArray.push_back(CLocalisation::LocalisationAPI::GetLocStringByKey(a_texts.c_str()));
+			Miscellaneous_SH_TextArray.push_back(GET_LOC_STRING_BY_KEY(a_texts.c_str()));
 
 			CFramework_Shouts_MS::Data.AddForm(Word1);
 			CFramework_Shouts_MS::Data.AddForm(Word2);
