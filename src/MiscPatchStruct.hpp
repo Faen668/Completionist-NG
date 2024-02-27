@@ -190,6 +190,10 @@ struct CMiscPatch
 
 	bool CanPickupFish(const CMiscPatchData* a_data, const RE::FormID a_formID)
 	{
+		if (a_data->FishPickupMap.size() == 0) {
+			return false;
+		};
+
 		return a_data->FishPickupMap.at(a_formID) ? a_data->FishPickupMap.at(a_formID) : false;
 	}
 
@@ -627,8 +631,7 @@ struct CMiscPatch
 			}
 
 			if (section.type == CMiscPatchType::kFish && section.data.HasForm(a_event->baseObj)) {	
-				if (CanPickupFish(&section, a_event->baseObj)) {
-					auto base = section.data.GetBase(a_event->baseObj) ? section.data.GetBase(a_event->baseObj) : a_event->baseObj;
+				if (CanPickupFish(&section, base)) {
 					ProcessFoundFormNoShow(base, a_event->baseObj, &section, cmd::kFish, "NotifySpecial");
 					return;
 				}
