@@ -9,17 +9,6 @@ Formlist Property Completionist_PinnedItemSoundList Auto
 ;-- Function ---------------------------------------
 ;---------------------------------------------------
 
-Event OnActivate(ObjectReference akActionRef)
-	
-	if (akActionRef)
-		;ClearReferences(false)
-	endif
-EndEvent
-
-;---------------------------------------------------
-;-- Function ---------------------------------------
-;---------------------------------------------------
-
 Event OnCellDetach()
 	ClearReferences(true)
 EndEvent

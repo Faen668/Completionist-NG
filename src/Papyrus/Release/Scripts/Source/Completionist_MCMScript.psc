@@ -608,7 +608,6 @@ Function ResetMarkerOnLoad()
 
 		Completionist_ItemFinder_Name.ForceRefTo(CompletionistItemString)
 		Completionist_ItemFinder_Type.ForceRefTo(CompletionistTypeString)
-		return
 	endIf
 
 	ObjectReference pinRef = Completionist_PinnedItemFinder_Item.GetReference() as ObjectReference
@@ -622,7 +621,6 @@ Function ResetMarkerOnLoad()
 		Completionist_PinnedItemFinder_Name.ForceRefTo(CompletionistPinnedItemString)
 		Completionist_PinnedItemFinder_Type.ForceRefTo(CompletionistPinnedTypeString)
 		(Completionist_PinnedItemFinder_Item as Completionist_PinnedItemScript).SetDisplayparamters(PinnedForm, bCellScanner_Pinning_Effect, CellScanner_Pinning_Sound_Choice)
-		return
 	endIf
 endFunction
 
@@ -1095,7 +1093,7 @@ function Build_Page_Settings()
 			AddMenuOptionST("State_Menu_Faction4", "$LDFaction", 			Legacy_Faction[Legacy_Faction_Choice])
 		else
 			AddTextOption("$LDFaction", "$NOFaction", 0)
-		endIf	
+		endIf
 		
 		if (bDebug)
 			AddEmptyOption()
@@ -1988,7 +1986,7 @@ Function Begin_Config_Save()
 		;;Factions
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!DG_Faction_Choice", DG_Faction_Choice)	
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!HR_Faction_Choice", HR_Faction_Choice)	
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice)	
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice)
 		
 		;;Shortcuts
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bShortCutActive", bShortCutActive as Int)
@@ -2304,7 +2302,7 @@ function AutoLoadConfig()
 		HR_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!HR_Faction_Choice", HR_Faction_Choice))
 		DG_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!DG_Faction_Choice", DG_Faction_Choice))
 		Legacy_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice))
-
+		
 		;;Shortcuts
 		bShortCutActive = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bShortCutActive", bShortCutActive as Int))
 		MainJumpPage = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!MainJumpPage", MainJumpPage))
@@ -2664,7 +2662,7 @@ State State_Radiant_Quests ; MENU
 	Event OnDefaultST()
 		Radiant_Quests_Choice = 0
 		Radiant_Quests_String = Radiant_Quests[Radiant_Quests_Choice]
-		SetMenuOptionValueST(Radiant_Quests[Radiant_Quests_Choice])
+		SetMenuOptionValueST(State_Radiant_Quests, Radiant_Quests[Radiant_Quests_Choice])
 	EndEvent
 
 	Event OnHighlightST()
@@ -2693,7 +2691,7 @@ State State_Menu_Faction1 ; MENU
 
 	Event OnDefaultST()
 		DG_Faction_Choice = 0
-		SetMenuOptionValueST(Dawnguard_Faction[DG_Faction_Choice])
+		SetMenuOptionValueST(State_Menu_Faction1, Dawnguard_Faction[DG_Faction_Choice])
 	EndEvent
 
 	Event OnHighlightST()
@@ -2722,7 +2720,7 @@ State State_Menu_Faction3 ; MENU
 
 	event OnDefaultST()
 		HR_Faction_Choice = 0
-		SetMenuOptionValueST(HelgenReborn_Faction[HR_Faction_Choice])
+		SetMenuOptionValueST(State_Menu_Faction3, HelgenReborn_Faction[HR_Faction_Choice])
 	endevent
 
 	event OnHighlightST()
@@ -2751,7 +2749,7 @@ State State_Menu_Faction4 ; MENU
 
 	event OnDefaultST()
 		Legacy_Faction_Choice = 0
-		SetMenuOptionValueST(Legacy_Faction[Legacy_Faction_Choice])
+		SetMenuOptionValueST(State_Menu_Faction4, Legacy_Faction[Legacy_Faction_Choice])
 	endevent
 
 	event OnHighlightST()
@@ -2781,7 +2779,7 @@ State State_ShortcutsMenu1 ; MENU
 
 	Event OnDefaultST()
 		MainMCMPagesChoice = 0
-		SetMenuOptionValueST(pages[MainMCMPagesChoice])
+		SetMenuOptionValueST(State_ShortcutsMenu1, pages[MainMCMPagesChoice])
 		MainJumpPage = pages[MainMCMPagesChoice]
 	EndEvent
 
@@ -2811,7 +2809,7 @@ State State_ShortcutsMenu2 ; MENU
 
 	Event OnDefaultST()
 		MiscMCMPagesChoice = 0
-		SetMenuOptionValueST(CompMCM2.pages[MiscMCMPagesChoice])
+		SetMenuOptionValueST(State_ShortcutsMenu2, CompMCM2.pages[MiscMCMPagesChoice])
 		MiscJumpPage = CompMCM2.pages[MiscMCMPagesChoice]
 	EndEvent
 
@@ -2834,14 +2832,14 @@ State State_ShortcutsMenu3 ; MENU
 					
 	Event OnMenuAcceptST(Int Index)
 		UnofficialMCMPagesChoice = Index
-		SetMenuOptionValueST(State_ShortcutsMenu2, CompMCM3.pages[UnofficialMCMPagesChoice])
+		SetMenuOptionValueST(State_ShortcutsMenu3, CompMCM3.pages[UnofficialMCMPagesChoice])
 		UnofficialJumpPage = CompMCM3.pages[UnofficialMCMPagesChoice]
 		ForcePageReset()
 	EndEvent
 
 	Event OnDefaultST()
 		UnofficialMCMPagesChoice = 0
-		SetMenuOptionValueST(CompMCM3.pages[UnofficialMCMPagesChoice])
+		SetMenuOptionValueST(State_ShortcutsMenu3, CompMCM3.pages[UnofficialMCMPagesChoice])
 		UnofficialJumpPage = CompMCM3.pages[UnofficialMCMPagesChoice]
 	EndEvent
 
@@ -2870,7 +2868,7 @@ State State_CompletionView ; MENU
 
 	Event OnDefaultST()
 		State_AutomaticCompletionView_Choice = 0
-		SetMenuOptionValueST(State_AutomaticCompletionView_List[State_AutomaticCompletionView_Choice])
+		SetMenuOptionValueST(State_CompletionView, State_AutomaticCompletionView_List[State_AutomaticCompletionView_Choice])
 	EndEvent
 
 	Event OnHighlightST()
@@ -2898,7 +2896,7 @@ State State_ManualCompletionView ; MENU
 
 	Event OnDefaultST()
 		State_ManualCompletionView_Choice = 0
-		SetMenuOptionValueST(State_ManualCompletionView_List[State_ManualCompletionView_Choice])
+		SetMenuOptionValueST(State_ManualCompletionView, State_ManualCompletionView_List[State_ManualCompletionView_Choice])
 	EndEvent
 
 	Event OnHighlightST()
@@ -2926,7 +2924,7 @@ State State_MiscCompletionView ; MENU
 
 	Event OnDefaultST()
 		State_MiscCompletionView_Choice = 0
-		SetMenuOptionValueST(State_MiscCompletionView_List[State_MiscCompletionView_Choice])
+		SetMenuOptionValueST(State_MiscCompletionView, State_MiscCompletionView_List[State_MiscCompletionView_Choice])
 	EndEvent
 
 	Event OnHighlightST()
