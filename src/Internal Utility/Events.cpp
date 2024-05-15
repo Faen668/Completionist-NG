@@ -43,11 +43,19 @@ namespace CEvents
 		return trampoline.write_call<5>(RELOCATION_ID(39535, 40621).address() + REL::Relocate(0x289, 0x280), f);
 	}
 
+	//---------------------------------------------------
+	//-- Event Distributor (Register Hooks ) ------------
+	//---------------------------------------------------
+
 	uintptr_t EventHandler::RegisterUpdateInventoryNameHook(const char* (*f)(RE::InventoryEntryData* a_this))
 	{
 		auto& trampoline = SKSE::GetTrampoline();
 		return trampoline.write_branch<5>(RELOCATION_ID(50926, 51803).address() + REL::Relocate(0x4, 0x4), f);
 	}
+
+	//---------------------------------------------------
+	//-- Event Distributor (Register Hooks ) ------------
+	//---------------------------------------------------
 
 	void EventHandler::RegisterUpdateCraftingMenuHook()
 	{
@@ -84,17 +92,29 @@ namespace CEvents
 		}
 	}
 
+	//---------------------------------------------------
+	//-- Event Distributor (Register Hooks ) ------------
+	//---------------------------------------------------
+
 	uintptr_t EventHandler::RegisterMapMarkerAddedHook(void (*f)(RE::TESFullName* a_form))
 	{
 		auto& trampoline = SKSE::GetTrampoline();
 		return trampoline.write_call<5>(RELOCATION_ID(55617, 56146).address() + REL::Relocate(0x9D, 0x9D), f);
 	}
 
+	//---------------------------------------------------
+	//-- Event Distributor (Register Hooks ) ------------
+	//---------------------------------------------------
+
 	uintptr_t EventHandler::RegisterMapMarkerDiscoveredHook(const char* (*f)(RE::TESFullName* a_form))
 	{
 		auto& trampoline = SKSE::GetTrampoline();
 		return trampoline.write_call<5>(RELOCATION_ID(39663, 40750).address() + REL::Relocate(0x1CC, 0x1EC), f);
 	}
+
+	//---------------------------------------------------
+	//-- Event Distributor (Register Hooks ) ------------
+	//---------------------------------------------------
 
 	uintptr_t EventHandler::RegisterEnchantmentHook(const char* (*f)(RE::TESForm* a_form), bool a_yesImSureCompat = false)
 	{

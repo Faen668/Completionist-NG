@@ -124,6 +124,24 @@ namespace CExternalPatchHandler
 		//-- INI Value Getters ------------------------------
 		//---------------------------------------------------
 
+		[[nodiscard]] static RE::BGSListForm* GetFormlist(RE::FormID a_formID, const char* a_modname) noexcept
+		{
+			try
+			{
+				return RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(a_formID, a_modname);
+			}
+			catch (const std::exception& e)
+			{
+				// Handle the conversion failure appropriately
+				INFO("Failed to convert FormID: {}", e.what());
+				return nullptr;
+			}
+		}
+
+		//---------------------------------------------------
+		//-- INI Value Getters ------------------------------
+		//---------------------------------------------------
+
 		template <typename T = int32_t>
 		[[nodiscard]] static T GetEnumValue(const char* section, const char* key) noexcept
 		{
@@ -173,6 +191,11 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static std::string GetRequiredMod(const char* section) noexcept
 		{
 			return GetStringValueWithDefault(section, "RequiresMod", "None");
+		};
+
+		[[nodiscard]] static std::string GetOverrideLocalisationFileName() noexcept
+		{
+			return GetStringValueWithDefault("Completionist Patch Data", "OverrideLocalisationFileName", "None");
 		};
 
 		[[nodiscard]] static std::string GetSliderValue(int32_t a_page) noexcept
@@ -278,6 +301,7 @@ namespace CExternalPatchHandler
 			std::stringstream ss(GetStringValue(section, "FormIDs"));
 			std::vector<std::tuple<RE::FormID, std::string, std::string>> formIDs{};
 			std::string str;
+			RE::FormID formID;
 
 			auto fromMod = GetInstallFromMod(section);
 			auto pluginFileName = (DKUtil::string::iequals(fromMod, "None") || DKUtil::string::iequals(fromMod, "")) ? GetPluginFileName() : fromMod;
@@ -312,7 +336,6 @@ namespace CExternalPatchHandler
 
 						str.erase(str.find("<"));
 					};
-
 					formIDs.push_back(std::make_tuple(static_cast<RE::FormID>(std::stoul(trim(str), nullptr, 16)), trim(str), pluginFileName));
 				}
 				else

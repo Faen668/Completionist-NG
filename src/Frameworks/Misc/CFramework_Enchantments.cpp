@@ -95,8 +95,6 @@ namespace CFramework_Enchantments {
 			_OnEnchantmentLearnt = trampoline.write_call<5>(func, OnEnchantmentLearnt_Legacy);
 			INFO("Installed Legacy Enchantment Hook");
 		}
-
-		INFO("No Hook Installed");
 	}
 
 	//---------------------------------------------------

@@ -49,7 +49,9 @@ namespace Completionist_MainHUD
 		_OnUpdateCrosshairText = CEvents::EventHandler::RegisterUpdateCrosshairHook(&OnUpdateCrosshairText);
 		_OnUpdateInventoryText = CEvents::EventHandler::RegisterUpdateInventoryNameHook(&OnUpdateInventoryText);
 		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
-		CEvents::EventHandler::RegisterUpdateCraftingMenuHook();
+
+		if (!CVariables::VariablesAPI::IsUsingLinux())
+			CEvents::EventHandler::RegisterUpdateCraftingMenuHook();
 	};
 
 	//---------------------------------------------------

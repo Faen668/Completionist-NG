@@ -69,22 +69,21 @@ namespace CQFramework_FavorQuests
 	//---------------------------------------------------
 
 	void CHandler::RegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
-		
-		auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
 
+		auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
 		if (!a_actor || !curspeaker || a_actor->GetFormID() != curspeaker->GetFormID()) { 
 			return; 
 		}
 
 		activeMerchant.Merchant = a_actor->GetFormID();
 		activeMerchant.BaseActor = RE::TESForm::LookupByID<RE::TESNPC>(a_actor->GetActorBase()->GetFormID());
-		//INFO("Registered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
+		INFO("Registered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
 	}
 
 	void CHandler::UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
 
+		INFO("Unregistered Merchant: REF:{} BASE:{} - [{}]", activeMerchant.Merchant, activeMerchant.BaseActor->GetFormID(), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
 		activeMerchant = {};
-		//INFO("Unregistered Merchant");
 	}
 
 	EventResult CHandler::ProcessEvent(RE::TESContainerChangedEvent const* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource)
@@ -94,11 +93,12 @@ namespace CQFramework_FavorQuests
 			if (a_event->newContainer == RE::PlayerCharacter::GetSingleton()->GetFormID() && activeMerchant.SoldForm) {
 				auto* GoldForm = RE::TESForm::LookupByID(0x00000f);
 				auto* EvntForm = RE::TESForm::LookupByID(a_event->baseObj);
+				auto* soldForm = RE::TESForm::LookupByID(activeMerchant.SoldForm);
 
-				//if (GoldForm->GetFormID() == EvntForm->GetFormID())
-				//{
-					//INFO("Receieved {} Gold for: {} {}. Performing NPC Lookup...", a_event->itemCount, activeMerchant.SoldQuantity, RE::TESForm::LookupByID(activeMerchant.SoldForm)->GetName());
-				//}
+				if (GoldForm->GetFormID() == EvntForm->GetFormID())
+				{
+					INFO("Receieved {} Gold for: {}x {}.", a_event->itemCount, activeMerchant.SoldQuantity, soldForm ? soldForm ->GetName() : "ERROR");
+				}
 
 				for (auto& [FormID, Quest_Key] : Merchant_Data) 
 				{
@@ -110,7 +110,6 @@ namespace CQFramework_FavorQuests
 						return EventResult::kContinue;
 					}
 				}
-
 				return EventResult::kContinue;
 			}
 
@@ -119,10 +118,10 @@ namespace CQFramework_FavorQuests
 
 				if (activeMerchant.Merchant && curspeaker && activeMerchant.Merchant == curspeaker->GetFormID()) {
 
-					auto* SoldForm = RE::TESForm::LookupByID(a_event->baseObj);
+					auto* soldForm = RE::TESForm::LookupByID(a_event->baseObj);
 
-					if (SoldForm) {
-						activeMerchant.SoldForm = SoldForm->GetFormID();
+					if (soldForm) {
+						activeMerchant.SoldForm = soldForm->GetFormID();
 						activeMerchant.SoldQuantity = a_event->itemCount;
 					}
 				}

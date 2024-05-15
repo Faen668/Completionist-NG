@@ -468,6 +468,12 @@ namespace CExternalPatchHandler
 
 		if (!data->official) {
 			std::string lName = fName.substr(0, fName.find_last_of('.')) + ".txt";
+
+			auto overrideName = GetOverrideLocalisationFileName();
+			if (!DKUtil::string::iequals(overrideName, "None")) {
+				lName = overrideName;
+			}
+
 			data->BuildLocalisedMap(lName.c_str());
 		}
 
@@ -814,6 +820,32 @@ namespace CExternalPatchHandler
 						break;
 					}
 
+					case CMiscPatchType::kInteractableObject:
+					{
+						if (data->log_install)
+						{
+							INFO("Adding A Support for: {} - {}", raw, form->GetName());
+						}
+						PatchData.data.AddForm(formID, pluginFileName);
+						PatchData.enabled = true;
+						Installed++;
+
+						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						if (!customHighlightText.empty()) {
+							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
+						};
+
+						auto customDisplayname = GetCustomDisplayName(sec, raw);
+						if (!customDisplayname.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						};
+
+						auto variations = GetVariationsArray(sec, raw, data->log_install);
+						if (!variations.empty()) {
+							CompileVariations(sec, &PatchData.data, variations, pluginFileName, formID, data->log_install);
+						};
+						break;
+					}
 					default:
 						break;
 					}

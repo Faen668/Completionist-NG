@@ -32,7 +32,7 @@ Category_Fish					|Fish:
 Category_Mask					|Dragon Priest Mask: 
 Category_Shrine					|Shrine: 
 Category_Stones					|Standing Stone: 
-Category_Barenziah				|Stone of barenziah: 
+Category_Skyshard				|Skyshard: 
 Category_Quest					|Quest: 
 ----------------------------------------------------------------------------
 V_ShoutText00					|~~~ Animal Allegiance ~~~\nWord 1: Ancient's Ascent, Word 2: Angarvunde, Word 3: Ysgramor's Tomb (Quest Locked)
@@ -327,3 +327,8 @@ MCMText_ProjectAHOHomeInfo		|~~~ Hla Fang ~~~               \nHla Fang can be pu
 MCMText_ThunderchildHomeText	|High Hrothgar Library
 MCMText_ThunderchildHomeInfo	|~~~ High Hrothgar Library ~~~  \nHigh Hrothgar Library can be acquired in High Hrothgar.
 ----------------------------------------------------------------------------
+MCMText_FossilMiningPageName1	|Common & Uncommon Fossils:
+MCMText_FossilMiningPageName2	|Rare Fossils:
+----------------------------------------------------------------------------
+MCMText_BadGremlinsPageName1	|Fairies & Fish:
+MCMText_BadGremlinsPageName2	|Heads & Jars:

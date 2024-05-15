@@ -18,3 +18,5 @@ Event OnActivate(ObjectReference akRef)
 		UnRegisterMerchant(GetReference() as Actor)
 	endif
 endEvent
+
+;Add NPC to ChopWood Faction: addtofaction 000BF210 0

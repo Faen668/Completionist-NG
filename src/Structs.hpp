@@ -15,6 +15,7 @@ enum class CMiscPatchType
 	kFish = 6,
 	kPlayerHomes = 7,
 	kPets = 8,
+	kInteractableObject = 9,
 };
 
 enum class CFlagEnum

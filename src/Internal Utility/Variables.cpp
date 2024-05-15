@@ -1,6 +1,7 @@
 #include "Variables.hpp"
 #include "ScriptObject.hpp"
 #include "DKUtil/Utility.hpp"
+#include "SimpleIni.h"
 
 static ScriptObjectPtr MCM;
 
@@ -77,6 +78,60 @@ namespace CVariables {
 	};
 
 	//---------------------------------------------------
+	//-- Variables Functions ( Linux Compatibility ) ----
+	//---------------------------------------------------
+
+	bool VariablesAPI::IsUsingLinux() {
+		CSimpleIniA ini;
+		const char* completionistSection = "Completionist";
+		const char* linuxKey = "Is_Using_Linux";
+		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
+
+		// Load the INI file
+		SI_Error rc = ini.LoadFile(iniFilePath);
+
+		// If the file doesn't exist, create it and add the required lines
+		if (rc < 0 && rc != SI_FILE) {
+			// Create the section and set the value
+			ini.SetValue(completionistSection, linuxKey, "false");
+
+			// Save the INI file
+			if (ini.SaveFile(iniFilePath) < 0) {
+				INFO("Failed to create and save completionist.ini");
+				return false;
+			}
+
+			// Log creation
+			INFO("Created completionist.ini");
+			return false;
+		}
+
+		// If there was another error loading the file, log it and return false
+		if (rc < 0) {
+			INFO("Unable to load completionist.ini");
+			return false;
+		}
+
+		// If the section or key doesn't exist, add them
+		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, linuxKey)) {
+			ini.SetValue(completionistSection, linuxKey, "false");
+
+			// Save the INI file
+			if (ini.SaveFile(iniFilePath) < 0) {
+				INFO("Failed to save completionist.ini");
+				return false;
+			}
+
+			// Log addition
+			INFO("Added missing section or key to completionist.ini");
+			return false;
+		}
+
+		// Return the value
+		return ini.GetBoolValue(completionistSection, linuxKey, false);
+	}
+
+	//---------------------------------------------------
 	//-- Variables Functions ( Update Properties ) ------
 	//---------------------------------------------------
 
@@ -91,7 +146,7 @@ namespace CVariables {
 			INFO("[Update] Script Pointer Not Set.");
 		};
 
-		V_TreatBooksAsItems = true;
+		V_TreatBooksAsItems = false;
 		if (const auto* prop = VariablesAPI::GetProperty("TreatBooksAsItems")) {
 			V_TreatBooksAsItems = prop->GetBool();
 		}
@@ -439,11 +494,6 @@ namespace CVariables {
 		V_Debugging = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bDebug")) {
 			V_Debugging = prop->GetBool();
-		}
-
-		V_Bittercup_Path = 0;
-		if (const auto* prop = VariablesAPI::GetProperty("Bittercup_Path_Choice")) {
-			V_Bittercup_Path = prop->GetSInt();
 		}
 	}
 }

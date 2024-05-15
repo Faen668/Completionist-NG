@@ -20,4 +20,3 @@ cTranslate_SectionHeader2R		|Read
 
 cTranslate_SectionHeader2L		|Locations:
 cTranslate_SectionHeader2R		|Discovered
-
