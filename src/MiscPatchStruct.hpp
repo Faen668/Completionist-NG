@@ -44,6 +44,9 @@ struct CMiscPatchData
 	//Quest Specific
 	std::vector<CQuestData*> quest_data_array{};
 	int32_t quest_data_id = -1;
+
+	std::string localisationFileName{};
+
 };
 
 struct CMiscPatch
@@ -143,6 +146,11 @@ struct CMiscPatch
 				break;
 			}
 
+			case CMiscPatchType::kInteractableObject: {
+				section.data.Populate(section.names, section.forms, section.bools, section.texts, true);
+				break;
+			}
+
 			default: break;
 			}
 			section.total = section.forms.size();
@@ -205,14 +213,15 @@ struct CMiscPatch
 	{
 		switch (a_type)
 		{
-		case CMiscPatchType::kItems:		return std::to_underlying(CFramework_Master::EntryCategory::kItem); break;
-		case CMiscPatchType::kBooks:		return master::GetBookCategoryType(a_book); break;
-		case CMiscPatchType::kLocations:	return std::to_underlying(CFramework_Master::EntryCategory::kMapM); break;
-		case CMiscPatchType::kEnchantments: return std::to_underlying(CFramework_Master::EntryCategory::kEnch); break;
-		case CMiscPatchType::kShouts:		return std::to_underlying(CFramework_Master::EntryCategory::kShou); break;
-		case CMiscPatchType::kFish:			return std::to_underlying(CFramework_Master::EntryCategory::kFish); break;
-		case CMiscPatchType::kPlayerHomes:	return std::to_underlying(CFramework_Master::EntryCategory::kHome); break;
-		case CMiscPatchType::kPets:			return std::to_underlying(CFramework_Master::EntryCategory::kPets); break;
+		case CMiscPatchType::kItems:				return std::to_underlying(CFramework_Master::EntryCategory::kItem); break;
+		case CMiscPatchType::kBooks:				return master::GetBookCategoryType(a_book); break;
+		case CMiscPatchType::kLocations:			return std::to_underlying(CFramework_Master::EntryCategory::kMapM); break;
+		case CMiscPatchType::kEnchantments:			return std::to_underlying(CFramework_Master::EntryCategory::kEnch); break;
+		case CMiscPatchType::kShouts:				return std::to_underlying(CFramework_Master::EntryCategory::kShou); break;
+		case CMiscPatchType::kFish:					return std::to_underlying(CFramework_Master::EntryCategory::kFish); break;
+		case CMiscPatchType::kPlayerHomes:			return std::to_underlying(CFramework_Master::EntryCategory::kHome); break;
+		case CMiscPatchType::kPets:					return std::to_underlying(CFramework_Master::EntryCategory::kPets); break;
+		case CMiscPatchType::kInteractableObject:	return std::to_underlying(CFramework_Master::EntryCategory::kShard); break;
 		}
 		return -1;
 	}
@@ -295,13 +304,14 @@ struct CMiscPatch
 
 				switch (section.type)
 				{
-				case CMiscPatchType::kItems:		section.bools[i] = master::IsItemKnown(section.forms[i], &section.data); break;
-				case CMiscPatchType::kBooks:		section.bools[i] = master::IsBookKnown(section.forms[i]); break;
-				case CMiscPatchType::kLocations:	section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kFish:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kPlayerHomes:	section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kPets:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kEnchantments: section.bools[i] = master::IsEnchantmentKnown(section.forms[i]); break;
+				case CMiscPatchType::kItems:				section.bools[i] = master::IsItemKnown(section.forms[i], &section.data); break;
+				case CMiscPatchType::kBooks:				section.bools[i] = master::IsBookKnown(section.forms[i]); break;
+				case CMiscPatchType::kLocations:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
+				case CMiscPatchType::kFish:					section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
+				case CMiscPatchType::kPlayerHomes:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
+				case CMiscPatchType::kPets:					section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
+				case CMiscPatchType::kInteractableObject:	section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
+				case CMiscPatchType::kEnchantments:			section.bools[i] = master::IsEnchantmentKnown(section.forms[i]); break;
 				case CMiscPatchType::kShouts: 
 				{
 					section.shout_names.clear();
@@ -704,6 +714,16 @@ struct CMiscPatch
 				{
 					auto base = section.data.GetBase(pet->GetFormID()) ? section.data.GetBase(pet->GetFormID()) : pet->GetFormID();
 					ProcessFoundFormNoShow(base, pet->GetFormID(), &section, cmd::kTamed, "NotifySpecial");
+					return;
+				}
+			}
+
+			if (section.type == CMiscPatchType::kInteractableObject)
+			{
+				if (a_reference && section.data.HasForm(a_reference->GetFormID()))
+				{
+					auto base = section.data.GetBase(a_reference->GetFormID()) ? section.data.GetBase(a_reference->GetFormID()) : a_reference->GetFormID();
+					ProcessFoundFormNoShow(base, a_reference->GetFormID(), &section, cmd::kDiscovered, "NotifySpecial");
 					return;
 				}
 			}

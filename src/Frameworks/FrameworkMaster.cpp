@@ -571,6 +571,7 @@ namespace CFramework_Master
 		case CFramework_Master::kShrine:    return GetLocalizedCategoryString("Category_Shrine");
 		case CFramework_Master::kStones:    return GetLocalizedCategoryString("Category_Stones");
 		case CFramework_Master::kBarenziah: return GetLocalizedCategoryString("Category_Barenziah");
+		case CFramework_Master::kShard:		return GetLocalizedCategoryString("Category_Skyshard");
 		default:                            return "";
 		}
 	}

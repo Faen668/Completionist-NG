@@ -90,8 +90,6 @@ namespace CVariables
 	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
 
-	inline int32_t			V_Bittercup_Path;
-
 	inline RE::BGSListForm* TCC_New;
 	inline RE::BGSListForm* TCC_FND;
 	inline RE::BGSListForm* TCC_DSP;
@@ -115,5 +113,7 @@ namespace CVariables
 		  static void SetFrameworkQuest(RE::StaticFunctionTag*, RE::TESQuest* a_quest);
 		  static bool IsDebuggingEnabled();
 		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
+
+		  static bool IsUsingLinux();
 	};
 }

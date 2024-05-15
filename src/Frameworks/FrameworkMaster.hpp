@@ -51,6 +51,7 @@ namespace CFramework_Master
 		kShrine,
 		kStones,
 		kBarenziah,
+		kShard,
 	};
 
 	class FrameworkAPI 
