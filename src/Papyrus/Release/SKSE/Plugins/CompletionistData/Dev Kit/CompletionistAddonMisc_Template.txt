@@ -7,7 +7,6 @@
 -KEYS							Translation
 ----------------------------------------------------------------------------
 cTranslate_MCMName				|Some MCM Name
-cTranslate_MCMGroupName			|None
 
 cTranslate_MultiPageName1		|Items & General Books:
 cTranslate_MultiPageName2		|Enchantments & Shouts:

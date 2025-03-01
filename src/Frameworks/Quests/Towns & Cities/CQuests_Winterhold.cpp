@@ -22,10 +22,6 @@ namespace CQFramework_Winterhold
 		{"Winterhold_Quest03",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
-	CDrunkData DrunkData[]{
-		{"Winterhold_Quest03", 0x0072EA2, 0x001C18B, "Skyrim.esm", CQuestProcessor::kExcluded},
-	};
-
 	CStageData StageData[]{
 		{"Winterhold_Quest00", CStageEnum::kDone, 40, 0},
 	};
@@ -45,7 +41,6 @@ namespace CQFramework_Winterhold
 			QuestData[i].init()
 				->initThaneData(ThaneData)
 				->initStageData(StageData)
-				->initDrunkData(DrunkData)
 				->initRadiantData(RadiantData)
 				->initFavorData(FavorData)
 				->finalize();

@@ -1,176 +1,57 @@
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Internal Utility/Events.hpp"
+#include "Events.hpp"
 #include "Serialization.hpp"
 #include "Variables.hpp"
 #include "mainHUD.hpp"
-#include "Import/QuickLootAPI.h"
 
 #undef GetModuleHandle
 
 namespace Completionist_MainHUD 
 {
-	using namespace CFramework_Master;
-	using namespace Serialization;
 	using namespace CVariables;
 
-	struct moreHUDmessage 
-	{
-		RE::FormID m_formID;
-		bool m_icontype; // false = New, true = Found
-		bool m_display;
-	};
-
-	struct quickLootMessage 
-	{
-		RE::FormID m_formId;
-		std::string newName;
-	};
-
-	struct CompletionistRequest
-	{
-		RE::FormID m_formId;
-	};
-
-	struct CompletionistRequestEE
-	{
-		RE::FormID m_formId;
-	};
+	using events = CEvents::EventHandler;
+	using serial = Serialization::CompletionistData;
 
 	CompletionistRequest s_messagefrommoreHUD{};
-	CompletionistRequestEE s_messagefromQuickLootEE{};
+	std::vector<std::string> formattedStringHolder{};
 
 	//---------------------------------------------------
 	//-- Install Hooks for Main HUD & Inventory Items ---
 	//---------------------------------------------------
 
-	void TextnTagsAPI::Register() {
+	void TextnTagsAPI::Register() 
+	{
+		_OnUpdateCrosshairText = events::RegisterUpdateCrosshairHook(&OnUpdateCrosshairText);
+		_OnUpdateInventoryText = events::RegisterUpdateInventoryNameHook(&OnUpdateInventoryText);
+		
+		//Disable crafting menu hook for linux users to avoid CTD on use.
+		if (!VariablesAPI::IsUsingLinux())
+		{
+			events::RegisterUpdateCraftingMenuHook();
+		}
 
-		auto& trampoline = SKSE::GetTrampoline();
-		_OnUpdateCrosshairText = CEvents::EventHandler::RegisterUpdateCrosshairHook(&OnUpdateCrosshairText);
-		_OnUpdateInventoryText = CEvents::EventHandler::RegisterUpdateInventoryNameHook(&OnUpdateInventoryText);
-		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
-
-		if (!CVariables::VariablesAPI::IsUsingLinux())
-			CEvents::EventHandler::RegisterUpdateCraftingMenuHook();
+		//Register menu open to periodically clear the formattedStringHolder.
+		events::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
+		SKSE::GetMessagingInterface()->RegisterListener("Ahzaab's moreHUD Inventory Plugin", moreHUDMessageHandler);
 	};
-
-	//---------------------------------------------------
-	//-- QuickLoot EE Support ---------------------------
-	//---------------------------------------------------
-
-	void TextnTagsAPI::RegisterQuickLootEEListener()
-	{
-		auto messageInterface = SKSE::GetMessagingInterface();
-		auto regQLEE = messageInterface->RegisterListener("QuickLootEE", TextnTagsAPI::QuickLootEEMessageHandler);
-	}
-
-	void TextnTagsAPI::QuickLootEEMessageHandler(SKSE::MessagingInterface::Message* a_msg)
-	{
-		auto* SKSEMessaging = SKSE::GetMessagingInterface();
-
-		std::string basename{};
-		RE::FormID  baseform{};
-		bool		basetype{};
-
-		if (a_msg->type != 1 || !a_msg->data) { return; }
-
-		s_messagefromQuickLootEE = *static_cast<struct CompletionistRequestEE*>(a_msg->data);
-
-		auto* receievedForm = RE::TESForm::LookupByID(s_messagefromQuickLootEE.m_formId);
-		if (receievedForm)
-		{
-			baseform = receievedForm->GetFormID();
-			basename = receievedForm->GetName();
-			basetype = TextnTagsAPI::ItemIsCollectable(receievedForm);
-		}
-
-		//INFO("Receieved Message From QuickLoot with [formID - {}] - [name - {}] - [Is Collectable - {}]", baseform, basename, basetype);
-
-		if (!baseform || basename == "" || !basetype || !V_quickLoot_Enabled)
-		{
-			if (SKSE::WinAPI::GetModuleHandle(L"QuickLootEE")) 
-			{
-				quickLootMessage msg{ s_messagefromQuickLootEE.m_formId, "" };
-				SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "QuickLootEE");
-				//INFO("Dispatched Invalid Message For - {}", s_messagefromQuickLootEE.m_formId);
-				return;
-			}
-			return;
-		}
-
-		if (SKSE::WinAPI::GetModuleHandle(L"QuickLootEE")) 
-		{
-			auto name = std::string(OnUpdateInventoryName(receievedForm->GetName(), ItemIsCollected(receievedForm)));
-			quickLootMessage msg{ s_messagefromQuickLootEE.m_formId, name };
-			SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "QuickLootEE");
-			//INFO("Dispatched Valid Messge For - {} with name - {}", s_messagefromQuickLootEE.m_formId, name);
-		}
-	}
 
 	//---------------------------------------------------
 	//-- moreHUD Support --------------------------------
 	//---------------------------------------------------
 
-	void TextnTagsAPI::RegistermoreHUDListener()
-	{
-		auto messageInterface = SKSE::GetMessagingInterface();
-		auto regMHUD = messageInterface->RegisterListener("Ahzaab's moreHUD Inventory Plugin", TextnTagsAPI::moreHUDMessageHandler);
-	}
-
 	void TextnTagsAPI::moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	{
-		auto* SKSEMessaging = SKSE::GetMessagingInterface();
-
-		if (a_msg->type != 1 || !a_msg->data) { return; }
+		if (!a_msg || a_msg->type != 1 || !a_msg->data) { return; }
 
 		s_messagefrommoreHUD = *static_cast<CompletionistRequest*>(a_msg->data);
-		
-		auto* baseform = RE::TESForm::LookupByID(s_messagefrommoreHUD.m_formId);
 
-		if (!baseform || !baseform->GetName() || !TextnTagsAPI::ItemIsCollectable(baseform)) 
-		{ 
-			if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDInventory")) 
-			{
-				moreHUDmessage msg{ s_messagefrommoreHUD.m_formId, false, false };
-				SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
-				return;
-			}
-			return;
-		}
-
-		if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDInventory")) 
+		auto* receievedForm = RE::TESForm::LookupByID(s_messagefrommoreHUD.formId);
+		if (receievedForm && ItemIsCollectable(receievedForm))
 		{
-			moreHUDmessage msg{ baseform->GetFormID(), ItemIsCollected(baseform), V_moreHudEnabled_Menus };
-			SKSEMessaging->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
+			moreHUDMessage msg{ receievedForm->GetFormID(), ItemIsCollected(receievedForm), V_moreHudEnabled_Menus };
+			SKSE::GetMessagingInterface()->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
 		}
-	}
-
-	//---------------------------------------------------
-	//-- Quickloot RE Support  --------------------------
-	//---------------------------------------------------
-
-	void TextnTagsAPI::RegisterQuickLootListener()
-	{
-		auto messageInterface = SKSE::GetMessagingInterface();
-		auto isRegistered = messageInterface->RegisterListener("QuickLootRE", TextnTagsAPI::QuickLootMessageHandler);
-	}
-
-	void TextnTagsAPI::QuickLootMessageHandler(SKSE::MessagingInterface::Message* a_msg)
-	{
-		if ((strcmp(a_msg->sender, "QuickLootRE") == 0) && a_msg->type == QL_RegisterPreprocessListItem) {
-			QL_RegisterPreprocessListItem_t DataSet = (QL_RegisterPreprocessListItem_t)a_msg->data;
-			DataSet(NULL, (QL_PreprocessListItemCallback_t)TextnTagsAPI::QuickLootMessageCallBack);
-		}
-	}
-	
-	void TextnTagsAPI::QuickLootMessageCallBack(void*, RE::GFxValue* gfx, RE::TESForm* form, int32_t count)
-	{
-		if (!form || !gfx || !form->GetName() || !TextnTagsAPI::ItemIsCollectable(form) || !V_quickLoot_Enabled)
-		{
-			return;
-		}
-
-		gfx->SetMember("displayName", { OnUpdateInventoryName(form->GetName(), ItemIsCollected(form)) } );
 	}
 
 	//---------------------------------------------------
@@ -179,7 +60,7 @@ namespace Completionist_MainHUD
 
 	void TextnTagsAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
 
-		if (!a_event->opening) { garbageDump.clear(); }
+		if (!a_event->opening) { formattedStringHolder.clear(); }
 	}
 
 	//---------------------------------------------------
@@ -193,7 +74,7 @@ namespace Completionist_MainHUD
 			return _OnUpdateInventoryText(a_this); 
 		}
 
-		return OnUpdateInventoryName(_OnUpdateInventoryText(a_this), ItemIsCollected(a_this->object));
+		return API_GetDisplayNameMerged(_OnUpdateInventoryText(a_this), ItemIsCollected(a_this->object));
 	}
 
 	//---------------------------------------------------
@@ -212,7 +93,8 @@ namespace Completionist_MainHUD
 			return a_this->GetName();
 		}
 
-		return OnUpdateInventoryName(a_this->GetName(), ItemIsCollected(a_this));
+		return API_GetDisplayNameMerged(a_this->GetName(), ItemIsCollected(a_this));
+
 	}
 
 	//---------------------------------------------------
@@ -221,19 +103,15 @@ namespace Completionist_MainHUD
 
 	std::string TextnTagsAPI::GetPrefix(int32_t a_variable)
 	{
-		switch (a_variable)
-		{
-		case 0: //One Star Prefix
+		switch (a_variable) {
+		case 0: // One Star Prefix
 			return "*";
-
-		case 1: //Two Star Prefix
+		case 1: // Two Star Prefix
 			return "**";
-
-		case 2: //Three Star Prefix
+		case 2: // Three Star Prefix
 			return "***";
-
 		default:
-			return "***";
+			return "";
 		}
 	}
 
@@ -241,69 +119,92 @@ namespace Completionist_MainHUD
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
 
-	const char* TextnTagsAPI::OnUpdateInventoryName(const char* a_this, bool a_collected) 
+	const char* TextnTagsAPI::API_GetDisplayNamePrefix(const char* a_this, bool a_collected) 
+	{
+		auto applyPrefix = [](const std::string& prefix, const char* str, int choice) -> std::string {
+			switch (choice) {
+			case 0: // Append
+			case 3: // Append
+				return fmt::format("{:s} {:s}", str, prefix);
+			case 1: // Prepend
+			case 4: // Prepend
+				return fmt::format("{:s} {:s}", prefix, str);
+			case 2: // Wrap
+			case 5: // Wrap
+				return fmt::format("{:s} {:s} {:s}", prefix, str, prefix);
+			default: // None
+				return str;
+			}
+			};
+
+		const std::string g_prefix = GetPrefix(V_PrefixChoice_G);
+		const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
+
+		if (a_collected) {
+			return formattedStringHolder.emplace_back(applyPrefix(g_prefix, a_this, V_TextChoice_G)).c_str();
+		}
+		else {
+			return formattedStringHolder.emplace_back(applyPrefix(n_prefix, a_this, V_TextChoice_N)).c_str();
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Name Processing For Inventory Items ------------
+	//---------------------------------------------------
+
+	uint32_t TextnTagsAPI::API_GetDisplayNameColour(RE::FormID a_formID)
 	{
 		auto newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
 		auto foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
-		
-		std::string g_prefix = GetPrefix(V_PrefixChoice_G);
-		std::string n_prefix = GetPrefix(V_PrefixChoice_N);
 
-		if (a_collected) 
-		{
-			switch (V_TextChoice_G) 
-			{
-			case 0: //Append
-				return garbageDump.emplace_back(fmt::format("{:s} {:s}"sv, a_this, g_prefix)).c_str();
-
-			case 1: //Prepend
-				return garbageDump.emplace_back(fmt::format("{:s} {:s}"sv, g_prefix, a_this)).c_str();
-
-			case 2: //Wrap
-				return garbageDump.emplace_back(fmt::format("{:s} {:s} {:s}"sv, g_prefix, a_this, g_prefix)).c_str();
-
-			case 3: //Append With Colour
-				return garbageDump.emplace_back(fmt::format("{:s} {:s}CompTag{:s}"sv, a_this, g_prefix, std::to_string(foundColour))).c_str();
-
-			case 4: //Prepend With Colour
-				return garbageDump.emplace_back(fmt::format("{:s} {:s}CompTag{:s}"sv, g_prefix, a_this, std::to_string(foundColour))).c_str();
-
-			case 5: //Wrap With Colour
-				return garbageDump.emplace_back(fmt::format("{:s} {:s} {:s}CompTag{:s}"sv, g_prefix, a_this, g_prefix, std::to_string(foundColour))).c_str();
-
-			case 6: //Just Colour
-				return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(foundColour))).c_str();
-
-			default: //None
-				return a_this;
-			}
+		if (ItemIsCollected(a_formID)) {
+			return (V_TextChoice_G >= 3 && V_TextChoice_G <= 6) ? foundColour : -1;
+		}
+		else {
+			return (V_TextChoice_N >= 3 && V_TextChoice_N <= 6) ? newColour : -1;
 		}
 
-		switch (V_TextChoice_N) 
-		{
-		case 0: //Append
-			return garbageDump.emplace_back(fmt::format("{:s} {:s}"sv, a_this, n_prefix)).c_str();
+		return -1; 
+	}
 
-		case 1: //Prepend
-			return garbageDump.emplace_back(fmt::format("{:s} {:s}"sv, n_prefix, a_this)).c_str();
+	//---------------------------------------------------
+	//-- Name Processing For Inventory Items ------------
+	//---------------------------------------------------
 
-		case 2: //Wrap
-			return garbageDump.emplace_back(fmt::format("{:s} {:s} {:s}"sv, n_prefix, a_this, n_prefix)).c_str();
+	const char* TextnTagsAPI::API_GetDisplayNameMerged(const char* a_this, bool a_collected) 
+	{
+		auto newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
+		auto foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
 
-		case 3: //Append With Colour
-			return garbageDump.emplace_back(fmt::format("{:s} {:s}CompTag{:s}"sv, a_this, n_prefix, std::to_string(newColour))).c_str();
+		const std::string g_prefix = GetPrefix(V_PrefixChoice_G);
+		const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
 
-		case 4: //Prepend With Colour
-			return garbageDump.emplace_back(fmt::format("{:s} {:s}CompTag{:s}"sv, n_prefix, a_this, std::to_string(newColour))).c_str();
+		auto formatString = [](const std::string& prefix, const char* str, int choice, int color) -> std::string {
+			switch (choice) {
+			case 0: // Append
+				return fmt::format("{:s} {:s}", str, prefix);
+			case 1: // Prepend
+				return fmt::format("{:s} {:s}", prefix, str);
+			case 2: // Wrap
+				return fmt::format("{:s} {:s} {:s}", prefix, str, prefix);
+			case 3: // Append With Colour
+				return fmt::format("{:s} {:s}CompTag{:d}", str, prefix, color);
+			case 4: // Prepend With Colour
+				return fmt::format("{:s} {:s}CompTag{:d}", prefix, str, color);
+			case 5: // Wrap With Colour
+				return fmt::format("{:s} {:s} {:s}CompTag{:d}", prefix, str, prefix, color);
+			case 6: // Just Colour
+				return fmt::format("{:s}CompTag{:d}", str, color);
+			default: // None
+				return str;
+			}
+			};
 
-		case 5: //Wrap With Colour
-			return garbageDump.emplace_back(fmt::format("{:s} {:s} {:s}CompTag{:s}"sv, n_prefix, a_this, n_prefix, std::to_string(newColour))).c_str();
-
-		case 6: //Just Colour
-			return garbageDump.emplace_back(fmt::format("{:s}CompTag{:s}"sv, a_this, std::to_string(newColour))).c_str();
-
-		default: //None
-			return a_this;
+		if (a_collected) {
+			return formattedStringHolder.emplace_back(formatString(g_prefix, a_this, V_TextChoice_G, foundColour)).c_str();
+		}
+		else {
+			return formattedStringHolder.emplace_back(formatString(n_prefix, a_this, V_TextChoice_N, newColour)).c_str();
 		}
 	}
 
@@ -311,13 +212,13 @@ namespace Completionist_MainHUD
 	//-- Crosshair Hook For Main HUD  -------------------
 	//---------------------------------------------------
 
-	void TextnTagsAPI::OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data) {
-
+	void TextnTagsAPI::OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data)
+	{
 		_OnUpdateCrosshairText(a_this, a_menuName, a_type, a_data);
 
 		const auto data = a_data ? static_cast<RE::HUDData*>(a_data) : nullptr;
-
 		if (!data) { return; }
+
 		ProcessCrosshairReference(data);
 	}
 
@@ -325,10 +226,8 @@ namespace Completionist_MainHUD
 	//-- Crosshair Ref Processing for Main HUD ----------
 	//---------------------------------------------------
 
-	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data) {
-		
-		auto* SKSEMessaging = SKSE::GetMessagingInterface();
-
+	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data) 
+	{
 		auto CurrentRef = RE::CrosshairPickData::GetSingleton();
 		if (!CurrentRef) { return; }
 
@@ -338,13 +237,12 @@ namespace Completionist_MainHUD
 		RE::TESForm* Base = CurrentObj.get()->GetBaseObject();
 		if (!Base) { return; }
 
-		bool PrevCollected = ItemIsCollected(Base);
-
 		if (!ItemIsCollectable(Base)) { return; }
 
-		if (SKSEMessaging && SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
-			moreHUDmessage msg{ Base->GetFormID(), PrevCollected, (V_moreHudEnabled_Crosshair) };
-			SKSEMessaging->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
+		bool PrevCollected = ItemIsCollected(Base);
+		if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
+			moreHUDMessage msg{ Base->GetFormID(), PrevCollected, V_moreHudEnabled_Crosshair };
+			SKSE::GetMessagingInterface()->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
 		}
 
 		if (PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
@@ -363,34 +261,21 @@ namespace Completionist_MainHUD
 
 	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) 
 	{
-		return CVariables::TCC_Mode ? TCC_New->HasForm(a_formID) : CompletionistData::CheckIsCollectable(a_formID);
+		return serial::CheckIsCollectable(a_formID);
 	}
 
-	// Override
 	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) 
 	{
-		return CVariables::TCC_Mode ? TCC_New->HasForm(a_form) : CompletionistData::CheckIsCollectable(a_form->GetFormID());
+		return serial::CheckIsCollectable(a_form->GetFormID());
 	}
 	RE::TESObjectREFR* my{};
 
 	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { 
-		return CVariables::TCC_Mode ? TCC_DSP->HasForm(a_formID) : FoundItemData.HasForm(a_formID) || FoundItemData_NoShow.HasForm(a_formID);
+		return CFramework_Master::FoundItemData.HasForm(a_formID) || CFramework_Master::FoundItemData_NoShow.HasForm(a_formID);
 	}
 
-	// Override
 	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) 
 	{ 
-		return  CVariables::TCC_Mode ? TCC_DSP->HasForm(a_form) : FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
-	}
-
-	bool TextnTagsAPI::ItemIsFound(RE::FormID a_formID) 
-	{
-		return CVariables::TCC_Mode ? TCC_FND->HasForm(a_formID) : false;
-	}
-
-	// Override
-	bool TextnTagsAPI::ItemIsFound(RE::TESForm* a_form)
-	{
-		return CVariables::TCC_Mode ? TCC_FND->HasForm(a_form) : false;
+		return CFramework_Master::FoundItemData.HasForm(a_form->GetFormID()) || CFramework_Master::FoundItemData_NoShow.HasForm(a_form->GetFormID());
 	}
 }

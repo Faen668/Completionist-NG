@@ -45,10 +45,6 @@ namespace CQFramework_Windhelm
 		{"Windhelm_Quest19",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
-	CDrunkData DrunkData[]{
-		{"Windhelm_Quest10", 0x0072EA2, 0x001B12B, "Skyrim.esm", CQuestProcessor::kExcluded},
-	};
-
 	CStageData StageData[]{
 		{"Windhelm_Quest01", CStageEnum::kPast, 199, 0},
 		{"Windhelm_Quest02", CStageEnum::kPast, 140, 0},
@@ -69,7 +65,6 @@ namespace CQFramework_Windhelm
 		{
 			QuestData[i].init()
 				->initThaneData(ThaneData)
-				->initDrunkData(DrunkData)
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initFavorData(FavorData)

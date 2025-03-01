@@ -38,10 +38,6 @@ namespace CQFramework_SmallTowns
 		{"SmallTowns_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 	};
 
-	CDrunkData DrunkData[]{
-		{"SmallTowns_Quest17", 0x0072EA2, 0x003550C, "Skyrim.esm", CQuestProcessor::kExcluded},
-	};
-
 	CStageData StageData[]{
 		{"SmallTowns_Quest00", CStageEnum::kPast, 300,	0},
 		{"SmallTowns_Quest01", CStageEnum::kPast, 199,	0},
@@ -65,7 +61,6 @@ namespace CQFramework_SmallTowns
 			QuestData[i].init()
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
-				->initDrunkData(DrunkData)
 				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 20, QuestData[i].unique_identifier));
 		}

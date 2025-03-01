@@ -1,0 +1,134 @@
+cTranslate_MCMNameBSB			|Beyond Skyrim: Bruma
+
+cTranslate_SectionHeaderITEM	|Items:
+cTranslate_SectionHeaderBOOK	|Books:
+cTranslate_SectionHeaderWEAP	|Weapons:
+cTranslate_SectionHeaderARMO	|Armor:
+cTranslate_SectionHeaderFOOD	|Food:
+cTranslate_SectionHeaderJEWL	|Jewelry:
+cTranslate_SectionHeaderSHIL	|Shields:
+cTranslate_SectionHeaderMISC	|Miscellaneous:
+cTranslate_SectionHeaderCLUT	|Pots and Bowls:
+cTranslate_SectionHeaderQUST	|Quests:
+cTranslate_SectionHeaderLCNT	|Locations:
+cTranslate_SectionHeaderPOTI	|Potions:
+cTranslate_SectionHeaderPOIS	|Poisons:
+cTranslate_SectionHeaderINGR	|Ingredients:
+cTranslate_SectionHeaderTOME	|Spell Tomes:
+cTranslate_SectionHeaderKEYS	|Keys:
+
+cTranslate_SectionHeaderC		|Completed
+cTranslate_SectionHeaderD		|Discovered
+cTranslate_SectionHeaderF		|Found
+cTranslate_SectionHeaderR		|Read
+
+cTranslateItemNameFRODA			|Frostcrag Ayleid Dagger
+
+cTranslate_MultiPageName1		|Quests
+cTranslate_MultiPageName2		|Weapons
+cTranslate_MultiPageName3		|Armor & Jewelry
+cTranslate_MultiPageName4		|Books I
+cTranslate_MultiPageName5		|Books II
+cTranslate_MultiPageName6		|Food
+cTranslate_MultiPageName7		|Ingredients I
+cTranslate_MultiPageName8		|Ingredients II
+cTranslate_MultiPageName9		|Pots and Bowls
+cTranslate_MultiPageName10		|Misc
+cTranslate_MultiPageName11		|Locations
+
+cTranslate_QuestName01			|Absent Antiquity
+cTranslate_QuestText01			|Find some stolen Akaviri artifacts.
+cTranslate_QuestName02			|A Delicate Situation
+cTranslate_QuestText02			|Help the Captain of the Guard deal with some Talos worshippers.
+cTranslate_QuestName03			|Against the Cutters
+cTranslate_QuestText03			|Eliminate the toughest criminal gang in County Bruma.
+cTranslate_QuestName04			|Service Rewarded
+cTranslate_QuestText04			|Receive your reward for all you have done for Bruma.
+cTranslate_QuestName05			|Alammu's Veil
+cTranslate_QuestText05			|Reunite a poor Dark Elf with her family heirloom.
+cTranslate_QuestName06			|Blade of the Cutpurse
+cTranslate_QuestText06			|Help Ereia Snow-Fist or Garceus Avoci deal with a bandit gang.
+cTranslate_QuestName07			|Cerendil's Accusations
+cTranslate_QuestText07			|Protect the reputation of a questionable tavern.
+cTranslate_QuestName08			|Dar'taqto's Reputation
+cTranslate_QuestText08			|Help a poor cat burglar clear his name.
+cTranslate_QuestName09			|Welcome to Cyrodiil
+cTranslate_QuestText09			|Find a way to enter Cyrodiil.
+cTranslate_QuestName10			|Barnius' Tribute
+cTranslate_QuestText10			|Help a lonely man honor the memory of his old companion.
+cTranslate_QuestName11			|Avar's Letter
+cTranslate_QuestText11			|Deliver a letter to a fugitive's brother.
+cTranslate_QuestName12			|The Herbalist
+cTranslate_QuestText12			|Rescue a herbalist in distress.
+cTranslate_QuestName13			|A Cutter in Need
+cTranslate_QuestText13			|Rid a fleeing Cutter of her pursuer.
+cTranslate_QuestName14			|Water Run Dry
+cTranslate_QuestText14			|Clear Greenwood's water source of some pesky ogres.
+cTranslate_QuestName15			|Whispers of the Mountain
+cTranslate_QuestText15			|Investigate the appearance of mysterious objects at the Bruma Synod Conclave.
+cTranslate_QuestName16			|The Scamp
+cTranslate_QuestText16			|Track down and eliminate an escaped scamp.
+cTranslate_QuestName17			|A Stormcloak in Chains
+cTranslate_QuestText17			|Help or hinder a captured Stormcloak.
+cTranslate_QuestName18			|Within the Ruins
+cTranslate_QuestText18			|Clear Fort Pale Pass of a spider infestation.
+cTranslate_QuestName20			|Aera's Amulet
+cTranslate_QuestText20			|Retrieve Aera the Devout's stolen amulet.
+cTranslate_QuestName21			|The Way Home
+cTranslate_QuestText21			|Put the spirits of the Blades to rest at Cloud Ruler Temple.
+cTranslate_QuestName22			|The Courier
+cTranslate_QuestText22			|Help a son of Skyrim rescue his friend and his important documents.
+cTranslate_QuestName23			|Undeath at Underpall
+cTranslate_QuestText23			|Clear the necromancers from Underpall Cave.
+cTranslate_QuestName24			|Ugly Love
+cTranslate_QuestText24			|Track down an Orc mercenary's missing wife.
+cTranslate_QuestName25			|About Renod
+cTranslate_QuestText25			|Ask about Renod.
+cTranslate_QuestName26			|The Screeching Songman
+cTranslate_QuestText26			|Rid the good people of Bruma of a talent-less singer's screechings.
+cTranslate_QuestName27			|Upon My Honor
+cTranslate_QuestText27			|Find out what happened to a missing Imperial soldier
+cTranslate_QuestName28			|Nord Weapons
+cTranslate_QuestText28			|Collect five Nord weapons for Rilja Stone-Hearth.
+cTranslate_QuestName29			|Dog Missing
+cTranslate_QuestText29			|Track down a runaway dog.
+cTranslate_QuestName30			|Gort's Quest
+cTranslate_QuestText30			|Retrieve Gort's Book of Killing.
+cTranslate_QuestName31			|Fighter's Guild Advertising
+cTranslate_QuestText31			|Raise the Fighters Guild's profile by putting up posters all over Bruma.
+cTranslate_QuestName32			|Serulius' Journal
+cTranslate_QuestText32			|Reunite an old war veteran with his precious journal.
+cTranslate_QuestName33			|Dar'taqto Wants Pelts
+cTranslate_QuestText33			|Gather ten bear pelts for Dar'taqto.
+cTranslate_QuestName34			|Horse, Off Course
+cTranslate_QuestText34			|Help a stablemaster track down a missing horse.
+cTranslate_QuestName35			|Greenwood Shipping
+cTranslate_QuestText35			|Deliver a shipping request to Greenwood.
+cTranslate_QuestName36			|Payments For Razzada
+cTranslate_QuestText36			|Get Razzada the Resplendent's recalcitrant customers to cough up their dues.
+cTranslate_QuestName37			|A Soulgem For Elintius
+cTranslate_QuestText37			|Find a filled common soul gem for Elintius Rentilia.
+cTranslate_QuestName38			|Ingredients For Ananril
+cTranslate_QuestText38			|Gather three sets of ingredients for Ananril.
+cTranslate_QuestName39			|A Visit to Bruma
+cTranslate_QuestText39			|Travel to Bruma.
+cTranslate_QuestName40			|The Museum Tour
+cTranslate_QuestText40			|Visit the museum of the famous Champion of Cyrodiil.
+cTranslate_QuestName41			|Horse, Meet Troll
+cTranslate_QuestText41			|Find out what happen to Gergus Malumea's beloved Red Diamond.
+cTranslate_QuestName42			|Cider Delivery
+cTranslate_QuestText42			|Deliver a batch of Applewatch cider to the Jerall View Inn.
+cTranslate_QuestName43			|The Big, Bad Wolf
+cTranslate_QuestText43			|Rid the good people of Applewatch of a troublesome wolfpack.
+cTranslate_QuestName44			|The Secrets of Rielle
+cTranslate_QuestText44			|Discover the secrets of Rielle.
+cTranslate_QuestName45			|Bounty: Bandit Boss
+cTranslate_QuestText45			|Eliminate a bandit leader for a bounty reward.
+cTranslate_QuestName46			|Bounty: Goblin Chief
+cTranslate_QuestText46			|Kill a goblin chief for a bounty reward.
+cTranslate_QuestName47			|An Apple a Day
+cTranslate_QuestText47			|Gather Apples for Gergus Malumea.
+cTranslate_QuestName48			|Charity I
+cTranslate_QuestText48			|Give coin to Serulius.
+cTranslate_QuestName49			|Charity II
+cTranslate_QuestText49			|Give coin to Reln-Tei.

@@ -12,7 +12,7 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1017,
+		kVersion = 1018,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -133,7 +133,12 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		[[nodiscard]] static std::string GetFormIDHexString(RE::TESForm* a_form) noexcept
 		{
-			return std::format("{:08X}", a_form->GetFormID());
+			return std::format("0x{:06X}", a_form->GetFormID());
+		}
+
+		[[nodiscard]] static std::string GetFormIDHexString(RE::FormID a_formID) noexcept
+		{
+			return std::format("0x{:06X}", a_formID);
 		}
 
 		//---------------------------------------------------
@@ -909,13 +914,14 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			time_t theTime = time(NULL);
 			struct tm* aTime = localtime(&theTime);
 
-			auto hr = std::to_string(aTime->tm_hour).length() == 1 ? fmt::format("0{}", aTime->tm_hour) : std::to_string(aTime->tm_hour);
-			auto mi = std::to_string(aTime->tm_min).length() == 1 ? fmt::format("0{}", aTime->tm_min) : std::to_string(aTime->tm_min);
+			// Use fmt::format for consistent formatting and avoid manual length checks
+			auto hr = fmt::format("{:02}", aTime->tm_hour); // Leading zero if necessary
+			auto mi = fmt::format("{:02}", aTime->tm_min);
+			auto da = fmt::format("{:02}", aTime->tm_mday);
+			auto mo = fmt::format("{:02}", aTime->tm_mon + 1); // Month is 0-11, so +1 is needed
+			auto yr = std::to_string(1900 + aTime->tm_year); // Year is already 4 digits
 
-			auto da = std::to_string(aTime->tm_mday).length() == 1 ? fmt::format("0{}", aTime->tm_mday) : std::to_string(aTime->tm_mday);
-			auto mo = std::to_string(aTime->tm_mon).length() == 1 ? fmt::format("0{}", aTime->tm_mon + 1) : std::to_string(aTime->tm_mon + 1);
-			auto yr = std::to_string(1900 + aTime->tm_year).length() == 1 ? fmt::format("0{}", 1900 + aTime->tm_year) : std::to_string(1900 + aTime->tm_year);
-			auto date = fmt::format("{}/{}/{}"sv, da, mo, yr);
+			auto date = fmt::format("{}/{}/{}", da, mo, yr);
 			auto time = fmt::format("{}:{}", hr, mi);
 
 			auto event = fmt::format("|{} ~ {}{}|", time, GetLogTypePrefx(kType), a_log);
@@ -1563,6 +1569,7 @@ namespace Serialization
 			}
 
 			for (auto& [data, name] : ISerializable::ManagedData) {
+
 				if (data)
 				{
 					/*Add new serialised data sets here for first load... e.g if (version < kVersion && name == "EXAMPLE DATA NAME") { continue; }*/
@@ -1628,6 +1635,46 @@ namespace Serialization
 
 								INFO("Correcting Invalid Formats on event: {}", it->first);
 								it->second = DKUtil::string::replace_nth_occurrence(it->second, 0, ":  ", ": ");
+								it++;
+							}
+							i++;
+						}
+					}
+
+					if (version < 1018 && DKUtil::string::iequals(name, "LoggingData"))
+					{
+						int i = 0;
+						int x = LoggingData.data.size();
+
+						while (i < x) {
+							std::unordered_map<const std::string, std::string>::iterator it = LoggingData.data.begin();
+
+							// Iterating over the map using Iterator till map end.
+							while (it != LoggingData.data.end()) {
+								if (it->first.find("/010/2024") != std::string::npos) {
+									INFO("Correcting Completion Log Date: {}", it->first);
+
+									std::string newNode = it->first;
+									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/010/2024", "/10/2024");
+
+									auto node = LoggingData.data.extract(it->first);
+									if (node) {
+										node.key() = newNode;
+										LoggingData.data.insert(std::move(node));
+									}
+								}
+								if (it->first.find("/011/2024") != std::string::npos) {
+									INFO("Correcting Completion Log Date: {}", it->first);
+
+									std::string newNode = it->first;
+									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/011/2024", "/11/2024");
+
+									auto node = LoggingData.data.extract(it->first);
+									if (node) {
+										node.key() = newNode;
+										LoggingData.data.insert(std::move(node));
+									}
+								}
 								it++;
 							}
 							i++;

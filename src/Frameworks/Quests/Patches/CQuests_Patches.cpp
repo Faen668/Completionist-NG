@@ -17,6 +17,7 @@ namespace CQFramework_Patches
 
 		{"LOTD_Exp_Quest13",  CRadiantEnum::kRadiant_LEG, 0x5a94c3, 0, 30},
 		{"LOTD_Exp_Quest14",  CRadiantEnum::kRadiant_LEG, 0x18DDE8, 0, 6},
+		{"LOTD_Exp_Quest15",  CRadiantEnum::kRadiant_LEG, 0x0F0D35, 0, 100},
 	};
 
 	CQuestData QuestData_LD1[]
@@ -34,6 +35,8 @@ namespace CQFramework_Patches
 		{"LOTD_Main_Quest10", CFlagEnum::kSide, CCompEnum::kStand, "DBM_DHQuest"},
 		{"LOTD_Main_Quest11", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_RadiantFindersKeepers"},
 		{"LOTD_Main_Quest12", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_RadiantResearch"},
+		{"LOTD_Main_Quest13", CFlagEnum::kSide, CCompEnum::kStand, "DBM_VigilantsQuest1"},
+		{"LOTD_Main_Quest14", CFlagEnum::kSide, CCompEnum::kStand, "DBM_VigilantsQuest2"},
 	};
 
 	CQuestData QuestData_LD2[]
@@ -89,6 +92,7 @@ namespace CQFramework_Patches
 		{"LOTD_Exp_Quest12", CFlagEnum::kSide, CCompEnum::kStand, "DBM_ExplorerFieldStation03"},
 		{"LOTD_Exp_Quest13", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_RadiantRuinedBooks"},
 		{"LOTD_Exp_Quest14", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_SextantHandler"},
+		{"LOTD_Exp_Quest15", CFlagEnum::kRadi, CCompEnum::kGlobl, "DBM_ArtifactOrderQuest"},
 	};
 
 	//---------------------------------------------------
@@ -111,8 +115,6 @@ namespace CQFramework_Patches
 
 	void CHandler::InstallLegacyoftheDragonBornQuests()
 	{
-		auto ND_Installed = cmd::IsModInstalled("KRI_DBMDelayPatch.esp");
-		auto ED_Installed = cmd::IsModInstalled("KRI_DBM_EXTRA_DelayPatch.esp");
 		auto RH_Installed = cmd::IsModInstalled("DBM_RelicHunter.esp");
 		auto MP_Installed = cmd::IsModInstalled("DBM_Moonpath_Patch.esp");
 
@@ -127,9 +129,7 @@ namespace CQFramework_Patches
 				QuestData_LD1[i].editor_id = "DBM_MoonpathIndarys";
 			}
 
-			QuestData_LD1[i].init()
-				->override(QuestData_LD1[i].kLocKey, fmt::format("{:s}{}"sv, QuestData_LD1[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
-				->initRadiantData(RadiaData_LD1)->finalize();
+			QuestData_LD1[i].init()->initRadiantData(RadiaData_LD1)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_LD1[i], QuestData_LD1[i].GetName(), 52, QuestData_LD1[i].unique_identifier));
 		};
 
@@ -153,176 +153,8 @@ namespace CQFramework_Patches
 
 		for (auto i = 0; i < std::extent_v<decltype(QuestData_LD5)>; i++)
 		{
-			QuestData_LD5[i].init()
-				->override(QuestData_LD5[i].kLocKey, fmt::format("{:s}{}"sv, QuestData_LD5[i].GetKey(), ND_Installed ? "_N" : ED_Installed ? "_E" : "_V").c_str())
-				->initRadiantData(RadiaData_LD1)->finalize();
+			QuestData_LD5[i].init()->initRadiantData(RadiaData_LD1)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_LD5[i], QuestData_LD5[i].GetName(), 56, QuestData_LD5[i].unique_identifier));
 		};
 	};
-
-	/*template<size_t N>
-	void CHandler::CreateINIFile(CQuestData(&a_data)[N], const char* a_page, int32_t i_id, const char* a_mod, const std::string& a_name)
-	{
-		const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
-
-		// Open a file for writing
-		std::ofstream outputFile(cFilePath);
-
-		// Check if the file is successfully opened
-		if (!outputFile.is_open()) {
-			INFO("Error opening the file for writing!")
-				return; // Exit with an error code
-		}
-
-		outputFile << "[Completionist Patch Data]" << std::endl;
-		outputFile << "PatchType = Quest" << std::endl;
-		outputFile << "Enabled = True" << std::endl;
-		outputFile << "axPlt = 2" << std::endl;
-		outputFile << " " << std::endl;
-
-		for (auto idx = 0; idx < N; ++idx)
-		{
-			outputFile << "[" + a_data[idx].unique_identifier + "]" << std::endl;
-
-			outputFile << "Enabled				= True" << std::endl;
-			outputFile << "UUID				= " + a_data[idx].unique_identifier << std::endl;
-			outputFile << "QuestLink			= " + std::to_string(i_id) << std::endl;
-			outputFile << fmt::format("MCMPageName			= {}", a_page) << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << fmt::format("PluginFileName		= {}", a_mod) << std::endl;
-			outputFile << "EditorID			= " + a_data[idx].editor_id << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << "QuestType			= " + std::to_string(static_cast<int>(a_data[idx].quest_type)) << std::endl;
-			outputFile << "CompletionType		= " + std::to_string(static_cast<int>(a_data[idx].completion_type)) << std::endl;
-			outputFile << " " << std::endl;
-		};
-
-		// Close the file
-		outputFile.close();
-
-		INFO("Data has been written to the file.");
-
-		return; // Exit successfully
-	};
-
-	template<size_t N, size_t S>
-	void CHandler::CreateINIFile(CQuestData(&a_data)[N], const char* a_page, int32_t i_id, CStageData(&a_stage)[S], const std::string& a_name)
-	{
-		const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
-
-		// Open a file for writing
-		std::ofstream outputFile(cFilePath);
-
-		// Check if the file is successfully opened
-		if (!outputFile.is_open()) {
-			INFO("Error opening the file for writing!")
-				return; // Exit with an error code
-		}
-
-		outputFile << "[Completionist Patch Data]" << std::endl;
-		outputFile << "PatchType = Quest" << std::endl;
-		outputFile << "Enabled = True" << std::endl;
-		outputFile << "axPlt = 1" << std::endl;
-		outputFile << " " << std::endl;
-
-		for (auto idx = 0; idx < N; ++idx)
-		{
-			outputFile << "[" + a_data[idx].unique_identifier + "]" << std::endl;
-
-			outputFile << "Enabled				= True" << std::endl;
-			outputFile << "UUID				= " + a_data[idx].unique_identifier << std::endl;
-			outputFile << "QuestLink			= " + std::to_string(i_id) << std::endl;
-			outputFile << fmt::format("MCMPageName			= {}", a_page) << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << "EditorID			= " + a_data[idx].editor_id << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << "QuestType			= " + std::to_string(static_cast<int>(a_data[idx].quest_type)) << std::endl;
-			outputFile << "CompletionType		= " + std::to_string(static_cast<int>(a_data[idx].completion_type)) << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << "QuestName			= " + fmt::format("cTranslate_QuestName{}", idx < 10 ? "0" + std::to_string(idx) : std::to_string(idx)) << std::endl;
-			outputFile << "HighlightText		= " + fmt::format("cTranslate_QuestText{}", idx < 10 ? "0" + std::to_string(idx) : std::to_string(idx)) << std::endl;
-			outputFile << " " << std::endl;
-
-			for (auto edx = 0; edx < S; ++edx)
-			{
-				if (DKUtil::string::iequals(a_stage[edx].link, a_data[idx].unique_identifier)) {
-					outputFile << "StageType			= " + std::to_string(static_cast<int>(a_stage[edx].type)) << std::endl;
-					outputFile << "Stage				= " + std::to_string(a_stage[edx].stage) << std::endl;
-					outputFile << "OptionalStage		= " + std::to_string(a_stage[edx].optional_stage) << std::endl;
-					outputFile << " " << std::endl;
-				}
-			}
-		};
-
-		// Close the file
-		outputFile.close();
-
-		INFO("Data has been written to the file.");
-
-		return; // Exit successfully
-	};
-
-	template<size_t N, size_t S>
-	void CHandler::CreateINIFile(CQuestData(&a_data)[N], const char* a_page, int32_t i_id, CRadiantData(&a_radiant)[S], const char* a_mod, const std::string& a_name)
-	{
-		const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
-
-		// Open a file for writing
-		std::ofstream outputFile(cFilePath);
-
-		// Check if the file is successfully opened
-		if (!outputFile.is_open()) {
-			INFO("Error opening the file for writing!")
-				return; // Exit with an error code
-		}
-
-		outputFile << "[Completionist Patch Data]" << std::endl;
-		outputFile << "PatchType = Quest" << std::endl;
-		outputFile << "Enabled = True" << std::endl;
-		outputFile << "axPlt = 1" << std::endl;
-		outputFile << " " << std::endl;
-
-		for (auto idx = 0; idx < N; ++idx)
-		{
-			outputFile << "[" + a_data[idx].unique_identifier + "]" << std::endl;
-
-			outputFile << "Enabled				= True" << std::endl;
-			outputFile << "UUID				= " + a_data[idx].unique_identifier << std::endl;
-			outputFile << "QuestLink			= " + std::to_string(i_id) << std::endl;
-			outputFile << fmt::format("MCMPageName			= {}", a_page) << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << fmt::format("PluginFileName		= {}", a_mod) << std::endl;
-			outputFile << "EditorID			= " + a_data[idx].editor_id << std::endl;
-			outputFile << " " << std::endl;
-
-			outputFile << "QuestType			= " + std::to_string(static_cast<int>(a_data[idx].quest_type)) << std::endl;
-			outputFile << "CompletionType		= " + std::to_string(static_cast<int>(a_data[idx].completion_type)) << std::endl;
-			outputFile << " " << std::endl;
-
-			for (auto edx = 0; edx < S; ++edx)
-			{
-				if (DKUtil::string::iequals(a_radiant[edx].link, a_data[idx].unique_identifier)) {
-					outputFile << "TimesRequired		= " + std::to_string(static_cast<int>(a_radiant[edx].value)) << std::endl;
-					outputFile << "BaseFormID				= " + std::format("{:08X}", a_radiant[edx].baseID) << std::endl;
-					outputFile << "RadiantStage			= " + std::to_string(a_radiant[edx].stage) << std::endl;
-					outputFile << " " << std::endl;
-				}
-			}
-		};
-
-		// Close the file
-		outputFile.close();
-
-		INFO("Data has been written to the file.");
-
-		return; // Exit successfully
-	};*/
-
-
 };

@@ -2,14 +2,16 @@
 #include "ScriptObject.hpp"
 #include "DKUtil/Utility.hpp"
 #include "SimpleIni.h"
+#include "Events.hpp"
 
 static ScriptObjectPtr MCM;
 
 namespace CVariables {
 
-	void VariablesAPI::Register() {
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(VariablesAPI::GetSingleton()));
+	void VariablesAPI::Register() 
+	{
+		//Register menu open to periodically clear the formattedStringHolder.
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
 	};
 
 	//---------------------------------------------------
@@ -39,15 +41,13 @@ namespace CVariables {
 	//-- Variables Functions ( On Menu Open / Close ) ---
 	//---------------------------------------------------
 
-	EventResult	VariablesAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) 
+	void VariablesAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event)
 	{
-		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) 
+		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME)
 		{
 			Update();
 		};
-
-		return EventResult::kContinue;
-	};
+	}
 
 	//---------------------------------------------------
 	//-- Variables Functions ( Get MCM Property ) -------
@@ -137,10 +137,6 @@ namespace CVariables {
 
 	void VariablesAPI::Update() 
 	{
-		TCC_New = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558285, "DBM_RelicNotifications.esp");
-		TCC_FND = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558286, "DBM_RelicNotifications.esp");
-		TCC_DSP = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(0x558287, "DBM_RelicNotifications.esp");
-
 		if (!MCM)
 		{
 			INFO("[Update] Script Pointer Not Set.");
@@ -179,6 +175,11 @@ namespace CVariables {
 		V_CellScanner_DETA = true;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_DETA")) {
 			V_CellScanner_DETA = prop->GetBool();
+		}
+
+		V_CellScanner_Markers = false;
+		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_MARK")) {
+			V_CellScanner_Markers = prop->GetBool();
 		}
 
 		V_CellScanner_Closest = true;
@@ -484,11 +485,6 @@ namespace CVariables {
 		V_moreHudEnabled_Menus = false;
 		if (const auto* prop = VariablesAPI::GetProperty("b_moreHUDEnabled_Menus")) {
 			V_moreHudEnabled_Menus = prop->GetBool();
-		}
-
-		V_quickLoot_Enabled = false;
-		if (const auto* prop = VariablesAPI::GetProperty("b_quickLoot_Enabled")) {
-			V_quickLoot_Enabled = prop->GetBool();
 		}
 
 		V_Debugging = false;

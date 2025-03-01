@@ -3,7 +3,13 @@
 
 namespace CHCMHandler
 {
-	inline std::vector<std::pair<std::string, CMiscPatchGroupData*>> CustomPatches{};	
+	//FormID, Menu uuid, Option Index
+	inline std::unordered_map<RE::FormID, std::pair<std::string, int32_t>> formVisibilityMap{};
+
+	//EditorID, Menu uuid, Option Index
+	inline std::unordered_map<std::string, std::pair<std::string, int32_t>> questVisibilityMap{};
+
+	inline std::vector<std::pair<std::string, CMiscPatch*>> CustomPatches{};	
 	inline std::vector<std::tuple<std::string, std::string, uint32_t>> MainPatchesMCMPagesDefs{};
 	inline std::vector<std::tuple<const char*, const char*, int32_t>> MainMCMPagesDefs =
 	{ {
@@ -63,8 +69,6 @@ namespace CHCMHandler
 	{ {
 		{"$Header9", "", -1},
 		{"$MCMPagePets", "", -1},
-		{"$MCMPageClaws", "", -1},
-		{"$MCMPageMasks", "", -1},
 		{"$MCMPageShouts", "", -1},
 		{"$MCMPageHouses", "", -1},
 		{"$MCMPageShrines", "", -1},
@@ -79,26 +83,6 @@ namespace CHCMHandler
 		{"$MCMPageLocations3", "", -1},
 		{"$MCMPageLocations4", "", -1},
 		{"$MCMPageLocations5", "", -1},
-		
-		{" ", "", -1},
-		{"$HeaderBooks", "", -1},
-		{"$MCMPageBooks1", "", -1},
-		{"$MCMPageBooks2", "", -1},
-		{"$MCMPageBooks3", "", -1},
-		{"$MCMPageBooks4", "", -1},
-		{"$MCMPageBooks5", "", -1},
-		{"$MCMPageBooks6", "", -1},
-		{"$MCMPageBooks7", "", -1},
-		{"$MCMPageBooks8", "", -1},
-		
-		{" ", "", -1},
-		{"$HeaderItems", "", -1},
-		{"$MCMPageArmor", "", -1},
-		{"$MCMPageItems", "", -1},
-		{"$MCMPageJewelry", "", -1},
-		{"$MCMPageLiquor", "", -1},
-		{"$MCMPageWeapons", "", -1},
-		{"$MCMPageConditionals", "", -1},
 
 		{" ", "", -1},
 		{"$HeaderEnchantments", "", -1},
@@ -110,23 +94,24 @@ namespace CHCMHandler
 	inline std::vector<std::string> MiscMCMPages{};
 	inline std::vector<std::string> PatchPages{};
 
-	using EventResult = RE::BSEventNotifyControl;
-
-	class MCMAPI final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> 
+	class MCMAPI final 
 	{
+	private:
+		MCMAPI() = default;
+		~MCMAPI() = default;
 
-		public: [[nodiscard]] static MCMAPI* GetSingleton() { static MCMAPI singleton; return &singleton; }
-
+	public:
 		static void						Register();
 		static bool						RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
-		EventResult						ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
+		static MCMAPI*					GetSingleton() { static MCMAPI singleton; return &singleton; }
+		static void						OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 
 		static int32_t					GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
 		static int32_t					GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
 		static void						BuildMCMPages(RE::StaticFunctionTag*);
 		static void						AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
-		static void						AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatchGroupData*>> defs);
+		static void						AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatch*>> defs);
 		
 		static int32_t					GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string MCMPage);
 		static std::vector<std::string> GetPageConfiguration(RE::StaticFunctionTag*, std::string mcmpage, int32_t pageNumber);
@@ -135,7 +120,6 @@ namespace CHCMHandler
 		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
 
 		static int32_t					GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage);
-		static bool						IsMultiPage(RE::StaticFunctionTag*, std::string MCMPage);
 		static int32_t					GetMultiPageCount(RE::StaticFunctionTag*, std::string MCMPage);
 		static std::vector<std::string> GetMultiPageSplashScreenConfig(RE::StaticFunctionTag*, std::string mcmpage);
 
@@ -159,10 +143,38 @@ namespace CHCMHandler
 		static void						ResetPageSettings(RE::StaticFunctionTag*, std::string a_page);
 		static std::string				GetActivePageName(RE::StaticFunctionTag*, int32_t activePage, std::string mcmpage);
 
-		static void						DisplayOfficialPatches();
-		static void						DisplayUnOfficialPatches();
-		static void						DisplayCreationClubPatches();
+		static int						GetDisplayValueForTotalAndFoundItemsByIdentifier(int32_t a_id, int32_t defaultValue);
+
+		static int						ModifyTotals(std::string a_pageName, int value, bool isTotal);
+		static void						DisplayVanillaTrackingPatches();
+		static void						DisplayModAddedTrackingPatches();
 		static std::vector<std::string> SearchMultiPage(RE::StaticFunctionTag*, std::string a_page, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType);
 		static std::string				GetSectionNameForForm(std::string a_page, std::string a_name, bool incPageNumber);
+
+		template <typename T = RE::FormID>
+		static void						AddVisibilityOption(const T& identifier, const std::string& pageName, int32_t optSelection)
+		{
+			if constexpr (std::is_same_v<T, RE::FormID>) {
+				formVisibilityMap.emplace(identifier, std::make_pair(pageName, optSelection - 1));
+			}
+
+			if constexpr (std::is_same_v<T, std::string>) {
+				questVisibilityMap.emplace(identifier, std::make_pair(pageName, optSelection - 1));
+			}
+		}
+
+		static bool						IsFormVisible(RE::StaticFunctionTag*, std::string pageName, RE::TESForm* a_form, int32_t optSelection);
+		static bool						IsQuestVisible(RE::StaticFunctionTag*, std::string pageName, std::string editorID, int32_t optSelection);
+		static bool						HasDropDownMenu(RE::StaticFunctionTag*, std::string a_page);
+		static std::string				GetDropDownMenuName(RE::StaticFunctionTag*, std::string a_page);
+		static std::string				GetDropDownMenuHighlight(RE::StaticFunctionTag*, std::string a_page);
+		static std::vector<std::string> GetDropDownMenuOptions(RE::StaticFunctionTag*, std::string a_page);
+		static void						SetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
+		static int32_t					GetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page);
+
+		MCMAPI(MCMAPI const&) = delete;
+		MCMAPI(MCMAPI const&&) = delete;
+		MCMAPI operator=(MCMAPI&) = delete;
+		MCMAPI operator=(MCMAPI&&) = delete;
 	};
 }

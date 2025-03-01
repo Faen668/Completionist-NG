@@ -18,7 +18,7 @@ DeadraBestFriendRewardText		|Note: This entry will complete when you collect one
 IllMetByMoonlightRewardText		|Note: This entry will complete when you collect one of the valid items in the quest "Ill Met By Moonlight".\nValid Items: Ring of Hircine | Ring of Hircine (Cursed) | Savior's Hide
 TheBlackStarRewardText			|Note: This entry will complete when you collect one of the valid items in the quest "The Black Star".\nValid Items: Azura's Star | The Black Star
 CidhnaMineRewardText			|Note: This entry will complete when you collect one of the valid items in the quest "No One Escapes Cidhna Mine".\nValid Items: Armor of the Old Gods | Silver-Blood Family Ring
-CivilWarRewardText				|Note: This entry will complete when you collect one of the valid items in the civil war quest line.\nValid Items: General Tullius' Armor | Ulfric's Clothes
+CivilWarRewardText				|Note: This entry will complete when you collect one of the valid items in the civil war quest line.\nValid Items: General Tullius' Armor | Ulfric's Clothes, Boots or Bracers.
 ----------------------------------------------------------------------------
 Category_Item					|Item: 
 Category_Book					|Book: 
@@ -278,6 +278,7 @@ MCMText_Section_3DC_MQS			|Main Quests:
 MCMText_Section_3DC_BOK			|Blood of Kings Quests:
 MCMText_Section_3DC_DS			|Darkened Steel Quests:
 MCMText_Section_3DC_MISC		|Miscellaneous Quests:
+MCMText_Section_3DC_Items		|Items, Books & Locations:
 MCMText_Section_SUT_JA			|Jade Statues:
 MCMText_Section_SUT_FI			|Figurines & Models:
 MCMText_Section_SUT_PL			|Unique Plates:
@@ -332,3 +333,59 @@ MCMText_FossilMiningPageName2	|Rare Fossils:
 ----------------------------------------------------------------------------
 MCMText_BadGremlinsPageName1	|Fairies & Fish:
 MCMText_BadGremlinsPageName2	|Heads & Jars:
+----------------------------------------------------------------------------
+MCMText_TBOOPageName1			|The Brotherhood of Old Quests:
+MCMText_TBOOPageName2			|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_ClockworkPageName1		|Clockwork Quests:
+MCMText_ClockworkPageName2		|Items, Books, Homes & Locations:
+----------------------------------------------------------------------------
+MCMText_FalskaarPageName1		|Falskaar Quests:
+MCMText_FalskaarPageName2		|Items, Books, Homes & Locations:
+----------------------------------------------------------------------------
+MCMText_TGCONPageName1		|The Gray Cowl of Nocturnal Quests:
+MCMText_TGCONPageName2		|Items, Books, Homes & Locations:
+----------------------------------------------------------------------------
+MCMText_HelgenRebornPageName1		|Helgen Reborn Quests:
+MCMText_HelgenRebornPageName2		|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_MoonAndStarPageName1		|Moon and Star Quests:
+MCMText_MoonAndStarPageName2		|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_MoonpathPageName1		|Moonpath to Elsweyr Quests:
+MCMText_MoonpathPageName2		|Items, Books & Homes:
+----------------------------------------------------------------------------
+MCMText_ProjectAHOPageName1		|Project AHO Quests:
+MCMText_ProjectAHOPageName2		|Items, Books, Homes & Locations:
+----------------------------------------------------------------------------
+MCMText_RequiemPageName1		|Armor, Weapons & Misc Items:
+MCMText_RequiemPageName2		|Books & Skill Books:
+MCMText_RequiemPageName3		|Requiem Spell Tomes:
+----------------------------------------------------------------------------
+MCMText_SkyrimUniqueTreasuresPageName1		|Statues, Figurines, Plates & Instruments:
+MCMText_SkyrimUniqueTreasuresPageName2		|Skulls, Ornaments, Gems, Stones & Glasses:
+MCMText_SkyrimUniqueTreasuresPageName3		|Armor, Weapons, Alcohol, Copper & Gold Ornaments:
+----------------------------------------------------------------------------
+MCMText_TeldrynSeriousPageName1		|Teldryn Serious Quests:
+MCMText_TeldrynSeriousPageName2		|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_UndeathPageName1		|Undeath Quests:
+MCMText_UndeathPageName2		|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_VigilantPageName1		|Vigilant Main Quests:
+MCMText_VigilantPageName2		|Vigilant Side Quests:
+MCMText_VigilantPageName3		|Vigilant Memory Quests:
+MCMText_VigilantPageName4		|Vigilant Radiant Quests:
+MCMText_VigilantPageName5		|Armor, Weapons & Misc Items:
+MCMText_VigilantPageName6		|Books, Skill Books & Spell Tomes:
+MCMText_VigilantPageName7		|Vigilant Locations:
+----------------------------------------------------------------------------
+MCMText_WheelsOfLullPageName1		|The Wheels of Lull Quests:
+MCMText_WheelsOfLullPageName2		|Items, Books & Locations:
+----------------------------------------------------------------------------
+MCMText_WyrmstoothPageName1		|Wyrmstooth Quests:
+MCMText_WyrmstoothPageName2		|Items, Books, Homes & Locations:
+----------------------------------------------------------------------------
+MCMText_AmuletsOfSkyrimPageName1		|Daedric & Miscellaneous Items:
+MCMText_AmuletsOfSkyrimPageName2		|Doomstone, Faiths & Dragon Priest Items:
+MCMText_AmuletsOfSkyrimPageName3		|Guilds, Holds, Jarls, Soldiers & Thane Items:

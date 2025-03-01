@@ -9,10 +9,7 @@ mkdir "%modpath%\backup\Release"
 mkdir "%modpath%\backup\Project"
 
 ::Copy over the project files
-XCOPY "%modpath%\.vscode" "%modpath%\backup\Project\.vscode\" /e /s /y
 XCOPY "%modpath%\Utility" "%modpath%\backup\Project\Utility\" /e /s /y
-XCOPY "%modpath%\SkyrimSE.code-workspace" "%modpath%\backup\Project\" /y
-XCOPY "%modpath%\skyrimse.ppj" "%modpath%\backup\Project\" /y
 
 ::Copy over the mod files
 XCOPY "%modpath%\Interface" "%modpath%\backup\release\Interface\" /e /s /y

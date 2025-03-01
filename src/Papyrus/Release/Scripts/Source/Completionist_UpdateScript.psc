@@ -47,7 +47,7 @@ Function DoVersioning() ;Initial versioning on a new game.
 	
 	GetSKSEVersion()
 	fVMajor = 4
-	fVMinor = 0
+	fVMinor = 1
 	fVPatch = 0
 	fVTweak = 0
 	fVersion = (fVMajor * 1000) + (fVMinor * 100) + (fVPatch * 10) + (fVTweak)
@@ -65,7 +65,7 @@ Function CheckVersioning() ;Versioning ran from OnPlayerLoadGame()
 	
 	GetSKSEVersion()
 	curVMajor = 4
-	curVMinor = 0
+	curVMinor = 1
 	curVPatch = 0
 	curVTweak = 0
 	curVersion = (curVMajor * 1000) + (curVMinor * 100) + (curVPatch * 10) + (curVTweak)
@@ -93,7 +93,8 @@ Function UpdateKicker()
 		return
 	endif
 
-	if (fVersion < 4000)
+	if (fVersion < 4100)
+		MessageBox("=== Completionist ===\nVersion 4.1.0.0 has undergone extensive changes to the .esp\n Please start a new game or alternatively make a manual save, exit the game and clean your save file with 'Resaver' to ensure the mod still works correctly.")
 		fVMajor = curVMajor
 		fVMinor = curVMinor
 		fVPatch = curVPatch

@@ -16,5 +16,6 @@ namespace CQFramework_Beggars
 
 		static void	InstallFramework();
 		static void EvaluateActivatedReference(RE::Actor* a_actor);
+		static void AddBeggarData(RE::FormID NPCReferenceFormID, const std::string& fileName, const std::string& Quest_Key);
 	};
 }

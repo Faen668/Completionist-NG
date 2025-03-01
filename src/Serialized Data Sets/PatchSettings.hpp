@@ -8,6 +8,7 @@ namespace Serialization
 		kdefaultPage,
 		kuse_default_page,
 		ksearchTerms,
+		kcurrentUserOption,
 	};
 
 	struct PatchData 
@@ -16,9 +17,10 @@ namespace Serialization
 		int32_t defaultPage;
 		bool use_default_page;
 		std::string searchTerms;
+		int32_t currentUserOption;
 
-		PatchData(int32_t ap = 0, int32_t dp = 0, bool ud = false, const std::string& st = "")
-			: activePage(ap), defaultPage(dp), use_default_page(ud), searchTerms(st) {}
+		PatchData(int32_t ap = 0, int32_t dp = 0, bool ud = false, const std::string& st = "", int32_t au = 0)
+			: activePage(ap), defaultPage(dp), use_default_page(ud), searchTerms(st), currentUserOption(au) {}
 	};
 
 	struct CompletionistPatchSettings final : public ISerializable
@@ -28,36 +30,46 @@ namespace Serialization
 			{ PatchDataEnum::kactivePage,		[](PatchData& pd, const std::string& a_value) { pd.activePage =			std::stoi(a_value); } },
 			{ PatchDataEnum::kdefaultPage,		[](PatchData& pd, const std::string& a_value) { pd.defaultPage =		std::stoi(a_value); } },
 			{ PatchDataEnum::kuse_default_page, [](PatchData& pd, const std::string& a_value) { pd.use_default_page =	std::stoi(a_value) != 0; } },
-			{ PatchDataEnum::ksearchTerms,		[](PatchData& pd, const std::string& a_value) { pd.searchTerms =		fmt::format("{}{}", a_value, pd.searchTerms); } }
+			{ PatchDataEnum::ksearchTerms,		[](PatchData& pd, const std::string& a_value) { pd.searchTerms =		fmt::format("{}{}", a_value, pd.searchTerms); } },
+			{ PatchDataEnum::kcurrentUserOption,[](PatchData& pd, const std::string& a_value) { pd.currentUserOption =	std::stoi(a_value); } },
 		};
 	public:
 
-		template <PatchDataEnum variable, typename T>
-		void UpdateSetting(const std::string& a_page, const T& a_value) {
+		void CreatePageIfRequired(const std::string& a_page) {
 			auto it = data.find(a_page);
 
 			if (it == data.end()) {
-				it = data.emplace(a_page, PatchData(0, 0, false, "")).first;
+				it = data.emplace(a_page, PatchData(0, 0, false, "", 0)).first;
 			}
+		}
 
-			PatchData& patchData = it->second;
+		template <PatchDataEnum variable, typename T>
+		void UpdateSetting(const std::string& a_page, const T& a_value) {
+			CreatePageIfRequired(a_page);
 
-			auto updateFunctionIt = updateFunctions.find(variable);
-			if (updateFunctionIt == updateFunctions.end()) {
-				return;
-			}
+			auto it = data.find(a_page.data());
+			if (it != data.end()) {
+				PatchData& patchData = it->second;
 
-			using ValueType = typename std::decay<T>::type;
+				auto updateFunctionIt = updateFunctions.find(variable);
+				if (updateFunctionIt == updateFunctions.end()) {
+					return;
+				}
 
-			if constexpr (std::is_same_v<ValueType, std::string>) {
-				updateFunctionIt->second(patchData, a_value);
-			}
-			else {
-				updateFunctionIt->second(patchData, std::to_string(a_value));
+				using ValueType = typename std::decay<T>::type;
+
+				if constexpr (std::is_same_v<ValueType, std::string>) {
+					updateFunctionIt->second(patchData, a_value);
+				}
+				else {
+					updateFunctionIt->second(patchData, std::to_string(a_value));
+				}
 			}
 		}
 
 		void ResetSettings(const std::string& a_page) noexcept {
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			if (it != data.end()) {
 				PatchData& patchData = it->second;
@@ -65,10 +77,13 @@ namespace Serialization
 				patchData.defaultPage = 0;
 				patchData.use_default_page = 0;
 				patchData.searchTerms = "";
+				patchData.currentUserOption = 0 ;
 			}
 		}
 
 		void DeleteSettings(const std::string& a_page) noexcept {
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			if (it != data.end()) {
 				data.erase(it);
@@ -86,6 +101,8 @@ namespace Serialization
 
 		void ClearSearchHistory(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			if (it != data.end()) {
 				PatchData& patchData = it->second;
@@ -95,6 +112,8 @@ namespace Serialization
 
 		void AddSearchTerm(const std::string& a_page, const std::string& a_term) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			if (it != data.end()) {
 				const auto term = fmt::format("|{}|", a_term);
@@ -105,30 +124,48 @@ namespace Serialization
 
 		[[nodiscard]] int32_t GetActivePage(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			return (it != data.end()) ? it->second.activePage : 0;
 		}
 
 		[[nodiscard]] int32_t GetDefaultPage(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			return (it != data.end()) ? it->second.defaultPage : 0;
 		}
 
 		[[nodiscard]] bool GetUseDefault(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			return (it != data.end()) ? it->second.use_default_page : false;
 		}
 
 		[[nodiscard]] std::string GetSearchTerms(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			auto it = data.find(a_page.data());
 			return (it != data.end()) ? it->second.searchTerms : "";
 		}
 
+		[[nodiscard]] int32_t GetCurrentUserOption(const std::string& a_page) noexcept
+		{
+			CreatePageIfRequired(a_page);
+
+			auto it = data.find(a_page.data());
+			return (it != data.end()) ? it->second.currentUserOption : 0;
+		}
+
 		[[nodiscard]] std::vector<std::string> GetCompiledSearchHistory(const std::string& a_page) noexcept
 		{
+			CreatePageIfRequired(a_page);
+
 			std::vector<std::string> list{};
 
 			auto it = data.find(a_page.data());
@@ -179,7 +216,8 @@ namespace Serialization
 					!a_intfc->WriteRecordData(patchData.searchTerms.data(), termSize) ||
 					!a_intfc->WriteRecordData(&patchData.activePage, sizeof(patchData.activePage)) ||
 					!a_intfc->WriteRecordData(&patchData.defaultPage, sizeof(patchData.defaultPage)) ||
-					!a_intfc->WriteRecordData(&patchData.use_default_page, sizeof(patchData.use_default_page)))
+					!a_intfc->WriteRecordData(&patchData.use_default_page, sizeof(patchData.use_default_page)) ||
+					!a_intfc->WriteRecordData(&patchData.currentUserOption, sizeof(patchData.currentUserOption)))
 				{
 					ERROR("Failed to write serialized patch settings data: {}", name);
 					return;
@@ -209,6 +247,7 @@ namespace Serialization
 				int32_t activePage;
 				int32_t defaultPage;
 				bool use_default_page;
+				int32_t currentUserOption;
 
 				std::size_t nameSize;
 				if (!a_intfc->ReadRecordData(&nameSize, sizeof(nameSize))) {
@@ -249,7 +288,12 @@ namespace Serialization
 					return;
 				}
 
-				data.emplace(name, PatchData(activePage, defaultPage, use_default_page, term));
+				if (!a_intfc->ReadRecordData(&currentUserOption, sizeof(currentUserOption))) {
+					ERROR("Failed to read serialized form data: Current User Option");
+					return;
+				}
+
+				data.emplace(name, PatchData(activePage, defaultPage, use_default_page, term, currentUserOption));
 				read++;
 			}
 

@@ -951,7 +951,7 @@ function Build_Menus()
 ;---------------------------------------------------
 	
 	Int x = 0	
-	Radiant_Quests = new String[10]
+	Radiant_Quests = new String[11]
 	Radiant_Quests[x] = "$RadiantChoice01"
 	x += 1
 	Radiant_Quests[x] = "$RadiantChoice02"

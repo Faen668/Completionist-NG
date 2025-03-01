@@ -46,7 +46,13 @@ struct CMiscPatchData
 	int32_t quest_data_id = -1;
 
 	std::string localisationFileName{};
+};
 
+struct CDropDownMenu
+{
+	std::string name;
+	std::string highlight;
+	std::vector<std::string> options;
 };
 
 struct CMiscPatch
@@ -57,19 +63,28 @@ struct CMiscPatch
 	std::vector<CMiscPatchData> type_sections{};
 	std::map<int32_t, std::string> section_defs{};
 
+	std::string iniFileName{};
+	std::string headerName{};
+
 	bool log_install{};
-	bool official{};
-	bool multipage{};
-	bool creation{};
 	bool prependPageNumber{};
-	int32_t multiPageCount{};
+	int32_t PageCount{};
+
+	bool HasDropDownMenu{};
+	CDropDownMenu DropDownMenu{};
 
 	std::unordered_map<std::string, std::string> translations{};
 
+	//Sets the mods priority, this determines the display order in the MCM.
+	std::int32_t priority{};
+
+	//True if this patch handles vanilla / creation club tracking.
+	bool isVanillaTracking{};
+
 	void InitPageDefs() {
 		
-		for (auto i = 1; i < multiPageCount; i++) {
-			std::string key = fmt::format("MultiPageName{}", std::to_string(i));
+		for (auto i = 1; i < PageCount; i++) {
+			std::string key = fmt::format("PageName{}", std::to_string(i));
 			section_defs.emplace(i, GetLocStringByKey(key.c_str()));
 		}
 	}
@@ -92,6 +107,7 @@ struct CMiscPatch
 		InstallSearchTerms();
 		AddCustomHighlighting();
 		AddCustomDisplayName();
+		AddDropDownOptions();
 	}
 
 	//---------------------------------------------------
@@ -105,19 +121,19 @@ struct CMiscPatch
 			switch (section.type)
 			{
 			case CMiscPatchType::kItems: {
-				section.data.Populate(section.names, section.forms, section.bools, section.texts); 
+				section.data.Populate(section.names, section.forms, section.bools, section.texts);
 				section.data.MergeAsCollectable(); 
 				break;
 			}
 
 			case CMiscPatchType::kBooks: {
-				section.data.Populate(section.names, section.forms, section.bools, section.texts, false, 1); 
+				section.data.Populate(section.names, section.forms, section.bools, section.texts, false, 1);
 				section.data.MergeAsCollectable(); 
 				break;
 			}
 
 			case CMiscPatchType::kLocations: {
-				section.data.Populate(section.names, section.forms, section.bools, section.texts, false, 2); 
+				section.data.Populate(section.names, section.forms, section.bools, section.texts, false, 2);
 				break;
 			}
 
@@ -159,6 +175,22 @@ struct CMiscPatch
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Add Dropdown Options ) --- 
+	//---------------------------------------------------
+
+	void AddDropDownOptions()
+	{
+		if (HasDropDownMenu) {
+			DropDownMenu.name = GetLocStringByKey(DropDownMenu.name.c_str());
+			DropDownMenu.highlight = GetLocStringByKey(DropDownMenu.highlight.c_str());
+			for (auto i = 0; i < DropDownMenu.options.size(); i++)
+			{
+				DropDownMenu.options[i] = GetLocStringByKey(DropDownMenu.options[i].c_str());
+			}
+		}
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Add Custom Highlighting ) 
 	//---------------------------------------------------
 
@@ -170,7 +202,7 @@ struct CMiscPatch
 
 				auto it = section.CustomHighlightText.find(section.forms[Idx]->GetFormID());
 				if (it != section.CustomHighlightText.end()) {
-					section.texts[Idx] = official ? GET_LOC_STRING_BY_KEY(it->second.c_str()) : GetLocStringByKey(it->second.c_str());
+					section.texts[Idx] = GetLocStringByKey(it->second.c_str());
 				}
 			}
 			section.CustomHighlightText.clear();
@@ -189,7 +221,7 @@ struct CMiscPatch
 
 				auto it = section.CustomDisplayNames.find(section.forms[Idx]->GetFormID());
 				if (it != section.CustomDisplayNames.end()) {
-					section.names[Idx] = official ? GET_LOC_STRING_BY_KEY(it->second.c_str()) : GetLocStringByKey(it->second.c_str());
+					section.names[Idx] = GetLocStringByKey(it->second.c_str());
 				}
 			}
 			section.CustomDisplayNames.clear();
@@ -244,7 +276,7 @@ struct CMiscPatch
 	//-- Framework Functions ( Build Localised Map ) ----
 	//---------------------------------------------------
 
-	void BuildLocalisedMap(const char* a_name)
+	void BuildLocalisedMap()
 	{
 		if (translations.size()) {
 			return;
@@ -256,17 +288,17 @@ struct CMiscPatch
 			return;
 		}
 
-		const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
+		const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, iniFileName);
 		if (!std::filesystem::exists(cFilePath) || std::filesystem::is_empty(cFilePath))
 		{
-			ERROR("Unable To Find localisation File {}", a_name)
+			ERROR("Unable To Find localisation File {}", iniFileName)
 		}
 
 		std::ifstream localised_file(cFilePath);
 		std::string tempstring;
 
 		if (!localised_file.is_open()) {
-			ERROR("Failed to open file: {}", a_name);
+			ERROR("Failed to open file: {}", iniFileName);
 			return;
 		}
 
@@ -289,7 +321,13 @@ struct CMiscPatch
 
 	const char* GetLocStringByKey(const char* s_key)
 	{
-		return official ? GET_LOC_STRING_BY_KEY(s_key) : translations.contains(s_key) ? translations.at(s_key).c_str() : s_key;
+		if (!translations.contains(s_key)) {
+			if (log_install) {
+				INFO("Unable to load translation for key {} from file: {}", s_key, iniFileName);
+			}
+			return s_key;
+		}
+		return translations.at(s_key).c_str();
 	}
 
 	//---------------------------------------------------
@@ -814,47 +852,5 @@ struct CMiscPatch
 			}
 		}
 		return;
-	}
-};
-
-struct CMiscPatchGroupData
-{
-	enum Request
-	{
-		kOfficial,
-		kUnofficial,
-		kCreationClub,
-		kAll,
-	};
-
-	bool defaultGroup{};
-	std::string groupName{};
-	std::vector<std::pair<std::string, CMiscPatch*>> patches{};
-	std::vector<std::pair<std::string, CMiscPatch*>> official_patches{};
-	std::vector<std::pair<std::string, CMiscPatch*>> creation_club_patches{};
-	
-	template <Request T = Request::kAll>
-	std::vector<std::pair<std::string, CMiscPatch*>> GetPatches() noexcept
-	{
-		if (T == kOfficial) {
-			return official_patches;
-		}
-
-		if (T == kUnofficial) {
-			return patches;
-		}
-
-		if (T == kCreationClub) {
-			return creation_club_patches;
-		}
-
-		if (T == kAll) {
-			std::vector<std::pair<std::string, CMiscPatch*>> list{};
-			list.insert(list.end(), patches.begin(), patches.end());
-			list.insert(list.end(), official_patches.begin(), official_patches.end());
-			list.insert(list.end(), creation_club_patches.begin(), creation_club_patches.end());
-			return list;
-		}
-		return {};
 	}
 };

@@ -29,10 +29,6 @@ namespace CQFramework_Dawnstar
 		{"Dawnstar_Quest09",  CRadiantEnum::kRadiant_Def, 0,0,0, CQuestProcessor::kExcluded},
 	};
 
-	CDrunkData DrunkData[]{
-		{"Dawnstar_Quest05", 0x0072EA2, 0x001A6BC, "Skyrim.esm", CQuestProcessor::kExcluded},
-	};
-
 	CStageData StageData[]{
 		{"Dawnstar_Quest03", CStageEnum::kPast, 199, 0},
 	};
@@ -53,7 +49,6 @@ namespace CQFramework_Dawnstar
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData)
-				->initDrunkData(DrunkData)
 				->initFavorData(FavorData)
 				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 7, QuestData[i].unique_identifier));

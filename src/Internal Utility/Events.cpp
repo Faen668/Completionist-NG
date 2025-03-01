@@ -5,7 +5,6 @@
 
 #define REGISTER_EVENT(EventType) RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<EventType>*>(EventHandler::GetSingleton()))
 
-
 namespace CEvents 
 {
 	std::vector<std::function<void(FuncParam_oHit)>> _OnHitEvent;
@@ -21,7 +20,7 @@ namespace CEvents
 	//-- Event Distributor (Register Events ) -----------
 	//---------------------------------------------------
 
-	void EventHandler::RegisterEvents() 
+	void EventHandler::Register() 
 	{
 		RE::BooksRead::GetEventSource()->AddEventSink(EventHandler::GetSingleton());
 		RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(EventHandler::GetSingleton()));
@@ -206,10 +205,8 @@ namespace CEvents
 			fn(a_event);
 		};
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnQuestStageTriggered(a_event);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnQuestStageTriggered(a_event);
 		};
 		return EventResult::kContinue;
 	};
@@ -240,10 +237,8 @@ namespace CEvents
 			fn(a_event);
 		};
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnMenuOpenCloseEvent(a_event);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnMenuOpenCloseEvent(a_event);
 		};
 		return EventResult::kContinue;
 	};
@@ -260,11 +255,9 @@ namespace CEvents
 			fn(a_event);
 		}
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnActivateEvent(a_event->objectActivated.get());
-			}
-		}
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnActivateEvent(a_event->objectActivated.get());
+		};
 		return EventResult::kContinue;
 	};
 
@@ -280,10 +273,8 @@ namespace CEvents
 			fn(a_event);
 		};
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnContainerChangedEvent(a_event);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnContainerChangedEvent(a_event);
 		};
 		return EventResult::kContinue;
 	};
@@ -300,10 +291,8 @@ namespace CEvents
 			fn(a_event);
 		};
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnBooksReadEvent(a_event);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnBooksReadEvent(a_event);
 		};
 		return EventResult::kContinue;
 	};

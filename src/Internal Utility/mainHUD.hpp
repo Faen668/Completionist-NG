@@ -1,38 +1,20 @@
 #pragma once
+#undef GetObject
 
 namespace Completionist_MainHUD
 {
-	inline std::vector<std::string> garbageDump{};
-
-	using EventResult = RE::BSEventNotifyControl;
-	using VM = RE::BSScript::Internal::VirtualMachine;
-	using StackID = RE::VMStackID;
-	using Severity = RE::BSScript::ErrorLogger::Severity;
-
-	class TextnTagsAPI final :
-
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
-		public: [[nodiscard]] static TextnTagsAPI* GetSingleton() { static TextnTagsAPI singleton; return &singleton; }
-
+	class TextnTagsAPI 
+	{
 	public:
-
-		EventResult	ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
-
-		static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
+		static TextnTagsAPI* GetSingleton() { static TextnTagsAPI singleton; return &singleton; }
 
 		static void Register();
 
-		static void RegisterQuickLootListener();
-		static void RegistermoreHUDListener();
-		static void RegisterQuickLootEEListener();
-
-		static void QuickLootEEMessageHandler(SKSE::MessagingInterface::Message* a_msg);
+		static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 		static void moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg);
 
-		static void QuickLootMessageHandler(SKSE::MessagingInterface::Message* a_msg);
-		static void QuickLootMessageCallBack(void*, RE::GFxValue* gfx, RE::TESForm* form, int32_t count);
-
 		static void	ProcessCrosshairReference(RE::HUDData* data);
+		static std::string GetPrefix(int32_t a_variable);
 
 		static bool ItemIsCollectable(RE::FormID a_formID);
 		static bool ItemIsCollectable(RE::TESForm* a_form);
@@ -40,17 +22,42 @@ namespace Completionist_MainHUD
 		static bool ItemIsCollected(RE::FormID a_formID);
 		static bool ItemIsCollected(RE::TESForm* a_form);
 
-		static bool ItemIsFound(RE::FormID a_formID);
-		static bool ItemIsFound(RE::TESForm* a_form);
-		static std::string GetPrefix(int32_t a_variable);
-
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
-		static const char* OnUpdateInventoryName(const char* a_this, bool a_displayTag);
 		static const char* OnUpdateCraftingText(RE::TESForm* a_this);
 
+		static const char*	API_GetDisplayNamePrefix(const char* a_this, bool a_collected);
+		static uint32_t		API_GetDisplayNameColour(RE::FormID a_formID);
+		static const char*	API_GetDisplayNameMerged(const char* a_this, bool a_collected);
+
+		TextnTagsAPI(TextnTagsAPI const&) = delete;
+		TextnTagsAPI(TextnTagsAPI const&&) = delete;
+		TextnTagsAPI operator=(TextnTagsAPI&) = delete;
+		TextnTagsAPI operator=(TextnTagsAPI&&) = delete;
+
 	private:
+		TextnTagsAPI() = default;
+		~TextnTagsAPI() = default;
+
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;
 		static inline REL::Relocation<decltype(OnUpdateInventoryText)> _OnUpdateInventoryText;
+	};
+
+	struct moreHUDMessage
+	{
+		RE::FormID formID;		// Item formID
+		bool iconType;			// False = New, True = Found
+		bool display;			// Display if enabled in MCM
+
+		moreHUDMessage(RE::FormID id = 0, bool icon = false, bool disp = false)
+			: formID(id), iconType(icon), display(disp) {}
+	};
+
+	struct CompletionistRequest
+	{
+		RE::FormID formId;		// Item formID
+
+		CompletionistRequest(RE::FormID id = 0)
+			: formId(id) {}
 	};
 }
