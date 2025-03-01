@@ -130,6 +130,9 @@ struct CRadiantData
 
 	//Should this quest be included in the quest stage processor
 	std::optional<CQuestProcessor> process = std::nullopt;
+
+	//Is this quest a generic favor quest in the ini framework.
+	bool isFavorQuest{};
 };
 
 //Faction, Faction File, Actor, Actor File
@@ -169,10 +172,11 @@ struct CThaneData
 
 struct CDrunkData
 {
-	const char* link;
+	std::string link;
 	RE::FormID listID;
 	RE::FormID formID;
-	const char* file_name;
+	std::string baseActor_file_name;
+	std::string itemLists_file_name;
 
 	//Should this quest be included in the quest stage processor
 	std::optional<CQuestProcessor> process = std::nullopt;
@@ -181,7 +185,8 @@ struct CDrunkData
 struct FavorMerchantData
 {
 	RE::FormID formID;
-	const char* quest_key;
+	std::string fileName;
+	std::string quest_key;
 };
 
 struct PlayerHomesData
@@ -247,7 +252,6 @@ struct CQuestData
 
 	// Dynamic Types
 	CThaneData*		thane_data{};
-	CDrunkData*		drunk_data{};
 	CStageData*		stage_data{};
 	CRadiantData*	radiant_data{};
 	CFavorData*		favor_data{};
@@ -265,7 +269,6 @@ struct CQuestData
 	// For patches
 	std::string		mcmPage{};
 	bool			official{};
-	bool			isNative{};
 	bool			log_install{};
 
 	//Override Enum & Map
@@ -287,10 +290,9 @@ struct CQuestData
 	};
 
 	// Builder Functions
-	auto init(bool a_native = true, bool a_official = false, std::optional<std::string> a_page = std::nullopt)
+	auto init(bool a_official = true, std::optional<std::string> a_page = std::nullopt)
 	{
-		isNative	= a_native;
-		official	= a_official;
+		official = a_official;
 
 		if (a_page.has_value()) {
 			mcmPage = a_page.value();
@@ -364,22 +366,6 @@ struct CQuestData
 	}
 
 	template <std::size_t N>
-	auto initDrunkData(CDrunkData(&a_data)[N])
-	{
-		for (auto idx = 0; idx < N; ++idx) {
-			if (DKUtil::string::iequals(GetKey(), a_data[idx].link)) {
-				drunk_data = &a_data[idx];
-				if (!drunk_data) { ERROR("Unable to initialise drunk_data for [{}]", unique_identifier); }
-
-				if (drunk_data->process) {
-					should_process = drunk_data->process.value();
-				}
-			}
-		}
-		return this;
-	}
-
-	template <std::size_t N>
 	auto initStageData(CStageData(&a_data)[N]) 
 	{
 		for (auto idx = 0; idx < N; ++idx) {
@@ -438,7 +424,7 @@ struct CQuestData
 	// Localisation
 	void SetLocalisedTranslationParameters()
 	{
-		if (isNative || official) {
+		if (official) {
 			search_term = GET_LOC_NAME_BY_KEY(localisation_key.c_str());
 			search_description = GET_LOC_DESCRIPTION_BY_KEY(localisation_key.c_str());
 		}
@@ -476,6 +462,7 @@ struct CQuestData
 			break;
 		case CQuestData::kLocKey:
 			localisation_key = s_key;
+			SetLocalisedTranslationParameters();
 			break;
 		default:
 			break;
@@ -524,7 +511,6 @@ struct CQuestData
 	auto GetStageType()				const -> int32_t			{ return stage_data ? std::to_underlying(stage_data->type) : 0; }
 	bool HasStageData()				const						{ return stage_data != nullptr; }
 	bool HasOptionalStage()			const						{ return GetOptionalStage() != 0; }
-	
 	auto GetStageTypeString() const -> std::string {
 		for (const auto& [value, string] : CStageEnum_Map) {
 			if (value == GetStageTypeEnum()) {
@@ -590,7 +576,7 @@ struct CQuestData
 	}
 
 	auto GetradiantQuest() const -> RE::TESQuest* {
-		if (radiant_data) {
+		if (radiant_data && radiant_data->isFavorQuest == false) {
 			if (auto* q1 = RE::TESQuest::LookupByID<RE::TESQuest>(radiant_data->baseID); q1) {
 				return q1;
 			}
@@ -706,14 +692,6 @@ struct CQuestData
 			INFO("          ~Favor Data: actor owner = {}", favor_data->actor_provider);
 		}
 
-		if (drunk_data)
-		{
-			INFO("          ~Drunk Data: link = {}", drunk_data->link);
-			INFO("          ~Drunk Data: npc formID = {}", drunk_data->formID);
-			INFO("          ~Drunk Data: npc Owner = {}", drunk_data->file_name);
-			INFO("          ~Drunk Data: list formID = {}", drunk_data->listID);
-		}
-
 		if (thane_data)
 		{
 			auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript");
@@ -730,7 +708,6 @@ struct CQuestData
 			INFO("          ~Search Data: Term       = {}", GetSearchTerm());
 			INFO("          ~Search Data: MCM Page   = {}", mcmPage);
 			INFO("          ~Search Data: official   = {}", official);
-			INFO("          ~Search Data: Native     = {}", isNative);
 		}
 
 		INFO(" ");

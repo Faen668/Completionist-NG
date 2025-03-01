@@ -1,5 +1,4 @@
 ﻿#include "Serialization.hpp"
-#include "Internal Utility/Array.hpp"
 #include "Internal Utility/mainHUD.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
@@ -12,46 +11,50 @@
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
 const SKSE::QueryInterface* g_QueryInterface = nullptr;
+constexpr const char* modName = "Completionist.esp";
 
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) 
 {
-	auto t1 = std::chrono::steady_clock::now();
-
 	switch (message->type)
 	{
-	case SKSE::MessagingInterface::kDataLoaded:
+	case SKSE::MessagingInterface::kDataLoaded: 
+	{
+		auto t1 = std::chrono::steady_clock::now();
 
-		CEvents::EventHandler::RegisterEvents();
+		const auto& Handler = RE::TESDataHandler::GetSingleton();
+		if (!Handler) {
+			ERROR("Completionist was unable to retrieve TESDataHandler.");
+		}
+
+		const auto& frm = Handler->LookupForm(0x000823, modName);
+		if (!frm) {
+			ERROR("Completionist.esp not found in load order.\n\nTry moving the .esp further up your load order so it has a higher priority.");
+		}
+
+		CEvents::EventHandler::Register();
+		CVariables::VariablesAPI::Register();
 		CLocalisation::LocalisationAPI::Register();
+
 		Completionist_MainHUD::TextnTagsAPI::Register();
-		CVariables::VariablesAPI::Register(); 
+
 		CQuestMaster::QuestAPI::Register();
-		CExternalPatchHandler::CHandler::Register();
 		CFramework_Master::FrameworkAPI::Register();
+		CExternalPatchHandler::CHandler::Register();
+		CFramework_Master::FrameworkAPI::RegisterCustomPatches();
+		CFramework_Master::FrameworkAPI::FinalizeRegistrations();
 		CHCMHandler::MCMAPI::Register();
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
+	}
 
 	case SKSE::MessagingInterface::kNewGame:
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		break;
 
-	case SKSE::MessagingInterface::kPreLoadGame:
-		break;
-
 	case SKSE::MessagingInterface::kPostLoadGame:
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
-		break;
-
-	case SKSE::MessagingInterface::kPostLoad:
-		Completionist_MainHUD::TextnTagsAPI::RegisterQuickLootListener();
-		break;
-
-	case SKSE::MessagingInterface::kPostPostLoad:
-		Completionist_MainHUD::TextnTagsAPI::RegistermoreHUDListener();
-		Completionist_MainHUD::TextnTagsAPI::RegisterQuickLootEEListener();
 		break;
 	}
 }
@@ -64,6 +67,7 @@ DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 
 	DKUtil::Logger::Init(Plugin::NAME, REL::Module::get().version().string());
 	SKSE::Init(a_skse);
+	SKSE::AllocTrampoline(256);
 
 	INFO("{} v{} loaded", Plugin::NAME, Plugin::Version);
 
@@ -74,18 +78,7 @@ DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 		return false;
 	}
 
-	auto papyrus = reinterpret_cast<SKSE::PapyrusInterface*>(a_skse->QueryInterface(SKSE::LoadInterface::kPapyrus));
-	if (!papyrus)
-	{
-		INFO("Failed to load scripting interface! This error is fatal, plugin will not load.");
-		return false;
-	}
-
-	SKSE::Init(a_skse);
-	SKSE::AllocTrampoline(256);
-
 	g_messaging->RegisterListener("SKSE", SKSEMessageHandler);
-
 	const auto* serialization = SKSE::GetSerializationInterface();
 	serialization->SetUniqueID(Serialization::kHeader);
 	serialization->SetSaveCallback(Serialization::SaveCallback);

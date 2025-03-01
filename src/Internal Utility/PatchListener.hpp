@@ -5,6 +5,9 @@
 #include "MiscPatchStruct.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Frameworks/Quests/Patches/CQuests_Patches.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Drunks.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Favors.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Beggars.hpp"
 
 namespace CExternalPatchHandler
 {
@@ -13,16 +16,14 @@ namespace CExternalPatchHandler
 	static std::string filename;
 
 
-	inline std::vector<std::pair<std::string, CMiscPatchGroupData*>> CustomItemsPatches{};
-	inline std::vector<std::pair<std::string, CMiscPatchGroupData*>> Get() { return CustomItemsPatches; }
+	inline std::vector<std::pair<std::string, CMiscPatch*>> CustomPatches{};
+	inline std::vector<std::pair<std::string, CMiscPatch*>> Get() { return CustomPatches; }
 	class CHandler {
 
 	public:
 		static void Register();
 		static int32_t GetRandomID();
-
-		static void AddQuestSupport(std::string file);
-		static void AddMiscSupport(std::string file);
+		static void ProcessiniFile(std::string file);
 
 		static auto GetNewQuestData() {
 			return new CQuestData;
@@ -36,12 +37,29 @@ namespace CExternalPatchHandler
 			return new CRadiantData;
 		}
 
+		static auto GetNewDrunkData() {
+			return new CDrunkData;
+		}
+
 		static auto GetNewPatchData() {
 			return new CMiscPatch;
 		}
 
-		static auto GetNewPatchGroupData() {
-			return new CMiscPatchGroupData;
+		[[nodiscard]] static std::string CreateGUID() noexcept
+		{
+			GUID guid;
+			if (CoCreateGuid(&guid) != S_OK) {
+				return "";
+			}
+
+			char guidString[39]; // 38 characters + null terminator
+			snprintf(guidString, sizeof(guidString),
+				"{%08x-%04x-%04x-%04x-%012llx}",
+				guid.Data1, guid.Data2, guid.Data3,
+				(guid.Data4[0] << 8) | guid.Data4[1],
+				*(reinterpret_cast<uint64_t*>(&guid.Data4[2])));
+
+			return std::string(guidString);
 		}
 
 		//---------------------------------------------------
@@ -62,7 +80,6 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static int GetIntValueWithDefault(const char* section, const char* key) noexcept
 		{
 			return ini.GetLongValue(section, key, -1);
-
 		};
 
 		//---------------------------------------------------
@@ -153,11 +170,6 @@ namespace CExternalPatchHandler
 			return GetIntValue("Completionist Patch Data", "PatchID");
 		};
 
-		[[nodiscard]] static bool Analyse() noexcept
-		{
-			return GetBoolValue("Completionist Patch Data", "Analyse");
-		};
-
 		[[nodiscard]] static int GetCustomPatchType() noexcept
 		{
 			return GetIntValue("Completionist Patch Data", "axPlt");
@@ -173,19 +185,19 @@ namespace CExternalPatchHandler
 			return GetBoolValue("Completionist Patch Data", "UseMCMPageGrouping");
 		};
 
-		[[nodiscard]] static bool IsMultiPage() noexcept
-		{
-			return GetBoolValue("Completionist Patch Data", "MultiPage");
-		};
-
 		[[nodiscard]] static int GetMultiPageCount() noexcept
 		{
-			return GetIntValue("Completionist Patch Data", "MultiPage_PageCount");
+			return GetIntValue("Completionist Patch Data", "PageCount");
 		};
 
 		[[nodiscard]] static int GetQuestID(const char* section) noexcept
 		{
 			return GetIntValue(section, "QuestID");
+		};
+
+		[[nodiscard]] static std::string GetHeaderName() noexcept
+		{
+			return GetStringValueWithDefault("Completionist Patch Data", "Header", "");
 		};
 
 		[[nodiscard]] static std::string GetRequiredMod(const char* section) noexcept
@@ -200,12 +212,12 @@ namespace CExternalPatchHandler
 
 		[[nodiscard]] static std::string GetSliderValue(int32_t a_page) noexcept
 		{
-			return GetStringValueWithDefault("Completionist Patch Data", fmt::format("MultiPageName{}", std::to_string(a_page)).c_str(), GET_LOC_STRING_BY_KEY("MCMText_Collectables"));
+			return GetStringValueWithDefault("Completionist Patch Data", fmt::format("PageName{}", std::to_string(a_page)).c_str(), GET_LOC_STRING_BY_KEY("MCMText_Collectables"));
 		};
 
 		[[nodiscard]] static bool GetMultiPagePrependPageNumber() noexcept
 		{
-			return GetBoolValue("Completionist Patch Data", "MultiPage_PrependPageNumber");
+			return GetBoolValue("Completionist Patch Data", "PrependPageNumber");
 		};
 
 		[[nodiscard]] static bool GetRequiredModValue(const char* section) noexcept
@@ -213,11 +225,32 @@ namespace CExternalPatchHandler
 			return GetBoolValue(section, "RequiresMod_Value");
 		};
 
+		[[nodiscard]] static bool HasCustomDropDownMenu() noexcept
+		{
+			return GetBoolValue("Completionist Patch Data", "DropDownMenu");
+		};
+
+		[[nodiscard]] static std::string GetCustomDropDownMenuName() noexcept
+		{
+			return GetStringValueWithDefault("Completionist Patch Data", "DropDownMenu_Name", "ERROR");
+		};
+
+		[[nodiscard]] static std::string GetCustomDropDownMenuHighlight() noexcept
+		{
+			return GetStringValueWithDefault("Completionist Patch Data", "DropDownMenu_Highlight", "ERROR");
+		};
+
+		[[nodiscard]] static std::string GetCustomDropDownOptionName(int32_t option) noexcept
+		{
+			return GetStringValueWithDefault("Completionist Patch Data", fmt::format("DropDownMenu_Option_{}", option).c_str(), "ERROR");
+		};
+
 		[[nodiscard]] static std::string GetInstallFromMod(const char* section) noexcept
 		{
 			return GetStringValueWithDefault(section, "InstallFrom", "None");
 		};
 
+		// Should Completionist load this form?
 		[[nodiscard]] static bool ShouldInstall(const char* section) noexcept
 		{
 			const std::string condition_string = GetInstallCondition(section);
@@ -228,21 +261,172 @@ namespace CExternalPatchHandler
 
 			const auto extractSubstring = [](const std::string& str) {
 				auto parsed_string = trim(str.substr(str.find('<') + 2));
-				if (parsed_string.ends_with(',')) {
-					parsed_string.pop_back();
-				}
 				return parsed_string;
 				};
 
-			if (condition_string.find("<!") == 0) {
-				return !Serialization::CompletionistData::IsModInstalled(extractSubstring(condition_string));
+			const auto splitString = [](const std::string& str, char delimiter) {
+				std::vector<std::string> tokens;
+				std::string token;
+				std::istringstream tokenStream(str);
+				while (std::getline(tokenStream, token, delimiter)) {
+					if (!token.empty()) {
+						tokens.push_back(trim(token));
+					}
+				}
+				return tokens;
+				};
+
+			const auto splitConditions = [](const std::string& str) {
+				std::vector<std::string> conditions;
+				std::string temp;
+
+				for (size_t i = 0; i < str.size(); ++i) {
+					if (str[i] == '<') {
+						if (!temp.empty()) {
+							conditions.push_back(temp);
+							temp.clear();
+						}
+					}
+					temp += str[i];
+				}
+
+				if (!temp.empty()) {
+					conditions.push_back(temp);
+				}
+
+				return conditions;
+				};
+
+			// Split the condition string by commas to handle OR conditions
+			const auto orConditions = splitString(condition_string, ',');
+
+			for (const auto& orCondition : orConditions) {
+
+				// Split each OR condition into individual AND conditions
+				const auto andConditions = splitConditions(orCondition);
+
+				bool andResult = true;
+
+				for (const auto& condition : andConditions) {
+
+					if (condition.find("<!") == 0) {
+						if (Serialization::CompletionistData::IsModInstalled(extractSubstring(condition))) {
+							andResult = false;
+							break;  // If any AND condition fails, skip to the next OR condition
+						}
+					}
+					else if (condition.find("<&") == 0) {
+						if (!Serialization::CompletionistData::IsModInstalled(extractSubstring(condition))) {
+							andResult = false;
+							break;  // If any AND condition fails, skip to the next OR condition
+						}
+					}
+					else {
+						// Invalid format; return false immediately
+						return false;
+					}
+				}
+
+				// If all AND conditions within an OR condition group are true, return true
+				if (andResult) {
+					return true;
+				}
 			}
 
-			if (condition_string.find("<&") == 0) {
-				return Serialization::CompletionistData::IsModInstalled(extractSubstring(condition_string));
-			}
+			// If none of the OR condition groups are true, return false
 			return false;
 		}
+
+		// Should Completionist load this form?
+		[[nodiscard]] static bool ShouldInstallForm(const char* section, const std::string& formID) noexcept
+		{
+			const std::string condition_string = GetCustomInstallCondition(section, formID);
+
+			if (condition_string.empty() || DKUtil::string::iequals(condition_string, "None")) {
+				return true;
+			}
+
+			const auto extractSubstring = [](const std::string& str) {
+				auto parsed_string = trim(str.substr(str.find('<') + 2));
+				return parsed_string;
+				};
+
+			const auto splitString = [](const std::string& str, char delimiter) {
+				std::vector<std::string> tokens;
+				std::string token;
+				std::istringstream tokenStream(str);
+				while (std::getline(tokenStream, token, delimiter)) {
+					if (!token.empty()) {
+						tokens.push_back(trim(token));
+					}
+				}
+				return tokens;
+				};
+
+			const auto splitConditions = [](const std::string& str) {
+				std::vector<std::string> conditions;
+				std::string temp;
+
+				for (size_t i = 0; i < str.size(); ++i) {
+					if (str[i] == '<') {
+						if (!temp.empty()) {
+							conditions.push_back(temp);
+							temp.clear();
+						}
+					}
+					temp += str[i];
+				}
+
+				if (!temp.empty()) {
+					conditions.push_back(temp);
+				}
+
+				return conditions;
+				};
+
+			// Split the condition string by commas to handle OR conditions
+			const auto orConditions = splitString(condition_string, ',');
+
+			for (const auto& orCondition : orConditions) {
+				// Split each OR condition into individual AND conditions
+				const auto andConditions = splitConditions(orCondition);
+
+				bool andResult = true;
+
+				for (const auto& condition : andConditions) {
+					if (condition.find("<!") == 0) {
+						if (Serialization::CompletionistData::IsModInstalled(extractSubstring(condition))) {
+							andResult = false;
+							break;  // If any AND condition fails, skip to the next OR condition
+						}
+					}
+					else if (condition.find("<&") == 0) {
+						if (!Serialization::CompletionistData::IsModInstalled(extractSubstring(condition))) {
+							andResult = false;
+							break;  // If any AND condition fails, skip to the next OR condition
+						}
+					}
+					else {
+						// Invalid format; return false immediately
+						return false;
+					}
+				}
+
+				// If all AND conditions within an OR condition group are true, return true
+				if (andResult) {
+					return true;
+				}
+			}
+
+			// If none of the OR condition groups are true, return false
+			return false;
+		}
+
+		[[nodiscard]] static bool GetIsQuestSection(const char* section) noexcept
+		{
+			std::string val = GetStringValueWithDefault(section, "EditorID", "None");
+			return val != "None";
+		};
 
 		[[nodiscard]] static std::string GetInstallCondition(const char* section) noexcept
 		{
@@ -254,31 +438,19 @@ namespace CExternalPatchHandler
 			return GetIntValue(section, "DisplayOnPage");
 		};
 
-		[[nodiscard]] static std::string GetGroupName() noexcept
+		[[nodiscard]] static int GetPriority(const char* section) noexcept
 		{
-			return GetStringValueWithDefault("Completionist Patch Data", "MCMPageGroupName", "None");
+			return GetIntValueWithDefault(section, "Priority");
 		};
 
-		[[nodiscard]] static bool GroupExists(std::string a_group) noexcept
+		[[nodiscard]] static int GetPriority() noexcept
 		{
-			for (auto& [group, data] : CustomItemsPatches)
-			{
-				if (DKUtil::string::iequals(group, a_group)) {
-					return true;
-				};
-			};
-			return false;
+			return GetIntValueWithDefault("Completionist Patch Data", "Priority");
 		};
 
-		[[nodiscard]] static CMiscPatchGroupData* GetGroup(std::string a_group) noexcept
+		[[nodiscard]] static bool GetIsVanillaTracking() noexcept
 		{
-			for (auto& [group, data] : CustomItemsPatches)
-			{
-				if (DKUtil::string::iequals(group, a_group)) {
-					return data;
-				};
-			};
-			return nullptr;
+			return GetBoolValue("Completionist Patch Data", "IsVanillaTracking");
 		};
 		
 		[[nodiscard]] static bool GetEnabled(const char* section) noexcept
@@ -301,7 +473,7 @@ namespace CExternalPatchHandler
 			std::stringstream ss(GetStringValue(section, "FormIDs"));
 			std::vector<std::tuple<RE::FormID, std::string, std::string>> formIDs{};
 			std::string str;
-			RE::FormID formID;
+			RE::FormID formID{};
 
 			auto fromMod = GetInstallFromMod(section);
 			auto pluginFileName = (DKUtil::string::iequals(fromMod, "None") || DKUtil::string::iequals(fromMod, "")) ? GetPluginFileName() : fromMod;
@@ -367,18 +539,36 @@ namespace CExternalPatchHandler
 			return formIDs;
 		};
 
+		[[nodiscard]] static int GetQuestVisibilityFlag(const char* section) noexcept
+		{
+			const auto& text = GetStringValueWithDefault(section, "Visibility", "Error");
+			if (DKUtil::string::iequals(text, "Error")) {
+				return -1;
+			};
+			return std::stoi(text);
+		};
+
 		[[nodiscard]] static std::string GetCustomDisplayName(const char* section, std::string formIDKey) noexcept
 		{
-			auto text = GetStringValueWithDefault(section, fmt::format("{}_DisplayName", formIDKey.c_str()).c_str(), "Error");
+			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_DisplayName", formIDKey.c_str()).c_str(), "Error");
 			if (DKUtil::string::iequals(text, "Error")) {
 				return std::string{};
 			};
 			return text;
 		};
 
-		[[nodiscard]] static std::string GetCustomHighlightText(const char* section, std::string formIDKey) noexcept
+		[[nodiscard]] static int GetCustomVisibilityFlag(const char* section, std::string formIDKey) noexcept
 		{
-			auto text = GetStringValueWithDefault(section, fmt::format("{}_Highlight", formIDKey.c_str()).c_str(), "Error");
+			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_Visibility", formIDKey.c_str()).c_str(), "Error");
+			if (DKUtil::string::iequals(text, "Error")) {
+				return -1;
+			};
+			return std::stoi(text);
+		};
+
+		[[nodiscard]] static std::string GetCustomHighlightText(const char* section, const std::string &formIDKey) noexcept
+		{
+			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_Highlight", formIDKey.c_str()).c_str(), "Error");
 			if (DKUtil::string::iequals(text, "Error")) {
 				return std::string{};
 			};
@@ -386,7 +576,17 @@ namespace CExternalPatchHandler
 			return text;
 		};
 
-		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string>> GetVariationsArray(const char* section, std::string formIDKey, bool log_install) noexcept
+		[[nodiscard]] static std::string GetCustomInstallCondition(const char* section, const std::string& formIDKey) noexcept
+		{
+			const auto &text = GetStringValueWithDefault(section, fmt::format("{}_InstallCondition", formIDKey.c_str()).c_str(), "Error");
+			if (DKUtil::string::iequals(text, "Error")) {
+				return std::string{};
+			};
+
+			return text;
+		};
+
+		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string>> GetVariationsArray(const char* section, const std::string &formIDKey, bool log_install) noexcept
 		{
 			std::vector<std::tuple<RE::FormID, std::string, std::string>> variations{};
 
@@ -413,6 +613,10 @@ namespace CExternalPatchHandler
 				if (str.ends_with(",")) {
 					str.erase(str.end());
 				};
+
+				if (!ShouldInstallForm(section, formIDKey)) {
+					continue;
+				}
 
 				if (!str.contains("*")) {
 
@@ -498,6 +702,13 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static std::string GetMCMPageName() noexcept
 		{
 			return GetStringValue("Completionist Patch Data", "MCMPageName");
+		};
+
+		[[nodiscard]] static bool IsPageLocalisationNameValid(int32_t index) noexcept
+		{
+			auto pageName = fmt::format("PageName{}", index);
+
+			return GetStringValueWithDefault("Completionist Patch Data", pageName.c_str(), "Error") != "Error";
 		};
 
 		[[nodiscard]] static std::string GetUUID(const char* section) noexcept
@@ -586,45 +797,39 @@ namespace CExternalPatchHandler
 			return GetFormIDValue(section, "BaseFormID");
 		};
 
+		[[nodiscard]] static RE::FormID GetDrunkFileList(const char* section) noexcept
+		{
+			return GetFormIDValue(section, "validItemsFormID");
+		};
+
+		[[nodiscard]] static std::string GetDrunkFileListPluginName(const char* section) noexcept
+		{
+			return GetStringValue(section, "validItemsFileName");
+		};
+
 		[[nodiscard]] static int GetRadiantStage(const char* section) noexcept
 		{
-			return GetIntValue(section, "RadiantStage");
+			return GetIntValueWithDefault(section, "RadiantStage");
+		};
+
+		[[nodiscard]] static bool IsFavorQuest(const char* section) noexcept
+		{
+			return GetBoolValue(section, "isGenericFavorQuest");
+		};
+
+		[[nodiscard]] static int GetFavorQuestType(const char* section) noexcept
+		{
+			return GetIntValueWithDefault(section, "GenericFavorQuestType");
 		};
 
 		[[nodiscard]] static int GetQuestLink(const char* section) noexcept
 		{
 			return GetIntValueWithDefault(section, "QuestLink");
 		};
-
-		[[nodiscard]] static RE::FormID GetItemFormID(const char* section) noexcept
-		{
-			return GetFormIDValue(section, "FormID");
-		};
-
 		
 		[[nodiscard]] static CMiscPatchType GetItemType(const char* section) noexcept
 		{
 			return GetEnumValue<CMiscPatchType>(section, "Type");
-		};
-
-		[[nodiscard]] static int GetItemsPatchID() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "ItemsPatchID");
-		};
-
-		[[nodiscard]] static int GetBooksPatchID() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "BooksPatchID");
-		};
-
-		[[nodiscard]] static int GetMapMaPatchID() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "MapMaPatchID");
-		};
-
-		[[nodiscard]] static int GetEnchaPatchID() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "EnchaPatchID");
 		};
 
 		//Pets Support
@@ -659,11 +864,7 @@ namespace CExternalPatchHandler
 			return GetIntValue(section, fmt::format("{}_OptionalStage", rawFormID).c_str());
 		};
 
-		[[nodiscard]] static RE::FormID GetPlayerHomeKey(const char* section, const std::string& rawFormID) noexcept
-		{
-			return GetFormIDValue(section, fmt::format("{}_KeyFormID", rawFormID).c_str());
-		};
-
+		//Fishing Support
 		[[nodiscard]] static bool CanPickUpFish(const char* section, const std::string& rawFormID) noexcept
 		{
 			return GetBoolValue(section, fmt::format("{}_PickupEnabled", rawFormID).c_str());
@@ -690,19 +891,19 @@ namespace CExternalPatchHandler
 
 		static void BuildLocalisedMap(const char* a_name, std::unordered_map<std::string, std::string>& translations)
 		{
-			translations.clear();
+			translations.clear(); 
 
-			const std::string cBasePath = R"(.\Data\SKSE\Plugins\CompletionistData\Translations\)";
+			const std::string &cBasePath = R"(.\Data\SKSE\Plugins\CompletionistData\Translations\)";
 			if (!std::filesystem::exists(cBasePath) || std::filesystem::is_empty(cBasePath))
 			{
 				INFO("Translations Folder Is Empty Or Does Not Exist.");
 				return;
 			}
 
-			const std::string cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
+			const std::string &cFilePath = fmt::format(R"(.\Data\SKSE\Plugins\CompletionistData\Translations\{})"sv, a_name);
 			if (!std::filesystem::exists(cFilePath) || std::filesystem::is_empty(cFilePath))
 			{
-				INFO("Translations Folderdeos not contain {}", a_name);
+				INFO("Translations Folder deos not contain {}", a_name);
 				return;
 			}
 
@@ -734,17 +935,14 @@ namespace CExternalPatchHandler
 
 		static void LinkPatchAndQuestData() 
 		{
-			for (auto& [groupName, group] : CustomItemsPatches)
+			for (auto& [page, patch] : CustomPatches)
 			{
-				for (auto& page : group->GetPatches())
+				for (auto& section : patch->type_sections)
 				{
-					for (auto& section : page.second->type_sections)
+					if (section.type == CMiscPatchType::kQuests)
 					{
-						if (section.type == CMiscPatchType::kQuests)
-						{
-							section.quest_data_array = GetQuestData(section.quest_data_id);
-							section.enabled = true;
-						};
+						section.quest_data_array = GetQuestData(section.quest_data_id);
+						section.enabled = true;
 					};
 				};
 			};

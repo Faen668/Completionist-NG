@@ -5,25 +5,25 @@
 
 using namespace Serialization;
 
-constexpr std::tuple<RE::FormID, const char*, const char*> Begggars[] =
+std::vector<FavorMerchantData> Beggar_Data =
 {
-	{0x1B138, "Windhelm_Quest18",	"Skyrim.esm" },
-	{0x2C90F, "Whiterun_Quest14",	"Skyrim.esm" },
-	{0x1F325, "Markarth_Quest21",	"Skyrim.esm" },
-	{0x198DC, "Solitude_Quest18",	"Skyrim.esm" },
-	{0x44A8D, "Riften_Quest27",		"Skyrim.esm" },
-	{0x03F5E, "Whiterun_Quest15",	"Hearthfires.esm" },
-	{0x19E24, "SmallTowns_Quest18",	"Skyrim.esm" },
-	{0x198BD, "Solitude_Quest19",	"Skyrim.esm" },
-	{0x1B122, "Windhelm_Quest19",	"Skyrim.esm" },
-	{0x44A8E, "Riften_Quest28",		"Skyrim.esm" },
-	{0x1A636, "Solitude_Quest20",	"Skyrim.esm" },
+	{0x013BA7, "Skyrim.esm",		"Whiterun_Quest14"},
+	{0x013392, "Skyrim.esm",		"Markarth_Quest21"},
+	{0x01327C, "Skyrim.esm",		"Solitude_Quest18"},
+	{0x013356, "Skyrim.esm",		"Riften_Quest27"},
+	{0x003F5F, "Hearthfires.esm",	"Whiterun_Quest15"},
+	{0x0136C0, "Skyrim.esm",		"SmallTowns_Quest18"},
+	{0x0132A9, "Skyrim.esm",		"Solitude_Quest20"},
+	{0x01329C, "Skyrim.esm",		"Solitude_Quest19"},
+	{0x014121, "Skyrim.esm",		"Windhelm_Quest19"},
+	{0x01B071, "Skyrim.esm",		"Riften_Quest28"},
+	{0x014137, "Skyrim.esm",		"Windhelm_Quest18"},
 };
 
 struct activatedBeggar 
 {
 	RE::Actor* Actor;
-	const char* quest_key;
+	std::string quest_key;
 };
 
 activatedBeggar curspeaker = {};
@@ -41,6 +41,17 @@ namespace CQFramework_Beggars
 	};
 
 	//---------------------------------------------------
+	//-- Add beggar Data --------------------------------
+	//---------------------------------------------------
+
+	void CHandler::AddBeggarData(RE::FormID NPCReferenceFormID, const std::string& fileName, const std::string& Quest_Key)
+	{
+		FavorMerchantData data = { NPCReferenceFormID, fileName, Quest_Key };
+		Beggar_Data.push_back(data);
+		//INFO("Added New Merchant Data: {} - {} - {}", Serialization::CompletionistData::GetFormIDHexString(NPCBaseFormID), fileName, Quest_Key)
+	}
+
+	//---------------------------------------------------
 	//-- Framework Function ( Is Valid Reference  ) -----
 	//---------------------------------------------------
 
@@ -48,13 +59,12 @@ namespace CQFramework_Beggars
 	{
 		if (a_actor)
 		{
-			for (auto& [formID, quest_key, fileName] : Begggars)
+			for (auto& [formID, fileName, quest_key] : Beggar_Data)
 			{
-				auto* Beggar = CompletionistData::GetFullForm<RE::Actor>(formID, fileName);
-
-				if (Beggar && Beggar->GetFormID() == a_actor->GetFormID())
+				auto* npc = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESNPC>(formID, fileName);
+				if (npc && npc->GetFormID() == a_actor->GetActorBase()->GetFormID())
 				{
-					curspeaker = activatedBeggar{ Beggar, quest_key };
+					curspeaker = activatedBeggar{ a_actor, quest_key };
 					break;
 				}
 			}
@@ -74,7 +84,7 @@ namespace CQFramework_Beggars
 
 		CHandler::EvaluateActivatedReference(a_event->objectActivated.get()->As<RE::Actor>());
 
-		if (curspeaker.Actor && curspeaker.quest_key)
+		if (curspeaker.Actor && !curspeaker.quest_key.empty())
 		{
 			INFO("{} is a valid beggar with paired quest key [{}]", curspeaker.Actor->GetName(), curspeaker.quest_key);
 		}
@@ -93,7 +103,7 @@ namespace CQFramework_Beggars
 			return EventResult::kContinue; 
 		}
 
-		if (curspeaker.Actor && curspeaker.quest_key)
+		if (curspeaker.Actor && !curspeaker.quest_key.empty())
 		{
 			if (a_event->newContainer == curspeaker.Actor->GetFormID())
 			{

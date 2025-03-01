@@ -1,97 +1,87 @@
+#include "Ini File Management/Cell Scanner Exclusions.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "Serialization.hpp"
 #include "CellScanner.hpp"
 #include "Variables.hpp"
 
-static std::vector<RE::TESObjectREFR*> refs;
-static std::vector<std::string> names;
-static std::vector<std::string> types;
-static std::vector<RE::FormID> formIDs;
-static std::vector<std::tuple<RE::TESObjectREFR*, std::string, std::string, RE::TESForm*>> refsWithNames;
-static std::unordered_map<RE::FormID, RE::FormID> ExcludedVendorChests{};
-
-static int32_t currentReferencePosition;
-
-namespace CellScanner
+namespace Completionist
 {
-	using cmd = Serialization::CompletionistData;
 	using namespace CFramework_Master;
 	using namespace Serialization;
 	using namespace CVariables;
+
+	static std::vector<RE::TESObjectREFR*> refs;
+	static std::vector<std::string> names;
+	static std::vector<std::string> types;
+	static std::vector<RE::FormID> formIDs;
+	static std::vector<std::tuple<RE::TESObjectREFR*, std::string, std::string, RE::TESForm*>> refsWithNames;
+	static std::unordered_map<RE::FormID, RE::FormID> ExcludedVendorChests;
+	static int32_t currentReferencePosition;
+
+	using cmd = Serialization::CompletionistData;
+
+	void CellScanner::init()
+	{
+		CompletionistExclusions::ExclusionHandler::init();
+		ExcludeAllVendorChests();
+	}
 
 	//---------------------------------------------------
 	//-- Serialisation Interface ------------------------
 	//---------------------------------------------------
 
-	void CellScanner::CHandler::ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* a_cell)
+	void CellScanner::ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* a_cell)
 	{
 		CFramework_Master::ExcludedCellScannerRefs.AddReference(a_ref->GetFormID(), a_ref->GetDisplayFullName(), a_cell->GetFormID());
 	};
 
-	void CellScanner::CHandler::RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
+	void CellScanner::RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
 	{
 		CFramework_Master::ExcludedCellScannerRefs.RemoveReference(a_ref->GetFormID());
 	};
 
-	std::vector<std::string> CellScanner::CHandler::GetReferenceFormIDs(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
+	std::vector<std::string> CellScanner::GetReferenceFormIDs(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceFormIDs(a_cell->GetFormID());
 	}
 
-	std::vector<std::string> CellScanner::CHandler::GetReferenceNames(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
+	std::vector<std::string> CellScanner::GetReferenceNames(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceNames(a_cell->GetFormID());
 	}
 
-	std::vector<RE::TESObjectREFR*> CellScanner::CHandler::GetObjectReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
+	std::vector<RE::TESObjectREFR*> CellScanner::GetObjectReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceForms(a_cell->GetFormID());
 	}
 
-	std::string CellScanner::CHandler::GetQuestMarkerReferenceFormID(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
+	std::string CellScanner::GetQuestMarkerReferenceFormID(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
 	{
 		if (!a_ref) { return "-"; }
 		return cmd::GetFormIDHexString(a_ref);
 	}
 
-	std::string CellScanner::CHandler::GetQuestMarkerReferenceOwner(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
+	std::string CellScanner::GetQuestMarkerReferenceOwner(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
 	{
 		if (!a_ref) { return "-"; }
 		return cmd::GetFormOwner(a_ref);
 	}
 
-	std::string CellScanner::CHandler::GetQuestMarkerReferenceIndex(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
+	std::string CellScanner::GetQuestMarkerReferenceIndex(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
 	{
 		if (!a_ref) { return "-"; }
 		return cmd::GetModIndexFromForm(a_ref);
 	}
 
 	//---------------------------------------------------
-	//-- Add Excluded Chests ----------------------------
-	//---------------------------------------------------
-
-	void CellScanner::CHandler::AddExcludedReferencesFromMods() {
-
-		for (auto& [reference, file, name] : ExcludedModAddedReferences)
-		{
-			auto* refr = cmd::GetFullForm<RE::TESObjectREFR>(reference, file);
-			if (refr && refr->GetParentCell())
-			{
-				CFramework_Master::ExcludedMerchantContainers.AddReference(refr, name, refr->GetParentCell()->GetFormID());
-			};
-		};
-	}; 
-
-	//---------------------------------------------------
 	//-- Vendor Chest Functions -------------------------
 	//---------------------------------------------------
 
-	void CellScanner::CHandler::ExcludeAllVendorChests() {
+	void CellScanner::ExcludeAllVendorChests() {
 
 		const auto& [allForms, lock] = RE::TESForm::GetAllForms();
 		for (auto& [id, form] : *allForms)
 		{
-			if (form && form->formType == RE::FormType::Faction) 
+			if (form && form->formType == RE::FormType::Faction)
 			{
 				const auto* faction = form->As<RE::TESFaction>();
 				if (faction && (faction->IsVendor() || faction->OffersServices()))
@@ -136,22 +126,47 @@ namespace CellScanner
 	//-- Vendor Chest Functions -------------------------
 	//---------------------------------------------------
 
-	bool CellScanner::CHandler::IsReferenceExcluded(RE::TESObjectREFR* a_chest)
+	bool CellScanner::IsModAddedReferenceExcluded(RE::FormID a_formID)
+	{
+		const auto& vector = CompletionistExclusions::ExclusionHandler::GetExcludedContainersVector();
+		return std::ranges::find(vector, a_formID) != vector.end();
+	}
+
+	//---------------------------------------------------
+	//-- Cell Scanner Function --------------------------
+	//---------------------------------------------------
+
+	bool CellScanner::isCellExcluded(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell) {
+
+		for (auto& formID : CompletionistExclusions::ExclusionHandler::GetExcludedCellsVector())
+		{
+			if (a_cell && a_cell->GetFormID() == formID) {
+				return true;
+			}
+		};
+		return false;
+	}
+
+	//---------------------------------------------------
+	//-- Vendor Chest Functions -------------------------
+	//---------------------------------------------------
+
+	bool CellScanner::IsReferenceExcluded(RE::TESObjectREFR* a_chest)
 	{
 		if (!a_chest) {
 			return true;
 		}
 
-		return ExcludedVendorChests.contains(a_chest->GetFormID()) 
-			|| CFramework_Master::ExcludedMerchantContainers.HasReference(a_chest->GetFormID())
-			|| CFramework_Master::ExcludedCellScannerRefs.HasReference(a_chest->GetFormID());
+		return ExcludedVendorChests.contains(a_chest->GetFormID())
+			|| CFramework_Master::ExcludedCellScannerRefs.HasReference(a_chest->GetFormID())
+			|| IsModAddedReferenceExcluded(a_chest->GetFormID());
 	}
-	 
+
 	//---------------------------------------------------
 	//-- Collectability Functions -----------------------
 	//---------------------------------------------------
 
-	bool CellScanner::CHandler::ItemIsCollectable(RE::TESForm* a_form) {
+	bool CellScanner::ItemIsCollectable(RE::TESForm* a_form) {
 		return cmd::CheckIsCollectable(a_form->GetFormID());
 	}
 
@@ -159,7 +174,7 @@ namespace CellScanner
 	//-- Collectability Functions -----------------------
 	//---------------------------------------------------
 
-	bool CellScanner::CHandler::ItemIsCollected(RE::TESForm* a_form) {
+	bool CellScanner::ItemIsCollected(RE::TESForm* a_form) {
 		return FoundItemData.HasForm(a_form->GetFormID()) || FoundItemData_NoShow.HasForm(a_form->GetFormID());
 	}
 
@@ -167,7 +182,7 @@ namespace CellScanner
 	//-- Cell Scanner Function --------------------------
 	//---------------------------------------------------
 
-	void CellScanner::CHandler::CheckForReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, bool a_logging, bool b_notify)
+	void CellScanner::CheckForReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, bool a_logging, bool b_notify)
 	{
 		ScanCell(cell, a_logging, b_notify);
 	}
@@ -176,7 +191,7 @@ namespace CellScanner
 	//-- Cell Scanner Function --------------------------
 	//---------------------------------------------------
 
-	RE::TESObjectREFR* CellScanner::CHandler::GetTargetReferenceRefr(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell, RE::TESForm* a_lastForm)
+	RE::TESObjectREFR* CellScanner::GetTargetReferenceRefr(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell, RE::TESForm* a_lastForm)
 	{
 		int32_t pos = 0;
 
@@ -184,7 +199,7 @@ namespace CellScanner
 			return nullptr;
 		}
 
-		CHandler::CheckForReferences(nullptr, a_cell, false, true);
+		CellScanner::CheckForReferences(nullptr, a_cell, false, true);
 
 		//If the list is empty return nothing.
 		if (refsWithNames.size() < 1) {
@@ -220,9 +235,9 @@ namespace CellScanner
 		else
 		{
 			//Get a random integer and traverse until we find a random ref that was not used previously.
-			pos = CHandler::GetRandomIndex(refsWithNames.size());
+			pos = CellScanner::GetRandomIndex(refsWithNames.size());
 			while (!std::get<0>(refsWithNames[pos]) || !std::get<3>(refsWithNames[pos]) || std::get<3>(refsWithNames[pos])->GetFormID() == a_lastForm->GetFormID()) {
-				pos = CHandler::GetRandomIndex(refsWithNames.size());
+				pos = CellScanner::GetRandomIndex(refsWithNames.size());
 			};
 			currentReferencePosition = pos;
 			return std::get<0>(refsWithNames[pos]);
@@ -231,23 +246,23 @@ namespace CellScanner
 		return nullptr;
 	}
 
-	std::string CellScanner::CHandler::GetTargetReferenceName(RE::StaticFunctionTag*)
+	std::string CellScanner::GetTargetReferenceName(RE::StaticFunctionTag*)
 	{
 		return currentReferencePosition != -1 ? std::get<1>(refsWithNames[currentReferencePosition]) : "";
 	};
 
-	std::string CellScanner::CHandler::GetTargetReferenceType(RE::StaticFunctionTag*)
+	std::string CellScanner::GetTargetReferenceType(RE::StaticFunctionTag*)
 	{
 		return currentReferencePosition != -1 ? std::get<2>(refsWithNames[currentReferencePosition]) : "";
 	};
 
-	RE::TESForm* CellScanner::CHandler::GetTargetReferenceForm(RE::StaticFunctionTag*)
+	RE::TESForm* CellScanner::GetTargetReferenceForm(RE::StaticFunctionTag*)
 	{
 		return currentReferencePosition != -1 ? std::get<3>(refsWithNames[currentReferencePosition]) : nullptr;
 	};
 
-	bool CellScanner::CHandler::HasPinnedFormInCell(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, RE::TESForm* a_form) {
-		
+	bool CellScanner::HasPinnedFormInCell(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, RE::TESForm* a_form) {
+
 		if (!a_form || refsWithNames.size() == 0) {
 			return false;
 		}
@@ -260,11 +275,11 @@ namespace CellScanner
 		return it != refsWithNames.end();
 	}
 
-	bool CellScanner::CHandler::IsItemPinnable(RE::StaticFunctionTag*, RE::TESForm* a_form) {
+	bool CellScanner::IsItemPinnable(RE::StaticFunctionTag*, RE::TESForm* a_form) {
 		return a_form && ItemIsCollectable(a_form) && !ItemIsCollected(a_form);
 	};
 
-	std::string CellScanner::CHandler::GetPinnedReferenceName(RE::StaticFunctionTag*, RE::TESForm* a_form)
+	std::string CellScanner::GetPinnedReferenceName(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
 		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
 			[a_form](const auto& tuple) {
@@ -278,7 +293,7 @@ namespace CellScanner
 		return "";
 	};
 
-	std::string CellScanner::CHandler::GetPinnedReferenceType(RE::StaticFunctionTag*, RE::TESForm* a_form)
+	std::string CellScanner::GetPinnedReferenceType(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
 		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
 			[a_form](const auto& tuple) {
@@ -292,7 +307,7 @@ namespace CellScanner
 		return "";
 	};
 
-	RE::TESObjectREFR* CellScanner::CHandler::GetPinnedReferenceRefr(RE::StaticFunctionTag*, RE::TESForm* a_form)
+	RE::TESObjectREFR* CellScanner::GetPinnedReferenceRefr(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
 		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
 			[a_form](const auto& tuple) {
@@ -305,25 +320,6 @@ namespace CellScanner
 		}
 		return nullptr;
 	};
-
-	//---------------------------------------------------
-	//-- Cell Scanner Function --------------------------
-	//---------------------------------------------------
-
-	bool CellScanner::CHandler::isCellExcluded(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell) {
-
-		auto* DH = RE::TESDataHandler::GetSingleton();
-
-		for (auto& [formID, modName, Text] : ModAddedCells)
-		{
-			auto* cell = DH->LookupForm<RE::TESObjectCELL>(formID, modName);
-
-			if (cell && cell->GetFormID() == a_cell->GetFormID()) {
-				return true;
-			};
-		};
-		return false;
-	}
 
 	//---------------------------------------------------
 	//-- Lambda to sort refs based on distance ----------
@@ -339,7 +335,7 @@ namespace CellScanner
 	//-- Cell Scanner Function --------------------------
 	//---------------------------------------------------
 
-	void CellScanner::CHandler::ScanCell(RE::TESObjectCELL* cell, bool a_logging, bool b_notify) 
+	void CellScanner::ScanCell(RE::TESObjectCELL* cell, bool a_logging, bool b_notify)
 	{
 		std::unordered_set<RE::TESForm*> forms;
 
@@ -395,7 +391,7 @@ namespace CellScanner
 
 								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
 									//RE::PlayerCharacter::GetSingleton()->MoveTo(ref.get());
-									//INFO("Found container item {} with formID {} ", obj->GetName(), obj->GetLocalFormID());
+									//INFO("Found container item: {}", obj->GetName());
 
 									if (!cell->IsInteriorCell()) {
 										auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
@@ -440,8 +436,8 @@ namespace CellScanner
 								}
 
 								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
-									//INFO("Found NPC Item: {} on - [{}]", RE::TESForm::LookupByID(obj->GetFormID())->GetName(), NPC->GetName());
-									
+									//INFO("Found NPC Item: {} on - [{}]", obj->GetName(), NPC->GetName());
+
 									if (!cell->IsInteriorCell()) {
 										auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
 
@@ -471,7 +467,7 @@ namespace CellScanner
 					}
 
 					if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
-						//INFO("Found loose item: {} with formID {} ", obj->GetName(), obj->GetLocalFormID());
+						//INFO("Found loose item: {}", obj->GetName());
 
 						if (!cell->IsInteriorCell()) {
 							auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
@@ -495,13 +491,16 @@ namespace CellScanner
 			return CompareByDistance(std::get<0>(a), std::get<0>(b));
 			});
 
-		if (forms.size() > 0) 
+		auto name = cell->IsInteriorCell() ? cell->GetFullName() : GET_LOC_STRING_BY_KEY("CellScanner_ExteriorCellPrefix");
+		if (forms.size() > 0)
 		{
-			if (b_notify) {
-				auto name = cell->IsInteriorCell() ? cell->GetFullName() : GET_LOC_STRING_BY_KEY("CellScanner_ExteriorCellPrefix");
-				if (V_CellScanner_NUMB) {
-					if (V_CellScanner_DETA) 
+			if (b_notify) 
+			{
+				if (V_CellScanner_NUMB) 
+				{
+					if (V_CellScanner_DETA)
 					{
+						//detailed
 						auto msg = fmt::format("~~~ {:s} {:s} ~~~"sv, name, CVariables::V_notificationTextCellScan3);
 						msg += loos > 0 ? fmt::format("\n~ {:s} {:s} ~"sv, std::to_string(loos), CVariables::V_notificationTextCellScan4) : "", "";
 						msg += npcs > 0 ? fmt::format("\n~ {:s} {:s} ~"sv, std::to_string(npcs), CVariables::V_notificationTextCellScan5) : "", "";
@@ -510,13 +509,23 @@ namespace CellScanner
 						RE::DebugMessageBox(msg.c_str());
 						return;
 					}
+
+					//numbers
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}"sv, name, CVariables::V_notificationTextCellScan0, std::to_string(forms.size()), CVariables::V_notificationTextCellScan1);
 					FrameworkAPI::SendNotification(msg, "NotifyMissable");
 					return;
 				}
+
+				//simple
 				auto msg = fmt::format("{:s}{:s}"sv, name, CVariables::V_notificationTextCellScan2);
 				FrameworkAPI::SendNotification(msg, "NotifyMissable");
 			}
+		}
+		else
+		{
+			//none
+			auto msg = fmt::format("{:s}{:s}"sv, name, GET_LOC_STRING_BY_KEY("CellScanner_NoCollectables"));
+			FrameworkAPI::SendNotification(msg, "NotifyMissable");
 		}
 	}
 
@@ -524,15 +533,15 @@ namespace CellScanner
 	//-- Get Item Type ----------------------------------
 	//---------------------------------------------------
 
-	bool CellScanner::CHandler::IsExcludedFormType(RE::TESForm* a_form)
+	bool CellScanner::IsExcludedFormType(RE::TESForm* a_form)
 	{
 		switch (a_form->GetFormType())
 		{
-		case RE::FormType::Armor:		{ return CVariables::V_CellScanner_ExcludeArmor; break;}
-		case RE::FormType::Book:		{ return CVariables::V_CellScanner_ExcludeBooks; break;}
-		case RE::FormType::Weapon:		{ return CVariables::V_CellScanner_ExcludeWeapons; break;}
+		case RE::FormType::Armor: { return CVariables::V_CellScanner_ExcludeArmor; break;}
+		case RE::FormType::Book: { return CVariables::V_CellScanner_ExcludeBooks; break;}
+		case RE::FormType::Weapon: { return CVariables::V_CellScanner_ExcludeWeapons; break;}
 		case RE::FormType::AlchemyItem: { return CVariables::V_CellScanner_ExcludeAlchemy; break;}
-		case RE::FormType::Misc:		{ return CVariables::V_CellScanner_ExcludeMiscItems; break;}
+		case RE::FormType::Misc: { return CVariables::V_CellScanner_ExcludeMiscItems; break;}
 		default: return false; break;
 		}
 		return false;
@@ -542,7 +551,7 @@ namespace CellScanner
 	//-- Get Item Type ----------------------------------
 	//---------------------------------------------------
 
-	std::string CellScanner::CHandler::GetFormType(RE::TESForm* a_form)
+	std::string CellScanner::GetFormType(RE::TESForm* a_form)
 	{
 		using loc = CLocalisation::LocalisationAPI;
 

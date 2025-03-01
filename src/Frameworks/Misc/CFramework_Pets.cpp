@@ -29,9 +29,12 @@ namespace CFramework_Pets {
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::Framework_UpdatePetOwnership(RE::StaticFunctionTag*, RE::TESActorBase* a_actorBase) {
+	void CHandler::Framework_UpdatePetOwnership(RE::StaticFunctionTag*, RE::Actor* a_critter) {
 
-		if (auto t_pos = std::ranges::find(Pets_VP_FormArray, a_actorBase); t_pos != Pets_VP_FormArray.end()) {
+		auto* baseActor = a_critter->GetActorBase();
+		if (!baseActor) { return; }
+
+		if (auto t_pos = std::ranges::find(Pets_VP_FormArray, baseActor); t_pos != Pets_VP_FormArray.end()) {
 			auto b_pos = std::distance(Pets_VP_FormArray.begin(), t_pos);
 
 			if (!FoundItemData_NoShow.HasForm(Pets_VP_FormArray[b_pos]->GetFormID())) {

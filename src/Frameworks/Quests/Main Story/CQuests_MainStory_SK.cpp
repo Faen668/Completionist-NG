@@ -41,7 +41,7 @@ namespace CQFramework_SK
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()->initStageData(StageData)->finalize();
-			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 0, QuestData[i].unique_identifier));
+			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(),0, QuestData[i].unique_identifier));
 		}
 	};
 };

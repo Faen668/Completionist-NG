@@ -46,9 +46,25 @@ namespace CQFramework_Dungeons
 
 	void CHandler::InstallFramework()
 	{	
+		//Dungeon Quests are not Miscellaneous - https://www.nexusmods.com/skyrimspecialedition/mods/123559
+		bool DQANM_Installed = Serialization::CompletionistData::IsModInstalled("Dungeon Quests are not Miscellaneous.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
 			QuestData[i].init()->initStageData(StageData)->finalize();
+
+			//If Dungeon Quests are not Miscellaneous is installed, lookup a different quest name for the modified quests.
+			if (DQANM_Installed && (i == 0 || i == 1 || i == 5 || i == 11 || i == 13 || i == 14))
+			{
+				QuestData[i].override(CQuestData::kLocKey, fmt::format("{}{}", QuestData[i].GetKey(), "_DQANM").c_str());
+
+				//For dunRebelsCairnQST, change the completion stage from 30 > 50.
+				if (i == 14)
+				{
+					StageData[5].stage = 50;
+				}
+			}
+
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 27, QuestData[i].unique_identifier));
 		}
 	};

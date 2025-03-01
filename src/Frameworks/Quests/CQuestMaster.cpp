@@ -38,7 +38,9 @@
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Favors.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Bounties.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Beggars.hpp"
+#include "Frameworks/Quests/Radiant & Favors/CQuests_Drunks.hpp"
 #include "Frameworks/Quests/Patches/CQuests_Patches.hpp"
+#include "Internal Utility/MCMHandler.hpp"
 
 namespace CQuestMaster
 {
@@ -87,6 +89,7 @@ namespace CQuestMaster
 		CQFramework_Beggars::CHandler::InstallFramework();
 		CQFramework_Bounties::CHandler::InstallFramework();
 		CQFramework_FavorQuests::CHandler::InstallFramework();
+		CQFramework_FavorQuests::DrunkHandler::InstallFramework();
 
 		//Quests (Patches)
 		CQFramework_Patches::CHandler::InstallFramework();
@@ -132,7 +135,6 @@ namespace CQuestMaster
 		auto UserInterface = RE::UI::GetSingleton();
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(QuestAPI::GetSingleton()));
-		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(QuestAPI::GetSingleton()));
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(QuestAPI::GetSingleton()));
 	};
 
@@ -194,6 +196,12 @@ namespace CQuestMaster
 
 		for (auto& [data, name, ID, key] : CQuestMaster::CQuestDataVec)
 		{
+			if (!CHCMHandler::MCMAPI::IsQuestVisible(nullptr, data->mcmPage, data->GetEditorID(), -1))
+			{
+				INFO("Quest: {} is hidden and cannot be processed", data->GetName());
+				continue;
+			}
+
 			if (list.size() >= maxResults)
 				break;
 
@@ -213,7 +221,7 @@ namespace CQuestMaster
 					continue;
 				}
 
-				if (!data->isNative)
+				if (!data->official)
 				{
 					list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + data->mcmPage + "}{" + GET_LOC_STRING_BY_KEY("Category_Quest") + "}{" + name + "}");
 					list.push_back(data->mcmPage);
@@ -376,45 +384,6 @@ namespace CQuestMaster
 	}
 
 	//---------------------------------------------------
-	//-- Framework Events ( On Item Added To Drunk ) ----
-	//---------------------------------------------------
-
-	EventResult QuestAPI::ProcessEvent(RE::TESContainerChangedEvent const* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource)
-	{
-		if (a_event && a_event->baseObj && a_event->oldContainer == RE::PlayerCharacter::GetSingleton()->GetFormID())
-		{
-			for (auto& [data, name, ID, key] : CQuestDataVec)
-			{
-				ProcessDrunkardQuest(data->drunk_data, a_event->baseObj, a_event->newContainer, RE::MenuTopicManager::GetSingleton()->speaker.get().get());
-			};
-		};
-		return EventResult::kContinue;
-	};
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Update Drunk Completion ) ----
-	//---------------------------------------------------
-
-	void QuestAPI::ProcessDrunkardQuest(CDrunkData* a_data, RE::FormID a_base, RE::FormID a_container, RE::TESObjectREFR* a_speaker)
-	{
-		if (!a_data || !a_base || !a_container || !a_speaker) { return; }
-
-		auto* drunk_list = static_cast<RE::BGSListForm*>(RE::TESDataHandler::GetSingleton()->LookupForm(a_data->listID, a_data->file_name));
-		auto* drunk_actr = static_cast<RE::TESObjectREFR*>(RE::TESDataHandler::GetSingleton()->LookupForm(a_data->formID, a_data->file_name));
-
-		if (!drunk_actr || !drunk_list || !drunk_list->HasForm(a_base) || a_speaker->GetFormID() != a_container)
-		{
-			return;
-		}
-
-		if (a_speaker == drunk_actr && a_container == drunk_actr->GetFormID())
-		{
-			CFramework_Master::RadiantCountData.IncreaseCount(a_data->link, 1);
-			CQuestMaster::QuestAPI::CheckForRadiantQuestCompletion(a_data->link);
-		}
-	}
-
-	//---------------------------------------------------
 	//-- Quest Functions ( Getter - Idens ) -------------
 	//---------------------------------------------------
 
@@ -442,7 +411,9 @@ namespace CQuestMaster
 	{
 		std::vector<std::string> list{};
 
-		if (auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page); a_ID != -1)
+		auto a_ID = CHCMHandler::MCMAPI::GetMCMPageIdentifierFromName(nullptr, a_page);
+
+		if (a_ID != -1)
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
 			{
@@ -680,7 +651,7 @@ namespace CQuestMaster
 	bool QuestAPI::IsStageDone(RE::TESQuest* a_quest, int32_t a_stage)
 	{
 		using func_t = decltype(IsStageDone);
-		REL::Relocation<func_t> func{ IsStageDoneAddress };
+		REL::Relocation<func_t> func{ CEvents::IsStageDoneAddress };
 		return a_quest && func(a_quest, a_stage);
 	}
 

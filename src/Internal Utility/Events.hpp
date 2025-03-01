@@ -8,11 +8,11 @@
 #define FuncParam_oHit RE::TESHitEvent const* a_event
 #define FuncParam_Stag RE::TESQuestStageEvent const* a_event
 
-constexpr inline REL::RelocationID IsStageDoneAddress = RELOCATION_ID(24483, 25011);
-constexpr inline REL::RelocationID GetAliasLocAddress = RELOCATION_ID(24538, 25067);
-
 namespace CEvents
 {
+	constexpr inline REL::RelocationID IsStageDoneAddress = RELOCATION_ID(24483, 25011);
+	constexpr inline REL::RelocationID GetAliasLocAddress = RELOCATION_ID(24538, 25067);
+
 	using EventResult = RE::BSEventNotifyControl;
 
 	class EventHandler :
@@ -24,11 +24,15 @@ namespace CEvents
 		public RE::BSTEventSink<RE::TESHitEvent>,
 		public RE::BSTEventSink<RE::TESQuestStageEvent>,
 		public RE::BSTEventSink<RE::TESContainerChangedEvent> {
-		
-	public: [[nodiscard]] static EventHandler* GetSingleton() { static EventHandler singleton; return &singleton; }
+
+	private:
+		EventHandler() = default;
+		~EventHandler() = default; 
 
 	public:
-		static void RegisterEvents();
+		static EventHandler* GetSingleton() { static EventHandler singleton; return &singleton; }
+
+		static void Register();
 		static uintptr_t RegisterMapMarkerAddedHook(void (*f)(RE::TESFullName* a_form));
 		static uintptr_t RegisterMapMarkerDiscoveredHook(const char* (*f)(RE::TESFullName* a_form));
 		static uintptr_t RegisterUpdateCrosshairHook(void (*f)(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data));
@@ -54,5 +58,10 @@ namespace CEvents
 		EventResult	ProcessEvent(FuncParam_Stag, RE::BSTEventSource<RE::TESQuestStageEvent>*) override;
 
 		static uintptr_t RegisterEnchantmentHook(const char* (*f)(RE::TESForm* a_form), bool a_yesImSureCompat);
+
+		EventHandler(EventHandler const&) = delete;
+		EventHandler(EventHandler const&&) = delete;
+		EventHandler operator=(EventHandler&) = delete;
+		EventHandler operator=(EventHandler&&) = delete;
 	};
 };

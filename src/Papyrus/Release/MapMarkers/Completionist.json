@@ -2,7 +2,7 @@
 // [Completionist](https://www.nexusmods.com/skyrimspecialedition/mods/56123)
   "iconDefinitions": [
     {
-       "name": "FishingSpot",
+       "name": "CompletionistFishingSpot",
        "source": 
 	   {
          "path": "Resources\\comapresources.swf",
@@ -18,153 +18,153 @@
 	
     {
       "refID": "Completionist.esp|F5A", // Black Briar Meadery
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F5F", // Brittleshin Pass
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F57", // Faldars Tooth
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F5E", // Fishermans Camp
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F61", // Geirmunds Hall
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F5D", // Half-Moon Mill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F58", // Heartwood Mill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F59", // Honeyside
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F60", // Lake Ilinalta
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F5B", // Riften Fishery
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
 	
 	// ---------------------------------------------------------------------------------- Fishing Spots (Streams)
 	
     {
       "refID": "Completionist.esp|F5C", // Stony Creek Cave
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6D", // Adventurer's Campsite
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F74", // Chillfurrow Farm
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6C", // Crabber's Shanty
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F70", // Deep Folk Crossing
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6B", // EEC Docks
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F72", // Goldenrock Mine
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F62", // Hunter's Camp
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F66", // Karth River
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F77", // Kynesgrove
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F69", // Lone Mountain
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F67", // Lost Valley Redoubt
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6E", // Lumber Mill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F85", // Markarth Mines
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F71", // Mixwater Mill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F68", // Morthal Jetty
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F65", // Morthal Stream
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F63", // Movarth's Lair
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F84", // Riften Canal
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F76", // Riverside Shack
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F75", // Riverwood
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6A", // Solitude Sawmill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F73", // Vilemyr Inn
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F6F", // Waterfall
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
 	
 	// ---------------------------------------------------------------------------------- Fishing Spots (Caves)
 	
     {
       "refID": "Completionist.esp|F86", // Blackreach
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F88", // Shadowgreen Cavern
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
 
 
@@ -172,91 +172,91 @@
 	
     {
       "refID": "Completionist.esp|F7E", // Anga's Mill
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F64", // Bronze Water Cave
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F8C", // Bujolds Retreat
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F79", // Castle Volkihar
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F82", // Dawnstar
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F89", // Dayspring Canyon Valley
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F87", // Deepwood Redoubt
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F8A", // Gyldenhul Barrow
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F8B", // Haknirs Shoal
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F81", // Helas Folly
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|829", //Heljarchen
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
 	{
       "refID": "Completionist.esp|F80", // Nightgate Inn
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },
     {
       "refID": "Completionist.esp|F8D", // Northshore Landing
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F78", // Orphans Tear
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F7F", // Pilgrims Trench
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F8E", // Raven Rock
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },		
     {
       "refID": "Completionist.esp|F83", // Shoreline Bandit Camp
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F7B", // Slaughterfish Bay
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F8F", // The Fisherman's Haul
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F7D", // Windhelm Docks
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F7C", // Wreck of the Pride of Tel Vos
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },	
     {
       "refID": "Completionist.esp|F7A", // Wreck of the Winter war
-      "iconName": "FishingSpot"
+      "iconName": "CompletionistFishingSpot"
     },		
   ]
 }

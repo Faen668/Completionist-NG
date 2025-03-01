@@ -58,11 +58,6 @@ namespace CQFramework_Markarth
 		{"Markarth_Quest11", CStageEnum::kPast, 20,	0},
 	};
 
-	CDrunkData DrunkData[]{
-		{"Markarth_Quest22", 0x0072EA2, 0x001F325, "Skyrim.esm", CQuestProcessor::kExcluded},
-		{"Markarth_Quest23", 0x0072EA2, 0x00198FA, "Skyrim.esm", CQuestProcessor::kExcluded},
-	};
-
 	CThaneData ThaneData[]{
 		{"Markarth_Quest24", "ReachImpGetOutofJail", "ReachSonsGetOutofJail"},
 	};
@@ -79,7 +74,6 @@ namespace CQFramework_Markarth
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)
 				->initThaneData(ThaneData)
-				->initDrunkData(DrunkData)
 				->initFavorData(FavorData)
 				->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData[i], QuestData[i].GetName(), 9, QuestData[i].unique_identifier));

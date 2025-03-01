@@ -6,14 +6,13 @@
 
 namespace CLocalisation
 {
-	class LocalisationAPI {
-
-	public: [[nodiscard]] static LocalisationAPI* GetSingleton() {
-		static LocalisationAPI singleton;
-		return &singleton;
-	}
+	class LocalisationAPI final 
+	{
+	public:
 		 static void Register();
 		 static bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+
+		 static LocalisationAPI* GetSingleton() { static LocalisationAPI singleton; return &singleton; }
 
 		 static void BuildLocalisedMaps();
 
@@ -28,8 +27,17 @@ namespace CLocalisation
 
 		 static int32_t GetStringLength(RE::StaticFunctionTag*, RE::BSFixedString);
 
-		static bool IsMatchingShout(RE::StaticFunctionTag*, std::string s_key, std::string s_key2);
+		 static bool IsMatchingShout(RE::StaticFunctionTag*, std::string s_key, std::string s_key2);
+
+		 LocalisationAPI(LocalisationAPI const&) = delete;
+		 LocalisationAPI(LocalisationAPI const&&) = delete;
+		 LocalisationAPI operator=(LocalisationAPI&) = delete;
+		 LocalisationAPI operator=(LocalisationAPI&&) = delete;
+
 	private:
+		LocalisationAPI() = default;
+		~LocalisationAPI() = default;
+
 		static inline std::unordered_map<std::string, std::string> localisedMap_M;
 		static inline std::unordered_map<std::string, std::string> localisedMap_N;
 		static inline std::unordered_map<std::string, std::string> localisedMap_D;

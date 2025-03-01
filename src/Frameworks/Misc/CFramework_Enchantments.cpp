@@ -144,10 +144,8 @@ namespace CFramework_Enchantments {
 			CHandler::ProcessFoundForm(base, section::kSummermyst_W);
 		}
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnEnchantmentLearnt(a_form);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnEnchantmentLearnt(a_form);
 		};
 	};
 

@@ -732,95 +732,38 @@ TBOO_Quest22				|Dead Drop 6: The Partner
 TBOO_Quest23				|Dead Drop 7: The Herald
 TBOO_Quest24				|One Small Favor
 ----------------------------------------------------------------------------
-LOTD_Main_Quest00_V			|An Interesting Prospect
-LOTD_Main_Quest01_V			|Dragonborn Gallery
-LOTD_Main_Quest02_V			|Akaviri Rising
-LOTD_Main_Quest03_V			|An Interesting Prospect.
-LOTD_Main_Quest04_V			|Dragonborn Gallery
-LOTD_Main_Quest05_V			|Night At The Museum
-LOTD_Main_Quest06_V			|Shadows Of One's Past
-LOTD_Main_Quest07_V			|Shattered Legacy
-LOTD_Main_Quest08_V			|The Ayleid Crossroads
-LOTD_Main_Quest09_V			|It Belongs In A Museum
-LOTD_Main_Quest10_V			|The Vaults Of Deepholme
-LOTD_Main_Quest11_V			|Finders Keepers
-LOTD_Main_Quest12_V			|Research Project
+LOTD_Main_Quest00			|An Interesting Prospect
+LOTD_Main_Quest01			|Dragonborn Gallery
+LOTD_Main_Quest02			|Akaviri Rising
+LOTD_Main_Quest03			|An Interesting Prospect.
+LOTD_Main_Quest04			|Dragonborn Gallery
+LOTD_Main_Quest05			|Night At The Museum
+LOTD_Main_Quest06			|Shadows Of One's Past
+LOTD_Main_Quest07			|Shattered Legacy
+LOTD_Main_Quest08			|The Ayleid Crossroads
+LOTD_Main_Quest09			|It Belongs In A Museum
+LOTD_Main_Quest10			|The Vaults Of Deepholme
+LOTD_Main_Quest11			|Finders Keepers
+LOTD_Main_Quest12			|Research Project
+LOTD_Main_Quest13			|The Price of Vigilants
+LOTD_Main_Quest14			|Faltering Light
 ----------------------------------------------------------------------------
-LOTD_Main_Quest00_N			|An Interesting Prospect
-LOTD_Main_Quest01_N			|Dragonborn Gallery
-LOTD_Main_Quest02_N			|Akaviri Rising
-LOTD_Main_Quest03_N			|An Interesting Prospect.
-LOTD_Main_Quest04_N			|Dragonborn Gallery
-LOTD_Main_Quest05_N			|Night At The Museum
-LOTD_Main_Quest06_N			|Shadows Of One's Past
-LOTD_Main_Quest07_N			|Shattered Legacy
-LOTD_Main_Quest08_N			|The Ayleid Crossroads
-LOTD_Main_Quest09_N			|It Belongs In A Museum
-LOTD_Main_Quest10_N			|The Vaults Of Deepholme
-LOTD_Main_Quest11_N			|Finders Keepers
-LOTD_Main_Quest12_N			|Research Project
-----------------------------------------------------------------------------
-LOTD_Main_Quest00_E			|An Interesting Prospect
-LOTD_Main_Quest01_E			|Dragonborn Gallery
-LOTD_Main_Quest02_E			|Akaviri Rising
-LOTD_Main_Quest03_E			|An Interesting Prospect.
-LOTD_Main_Quest04_E			|Dragonborn Gallery
-LOTD_Main_Quest05_E			|Night At The Museum
-LOTD_Main_Quest06_E			|Shadows Of One's Past
-LOTD_Main_Quest07_E			|Shattered Legacy
-LOTD_Main_Quest08_E			|The Ayleid Crossroads
-LOTD_Main_Quest09_E			|It Belongs In A Museum
-LOTD_Main_Quest10_E			|The Vaults Of Deepholme
-LOTD_Main_Quest11_E			|Finders Keepers
-LOTD_Main_Quest12_E			|Research Project
-----------------------------------------------------------------------------
-LOTD_Exp_Quest00_V			|A Room With A View
-LOTD_Exp_Quest01_V			|Digging Up Explorers
-LOTD_Exp_Quest02_V			|The Excavation of Windcaller Pass
-LOTD_Exp_Quest03_V			|The Excavation of the Ruins of Rkund
-LOTD_Exp_Quest04_V			|The Visage
-LOTD_Exp_Quest05_V			|Trial Of Trinimac
-LOTD_Exp_Quest06_V			|Eternal Ice
-LOTD_Exp_Quest07_V			|A Path To The Heavens
-LOTD_Exp_Quest08_V			|The Book Of Wonders
-LOTD_Exp_Quest09_V			|Tools Of The Trade
-LOTD_Exp_Quest10_V			|Branching Out
-LOTD_Exp_Quest11_V			|Branching Out... Again
-LOTD_Exp_Quest12_V			|Branching Out... Ever More
-LOTD_Exp_Quest13_V			|One Man's Junk
-LOTD_Exp_Quest14_V			|Relic Hunt
-----------------------------------------------------------------------------
-LOTD_Exp_Quest00_N			|A Room With A View
-LOTD_Exp_Quest01_N			|Digging Up Explorers
-LOTD_Exp_Quest02_N			|The Excavation of Windcaller Pass
-LOTD_Exp_Quest03_N			|The Excavation of the Ruins of Rkund
-LOTD_Exp_Quest04_N			|The Visage
-LOTD_Exp_Quest05_N			|Trial Of Trinimac
-LOTD_Exp_Quest06_N			|Eternal Ice
-LOTD_Exp_Quest07_N			|A Path To The Heavens
-LOTD_Exp_Quest08_N			|The Book Of Wonders
-LOTD_Exp_Quest09_N			|Tools Of The Trade
-LOTD_Exp_Quest10_N			|Branching Out
-LOTD_Exp_Quest11_N			|Branching Out... Again
-LOTD_Exp_Quest12_N			|Branching Out... Ever More
-LOTD_Exp_Quest13_N			|One Man's Junk
-LOTD_Exp_Quest14_N			|Relic Hunt
-----------------------------------------------------------------------------
-LOTD_Exp_Quest00_E			|A Room With A View
-LOTD_Exp_Quest01_E			|Digging Up Explorers
-LOTD_Exp_Quest02_E			|The Excavation of Windcaller Pass
-LOTD_Exp_Quest03_E			|The Excavation of the Ruins of Rkund
-LOTD_Exp_Quest04_E			|The Visage
-LOTD_Exp_Quest05_E			|Trial Of Trinimac
-LOTD_Exp_Quest06_E			|Eternal Ice
-LOTD_Exp_Quest07_E			|A Path To The Heavens
-LOTD_Exp_Quest08_E			|The Book Of Wonders
-LOTD_Exp_Quest09_E			|Tools Of The Trade
-LOTD_Exp_Quest10_E			|Branching Out
-LOTD_Exp_Quest11_E			|Branching Out... Again
-LOTD_Exp_Quest12_E			|Branching Out... Ever More
-LOTD_Exp_Quest13_E			|One Man's Junk
-LOTD_Exp_Quest14_E			|Relic Hunt
+LOTD_Exp_Quest00			|A Room With A View
+LOTD_Exp_Quest01			|Digging Up Explorers
+LOTD_Exp_Quest02			|The Excavation of Windcaller Pass
+LOTD_Exp_Quest03			|The Excavation of the Ruins of Rkund
+LOTD_Exp_Quest04			|The Visage
+LOTD_Exp_Quest05			|Trial Of Trinimac
+LOTD_Exp_Quest06			|Eternal Ice
+LOTD_Exp_Quest07			|A Path To The Heavens
+LOTD_Exp_Quest08			|The Book Of Wonders
+LOTD_Exp_Quest09			|Tools Of The Trade
+LOTD_Exp_Quest10			|Branching Out
+LOTD_Exp_Quest11			|Branching Out... Again
+LOTD_Exp_Quest12			|Branching Out... Ever More
+LOTD_Exp_Quest13			|One Man's Junk
+LOTD_Exp_Quest14			|Relic Hunt
+LOTD_Exp_Quest15			|Rebuilding The Past
 ----------------------------------------------------------------------------
 LOTD_Journals_Quest00		|Sanamia's Journals - Mzulft
 LOTD_Journals_Quest01		|Sanamia's Journals - Valthume

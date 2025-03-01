@@ -12,21 +12,17 @@ namespace CQuestMaster
 
 	class QuestAPI final :
 		public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
-		public RE::BSTEventSink<RE::TESQuestStageEvent>,
-		public RE::BSTEventSink<RE::TESContainerChangedEvent>
+		public RE::BSTEventSink<RE::TESQuestStageEvent>
 	{
 
 	public: [[nodiscard]] static QuestAPI* GetSingleton() { static QuestAPI singleton; return &singleton; }
 
 		  EventResult							ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 		  EventResult							ProcessEvent(RE::TESQuestStageEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESQuestStageEvent>* a_eventSource) override;
-		  EventResult							ProcessEvent(RE::TESContainerChangedEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource) override;
 
 		  static bool							RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 		  static void							SinkEvents();
 		  static void							Register();
-
-		  static void							ProcessDrunkardQuest(CDrunkData* a_data, RE::FormID a_base, RE::FormID a_container, RE::TESObjectREFR* cur_speaker);
 
 		  static std::vector<std::string>		qGetNameArrayByID(RE::StaticFunctionTag*, std::string a_page);
 		  static std::vector<std::string>		qGetTextArrayByID(RE::StaticFunctionTag*, std::string a_page);
@@ -52,7 +48,7 @@ namespace CQuestMaster
 
 		  static std::vector<std::string>		SearchAndReportPage(RE::StaticFunctionTag*, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t searchType);
 		  static std::string                    GetLocalisedPageName(int32_t ID);
-		  static CQuestData* GetQuestDataByKey(std::string a_key);
+		  static CQuestData*					GetQuestDataByKey(std::string a_key);
 		  static void							AddQuestData(CQuestData* a_data, std::string a_name, int32_t a_ID, std::string a_key);
 
 		  static std::vector<std::string>		qGetMiscQuestIdenArrayByID(RE::StaticFunctionTag*, int32_t a_patchID);

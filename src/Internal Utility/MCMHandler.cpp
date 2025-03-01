@@ -1,4 +1,5 @@
 #include "MCMHandler.hpp"
+#include "Events.hpp"
 #include "ScriptObject.hpp"
 #include "Serialization.hpp"
 #include "DKUtil/Utility.hpp"
@@ -9,10 +10,13 @@ namespace CHCMHandler
 {
 	void MCMAPI::Register() 
 	{
+		///Register Papyrus Functions.
 		SKSE::GetPapyrusInterface()->Register(RegisterFunctions);
 
-		auto ui = RE::UI::GetSingleton();
-		ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(MCMAPI::GetSingleton()));
+		//Register menu open event.
+		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
+
+		//Build MCM Page Definitions.
 		BuildMCMPages(nullptr);
 	};
 
@@ -30,7 +34,6 @@ namespace CHCMHandler
 		a_vm->RegisterFunction("GetPageConfiguration", "Completionist_Native", GetPageConfiguration);
 		a_vm->RegisterFunction("IsSettingsPage", "Completionist_Native", IsSettingsPage);
 
-		a_vm->RegisterFunction("IsMultiPage", "Completionist_Native", IsMultiPage);
 		a_vm->RegisterFunction("GetMultiPageCount", "Completionist_Native", GetMultiPageCount);
 		a_vm->RegisterFunction("GetTotalEntriesForPage", "Completionist_Native", GetTotalEntriesForPage);
 		a_vm->RegisterFunction("GetTotalEntriesFoundForPage", "Completionist_Native", GetTotalEntriesFoundForPage);
@@ -51,12 +54,137 @@ namespace CHCMHandler
 		a_vm->RegisterFunction("GetQuestID", "Completionist_Native", GetQuestID);
 		a_vm->RegisterFunction("GetActivePageName", "Completionist_Native", GetActivePageName);
 		a_vm->RegisterFunction("SearchMultiPage", "Completionist_Native", SearchMultiPage);
+
+		a_vm->RegisterFunction("IsFormVisible", "Completionist_Native", IsFormVisible);
+		a_vm->RegisterFunction("IsQuestVisible", "Completionist_Native", IsQuestVisible);
+		a_vm->RegisterFunction("HasDropDownMenu", "Completionist_Native", HasDropDownMenu);
+		a_vm->RegisterFunction("GetDropDownMenuOptions", "Completionist_Native", GetDropDownMenuOptions);
+		a_vm->RegisterFunction("GetDropDownMenuName", "Completionist_Native", GetDropDownMenuName);
+		a_vm->RegisterFunction("GetDropDownMenuHighlight", "Completionist_Native", GetDropDownMenuHighlight);
+		a_vm->RegisterFunction("GetCurrentUserOption", "Completionist_Native", GetCurrentUserOption);
+		a_vm->RegisterFunction("SetCurrentUserOption", "Completionist_Native", SetCurrentUserOption);
 		
 		return true;
 	}
-	
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	bool MCMAPI::IsFormVisible(RE::StaticFunctionTag*, std::string pageName, RE::TESForm* a_form, int32_t optSelection)
+	{
+		bool has_visibility_condition = a_form && formVisibilityMap.contains(a_form->GetFormID());
+		if (!has_visibility_condition) { return true; }
+
+		if (optSelection == -1) {
+			optSelection = GetCurrentUserOption(nullptr, pageName);
+		}
+
+		auto &entry = formVisibilityMap.at(a_form->GetFormID());
+
+		if (entry.first == pageName && entry.second == optSelection) { return true; }
+
+		return false;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	bool MCMAPI::IsQuestVisible(RE::StaticFunctionTag*, std::string pageName, std::string editorID, int32_t optSelection)
+	{
+		bool has_visibility_condition = questVisibilityMap.contains(editorID);
+		if (!has_visibility_condition) { return true; }
+
+		if (optSelection == -1) {
+			optSelection = GetCurrentUserOption(nullptr, pageName);
+		}
+
+		auto& entry = questVisibilityMap.at(editorID);
+
+		if (entry.first == pageName && entry.second == (optSelection)) { return true; }
+
+		return false;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	bool MCMAPI::HasDropDownMenu(RE::StaticFunctionTag*, std::string a_page)
+	{
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (!DKUtil::string::iequals(a_page, pageName))
+			{
+				continue;
+			};
+
+			return patchData->HasDropDownMenu;
+		};
+		return false;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	std::vector<std::string> MCMAPI::GetDropDownMenuOptions(RE::StaticFunctionTag*, std::string a_page) 
+	{
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (!DKUtil::string::iequals(a_page, pageName))
+			{
+				continue;
+			};
+
+			return patchData->DropDownMenu.options;
+		};
+		return {};
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	std::string MCMAPI::GetDropDownMenuName(RE::StaticFunctionTag*, std::string a_page)
+	{
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (!DKUtil::string::iequals(a_page, pageName))
+			{
+				continue;
+			};
+
+			return patchData->DropDownMenu.name;
+		};
+		return {};
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	std::string MCMAPI::GetDropDownMenuHighlight(RE::StaticFunctionTag*, std::string a_page)
+	{
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (!DKUtil::string::iequals(a_page, pageName))
+			{
+				continue;
+			};
+
+			return patchData->DropDownMenu.highlight;
+		};
+		return {};
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
 	bool MCMAPI::IsSettingsPage(RE::StaticFunctionTag*, std::string a_page) {
-		return a_page == "" || a_page == " " || DKUtil::string::icontains(a_page, "MCMPageSettings") || DKUtil::string::icontains(a_page, "Header");
+		return a_page == "" || a_page == " " || DKUtil::string::icontains(a_page, "MCMPageSettings") || DKUtil::string::icontains(a_page, "Header") || DKUtil::string::icontains(a_page, "~~ ");
 	}
 
 	//---------------------------------------------------
@@ -88,38 +216,6 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	std::vector<std::string> GetQuestNames(std::string a_page)
-	{
-		std::vector<std::string> list{};
-
-		for (auto& [groupName, group] : CustomPatches)
-		{
-			for (auto& page : group->GetPatches())
-			{
-				if (!DKUtil::string::iequals(a_page, page.first))
-				{
-					continue;
-				};
-
-				for (auto& section : page.second->type_sections)
-				{
-					if (section.type == CMiscPatchType::kQuests)
-					{
-						for (auto& quest_name : section.names)
-						{
-							list.push_back(quest_name);
-						};
-					};
-				};
-			};
-		};
-		return list;
-	};
-
-	//---------------------------------------------------
-	//---------------------------------------------------
-	//---------------------------------------------------
-
 	std::vector<std::string> MCMAPI::SearchMultiPage(RE::StaticFunctionTag*, std::string a_page, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType)
 	{
 		std::vector<std::string> list{};
@@ -132,6 +228,11 @@ namespace CHCMHandler
 			{
 				continue;
 			};
+
+			if (!IsFormVisible(nullptr, mcmPage, form, GetCurrentUserOption(nullptr, mcmPage)))
+			{
+				continue;
+			}
 
 			if (list.size() >= i_maxResults)
 			{
@@ -167,6 +268,11 @@ namespace CHCMHandler
 			{
 				continue;
 			};
+
+			if (!IsQuestVisible(nullptr, data->mcmPage, data->GetEditorID(), GetCurrentUserOption(nullptr, data->mcmPage)))
+			{
+				continue;
+			}
 
 			if (list.size() >= i_maxResults)
 				break;
@@ -228,13 +334,11 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	EventResult	MCMAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-		
-		if (a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) { 
+	void MCMAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) 
+	{
+		if (a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) {
 			BuildMCMPages(nullptr);
 		}
-
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -254,23 +358,20 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	void MCMAPI::AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatchGroupData*>> defs) {
+	void MCMAPI::AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatch*>> defs) {
 
 		CustomPatches = defs;
 
-		for (auto& [groupName, group] : defs)
+		for (auto& [pageName, patchData] : defs)
 		{
-			for (auto& page : group->GetPatches())
+			if (patchData->log_install)
 			{
-				if (page.second->log_install)
+				for (auto& section : patchData->type_sections)
 				{
-					for (auto& section : page.second->type_sections)
-					{
-						INFO("Misc Page Section Added: {} - {} - {}", page.first, section.pageheaderL, section.ID);
-					};
-				};
-			};
-		};
+					INFO("Misc Page Section Added: {} - {} - {}", pageName, section.pageheaderL, section.ID);
+				}
+			}
+		}
 	}
 
 	//---------------------------------------------------
@@ -278,19 +379,19 @@ namespace CHCMHandler
 	//---------------------------------------------------
 
 	int32_t MCMAPI::GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage) {
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patchData] : group->GetPatches()) {
-				if (DKUtil::string::iequals(a_page, pageName)) {
-					for (auto& section : patchData->type_sections)
+
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (DKUtil::string::iequals(a_page, pageName)) {
+				for (auto& section : patchData->type_sections)
+				{
+					if (section.displayOnPage == activePage)
 					{
-						if (section.displayOnPage == activePage)
-						{
-							return section.quest_data_id;
-						}
+						return section.quest_data_id;
 					}
 				}
-			};
-		};
+			}
+		}
 		return -1;
 	}
 
@@ -298,29 +399,13 @@ namespace CHCMHandler
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	bool MCMAPI::IsMultiPage(RE::StaticFunctionTag*, std::string a_page) {
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patchData] : group->GetPatches()) {
-				if (DKUtil::string::iequals(a_page, pageName)) {
-					return patchData->multipage;
-				}
-			};
-		};
-		return false;
-	}
-
-	//---------------------------------------------------
-	//---------------------------------------------------
-	//---------------------------------------------------
-
 	int32_t MCMAPI::GetMultiPageCount(RE::StaticFunctionTag*, std::string a_page) {
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patchData] : group->GetPatches()) {
-				if (DKUtil::string::iequals(a_page, pageName)) {
-					return patchData->multiPageCount + 1;
-				}
-			};
-		};
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (DKUtil::string::iequals(a_page, pageName)) {
+				return patchData->PageCount + 1;
+			}
+		}
 		return -1;
 	}
 
@@ -331,23 +416,23 @@ namespace CHCMHandler
 	int32_t MCMAPI::GetTotalEntriesFoundForPage(RE::StaticFunctionTag*, std::string a_page) {
 		int32_t found = 0;
 
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patchData] : group->GetPatches()) {
-				if (DKUtil::string::iequals(a_page, pageName)) {
-					for (auto& section : patchData->type_sections)
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (DKUtil::string::iequals(a_page, pageName)) {
+				for (auto& section : patchData->type_sections)
+				{
+					if (section.type == CMiscPatchType::kQuests)
 					{
-						if (section.type == CMiscPatchType::kQuests)
-						{
-							auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
-							section.found = totals.first;
-							section.total = totals.second;
-						};
-
-						found += section.found;
+						auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
+						section.found = totals.first;
+						section.total = totals.second;
 					};
+
+					found += section.found;
 				};
-			};
-		};
+				found = ModifyTotals(pageName, found, false);
+			}
+		}
 		return found;
 	}
 
@@ -358,24 +443,115 @@ namespace CHCMHandler
 	int32_t MCMAPI::GetTotalEntriesForPage(RE::StaticFunctionTag*, std::string a_page) {
 		int32_t total = 0;
 
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patchData] : group->GetPatches()) {
-				if (DKUtil::string::iequals(a_page, pageName)) {
-					for (auto& section : patchData->type_sections)
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (DKUtil::string::iequals(a_page, pageName)) 
+			{
+				for (auto& section : patchData->type_sections)
+				{
+					if (section.type == CMiscPatchType::kQuests)
 					{
-						if (section.type == CMiscPatchType::kQuests)
-						{
-							auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
-							section.found = totals.first;
-							section.total = totals.second;
-						};
-
-						total += section.total;
+						auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
+						section.found = totals.first;
+						section.total = totals.second;
 					};
+
+					total += section.total;
 				};
-			};
-		};
+				total = ModifyTotals(pageName, total, true);
+			}
+		}
 		return total;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int MCMAPI::GetDisplayValueForTotalAndFoundItemsByIdentifier(int32_t a_id, int32_t defaultValue)
+	{
+		int v = defaultValue;
+
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			for (auto& sectionData : patchData->type_sections)
+			{
+				if (sectionData.ID == a_id)
+				{
+					int currentUserOption = GetCurrentUserOption(nullptr, pageName);
+
+					for (auto& form : sectionData.forms)
+					{
+						if (!IsFormVisible(nullptr, pageName, form, currentUserOption))
+						{
+							v--;
+						}
+					}
+				}
+			}
+		}
+		return v;
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int MCMAPI::ModifyTotals(std::string a_pageName, int value, bool isTotal)
+	{
+		int v = value;
+
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (DKUtil::string::iequals(a_pageName, pageName))
+			{
+				int currentUserOption = GetCurrentUserOption(nullptr, pageName);
+
+				for (auto& section : patchData->type_sections)
+				{
+					if (section.type == CMiscPatchType::kQuests)
+					{
+						for (auto& questData : section.quest_data_array)
+						{
+							if (!IsQuestVisible(nullptr, pageName, questData->GetEditorID(), currentUserOption))
+							{
+								if (isTotal) {
+									v--;
+								}
+								else
+								{
+									if (
+										CFramework_Master::CQuestKeys_Manual.HasKey(questData->GetKey()) ||
+										CFramework_Master::CQuestKeys_Natural.HasKey(questData->GetKey()))
+									{
+										v--;
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						for (auto& form : section.forms)
+						{
+							if (!IsFormVisible(nullptr, pageName, form, currentUserOption))
+							{
+								if (isTotal) {
+									v--;
+								}
+								else
+								{
+									if (CFramework_Master::FoundItemData.HasForm(form) || CFramework_Master::FoundItemData_NoShow.HasForm(form)) {
+										v--;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return v;
 	}
 
 	//---------------------------------------------------
@@ -394,6 +570,15 @@ namespace CHCMHandler
 	int32_t MCMAPI::GetDefaultPage(RE::StaticFunctionTag*, std::string a_page)
 	{
 		return CFramework_Master::PatchSettings.GetDefaultPage(a_page);
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	int32_t MCMAPI::GetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page)
+	{
+		return CFramework_Master::PatchSettings.GetCurrentUserOption(a_page);
 	}
 
 	//---------------------------------------------------
@@ -421,6 +606,15 @@ namespace CHCMHandler
 	void MCMAPI::SetDefaultPage(RE::StaticFunctionTag*, std::string a_page, int32_t a_value)
 	{
 		CFramework_Master::PatchSettings.UpdateSetting<Serialization::PatchDataEnum::kdefaultPage>(a_page, a_value);
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	void MCMAPI::SetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page, int32_t a_value)
+	{
+		CFramework_Master::PatchSettings.UpdateSetting<Serialization::PatchDataEnum::kcurrentUserOption>(a_page, a_value);
 	}
 
 	//---------------------------------------------------
@@ -474,37 +668,34 @@ namespace CHCMHandler
 
 	int32_t MCMAPI::GetPageNumberForForm(RE::StaticFunctionTag*, std::string a_page, std::string a_name) {
 
-		for (auto& [groupName, group] : CustomPatches) 
+		for (auto& [pageName, patchData] : CustomPatches)
 		{
-			for (auto& [pageName, patchData] : group->GetPatches())
+			if (DKUtil::string::iequals(a_page, pageName)) 
 			{
-				if (DKUtil::string::iequals(a_page, pageName)) 
+				for (auto& section : patchData->type_sections)
 				{
-					for (auto& section : patchData->type_sections)
+					if (section.type == CMiscPatchType::kQuests)
 					{
-						if (section.type == CMiscPatchType::kQuests)
+						for (auto& qstData : section.quest_data_array)
 						{
-							for (auto& qstData : section.quest_data_array)
+							if (DKUtil::string::iequals(a_name, qstData->GetName()))
 							{
-								if (DKUtil::string::iequals(a_name, qstData->GetName()))
-								{
-									return section.displayOnPage;
-								};
+								return section.displayOnPage;
 							};
-						}
-						else
+						};
+					}
+					else
+					{
+						for (auto& name : section.names)
 						{
-							for (auto& name : section.names)
+							if (DKUtil::string::iequals(a_name, name))
 							{
-								if (DKUtil::string::iequals(a_name, name))
-								{
-									return section.displayOnPage;
-								};
+								return section.displayOnPage;
 							};
 						};
 					};
-					return 0;
 				};
+				return 0;
 			};
 		};
 		return 0;
@@ -516,51 +707,48 @@ namespace CHCMHandler
 
 	std::string MCMAPI::GetSectionNameForForm(std::string a_page, std::string a_name, bool incPageNumber) {
 
-		for (auto& [groupName, group] : CustomPatches)
+		for (auto& [pageName, patchData] : CustomPatches)
 		{
-			for (auto& [pageName, patchData] : group->GetPatches())
+			if (DKUtil::string::iequals(a_page, pageName))
 			{
-				if (DKUtil::string::iequals(a_page, pageName))
+				for (auto& section : patchData->type_sections)
 				{
-					for (auto& section : patchData->type_sections)
+					if (section.type == CMiscPatchType::kQuests)
 					{
-						if (section.type == CMiscPatchType::kQuests)
+						for (auto& qstData : section.quest_data_array)
 						{
-							for (auto& qstData : section.quest_data_array)
+							if (DKUtil::string::iequals(a_name, qstData->GetName()))
 							{
-								if (DKUtil::string::iequals(a_name, qstData->GetName()))
+								std::string substr = section.pageheaderL;
+
+								if (substr.ends_with(":"))
 								{
-									std::string substr = section.pageheaderL;
-
-									if (substr.ends_with(":"))
-									{
-										substr = substr.substr(0, substr.length() - 1);
-									};
-
-									return incPageNumber ? fmt::format("Page {} - {}", section.displayOnPage, substr) : fmt::format("{}", substr);
+									substr = substr.substr(0, substr.length() - 1);
 								};
+
+								return incPageNumber ? fmt::format("Page {} - {}", section.displayOnPage, substr) : fmt::format("{}", substr);
 							};
-						}
-						else
+						};
+					}
+					else
+					{
+						for (auto& name : section.names)
 						{
-							for (auto& name : section.names)
+							if (DKUtil::string::iequals(a_name, name))
 							{
-								if (DKUtil::string::iequals(a_name, name))
+								auto& substr = section.pageheaderL;
+
+								if (substr.ends_with(":"))
 								{
-									auto& substr = section.pageheaderL;
-
-									if (substr.ends_with(":"))
-									{
-										substr = substr.substr(0, substr.length() - 1);
-									};
-
-									return incPageNumber ? fmt::format("Page {} - {}", section.displayOnPage, substr) : fmt::format("{}", substr);
+									substr = substr.substr(0, substr.length() - 1);
 								};
+
+								return incPageNumber ? fmt::format("Page {} - {}", section.displayOnPage, substr) : fmt::format("{}", substr);
 							};
 						};
 					};
-					return "";
 				};
+				return "";
 			};
 		};
 		return "";
@@ -572,21 +760,18 @@ namespace CHCMHandler
 
 	int32_t MCMAPI::GetPageNumberForSection(RE::StaticFunctionTag*, std::string a_page, std::string a_name) {
 
-		for (auto& [groupName, group] : CustomPatches)
+		for (auto& [pageName, patchData] : CustomPatches)
 		{
-			for (auto& [pageName, patchData] : group->GetPatches())
+			if (DKUtil::string::iequals(a_page, pageName))
 			{
-				if (DKUtil::string::iequals(a_page, pageName))
+				for (auto& [Idx, page] : patchData->section_defs)
 				{
-					for (auto& [Idx, page] : patchData->section_defs)
+					if (DKUtil::string::iequals(a_name, patchData->prependPageNumber ? fmt::format("{}. {}", std::to_string(Idx), page) : page))
 					{
-						if (DKUtil::string::iequals(a_name, patchData->prependPageNumber ? fmt::format("{}. {}", std::to_string(Idx), page) : page))
-						{
-							return Idx;
-						};
+						return Idx;
 					};
-					return 0;
 				};
+				return 0;
 			};
 		};
 		return 0;
@@ -653,109 +838,85 @@ namespace CHCMHandler
 			MiscMCMPages.push_back(page);
 		}
 
-		DisplayOfficialPatches();
-		DisplayCreationClubPatches();
-		DisplayUnOfficialPatches();
+		DisplayVanillaTrackingPatches();
+		DisplayModAddedTrackingPatches();
 	};
 
 	//---------------------------------------------------
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	void MCMAPI::DisplayOfficialPatches() {
+	void MCMAPI::DisplayVanillaTrackingPatches() {
+		std::string lastHeader;
+		bool isDefaultHeaderAdded = false;
 
-		bool OfficialHeaderAdded{};
+		for (auto& [pageName, patchData] : CustomPatches) {
+			if (!patchData->isVanillaTracking) {
+				continue;
+			}
 
-		for (auto& [gName, gData] : CustomPatches)
-		{
-			auto patches = gData->GetPatches<gData->kOfficial>();
-
-			if (patches.size() > 0)
-			{
-				if (!OfficialHeaderAdded)
-				{
-					PatchPages.push_back("$HeaderO");
-					OfficialHeaderAdded = true;
+			// Handle default header for patches without a specific Header
+			if (patchData->headerName.empty()) {
+				if (!isDefaultHeaderAdded) {
+					PatchPages.push_back("$HeaderO"); // Default header
+					isDefaultHeaderAdded = true;
 				}
+			}
+			else {
+				// Handle new specific Header group
+				if (lastHeader != patchData->headerName) {
+					if (!lastHeader.empty() || isDefaultHeaderAdded) {
+						PatchPages.push_back(" "); // Empty page before a new group
+					}
+					PatchPages.push_back("~~ " + patchData->headerName + " ~~"); // Add the new header
+					lastHeader = patchData->headerName;
+				}
+			}
 
-				if (!gData->defaultGroup && PatchPages.size() > 1)
-				{
-					PatchPages.push_back(" ");
-				};
-
-				for (auto& page : patches)
-				{
-					PatchPages.push_back(page.first);
-				};
-			};
-		};
-	};
-
-	//---------------------------------------------------
-	//---------------------------------------------------
-	//---------------------------------------------------
-
-	void MCMAPI::DisplayUnOfficialPatches() 
-	{
-		bool UnOfficialHeaderAdded{};
-		for (auto& [gName, gData] : CustomPatches)
-		{
-			auto patches = gData->GetPatches<gData->kUnofficial>();
-
-			if (patches.size() > 0)
-			{
-				if (PatchPages.size() > 0)
-				{
-					PatchPages.push_back(" ");
-				};
-				PatchPages.push_back("$HeaderU");
-				UnOfficialHeaderAdded = true;
-
-				if (!gData->defaultGroup && PatchPages.size() > 1)
-				{
-					PatchPages.push_back(" ");
-				};
-
-				for (auto& page : patches)
-				{
-					PatchPages.push_back(page.first);
-				};
-			};
-		};
-	};
+			PatchPages.push_back(pageName); // Add the patch page
+		}
+	}
 
 	//---------------------------------------------------
 	//---------------------------------------------------
 	//---------------------------------------------------
 
-	void MCMAPI::DisplayCreationClubPatches()
-	{
-		bool HeaderAdded{};
-		for (auto& [gName, gData] : CustomPatches)
-		{
-			auto patches = gData->GetPatches<gData->kCreationClub>();
+	void MCMAPI::DisplayModAddedTrackingPatches() {
+		std::string lastHeader;
+		bool isDefaultHeaderAdded = false;
+		bool isFirstGroupAdded = false;
 
-			if (patches.size() > 0)
-			{
-				if (PatchPages.size() > 0)
-				{
-					PatchPages.push_back(" ");
-				};
-				PatchPages.push_back("$HeaderC");
-				HeaderAdded = true;
+		for (auto& [pageName, patchData] : CustomPatches) {
+			if (patchData->isVanillaTracking) {
+				continue;
+			}
 
-				if (!gData->defaultGroup && PatchPages.size() > 1)
-				{
-					PatchPages.push_back(" ");
-				};
+			// Handle default header for patches without a specific Header
+			if (patchData->headerName.empty()) {
+				if (!isDefaultHeaderAdded) {
+					if (!PatchPages.empty() || !isFirstGroupAdded) {
+						PatchPages.push_back(" "); // Empty page before default header
+					}
+					PatchPages.push_back("$HeaderU"); // Default header
+					isDefaultHeaderAdded = true;
+					isFirstGroupAdded = true; // Mark that the first group has been added
+				}
+			}
+			else {
+				// Handle new specific Header group
+				if (lastHeader != patchData->headerName) {
+					if (!lastHeader.empty() || isDefaultHeaderAdded || !isFirstGroupAdded) {
+						PatchPages.push_back(" "); // Empty page before a new group
+					}
+					PatchPages.push_back("~~ " + patchData->headerName + " ~~"); // Add the new header
+					lastHeader = patchData->headerName;
+					isFirstGroupAdded = true; // Mark that the first group has been added
+				}
+			}
 
-				for (auto& page : patches)
-				{
-					PatchPages.push_back(page.first);
-				};
-			};
-		};
-	};
+			PatchPages.push_back(pageName); // Add the patch page
+		}
+	}
 
 	//---------------------------------------------------
 	//---------------------------------------------------
@@ -788,41 +949,62 @@ namespace CHCMHandler
 		int32_t total{};
 		int32_t found{};
 
-		for (auto& [groupName, group] : CustomPatches) 
+		for (auto& [pageName, patch] : CustomPatches)
 		{
-			for (auto& [pageName, patch] : group->GetPatches())
+			if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
 			{
-				if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
+				int currentUserOption = GetCurrentUserOption(nullptr, pageName);
+
+				for (auto& [Idx, page] : patch->section_defs) 
 				{
-					for (auto& [Idx, page] : patch->section_defs) 
+					total = 0;
+					found = 0;
+
+					for (auto& section : patch->type_sections)
 					{
-						total = 0;
-						found = 0;
-
-						for (auto& section : patch->type_sections)
+						if (section.displayOnPage == Idx && section.enabled)
 						{
-							if (section.displayOnPage == Idx && section.enabled)
+							if (section.type == CMiscPatchType::kQuests)
 							{
-								if (section.type == CMiscPatchType::kQuests)
+								auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
+								section.found = totals.first;
+								section.total = totals.second;
+							}
+
+							total += section.total;
+							found += section.found;
+
+							for (auto& form : section.forms)
+							{
+								if (!IsFormVisible(nullptr, pageName, form, currentUserOption))
 								{
-									auto totals = CQuestMaster::QuestAPI::qGetQuestCompletionTotals(section.quest_data_array);
-									section.found = totals.first;
-									section.total = totals.second;
-								};
+									total--;
+									if (CFramework_Master::FoundItemData.HasForm(form) || CFramework_Master::FoundItemData_NoShow.HasForm(form)) {
+										found--;
+									}
+								}
+							}
 
-								total += section.total;
-								found += section.found;
-							};
-						};
-
-						if (total > 0) {
-							config.push_back(patch->prependPageNumber ? fmt::format("{}. {}", std::to_string(Idx), page) : page);
-							config.push_back(fmt::format("{}/{} - {}% Completed", found, total, GetPercentage(found, total)));
+							for (auto& questData : section.quest_data_array)
+							{
+								if (!IsQuestVisible(nullptr, pageName, questData->GetEditorID(), currentUserOption))
+								{
+									total--;
+									if (CFramework_Master::CQuestKeys_Manual.HasKey(questData->GetKey()) || CFramework_Master::CQuestKeys_Natural.HasKey(questData->GetKey())) {
+										found--;
+									}
+								}
+							}
 						}
 					}
-				};
-			};
-		};
+
+					if (total > 0) {
+						config.push_back(patch->prependPageNumber ? fmt::format("{}. {}", std::to_string(Idx), page) : page);
+						config.push_back(fmt::format("{}/{} - {}% Completed", found, total, GetPercentage(found, total)));
+					}
+				}
+			}
+		}
 		return config;
 	};
 
@@ -834,23 +1016,20 @@ namespace CHCMHandler
 	{
 		if (activePage == 0) {
 			return GET_LOC_STRING_BY_KEY("MCMText_PageDirectory");
-		};
+		}
 
 		std::vector<std::string> sections{};
 		std::string page_name{};
 
-		for (auto& [groupName, group] : CustomPatches)
+		for (auto& [pageName, patch] : CustomPatches)
 		{
-			for (auto& [pageName, patch] : group->GetPatches())
+			if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
 			{
-				if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
-				{
-					return patch->section_defs.at(activePage);
-				};
-			};
-		};
+				return patch->section_defs.at(activePage);
+			}
+		}
 		return GET_LOC_STRING_BY_KEY("MCMText_Collectables");
-	};
+	}
 
 	//---------------------------------------------------
 	//---------------------------------------------------
@@ -860,25 +1039,23 @@ namespace CHCMHandler
 	{
 		std::vector<std::string> config{};
 
-		for (auto& [groupName, group] : CustomPatches) {
-			for (auto& [pageName, patch] : group->GetPatches()) {
+		for (auto& [pageName, patch] : CustomPatches) {
 
-				if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
-				{
-					config.push_back("0");
+			if (DKUtil::string::iequals(pageName.c_str(), mcmpage.c_str()))
+			{
+				config.push_back("0");
 
-					for (auto& section : patch->type_sections) {
-						if (section.enabled && pageNumber == section.displayOnPage) {
-							config.push_back(std::to_string(section.ID));
-							config.push_back(section.pageheaderL);
-							config.push_back(section.pageheaderR);
-							config.push_back(std::to_string(static_cast<int32_t>(section.type)));
-							config[0] = std::to_string(std::stoi(config[0]) + 1);
-						};
-					};
-				};
-			};
-		};
+				for (auto& section : patch->type_sections) {
+					if (section.enabled && pageNumber == section.displayOnPage) {
+						config.push_back(std::to_string(section.ID));
+						config.push_back(section.pageheaderL);
+						config.push_back(section.pageheaderR);
+						config.push_back(std::to_string(static_cast<int32_t>(section.type)));
+						config[0] = std::to_string(std::stoi(config[0]) + 1);
+					}
+				}
+			}
+		}
 		return config;
-	};
+	}
 };

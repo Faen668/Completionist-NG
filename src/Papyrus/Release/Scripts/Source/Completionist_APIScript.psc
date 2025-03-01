@@ -10,6 +10,7 @@ Completionist_MCMScript2 Property CompMCM2 Auto
 Completionist_UpdateScript Property CompVer Auto
 
 Perk Property Completionist_ShrineWatcher Auto
+Perk Property Completionist_MerchantHandler Auto
 
 GlobalVariable Property Completionist_Busy Auto
 
@@ -34,6 +35,8 @@ endEvent
 Event OnUpdate()
 		
 	Game.GetPlayer().AddPerk(Completionist_ShrineWatcher)
+	Game.GetPlayer().AddPerk(Completionist_MerchantHandler)
+	
 	SetFrameworkQuest(CompMCM as quest)
 	Framework_UpdateShouts()
 	

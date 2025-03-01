@@ -36,10 +36,8 @@ namespace CFramework_Shouts {
 
 		if (!a_event || !a_event->spell || a_event->object.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->ProcessLearntWord(a_event->spell);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->ProcessLearntWord(a_event->spell);
 		};
 
 		if (CFramework_Shouts_VS::Data.HasForm(a_event->spell)) {
@@ -293,10 +291,8 @@ namespace CFramework_Shouts {
 		VariablesAPI::Update();
 		CHandler::UpdateFoundForms();
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->UpdateFoundForms();
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->UpdateFoundForms();
 		};
 	}
 

@@ -9,36 +9,6 @@ namespace CFramework_Others {
 
 	// clang-format off
 
-	constexpr Serialization::FormArray VC_Forms_SK = {
-	0x0AB375,0x05AF48,0x0AB7BB,0x07C260,0x0B634C,0x08CDFA,
-	0x0ED417,0x039647,0x04B56C,0x0663D7,
-	};
-
-	constexpr Serialization::FormArray VC_Forms_DB = {
-	0x01CAC0,0x01CAC1,
-	};
-
-	constexpr Serialization::FormArray VM_Forms_SK = {
-	0x0061CC1,0x0061CD6,0x0061CB9,0x0061C8B,0x0061CA5,0x0061CC2,0x0061CC0,
-	0x0061CC9,0x0061CAB,0x0061CCA,
-	};
-
-	constexpr Serialization::FormArray VM_Forms_DB = {
-	0x0240FE,0x0240FF,0x024037,
-	};
-
-	constexpr Serialization::Variation VM_FormV_DB[] = {
-	{ 0x039FA1, { 0x039FA2, 0x039FA3, 0x039D2B, 0x039D2E, 0x039D2F } },
-	};
-
-	constexpr Serialization::FormArray Forms_PC = {
-	0
-	};
-
-	constexpr Serialization::FormArray Forms_PM = {
-	0
-	};
-
 	constexpr Serialization::FormArray Forms_SB = {
 	0x07FB5D,0x07FB56,0x07F908,0x07F927,0x07F901,0x07FB4F,0x07FB58,
 	0x07FB63,0x07F925,0x07F909,0x07FB45,0x07FB64,0x07FB55,0x07F926,
@@ -58,7 +28,6 @@ namespace CFramework_Others {
 		CHandler::InstallSearchTerms();
 		FrameworkAPI::AddUpdateFoundForms(CHandler::UpdateFoundForms);
 		CEvents::EventHandler::RegisterForEvent_OnActivateEvent(CHandler::OnActivateEvent);
-		CEvents::EventHandler::RegisterForEvent_OnContainerChangedEvent(CHandler::OnContainerChangedEvent);
 	}
 
 	//---------------------------------------------------
@@ -70,40 +39,6 @@ namespace CFramework_Others {
 		if (a_event->objectActivated && ItemDataSB.HasForm(a_event->objectActivated.get()->GetFormID())) 
 		{ 
 			CHandler::ProcessFoundForm(a_event->objectActivated.get());
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Framework Events ( On Item Added ) -------------
-	//---------------------------------------------------
-
-	void CHandler::OnContainerChangedEvent(RE::TESContainerChangedEvent const* a_event) {
-		using log = Serialization::CompletionistLog::logType;
-
-		if (a_event->newContainer != 0x00014) { return; }
-
-		if (ItemDataVC.HasForm(a_event->baseObj)) {
-			auto base = ItemDataVC.GetBase(a_event->baseObj) ? ItemDataVC.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataVC, VC_FormArray, &VC_BoolArray, &VC_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataPC.HasForm(a_event->baseObj)) {
-			auto base = ItemDataPC.GetBase(a_event->baseObj) ? ItemDataPC.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataPC, PC_FormArray, &PC_BoolArray, &PC_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataVM.HasForm(a_event->baseObj)) {
-			auto base = ItemDataVM.GetBase(a_event->baseObj) ? ItemDataVM.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataVM, VM_FormArray, &VM_BoolArray, &VM_EntriesFound, log::kCollected, "NotifyItems");
-			return;
-		}
-
-		if (ItemDataPM.HasForm(a_event->baseObj)) {
-			auto base = ItemDataPM.GetBase(a_event->baseObj) ? ItemDataPM.GetBase(a_event->baseObj) : a_event->baseObj;
-			CHandler::ProcessFoundForm(base, a_event->baseObj, ItemDataPM, PM_FormArray, &PM_BoolArray, &PM_EntriesFound, log::kCollected, "NotifyItems");
-			return;
 		}
 	}
 
@@ -157,47 +92,8 @@ namespace CFramework_Others {
 
 	void CHandler::InjectAndCompileData() {
 
-		if (Serialization::CompletionistData::IsModInstalled("Helgen Reborn.esp")) {
-			ItemDataPC.AddForm(0x11035C, "Helgen Reborn.esp");
-		}
-
-		if (Serialization::CompletionistData::IsModInstalled("Wyrmstooth.esp")) {
-			ItemDataPC.AddForm(0x27978A, "Wyrmstooth.esp");
-			ItemDataPM.AddForm(0x4F2E1F, "Wyrmstooth.esp");
-		}
-
-		ItemDataPC.CompileFormArray(CFramework_Others::Forms_PC, "");
-		ItemDataVC.CompileFormArray(CFramework_Others::VC_Forms_SK, "Skyrim.esm");
-		ItemDataVC.CompileFormArray(CFramework_Others::VC_Forms_DB, "Dragonborn.esm");
-		ItemDataVC.MergeAsCollectable();
-		ItemDataPC.MergeAsCollectable();
-
-		ItemDataPM.CompileFormArray(CFramework_Others::Forms_PM, "");
-		ItemDataVM.CompileFormArray(CFramework_Others::VM_Forms_SK, "Skyrim.esm");
-		ItemDataVM.CompileFormArray(CFramework_Others::VM_Forms_DB, "Dragonborn.esm");
-		ItemDataVM.CompileVariation(CFramework_Others::VM_FormV_DB, "Dragonborn.esm");
-		ItemDataVM.MergeAsCollectable();
-		ItemDataPM.MergeAsCollectable();
-
 		ItemDataSB.CompileFormArray(CFramework_Others::Forms_SB, "Skyrim.esm");
 		BuildBaranziahArrays();
-
-		ItemDataVC.Populate(VC_NameArray, VC_FormArray, VC_BoolArray, VC_TextArray);
-
-		VC_EntriesTotal = VC_FormArray.size();
-		VC_EntriesFound = std::ranges::count(VC_BoolArray, true);
-
-		ItemDataPC.Populate(PC_NameArray, PC_FormArray, PC_BoolArray, PC_TextArray);
-		PC_EntriesTotal = PC_FormArray.size();
-		PC_EntriesFound = std::ranges::count(PC_BoolArray, true);
-
-		ItemDataVM.Populate(VM_NameArray, VM_FormArray, VM_BoolArray, VM_TextArray);
-		VM_EntriesTotal = VM_FormArray.size();
-		VM_EntriesFound = std::ranges::count(VM_BoolArray, true);
-
-		ItemDataPM.Populate(PM_NameArray, PM_FormArray, PM_BoolArray, PM_TextArray);
-		PM_EntriesTotal = PM_FormArray.size();
-		PM_EntriesFound = std::ranges::count(PM_BoolArray, true);
 
 		SB_EntriesTotal = SB_FormArray.size();
 		SB_EntriesFound = std::ranges::count(SB_BoolArray, true);
@@ -209,18 +105,6 @@ namespace CFramework_Others {
 
 	void CHandler::InstallSearchTerms()
 	{
-		for (auto i = 0; i < VC_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VC_FormArray[i], VC_NameArray[i], "$MCMPageClaws", std::to_underlying(EntryCategory::kClaw)));
-		}
-		for (auto i = 0; i < PC_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(PC_FormArray[i], PC_NameArray[i], "$MCMPageClaws", std::to_underlying(EntryCategory::kClaw)));
-		}
-		for (auto i = 0; i < VM_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(VM_FormArray[i], VM_NameArray[i], "$MCMPageMasks", std::to_underlying(EntryCategory::kMask)));
-		}
-		for (auto i = 0; i < PM_NameArray.size(); i++) {
-			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(PM_FormArray[i], PM_NameArray[i], "$MCMPageMasks", std::to_underlying(EntryCategory::kMask)));
-		}
 		for (auto i = 0; i < SB_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(SB_FormArray[i], SB_NameArray[i], "$MCMPageBarenziah", std::to_underlying(EntryCategory::kBarenziah)));
 		}
@@ -232,39 +116,11 @@ namespace CFramework_Others {
 
 	void CHandler::UpdateFoundForms() {
 
-		for (auto i = 0; i < VC_FormArray.size(); i++) {
-			VC_BoolArray[i] = FrameworkAPI::IsItemKnown(VC_FormArray[i], &ItemDataVC);
-		}
-
-		for (auto i = 0; i < PC_FormArray.size(); i++) {
-			PC_BoolArray[i] = FrameworkAPI::IsItemKnown(PC_FormArray[i], &ItemDataPC);
-		}
-
-		for (auto i = 0; i < VM_FormArray.size(); i++) {
-			VM_BoolArray[i] = FrameworkAPI::IsItemKnown(VM_FormArray[i], &ItemDataVM);
-		}
-
-		for (auto i = 0; i < PM_FormArray.size(); i++) {
-			PM_BoolArray[i] = FrameworkAPI::IsItemKnown(PM_FormArray[i], &ItemDataPM);
-		}
-
 		for (auto i = 0; i < SB_FormArray.size(); i++) {
 			if (FoundItemData_NoShow.HasForm(SB_FormArray[i]->GetFormID())) {
 				SB_BoolArray[i] = true;
 			}
 		}
-
-		VC_EntriesTotal = VC_FormArray.size();
-		VC_EntriesFound = std::ranges::count(VC_BoolArray, true);
-
-		PC_EntriesTotal = PC_FormArray.size();
-		PC_EntriesFound = std::ranges::count(PC_BoolArray, true);
-
-		VM_EntriesTotal = VM_FormArray.size();
-		VM_EntriesFound = std::ranges::count(VM_BoolArray, true);
-
-		PM_EntriesTotal = PM_FormArray.size();
-		PM_EntriesFound = std::ranges::count(PM_BoolArray, true);
 
 		SB_EntriesTotal = SB_FormArray.size();
 		SB_EntriesFound = std::ranges::count(SB_BoolArray, true);

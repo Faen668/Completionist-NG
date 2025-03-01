@@ -2,9 +2,6 @@
 
 namespace CVariables
 {
-	inline std::vector<RE::TESObjectREFR*> collection_containers;
-	inline bool				V_UseThreeStepTracking;
-
 	inline std::string 		V_ShoutColour_New;
 	inline std::string 		V_ShoutColour_Found;
 
@@ -41,7 +38,6 @@ namespace CVariables
 	inline std::string		V_CrosshairTag_New;
 	inline std::string		V_CrosshairTag_Found;
 
-	inline bool				V_quickLoot_Enabled;
 	inline bool				V_moreHudEnabled_Crosshair;
 	inline bool				V_moreHudEnabled_Menus;
 
@@ -78,6 +74,7 @@ namespace CVariables
 	inline bool				V_CellScanner_NUMB;
 	inline bool				V_CellScanner_DETA;
 	inline bool				V_CellScanner_Closest;
+	inline bool				V_CellScanner_Markers;
 
 	inline bool				V_CellScanner_ExcludeBooks;
 	inline bool				V_CellScanner_ExcludeArmor;
@@ -90,30 +87,28 @@ namespace CVariables
 	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
 
-	inline RE::BGSListForm* TCC_New;
-	inline RE::BGSListForm* TCC_FND;
-	inline RE::BGSListForm* TCC_DSP;
-	inline bool				TCC_Mode = false;
-
-	using EventResult = RE::BSEventNotifyControl;
-
-	class VariablesAPI final :
-
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
-
-	public: [[nodiscard]] static VariablesAPI* GetSingleton() {
-		static VariablesAPI singleton;
-		return &singleton;
-	}
-		  EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
+	class VariablesAPI final
+	{
+	private:
+		VariablesAPI() = default;
+		~VariablesAPI() = default;
+	
+	public:
+		  static VariablesAPI* GetSingleton() { static VariablesAPI singleton; return &singleton; }
 
 		  static void Register();
 		  static void Update();
-
+		  static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 		  static void SetFrameworkQuest(RE::StaticFunctionTag*, RE::TESQuest* a_quest);
-		  static bool IsDebuggingEnabled();
+
 		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
 
 		  static bool IsUsingLinux();
+		  static bool IsDebuggingEnabled();
+
+		  VariablesAPI(VariablesAPI const&) = delete;
+		  VariablesAPI(VariablesAPI const&&) = delete;
+		  VariablesAPI operator=(VariablesAPI&) = delete;
+		  VariablesAPI operator=(VariablesAPI&&) = delete;
 	};
 }

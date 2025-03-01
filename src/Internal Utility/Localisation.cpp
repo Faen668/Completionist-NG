@@ -7,7 +7,8 @@ namespace CLocalisation {
 	//-- Localisation ( Register Localisation Class ) ---
 	//---------------------------------------------------
 
-	void LocalisationAPI::Register() {
+	void LocalisationAPI::Register() 
+	{
 		SKSE::GetPapyrusInterface()->Register(RegisterFunctions);
 		BuildLocalisedMaps();
 	}
@@ -19,9 +20,9 @@ namespace CLocalisation {
 	bool LocalisationAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) {
 		const char* scriptName = "Completionist_Native";
 
-		a_vm->RegisterFunction("GetStringLength", scriptName, GetStringLength);
-		a_vm->RegisterFunction("IsMatchingShout", scriptName, IsMatchingShout);
-		a_vm->RegisterFunction("GetLocStringByKeyExt", scriptName, GetLocStringByKeyExt);
+		a_vm->RegisterFunction("GetStringLength",		scriptName, GetStringLength);
+		a_vm->RegisterFunction("IsMatchingShout",		scriptName, IsMatchingShout);
+		a_vm->RegisterFunction("GetLocStringByKeyExt",	scriptName, GetLocStringByKeyExt);
 		return true;
 	}
 

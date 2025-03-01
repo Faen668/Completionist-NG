@@ -28,5 +28,6 @@ namespace CQFramework_FavorQuests
 		  static void InstallFramework();
 		  static void RegisterMerchant(RE::StaticFunctionTag*, RE::Actor*);
 		  static void UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor*);
+		  static void AddMerchantData(RE::FormID NPCBaseFormID, const std::string& fileName, const std::string& Quest_Key);
 	};
 }

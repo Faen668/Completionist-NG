@@ -3,6 +3,7 @@
 #include "Serialization.hpp"
 #include "Serialized Data Sets/PlayerKills.hpp"
 #include "Serialized Data Sets/PatchSettings.hpp"
+
 namespace CFramework_Master
 {	
 	inline Serialization::CompletionistKey CQuestKeys_Natural;
@@ -91,6 +92,9 @@ namespace CFramework_Master
 		//General Functions
 		static bool							RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 		static void							Register();
+		static void							RegisterCustomPatches();
+		static void							FinalizeRegistrations();
+
 		static void							Update();
 		static void							LogWithPlugin(RE::StaticFunctionTag*, std::string a_message);
 

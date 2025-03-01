@@ -7,6 +7,7 @@
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
+#include "Internal Utility/MCMHandler.hpp"
 
 namespace CFramework_Master 
 {
@@ -42,29 +43,33 @@ namespace CFramework_Master
 		SetSerializableInfo(PlayerHits);
 
 		//Frameworks
-		CFramework_Uniques::CHandler::InstallFramework();
 		CFramework_Others::CHandler::InstallFramework();
-		CFramework_Books::CHandler::InstallFramework();
 		CFramework_MapMa::CHandler::InstallFramework();
 		CFramework_Blessings::CHandler::InstallFramework();
 		CFramework_Enchantments::CHandler::InstallFramework();
 		CFramework_Pets::CHandler::InstallFramework();
 		CFramework_PlayerHomes::CHandler::InstallFramework();
 		CFramework_Shouts::CHandler::InstallFramework();
+	};
 
-		//Custom Patches
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->InstallFramework();
-			};
+	void FrameworkAPI::RegisterCustomPatches()
+	{
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->InstallFramework();
 		};
+	}
 
+	void FrameworkAPI::FinalizeRegistrations()
+	{
 		//Register Arrays
 		ArrayHolder::RegisterArrays();
 
 		//Exclude Vendor Chests.
-		CellScanner::CHandler::ExcludeAllVendorChests();
-		CellScanner::CHandler::AddExcludedReferencesFromMods();
+		Completionist::CellScanner::init();
+	}
+
+	static void HideTrackedItem(RE::TESForm* a_item) {
+		
 	};
 
 	static std::string GetDeathPrefix(const std::string&  a_location)
@@ -391,28 +396,28 @@ namespace CFramework_Master
 		a_vm->RegisterFunction("Framework_UpdateShouts", "Completionist_Native", CFramework_Shouts::CHandler::UpdateFoundFormsExt);
 		a_vm->RegisterFunction("ActivateShrineByID", "Completionist_Native", CFramework_Blessings::CHandler::ActivateShrineFromPapyrus);
 
-		a_vm->RegisterFunction("CheckForReferences", "Completionist_Native", CellScanner::CHandler::CheckForReferences);
-		a_vm->RegisterFunction("GetTargetReferenceRefr", "Completionist_Native", CellScanner::CHandler::GetTargetReferenceRefr);
-		a_vm->RegisterFunction("GetTargetReferenceName", "Completionist_Native", CellScanner::CHandler::GetTargetReferenceName);
-		a_vm->RegisterFunction("GetTargetReferenceType", "Completionist_Native", CellScanner::CHandler::GetTargetReferenceType);
-		a_vm->RegisterFunction("GetTargetReferenceForm", "Completionist_Native", CellScanner::CHandler::GetTargetReferenceForm);
+		a_vm->RegisterFunction("CheckForReferences", "Completionist_Native", Completionist::CellScanner::CheckForReferences);
+		a_vm->RegisterFunction("GetTargetReferenceRefr", "Completionist_Native", Completionist::CellScanner::GetTargetReferenceRefr);
+		a_vm->RegisterFunction("GetTargetReferenceName", "Completionist_Native", Completionist::CellScanner::GetTargetReferenceName);
+		a_vm->RegisterFunction("GetTargetReferenceType", "Completionist_Native", Completionist::CellScanner::GetTargetReferenceType);
+		a_vm->RegisterFunction("GetTargetReferenceForm", "Completionist_Native", Completionist::CellScanner::GetTargetReferenceForm);
 
-		a_vm->RegisterFunction("GetQuestMarkerReferenceFormID", "Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceFormID);
-		a_vm->RegisterFunction("GetQuestMarkerReferenceOwner", "Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceOwner);
-		a_vm->RegisterFunction("GetQuestMarkerReferenceIndex", "Completionist_Native", CellScanner::CHandler::GetQuestMarkerReferenceIndex);
-		a_vm->RegisterFunction("GetReferenceFormIDs", "Completionist_Native", CellScanner::CHandler::GetReferenceFormIDs);
-		a_vm->RegisterFunction("GetReferenceNames", "Completionist_Native", CellScanner::CHandler::GetReferenceNames);
-		a_vm->RegisterFunction("GetObjectReferences", "Completionist_Native", CellScanner::CHandler::GetObjectReferences);
-		a_vm->RegisterFunction("isCellExcluded", "Completionist_Native", CellScanner::CHandler::isCellExcluded);
-		a_vm->RegisterFunction("HasPinnedFormInCell", "Completionist_Native", CellScanner::CHandler::HasPinnedFormInCell);
-		a_vm->RegisterFunction("IsItemPinnable", "Completionist_Native", CellScanner::CHandler::IsItemPinnable);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceFormID", "Completionist_Native", Completionist::CellScanner::GetQuestMarkerReferenceFormID);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceOwner", "Completionist_Native", Completionist::CellScanner::GetQuestMarkerReferenceOwner);
+		a_vm->RegisterFunction("GetQuestMarkerReferenceIndex", "Completionist_Native", Completionist::CellScanner::GetQuestMarkerReferenceIndex);
+		a_vm->RegisterFunction("GetReferenceFormIDs", "Completionist_Native", Completionist::CellScanner::GetReferenceFormIDs);
+		a_vm->RegisterFunction("GetReferenceNames", "Completionist_Native", Completionist::CellScanner::GetReferenceNames);
+		a_vm->RegisterFunction("GetObjectReferences", "Completionist_Native", Completionist::CellScanner::GetObjectReferences);
+		a_vm->RegisterFunction("isCellExcluded", "Completionist_Native", Completionist::CellScanner::isCellExcluded);
+		a_vm->RegisterFunction("HasPinnedFormInCell", "Completionist_Native", Completionist::CellScanner::HasPinnedFormInCell);
+		a_vm->RegisterFunction("IsItemPinnable", "Completionist_Native", Completionist::CellScanner::IsItemPinnable);
 
-		a_vm->RegisterFunction("GetPinnedReferenceName", "Completionist_Native", CellScanner::CHandler::GetPinnedReferenceName);
-		a_vm->RegisterFunction("GetPinnedReferenceType", "Completionist_Native", CellScanner::CHandler::GetPinnedReferenceType);
-		a_vm->RegisterFunction("GetPinnedReferenceRefr", "Completionist_Native", CellScanner::CHandler::GetPinnedReferenceRefr);
+		a_vm->RegisterFunction("GetPinnedReferenceName", "Completionist_Native", Completionist::CellScanner::GetPinnedReferenceName);
+		a_vm->RegisterFunction("GetPinnedReferenceType", "Completionist_Native", Completionist::CellScanner::GetPinnedReferenceType);
+		a_vm->RegisterFunction("GetPinnedReferenceRefr", "Completionist_Native", Completionist::CellScanner::GetPinnedReferenceRefr);
 
-		a_vm->RegisterFunction("ExcludeReference", "Completionist_Native", CellScanner::CHandler::ExcludeReference);
-		a_vm->RegisterFunction("RemoveExcludedReference", "Completionist_Native", CellScanner::CHandler::RemoveExcludedReference);
+		a_vm->RegisterFunction("ExcludeReference", "Completionist_Native", Completionist::CellScanner::ExcludeReference);
+		a_vm->RegisterFunction("RemoveExcludedReference", "Completionist_Native", Completionist::CellScanner::RemoveExcludedReference);
 
 		a_vm->RegisterFunction("MapMarkerIsCleared", "Completionist_Native", CFramework_MapMa::CHandler::MarkerIsCleared);
 
@@ -522,6 +527,12 @@ namespace CFramework_Master
 
 		for (const auto& [form, name, mcmPage, Category] : CFramework_Master::CItemsDataVec)
 		{
+			if (!CHCMHandler::MCMAPI::IsFormVisible(nullptr, mcmPage, form, -1))
+			{
+				INFO("Form: {} is hidden and cannot be processed", form->GetName());
+				continue;
+			}
+
 			if (list.size() >= i_maxResults)
 				break;
 
@@ -670,10 +681,8 @@ namespace CFramework_Master
 	{
 		AddUpdateFoundForms_Invoke();
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->UpdateFoundForms();
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->UpdateFoundForms();
 		};
 	}
 
@@ -686,10 +695,8 @@ namespace CFramework_Master
 		_OnMapMarkerAdded(a_form);
 		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->ProcessHookedMarker(a_form->GetFullName());
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->ProcessHookedMarker(a_form->GetFullName());
 		};
 	}
 
@@ -700,10 +707,9 @@ namespace CFramework_Master
 	const char* FrameworkAPI::OnMapMarkerDiscovered(RE::TESFullName* a_form)
 	{
 		AddMapMarkerDiscovery_Invoke(a_form->GetFullName());
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->ProcessHookedMarker(a_form->GetFullName());
-			};
+
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->ProcessHookedMarker(a_form->GetFullName());
 		};
 
 		return _OnMapMarkerDiscovered(a_form);
@@ -716,10 +722,8 @@ namespace CFramework_Master
 	void FrameworkAPI::ProcessCaughtFishFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_form) {
 		using ret = Serialization::CompletionistLog;
 
-		for (auto& [groupName, groups] : CExternalPatchHandler::Get()) {
-			for (auto& [pageName, patchData] : groups->GetPatches()) {
-				patchData->OnFishCaught(a_form);
-			};
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->OnFishCaught(a_form);
 		};
 	};
 
@@ -730,8 +734,12 @@ namespace CFramework_Master
 	std::int32_t FrameworkAPI::GetEntries_TotalByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& value = HandleTotalSet(a_ID);
-		//INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(a_ID), value);
-		return value;
+
+		int modifiedValue = value;
+		modifiedValue = CHCMHandler::MCMAPI::GetDisplayValueForTotalAndFoundItemsByIdentifier(a_ID, modifiedValue);
+
+		//INFO("Returning total count for framework {} with a value of: {}", std::to_underlying(a_ID), modifiedValue);
+		return modifiedValue < 0 ? 0 : modifiedValue;
 	}
 
 	//---------------------------------------------------
@@ -741,8 +749,12 @@ namespace CFramework_Master
 	std::int32_t FrameworkAPI::GetEntries_FoundByID(RE::StaticFunctionTag*, std::int32_t a_ID) {
 
 		auto& value = HandleFoundSet(a_ID);
-		//INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(a_ID), value);
-		return value;
+
+		int modifiedValue = value;
+		modifiedValue = CHCMHandler::MCMAPI::GetDisplayValueForTotalAndFoundItemsByIdentifier(a_ID, modifiedValue);
+
+		//INFO("Returning found count for framework {} with a value of: {}", std::to_underlying(a_ID), modifiedValue);
+		return modifiedValue < 0 ? 0 : modifiedValue;
 	}
 
 	//---------------------------------------------------
