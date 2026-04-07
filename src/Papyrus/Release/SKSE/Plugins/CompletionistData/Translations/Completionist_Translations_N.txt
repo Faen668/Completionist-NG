@@ -471,6 +471,13 @@ Dungeons_Quest19			|Volskygge
 Dungeons_Quest20			|Silenced Tongues
 Dungeons_Quest21			|Yngol's Barrow
 ----------------------------------------------------------------------------
+Dungeons_Quest00_DQANM		|The Treasure of Angarvunde
+Dungeons_Quest01_DQANM		|A Love Beyond Death
+Dungeons_Quest05_DQANM		|What Lies Beneath
+Dungeons_Quest11_DQANM		|Forgetting About Fjola
+Dungeons_Quest13_DQANM		|The Secrets of Ragnvald
+Dungeons_Quest14_DQANM		|The Legend of Red Eagle
+----------------------------------------------------------------------------
 Misc_DB_Quest00				|Deathbrand
 Misc_DB_Quest01				|The Ebony Warrior
 Misc_DB_Quest02				|Hrodulf's Madness
@@ -783,14 +790,14 @@ LOTD_Notes_Quest07			|Auryen's Notes: The Dragonmail Cuirass
 LOTD_Notes_Quest08			|Auryen's Notes: The Fists Of Randagulf
 LOTD_Notes_Quest09			|Auryen's Notes: The Tools Of Kagrenac
 --------------------------------------------------------------------------------------------------------
-LOTD_Misc_Quest00			LOTD_Misc_Quest00			|Auryen Morellus and the Chamber of Secrets
-LOTD_Misc_Quest01			LOTD_Misc_Quest01			|Much Ado About Snow Elves
-LOTD_Misc_Quest02			LOTD_Misc_Quest02			|The Hand Of Glory
-LOTD_Misc_Quest03			LOTD_Misc_Quest03			|Breaking The Curse
-LOTD_Misc_Quest04			LOTD_Misc_Quest04			|Ongar's Kegbreaker
-LOTD_Misc_Quest05			LOTD_Misc_Quest05			|Back To The Drawing Board
-LOTD_Misc_Quest06			LOTD_Misc_Quest06			|Lord's Mail
-LOTD_Misc_Quest07			LOTD_Misc_Quest07			|Guardians Of The Divine
+LOTD_Misc_Quest00			|Auryen Morellus and the Chamber of Secrets
+LOTD_Misc_Quest01			|Much Ado About Snow Elves
+LOTD_Misc_Quest02			|The Hand Of Glory
+LOTD_Misc_Quest03			|Breaking The Curse
+LOTD_Misc_Quest04			|Ongar's Kegbreaker
+LOTD_Misc_Quest05			|Back To The Drawing Board
+LOTD_Misc_Quest06			|Lord's Mail
+LOTD_Misc_Quest07			|Guardians Of The Divine
 ----------------------------------------------------------------------------
 3DNPC_Main_Quest00			|A Debt of Blood
 3DNPC_Main_Quest01			|A Rose Without Thorns

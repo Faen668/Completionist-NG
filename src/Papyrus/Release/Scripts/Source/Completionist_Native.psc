@@ -47,7 +47,7 @@ Int[] Function qGetRadiArrayByName(String a_page) Global Native
 String function qGetTimesCompletedVsTimesRequiredText(String a_key) Global Native
 
 ; Updates Pet Ownership and Shouut Completion in the DLL Frameworks.
-Function Framework_UpdatePetOwnership(ActorBase a_actorBase) Global Native
+Function Framework_UpdatePetOwnership(Actor a_critter) Global Native
 Function Framework_UpdateShouts() Global Native
 
 ;Print Message from Plugin with colour formatting.
@@ -124,7 +124,6 @@ String[] Function SearchMultiPage(string page, string query, bool ignoreComplete
 
 Int Function GetQuestID(string mcmpage, int activePage) Global Native
 Int Function GetMultiPageCount(string mcmpage) Global Native
-bool function IsMultiPage(string mcmpage) Global Native
 
 Int Function GetTotalEntriesForPage(string mcmpage) Global Native
 Int Function GetTotalEntriesFoundForPage(string mcmpage) Global Native
@@ -154,6 +153,7 @@ Function ClearSearchHistory(string mcmpage) Global Native
 String[] Function GetMultiPageSplashScreenConfig(string mcmpage) Global Native
 
 bool function IsSettingsPage(string mcmpage) Global Native
+bool function CanLoadPage(string mcmpage) Global Native
 bool function GetHeaderRequired(string mcmpage, int header) Global Native
 string function GetHeader(string mcmpage, int header, bool _left) Global Native
 string function GetActivePageName(int activePage, string mcmpage) Global Native
@@ -178,3 +178,14 @@ string Function GetDeathString(string a_name)  Global Native
 string Function GetCombinedKillString(string a_name)  Global Native
 
 int function GetPatchCount() Global Native
+
+bool Function HasDropDownMenu(string mcmpage)  Global Native
+string function GetDropDownMenuName(string mcmpage)  Global Native
+string function GetDropDownMenuHighlight(string mcmpage)  Global Native
+String[] Function GetDropDownMenuOptions(string mcmpage)  Global Native
+bool Function IsFormVisible(string mcmpage, Form a_form, int optionSelection) Global Native
+bool Function IsQuestVisible(string mcmpage, string editorID, int optionSelection) Global Native
+Function SetCurrentUserOption(string mcmpage, int optionIndex) Global Native
+Int Function GetCurrentUserOption(string mcmpage) Global Native
+
+String Function GetMuseumDisplayStatus(Form aform) Global Native

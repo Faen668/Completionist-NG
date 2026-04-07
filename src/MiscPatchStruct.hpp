@@ -1,17 +1,25 @@
-#pragma once
+﻿#pragma once
 #include "Serialization.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+
+#ifndef LOG_IF_ENABLED
+#define LOG_IF_ENABLED(...) if (CVariables::V_Global_Patch_Logging || log_install) { INFO(__VA_ARGS__); }
+#endif
+
+#ifndef ProcessPatchFoundFormArgs
+#define ProcessPatchFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, CMiscPatchData* data, Serialization::CompletionistLog::logType eventHandle
+#endif
 
 using namespace CVariables;
 
 struct CMiscPatchData
 {
-#define ProcessPatchFoundFormArgs RE::FormID a_baseID, RE::FormID a_eventID, CMiscPatchData* data, Serialization::CompletionistLog::logType eventHandle
-
 	int32_t ID{};
 	CMiscPatchType type{};
 	bool enabled{};
+
+	std::vector<RE::FormID> originalOrder{};
 	Serialization::CompletionistData data;
 	std::vector<PetsDataStruct> petsData{};
 	std::vector<PlayerHomesDataStruct> playerHomeData{};
@@ -46,6 +54,11 @@ struct CMiscPatchData
 	int32_t quest_data_id = -1;
 
 	std::string localisationFileName{};
+
+	//Set by the PatchListener if this page should be cleaned and removed.
+	bool FailedInstallCondition{};
+
+	bool IsEmpty() const { return FailedInstallCondition || (type == CMiscPatchType::kQuests && quest_data_array.size() <= 0) || (type != CMiscPatchType::kQuests && data.data.size() <= 0); }
 };
 
 struct CDropDownMenu
@@ -55,8 +68,17 @@ struct CDropDownMenu
 	std::vector<std::string> options;
 };
 
+enum CMiscPatchSortMode
+{
+	kDefault = 0,
+	kIgnoreArticles = 1,
+	kDeveloperOrder = 2,
+};
+
 struct CMiscPatch
 {
+#define LOG_IF_ENABLED(...) if (CVariables::V_Global_Patch_Logging || log_install) { INFO(__VA_ARGS__); }
+
 	using master = CFramework_Master::FrameworkAPI;
 	
 	std::string mcmpage{};
@@ -81,12 +103,153 @@ struct CMiscPatch
 	//True if this patch handles vanilla / creation club tracking.
 	bool isVanillaTracking{};
 
-	void InitPageDefs() {
-		
-		for (auto i = 1; i < PageCount; i++) {
-			std::string key = fmt::format("PageName{}", std::to_string(i));
-			section_defs.emplace(i, GetLocStringByKey(key.c_str()));
+	bool CanLoadPage;
+
+	// Sorting Mode
+	CMiscPatchSortMode sortMode = kDefault;
+
+	//---------------------------------------------------
+	//-- function ---------------------------------------
+	//---------------------------------------------------
+
+	void ValidatePageSizeRules()
+	{
+		bool failedValidation = false;
+		std::unordered_map<int32_t, std::vector<const CMiscPatchData*>> sectionsByPage;
+
+		// Step 1: Group by displayOnPage
+		for (const auto& section : type_sections) {
+			if (!section.IsEmpty()) {
+				sectionsByPage[section.displayOnPage].push_back(&section);
+			}
 		}
+
+		// Step 2: Validate each page
+		for (const auto& [page, sections] : sectionsByPage) {
+			int totalForms = 0;
+			for (const auto* section : sections) {
+				totalForms += static_cast<int>(std::ranges::distance(section->data.GetAllBases()));
+			}
+
+			int sectionCount = sections.size();
+
+			// Compute max allowed forms for this count
+			int maxFormsAllowed = 128 - (sectionCount * 2); // 2 headers per section
+			if (sectionCount > 1) {
+				maxFormsAllowed -= ((sectionCount - 1) * 2); // 2 "spacer" slots per additional section
+			}
+
+			if (totalForms > maxFormsAllowed) {
+				failedValidation = true;
+				INFO("Critical Error: Page [{}] has too many entries: {} forms across {} sections. Max allowed: {}",
+					page, totalForms, sectionCount, maxFormsAllowed);
+			}
+			else
+			{
+				LOG_IF_ENABLED("Page Size Validation Passed: Page [{}] has {} forms across {} sections. Max allowed: {}",
+					page, totalForms, sectionCount, maxFormsAllowed);
+			}
+		}
+
+		CanLoadPage = !failedValidation;
+		LOG_IF_ENABLED("{} CanLoadPage: {}", mcmpage, CanLoadPage);
+	}
+
+	void CleanEmptyPages()
+	{
+		LOG_IF_ENABLED("[{}] Starting CleanEmptyPages().", mcmpage);
+		LOG_IF_ENABLED("[{}] Initial PageCount: {}", mcmpage, PageCount);
+
+		std::vector<CMiscPatchData> nonEmptySections;
+		bool hasEmptySections = false;
+
+		// Step 1: Remove all empty sections first
+		for (const auto& section : type_sections)
+		{
+			if (!section.IsEmpty())
+			{
+				nonEmptySections.push_back(section);
+				LOG_IF_ENABLED("[{}] Keeping non-empty section on page {}", mcmpage, section.displayOnPage);
+			}
+			else
+			{
+				hasEmptySections = true;
+				LOG_IF_ENABLED("[{}] Removing empty section on page {}", mcmpage, section.displayOnPage);
+			}
+		}
+
+		// Early exit: No empty sections found → nothing to clean
+		if (!hasEmptySections)
+		{
+			LOG_IF_ENABLED("[{}] No empty sections detected. Exiting early.", mcmpage);
+			return;
+		}
+
+		// Step 2: Identify valid pages
+		std::set<int32_t> validPages;
+		for (const auto& section : nonEmptySections)
+		{
+			validPages.insert(section.displayOnPage);
+		}
+
+		LOG_IF_ENABLED("[{}] Valid pages after removing empty sections: {}", mcmpage, validPages.size());
+
+		// Step 3: Create page remapping
+		std::map<int32_t, int32_t> pageRemap;
+		int newPageNum = 1;
+		for (int oldPage = 1; oldPage <= PageCount; ++oldPage)
+		{
+			if (validPages.count(oldPage))
+			{
+				pageRemap[oldPage] = newPageNum++;
+				LOG_IF_ENABLED("[{}] Remapping old page {} → new page {}", mcmpage, oldPage, pageRemap[oldPage]);
+			}
+			else
+			{
+				LOG_IF_ENABLED("[{}] Page {} has no sections and will be removed.", mcmpage, oldPage);
+			}
+		}
+
+		// Step 4: Update sections' page numbers
+		std::vector<CMiscPatchData> updatedSections;
+		for (auto& section : nonEmptySections)
+		{
+			auto it = pageRemap.find(section.displayOnPage);
+			if (it != pageRemap.end())
+			{
+				section.displayOnPage = it->second;
+				updatedSections.push_back(std::move(section));
+				LOG_IF_ENABLED("[{}] Updated section from old page {} to new page {}", mcmpage, it->first, it->second);
+			}
+			else
+			{
+				LOG_IF_ENABLED("[{}] ERROR: Section from page {} not in remap", mcmpage, section.displayOnPage);
+			}
+		}
+
+		type_sections = std::move(updatedSections);
+		LOG_IF_ENABLED("[{}] Sections after cleanup: {}", mcmpage, type_sections.size());
+
+		// Step 5: Update PageCount
+		PageCount = newPageNum - 1;
+		LOG_IF_ENABLED("[{}] Updated PageCount: {}", mcmpage, PageCount);
+
+		// Step 6: Update section_defs
+		std::map<int32_t, std::string> updatedSectionDefs;
+		for (const auto& [oldPage, value] : section_defs)
+		{
+			if (pageRemap.count(oldPage))
+			{
+				updatedSectionDefs[pageRemap[oldPage]] = value;
+				LOG_IF_ENABLED("[{}] Updated section_defs from old page {} to new page {}", mcmpage, oldPage, pageRemap[oldPage]);
+			}
+			else
+			{
+				LOG_IF_ENABLED("[{}] Removing section_defs entry for old page {}", mcmpage, oldPage);
+			}
+		}
+		section_defs = std::move(updatedSectionDefs);
+		LOG_IF_ENABLED("[{}] CleanEmptyPages() completed successfully.", mcmpage);
 	}
 
 	//---------------------------------------------------
@@ -108,6 +271,84 @@ struct CMiscPatch
 		AddCustomHighlighting();
 		AddCustomDisplayName();
 		AddDropDownOptions();
+		SortLists();
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Form Injection ) ---------
+	//---------------------------------------------------
+
+	void SortLists()
+	{
+		auto ignore_articles = [](const std::string& str) -> std::string {
+			static const std::vector<std::string> articles = { "the ", "a ", "an " };
+			std::string lower = str;
+			std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+			for (const auto& article : articles) {
+				if (lower.starts_with(article)) {
+					return str.substr(article.size());  // Skip the article
+				}
+			}
+			return str;
+			};
+
+		for (auto& section : type_sections)
+		{
+			std::vector<std::tuple<std::string, std::string, RE::TESForm*, bool>> combined;
+
+			for (size_t i = 0; i < section.names.size(); ++i) {
+				combined.emplace_back(section.names[i], section.texts[i], section.forms[i], section.bools[i]);
+			}
+
+			std::sort(combined.begin(), combined.end(),
+				[this, &ignore_articles, &section](const auto& a, const auto& b) {
+					const auto& aName = std::get<0>(a);
+					const auto& bName = std::get<0>(b);
+
+					const auto* aForm = std::get<2>(a);
+					const auto* bForm = std::get<2>(b);
+
+					switch (sortMode) {
+					case kDefault:
+						return aName < bName;
+
+					case kIgnoreArticles:
+						return ignore_articles(aName) < ignore_articles(bName);
+
+					case kDeveloperOrder:
+						if (aForm && bForm) {
+							auto aID = aForm->GetFormID();
+							auto bID = bForm->GetFormID();
+
+							auto aIt = std::find(section.originalOrder.begin(), section.originalOrder.end(), aID);
+							auto bIt = std::find(section.originalOrder.begin(), section.originalOrder.end(), bID);
+
+							size_t aIdx = (aIt != section.originalOrder.end()) ? std::distance(section.originalOrder.begin(), aIt) : SIZE_MAX;
+							size_t bIdx = (bIt != section.originalOrder.end()) ? std::distance(section.originalOrder.begin(), bIt) : SIZE_MAX;
+
+							return aIdx < bIdx;
+						}
+						return false; // fallback if forms are null
+
+					default:
+						return aName < bName;
+					}
+				});
+
+			// Unpack sorted data back into vectors
+			for (size_t i = 0; i < combined.size(); ++i) {
+				section.names[i] = std::get<0>(combined[i]);
+				section.texts[i] = std::get<1>(combined[i]);
+				section.forms[i] = std::get<2>(combined[i]);
+				section.bools[i] = std::get<3>(combined[i]);
+			}
+
+			// Clear original order once it's been used
+			if (sortMode == kDeveloperOrder) {
+				section.originalOrder.clear();
+			}
+		}
 	}
 
 	//---------------------------------------------------
@@ -128,7 +369,7 @@ struct CMiscPatch
 
 			case CMiscPatchType::kBooks: {
 				section.data.Populate(section.names, section.forms, section.bools, section.texts, false, 1);
-				section.data.MergeAsCollectable(); 
+				section.data.MergeAsCollectable();
 				break;
 			}
 
@@ -181,11 +422,11 @@ struct CMiscPatch
 	void AddDropDownOptions()
 	{
 		if (HasDropDownMenu) {
-			DropDownMenu.name = GetLocStringByKey(DropDownMenu.name.c_str());
-			DropDownMenu.highlight = GetLocStringByKey(DropDownMenu.highlight.c_str());
+			DropDownMenu.name = GetLocStringByKey(DropDownMenu.name.c_str(), "DropDownMenuName");
+			DropDownMenu.highlight = GetLocStringByKey(DropDownMenu.highlight.c_str(), "DropDownMenuHighlight");
 			for (auto i = 0; i < DropDownMenu.options.size(); i++)
 			{
-				DropDownMenu.options[i] = GetLocStringByKey(DropDownMenu.options[i].c_str());
+				DropDownMenu.options[i] = GetLocStringByKey(DropDownMenu.options[i].c_str(), "DropDownMenuOption");
 			}
 		}
 	}
@@ -202,7 +443,7 @@ struct CMiscPatch
 
 				auto it = section.CustomHighlightText.find(section.forms[Idx]->GetFormID());
 				if (it != section.CustomHighlightText.end()) {
-					section.texts[Idx] = GetLocStringByKey(it->second.c_str());
+					section.texts[Idx] = GetLocStringByKey(it->second.c_str(), "CustomHighlightText");
 				}
 			}
 			section.CustomHighlightText.clear();
@@ -221,7 +462,7 @@ struct CMiscPatch
 
 				auto it = section.CustomDisplayNames.find(section.forms[Idx]->GetFormID());
 				if (it != section.CustomDisplayNames.end()) {
-					section.names[Idx] = GetLocStringByKey(it->second.c_str());
+					section.names[Idx] = GetLocStringByKey(it->second.c_str(), "CustomDisplayNames");
 				}
 			}
 			section.CustomDisplayNames.clear();
@@ -319,12 +560,10 @@ struct CMiscPatch
 	//-- Framework Functions ( Get Localised String ) ---
 	//---------------------------------------------------
 
-	const char* GetLocStringByKey(const char* s_key)
+	const char* GetLocStringByKey(const char* s_key, const char* s_param)
 	{
 		if (!translations.contains(s_key)) {
-			if (log_install) {
-				INFO("Unable to load translation for key {} from file: {}", s_key, iniFileName);
-			}
+			LOG_IF_ENABLED("Unable to load translation for key {} in param {} from file: {}", s_key, s_param, iniFileName);
 			return s_key;
 		}
 		return translations.at(s_key).c_str();
@@ -334,36 +573,69 @@ struct CMiscPatch
 	//-- Framework Functions ( Update Found Forms ) -----
 	//---------------------------------------------------
 
-	void UpdateFoundForms() {
-
+	void UpdateFoundForms()
+	{
 		for (auto& section : type_sections)
 		{
-			for (auto i = 0; i < section.forms.size(); i++) {
-
+			for (size_t i = 0; i < section.forms.size(); i++)
+			{
 				switch (section.type)
 				{
-				case CMiscPatchType::kItems:				section.bools[i] = master::IsItemKnown(section.forms[i], &section.data); break;
-				case CMiscPatchType::kBooks:				section.bools[i] = master::IsBookKnown(section.forms[i]); break;
-				case CMiscPatchType::kLocations:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kFish:					section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kPlayerHomes:			section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kPets:					section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kInteractableObject:	section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID()); break;
-				case CMiscPatchType::kEnchantments:			section.bools[i] = master::IsEnchantmentKnown(section.forms[i]); break;
-				case CMiscPatchType::kShouts: 
+				case CMiscPatchType::kItems:
+					section.bools[i] = master::IsItemKnown(section.forms[i], &section.data);
+					break;
+
+				case CMiscPatchType::kBooks:
+					section.bools[i] = master::IsBookKnown(section.forms[i]);
+					break;
+
+				case CMiscPatchType::kLocations:
+				case CMiscPatchType::kFish:
+				case CMiscPatchType::kPlayerHomes:
+				case CMiscPatchType::kPets:
+				case CMiscPatchType::kInteractableObject:
+					section.bools[i] = CFramework_Master::FoundItemData_NoShow.HasForm(section.forms[i]->GetFormID());
+					break;
+
+				case CMiscPatchType::kEnchantments:
+					section.bools[i] = master::IsEnchantmentKnown(section.forms[i]);
+					break;
+
+				case CMiscPatchType::kShouts:
 				{
 					section.shout_names.clear();
 
-					for (auto i = 0; i < section.forms.size(); i++) {
+					for (size_t i = 0; i < section.forms.size(); i++)
+					{
+						auto* shout = static_cast<RE::TESShout*>(section.forms[i]);
+						if (!shout) {
+							ERROR("Null shout pointer at index {}", i);
+							section.shout_names.push_back("<Invalid shout>");
+							section.bools[i] = false;
+							continue;
+						}
 
-						auto* Word1 = static_cast<RE::TESShout*>(section.forms[i])->variations[0].word;
-						auto* Word2 = static_cast<RE::TESShout*>(section.forms[i])->variations[1].word;
-						auto* Word3 = static_cast<RE::TESShout*>(section.forms[i])->variations[2].word;
+						auto* Word1 = shout->variations[0].word;
+						auto* Word2 = shout->variations[1].word;
+						auto* Word3 = shout->variations[2].word;
 
+						if (!Word1 || !Word2 || !Word3) {
+							ERROR("Null word pointer(s) in shout index {}", i);
+							section.shout_names.push_back("<Missing word(s)>");
+							section.bools[i] = false;
+							continue;
+						}
+
+						if (i >= section.names.size()) {
+							ERROR("Index {} out of bounds for section.names (size = {})", i, section.names.size());
+							section.shout_names.push_back("<Invalid name>");
+							section.bools[i] = false;
+							continue;
+						}
+
+						// --- Begin the original logic with logging ---
 						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_3[i])) {
-
 							section.shout_names.push_back(section.names[i] + GetCompletedTemplate(Word1, Word2, Word3));
-
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_3[i]);
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_2[i]);
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
@@ -372,9 +644,7 @@ struct CMiscPatch
 						}
 
 						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_2[i])) {
-
 							section.shout_names.push_back(section.names[i] + GetSecondWordTemplate(Word1, Word2, Word3));
-
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_2[i]);
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
 							section.bools[i] = false;
@@ -382,18 +652,40 @@ struct CMiscPatch
 						}
 
 						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_1[i])) {
-
 							section.shout_names.push_back(section.names[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
+							section.bools[i] = false;
 							continue;
 						}
 
-						section.shout_names.push_back(section.names[i] + GetBaseTemplate(Word1, Word2, Word3));
+						// --- Problematic line: log everything before we touch it ---
+						INFO(
+							"Processing shout index {} | FormID {:08X} | Name = '{}' | Words = [{}, {}, {}]",
+							i,
+							section.forms[i] ? section.forms[i]->GetFormID() : 0,
+							section.names[i],
+							Word1->GetFullName(),
+							Word2->GetFullName(),
+							Word3->GetFullName()
+						);
+
+						try {
+							section.shout_names.push_back(section.names[i] + GetBaseTemplate(Word1, Word2, Word3));
+						}
+						catch (const std::exception& e) {
+							ERROR("Exception adding shout name at index {}: {}", i, e.what());
+						}
+						catch (...) {
+							ERROR("Unknown exception adding shout name at index {}", i);
+						}
+
 						section.bools[i] = false;
 					}
+					break;
 				}
-				}
+				} // end switch
 			}
+
 			section.total = section.forms.size();
 			section.found = std::ranges::count(section.bools, true);
 		}

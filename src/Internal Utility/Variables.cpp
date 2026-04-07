@@ -12,6 +12,7 @@ namespace CVariables {
 	{
 		//Register menu open to periodically clear the formattedStringHolder.
 		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
+		V_Global_Patch_Logging = VariablesAPI::IsGlobalPatchInstallLoggingEnabled();
 	};
 
 	//---------------------------------------------------
@@ -77,14 +78,10 @@ namespace CVariables {
 		return V_Debugging;
 	};
 
-	//---------------------------------------------------
-	//-- Variables Functions ( Linux Compatibility ) ----
-	//---------------------------------------------------
-
-	bool VariablesAPI::IsUsingLinux() {
+	bool VariablesAPI::GetIniBoolValue(const std::string& key)
+	{
 		CSimpleIniA ini;
 		const char* completionistSection = "Completionist";
-		const char* linuxKey = "Is_Using_Linux";
 		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
 
 		// Load the INI file
@@ -93,7 +90,7 @@ namespace CVariables {
 		// If the file doesn't exist, create it and add the required lines
 		if (rc < 0 && rc != SI_FILE) {
 			// Create the section and set the value
-			ini.SetValue(completionistSection, linuxKey, "false");
+			ini.SetValue(completionistSection, key.c_str(), "false");
 
 			// Save the INI file
 			if (ini.SaveFile(iniFilePath) < 0) {
@@ -113,8 +110,8 @@ namespace CVariables {
 		}
 
 		// If the section or key doesn't exist, add them
-		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, linuxKey)) {
-			ini.SetValue(completionistSection, linuxKey, "false");
+		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, key.c_str())) {
+			ini.SetValue(completionistSection, key.c_str(), "false");
 
 			// Save the INI file
 			if (ini.SaveFile(iniFilePath) < 0) {
@@ -128,7 +125,34 @@ namespace CVariables {
 		}
 
 		// Return the value
-		return ini.GetBoolValue(completionistSection, linuxKey, false);
+		return ini.GetBoolValue(completionistSection, key.c_str(), false);
+	}
+
+	//---------------------------------------------------
+	//-- Variables Functions ( Is MuseumAPI Enabled ) ---
+	//---------------------------------------------------
+
+	bool VariablesAPI::IsMuseumAPILoggingEnabled()
+	{
+		return GetIniBoolValue("MuseumAPILogging");
+	}
+
+	//---------------------------------------------------
+	//-- Variables Functions ( Linux Compatibility ) ----
+	//---------------------------------------------------
+
+	bool VariablesAPI::IsUsingLinux() 
+	{
+		return GetIniBoolValue("Is_Using_Linux");
+	}
+
+	//---------------------------------------------------
+	//-- Variables Functions ( Global Patch Logging ) ---
+	//---------------------------------------------------
+
+	bool VariablesAPI::IsGlobalPatchInstallLoggingEnabled()
+	{
+		return GetIniBoolValue("Log_All_Patch_Installs");
 	}
 
 	//---------------------------------------------------
@@ -292,6 +316,21 @@ namespace CVariables {
 			V_TextChoice_G = prop->GetSInt();
 		}
 
+		V_TextChoice_Displayable = 4;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrAP_Choice_Displayable")) {
+			V_TextChoice_Displayable = prop->GetSInt();
+		}
+
+		V_TextChoice_Displayed = 4;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrAP_Choice_Displayed")) {
+			V_TextChoice_Displayed = prop->GetSInt();
+		}
+
+		V_TextChoice_Occupied = 4;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrAP_Choice_Occupied")) {
+			V_TextChoice_Occupied = prop->GetSInt();
+		}
+
 		V_PrefixChoice_N = 3;
 		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrFx_Choice_N")) {
 			V_PrefixChoice_N = prop->GetSInt();
@@ -300,6 +339,21 @@ namespace CVariables {
 		V_PrefixChoice_G = 3;
 		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrFx_Choice_G")) {
 			V_PrefixChoice_G = prop->GetSInt();
+		}
+
+		V_PrefixChoice_Displayable = 3;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrFx_Choice_Displayable")) {
+			V_PrefixChoice_Displayable = prop->GetSInt();
+		}
+
+		V_PrefixChoice_Displayed = 3;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrFx_Choice_Displayed")) {
+			V_PrefixChoice_Displayed = prop->GetSInt();
+		}
+
+		V_PrefixChoice_Occupied = 3;
+		if (const auto* prop = VariablesAPI::GetProperty("InventoryMode_PrFx_Choice_Occupied")) {
+			V_PrefixChoice_Occupied = prop->GetSInt();
 		}
 
 		V_CrosshairTag_New = "Need It!";
@@ -312,6 +366,21 @@ namespace CVariables {
 			V_CrosshairTag_Found = prop->GetString();
 		}
 
+		V_CrosshairTag_Displayable = "Displayable!";
+		if (const auto* prop = VariablesAPI::GetProperty("State_OverRide_Displayable_Name_String")) {
+			V_CrosshairTag_Displayable = prop->GetString();
+		}
+
+		V_CrosshairTag_Displayed = "Displayed!";
+		if (const auto* prop = VariablesAPI::GetProperty("State_OverRide_Displayed_Name_String")) {
+			V_CrosshairTag_Displayed = prop->GetString();
+		}
+
+		V_CrosshairTag_Occupied = "Occupied!";
+		if (const auto* prop = VariablesAPI::GetProperty("State_OverRide_Occupied_Name_String")) {
+			V_CrosshairTag_Occupied = prop->GetString();
+		}
+
 		V_HUD_Override_Enabled_New_Crosshair = false;
 		if (const auto* prop = VariablesAPI::GetProperty("b_CustomColour_N_HUD_Crosshair")) {
 			V_HUD_Override_Enabled_New_Crosshair = prop->GetBool();
@@ -320,6 +389,21 @@ namespace CVariables {
 		V_HUD_Override_Enabled_Found_Crosshair = false;
 		if (const auto* prop = VariablesAPI::GetProperty("b_CustomColour_G_HUD_Crosshair")) {
 			V_HUD_Override_Enabled_Found_Crosshair = prop->GetBool();
+		}
+
+		V_HUD_Override_Enabled_Displayable = false;
+		if (const auto* prop = VariablesAPI::GetProperty("b_CustomColour_Displayable")) {
+			V_HUD_Override_Enabled_Displayable = prop->GetBool();
+		}
+
+		V_HUD_Override_Enabled_Displayed = false;
+		if (const auto* prop = VariablesAPI::GetProperty("b_CustomColour_Displayed")) {
+			V_HUD_Override_Enabled_Displayed = prop->GetBool();
+		}
+
+		V_HUD_Override_Enabled_Occupied = false;
+		if (const auto* prop = VariablesAPI::GetProperty("b_CustomColour_Occupied")) {
+			V_HUD_Override_Enabled_Occupied = prop->GetBool();
 		}
 
 		V_HUD_Colour_New_Crosshair = 4430046;
@@ -332,6 +416,21 @@ namespace CVariables {
 			V_HUD_Colour_Found_Crosshair = prop->GetSInt();
 		}
 
+		V_HUD_Colour_Displayable = 1288220;
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Displayable")) {
+			V_HUD_Colour_Displayable = prop->GetSInt();
+		}
+
+		V_HUD_Colour_Displayed = 1288220;
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Displayed")) {
+			V_HUD_Colour_Displayed = prop->GetSInt();
+		}
+
+		V_HUD_Colour_Occupied = 1288220;
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Occupied")) {
+			V_HUD_Colour_Occupied = prop->GetSInt();
+		}
+
 		V_HUD_ColourString_New_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_N_HUD_Crosshair")) {
 			V_HUD_ColourString_New_Crosshair = prop->GetString();
@@ -340,6 +439,21 @@ namespace CVariables {
 		V_HUD_ColourString_Found_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_G_HUD_Crosshair")) {
 			V_HUD_ColourString_Found_Crosshair = prop->GetString();
+		}
+
+		V_HUD_ColourString_Displayable = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Displayable")) {
+			V_HUD_ColourString_Displayable = prop->GetString();
+		}
+
+		V_HUD_ColourString_Displayed = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Displayed")) {
+			V_HUD_ColourString_Displayed = prop->GetString();
+		}
+
+		V_HUD_ColourString_Occupied = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Occupied")) {
+			V_HUD_ColourString_Occupied = prop->GetString();
 		}
 
 		V_HUD_Override_Enabled_New_Menus = false;
@@ -382,6 +496,21 @@ namespace CVariables {
 			V_HUD_CustomColour_Found_Crosshair = prop->GetSInt();
 		}
 
+		V_HUD_CustomColour_Displayable = -1;
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourVal_Displayable")) {
+			V_HUD_CustomColour_Displayable = prop->GetSInt();
+		}
+
+		V_HUD_CustomColour_Displayed = -1;
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourVal_Displayed")) {
+			V_HUD_CustomColour_Displayed = prop->GetSInt();
+		}
+
+		V_HUD_CustomColour_Occupied = -1;
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourVal_Occupied")) {
+			V_HUD_CustomColour_Occupied = prop->GetSInt();
+		}
+
 		V_HUD_CustomColourString_New_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_N_HUD_Crosshair")) {
 			V_HUD_CustomColourString_New_Crosshair = prop->GetString();
@@ -390,6 +519,21 @@ namespace CVariables {
 		V_HUD_CustomColourString_Found_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_G_HUD_Crosshair")) {
 			V_HUD_CustomColourString_Found_Crosshair = prop->GetString();
+		}
+
+		V_HUD_CustomColourString_Displayable = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_Displayable")) {
+			V_HUD_CustomColourString_Displayable = prop->GetString();
+		}
+
+		V_HUD_CustomColourString_Displayed = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_Displayed")) {
+			V_HUD_CustomColourString_Displayed = prop->GetString();
+		}
+
+		V_HUD_CustomColourString_Occupied = "";
+		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_Occupied")) {
+			V_HUD_CustomColourString_Occupied = prop->GetString();
 		}
 
 		V_HUD_CustomColour_New_Menus = -1;
@@ -490,6 +634,16 @@ namespace CVariables {
 		V_Debugging = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bDebug")) {
 			V_Debugging = prop->GetBool();
+		}
+
+		V_MuseumModeEnabled = false;
+		if (const auto* prop = VariablesAPI::GetProperty("MuseumModeEnabled")) {
+			V_MuseumModeEnabled = prop->GetBool();
+		}
+
+		V_TreatOccupiedAsDisplayed = false;
+		if (const auto* prop = VariablesAPI::GetProperty("TreatOccupiedAsDisplayed")) {
+			V_TreatOccupiedAsDisplayed = prop->GetBool();
 		}
 	}
 }

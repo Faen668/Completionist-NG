@@ -147,9 +147,19 @@ endevent
 ;---------------------------------------------------
 
 Event OnOptionHighlight(Int val)
-	
-	SetInfoText(GetHighlightText(val, Get_Option_Name(val)))
-EndEvent
+	string baseText = GetHighlightText(val)
+	string displayStatus = GetMuseumDisplayStatus(Get_Option_Form(val))
+
+	if (CompMCM.MuseumModeEnabled && displayStatus != "")
+		if (baseText != "")
+			SetInfoText(baseText + "\nMuseum Display Status: " + displayStatus)
+		else
+			SetInfoText("~~~ " + Get_Option_Name(val) + " ~~~" + "\nMuseum Display Status: " + displayStatus)
+		endif
+	else
+		SetInfoText(baseText)
+	endif
+endEvent
 
 ;---------------------------------------------------
 ;-- Functions --------------------------------------
@@ -252,9 +262,9 @@ endfunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-String function GetHighlightText(Int val, String sOption)
+String function GetHighlightText(Int val)
 	
-	Int Index = OptionName.Find(sOption)
+	Int Index = OptionSlot.Find(val)
 	if (Index != -1)
 		Return OptionHigh[Index]
 	endif
@@ -822,181 +832,84 @@ function Select_Page()
 	PagePIndex = 0
 	SetCursorFillMode(LEFT_TO_RIGHT)
 	GoToState("Framework_TrackingState")
-
-;---------------------------------------------------
-;---------------------------------------------------
-				
-	if (CurrentPage == "$MCMPageArmor")
-		DisplayPage_1Entry(00, "$PageHeaderArmor1", "$PageHeaderGenericFoundI")
-
 ;---------------------------------------------------
 ;---------------------------------------------------
 		
-	elseif (CurrentPage == "$MCMPageWeapons")
-		DisplayPage_1Entry(01, "$PageHeaderWeapon1", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageItems")
-		DisplayPage_1Entry(02, "$PageHeaderItems1", "$PageHeaderGenericFoundI")
+	if (CurrentPage == "$MCMPageBarenziah")
+		DisplayPage_1Entry(0, "$PageHeaderBarenziah1", "$PageHeaderGenericFoundI")
 		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageJewelry")
-		DisplayPage_1Entry(03, "$PageHeaderJewelry1", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageLiquor")
-		DisplayPage_2Entry(04, 325, "$PageHeaderLiquor1", "$PageHeaderLiquorSUDS", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageConditionals")
-		DisplayPage_1Entry(67, "$PageHeaderConditionals1", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageClaws")
-		DisplayPage_2Entry(08, 09, "$PageHeaderClaws1", "$PageHeaderClaws2", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageMasks")
-		DisplayPage_2Entry(10, 11, "$PageHeaderMasks1", "$PageHeaderMasks2", "$PageHeaderGenericFoundI", "$PageHeaderGenericFoundI")
-
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageBarenziah")
-		DisplayPage_1Entry(12, "$PageHeaderBarenziah1", "$PageHeaderGenericFoundI")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-		
-	elseif (CurrentPage == "$MCMPageBooks1")
-		DisplayPage_1Entry(13, "$PageHeaderBooks1", "$PageHeaderGenericFoundB")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks2")  
-		DisplayPage_1Entry(14, "$PageHeaderBooks1", "$PageHeaderGenericFoundB")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks3")
-		DisplayPage_1Entry(15, "$PageHeaderBooks1", "$PageHeaderGenericFoundB")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks5") 
-		DisplayPage_1Entry(16, "$PageHeaderBooks1", "$PageHeaderGenericFoundB")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks6")  
-		DisplayPage_5Entry(17, 50, 51, 52, 53, "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-		
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks7")  
-		DisplayPage_6Entry(18, 19, 54, 55, 56, 57, "$PageHeaderBooks1", "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks8") 
-		DisplayPage_6Entry(20, 21, 58, 59, 60, 61, "$PageHeaderBooks1", "$PageHeaderBooksA", "$PageHeaderBooksC", "$PageHeaderBooksD", "$PageHeaderBooksI", "$PageHeaderBooksR", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
-
-;---------------------------------------------------
-;---------------------------------------------------
-
-	elseif (CurrentPage == "$MCMPageBooks4") 
-		DisplayPage_3Entry(22, 23, 24, "$PageHeaderMaps1", "$PageHeaderMaps2", "$PageHeaderMaps3", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundB", "$PageHeaderGenericFoundB")
-
 ;---------------------------------------------------
 ;---------------------------------------------------
 		
 	elseif (CurrentPage == "$MCMPageLocations1")
-		DisplayPage_1Entry(27, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
+		DisplayPage_1Entry(1, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
 		
 	elseif (CurrentPage == "$MCMPageLocations2")
-		DisplayPage_1Entry(28, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
+		DisplayPage_1Entry(2, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
 
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageLocations3")
-		DisplayPage_1Entry(29, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
+		DisplayPage_1Entry(3, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
 	
 ;---------------------------------------------------
 ;---------------------------------------------------
 		
 	elseif (CurrentPage == "$MCMPageLocations4")
-		DisplayPage_1Entry(30, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
+		DisplayPage_1Entry(4, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
 		
 	elseif (CurrentPage == "$MCMPageLocations5")
-		DisplayPage_1Entry(31, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
+		DisplayPage_1Entry(5, "$PageHeaderPlaces1", "$PageHeaderGenericFoundL", 1)
 
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageDoomstone")
-		DisplayPage_1Entry(33, "$PageHeaderDoomstone1", "$PageHeaderGenericFoundL")
+		DisplayPage_1Entry(6, "$PageHeaderDoomstone1", "$PageHeaderGenericFoundL")
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageShrines")
-		DisplayPage_2Entry(34, 35, "$PageHeaderShrines1", "$PageHeaderShrines2", "$PageHeaderGenericFoundL", "$PageHeaderGenericFoundL")	
+		DisplayPage_2Entry(7, 8, "$PageHeaderShrines1", "$PageHeaderShrines2", "$PageHeaderGenericFoundL", "$PageHeaderGenericFoundL")	
 
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageAEnchantments")
-		DisplayPage_2Entry(36, 37, "$PageHeaderAEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
+		DisplayPage_2Entry(9, 10, "$PageHeaderAEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
 	
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageWEnchantments")
-		DisplayPage_2Entry(38, 39, "$PageHeaderWEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
+		DisplayPage_2Entry(11, 12, "$PageHeaderWEnchantments", "$PageHeaderSEnchantments", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")
 
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPagePets")
-		DisplayPage_1Entry(40, "$PageHeaderPets1", "$PageHeaderGenericFoundO")
+		DisplayPage_1Entry(13, "$PageHeaderPets1", "$PageHeaderGenericFoundO")
 		
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageHouses")
-		DisplayPage_1Entry(44, "$PageHeaderHouses1", "$PageHeaderGenericFoundO")
+		DisplayPage_1Entry(14, "$PageHeaderHouses1", "$PageHeaderGenericFoundO")
 
 ;---------------------------------------------------
 ;---------------------------------------------------
 
 	elseif (CurrentPage == "$MCMPageShouts")
 		GoToState("State_NoSelect")
-		DisplayPage_3Entry(47, 48, 49, "$PageHeaderShouts1", "$PageHeaderShouts2","$PageHeaderShouts3", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")	
+		DisplayPage_3Entry(15, 16, 17, "$PageHeaderShouts1", "$PageHeaderShouts2","$PageHeaderShouts3", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS", "$PageHeaderGenericFoundS")	
 	endif
 EndFunction	
 
