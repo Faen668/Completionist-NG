@@ -451,7 +451,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		//-- Completionist Data Functions ( Get File Name ) -
 		//---------------------------------------------------
 
-		[[nodiscard]] std::string_view GetFileName(RE::FormID a_form) noexcept
+		[[nodiscard]] std::string_view GetFileName(RE::FormID a_form) const noexcept
 		{
 			return HasForm(a_form) ? GetForm(a_form)->GetFile()->GetFilename() : std::string_view{};
 		}
@@ -775,7 +775,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		// accessor
-		[[nodiscard]] bool HasKey(std::string_view a_key) noexcept
+		[[nodiscard]] bool HasKey(std::string_view a_key) const noexcept
 		{
 			return data.contains(a_key.data());
 		}
@@ -851,7 +851,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			auto read = 0;
 			for (auto i = 0; i < total; ++i) {
 				static std::string key, val;
-				std::size_t keySize, valSize;
+				std::size_t keySize, valSize{};
 				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
 					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
 					ERROR("Failed to read serialized form data: pair_size");
@@ -1119,7 +1119,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			auto read = 0;
 			for (auto i = 0; i < total; ++i) {
 				static std::string key, val;
-				std::size_t keySize, valSize;
+				std::size_t keySize, valSize{};
 				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
 					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
 					ERROR("Failed to read serialized form data: pair_size");
@@ -1167,7 +1167,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		// accessor
-		[[nodiscard]] bool HasKey(std::string_view a_key) noexcept
+		[[nodiscard]] bool HasKey(std::string_view a_key) const noexcept
 		{
 			return data.contains(a_key.data());
 		}
