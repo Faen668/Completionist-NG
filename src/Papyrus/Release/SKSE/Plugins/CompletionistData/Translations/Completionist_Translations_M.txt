@@ -8,6 +8,7 @@
 
 MODNAME1						|Completionist: Tracker (Main)
 MODNAME2						|Completionist: Tracker (Misc)
+MODNAME3						|Completionist: Tracker (Patches)
 
 - Translations Start Here
 ----------------------------------------------------------------------------
@@ -118,7 +119,7 @@ Barenziah_Name14				|Proudspire Manor
 Barenziah_Name15				|Stony Creek Cave
 Barenziah_Name16				|Sunderstone Gorge
 Barenziah_Name17				|Thalmor Embassy
-Barenziah_Name18				|Hall of the Dead
+Barenziah_Name18				|Whiterun Hall of the Dead
 Barenziah_Name19				|Dragonsreach
 Barenziah_Name20				|Jorrvaskr
 Barenziah_Name21				|House of Clan Shatter-Shield
@@ -143,7 +144,7 @@ Barenziah_Text14				|~~~ Proudspire Manor ~~~\n This Stone of Barenziah can be l
 Barenziah_Text15				|~~~ Stony Creek Cave ~~~\n This Stone of Barenziah can be located on the table next to the alchemy lab in the room off to the side.
 Barenziah_Text16				|~~~ Sunderstone Gorge ~~~\n This Stone of Barenziah can be located on the table with two bodies in front of the Word Wall.
 Barenziah_Text17				|~~~ Thalmor Embassy / Reeking Cave ~~~\n This Stone of Barenziah can be located in the Thalmor Embassy in Elenwen's Solar on the second floor. or inside Reeking Cave next to a corpse in the back depending on your Skyrim Version.
-Barenziah_Text18				|~~~ Hall of the Dead ~~~\n This Stone of Barenziah can be located inside the Hall of the Dead Catacombs, go down the left stairs and it will be to your left, next to a skeleton.
+Barenziah_Text18				|~~~ Whiterun Hall of the Dead ~~~\n This Stone of Barenziah can be located inside the Hall of the Dead Catacombs, go down the left stairs and it will be to your left, next to a skeleton.
 Barenziah_Text19				|~~~ Dragonsreach ~~~\n This Stone of Barenziah can be located in Dragonsreach in the Jarl's bedroom, on the right-hand end table.
 Barenziah_Text20				|~~~ Jorrvaskr ~~~\n This Stone of Barenziah can be located in Jorrvaskr's living quarters, on the bookshelf in Kodlak's room.
 Barenziah_Text21				|~~~ House of Clan Shatter-Shield ~~~\n This Stone of Barenziah can be located in the House of Clan Shatter-Shield, on a bookshelf in the room to the left of the top of the stairs.
@@ -185,207 +186,7 @@ CellScanner_ExteriorCellPrefix		|This Location
 CellScanner_NoReference		    |Error: No Active Quest Marker
 CellScanner_ExcludeSuccess		|Excluded Quest Marker Reference...
 ----------------------------------------------------------------------------
-MCMText_PageHeader_AHD			|Additional Hearthfire Dolls
-MCMText_PageHeader_AOS			|Amulets of Skyrim
-MCMText_PageHeader_BGC			|Bad Gremlins Collection
-MCMText_PageHeader_BOO			|The Brotherhood of Old
-MCMText_PageHeader_CME			|Cheesemod for Everyone
-MCMText_PageHeader_COS			|Cloaks of Skyrim
-MCMText_PageHeader_CLW			|Clockwork
-MCMText_PageHeader_FSK			|Falskaar
-MCMText_PageHeader_FOS			|Fossil Mining
-MCMText_PageHeader_GCN			|The Gray Cowl Of Nocturnal
-MCMText_PageHeader_HRB			|Helgen Reborn
-MCMText_PageHeader_ICW			|Immersive College of Winterhold
-MCMText_PageHeader_INN			|Inn Soaps
-MCMText_PageHeader_3DC			|Interesting NPC's
-MCMText_PageHeader_JAY			|JaySuS Swords
-MCMText_PageHeader_MAS			|Moon and Star
-MCMText_PageHeader_MTE			|Moonpath to Elsweyr
-MCMText_PageHeader_OAP			|Oblivion Artifacts
-MCMText_PageHeader_AHO			|Project AHO
-MCMText_PageHeader_REQ			|Requiem
-MCMText_PageHeader_ROY			|Royal Armory
-MCMText_PageHeader_SUT			|Skyrims Unique Treasures
-MCMText_PageHeader_TEL			|Teldryn Serious
-MCMText_PageHeader_AOB			|The Tournament of the ten Bloods
-MCMText_PageHeader_THU			|Thunderchild
-MCMText_PageHeader_UND			|Undeath
-MCMText_PageHeader_WOL			|The Wheels of Lull
-MCMText_PageHeader_WSN			|Wintersun
-MCMText_PageHeader_WYR			|Wyrmstooth
-MCMText_PageHeader_VIG			|Vigilant.
-MCMText_PageHeader_APOC			|Apocalypse
-MCMText_PageHeader_FMAG			|Forgotten Magic Redone
-MCMText_PageHeader_MYS			|Mysticism
-MCMText_PageHeader_ODIN			|Odin
-MCMText_PageHeader_TRIUM		|Triumvirate
 MCMText_DeathSentanceBy			|Death by:
-----------------------------------------------------------------------------
-MCMText_PageHeader_HAM			|Hammet Dungeons
-MCMText_PageHeader_HAM_PG1		|Armor & Weapons:
-MCMText_PageHeader_HAM_PG2		|Books, Tomes & Misc Items:
-MCMText_PageHeader_HAM_PG3		|Locations:
-----------------------------------------------------------------------------
 MCMText_Collectables			|Collectables:
 MCMText_PageDirectory			|Page Directory:
-MCMText_Section_Q_1				|Quests:
-MCMText_Section_Q_2				|Completed
-MCMText_Section_I_1				|Items:
-MCMText_Section_I_2				|Found
-MCMText_Section_B_1				|Books:
-MCMText_Section_B_2				|Read
-MCMText_Section_W_1				|Weapons:
-MCMText_Section_W_2				|Found
-MCMText_Section_A_1				|Armor:
-MCMText_Section_A_2				|Found
-MCMText_Section_L_1				|Locations:
-MCMText_Section_L_2				|Discovered
-MCMText_Section_SB_1			|Skill Books:
-MCMText_Section_SB_2			|Read
-MCMText_Section_ST_1			|Spell Tomes:
-MCMText_Section_ST_2			|Consumed
-MCMText_Section_D_1				|Dolls:
-MCMText_Section_INN_1			|Soap:
-MCMText_Section_BGC_1			|Fairies:
-MCMText_Section_BGC_2			|Fish:
-MCMText_Section_BGC_3			|Heads:
-MCMText_Section_BGC_4			|Jars:
-MCMText_Section_PH_1			|Player Homes:
-MCMText_Section_PH_2			|Obtained
-MCMText_Section_AOS_01			|Miscellaneous Amulets:
-MCMText_Section_AOS_02			|Miscellaneous Rings:
-MCMText_Section_AOS_03			|Daedric Amulets:
-MCMText_Section_AOS_04			|Dragon Priest Amulets:
-MCMText_Section_AOS_05			|Dragon Priest Rings:
-MCMText_Section_AOS_06			|Faith Amulets:
-MCMText_Section_AOS_07			|Doomstone Amulets:
-MCMText_Section_AOS_08			|Solder Amulets:
-MCMText_Section_AOS_09			|Guild Amulets:
-MCMText_Section_AOS_10			|Thane Amulets:
-MCMText_Section_AOS_11			|Jarl Amulets:
-MCMText_Section_AOS_12			|Hold Amulets:
-MCMText_Section_CME_1			|Cheese Slices:
-MCMText_Section_CME_2			|Cheese Wedges:
-MCMText_Section_CME_3			|Cheese Wheels:
-MCMText_Section_CME_4			|Miscellaneous Cheese:
-MCMText_Section_COS_1			|Cloaks:
-MCMText_Section_COS_2			|Dragon Priest Cloaks:
-MCMText_Section_FOS_1			|Fossils: (Common)
-MCMText_Section_FOS_2			|Fossils: (Uncommon)
-MCMText_Section_FOS_3			|Fossils: (Rare)
-MCMText_Section_3DC_MQS			|Main Quests:
-MCMText_Section_3DC_BOK			|Blood of Kings Quests:
-MCMText_Section_3DC_DS			|Darkened Steel Quests:
-MCMText_Section_3DC_MISC		|Miscellaneous Quests:
-MCMText_Section_3DC_Items		|Items, Books & Locations:
-MCMText_Section_SUT_JA			|Jade Statues:
-MCMText_Section_SUT_FI			|Figurines & Models:
-MCMText_Section_SUT_PL			|Unique Plates:
-MCMText_Section_SUT_IN			|Musical Instruments:
-MCMText_Section_SUT_SK			|Unique Skulls:
-MCMText_Section_SUT_GL			|Glass Ornaments:
-MCMText_Section_SUT_GE			|Gems & Stones:
-MCMText_Section_SUT_WI			|Wine Glasses:
-MCMText_Section_SUT_WE			|Armor & Weapons:
-MCMText_Section_SUT_AL			|Alcohol:
-MCMText_Section_SUT_GO			|Gold Ornaments:
-MCMText_Section_SUT_CO			|Copper Ornaments:
-MCMText_Section_VIG_Q1			|Main Quests:
-MCMText_Section_VIG_Q2			|Side Quests:
-MCMText_Section_VIG_Q3			|Memory Quests:
-MCMText_Section_VIG_Q4			|Radiant Quests:
-MCMText_Section_Tomes_A			|Alteration Tomes:
-MCMText_Section_Tomes_C			|Conjuration Tomes:
-MCMText_Section_Tomes_I			|Illusion Tomes:
-MCMText_Section_Tomes_D			|Destruction Tomes:
-MCMText_Section_Tomes_R			|Restoration Tomes:
-MCMText_Section_Tomes_P			|Lesser Powers:
-MCMText_Section_Tomes_AC		|Alteration & Conjuration:
-MCMText_Section_Tomes_DIPR		|Destruction, Illusion, Powers & Restoration:
 ----------------------------------------------------------------------------
-MCMText_WyrmstoothHomeText		|Fort Valus
-MCMText_WyrmstoothHomeInfo		|~~~ Fort Valus ~~~             \nFort Valus can be purchased in Wyrmstooth.
-----------------------------------------------------------------------------
-MCMText_ClockworkHomeText		|Clockwork Castle
-MCMText_ClockworkHomeInfo		|~~~ Clockwork Castle ~~~       \nClockwork Castle can be acquired in the Velothi Mountains.
-----------------------------------------------------------------------------
-MCMText_FalskaarHomeText		|Horndew Lodge
-MCMText_FalskaarHomeInfo		|~~~ Horndew Lodge ~~~          \nHorndew Lodge can be purchased in Amber Creek.
-----------------------------------------------------------------------------
-MCMText_GrayCowlHomeText		|Moonlight Home
-MCMText_GrayCowlHomeInfo		|~~~ Moonlight Home ~~~         \nMoonlight Home can be purchased in the central area of Ben Erai.
-----------------------------------------------------------------------------
-MCMText_HelgenRebornHomeText	|Private Tower
-MCMText_HelgenRebornHomeInfo	|~~~ Private Tower ~~~          \nPrivate Tower can be acquired in Helgen.
-----------------------------------------------------------------------------
-MCMText_MoonpathHomeText		|The Priderock
-MCMText_MoonpathHomeInfo		|~~~ The Priderock ~~~          \nThe Priderock can be acquired in Elsweyr.
-----------------------------------------------------------------------------
-MCMText_ProjectAHOHomeText		|Hla Fang
-MCMText_ProjectAHOHomeInfo		|~~~ Hla Fang ~~~               \nHla Fang can be purchased in Sadrith Kegran.
-----------------------------------------------------------------------------
-MCMText_ThunderchildHomeText	|High Hrothgar Library
-MCMText_ThunderchildHomeInfo	|~~~ High Hrothgar Library ~~~  \nHigh Hrothgar Library can be acquired in High Hrothgar.
-----------------------------------------------------------------------------
-MCMText_FossilMiningPageName1	|Common & Uncommon Fossils:
-MCMText_FossilMiningPageName2	|Rare Fossils:
-----------------------------------------------------------------------------
-MCMText_BadGremlinsPageName1	|Fairies & Fish:
-MCMText_BadGremlinsPageName2	|Heads & Jars:
-----------------------------------------------------------------------------
-MCMText_TBOOPageName1			|The Brotherhood of Old Quests:
-MCMText_TBOOPageName2			|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_ClockworkPageName1		|Clockwork Quests:
-MCMText_ClockworkPageName2		|Items, Books, Homes & Locations:
-----------------------------------------------------------------------------
-MCMText_FalskaarPageName1		|Falskaar Quests:
-MCMText_FalskaarPageName2		|Items, Books, Homes & Locations:
-----------------------------------------------------------------------------
-MCMText_TGCONPageName1		|The Gray Cowl of Nocturnal Quests:
-MCMText_TGCONPageName2		|Items, Books, Homes & Locations:
-----------------------------------------------------------------------------
-MCMText_HelgenRebornPageName1		|Helgen Reborn Quests:
-MCMText_HelgenRebornPageName2		|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_MoonAndStarPageName1		|Moon and Star Quests:
-MCMText_MoonAndStarPageName2		|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_MoonpathPageName1		|Moonpath to Elsweyr Quests:
-MCMText_MoonpathPageName2		|Items, Books & Homes:
-----------------------------------------------------------------------------
-MCMText_ProjectAHOPageName1		|Project AHO Quests:
-MCMText_ProjectAHOPageName2		|Items, Books, Homes & Locations:
-----------------------------------------------------------------------------
-MCMText_RequiemPageName1		|Armor, Weapons & Misc Items:
-MCMText_RequiemPageName2		|Books & Skill Books:
-MCMText_RequiemPageName3		|Requiem Spell Tomes:
-----------------------------------------------------------------------------
-MCMText_SkyrimUniqueTreasuresPageName1		|Statues, Figurines, Plates & Instruments:
-MCMText_SkyrimUniqueTreasuresPageName2		|Skulls, Ornaments, Gems, Stones & Glasses:
-MCMText_SkyrimUniqueTreasuresPageName3		|Armor, Weapons, Alcohol, Copper & Gold Ornaments:
-----------------------------------------------------------------------------
-MCMText_TeldrynSeriousPageName1		|Teldryn Serious Quests:
-MCMText_TeldrynSeriousPageName2		|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_UndeathPageName1		|Undeath Quests:
-MCMText_UndeathPageName2		|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_VigilantPageName1		|Vigilant Main Quests:
-MCMText_VigilantPageName2		|Vigilant Side Quests:
-MCMText_VigilantPageName3		|Vigilant Memory Quests:
-MCMText_VigilantPageName4		|Vigilant Radiant Quests:
-MCMText_VigilantPageName5		|Armor, Weapons & Misc Items:
-MCMText_VigilantPageName6		|Books, Skill Books & Spell Tomes:
-MCMText_VigilantPageName7		|Vigilant Locations:
-----------------------------------------------------------------------------
-MCMText_WheelsOfLullPageName1		|The Wheels of Lull Quests:
-MCMText_WheelsOfLullPageName2		|Items, Books & Locations:
-----------------------------------------------------------------------------
-MCMText_WyrmstoothPageName1		|Wyrmstooth Quests:
-MCMText_WyrmstoothPageName2		|Items, Books, Homes & Locations:
-----------------------------------------------------------------------------
-MCMText_AmuletsOfSkyrimPageName1		|Daedric & Miscellaneous Items:
-MCMText_AmuletsOfSkyrimPageName2		|Doomstone, Faiths & Dragon Priest Items:
-MCMText_AmuletsOfSkyrimPageName3		|Guilds, Holds, Jarls, Soldiers & Thane Items:

@@ -37,6 +37,7 @@ Event OnUpdate()
 	Game.GetPlayer().AddPerk(Completionist_ShrineWatcher)
 	Game.GetPlayer().AddPerk(Completionist_MerchantHandler)
 	
+	LogWithPlugin("Setting Framework Quest");
 	SetFrameworkQuest(CompMCM as quest)
 	Framework_UpdateShouts()
 	

@@ -474,6 +474,11 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			return std::views::keys(data) | std::views::filter([&](auto f) { return !IsVariation(f); });
 		}
 
+		[[nodiscard]] auto GetAllBases() const noexcept
+		{
+			return std::views::keys(data) | std::views::filter([&](auto f) { return !IsVariation(f); });
+		}
+
 		//---------------------------------------------------
 		//-- Completionist Data Functions ( Get All varia ) -
 		//---------------------------------------------------
@@ -1000,7 +1005,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		// accessor
-		[[nodiscard]] bool HasDate(std::string_view a_date) noexcept
+		[[nodiscard]] bool HasDate(std::string_view a_date) const noexcept
 		{
 			return data.contains(a_date.data());
 		}

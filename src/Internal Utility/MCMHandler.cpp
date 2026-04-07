@@ -33,6 +33,7 @@ namespace CHCMHandler
 		a_vm->RegisterFunction("GetValidMainPatchPageID", "Completionist_Native", GetValidMainPatchPageID);
 		a_vm->RegisterFunction("GetPageConfiguration", "Completionist_Native", GetPageConfiguration);
 		a_vm->RegisterFunction("IsSettingsPage", "Completionist_Native", IsSettingsPage);
+		a_vm->RegisterFunction("CanLoadPage", "Completionist_Native", CanLoadPage);
 
 		a_vm->RegisterFunction("GetMultiPageCount", "Completionist_Native", GetMultiPageCount);
 		a_vm->RegisterFunction("GetTotalEntriesForPage", "Completionist_Native", GetTotalEntriesForPage);
@@ -185,6 +186,24 @@ namespace CHCMHandler
 
 	bool MCMAPI::IsSettingsPage(RE::StaticFunctionTag*, std::string a_page) {
 		return a_page == "" || a_page == " " || DKUtil::string::icontains(a_page, "MCMPageSettings") || DKUtil::string::icontains(a_page, "Header") || DKUtil::string::icontains(a_page, "~~ ");
+	}
+
+	//---------------------------------------------------
+	//---------------------------------------------------
+	//---------------------------------------------------
+
+	bool MCMAPI::CanLoadPage(RE::StaticFunctionTag*, std::string a_page) 
+	{
+		for (auto& [pageName, patchData] : CustomPatches)
+		{
+			if (!DKUtil::string::iequals(a_page, pageName))
+			{
+				continue;
+			};
+
+			return patchData->CanLoadPage;
+		};
+		return {};
 	}
 
 	//---------------------------------------------------

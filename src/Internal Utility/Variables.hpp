@@ -12,6 +12,16 @@ namespace CVariables
 	inline std::string 		V_HUD_ColourString_New_Crosshair;
 	inline std::string 		V_HUD_ColourString_Found_Crosshair;
 
+	inline bool 			V_HUD_Override_Enabled_Displayable;
+	inline bool 			V_HUD_Override_Enabled_Displayed;
+	inline bool 			V_HUD_Override_Enabled_Occupied;
+	inline std::int32_t		V_HUD_Colour_Displayable;
+	inline std::int32_t		V_HUD_Colour_Displayed;
+	inline std::int32_t		V_HUD_Colour_Occupied;
+	inline std::string 		V_HUD_ColourString_Displayable;
+	inline std::string 		V_HUD_ColourString_Displayed;
+	inline std::string 		V_HUD_ColourString_Occupied;
+
 	inline bool 			V_HUD_Override_Enabled_New_Menus;
 	inline bool 			V_HUD_Override_Enabled_Found_Menus;
 	inline std::int32_t		V_HUD_Colour_New_Menus;
@@ -24,6 +34,13 @@ namespace CVariables
 	inline std::string 		V_HUD_CustomColourString_New_Crosshair;
 	inline std::string 		V_HUD_CustomColourString_Found_Crosshair;
 
+	inline std::int32_t		V_HUD_CustomColour_Displayable;
+	inline std::int32_t		V_HUD_CustomColour_Displayed;
+	inline std::int32_t		V_HUD_CustomColour_Occupied;
+	inline std::string 		V_HUD_CustomColourString_Displayable;
+	inline std::string 		V_HUD_CustomColourString_Displayed;
+	inline std::string 		V_HUD_CustomColourString_Occupied;
+
 	inline std::int32_t		V_HUD_CustomColour_New_Menus;
 	inline std::int32_t		V_HUD_CustomColour_Found_Menus;
 	inline std::string 		V_HUD_CustomColourString_New_Menus;
@@ -32,11 +49,22 @@ namespace CVariables
 	inline std::int32_t		V_TextChoice_N;
 	inline std::int32_t		V_TextChoice_G;
 
+	inline std::int32_t		V_TextChoice_Displayable;
+	inline std::int32_t		V_TextChoice_Displayed;
+	inline std::int32_t		V_TextChoice_Occupied;
+
 	inline std::int32_t		V_PrefixChoice_N;
 	inline std::int32_t		V_PrefixChoice_G;
 
+	inline std::int32_t		V_PrefixChoice_Displayable;
+	inline std::int32_t		V_PrefixChoice_Displayed;
+	inline std::int32_t		V_PrefixChoice_Occupied ;
+
 	inline std::string		V_CrosshairTag_New;
 	inline std::string		V_CrosshairTag_Found;
+	inline std::string		V_CrosshairTag_Displayable;
+	inline std::string		V_CrosshairTag_Displayed;
+	inline std::string		V_CrosshairTag_Occupied;
 
 	inline bool				V_moreHudEnabled_Crosshair;
 	inline bool				V_moreHudEnabled_Menus;
@@ -86,7 +114,11 @@ namespace CVariables
 	inline bool				V_FishingSpotMarkers;
 	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
+	inline bool				V_Global_Patch_Logging;
 
+	inline bool				V_MuseumModeEnabled;
+	inline bool				V_TreatOccupiedAsDisplayed;
+	
 	class VariablesAPI final
 	{
 	private:
@@ -104,7 +136,10 @@ namespace CVariables
 		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
 
 		  static bool IsUsingLinux();
+		  static bool IsMuseumAPILoggingEnabled();
+		  static bool IsGlobalPatchInstallLoggingEnabled();
 		  static bool IsDebuggingEnabled();
+		  static bool GetIniBoolValue(const std::string& key);
 
 		  VariablesAPI(VariablesAPI const&) = delete;
 		  VariablesAPI(VariablesAPI const&&) = delete;

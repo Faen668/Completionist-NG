@@ -36,7 +36,7 @@ namespace CFramework_Others {
 
 	void CHandler::OnActivateEvent(RE::TESActivateEvent const* a_event) 
 	{
-		if (a_event->objectActivated && ItemDataSB.HasForm(a_event->objectActivated.get()->GetFormID())) 
+		if (a_event->objectActivated && a_event->actionRef.get() == RE::PlayerCharacter::GetSingleton() && ItemDataSB.HasForm(a_event->objectActivated.get()->GetFormID()))
 		{ 
 			CHandler::ProcessFoundForm(a_event->objectActivated.get());
 		}

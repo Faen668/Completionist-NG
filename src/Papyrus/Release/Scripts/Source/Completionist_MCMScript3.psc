@@ -96,6 +96,10 @@ String[] SearchHistory
 int SearchHistoryChoice
 Int OID_SearhTerm
 
+int State_UserOptions
+String[] UserOptions
+int UserOptionsChoice
+
 Bool ManualPageChange = false
 
 ;---------------------------------------------------
@@ -277,7 +281,7 @@ Function PopulatePage(form[] a_forms, string[] a_names, string[] a_texts, bool[]
 	Int idx = 0
 				
 	while idx < a_names.Length
-		if (a_names[idx] != "")
+		if (a_names[idx] != "" && IsFormVisible(CurrentPage, a_forms[idx], UserOptionsChoice))
 			SetCursorPosition(PagePIndex)
 
 			if (a_names[idx] == CompMCM.SearchedEntry || (a_type == 4 && IsMatchingShout(a_names[idx], CompMCM.SearchedEntry)))
@@ -368,11 +372,9 @@ EndFunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-Function DisplayPatchPage(string[] config, bool _multipage = false)
+Function DisplayPatchPage(string[] config)
 
-	if (_multipage)
-		AddMultiPageOptions()
-	endif
+	AddMultiPageOptions()
 
 	Int Idx = 1
 	Int Edx = 0
@@ -380,7 +382,7 @@ Function DisplayPatchPage(string[] config, bool _multipage = false)
 	While Edx < (config[0] as int)
 		Int f = GetEntries_FoundByID(config[Idx] as int)
 		Int t = GetEntries_TotalByID(config[Idx] as int)
-
+	
 		SetCursorPosition(PagePIndex)
 		AddHeaderOption(config[Idx + 1])
 		PagePIndex += 1
@@ -399,11 +401,6 @@ Function DisplayPatchPage(string[] config, bool _multipage = false)
 	Int title_t = GetTotalEntriesForPage(CurrentPage)
 	SetTitleText("~ " + title_f + "/" + title_t + " - " + (((title_f as Float / title_t as Float * 100 as Float)  as Int) as String) + "% Completed ~")
 endfunction
-
-;---------------------------------------------------
-;-- Functions --------------------------------------
-;---------------------------------------------------
-
 
 ;---------------------------------------------------
 ;-- Functions --------------------------------------
@@ -467,7 +464,7 @@ endFunction
 
 Function DisplayMultiPageSplashScreen()
 	GoToState("MultiPageSplash")
-
+	
 	Int title_f = GetTotalEntriesFoundForPage(CurrentPage)
 	Int title_t = GetTotalEntriesForPage(CurrentPage)
 	SearchHistory = GetSearchHistory(CurrentPage)
@@ -488,8 +485,15 @@ Function DisplayMultiPageSplashScreen()
 
 	OID_SearhTerm = AddInputOption("$State_SearchTerm_Text", "$State_SearchTermString", 0)
 	AddMenuOptionST("State_SearchHistory", "$State_SearchHistory_Text", SearchHistory[SearchHistoryChoice], 0)
-
-	AddEmptyOption()
+		
+	if HasDropDownMenu(CurrentPage)
+		UserOptions = GetDropDownMenuOptions(CurrentPage)
+		UserOptionsChoice = GetCurrentUserOption(CurrentPage)		
+		AddMenuOptionST("State_UserOptions", GetDropDownMenuName(CurrentPage), UserOptions[UserOptionsChoice], 0)
+	else
+		AddEmptyOption()
+	endif
+	
 	AddEmptyOption()
 
 	AddHeaderOption("$Sections{" + CurrentPage + "}")
@@ -518,38 +522,35 @@ function Select_Page()
 	GoToState("Framework_TrackingState")
 
 	if (!IsSettingsPage(CurrentPage))
-		bool multipage = IsMultiPage(CurrentPage)
-
-		ActivePage = GetActivePage(CurrentPage)	
-		if (activePage > 0 && !multipage)
-			activePage = 0
-			SetActivePage(currentpage, 0)
-		endif	
 		
-		if (multipage)
+		if (!CanLoadPage(CurrentPage))
+			ShowMessage("$PageValidationError", false, "$ConfirmY")
+			return
+		endif
+		
+		ActivePage = GetActivePage(CurrentPage)	
 
-			int page_count = GetMultiPageCount(currentpage) - 1
-			if (GetActivePage(CurrentPage) > page_count || GetDefaultPage(CurrentPage) > page_count )
-				ResetPageSettings(CurrentPage)
-				RefreshPage()
-			endif
+		int page_count = GetMultiPageCount(currentpage) - 1
+		if (GetActivePage(CurrentPage) > page_count || GetDefaultPage(CurrentPage) > page_count )
+			ResetPageSettings(CurrentPage)
+			RefreshPage()
+		endif
 
-			if (SearchActive)
-				ActivePage = GetPageNumberForForm(CompMCM.SearchJumpPage, CompMCM.SearchedEntry)
+		if (SearchActive)
+			ActivePage = GetPageNumberForForm(CompMCM.SearchJumpPage, CompMCM.SearchedEntry)
+			SetActivePage(CurrentPage, ActivePage)
+			SearchActive = false
+		else
+			if (GetUseDefaultPage(CurrentPage) && !ManualPageChange)
+				ActivePage = GetDefaultPage(CurrentPage)
 				SetActivePage(CurrentPage, ActivePage)
-				SearchActive = false
-			else
-				if (GetUseDefaultPage(CurrentPage) && !ManualPageChange)
-					ActivePage = GetDefaultPage(CurrentPage)
-					SetActivePage(CurrentPage, ActivePage)
-				endif
 			endif
 		endif
 
 		if (GetUseDefaultPage(CurrentPage))
 			ManualPageChange = false
 		endif
-
+		
 		CurrentQuestID = GetQuestID(CurrentPage, ActivePage)
 
 		if(CurrentQuestID > 0)
@@ -561,13 +562,13 @@ function Select_Page()
 			RadiArray = qGetMiscQuestRadiArrayByID(CurrentQuestID)
 			KeysArray = qGetMiscQuestKeysArrayByID(CurrentQuestID)
 			OptionIndx = KeysArray.length
-			LoadPage(multipage)
+			LoadPage()
 			return
 		endif
 
 		string[] config = GetPageConfiguration(CurrentPage, ActivePage)
 
-		if(multipage && ActivePage == 0)
+		if(ActivePage == 0)
 			DisplayMultiPageSplashScreen()
 			return
 		endif
@@ -576,7 +577,7 @@ function Select_Page()
 			return
 		endif
 
-		DisplayPatchPage(config, multipage)
+		DisplayPatchPage(config)
 	endif
 EndFunction	
 
@@ -765,6 +766,37 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+State State_UserOptions ; MENU
+
+	Event OnMenuOpenST()
+		SetMenuDialogStartIndex(UserOptionsChoice)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(UserOptions)
+	EndEvent
+					
+	Event OnMenuAcceptST(Int index)
+		UserOptionsChoice = Index
+		SetCurrentUserOption(CurrentPage, UserOptionsChoice)
+		SetMenuOptionValueST(State_UserOptions, UserOptions[UserOptionsChoice])
+		RefreshPage()
+		return
+	EndEvent
+
+	Event OnDefaultST()
+		UserOptionsChoice = 0
+		SetCurrentUserOption(CurrentPage, UserOptionsChoice)
+		SetMenuOptionValueST(State_UserOptions, UserOptions[UserOptionsChoice])
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText(GetDropDownMenuHighlight(CurrentPage))
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 State Framework_TrackingState
 	Event OnOptionSelect(Int val)
 		
@@ -811,7 +843,18 @@ State Framework_TrackingState
 	endEvent
 
 	Event OnOptionHighlight(Int val)
-			SetInfoText(GetHighlightText(val))
+		string baseText = GetHighlightText(val)
+		string displayStatus = GetMuseumDisplayStatus(Get_Option_Form(val))
+
+		if (CompMCM.MuseumModeEnabled && displayStatus != "")
+			if (baseText != "")
+				SetInfoText(baseText + "\nMuseum Display Status: " + displayStatus)
+			else
+				SetInfoText("~~~ " + Get_Option_Name(val) + " ~~~" + "\nMuseum Display Status: " + displayStatus)
+			endif
+		else
+			SetInfoText(baseText)
+		endif
 	endEvent
 endState
 
@@ -863,25 +906,6 @@ State Quest_TrackingState
 endState
 
 ;---------------------------------------------------
-;-- END OF CODE ------------------------------------
-;---------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;---------------------------------------------------
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
@@ -923,17 +947,15 @@ endFunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-function buildpageLayout(bool _multipage)
+function buildpageLayout()
 
 	posLeft = 0
 	posRight = 1	
 
-	if (_multipage)
-		AddMultiPageOptions()
+	AddMultiPageOptions()
 
-		posLeft = 2
-		posRight = 3
-	endif
+	posLeft = 2
+	posRight = 3
 
 	SetCursorFillMode(LEFT_TO_RIGHT)
 	posSectionLeft = 0
@@ -1007,18 +1029,20 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 			While Index < NameArr.length && NameArr[Index] != ""
 				SetCursorPosition(posLeft)
 				
-				if (NameArr[Index] == CompMCM.SearchedEntry && CompMCM.b_SearchHighlightQuest)
-					GetColourStatus(NameArr[Index], KeysArr[Index], true)
-				else
-					OptionSlot[OptionIndx] = AddTextOption(NameArr[Index], "", 0)
+				if IsQuestVisible(CurrentPage, IdenArr[Index], UserOptionsChoice)
+					if (NameArr[Index] == CompMCM.SearchedEntry && CompMCM.b_SearchHighlightQuest)
+						GetColourStatus(NameArr[Index], KeysArr[Index], true)
+					else
+						OptionSlot[OptionIndx] = AddTextOption(NameArr[Index], "", 0)
+					endif
+
+					OptionName[OptionIndx] = NameArr[Index]
+					OptionHigh[OptionIndx] = TextArr[Index]
+					OptionIden[OptionIndx] = IdenArr[Index]
+					OptionKeys[OptionIndx] = KeysArr[Index]
+					OptionIndx += 1
+					posLeft += 2
 				endif
-				
-				OptionName[OptionIndx] = NameArr[Index]
-				OptionHigh[OptionIndx] = TextArr[Index]
-				OptionIden[OptionIndx] = IdenArr[Index]
-				OptionKeys[OptionIndx] = KeysArr[Index]
-				OptionIndx += 1
-				posLeft += 2
 				Index += 1
 			EndWhile
 		endif
@@ -1045,13 +1069,16 @@ function buildSection(bool pageLeft, String headerString, Int intPos, String[] N
 		else
 			While Index < NameArr.length && NameArr[Index] != ""
 				SetCursorPosition(posRight)
-				GetColourStatus(NameArr[Index], KeysArr[Index])
-				OptionName[OptionIndx] = NameArr[Index]
-				OptionHigh[OptionIndx] = TextArr[Index]
-				OptionIden[OptionIndx] = IdenArr[Index]
-				OptionKeys[OptionIndx] = KeysArr[Index]
-				OptionIndx += 1
-				posRight += 2
+				
+				if IsQuestVisible(CurrentPage, IdenArr[Index], UserOptionsChoice)
+					GetColourStatus(NameArr[Index], KeysArr[Index])
+					OptionName[OptionIndx] = NameArr[Index]
+					OptionHigh[OptionIndx] = TextArr[Index]
+					OptionIden[OptionIndx] = IdenArr[Index]
+					OptionKeys[OptionIndx] = KeysArr[Index]
+					OptionIndx += 1
+					posRight += 2
+				endif
 				Index += 1
 			EndWhile
 		endif
@@ -1122,7 +1149,7 @@ endFunction
 ;-- Functions --------------------------------------
 ;---------------------------------------------------
 
-function LoadPage(bool multipage)
+function LoadPage()
 
 	ShowMainQuests = False
 	ShowSideQuests = False
@@ -1201,7 +1228,7 @@ function LoadPage(bool multipage)
 		Index += 1
 	EndWhile	
 	
-	buildpageLayout(multipage)	
+	buildpageLayout()	
 EndFunction
 
 ;---------------------------------------------------

@@ -1,8 +1,9 @@
-#include "Frameworks/FrameworkMaster.hpp"
+﻿#include "Frameworks/FrameworkMaster.hpp"
 #include "Events.hpp"
 #include "Serialization.hpp"
 #include "Variables.hpp"
 #include "mainHUD.hpp"
+#include "MuseumAPI.hpp"
 
 #undef GetModuleHandle
 
@@ -12,8 +13,8 @@ namespace Completionist_MainHUD
 
 	using events = CEvents::EventHandler;
 	using serial = Serialization::CompletionistData;
+	using museum = Completionist::MuseumAPI;
 
-	CompletionistRequest s_messagefrommoreHUD{};
 	std::vector<std::string> formattedStringHolder{};
 
 	//---------------------------------------------------
@@ -33,26 +34,7 @@ namespace Completionist_MainHUD
 
 		//Register menu open to periodically clear the formattedStringHolder.
 		events::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
-		SKSE::GetMessagingInterface()->RegisterListener("Ahzaab's moreHUD Inventory Plugin", moreHUDMessageHandler);
 	};
-
-	//---------------------------------------------------
-	//-- moreHUD Support --------------------------------
-	//---------------------------------------------------
-
-	void TextnTagsAPI::moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg)
-	{
-		if (!a_msg || a_msg->type != 1 || !a_msg->data) { return; }
-
-		s_messagefrommoreHUD = *static_cast<CompletionistRequest*>(a_msg->data);
-
-		auto* receievedForm = RE::TESForm::LookupByID(s_messagefrommoreHUD.formId);
-		if (receievedForm && ItemIsCollectable(receievedForm))
-		{
-			moreHUDMessage msg{ receievedForm->GetFormID(), ItemIsCollected(receievedForm), V_moreHudEnabled_Menus };
-			SKSE::GetMessagingInterface()->Dispatch(2, &msg, sizeof(msg), "Ahzaab's moreHUD Inventory Plugin");
-		}
-	}
 
 	//---------------------------------------------------
 	//-- Events ( Update Variables & Clear Garbage ) ----
@@ -74,7 +56,7 @@ namespace Completionist_MainHUD
 			return _OnUpdateInventoryText(a_this); 
 		}
 
-		return API_GetDisplayNameMerged(_OnUpdateInventoryText(a_this), ItemIsCollected(a_this->object));
+		return API_GetDisplayNameMerged(_OnUpdateInventoryText(a_this), ItemIsCollected(a_this->object), a_this->object);
 	}
 
 	//---------------------------------------------------
@@ -93,7 +75,7 @@ namespace Completionist_MainHUD
 			return a_this->GetName();
 		}
 
-		return API_GetDisplayNameMerged(a_this->GetName(), ItemIsCollected(a_this));
+		return API_GetDisplayNameMerged(a_this->GetName(), ItemIsCollected(a_this), a_this);
 
 	}
 
@@ -119,7 +101,7 @@ namespace Completionist_MainHUD
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
 
-	const char* TextnTagsAPI::API_GetDisplayNamePrefix(const char* a_this, bool a_collected) 
+	const char* TextnTagsAPI::API_GetDisplayNamePrefix(const char* a_this, bool a_collected, bool a_displayed, bool a_variationDisplayed) 
 	{
 		auto applyPrefix = [](const std::string& prefix, const char* str, int choice) -> std::string {
 			switch (choice) {
@@ -137,14 +119,34 @@ namespace Completionist_MainHUD
 			}
 			};
 
-		const std::string g_prefix = GetPrefix(V_PrefixChoice_G);
-		const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
+		if (CVariables::V_MuseumModeEnabled)
+		{
+			const std::string displayable_prefix = GetPrefix(V_PrefixChoice_Displayable);
+			const std::string displayed_prefix = GetPrefix(V_PrefixChoice_Displayed);
+			const std::string occupied_prefix = GetPrefix(V_PrefixChoice_Occupied);
 
-		if (a_collected) {
-			return formattedStringHolder.emplace_back(applyPrefix(g_prefix, a_this, V_TextChoice_G)).c_str();
+			if (a_displayed) {
+				return formattedStringHolder.emplace_back(applyPrefix(displayed_prefix, a_this, V_TextChoice_Displayed)).c_str();
+			}
+
+			if (a_variationDisplayed) {
+				return formattedStringHolder.emplace_back(applyPrefix(occupied_prefix, a_this, V_TextChoice_Occupied)).c_str();
+			}
+			else {
+				return formattedStringHolder.emplace_back(applyPrefix(displayable_prefix, a_this, V_TextChoice_Displayable)).c_str();
+			}
 		}
-		else {
-			return formattedStringHolder.emplace_back(applyPrefix(n_prefix, a_this, V_TextChoice_N)).c_str();
+		else
+		{
+			const std::string g_prefix = GetPrefix(V_PrefixChoice_G);
+			const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
+
+			if (a_collected) {
+				return formattedStringHolder.emplace_back(applyPrefix(g_prefix, a_this, V_TextChoice_G)).c_str();
+			}
+			else {
+				return formattedStringHolder.emplace_back(applyPrefix(n_prefix, a_this, V_TextChoice_N)).c_str();
+			}
 		}
 	}
 
@@ -152,34 +154,29 @@ namespace Completionist_MainHUD
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
 
-	uint32_t TextnTagsAPI::API_GetDisplayNameColour(RE::FormID a_formID)
+	const char* TextnTagsAPI::API_GetDisplayNameMerged(const char* a_this, bool a_collected, RE::TESForm* a_form) 
 	{
-		auto newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
-		auto foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
+		int32_t newColour, foundColour, occupiedColour;
+		bool isMuseumDisplayable = false;
 
-		if (ItemIsCollected(a_formID)) {
-			return (V_TextChoice_G >= 3 && V_TextChoice_G <= 6) ? foundColour : -1;
+		if (CVariables::V_MuseumModeEnabled && museum::IsMuseumDisplayable(a_form)) {
+			newColour = V_HUD_Override_Enabled_Displayable ? V_HUD_CustomColour_Displayable : V_HUD_Colour_Displayable;
+			foundColour = V_HUD_Override_Enabled_Displayed ? V_HUD_CustomColour_Displayed : V_HUD_Colour_Displayed;
+			occupiedColour = V_HUD_Override_Enabled_Occupied ? V_HUD_CustomColour_Occupied : V_HUD_Colour_Occupied;
+			isMuseumDisplayable = true;
 		}
 		else {
-			return (V_TextChoice_N >= 3 && V_TextChoice_N <= 6) ? newColour : -1;
+			newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
+			foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
 		}
-
-		return -1; 
-	}
-
-	//---------------------------------------------------
-	//-- Name Processing For Inventory Items ------------
-	//---------------------------------------------------
-
-	const char* TextnTagsAPI::API_GetDisplayNameMerged(const char* a_this, bool a_collected) 
-	{
-		auto newColour = V_HUD_Override_Enabled_New_Menus ? V_HUD_CustomColour_New_Menus : V_HUD_Colour_New_Menus;
-		auto foundColour = V_HUD_Override_Enabled_Found_Menus ? V_HUD_CustomColour_Found_Menus : V_HUD_Colour_Found_Menus;
 
 		const std::string g_prefix = GetPrefix(V_PrefixChoice_G);
 		const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
+		const std::string displayable_prefix = GetPrefix(V_PrefixChoice_Displayable);
+		const std::string displayed_prefix = GetPrefix(V_PrefixChoice_Displayed);
+		const std::string occupied_prefix = GetPrefix(V_PrefixChoice_Occupied);
 
-		auto formatString = [](const std::string& prefix, const char* str, int choice, int color) -> std::string {
+		auto applyFormat = [](const std::string& prefix, const char* str, int choice, int color) -> std::string {
 			switch (choice) {
 			case 0: // Append
 				return fmt::format("{:s} {:s}", str, prefix);
@@ -200,11 +197,25 @@ namespace Completionist_MainHUD
 			}
 			};
 
-		if (a_collected) {
-			return formattedStringHolder.emplace_back(formatString(g_prefix, a_this, V_TextChoice_G, foundColour)).c_str();
+		if (isMuseumDisplayable) {
+			bool isVariationDisplayedInstead = false;
+			if (museum::IsDisplayed(a_form, isVariationDisplayedInstead) || (isVariationDisplayedInstead && V_TreatOccupiedAsDisplayed)) {
+				return formattedStringHolder.emplace_back(applyFormat(displayed_prefix, a_this, V_TextChoice_Displayed, foundColour)).c_str();
+			}
+
+			if (isVariationDisplayedInstead) {
+				return formattedStringHolder.emplace_back(applyFormat(occupied_prefix, a_this, V_TextChoice_Occupied, occupiedColour)).c_str();
+			}
+
+			return formattedStringHolder.emplace_back(applyFormat(displayable_prefix, a_this, V_TextChoice_Displayable, newColour)).c_str();
 		}
 		else {
-			return formattedStringHolder.emplace_back(formatString(n_prefix, a_this, V_TextChoice_N, newColour)).c_str();
+			if (a_collected) {
+				return formattedStringHolder.emplace_back(applyFormat(g_prefix, a_this, V_TextChoice_G, foundColour)).c_str();
+			}
+			else {
+				return formattedStringHolder.emplace_back(applyFormat(n_prefix, a_this, V_TextChoice_N, newColour)).c_str();
+			}
 		}
 	}
 
@@ -226,52 +237,71 @@ namespace Completionist_MainHUD
 	//-- Crosshair Ref Processing for Main HUD ----------
 	//---------------------------------------------------
 
-	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data) 
+	void TextnTagsAPI::ProcessCrosshairReference(RE::HUDData* data)
 	{
 		auto CurrentRef = RE::CrosshairPickData::GetSingleton();
-		if (!CurrentRef) { return; }
+		if (!CurrentRef || !CurrentRef->target) return;
 
 		auto CurrentObj = CurrentRef->target.get();
-		if (!CurrentObj) { return; }
+		RE::TESForm* Base = CurrentObj->GetBaseObject();
+		if (!Base || !ItemIsCollectable(Base)) return;
 
-		RE::TESForm* Base = CurrentObj.get()->GetBaseObject();
-		if (!Base) { return; }
+		const auto formatTag = [](const RE::BSString& originalText, const std::string& color, const std::string& tag) -> std::string {
+			return fmt::format("{:s} <font color = '{:s}'>{:s} </font>"sv, originalText.c_str(), color, tag);
+			};
 
-		if (!ItemIsCollectable(Base)) { return; }
+		std::string newColour, foundColour, occupiedColour;
+		bool isMuseumDisplayable = CVariables::V_MuseumModeEnabled && museum::IsMuseumDisplayable(Base);
 
-		bool PrevCollected = ItemIsCollected(Base);
-		if (SKSE::WinAPI::GetModuleHandle(L"AHZmoreHUDPlugin")) {
-			moreHUDMessage msg{ Base->GetFormID(), PrevCollected, V_moreHudEnabled_Crosshair };
-			SKSE::GetMessagingInterface()->Dispatch(1, &msg, sizeof(msg), "Ahzaab's moreHUD Plugin");
+		if (isMuseumDisplayable) {
+			newColour = V_HUD_Override_Enabled_Displayable ? V_HUD_CustomColourString_Displayable : V_HUD_ColourString_Displayable;
+			foundColour = V_HUD_Override_Enabled_Displayed ? V_HUD_CustomColourString_Displayed : V_HUD_ColourString_Displayed;
+			occupiedColour = V_HUD_Override_Enabled_Occupied ? V_HUD_CustomColourString_Occupied : V_HUD_ColourString_Occupied;
+
+			bool isVariationDisplayedInstead = false;
+			bool isDisplayed = museum::IsDisplayed(Base, isVariationDisplayedInstead);
+
+			if (isVariationDisplayedInstead && V_TreatOccupiedAsDisplayed)
+				isDisplayed = true;
+
+			// Skip if appropriate tag is disabled ("...")
+			if ((isDisplayed && V_CrosshairTag_Displayed == "...") ||
+				(isVariationDisplayedInstead && V_CrosshairTag_Occupied == "...") ||
+				(!isVariationDisplayedInstead && !isDisplayed && V_CrosshairTag_Displayable == "...")) {
+				return;
+			}
+
+			data->text = isDisplayed ?
+				formatTag(data->text, foundColour, V_CrosshairTag_Displayed) :
+				isVariationDisplayedInstead ?
+				formatTag(data->text, occupiedColour, V_CrosshairTag_Occupied) :
+				formatTag(data->text, newColour, V_CrosshairTag_Displayable);
 		}
+		else {
+			newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
+			foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;
 
-		if (PrevCollected && V_CrosshairTag_Found == "..." || !PrevCollected && V_CrosshairTag_New == "...") { return; }
+			bool isCollected = ItemIsCollected(Base);
 
-		auto& newColour = V_HUD_Override_Enabled_New_Crosshair ? V_HUD_CustomColourString_New_Crosshair : V_HUD_ColourString_New_Crosshair;
-		auto& foundColour = V_HUD_Override_Enabled_Found_Crosshair ? V_HUD_CustomColourString_Found_Crosshair : V_HUD_ColourString_Found_Crosshair;
+			// Skip if appropriate tag is disabled ("...")
+			if ((isCollected && V_CrosshairTag_Found == "...") ||
+				(!isCollected && V_CrosshairTag_New == "...")) {
+				return;
+			}
 
-		data->text = PrevCollected ? 
-			fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, foundColour, V_CrosshairTag_Found) :
-			fmt::format("{:s} <font color = '{:s}'>{:s} < / font>"sv, data->text, newColour, V_CrosshairTag_New);
+			data->text = isCollected ?
+				formatTag(data->text, foundColour, V_CrosshairTag_Found) :
+				formatTag(data->text, newColour, V_CrosshairTag_New);
+		}
 	}
 
 	//---------------------------------------------------
 	//-- Collectability Functions -----------------------
 	//---------------------------------------------------
 
-	bool TextnTagsAPI::ItemIsCollectable(RE::FormID a_formID) 
-	{
-		return serial::CheckIsCollectable(a_formID);
-	}
-
 	bool TextnTagsAPI::ItemIsCollectable(RE::TESForm* a_form) 
 	{
 		return serial::CheckIsCollectable(a_form->GetFormID());
-	}
-	RE::TESObjectREFR* my{};
-
-	bool TextnTagsAPI::ItemIsCollected(RE::FormID a_formID) { 
-		return CFramework_Master::FoundItemData.HasForm(a_formID) || CFramework_Master::FoundItemData_NoShow.HasForm(a_formID);
 	}
 
 	bool TextnTagsAPI::ItemIsCollected(RE::TESForm* a_form) 

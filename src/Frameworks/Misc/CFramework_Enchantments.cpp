@@ -52,10 +52,6 @@ namespace CFramework_Enchantments {
 	0x05115F,0x051115,0x0510FC,0x0511AE,
 	};
 
-	constexpr Serialization::FormArray Forms_NGA = {
-	0x00087E,0x0008CC,
-	};
-
 	// clang-format on
 
 	//---------------------------------------------------
@@ -299,6 +295,12 @@ namespace CFramework_Enchantments {
 		if (!Serialization::CompletionistData::IsModInstalled("Thaumaturgy.esp"))
 		{
 			CFramework_Enchantments_VA::Data.AddForm(0x10FB7B);
+		}
+
+		if (Serialization::CompletionistData::IsModInstalled("ccvsvsse003-necroarts.esl"))
+		{
+			CFramework_Enchantments_VA::Data.AddForm(0x00087E, "ccvsvsse003-necroarts.esl");
+			CFramework_Enchantments_VA::Data.AddForm(0x0008CC, "ccvsvsse003-necroarts.esl");
 		}
 
 		CFramework_Enchantments_VA::Data.CompileFormArray(CFramework_Enchantments::Forms_VA, "Skyrim.esm");

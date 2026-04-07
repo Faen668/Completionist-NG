@@ -15,9 +15,11 @@ namespace CHCMHandler
 	{ {
 		{"$MCMPageSettings", "", -1},
 		{"$MCMPageSettings3", "", -1},
+		{"$MCMPageSettings6", "LegacyoftheDragonborn.esm", -1},
 		{"$MCMPageSettings2", "", -1},
 		{"$MCMPageSettings4", "", -1},
 		{"$MCMPageSettings5", "", -1},
+
 		{" ", "", -1},
 		{"$Header0", "", -1},
 		{"$MCMPageMain", "", 0},
@@ -117,6 +119,7 @@ namespace CHCMHandler
 		static std::vector<std::string> GetPageConfiguration(RE::StaticFunctionTag*, std::string mcmpage, int32_t pageNumber);
 
 		static bool						IsSettingsPage(RE::StaticFunctionTag*, std::string MCMPage);
+		static bool						CanLoadPage(RE::StaticFunctionTag*, std::string MCMPage);
 		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
 
 		static int32_t					GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage);

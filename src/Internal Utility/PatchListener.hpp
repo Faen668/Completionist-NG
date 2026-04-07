@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "SimpleIni.h"
 #include "Serialization.hpp"
@@ -8,6 +8,7 @@
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Drunks.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Favors.hpp"
 #include "Frameworks/Quests/Radiant & Favors/CQuests_Beggars.hpp"
+#include "Internal Utility/MuseumAPI.hpp"
 
 namespace CExternalPatchHandler
 {
@@ -80,6 +81,11 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static int GetIntValueWithDefault(const char* section, const char* key) noexcept
 		{
 			return ini.GetLongValue(section, key, -1);
+		};
+
+		[[nodiscard]] static int GetIntValueWithDefault(const char* section, const char* key, int32_t a_default) noexcept
+		{
+			return ini.GetLongValue(section, key, a_default);
 		};
 
 		//---------------------------------------------------
@@ -165,6 +171,12 @@ namespace CExternalPatchHandler
 			return static_cast<T>(GetIntValue(section, key));
 		}
 
+		template <typename T = int32_t>
+		[[nodiscard]] static T GetEnumValueWithDefault(const char* section, const char* key, int32_t a_default) noexcept
+		{
+			return static_cast<T>(GetIntValueWithDefault(section, key, a_default));
+		}
+
 		[[nodiscard]] static int GetPatchID() noexcept
 		{
 			return GetIntValue("Completionist Patch Data", "PatchID");
@@ -184,10 +196,15 @@ namespace CExternalPatchHandler
 		{
 			return GetBoolValue("Completionist Patch Data", "UseMCMPageGrouping");
 		};
-
+		
 		[[nodiscard]] static int GetMultiPageCount() noexcept
 		{
 			return GetIntValue("Completionist Patch Data", "PageCount");
+		};
+
+		[[nodiscard]] static CMiscPatchSortMode GetSortMode() noexcept
+		{
+			return GetEnumValueWithDefault<CMiscPatchSortMode>("Completionist Patch Data", "SortMode", 0);
 		};
 
 		[[nodiscard]] static int GetQuestID(const char* section) noexcept
@@ -199,6 +216,7 @@ namespace CExternalPatchHandler
 		{
 			return GetStringValueWithDefault("Completionist Patch Data", "Header", "");
 		};
+
 
 		[[nodiscard]] static std::string GetRequiredMod(const char* section) noexcept
 		{
@@ -337,10 +355,15 @@ namespace CExternalPatchHandler
 			return false;
 		}
 
-		// Should Completionist load this form?
-		[[nodiscard]] static bool ShouldInstallForm(const char* section, const std::string& formID) noexcept
+		[[nodiscard]] static bool ShouldInstallPage(const std::string& pageNumber) noexcept
 		{
-			const std::string condition_string = GetCustomInstallCondition(section, formID);
+			return ShouldInstallForm("Completionist Patch Data", "", fmt::format("PageName{}", pageNumber));
+		}
+
+		// Should Completionist load this form?
+		[[nodiscard]] static bool ShouldInstallForm(const char* section, const std::string& fullVariableString, const std::string& formID) noexcept
+		{
+			const std::string condition_string = GetCustomInstallCondition(section, fullVariableString, formID);
 
 			if (condition_string.empty() || DKUtil::string::iequals(condition_string, "None")) {
 				return true;
@@ -468,10 +491,10 @@ namespace CExternalPatchHandler
 			return GetStringValue(section, "MCMPageName");
 		};
 
-		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string>> GetFormIDArray(const char* section, bool log_install) noexcept
+		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string, std::string>> GetFormIDArray(const char* section, bool log_install) noexcept
 		{
 			std::stringstream ss(GetStringValue(section, "FormIDs"));
-			std::vector<std::tuple<RE::FormID, std::string, std::string>> formIDs{};
+			std::vector<std::tuple<RE::FormID, std::string, std::string, std::string>> formIDs{};
 			std::string str;
 			RE::FormID formID{};
 
@@ -508,7 +531,7 @@ namespace CExternalPatchHandler
 
 						str.erase(str.find("<"));
 					};
-					formIDs.push_back(std::make_tuple(static_cast<RE::FormID>(std::stoul(trim(str), nullptr, 16)), trim(str), pluginFileName));
+					formIDs.push_back(std::make_tuple(static_cast<RE::FormID>(std::stoul(trim(str), nullptr, 16)), trim(str), pluginFileName, str));
 				}
 				else
 				{
@@ -532,8 +555,9 @@ namespace CExternalPatchHandler
 					std::string rawformID = trim(str.substr(0, str.find(delimiter)));
 					RE::FormID formID = static_cast<RE::FormID>(std::stoul(rawformID, nullptr, 16));
 					
+					std::string fullVariable = str;
 					str.erase(0, str.find(delimiter) + delimiter.length());
-					formIDs.push_back(std::make_tuple(formID, rawformID, str));
+					formIDs.push_back(std::make_tuple(formID, rawformID, str, fullVariable));
 				}
 			};
 			return formIDs;
@@ -548,52 +572,86 @@ namespace CExternalPatchHandler
 			return std::stoi(text);
 		};
 
-		[[nodiscard]] static std::string GetCustomDisplayName(const char* section, std::string formIDKey) noexcept
+		[[nodiscard]] static std::string GetCustomDisplayName(const char* section, const std::string& fullVariableString, const std::string& formIDKey) noexcept
 		{
-			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_DisplayName", formIDKey.c_str()).c_str(), "Error");
-			if (DKUtil::string::iequals(text, "Error")) {
-				return std::string{};
-			};
-			return text;
-		};
+			constexpr std::string_view errorStr = "Error";
 
-		[[nodiscard]] static int GetCustomVisibilityFlag(const char* section, std::string formIDKey) noexcept
+			auto result = GetStringValueWithDefault(section, fmt::format("{}_DisplayName", fullVariableString).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
+
+			result = GetStringValueWithDefault(section, fmt::format("{}_DisplayName", formIDKey).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
+
+			return {};
+		}
+
+		[[nodiscard]] static std::string GetCustomHighlightText(const char* section, const std::string& fullVariableString, const std::string& formIDKey) noexcept
 		{
-			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_Visibility", formIDKey.c_str()).c_str(), "Error");
-			if (DKUtil::string::iequals(text, "Error")) {
-				return -1;
-			};
-			return std::stoi(text);
-		};
+			constexpr std::string_view errorStr = "Error";
 
-		[[nodiscard]] static std::string GetCustomHighlightText(const char* section, const std::string &formIDKey) noexcept
+			auto result = GetStringValueWithDefault(section, fmt::format("{}_Highlight", fullVariableString).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
+
+			result = GetStringValueWithDefault(section, fmt::format("{}_Highlight", formIDKey).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
+
+			return {};
+		}
+
+		[[nodiscard]] static int GetCustomVisibilityFlag(const char* section, const std::string& fullVariableString, const std::string& formIDKey) noexcept
 		{
-			const auto& text = GetStringValueWithDefault(section, fmt::format("{}_Highlight", formIDKey.c_str()).c_str(), "Error");
-			if (DKUtil::string::iequals(text, "Error")) {
-				return std::string{};
-			};
+			constexpr std::string_view errorStr = "Error";
 
-			return text;
-		};
+			auto result = GetStringValueWithDefault(section, fmt::format("{}_Visibility", fullVariableString).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return std::stoi(result);
+			}
 
-		[[nodiscard]] static std::string GetCustomInstallCondition(const char* section, const std::string& formIDKey) noexcept
+			result = GetStringValueWithDefault(section, fmt::format("{}_Visibility", formIDKey).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return std::stoi(result);
+			}
+
+			return -1;
+		}
+
+		[[nodiscard]] static std::string GetCustomInstallCondition(const char* section, const std::string& fullVariableString, const std::string& formIDKey) noexcept
 		{
-			const auto &text = GetStringValueWithDefault(section, fmt::format("{}_InstallCondition", formIDKey.c_str()).c_str(), "Error");
-			if (DKUtil::string::iequals(text, "Error")) {
-				return std::string{};
-			};
+			constexpr std::string_view errorStr = "Error";
 
-			return text;
-		};
+			auto result = GetStringValueWithDefault(section, fmt::format("{}_InstallCondition", fullVariableString).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
 
-		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string>> GetVariationsArray(const char* section, const std::string &formIDKey, bool log_install) noexcept
+			result = GetStringValueWithDefault(section, fmt::format("{}_InstallCondition", formIDKey).c_str(), errorStr.data());
+			if (!DKUtil::string::iequals(result, errorStr)) {
+				return result;
+			}
+
+			return {};
+		}
+
+		[[nodiscard]] static std::vector<std::tuple<RE::FormID, std::string, std::string>> GetVariationsArray(const char* section, const std::string& fullVariableString, const std::string &formIDKey, bool log_install) noexcept
 		{
 			std::vector<std::tuple<RE::FormID, std::string, std::string>> variations{};
 
-			auto variationString = GetStringValueWithDefault(section, formIDKey.c_str(), "Error");
-			if (DKUtil::string::iequals(variationString, "Error")) {
-				return variations;
-			};
+			auto variationString = GetStringValueWithDefault(section, fullVariableString.c_str(), "Error");
+			if (DKUtil::string::iequals(variationString, "Error"))
+			{
+				variationString = GetStringValueWithDefault(section, formIDKey.c_str(), "Error");
+				if (DKUtil::string::iequals(variationString, "Error")) {
+					return variations;
+				};
+			}
 
 			std::stringstream ss(variationString);
 			std::string str;
@@ -614,7 +672,7 @@ namespace CExternalPatchHandler
 					str.erase(str.end());
 				};
 
-				if (!ShouldInstallForm(section, formIDKey)) {
+				if (!ShouldInstallForm(section, fullVariableString, formIDKey)) {
 					continue;
 				}
 
@@ -670,6 +728,8 @@ namespace CExternalPatchHandler
 		static void CompileVariations(std::string sec, Serialization::CompletionistData* data, std::vector<std::tuple<RE::FormID, std::string, std::string>> variations, const std::string &base_name, RE::FormID a_baseID, bool log_install)
 		{
 			auto Idx = 0;
+			std::unordered_set<RE::TESForm*> variationsSet;
+
 			for (auto& [formID, raw, pluginFileName] : variations) 
 			{
 				if (!data->IsModInstalled(pluginFileName)) {
@@ -695,6 +755,7 @@ namespace CExternalPatchHandler
 					INFO("Adding V Support for: {} - {}", raw, form->GetName());
 				};
 				data->AddForm(a_baseID, base_name, formID, pluginFileName);
+				variationsSet.emplace(form);
 				Idx++;
 			};
 		};

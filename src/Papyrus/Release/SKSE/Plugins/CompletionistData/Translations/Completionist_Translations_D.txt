@@ -471,6 +471,13 @@ Dungeons_Quest19			|Quest Giver: - Automatic Start.                         \nOv
 Dungeons_Quest20			|Quest Giver: - Heddic's Volunruud Notes.                \nOverview: - Unlock the burial chamber of Kvenel\n Location: Volunruud.
 Dungeons_Quest21			|Quest Giver: - Birna.                                   \nOverview: - Retrieve the treasure of Yngol Barrow\n Location: Yngol's Barrow.
 ----------------------------------------------------------------------------
+Dungeons_Quest00_DQANM		|Quest Giver: - Medresi Dran.                            \nOverview: - Retrieve the treasure of Angarvunde\n Location: Angarvunde.
+Dungeons_Quest01_DQANM		|Quest Giver: - Automatic Start.                         \nOverview: - Kill Lu'ah Al-Skaven.\n Location: Ansilvund.
+Dungeons_Quest05_DQANM		|Quest Giver: - Automatic Start.                         \nOverview: - Investigate Frostflow Lighthouse\n Location: Frostflow Lighthouse.                    \nNOTE: It is recommended to complete this quest as soon as possible.
+Dungeons_Quest11_DQANM		|Quest Giver: - Christer.                                \nOverview: - Help Christer locate his wife\n Location: Mistwatch.
+Dungeons_Quest13_DQANM		|Quest Giver: - Automatic Start (Activate Sarcophagus.)  \nOverview: - Discover the secrets of Ragnvald\n Location: Ragnvald.
+Dungeons_Quest14_DQANM		|Quest Giver: - Read 'The Legend of Red Eagle'.          \nOverview: - Retrieve Red Eagle's sword\n Location: Red Eagle Redoubt.
+----------------------------------------------------------------------------
 Misc_DB_Quest00				|Quest Giver: - Read the book (Deathbrand).      \nOverview: - Find the treasure of Haknir Death-Brand.
 Misc_DB_Quest01				|Quest Giver: - Automatic (Reach level 80).      \nOverview: - Locate and defeat the Ebony Warrior.
 Misc_DB_Quest02				|Quest Giver: - Automatic (World Encounter).     \nOverview: - Uncover the secret of Hrodulf's House.

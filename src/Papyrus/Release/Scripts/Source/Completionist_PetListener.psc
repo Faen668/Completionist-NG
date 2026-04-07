@@ -3,7 +3,7 @@ ScriptName Completionist_PetListener Extends Quest
 Import Completionist_Native
 
 ReferenceAlias Property _Critter Auto
-ActorBase AdoptedCritter
+Actor AdoptedCritter
 
 Event OnInit()
 	
@@ -12,8 +12,8 @@ endEvent
 
 Event OnUpdate()
 	
-	if (_Critter.GetActorReference() && _Critter.GetActorReference().GetActorBase() != AdoptedCritter)
-		AdoptedCritter = _Critter.GetActorReference().GetActorBase()
+	if (_Critter.GetActorReference() && _Critter.GetActorReference() != AdoptedCritter)
+		AdoptedCritter = _Critter.GetActorReference()
 		Framework_UpdatePetOwnership(AdoptedCritter)
 	endif
 	

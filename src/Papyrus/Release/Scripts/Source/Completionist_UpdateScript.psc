@@ -49,7 +49,7 @@ Function DoVersioning() ;Initial versioning on a new game.
 	fVMajor = 4
 	fVMinor = 1
 	fVPatch = 0
-	fVTweak = 0
+	fVTweak = 8
 	fVersion = (fVMajor * 1000) + (fVMinor * 100) + (fVPatch * 10) + (fVTweak)
 	ModVersion = (fVMajor + "." + fVMinor + "." + fVPatch + "." + fVTweak)
 	
@@ -67,7 +67,7 @@ Function CheckVersioning() ;Versioning ran from OnPlayerLoadGame()
 	curVMajor = 4
 	curVMinor = 1
 	curVPatch = 0
-	curVTweak = 0
+	curVTweak = 8
 	curVersion = (curVMajor * 1000) + (curVMinor * 100) + (curVPatch * 10) + (curVTweak)
 	
 	While IsInMenuMode()
@@ -87,14 +87,12 @@ endFunction
 Function UpdateKicker()
 	
 	bUpdated = False
-	
-	if (fVersion < 3803)
-		MessageBox("=== Completionist ===\nVersion 3.8.0.3 requires a new game to function correctly\n Please downgrade to your previous version and reload your save or start a new game")
-		return
+
+	if (fVersion < 4102)
+		MessageBox("=== Completionist ===\nVersion 4.1.0.2 has undergone extensive changes to the patch framework\nPlease start a new game or alternatively make a manual save, exit the game and clean your save file with 'Resaver' to ensure the mod still works correctly.")
 	endif
 
-	if (fVersion < 4100)
-		MessageBox("=== Completionist ===\nVersion 4.1.0.0 has undergone extensive changes to the .esp\n Please start a new game or alternatively make a manual save, exit the game and clean your save file with 'Resaver' to ensure the mod still works correctly.")
+	if (fVersion < 4108)
 		fVMajor = curVMajor
 		fVMinor = curVMinor
 		fVPatch = curVPatch

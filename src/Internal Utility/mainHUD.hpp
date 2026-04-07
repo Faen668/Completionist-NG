@@ -11,7 +11,6 @@ namespace Completionist_MainHUD
 		static void Register();
 
 		static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
-		static void moreHUDMessageHandler(SKSE::MessagingInterface::Message* a_msg);
 
 		static void	ProcessCrosshairReference(RE::HUDData* data);
 		static std::string GetPrefix(int32_t a_variable);
@@ -26,9 +25,8 @@ namespace Completionist_MainHUD
 		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
 		static const char* OnUpdateCraftingText(RE::TESForm* a_this);
 
-		static const char*	API_GetDisplayNamePrefix(const char* a_this, bool a_collected);
-		static uint32_t		API_GetDisplayNameColour(RE::FormID a_formID);
-		static const char*	API_GetDisplayNameMerged(const char* a_this, bool a_collected);
+		static const char*	API_GetDisplayNamePrefix(const char* a_this, bool a_collected, bool a_displayed = false, bool a_variationDisplayed = false);
+		static const char*  API_GetDisplayNameMerged(const char* a_this, bool a_collected, RE::TESForm* a_form);
 
 		TextnTagsAPI(TextnTagsAPI const&) = delete;
 		TextnTagsAPI(TextnTagsAPI const&&) = delete;
@@ -41,23 +39,5 @@ namespace Completionist_MainHUD
 
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;
 		static inline REL::Relocation<decltype(OnUpdateInventoryText)> _OnUpdateInventoryText;
-	};
-
-	struct moreHUDMessage
-	{
-		RE::FormID formID;		// Item formID
-		bool iconType;			// False = New, True = Found
-		bool display;			// Display if enabled in MCM
-
-		moreHUDMessage(RE::FormID id = 0, bool icon = false, bool disp = false)
-			: formID(id), iconType(icon), display(disp) {}
-	};
-
-	struct CompletionistRequest
-	{
-		RE::FormID formId;		// Item formID
-
-		CompletionistRequest(RE::FormID id = 0)
-			: formId(id) {}
 	};
 }

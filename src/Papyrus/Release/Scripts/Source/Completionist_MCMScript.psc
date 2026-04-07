@@ -100,14 +100,27 @@ String Property CompletionLog_SpecialTextColourString = "#99FFFF" Auto Hidden
 
 String Property State_OverRide_G_Name_String = "Got It!" Auto Hidden
 String Property State_OverRide_N_Name_String = "Need It!" Auto Hidden
+String Property State_OverRide_Displayable_Name_String = "Displayable!" Auto Hidden
+String Property State_OverRide_Displayed_Name_String = "Displayed!" Auto Hidden
+String Property State_OverRide_Occupied_Name_String = "Occupied!" Auto Hidden
 Int OID_OverRide_G_Name
 Int OID_OverRide_N_Name
+Int OID_OverRide_Displayable_Name
+Int OID_OverRide_Displayed_Name
+Int OID_OverRide_Occupied_Name
 Int OID_SearhTerm
 
 Int Property State_ColourVal_G_HUD_Crosshair = 1288220 Auto Hidden
 Int Property State_ColourVal_N_HUD_Crosshair = 4430046 Auto Hidden
 String Property State_ColourString_G_HUD_Crosshair = "#13a81c" Auto Hidden
 String Property State_ColourString_N_HUD_Crosshair = "#4398de" Auto Hidden
+
+Int Property State_ColourVal_Displayable = 1288220 Auto Hidden
+Int Property State_ColourVal_Displayed = 4430046 Auto Hidden
+Int Property State_ColourVal_Occupied = 4430046 Auto Hidden
+String Property State_ColourString_Displayable = "#13a81c" Auto Hidden
+String Property State_ColourString_Displayed = "#4398de" Auto Hidden
+String Property State_ColourString_Occupied = "#4398de" Auto Hidden
 
 Int Property State_ColourVal_G_HUD_Menus = 1288220 Auto Hidden
 Int Property State_ColourVal_N_HUD_Menus = 4430046 Auto Hidden
@@ -123,6 +136,21 @@ Int OID_CustomColour_N_HUD_Crosshair
 Bool Property b_CustomColour_N_HUD_Crosshair Auto Hidden
 Int Property State_CustomColourVal_N_HUD_Crosshair = -1 Auto Hidden
 String Property State_CustomColourString_N_HUD_Crosshair = "Enter Decimal" Auto Hidden
+
+Int OID_CustomColour_Displayable
+Bool Property b_CustomColour_Displayable Auto Hidden
+Int Property State_CustomColourVal_Displayable = -1 Auto Hidden
+String Property State_CustomColourString_Displayable = "Enter Decimal" Auto Hidden
+
+Int OID_CustomColour_Displayed
+Bool Property b_CustomColour_Displayed Auto Hidden
+Int Property State_CustomColourVal_Displayed = -1 Auto Hidden
+String Property State_CustomColourString_Displayed = "Enter Decimal" Auto Hidden
+
+Int OID_CustomColour_Occupied
+Bool Property b_CustomColour_Occupied Auto Hidden
+Int Property State_CustomColourVal_Occupied = -1 Auto Hidden
+String Property State_CustomColourString_Occupied = "Enter Decimal" Auto Hidden
 
 Int OID_CustomColour_G_HUD_Menus
 Bool Property b_CustomColour_G_HUD_Menus Auto Hidden
@@ -152,10 +180,6 @@ String s_SearchType = "$SearchTypeChoice01"
 String[] Dawnguard_Faction
 Int State_Menu_Faction1
 Int Property DG_Faction_Choice = 0 Auto Hidden
-
-String[] HelgenReborn_Faction
-int State_Menu_Faction3
-int property HR_Faction_Choice = 0 Auto Hidden
 
 String[] Legacy_Faction
 int State_Menu_Faction4
@@ -223,21 +247,44 @@ Int InventoryModeOptions_PrAp_G
 String[] InventoryMode_PrAp_List_N
 Int InventoryModeOptions_PrAp_N
 
+String[] InventoryMode_PrAp_List_Displayable
+Int InventoryModeOptions_PrAp_Displayable
+
+String[] InventoryMode_PrAp_List_Displayed
+Int InventoryModeOptions_PrAp_Displayed
+
+String[] InventoryMode_PrAp_List_Occupied
+Int InventoryModeOptions_PrAp_Occupied
+
 String[] InventoryMode_PrFx_List_G
 Int InventoryModeOptions_PrFx_G
 
 String[] InventoryMode_PrFx_List_N
 Int InventoryModeOptions_PrFx_N
 
+String[] InventoryMode_PrFx_List_Displayable
+Int InventoryModeOptions_PrFx_Displayable
+
+String[] InventoryMode_PrFx_List_Displayed
+Int InventoryModeOptions_PrFx_Displayed
+
+String[] InventoryMode_PrFx_List_Occupied
+Int InventoryModeOptions_PrFx_Occupied
+
 Int Property InventoryMode_PrAp_Choice_G = 4 Auto Hidden ;;Hooked By DLL
 Int Property InventoryMode_PrAp_Choice_N = 4 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrAp_Choice_Displayable = 4 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrAp_Choice_Displayed = 4 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrAp_Choice_Occupied = 4 Auto Hidden ;;Hooked By DLL
 
 Int Property InventoryMode_PrFx_Choice_G = 0 Auto Hidden ;;Hooked By DLL
 Int Property InventoryMode_PrFx_Choice_N = 0 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrFx_Choice_Displayable = 0 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrFx_Choice_Displayed = 0 Auto Hidden ;;Hooked By DLL
+Int Property InventoryMode_PrFx_Choice_Occupied = 0 Auto Hidden ;;Hooked By DLL
 
 Bool Property b_moreHUDEnabled_Crosshair = True Auto Hidden ;;Hooked By DLL
 Bool Property b_moreHUDEnabled_Menus = True Auto Hidden ;;Hooked By DLL
-Bool Property b_quickLoot_Enabled = True Auto Hidden ;;Hooked By DLL
 
 String[] OptionName
 String[] OptionText
@@ -359,6 +406,9 @@ float keyHoldDuration
 
 ObjectReference Property lastReference Auto Hidden
 Bool Property bCellScanner_UseClosestReference = True Auto Hidden
+
+Bool Property MuseumModeEnabled = False Auto Hidden
+Bool Property TreatOccupiedAsDisplayed = False Auto Hidden
 
 ;---------------------------------------------------
 ;-- START OF CODE ----------------------------------
@@ -538,11 +588,6 @@ Event OnKeyDown(Int KeyCode)
 			
 			curRef = GetTargetReferenceRefr(curCell, LastTargettedForm)
 			if (!curRef)
-				if (curCell.IsInterior())
-					SendNotification(curCell.GetName() + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
-				else
-					SendNotification(GetLocStringByKeyExt("CellScanner_ExteriorCellPrefix") + GetLocStringByKeyExt("CellScanner_NoCollectables"), ColourString, NotificationColourEnabled)
-				endIf
 				return
 			endIf
 
@@ -670,6 +715,10 @@ Event OnPageReset(String page)
 		GoToState("")
 		Build_Page_Settings5()
 		
+	elseif (CurrentPage == "$MCMPageSettings6")
+		GoToState("")
+		Build_Page_Settings6()
+		
 	else
 		if (!Completionist_Busy.GetValue())
 			GoToState("Quest_TrackingState")
@@ -696,6 +745,21 @@ Event OnOptionHighlight(Int val)
 		return
 	endIf
 
+	if (val == OID_OverRide_Displayable_Name)
+		SetInfoText("$State_OverRide_Displayable_Name_Info")	
+		return
+	endIf
+
+	if (val == OID_OverRide_Displayed_Name)
+		SetInfoText("$State_OverRide_Displayed_Name_Info")	
+		return
+	endIf
+
+	if (val == OID_OverRide_Occupied_Name)
+		SetInfoText("$State_OverRide_Occupied_Name_Info")	
+		return
+	endIf
+
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		SetInfoText("$ModNotificationsCustomInfoG_Crosshair")	
 		return
@@ -706,6 +770,21 @@ Event OnOptionHighlight(Int val)
 		return
 	endIf
 
+	if (val == OID_CustomColour_Displayable)
+		SetInfoText("$ModNotificationsCustomInfoDisplayable")	
+		return
+	endIf
+
+	if (val == OID_CustomColour_Displayed)
+		SetInfoText("$ModNotificationsCustomInfoDisplayed")	
+		return
+	endIf
+
+	if (val == OID_CustomColour_Occupied)
+		SetInfoText("$ModNotificationsCustomInfoOccupied")	
+		return
+	endIf
+	
 	if (val == OID_CustomColour_G_HUD_Menus)
 		SetInfoText("$ModNotificationsCustomInfoG_Menus")	
 		return
@@ -715,7 +794,7 @@ Event OnOptionHighlight(Int val)
 		SetInfoText("$ModNotificationsCustomInfoN_Menus")	
 		return
 	endIf
-
+	
 	if (val == OID_SearhTerm)
 		SetInfoText("$State_SearchTerm_Info")
 	endIf
@@ -737,16 +816,46 @@ Event OnOptionInputOpen(Int val)
 		return
 	endIf
 
+	if (val == OID_OverRide_Displayable_Name)
+		SetInputDialogStartText(State_OverRide_Displayable_Name_String)
+		return
+	endIf
+	
+	if (val == OID_OverRide_Displayed_Name)
+		SetInputDialogStartText(State_OverRide_Displayed_Name_String)
+		return
+	endIf
+	
+	if (val == OID_OverRide_Occupied_Name)
+		SetInputDialogStartText(State_OverRide_Occupied_Name_String)
+		return
+	endIf
+	
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		SetInputDialogStartText(State_CustomColourString_G_HUD_Crosshair)
 		return
 	endIf
-
+	
 	if (val == OID_CustomColour_N_HUD_Crosshair)
 		SetInputDialogStartText(State_CustomColourString_N_HUD_Crosshair)
 		return
 	endIf
 
+	if (val == OID_CustomColour_Displayable)
+		SetInputDialogStartText(State_CustomColourString_Displayable)
+		return
+	endIf
+
+	if (val == OID_CustomColour_Displayed)
+		SetInputDialogStartText(State_CustomColourString_Displayed)
+		return
+	endIf
+
+	if (val == OID_CustomColour_Occupied)
+		SetInputDialogStartText(State_CustomColourString_Occupied)
+		return
+	endIf
+	
 	if (val == OID_CustomColour_G_HUD_Menus)
 		SetInputDialogStartText(State_CustomColourString_G_HUD_Menus)
 		return
@@ -778,16 +887,46 @@ Event OnOptionInputAccept(Int val, String HexString)
 		return
 	endIf
 
+	if (val == OID_OverRide_Displayable_Name)
+		OverRide_Displayable_Name(HexString)
+		return
+	endIf
+
+	if (val == OID_OverRide_Displayed_Name)
+		OverRide_Displayed_Name(HexString)
+		return
+	endIf
+
+	if (val == OID_OverRide_Occupied_Name)
+		OverRide_Occupied_Name(HexString)
+		return
+	endIf
+	
 	if (val == OID_CustomColour_G_HUD_Crosshair)
 		OverRide_G_Colour_Crosshair(HexString)
 		return
 	endIf
-
+	
 	if (val == OID_CustomColour_N_HUD_Crosshair)
 		OverRide_N_Colour_Crosshair(HexString)
 		return
 	endIf
-
+	
+	if (val == OID_CustomColour_Displayable)
+		OverRide_Displayable_Colour(HexString)
+		return
+	endIf
+	
+	if (val == OID_CustomColour_Displayed)
+		OverRide_Displayed_Colour(HexString)
+		return
+	endIf
+	
+	if (val == OID_CustomColour_Occupied)
+		OverRide_Occupied_Colour(HexString)
+		return
+	endIf
+	
 	if (val == OID_CustomColour_G_HUD_Menus)
 		OverRide_G_Colour_Menus(HexString)
 		return
@@ -897,6 +1036,36 @@ function Build_Menus()
 	InventoryMode_PrAp_List_N[6] = "$InventoryMode_PrAp_Menu6"
 	InventoryMode_PrAp_List_N[7] = "$InventoryMode_PrAp_Menu7"
 
+	InventoryMode_PrAp_List_Displayable = new string[8]
+	InventoryMode_PrAp_List_Displayable[0] = "$InventoryMode_PrAp_Menu0"
+	InventoryMode_PrAp_List_Displayable[1] = "$InventoryMode_PrAp_Menu1"
+	InventoryMode_PrAp_List_Displayable[2] = "$InventoryMode_PrAp_Menu2"
+	InventoryMode_PrAp_List_Displayable[3] = "$InventoryMode_PrAp_Menu3"
+	InventoryMode_PrAp_List_Displayable[4] = "$InventoryMode_PrAp_Menu4"
+	InventoryMode_PrAp_List_Displayable[5] = "$InventoryMode_PrAp_Menu5"
+	InventoryMode_PrAp_List_Displayable[6] = "$InventoryMode_PrAp_Menu6"
+	InventoryMode_PrAp_List_Displayable[7] = "$InventoryMode_PrAp_Menu7"
+
+	InventoryMode_PrAp_List_Displayed = new string[8]
+	InventoryMode_PrAp_List_Displayed[0] = "$InventoryMode_PrAp_Menu0"
+	InventoryMode_PrAp_List_Displayed[1] = "$InventoryMode_PrAp_Menu1"
+	InventoryMode_PrAp_List_Displayed[2] = "$InventoryMode_PrAp_Menu2"
+	InventoryMode_PrAp_List_Displayed[3] = "$InventoryMode_PrAp_Menu3"
+	InventoryMode_PrAp_List_Displayed[4] = "$InventoryMode_PrAp_Menu4"
+	InventoryMode_PrAp_List_Displayed[5] = "$InventoryMode_PrAp_Menu5"
+	InventoryMode_PrAp_List_Displayed[6] = "$InventoryMode_PrAp_Menu6"
+	InventoryMode_PrAp_List_Displayed[7] = "$InventoryMode_PrAp_Menu7"
+
+	InventoryMode_PrAp_List_Occupied = new string[8]
+	InventoryMode_PrAp_List_Occupied[0] = "$InventoryMode_PrAp_Menu0"
+	InventoryMode_PrAp_List_Occupied[1] = "$InventoryMode_PrAp_Menu1"
+	InventoryMode_PrAp_List_Occupied[2] = "$InventoryMode_PrAp_Menu2"
+	InventoryMode_PrAp_List_Occupied[3] = "$InventoryMode_PrAp_Menu3"
+	InventoryMode_PrAp_List_Occupied[4] = "$InventoryMode_PrAp_Menu4"
+	InventoryMode_PrAp_List_Occupied[5] = "$InventoryMode_PrAp_Menu5"
+	InventoryMode_PrAp_List_Occupied[6] = "$InventoryMode_PrAp_Menu6"
+	InventoryMode_PrAp_List_Occupied[7] = "$InventoryMode_PrAp_Menu7"
+	
 	InventoryMode_PrFx_List_G = new string[3]
 	InventoryMode_PrFx_List_G[0] = "$InventoryMode_PrFx_Menu0"
 	InventoryMode_PrFx_List_G[1] = "$InventoryMode_PrFx_Menu1"
@@ -906,6 +1075,21 @@ function Build_Menus()
 	InventoryMode_PrFx_List_N[0] = "$InventoryMode_PrFx_Menu0"
 	InventoryMode_PrFx_List_N[1] = "$InventoryMode_PrFx_Menu1"
 	InventoryMode_PrFx_List_N[2] = "$InventoryMode_PrFx_Menu2"
+	
+	InventoryMode_PrFx_List_Displayable = new string[3]
+	InventoryMode_PrFx_List_Displayable[0] = "$InventoryMode_PrFx_Menu0"
+	InventoryMode_PrFx_List_Displayable[1] = "$InventoryMode_PrFx_Menu1"
+	InventoryMode_PrFx_List_Displayable[2] = "$InventoryMode_PrFx_Menu2"
+	
+	InventoryMode_PrFx_List_Displayed = new string[3]
+	InventoryMode_PrFx_List_Displayed[0] = "$InventoryMode_PrFx_Menu0"
+	InventoryMode_PrFx_List_Displayed[1] = "$InventoryMode_PrFx_Menu1"
+	InventoryMode_PrFx_List_Displayed[2] = "$InventoryMode_PrFx_Menu2"
+	
+	InventoryMode_PrFx_List_Occupied = new string[3]
+	InventoryMode_PrFx_List_Occupied[0] = "$InventoryMode_PrFx_Menu0"
+	InventoryMode_PrFx_List_Occupied[1] = "$InventoryMode_PrFx_Menu1"
+	InventoryMode_PrFx_List_Occupied[2] = "$InventoryMode_PrFx_Menu2"
 	
 ;---------------------------------------------------
 	
@@ -994,14 +1178,6 @@ function Build_Menus()
 			Legacy_Faction[3] = "$MenuChoice07"
 		endIf
 	endIf
-
-;---------------------------------------------------
-	
-	HelgenReborn_Faction = new string[4]
-	HelgenReborn_Faction[0] = "$MenuChoiceDefault"
-	HelgenReborn_Faction[1] = "$MenuChoice08"
-	HelgenReborn_Faction[2] = "$MenuChoice10"
-	HelgenReborn_Faction[3] = "$MenuChoice09"
 EndFunction
 
 ;---------------------------------------------------
@@ -1084,11 +1260,6 @@ function Build_Page_Settings()
 		AddEmptyOption()
 		AddHeaderOption("$MCMPageSettingsHeader2")
 		AddMenuOptionST("State_Menu_Faction1",  		 "$DGFaction",   				Dawnguard_Faction[DG_Faction_Choice])
-		if Game.GetModByName("Helgen Reborn.esp") != 255
-			AddMenuOptionST("State_Menu_Faction3", 	"$HRFaction", 			HelgenReborn_Faction[HR_Faction_Choice])
-		else
-			AddTextOption("$HRFaction", "$NOFaction", 0)
-		endIf
 		if (Game.GetModByName("LegacyoftheDragonborn.esm") != 255)
 			AddMenuOptionST("State_Menu_Faction4", "$LDFaction", 			Legacy_Faction[Legacy_Faction_Choice])
 		else
@@ -1249,11 +1420,9 @@ function Build_Page_Settings3()
 		AddEmptyOption()
 		AddHeaderOption("$moreHUD_Header")
 		AddTextOptionST("State_moreHUDEnabled_Crosshair", 	 	"$State_moreHUDEnabled_Crosshair_Text", GetEnabledStatus(b_moreHUDEnabled_Crosshair),  	0)
-		AddTextOptionST("State_moreHUDEnabled_Menus", 	 		"$State_moreHUDEnabled_Menus_Text", 	GetEnabledStatus(b_moreHUDEnabled_Menus),  	0)
-		
 		SetCursorPosition(1)
 
-		AddHeaderOption("$MainHUDMode_Header_G")		
+		AddHeaderOption("$MainHUDMode_Header_G")
 		OID_OverRide_G_Name = AddInputOption("$State_OverRide_G_Name_Text", 						State_OverRide_G_Name_String, 0)
 		AddColorOptionST("ColourState_G_HUD_Crosshair", "$ColourState_G_Generic_Text_Crosshair", State_ColourVal_G_HUD_Crosshair, (b_CustomColour_G_HUD_Crosshair as Bool) as Int)
 		OID_CustomColour_G_HUD_Crosshair = AddInputOption("$ModNotificationsCustomTextG_Crosshair", GetFontOption(State_CustomColourString_G_HUD_Crosshair, b_CustomColour_G_HUD_Crosshair))
@@ -1267,8 +1436,50 @@ function Build_Page_Settings3()
 
 		AddEmptyOption()
 		AddHeaderOption("")
-		AddTextOptionST("State_quickLootEnabled", 	 	"$State_quickLootEnabled_Text", GetEnabledStatus(b_quickLoot_Enabled),  	0)
+		AddTextOptionST("State_moreHUDEnabled_Menus", 	 		"$State_moreHUDEnabled_Menus_Text", 	GetEnabledStatus(b_moreHUDEnabled_Menus),  	0)
+	endIf
+EndFunction
+
+;---------------------------------------------------
+;-- Functions --------------------------------------
+;---------------------------------------------------
+
+function Build_Page_Settings6()
+
+	if (CurrentPage == "$MCMPageSettings6")
+		SetCursorFillMode(TOP_TO_BOTTOM)
+		SetCursorPosition(0)
+
+		AddHeaderOption("$MenuHUDMode_Header_DB")
+		AddTextOptionST("State_MuseumModeEnabled", 	 		"$State_MuseumModeEnabled_Text", 			GetEnabledStatus(MuseumModeEnabled),  	0)
+		AddTextOptionST("State_TreatOccupiedAsDisplayed", 	"$State_TreatOccupiedAsDisplayed_Text", 	GetEnabledStatus(TreatOccupiedAsDisplayed),  	0)
 		AddEmptyOption()
+		AddEmptyOption()
+		AddEmptyOption()
+		
+		AddHeaderOption("$MenuHUDMode_Header_N_DB")
+		OID_OverRide_Displayable_Name = AddInputOption("$State_OverRide_Displayable_Name_Text", State_OverRide_Displayable_Name_String, 0)
+		AddColorOptionST("ColourState_Displayable", "$ColourState_Displayable_Text", State_ColourVal_Displayable, (b_CustomColour_Displayable as Bool) as Int)
+		OID_CustomColour_Displayable = AddInputOption("$ModNotificationsCustomTextDisplayable", GetFontOption(State_CustomColourString_Displayable, b_CustomColour_Displayable))
+		AddMenuOptionST("InventoryModeOptions_PrAp_Displayable", "$InventoryModeOptions_PrAp_Text_Displayable", InventoryMode_PrAp_List_Displayable[InventoryMode_PrAp_Choice_Displayable], 0)
+		AddMenuOptionST("InventoryModeOptions_PrFx_Displayable", "$InventoryModeOptions_PrFx_Text_Displayable", InventoryMode_PrFx_List_Displayable[InventoryMode_PrFx_Choice_Displayable], 0)
+		
+		SetCursorPosition(1)
+
+		AddHeaderOption("$MenuHUDMode_Header_G_DB")
+		OID_OverRide_Displayed_Name = AddInputOption("$State_OverRide_Displayed_Name_Text", State_OverRide_Displayed_Name_String, 0)
+		AddColorOptionST("ColourState_Displayed", "$ColourState_Displayed_Text", State_ColourVal_Displayed, (b_CustomColour_Displayed as Bool) as Int)
+		OID_CustomColour_Displayed = AddInputOption("$ModNotificationsCustomTextDisplayed", GetFontOption(State_CustomColourString_Displayed, b_CustomColour_Displayed))
+		AddMenuOptionST("InventoryModeOptions_PrAp_Displayed", "$InventoryModeOptions_PrAp_Text_Displayed", InventoryMode_PrAp_List_Displayed[InventoryMode_PrAp_Choice_Displayed], 0)
+		AddMenuOptionST("InventoryModeOptions_PrFx_Displayed", "$InventoryModeOptions_PrFx_Text_Displayed", InventoryMode_PrFx_List_Displayed[InventoryMode_PrFx_Choice_Displayed], 0)
+		
+		AddEmptyOption()
+		
+		OID_OverRide_Occupied_Name = AddInputOption("$State_OverRide_Occupied_Name_Text", State_OverRide_Occupied_Name_String, 0)
+		AddColorOptionST("ColourState_Occupied", "$ColourState_Occupied_Text", State_ColourVal_Occupied, (b_CustomColour_Occupied as Bool) as Int)
+		OID_CustomColour_Occupied = AddInputOption("$ModNotificationsCustomTextOccupied", GetFontOption(State_CustomColourString_Occupied, b_CustomColour_Occupied))
+		AddMenuOptionST("InventoryModeOptions_PrAp_Occupied", "$InventoryModeOptions_PrAp_Text_Occupied", InventoryMode_PrAp_List_Occupied[InventoryMode_PrAp_Choice_Occupied], 0)
+		AddMenuOptionST("InventoryModeOptions_PrFx_Occupied", "$InventoryModeOptions_PrFx_Text_Occupied", InventoryMode_PrFx_List_Occupied[InventoryMode_PrFx_Choice_Occupied], 0)
 	endIf
 EndFunction
 
@@ -1493,15 +1704,20 @@ function Build_Page_Settings5()
 
 	if (CurrentPage == "$MCMPageSettings5")
 		LoggingDates = GetLoggingDates()
-		
+			
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		SetCursorPosition(0)
 
 		AddHeaderOption("$Log_Header")
 		SetCursorPosition(1)
-		AddMenuOptionST("Log_DateSelection", 	"$Log_DateSelection_Text", LoggingDates[LoggingValue], 0)
-		
-		String[] events = GetLoggedEventsForDate(LoggingDates[LoggingValue], CompletionLog_PrefixEnabled, CompletionLog_ColoursEnabled, CompletionLog_QuestsTextColourString, CompletionLog_ItemsTextColourString, CompletionLog_BooksTextColourString, CompletionLog_SpecialTextColourString)
+
+		String[] events
+		if LoggingDates.length > 0 
+			AddMenuOptionST("Log_DateSelection", 	"$Log_DateSelection_Text", LoggingDates[LoggingValue], 0)
+			events = GetLoggedEventsForDate(LoggingDates[LoggingValue], CompletionLog_PrefixEnabled, CompletionLog_ColoursEnabled, CompletionLog_QuestsTextColourString, CompletionLog_ItemsTextColourString, CompletionLog_BooksTextColourString, CompletionLog_SpecialTextColourString)
+		else
+			AddHeaderOption("")
+		endif
 		
 		int y = 2
 		int x = 0
@@ -1985,7 +2201,6 @@ Function Begin_Config_Save()
 		
 		;;Factions
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!DG_Faction_Choice", DG_Faction_Choice)	
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!HR_Faction_Choice", HR_Faction_Choice)	
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice)
 		
 		;;Shortcuts
@@ -2048,9 +2263,15 @@ Function Begin_Config_Save()
 		
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Crosshair", State_ColourVal_G_HUD_Crosshair)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Crosshair", State_ColourVal_N_HUD_Crosshair)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayable", State_ColourVal_Displayable)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayed", State_ColourVal_Displayed)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Occupied", State_ColourVal_Occupied)
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_G_HUD_Crosshair", State_ColourString_G_HUD_Crosshair)	
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_N_HUD_Crosshair", State_ColourString_N_HUD_Crosshair)	
-
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayable", State_ColourString_Displayable)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayed", State_ColourString_Displayed)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Occupied", State_ColourString_Occupied)	
+		
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Menus", State_ColourVal_G_HUD_Menus)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Menus", State_ColourVal_N_HUD_Menus)
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_G_HUD_Menus", State_ColourString_G_HUD_Menus)	
@@ -2058,17 +2279,35 @@ Function Begin_Config_Save()
 		
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_G_Name_String", State_OverRide_G_Name_String)	
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_N_Name_String", State_OverRide_N_Name_String)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayable_Name_String", State_OverRide_Displayable_Name_String)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayed_Name_String", State_OverRide_Displayed_Name_String)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Occupied_Name_String", State_OverRide_Occupied_Name_String)	
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_N", InventoryMode_PrAp_Choice_N)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_G", InventoryMode_PrAp_Choice_G)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayable", InventoryMode_PrAp_Choice_Displayable)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayed", InventoryMode_PrAp_Choice_Displayed)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Occupied", InventoryMode_PrAp_Choice_Occupied)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_N", InventoryMode_PrFx_Choice_N)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_G", InventoryMode_PrFx_Choice_G)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayable", InventoryMode_PrFx_Choice_Displayable)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayed", InventoryMode_PrFx_Choice_Displayed)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Occupied", InventoryMode_PrFx_Choice_Occupied)
 		
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Crosshair", b_CustomColour_G_HUD_Crosshair as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Crosshair", b_CustomColour_N_HUD_Crosshair as Int)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayable", b_CustomColour_Displayable as Int)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayed", b_CustomColour_Displayed as Int)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Occupied", b_CustomColour_Occupied as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_G_HUD_Crosshair", State_CustomColourVal_G_HUD_Crosshair)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_N_HUD_Crosshair", State_CustomColourVal_N_HUD_Crosshair)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayable", State_CustomColourVal_Displayable)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayed", State_CustomColourVal_Displayed)
+		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Occupied", State_CustomColourVal_Occupied)
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_G_HUD_Crosshair", State_CustomColourString_G_HUD_Crosshair)	
 		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_N_HUD_Crosshair", State_CustomColourString_N_HUD_Crosshair)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayable", State_CustomColourString_Displayable)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayed", State_CustomColourString_Displayed)	
+		jsonutil.SetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Occupied", State_CustomColourString_Occupied)	
 
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Menus", b_CustomColour_G_HUD_Menus as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Menus", b_CustomColour_N_HUD_Menus as Int)
@@ -2094,7 +2333,6 @@ Function Begin_Config_Save()
 
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int)
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int)
 		
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int)
 
@@ -2136,7 +2374,6 @@ Function Begin_Config_Load()
 			s_SearchType = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!s_SearchType", s_SearchType))
 			
 			;;Factions
-			HR_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!HR_Faction_Choice", HR_Faction_Choice))
 			DG_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!DG_Faction_Choice", DG_Faction_Choice))
 			Legacy_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice))
 
@@ -2212,8 +2449,14 @@ Function Begin_Config_Load()
 		
 			State_ColourVal_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Crosshair", State_ColourVal_G_HUD_Crosshair))
 			State_ColourVal_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Crosshair", State_ColourVal_N_HUD_Crosshair))
+			State_ColourVal_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayable", State_ColourVal_Displayable))
+			State_ColourVal_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayed", State_ColourVal_Displayed))
+			State_ColourVal_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Occupied", State_ColourVal_Occupied))
 			State_ColourString_G_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_G_HUD_Crosshair", State_ColourString_G_HUD_Crosshair))
 			State_ColourString_N_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_N_HUD_Crosshair", State_ColourString_N_HUD_Crosshair))
+			State_ColourString_Displayable = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayable", State_ColourString_Displayable))
+			State_ColourString_Displayed = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayed", State_ColourString_Displayed))
+			State_ColourString_Occupied = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Occupied", State_ColourString_Occupied))
 
 			State_ColourVal_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Menus", State_ColourVal_G_HUD_Menus))
 			State_ColourVal_N_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Menus", State_ColourVal_N_HUD_Menus))
@@ -2222,11 +2465,20 @@ Function Begin_Config_Load()
 
 			b_CustomColour_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Crosshair", b_CustomColour_G_HUD_Crosshair as Int))
 			b_CustomColour_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Crosshair", b_CustomColour_N_HUD_Crosshair as Int))
+			b_CustomColour_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayable", b_CustomColour_Displayable as Int))
+			b_CustomColour_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayed", b_CustomColour_Displayed as Int))
+			b_CustomColour_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Occupied", b_CustomColour_Occupied as Int))
 			State_CustomColourVal_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_G_HUD_Crosshair", State_CustomColourVal_G_HUD_Crosshair))
 			State_CustomColourVal_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_N_HUD_Crosshair", State_CustomColourVal_N_HUD_Crosshair))
+			State_CustomColourVal_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayable", State_CustomColourVal_Displayable))
+			State_CustomColourVal_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayed", State_CustomColourVal_Displayed))
+			State_CustomColourVal_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Occupied", State_CustomColourVal_Occupied))		
 			State_CustomColourString_G_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_G_HUD_Crosshair", State_CustomColourString_G_HUD_Crosshair))
 			State_CustomColourString_N_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_N_HUD_Crosshair", State_CustomColourString_N_HUD_Crosshair))
-
+			State_CustomColourString_Displayable = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayable", State_CustomColourString_Displayable))
+			State_CustomColourString_Displayed = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayed", State_CustomColourString_Displayed))
+			State_CustomColourString_Occupied = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Occupied", State_CustomColourString_Occupied))
+			
 			b_CustomColour_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Menus", b_CustomColour_G_HUD_Menus as Int))
 			b_CustomColour_N_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Menus", b_CustomColour_N_HUD_Menus as Int))
 			State_CustomColourVal_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_G_HUD_Menus", State_CustomColourVal_G_HUD_Menus))
@@ -2236,10 +2488,19 @@ Function Begin_Config_Load()
 		
 			State_OverRide_G_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_G_Name_String", State_OverRide_G_Name_String))
 			State_OverRide_N_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_N_Name_String", State_OverRide_N_Name_String))
+			State_OverRide_Displayable_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayable_Name_String", State_OverRide_Displayable_Name_String))
+			State_OverRide_Displayed_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayed_Name_String", State_OverRide_Displayed_Name_String))
+			State_OverRide_Occupied_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Occupied_Name_String", State_OverRide_Occupied_Name_String))
 			InventoryMode_PrAp_Choice_N = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_N", InventoryMode_PrAp_Choice_N as Int))
 			InventoryMode_PrAp_Choice_G = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_G", InventoryMode_PrAp_Choice_G as Int))
+			InventoryMode_PrAp_Choice_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayable", InventoryMode_PrAp_Choice_Displayable as Int))
+			InventoryMode_PrAp_Choice_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayed", InventoryMode_PrAp_Choice_Displayed as Int))
+			InventoryMode_PrAp_Choice_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Occupied", InventoryMode_PrAp_Choice_Occupied as Int))
 			InventoryMode_PrFx_Choice_N = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_N", InventoryMode_PrFx_Choice_N as Int))
 			InventoryMode_PrFx_Choice_G = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_G", InventoryMode_PrFx_Choice_G as Int))
+			InventoryMode_PrFx_Choice_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayable", InventoryMode_PrFx_Choice_Displayable as Int))
+			InventoryMode_PrFx_Choice_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayed", InventoryMode_PrFx_Choice_Displayed as Int))
+			InventoryMode_PrFx_Choice_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Occupied", InventoryMode_PrFx_Choice_Occupied as Int))
 			
 			bCellScanner_CONT = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_CONT", bCellScanner_CONT as Int))
 			bCellScanner_DETA = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_DETA", bCellScanner_DETA as Int))
@@ -2258,7 +2519,6 @@ Function Begin_Config_Load()
 		
 			b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
 			b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
-			b_quickLoot_Enabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int))
 
 			TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
 	
@@ -2299,7 +2559,6 @@ function AutoLoadConfig()
 		s_SearchType = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!s_SearchType", s_SearchType))
 
 		;;Factions
-		HR_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!HR_Faction_Choice", HR_Faction_Choice))
 		DG_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!DG_Faction_Choice", DG_Faction_Choice))
 		Legacy_Faction_Choice = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!Legacy_Faction_Choice", Legacy_Faction_Choice))
 		
@@ -2375,9 +2634,15 @@ function AutoLoadConfig()
 			
 		State_ColourVal_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Crosshair", State_ColourVal_G_HUD_Crosshair))
 		State_ColourVal_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Crosshair", State_ColourVal_N_HUD_Crosshair))
+		State_ColourVal_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayable", State_ColourVal_Displayable))
+		State_ColourVal_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Displayed", State_ColourVal_Displayed))
+		State_ColourVal_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_Occupied", State_ColourVal_Occupied))
 		State_ColourString_G_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_G_HUD_Crosshair", State_ColourString_G_HUD_Crosshair))
 		State_ColourString_N_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_N_HUD_Crosshair", State_ColourString_N_HUD_Crosshair))
-
+		State_ColourString_Displayable = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayable", State_ColourString_Displayable))
+		State_ColourString_Displayed = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Displayed", State_ColourString_Displayed))
+		State_ColourString_Occupied = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_Occupied", State_ColourString_Occupied))
+			
 		State_ColourVal_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_G_HUD_Menus", State_ColourVal_G_HUD_Menus))
 		State_ColourVal_N_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourVal_N_HUD_Menus", State_ColourVal_N_HUD_Menus))
 		State_ColourString_G_HUD_Menus = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_ColourString_G_HUD_Menus", State_ColourString_G_HUD_Menus))
@@ -2385,11 +2650,20 @@ function AutoLoadConfig()
 
 		b_CustomColour_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Crosshair", b_CustomColour_G_HUD_Crosshair as Int))
 		b_CustomColour_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Crosshair", b_CustomColour_N_HUD_Crosshair as Int))
+		b_CustomColour_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayable", b_CustomColour_Displayable as Int))
+		b_CustomColour_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Displayed", b_CustomColour_Displayed as Int))
+		b_CustomColour_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_Occupied", b_CustomColour_Occupied as Int))
 		State_CustomColourVal_G_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_G_HUD_Crosshair", State_CustomColourVal_G_HUD_Crosshair))
 		State_CustomColourVal_N_HUD_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_N_HUD_Crosshair", State_CustomColourVal_N_HUD_Crosshair))
+		State_CustomColourVal_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayable", State_CustomColourVal_Displayable))
+		State_CustomColourVal_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Displayed", State_CustomColourVal_Displayed))
+		State_CustomColourVal_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_Occupied", State_CustomColourVal_Occupied))
 		State_CustomColourString_G_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_G_HUD_Crosshair", State_CustomColourString_G_HUD_Crosshair))
 		State_CustomColourString_N_HUD_Crosshair = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_N_HUD_Crosshair", State_CustomColourString_N_HUD_Crosshair))
-
+		State_CustomColourString_Displayable = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayable", State_CustomColourString_Displayable))
+		State_CustomColourString_Displayed = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Displayed", State_CustomColourString_Displayed))
+		State_CustomColourString_Occupied = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourString_Occupied", State_CustomColourString_Occupied))
+			
 		b_CustomColour_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_G_HUD_Menus", b_CustomColour_G_HUD_Menus as Int))
 		b_CustomColour_N_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_CustomColour_N_HUD_Menus", b_CustomColour_N_HUD_Menus as Int))
 		State_CustomColourVal_G_HUD_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_CustomColourVal_G_HUD_Menus", State_CustomColourVal_G_HUD_Menus))
@@ -2399,11 +2673,20 @@ function AutoLoadConfig()
 			
 		State_OverRide_G_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_G_Name_String", State_OverRide_G_Name_String))
 		State_OverRide_N_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_N_Name_String", State_OverRide_N_Name_String))
+		State_OverRide_Displayable_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayable_Name_String", State_OverRide_Displayable_Name_String))
+		State_OverRide_Displayed_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Displayed_Name_String", State_OverRide_Displayed_Name_String))
+		State_OverRide_Occupied_Name_String = (jsonutil.GetPathStringValue("../CompletionistData/Profiles/CompConfig", ".!State_OverRide_Occupied_Name_String", State_OverRide_Occupied_Name_String))
 		InventoryMode_PrAp_Choice_N = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_N", InventoryMode_PrAp_Choice_N as Int))
 		InventoryMode_PrAp_Choice_G = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_G", InventoryMode_PrAp_Choice_G as Int))
+		InventoryMode_PrAp_Choice_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayable", InventoryMode_PrAp_Choice_Displayable as Int))
+		InventoryMode_PrAp_Choice_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Displayed", InventoryMode_PrAp_Choice_Displayed as Int))
+		InventoryMode_PrAp_Choice_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrAp_Choice_Occupied", InventoryMode_PrAp_Choice_Occupied as Int))
 		InventoryMode_PrFx_Choice_N = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_N", InventoryMode_PrFx_Choice_N as Int))
 		InventoryMode_PrFx_Choice_G = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_G", InventoryMode_PrFx_Choice_G as Int))
-
+		InventoryMode_PrFx_Choice_Displayable = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayable", InventoryMode_PrFx_Choice_Displayable as Int))
+		InventoryMode_PrFx_Choice_Displayed = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Displayed", InventoryMode_PrFx_Choice_Displayed as Int))
+		InventoryMode_PrFx_Choice_Occupied = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!InventoryMode_PrFx_Choice_Occupied", InventoryMode_PrFx_Choice_Occupied as Int))
+		
 		bCellScanner_CONT = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_CONT", bCellScanner_CONT as Int))
 		bCellScanner_DETA = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_DETA", bCellScanner_DETA as Int))
 		bCellScanner_NPCS = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_NPCS", bCellScanner_NPCS as Int))
@@ -2421,7 +2704,6 @@ function AutoLoadConfig()
 			
 		b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
 		b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
-		b_quickLoot_Enabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_quickLoot_Enabled", b_quickLoot_Enabled as Int))
 		
 		TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
 
@@ -2446,7 +2728,6 @@ Function Begin_Config_Default()
 	i_SearchTypeChoice = 0
 	s_SearchType = "$SearchTypeChoice01"
 
-	HR_Faction_Choice = 0
 	DG_Faction_Choice = 0
 	Legacy_Faction_Choice = 0
 	
@@ -2515,9 +2796,15 @@ Function Begin_Config_Default()
 	
 	State_ColourVal_G_HUD_Crosshair = 1288220
 	State_ColourVal_N_HUD_Crosshair = 4430046
+	State_ColourVal_Displayable = 4430046
+	State_ColourVal_Displayed = 4430046
+	State_ColourVal_Occupied = 4430046
 	State_ColourString_G_HUD_Crosshair = GetHexValue(State_ColourVal_G_HUD_Crosshair)
 	State_ColourString_N_HUD_Crosshair = GetHexValue(State_ColourVal_N_HUD_Crosshair)
-
+	State_ColourString_Displayable = GetHexValue(State_ColourVal_Displayable)
+	State_ColourString_Displayed = GetHexValue(State_ColourVal_Displayed)
+	State_ColourString_Occupied = GetHexValue(State_ColourVal_Occupied)
+	
 	State_ColourVal_G_HUD_Menus = 1288220
 	State_ColourVal_N_HUD_Menus = 4430046
 	State_ColourString_G_HUD_Menus = GetHexValue(State_ColourVal_G_HUD_Menus)
@@ -2525,6 +2812,9 @@ Function Begin_Config_Default()
 	
 	b_CustomColour_G_HUD_Crosshair = False
 	b_CustomColour_N_HUD_Crosshair = False
+	b_CustomColour_Displayable = False
+	b_CustomColour_Displayed = False
+	b_CustomColour_Occupied = False
 
 	State_CustomColourVal_G_HUD_Crosshair = -1
 	State_CustomColourString_G_HUD_Crosshair = "Enter Decimal"
@@ -2532,6 +2822,15 @@ Function Begin_Config_Default()
 	State_CustomColourVal_N_HUD_Crosshair = -1
 	State_CustomColourString_N_HUD_Crosshair = "Enter Decimal"
 
+	State_CustomColourVal_Displayable = -1
+	State_CustomColourString_Displayable = "Enter Decimal"
+	
+	State_CustomColourVal_Displayed = -1
+	State_CustomColourString_Displayed = "Enter Decimal"
+	
+	State_CustomColourVal_Occupied = -1
+	State_CustomColourString_Occupied = "Enter Decimal"
+	
 	b_CustomColour_G_HUD_Menus = False
 	b_CustomColour_N_HUD_Menus = False
 	
@@ -2543,12 +2842,21 @@ Function Begin_Config_Default()
 	
 	InventoryMode_PrAp_Choice_N = 4
 	InventoryMode_PrAp_Choice_G = 4
-
+	InventoryMode_PrAp_Choice_Displayable = 4
+	InventoryMode_PrAp_Choice_Displayed = 4
+	InventoryMode_PrAp_Choice_Occupied = 4
+	
 	InventoryMode_PrFx_Choice_N = 0
 	InventoryMode_PrFx_Choice_G = 0
+	InventoryMode_PrFx_Choice_Displayable = 0
+	InventoryMode_PrFx_Choice_Displayed = 0
+	InventoryMode_PrFx_Choice_Occupied = 0
 	
 	State_OverRide_G_Name_String = "Got It!"
 	State_OverRide_N_Name_String = "Need It!"
+	State_OverRide_Displayable_Name_String = "Displayable!"
+	State_OverRide_Displayed_Name_String = "Displayed!"
+	State_OverRide_Occupied_Name_String = "Occupied!"
 	State_SearchTermString = "Enter Search Term..."
 	
 	if (!Completionist_FishingEnabled.GetValue())
@@ -2575,7 +2883,6 @@ Function Begin_Config_Default()
 
 	b_moreHUDEnabled_Crosshair = True
 	b_moreHUDEnabled_Menus = True
-	b_quickLoot_Enabled = True
 			
 	if IsInMenuMode()
 		ForcePageReset()
@@ -2697,35 +3004,6 @@ State State_Menu_Faction1 ; MENU
 	Event OnHighlightST()
 		SetInfoText("$DGFactionInfo")
 	EndEvent
-	
-endState
-
-;---------------------------------------------------
-;-- States -----------------------------------------
-;---------------------------------------------------
-
-State State_Menu_Faction3 ; MENU
-
-	event OnMenuOpenST()
-		SetMenuDialogStartIndex(HR_Faction_Choice)
-		SetMenuDialogDefaultIndex(0)
-		SetMenuDialogOptions(HelgenReborn_Faction)
-	endevent
-					
-	event OnMenuAcceptST(int index)
-		HR_Faction_Choice = Index
-		SetMenuOptionValueST(State_Menu_Faction3, HelgenReborn_Faction[HR_Faction_Choice])
-		ForcePageReset()
-	endevent
-
-	event OnDefaultST()
-		HR_Faction_Choice = 0
-		SetMenuOptionValueST(State_Menu_Faction3, HelgenReborn_Faction[HR_Faction_Choice])
-	endevent
-
-	event OnHighlightST()
-		SetInfoText("$HRFactionInfo")
-	endevent
 	
 endState
 
@@ -3713,6 +3991,90 @@ endState
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
+state InventoryModeOptions_PrAp_Displayable
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrAp_Choice_Displayable)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrAp_List_Displayable)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrAp_Choice_Displayable = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrAp_Displayable, InventoryMode_PrAp_List_Displayable[InventoryMode_PrAp_Choice_Displayable])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrAp_Choice_Displayable = 4
+		SetMenuOptionValueST(InventoryMode_PrAp_List_Displayable[InventoryMode_PrAp_Choice_Displayable])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrAp_Info_Displayable")
+	endEvent
+endState
+
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state InventoryModeOptions_PrAp_Displayed
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrAp_Choice_Displayed)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrAp_List_Displayed)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrAp_Choice_Displayed = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrAp_Displayed, InventoryMode_PrAp_List_Displayed[InventoryMode_PrAp_Choice_Displayed])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrAp_Choice_Displayed = 4
+		SetMenuOptionValueST(InventoryMode_PrAp_List_Displayed[InventoryMode_PrAp_Choice_Displayed])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrAp_Info_Displayed")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state InventoryModeOptions_PrAp_Occupied
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrAp_Choice_Occupied)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrAp_List_Occupied)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrAp_Choice_Occupied = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrAp_Occupied, InventoryMode_PrAp_List_Occupied[InventoryMode_PrAp_Choice_Occupied])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrAp_Choice_Occupied = 4
+		SetMenuOptionValueST(InventoryMode_PrAp_List_Occupied[InventoryMode_PrAp_Choice_Occupied])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrAp_Info_Occupied")
+	endEvent
+endState
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
 state InventoryModeOptions_PrFx_N
 
 	event OnMenuOpenST()
@@ -3762,6 +4124,90 @@ state InventoryModeOptions_PrFx_G
 
 	event OnHighlightST()
 		SetInfoText("$InventoryModeOptions_PrFx_Info_G")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state InventoryModeOptions_PrFx_Displayable
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrFx_Choice_Displayable)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrFx_List_Displayable)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrFx_Choice_Displayable = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrFx_Displayable, InventoryMode_PrFx_List_Displayable[InventoryMode_PrFx_Choice_Displayable])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrFx_Choice_Displayable = 0
+		SetMenuOptionValueST(InventoryMode_PrFx_List_Displayable[InventoryMode_PrFx_Choice_Displayable])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrFx_Info_Displayable")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state InventoryModeOptions_PrFx_Displayed
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrFx_Choice_Displayed)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrFx_List_Displayed)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrFx_Choice_Displayed = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrFx_Displayed, InventoryMode_PrFx_List_Displayed[InventoryMode_PrFx_Choice_Displayed])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrFx_Choice_Displayed = 0
+		SetMenuOptionValueST(InventoryMode_PrFx_List_Displayed[InventoryMode_PrFx_Choice_Displayed])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrFx_Info_Displayed")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state InventoryModeOptions_PrFx_Occupied
+
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(InventoryMode_PrFx_Choice_Occupied)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(InventoryMode_PrFx_List_Occupied)
+	endEvent
+
+	event OnMenuAcceptST(int index)
+		InventoryMode_PrFx_Choice_Occupied = Index
+		SetMenuOptionValueST(InventoryModeOptions_PrFx_Occupied, InventoryMode_PrFx_List_Occupied[InventoryMode_PrFx_Choice_Occupied])				
+		ForcePageReset()
+	endEvent
+
+	event OnDefaultST()
+		InventoryMode_PrFx_Choice_Occupied = 0
+		SetMenuOptionValueST(InventoryMode_PrFx_List_Occupied[InventoryMode_PrFx_Choice_Occupied])
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$InventoryModeOptions_PrFx_Info_Occupied")
 	endEvent
 endState
 
@@ -4213,6 +4659,39 @@ Function OverRide_N_Name(String InputString)
 	endIf
 endFunction
 
+Function OverRide_Displayable_Name(String InputString)
+		
+	if (InputString != "") 
+		State_OverRide_Displayable_Name_String = InputString
+		SetInputOptionValue(OID_OverRide_Displayable_Name, InputString)
+	else
+		State_OverRide_Displayable_Name_String = "Displayable!"
+		SetInputOptionValue(OID_OverRide_Displayable_Name, InputString)
+	endIf
+endFunction
+
+Function OverRide_Displayed_Name(String InputString)
+		
+	if (InputString != "") 
+		State_OverRide_Displayed_Name_String = InputString
+		SetInputOptionValue(OID_OverRide_Displayed_Name, InputString)
+	else
+		State_OverRide_Displayed_Name_String = "Displayed!"
+		SetInputOptionValue(OID_OverRide_Displayed_Name, InputString)
+	endIf
+endFunction
+
+Function OverRide_Occupied_Name(String InputString)
+		
+	if (InputString != "") 
+		State_OverRide_Occupied_Name_String = InputString
+		SetInputOptionValue(OID_OverRide_Occupied_Name, InputString)
+	else
+		State_OverRide_Occupied_Name_String = "Occupied!"
+		SetInputOptionValue(OID_OverRide_Occupied_Name, InputString)
+	endIf
+endFunction
+
 Function Search(String InputString)
 		
 	if (InputString != "") 
@@ -4283,6 +4762,99 @@ state ColourState_N_HUD_Crosshair
 
 	event OnHighlightST()
 		SetInfoText("$ColourState_N_Generic_Info_Crosshair")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state ColourState_Displayable
+	
+	event OnColorOpenST()
+	
+		SetColorDialogStartColor(State_ColourVal_Displayable)
+		SetColorDialogDefaultColor(4430046)
+	endEvent
+	
+	event OnColorAcceptST(Int Index)
+	
+		State_ColourVal_Displayable = Index
+		State_ColourString_Displayable = GetHexValue(State_ColourVal_Displayable)
+		SetColorOptionValueST(State_ColourVal_Displayable, false)
+	endEvent
+
+	event OnDefaultST()
+	
+		State_ColourVal_Displayable = 4430046
+		State_ColourString_Displayable = GetHexValue(State_ColourVal_Displayable)
+		SetColorOptionValueST(State_ColourVal_Displayable, false)
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$ColourState_Displayable_Info")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state ColourState_Displayed
+	
+	event OnColorOpenST()
+	
+		SetColorDialogStartColor(State_ColourVal_Displayed)
+		SetColorDialogDefaultColor(4430046)
+	endEvent
+	
+	event OnColorAcceptST(Int Index)
+	
+		State_ColourVal_Displayed = Index
+		State_ColourString_Displayed = GetHexValue(State_ColourVal_Displayed)
+		SetColorOptionValueST(State_ColourVal_Displayed, false)
+	endEvent
+
+	event OnDefaultST()
+	
+		State_ColourVal_Displayed = 4430046
+		State_ColourString_Displayed = GetHexValue(State_ColourVal_Displayed)
+		SetColorOptionValueST(State_ColourVal_Displayed, false)
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$ColourState_Displayed_Info")
+	endEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state ColourState_Occupied
+	
+	event OnColorOpenST()
+	
+		SetColorDialogStartColor(State_ColourVal_Occupied)
+		SetColorDialogDefaultColor(4430046)
+	endEvent
+	
+	event OnColorAcceptST(Int Index)
+	
+		State_ColourVal_Occupied = Index
+		State_ColourString_Occupied = GetHexValue(State_ColourVal_Occupied)
+		SetColorOptionValueST(State_ColourVal_Occupied, false)
+	endEvent
+
+	event OnDefaultST()
+	
+		State_ColourVal_Occupied = 4430046
+		State_ColourString_Occupied = GetHexValue(State_ColourVal_Occupied)
+		SetColorOptionValueST(State_ColourVal_Occupied, false)
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("$ColourState_Occupied_Info")
 	endEvent
 endState
 
@@ -4430,6 +5002,123 @@ endFunction
 ;-- Text Input Events ------------------------------
 ;---------------------------------------------------
 
+Function OverRide_Displayable_Colour(String HexString)
+
+	if HexString == "Clear"
+		if (b_CustomColour_Displayable)
+		
+			State_CustomColourString_Displayable = "Enter Decimal"
+			State_CustomColourVal_Displayable = -1
+			
+			b_CustomColour_Displayable = False
+			ShowMessage("$ColourClear1")
+			ForcePageReset()
+		else
+			ShowMessage("$ColourClear2")
+			b_CustomColour_Displayable = False
+		endIf
+	endIf
+		
+	if (HexString != "Enter Decimal") && (HexString != "Clear")
+		
+		if ((HexString as Int) == 0)
+			ShowMessage("$ColourError")
+			return
+		endIf
+		
+		b_CustomColour_Displayable = True
+		
+		State_CustomColourVal_Displayable = (HexString as Int)
+		State_CustomColourString_Displayable = GetHexValue(State_CustomColourVal_Displayable)
+		
+		SetInputOptionValue(OID_CustomColour_Displayable, GetFontOption(State_CustomColourString_Displayable, b_CustomColour_Displayable))
+		ForcePageReset()
+		
+	endIf
+endFunction
+
+;---------------------------------------------------
+;-- Text Input Events ------------------------------
+;---------------------------------------------------
+
+Function OverRide_Displayed_Colour(String HexString)
+
+	if HexString == "Clear"
+		if (b_CustomColour_Displayed)
+		
+			State_CustomColourString_Displayed = "Enter Decimal"
+			State_CustomColourVal_Displayed = -1
+			
+			b_CustomColour_Displayed = False
+			ShowMessage("$ColourClear1")
+			ForcePageReset()
+		else
+			ShowMessage("$ColourClear2")
+			b_CustomColour_Displayed = False
+		endIf
+	endIf
+		
+	if (HexString != "Enter Decimal") && (HexString != "Clear")
+		
+		if ((HexString as Int) == 0)
+			ShowMessage("$ColourError")
+			return
+		endIf
+		
+		b_CustomColour_Displayed = True
+		
+		State_CustomColourVal_Displayed = (HexString as Int)
+		State_CustomColourString_Displayed = GetHexValue(State_CustomColourVal_Displayed)
+		
+		SetInputOptionValue(OID_CustomColour_Displayed, GetFontOption(State_CustomColourString_Displayed, b_CustomColour_Displayed))
+		ForcePageReset()
+		
+	endIf
+endFunction
+
+;---------------------------------------------------
+;-- Text Input Events ------------------------------
+;---------------------------------------------------
+
+Function OverRide_Occupied_Colour(String HexString)
+
+	if HexString == "Clear"
+		if (b_CustomColour_Occupied)
+		
+			State_CustomColourString_Occupied = "Enter Decimal"
+			State_CustomColourVal_Occupied = -1
+			
+			b_CustomColour_Occupied = False
+			ShowMessage("$ColourClear1")
+			ForcePageReset()
+		else
+			ShowMessage("$ColourClear2")
+			b_CustomColour_Occupied = False
+		endIf
+	endIf
+		
+	if (HexString != "Enter Decimal") && (HexString != "Clear")
+		
+		if ((HexString as Int) == 0)
+			ShowMessage("$ColourError")
+			return
+		endIf
+		
+		b_CustomColour_Occupied = True
+		
+		State_CustomColourVal_Occupied = (HexString as Int)
+		State_CustomColourString_Occupied = GetHexValue(State_CustomColourVal_Occupied)
+		
+		SetInputOptionValue(OID_CustomColour_Occupied, GetFontOption(State_CustomColourString_Occupied, b_CustomColour_Occupied))
+		ForcePageReset()
+		
+	endIf
+endFunction
+
+;---------------------------------------------------
+;-- Text Input Events ------------------------------
+;---------------------------------------------------
+
 Function OverRide_G_Colour_Menus(String HexString)
 
 	if HexString == "Clear"
@@ -4508,28 +5197,6 @@ endFunction
 ;-- States -----------------------------------------
 ;---------------------------------------------------
 
-state State_quickLootEnabled
-
-	Event OnSelectST()
-		b_quickLoot_Enabled = !b_quickLoot_Enabled
-		SetTextOptionValueST(GetEnabledStatus(b_quickLoot_Enabled))
-	EndEvent
-	
-	Event OnDefaultST()
-		b_quickLoot_Enabled = True
-		SetTextOptionValueST(GetEnabledStatus(b_quickLoot_Enabled))
-	EndEvent
-
-	Event OnHighlightST()
-
-		SetInfoText("$State_quickLootEnabled_Info")
-	EndEvent
-endState
-
-;---------------------------------------------------
-;-- States -----------------------------------------
-;---------------------------------------------------
-
 state State_moreHUDEnabled_Crosshair
 
 	Event OnSelectST()
@@ -4567,6 +5234,50 @@ state State_moreHUDEnabled_Menus
 	Event OnHighlightST()
 
 		SetInfoText("$State_moreHUDEnabled_Menus_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state State_MuseumModeEnabled
+
+	Event OnSelectST()
+		MuseumModeEnabled = !MuseumModeEnabled
+		SetTextOptionValueST(GetEnabledStatus(MuseumModeEnabled))
+	EndEvent
+	
+	Event OnDefaultST()
+		MuseumModeEnabled = True
+		SetTextOptionValueST(GetEnabledStatus(MuseumModeEnabled))
+	EndEvent
+
+	Event OnHighlightST()
+
+		SetInfoText("$State_MuseumModeEnabled_Info")
+	EndEvent
+endState
+
+;---------------------------------------------------
+;-- States -----------------------------------------
+;---------------------------------------------------
+
+state State_TreatOccupiedAsDisplayed
+
+	Event OnSelectST()
+		TreatOccupiedAsDisplayed = !TreatOccupiedAsDisplayed
+		SetTextOptionValueST(GetEnabledStatus(TreatOccupiedAsDisplayed))
+	EndEvent
+	
+	Event OnDefaultST()
+		TreatOccupiedAsDisplayed = True
+		SetTextOptionValueST(GetEnabledStatus(TreatOccupiedAsDisplayed))
+	EndEvent
+
+	Event OnHighlightST()
+
+		SetInfoText("$State_TreatOccupiedAsDisplayed_Info")
 	EndEvent
 endState
 
@@ -5087,6 +5798,7 @@ state CellScanner_Setting_EXRF
 	EndEvent
 endState
 
+ReferenceAlias SomeActor;
 ;---------------------------------------------------
 ;-- States -----------------------------------------
 ;---------------------------------------------------

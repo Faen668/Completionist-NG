@@ -77,7 +77,7 @@ namespace CExternalPatchHandler
 				continue;
 			};
 
-			bool log_install = GetLoggingAllowed();
+			bool log_install = CVariables::V_Global_Patch_Logging || GetLoggingAllowed();
 
 			if (!GetEnabled()) {
 				if (log_install) {
@@ -93,11 +93,20 @@ namespace CExternalPatchHandler
 				continue;
 			};
 
-			INFO("Processing file: {}", filename);
+			if (log_install) {
+				INFO("Processing file: {}", filename);
+			}
+
 			ProcessiniFile(file);
 		};
 
 		LinkPatchAndQuestData();
+
+		for (auto& patch : CustomPatches)
+		{
+			patch.second->CleanEmptyPages();
+			patch.second->ValidatePageSizeRules();
+		}
 
 		if (CustomPatches.size() > 0)
 		{
@@ -152,9 +161,10 @@ namespace CExternalPatchHandler
 		};
 
 		auto* data = GetNewPatchData();
-		data->log_install = GetLoggingAllowed();
+		data->log_install = CVariables::V_Global_Patch_Logging || GetLoggingAllowed();
 		data->priority = GetPriority();
 		data->isVanillaTracking = GetIsVanillaTracking();
+		data->sortMode = GetSortMode();
 
 		std::string lName = fName.substr(0, fName.find_last_of('.')) + ".txt";
 
@@ -175,8 +185,9 @@ namespace CExternalPatchHandler
 		ini.GetAllSections(sections);
 		sections.sort(typename CSimpleIniA::Entry::LoadOrder());
 
-		data->headerName = data->GetLocStringByKey(GetHeaderName().c_str());
-		data->mcmpage = data->GetLocStringByKey(GetMCMPageName().c_str());
+		auto header = GetHeaderName();
+		data->headerName = header.empty() ? "" : data->GetLocStringByKey(header.c_str(), "headerName");
+		data->mcmpage = data->GetLocStringByKey(GetMCMPageName().c_str(), "mcmpage");
 		data->prependPageNumber = GetMultiPagePrependPageNumber();
 
 		for (auto i = 1; i < 128; i++) {
@@ -320,11 +331,11 @@ namespace CExternalPatchHandler
 			PatchData.type = GetItemType(sec);
 			PatchData.ID = GetRandomID();
 			PatchData.displayOnPage = GetMultiPageValue(sec);
+			PatchData.FailedInstallCondition = !ShouldInstallPage(std::to_string(PatchData.displayOnPage));
+			PatchData.pageheaderL = data->GetLocStringByKey(GetSectionHeaderL(sec).c_str(), "pageheaderL");
+			PatchData.pageheaderR = data->GetLocStringByKey(GetSectionHeaderR(sec).c_str(), "pageheaderR");
 
-			PatchData.pageheaderL = data->GetLocStringByKey(GetSectionHeaderL(sec).c_str());
-			PatchData.pageheaderR = data->GetLocStringByKey(GetSectionHeaderR(sec).c_str());
-
-			auto page_def = data->GetLocStringByKey(GetSliderValue(PatchData.displayOnPage).c_str());
+			auto page_def = data->GetLocStringByKey(GetSliderValue(PatchData.displayOnPage).c_str(), "page_def");
 			data->section_defs.emplace(PatchData.displayOnPage, page_def);
 
 			auto* Handler = RE::TESDataHandler::GetSingleton();
@@ -336,19 +347,21 @@ namespace CExternalPatchHandler
 			else
 			{
 				auto Idx = 0;
-				for (auto& [formID, raw, pluginFileName] : GetFormIDArray(sec, data->log_install))
+				for (auto& [formID, raw, pluginFileName, fullVariableString] : GetFormIDArray(sec, data->log_install))
 				{
 					if (!Serialization::CompletionistData::IsModInstalled(pluginFileName)) {
 						if (data->log_install) {
 							INFO("Unable to load useable data from entry: {} in section {}: [{} not found.]", Idx, sec, pluginFileName);
+							INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 						}
 						Idx++;
 						continue;
 					};
 
-					if (!ShouldInstallForm(sec, raw)) {
+					if (!ShouldInstallForm(sec, fullVariableString, raw)) {
 						if (data->log_install) {
 							INFO("Unable to load useable data from entry: {} in section {}: [{} did not meet install condition.]", Idx, sec, raw);
+							INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 						}
 						Idx++;
 						continue;
@@ -359,12 +372,13 @@ namespace CExternalPatchHandler
 					{
 						if (data->log_install) {
 							INFO("Unable to load useable data from entry: {} in section {}: [{}]", Idx, sec, "Incorrect FormID or Form not found.");
+							INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 						}
 						Idx++;
 						continue;
 					};
 
-					int32_t visibilityStatus = GetCustomVisibilityFlag(sec, raw);
+					int32_t visibilityStatus = GetCustomVisibilityFlag(sec, fullVariableString, raw);
 					if (visibilityStatus > -1) {
 						MCMAPI::AddVisibilityOption(form->GetFormID(), data->mcmpage, visibilityStatus);
 					};
@@ -372,33 +386,34 @@ namespace CExternalPatchHandler
 					switch (PatchData.type) {
 					case CMiscPatchType::kItems:
 					{
-						if (data->log_install)
-						{
-							switch (form->GetFormType())
-							{
-							case RE::FormType::Weapon: INFO("Adding W Support for: {} - {}", raw, form->GetName()); break;
-							case RE::FormType::Armor: INFO("Adding A Support for: {} - {}", raw, form->GetName()); break;
-							default: INFO("Adding I Support for: {} - {}", raw, form->GetName()); break;
-							};
-						};
-
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
-						auto variations = GetVariationsArray(sec, raw, data->log_install);
+						auto variations = GetVariationsArray(sec, fullVariableString, raw, data->log_install);
 						if (!variations.empty()) {
 							CompileVariations(sec, &PatchData.data, variations, pluginFileName, formID, data->log_install);
+						};
+
+						if (data->log_install)
+						{
+							switch (form->GetFormType())
+							{
+							case RE::FormType::Weapon: INFO("Added W Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames")); break;
+							case RE::FormType::Armor: INFO("Added A Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames")); break;
+							default: INFO("Added I Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames")); break;
+							};
 						};
 
 						break;
@@ -409,33 +424,37 @@ namespace CExternalPatchHandler
 						if (!form->IsBook()) {
 							if (data->log_install) {
 								INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Incorrect TypeID");
+								INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 							}
 							Idx++;
 							continue;
 						}
 
-						if (data->log_install)
-						{
-							INFO("Adding B Support for: {} - {}", raw, form->GetName());
-						}
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
-						auto variations = GetVariationsArray(sec, raw, data->log_install);
+						auto variations = GetVariationsArray(sec, fullVariableString, raw, data->log_install);
 						if (!variations.empty()) {
 							CompileVariations(sec, &PatchData.data, variations, pluginFileName, formID, data->log_install);
 						};
+
+						if (data->log_install)
+						{
+							INFO("Added B Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
+
 						break;
 					}
 
@@ -444,25 +463,28 @@ namespace CExternalPatchHandler
 						if (!static_cast<RE::TESObjectREFR*>(form)->GetBaseObject() || static_cast<RE::TESObjectREFR*>(form)->GetBaseObject()->GetFormID() != 0x000010) {
 							if (data->log_install) {
 								INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Incorrect TypeID");
+								INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 							}
 							Idx++;
 							continue;
 						}
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
 						if (data->log_install)
 						{
-							INFO("Adding L Support for: {} - {}", raw, Serialization::CompletionistData::GetMapMarkerName(form));
+							INFO("Added L Support for: {} - {}", raw, customDisplayName.empty() ? Serialization::CompletionistData::GetMapMarkerName(form) : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
 						}
+
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
@@ -471,21 +493,22 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kEnchantments:
 					{
-						if (data->log_install)
-						{
-							INFO("Adding E Support for: {} - {}", raw, form->GetName());
-						}
-
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
+						if (data->log_install)
+						{
+							INFO("Added E Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
+
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
@@ -497,24 +520,27 @@ namespace CExternalPatchHandler
 						if (form->formType != RE::FormType::Shout)
 						{
 							INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Incorrect TypeID");
+							INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
 							Idx++;
 							continue;
 						}
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
 						if (data->log_install)
 						{
-							INFO("Adding S Support for: {} - {}", raw, form->GetName());
+							INFO("Added S Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
 						}
+
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
@@ -523,40 +549,37 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kFish:
 					{
-						if (data->log_install)
-						{
-							INFO("Adding F Support for: {} - {}", raw, form->GetName());
-						};
-
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.FishPickupMap.emplace(Handler->LookupFormID(formID, pluginFileName), CanPickUpFish(sec, raw));
 						PatchData.enabled = true;
 						Installed++;
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
-						};
+						}
 
-						auto customDisplayName = GetCustomDisplayName(sec, raw);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
 						if (!customDisplayName.empty()) {
 							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
-						};
+						}
 
-						auto variations = GetVariationsArray(sec, raw, data->log_install);
+						auto variations = GetVariationsArray(sec, fullVariableString, raw, data->log_install);
 						if (!variations.empty()) {
 							CompileVariations(sec, &PatchData.data, variations, pluginFileName, formID, data->log_install);
-						};
+						}
+
+						if (data->log_install)
+						{
+							INFO("Added F Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
 
 						break;
 					}
 
 					case CMiscPatchType::kPlayerHomes:
 					{
-						if (data->log_install)
-						{
-							INFO("Adding H Support for: {} - {}", raw, form->GetName());
-						};
 						PlayerHomesDataStruct houseData{};
 
 						houseData.type = static_cast<PlayerHomesDataStructType>(GetPlayerHomeType(sec, raw));
@@ -568,16 +591,22 @@ namespace CExternalPatchHandler
 						}
 						PatchData.playerHomeData.push_back(houseData);
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayName = GetCustomDisplayName(sec, raw);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
 						if (!customDisplayName.empty()) {
 							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
+						if (data->log_install)
+						{
+							INFO("Added H Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
+
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
@@ -586,11 +615,6 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kPets:
 					{
-						if (data->log_install)
-						{
-							INFO("Adding P Support for: {} - {}", raw, form->GetName());
-						};
-
 						PetsDataStruct petData{};
 						petData.type = static_cast<PetsDataStructType>(GetPetCompletionType(sec, raw));
 						petData.formID = RE::TESDataHandler::GetSingleton()->LookupFormID(formID, pluginFileName);
@@ -600,16 +624,22 @@ namespace CExternalPatchHandler
 						}
 						PatchData.petsData.push_back(petData);
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayName = GetCustomDisplayName(sec, raw);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
 						if (!customDisplayName.empty()) {
 							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
+						if (data->log_install)
+						{
+							INFO("Added P Support for: {} - {}", raw, customDisplayName.empty() ? form->GetName() : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
+
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
@@ -618,28 +648,33 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kInteractableObject:
 					{
-						if (data->log_install)
-						{
-							INFO("Adding A Support for: {} - {}", raw, form->GetName());
-						}
+						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
 						Installed++;
 
-						auto customHighlightText = GetCustomHighlightText(sec, raw);
+						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
 						};
 
-						auto customDisplayname = GetCustomDisplayName(sec, raw);
-						if (!customDisplayname.empty()) {
-							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayname);
+						auto customDisplayName = GetCustomDisplayName(sec, fullVariableString, raw);
+						if (!customDisplayName.empty()) {
+							PatchData.CustomDisplayNames.emplace(form->GetFormID(), customDisplayName);
 						};
 
-						auto variations = GetVariationsArray(sec, raw, data->log_install);
+						auto variations = GetVariationsArray(sec, fullVariableString, raw, data->log_install);
 						if (!variations.empty()) {
 							CompileVariations(sec, &PatchData.data, variations, pluginFileName, formID, data->log_install);
 						};
+
+						if (data->log_install)
+						{
+							auto* refr = form->As<RE::TESObjectREFR>();
+							auto* base = refr ? refr->GetBaseObject() : nullptr;
+							INFO("Added A Support for: {} - {}", raw, customDisplayName.empty() ? base ? base->GetName() : "Unknown" : data->GetLocStringByKey(customDisplayName.c_str(), "CustomDisplayNames"));
+						}
+
 						break;
 					}
 					default:
