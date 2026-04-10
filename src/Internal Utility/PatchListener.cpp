@@ -110,20 +110,6 @@ namespace CExternalPatchHandler
 
 		if (CustomPatches.size() > 0)
 		{
-			/*std::sort(CustomPatches.begin(), CustomPatches.end(),
-				[](const auto& a, const auto& b) {
-					// Primary: Group by headerName
-					if (a.second->headerName != b.second->headerName) {
-						return a.second->headerName < b.second->headerName;
-					}
-					// Secondary: Sort by priority within the same header group
-					if (a.second->priority != b.second->priority) {
-						return a.second->priority < b.second->priority;
-					}
-					// Tertiary: Alphabetical order of the string key
-					return a.first < b.first;
-				});*/
-
 			std::sort(CustomPatches.begin(), CustomPatches.end(),
 				[](const auto& a, const auto& b) {
 					// Primary: Sort so that headers come before empty headers
@@ -152,6 +138,12 @@ namespace CExternalPatchHandler
 
 	void CHandler::ProcessiniFile(std::string file)
 	{
+		auto IsTrackedEntity = [](CMiscPatchType a_type) -> bool
+		{
+			return std::find(CVariables::V_TrackedEntityTypes.begin(),
+				CVariables::V_TrackedEntityTypes.end(), a_type) != CVariables::V_TrackedEntityTypes.end();
+		};
+
 		auto fName = file.substr(file.find_last_of("/") + 1);
 
 		using namespace CHCMHandler;
@@ -253,6 +245,13 @@ namespace CExternalPatchHandler
 			auto IsQuestSection = GetIsQuestSection(sec);
 			if (IsQuestSection) 
 			{
+				if (!IsTrackedEntity(CMiscPatchType::kQuests)) {
+					if (data->log_install) {
+						INFO("Skipping quest section {}: quests not tracked", sec);
+					}
+					continue;
+				}
+
 				//Skip if quest not found.
 				RE::TESQuest* quest = RE::TESForm::LookupByEditorID<RE::TESQuest>(GetEditorID(sec));
 				if (!quest) {
@@ -329,6 +328,14 @@ namespace CExternalPatchHandler
 
 			CMiscPatchData PatchData{};
 			PatchData.type = GetItemType(sec);
+
+			if (!IsTrackedEntity(PatchData.type)) {
+				if (data->log_install) {
+					INFO("Skipping misc section {}: type {} not tracked", sec, static_cast<int>(PatchData.type));
+				}
+				continue;
+			}
+
 			PatchData.ID = GetRandomID();
 			PatchData.displayOnPage = GetMultiPageValue(sec);
 			PatchData.FailedInstallCondition = !ShouldInstallPage(std::to_string(PatchData.displayOnPage));

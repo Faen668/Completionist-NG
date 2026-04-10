@@ -1,4 +1,5 @@
 #pragma once
+#include "Enums.hpp"
 
 namespace CVariables
 {
@@ -115,6 +116,7 @@ namespace CVariables
 	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
 	inline bool				V_Global_Patch_Logging;
+	inline std::vector<CMiscPatchType> V_TrackedEntityTypes;
 
 	inline bool				V_MuseumModeEnabled;
 	inline bool				V_TreatOccupiedAsDisplayed;
@@ -138,8 +140,10 @@ namespace CVariables
 		  static bool IsUsingLinux();
 		  static bool IsMuseumAPILoggingEnabled();
 		  static bool IsGlobalPatchInstallLoggingEnabled();
+		  static std::vector<CMiscPatchType> GetTrackedEntityTypes();
 		  static bool IsDebuggingEnabled();
 		  static bool GetIniBoolValue(const std::string& key);
+		  static std::string GetIniStringValue(const std::string& key);
 
 		  VariablesAPI(VariablesAPI const&) = delete;
 		  VariablesAPI(VariablesAPI const&&) = delete;

@@ -1,18 +1,20 @@
 #include "Variables.hpp"
-#include "ScriptObject.hpp"
 #include "DKUtil/Utility.hpp"
-#include "SimpleIni.h"
 #include "Events.hpp"
+#include "ScriptObject.hpp"
+#include "SimpleIni.h"
 
 static ScriptObjectPtr MCM;
 
-namespace CVariables {
+namespace CVariables
+{
 
-	void VariablesAPI::Register() 
+	void VariablesAPI::Register()
 	{
 		//Register menu open to periodically clear the formattedStringHolder.
 		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
 		V_Global_Patch_Logging = VariablesAPI::IsGlobalPatchInstallLoggingEnabled();
+		V_TrackedEntityTypes = VariablesAPI::GetTrackedEntityTypes();
 	};
 
 	//---------------------------------------------------
@@ -21,15 +23,13 @@ namespace CVariables {
 
 	void VariablesAPI::SetFrameworkQuest(RE::StaticFunctionTag*, RE::TESQuest* a_quest)
 	{
-		if (!a_quest)
-		{
+		if (!a_quest) {
 			INFO("No Quest Passed To Registration Function");
 			return;
 		};
 
 		MCM = ScriptObject::FromForm(a_quest, "Completionist_MCMScript");
-		if (!MCM) 
-		{
+		if (!MCM) {
 			INFO("Unable To Locate MCM Script on Form");
 			return;
 		};
@@ -44,8 +44,7 @@ namespace CVariables {
 
 	void VariablesAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event)
 	{
-		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME)
-		{
+		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) {
 			Update();
 		};
 	}
@@ -54,10 +53,9 @@ namespace CVariables {
 	//-- Variables Functions ( Get MCM Property ) -------
 	//---------------------------------------------------
 
-	RE::BSScript::Variable* VariablesAPI::GetProperty(const char* a_prop) 
+	RE::BSScript::Variable* VariablesAPI::GetProperty(const char* a_prop)
 	{
-		if (!MCM)
-		{
+		if (!MCM) {
 			return nullptr;
 		};
 
@@ -128,6 +126,49 @@ namespace CVariables {
 		return ini.GetBoolValue(completionistSection, key.c_str(), false);
 	}
 
+	std::string VariablesAPI::GetIniStringValue(const std::string& key)
+	{
+		CSimpleIniA ini;
+		const char* completionistSection = "Completionist";
+		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
+		// Load the INI file
+		SI_Error rc = ini.LoadFile(iniFilePath);
+		// If the file doesn't exist, create it and add the required lines
+		if (rc < 0 && rc != SI_FILE) {
+			// Create the section and set the value
+			ini.SetValue(completionistSection, key.c_str(), "0,1,2,3,4,5,6,7,8,9");
+			// Save the INI file
+			if (ini.SaveFile(iniFilePath) < 0) {
+				INFO("Failed to create and save completionist.ini");
+				return "";
+			}
+			// Log creation
+			INFO("Created completionist.ini");
+			return "";
+		}
+		// If there was another error loading the file, log it and return false
+		if (rc < 0) {
+			INFO("Unable to load completionist.ini");
+			return "";
+		}
+		// If the section or key doesn't exist, add them
+		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, key.c_str())) 
+		{
+			ini.SetValue(completionistSection, key.c_str(), "0,1,2,3,4,5,6,7,8,9");
+
+			// Save the INI file
+			if (ini.SaveFile(iniFilePath) < 0) {
+				INFO("Failed to save completionist.ini");
+				return "";
+			}
+
+			// Log addition
+			INFO("Added missing section or key to completionist.ini");
+			return "";
+		}
+		return ini.GetValue(completionistSection, key.c_str(), "");
+	}
+
 	//---------------------------------------------------
 	//-- Variables Functions ( Is MuseumAPI Enabled ) ---
 	//---------------------------------------------------
@@ -141,7 +182,7 @@ namespace CVariables {
 	//-- Variables Functions ( Linux Compatibility ) ----
 	//---------------------------------------------------
 
-	bool VariablesAPI::IsUsingLinux() 
+	bool VariablesAPI::IsUsingLinux()
 	{
 		return GetIniBoolValue("Is_Using_Linux");
 	}
@@ -155,14 +196,42 @@ namespace CVariables {
 		return GetIniBoolValue("Log_All_Patch_Installs");
 	}
 
+	/// <summary>
+	/// Gets the Tracked Entity Types from the INI, splits them by comma, and returns them as a vector of strings.
+	/// </summary>
+	/// <returns></returns>
+	std::vector<CMiscPatchType> VariablesAPI::GetTrackedEntityTypes()
+	{
+		std::vector<CMiscPatchType> entityTypes;
+		std::string trackedTypesStr = GetIniStringValue("TrackedEntityTypes");
+		std::istringstream ss(trackedTypesStr);
+		std::string type;
+
+		while (std::getline(ss, type, ',')) {
+			type.erase(std::remove_if(type.begin(), type.end(), ::isspace), type.end());
+
+			if (!type.empty()) {
+				try {
+					entityTypes.push_back(static_cast<CMiscPatchType>(std::stoi(type)));
+				}
+				catch (const std::exception&) {
+					// Optional: log invalid entry
+					// e.g. "Invalid TrackedEntityType: " + type
+					INFO("Invalid TrackedEntityType: {}", type);
+				}
+			}
+		}
+
+		return entityTypes;
+	}
+
 	//---------------------------------------------------
 	//-- Variables Functions ( Update Properties ) ------
 	//---------------------------------------------------
 
-	void VariablesAPI::Update() 
+	void VariablesAPI::Update()
 	{
-		if (!MCM)
-		{
+		if (!MCM) {
 			INFO("[Update] Script Pointer Not Set.");
 		};
 
