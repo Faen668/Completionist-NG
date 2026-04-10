@@ -160,10 +160,8 @@ struct CMiscPatch
 		LOG_IF_ENABLED("[{}] Starting CleanEmptyPages().", mcmpage);
 		LOG_IF_ENABLED("[{}] Initial PageCount: {}", mcmpage, PageCount);
 
+		// Step 1: Remove all empty sections
 		std::vector<CMiscPatchData> nonEmptySections;
-		bool hasEmptySections = false;
-
-		// Step 1: Remove all empty sections first
 		for (const auto& section : type_sections)
 		{
 			if (!section.IsEmpty())
@@ -173,19 +171,11 @@ struct CMiscPatch
 			}
 			else
 			{
-				hasEmptySections = true;
 				LOG_IF_ENABLED("[{}] Removing empty section on page {}", mcmpage, section.displayOnPage);
 			}
 		}
 
-		// Early exit: No empty sections found → nothing to clean
-		if (!hasEmptySections)
-		{
-			LOG_IF_ENABLED("[{}] No empty sections detected. Exiting early.", mcmpage);
-			return;
-		}
-
-		// Step 2: Identify valid pages
+		// Step 2: Identify pages that actually have sections
 		std::set<int32_t> validPages;
 		for (const auto& section : nonEmptySections)
 		{
@@ -194,7 +184,7 @@ struct CMiscPatch
 
 		LOG_IF_ENABLED("[{}] Valid pages after removing empty sections: {}", mcmpage, validPages.size());
 
-		// Step 3: Create page remapping
+		// Step 3: Create page remapping (old page -> new consecutive page)
 		std::map<int32_t, int32_t> pageRemap;
 		int newPageNum = 1;
 		for (int oldPage = 1; oldPage <= PageCount; ++oldPage)
@@ -249,6 +239,7 @@ struct CMiscPatch
 			}
 		}
 		section_defs = std::move(updatedSectionDefs);
+
 		LOG_IF_ENABLED("[{}] CleanEmptyPages() completed successfully.", mcmpage);
 	}
 
