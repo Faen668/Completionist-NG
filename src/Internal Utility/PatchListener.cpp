@@ -437,6 +437,19 @@ namespace CExternalPatchHandler
 							continue;
 						}
 
+						if (CVariables::V_RestrictBooksToTomesAndSkillBooks)
+						{
+							auto* book = static_cast<RE::TESObjectBOOK*>(form);
+							if (!book->GetSpell() && !book->TeachesSkill()) {
+								if (data->log_install) {
+									INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Book is not a tome or skill book");
+									INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
+								}
+								Idx++;
+								continue;
+							}
+						}
+
 						PatchData.originalOrder.push_back(formID);
 						PatchData.data.AddForm(formID, pluginFileName);
 						PatchData.enabled = true;
