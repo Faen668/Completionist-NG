@@ -15,6 +15,7 @@ namespace CVariables
 		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
 		V_Global_Patch_Logging = VariablesAPI::IsGlobalPatchInstallLoggingEnabled();
 		V_TrackedEntityTypes = VariablesAPI::GetTrackedEntityTypes();
+		V_RestrictBooksToTomesAndSkillBooks = VariablesAPI::GetRestrictBooksToTomesAndSkillBooks();
 	};
 
 	//---------------------------------------------------
@@ -187,6 +188,15 @@ namespace CVariables
 		return GetIniBoolValue("Is_Using_Linux");
 	}
 
+	//---------------------------------------------------
+	//-- Variables Functions ( Book Restrictions ) ------
+	//---------------------------------------------------
+
+	bool VariablesAPI::GetRestrictBooksToTomesAndSkillBooks()
+	{
+		return GetIniBoolValue("RestrictBooksToTomesAndSkillBooks");
+	}
+	
 	//---------------------------------------------------
 	//-- Variables Functions ( Global Patch Logging ) ---
 	//---------------------------------------------------
