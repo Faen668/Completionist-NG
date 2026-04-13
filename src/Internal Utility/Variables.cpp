@@ -250,11 +250,6 @@ namespace CVariables
 			V_TreatBooksAsItems = prop->GetBool();
 		}
 
-		V_FishingSpotMarkers = true;
-		if (const auto* prop = VariablesAPI::GetProperty("FishingSpotMarkers")) {
-			V_FishingSpotMarkers = prop->GetBool();
-		}
-
 		V_CellScanner_CONT = true;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_CONT")) {
 			V_CellScanner_CONT = prop->GetBool();
@@ -698,16 +693,6 @@ namespace CVariables
 		V_Radiant_BladesVal = 5;
 		if (const auto* prop = VariablesAPI::GetProperty("State_BladesCounterVal")) {
 			V_Radiant_BladesVal = prop->GetSInt();
-		}
-
-		V_moreHudEnabled_Crosshair = false;
-		if (const auto* prop = VariablesAPI::GetProperty("b_moreHUDEnabled_Crosshair")) {
-			V_moreHudEnabled_Crosshair = prop->GetBool();
-		}
-
-		V_moreHudEnabled_Menus = false;
-		if (const auto* prop = VariablesAPI::GetProperty("b_moreHUDEnabled_Menus")) {
-			V_moreHudEnabled_Menus = prop->GetBool();
 		}
 
 		V_Debugging = false;

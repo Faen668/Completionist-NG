@@ -67,9 +67,6 @@ namespace CVariables
 	inline std::string		V_CrosshairTag_Displayed;
 	inline std::string		V_CrosshairTag_Occupied;
 
-	inline bool				V_moreHudEnabled_Crosshair;
-	inline bool				V_moreHudEnabled_Menus;
-
 	inline std::int32_t		V_Radiant_FavorVal;
 	inline std::int32_t		V_Radiant_CollegeVal;
 	inline std::int32_t		V_Radiant_CompanionsVal;
@@ -112,7 +109,6 @@ namespace CVariables
 	inline bool				V_CellScanner_ExcludeMiscItems;
 	inline std::int32_t		V_CellScanner_ScanRange;
 
-	inline bool				V_FishingSpotMarkers;
 	inline bool				V_TreatBooksAsItems;
 	inline bool				V_Debugging;
 	inline bool				V_Global_Patch_Logging;
