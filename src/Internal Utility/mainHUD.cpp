@@ -101,7 +101,7 @@ namespace Completionist_MainHUD
 	//-- Name Processing For Inventory Items ------------
 	//---------------------------------------------------
 
-	const char* TextnTagsAPI::API_GetDisplayNamePrefix(const char* a_this, bool a_collected, bool a_displayed, bool a_variationDisplayed) 
+	const char* TextnTagsAPI::API_GetDisplayNamePrefix(RE::InventoryEntryData* a_object, bool a_collected, bool a_displayed, bool a_variationDisplayed) 
 	{
 		auto applyPrefix = [](const std::string& prefix, const char* str, int choice) -> std::string {
 			switch (choice) {
@@ -119,21 +119,22 @@ namespace Completionist_MainHUD
 			}
 			};
 
-		if (CVariables::V_MuseumModeEnabled)
+		auto displayName = a_object->GetDisplayName();
+		if (CVariables::V_MuseumModeEnabled && museum::IsMuseumDisplayable(a_object->GetObject()))
 		{
 			const std::string displayable_prefix = GetPrefix(V_PrefixChoice_Displayable);
 			const std::string displayed_prefix = GetPrefix(V_PrefixChoice_Displayed);
 			const std::string occupied_prefix = GetPrefix(V_PrefixChoice_Occupied);
 
 			if (a_displayed) {
-				return formattedStringHolder.emplace_back(applyPrefix(displayed_prefix, a_this, V_TextChoice_Displayed)).c_str();
+				return formattedStringHolder.emplace_back(applyPrefix(displayed_prefix, displayName, V_TextChoice_Displayed)).c_str();
 			}
 
 			if (a_variationDisplayed) {
-				return formattedStringHolder.emplace_back(applyPrefix(occupied_prefix, a_this, V_TextChoice_Occupied)).c_str();
+				return formattedStringHolder.emplace_back(applyPrefix(occupied_prefix, displayName, V_TextChoice_Occupied)).c_str();
 			}
 			else {
-				return formattedStringHolder.emplace_back(applyPrefix(displayable_prefix, a_this, V_TextChoice_Displayable)).c_str();
+				return formattedStringHolder.emplace_back(applyPrefix(displayable_prefix, displayName, V_TextChoice_Displayable)).c_str();
 			}
 		}
 		else
@@ -142,10 +143,10 @@ namespace Completionist_MainHUD
 			const std::string n_prefix = GetPrefix(V_PrefixChoice_N);
 
 			if (a_collected) {
-				return formattedStringHolder.emplace_back(applyPrefix(g_prefix, a_this, V_TextChoice_G)).c_str();
+				return formattedStringHolder.emplace_back(applyPrefix(g_prefix, displayName, V_TextChoice_G)).c_str();
 			}
 			else {
-				return formattedStringHolder.emplace_back(applyPrefix(n_prefix, a_this, V_TextChoice_N)).c_str();
+				return formattedStringHolder.emplace_back(applyPrefix(n_prefix, displayName, V_TextChoice_N)).c_str();
 			}
 		}
 	}

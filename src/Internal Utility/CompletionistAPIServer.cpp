@@ -200,7 +200,7 @@ RE::BSString CompletionistAPIServer::InterfaceV20::GetDecoratedItemName(RE::Inve
 
 	return !IsItemTracked(entry->object)
 		? entry->GetDisplayName()
-		: hud::API_GetDisplayNamePrefix(entry->GetDisplayName(), IsItemCollected(entry->object), displayed, isVariationDisplayedInstead);
+		: hud::API_GetDisplayNamePrefix(entry, IsItemCollected(entry->object), displayed, isVariationDisplayedInstead);
 }
 
 uint32_t CompletionistAPIServer::InterfaceV20::GetItemTextColor(RE::TESBoundObject* object)
