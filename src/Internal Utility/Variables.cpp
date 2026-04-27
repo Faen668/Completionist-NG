@@ -490,17 +490,17 @@ namespace CVariables
 			V_HUD_Colour_Found_Crosshair = prop->GetSInt();
 		}
 
-		V_HUD_Colour_Displayable = 1288220;
+		V_HUD_Colour_Displayable = 11796224;
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Displayable")) {
 			V_HUD_Colour_Displayable = prop->GetSInt();
 		}
 
-		V_HUD_Colour_Displayed = 1288220;
+		V_HUD_Colour_Displayed = 8388736;
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Displayed")) {
 			V_HUD_Colour_Displayed = prop->GetSInt();
 		}
 
-		V_HUD_Colour_Occupied = 1288220;
+		V_HUD_Colour_Occupied = 16753920;
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_Occupied")) {
 			V_HUD_Colour_Occupied = prop->GetSInt();
 		}
@@ -515,17 +515,17 @@ namespace CVariables
 			V_HUD_ColourString_Found_Crosshair = prop->GetString();
 		}
 
-		V_HUD_ColourString_Displayable = "";
+		V_HUD_ColourString_Displayable = "#b40000";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Displayable")) {
 			V_HUD_ColourString_Displayable = prop->GetString();
 		}
 
-		V_HUD_ColourString_Displayed = "";
+		V_HUD_ColourString_Displayed = "#8000ff";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Displayed")) {
 			V_HUD_ColourString_Displayed = prop->GetString();
 		}
 
-		V_HUD_ColourString_Occupied = "";
+		V_HUD_ColourString_Occupied = "#ffaa00";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_Occupied")) {
 			V_HUD_ColourString_Occupied = prop->GetString();
 		}

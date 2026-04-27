@@ -102,12 +102,22 @@ void CompletionistAPIServer::InterfaceV20::GetItemInfo(CompletionistAPI::ItemInf
 				if (isVariationDisplayedInstead && TreatOccupiedAsDisplayed())
 					displayed = true;
 
-				currentItem.decoratedName = GetDecoratedItemName(currentItem.entry);
-				currentItem.textColor = displayed ? GetDisplayedItemTextColor() : isVariationDisplayedInstead ? GetOccupiedItemTextColor() : collected ? GetCollectedItemTextColor() : GetNeededItemTextColor();
 				currentItem.isDisplayable = dbm::IsMuseumDisplayable(boundObject);;
 				currentItem.isDisplayed = displayed;
 				currentItem.isOccupied = isVariationDisplayedInstead;
 				currentItem.treatOccupiedAsDisplayed = TreatOccupiedAsDisplayed();
+				currentItem.decoratedName = GetDecoratedItemName(currentItem.entry);
+
+				if (displayed)
+					currentItem.textColor = GetDisplayedItemTextColor();
+				else if (isVariationDisplayedInstead)
+					currentItem.textColor = GetOccupiedItemTextColor();
+				else if (currentItem.isDisplayable)
+					currentItem.textColor = GetDisplayableItemTextColor();
+				else if (collected)
+					currentItem.textColor = GetCollectedItemTextColor();
+				else
+					currentItem.textColor = GetNeededItemTextColor();
 			}
 			else
 			{
