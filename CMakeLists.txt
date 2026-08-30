@@ -13,7 +13,7 @@ include(GNUInstallDirs)
 # info
 project(
 	Completionist
-	VERSION 6.3.3.3
+	VERSION 7.0.0.1
 	LANGUAGES CXX
 )
 
@@ -103,7 +103,6 @@ if (MSVC)
 
 		PRIVATE
 			/MP
-			/await
 			/W0
 			/WX
 			/permissive-

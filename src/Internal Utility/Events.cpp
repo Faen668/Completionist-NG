@@ -289,7 +289,7 @@ namespace CEvents
 
 		for (auto& fn : _OnBooksRead) {
 			fn(a_event);
-		};
+		}; 
 
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->OnBooksReadEvent(a_event);

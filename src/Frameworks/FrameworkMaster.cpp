@@ -650,8 +650,8 @@ namespace CFramework_Master
 		if (!MCMScript->GetProperty(a_setting)->GetBool()) { return; }
 
 		auto message = fmt::format("<font color='{:s}'>{:s}</font>"sv, MCMScript->GetProperty("ColourString")->GetString(), a_msg);
-		if (!MCMScript->GetProperty("NotificationColourEnabled")->GetBool()) { RE::DebugNotification(a_msg.c_str()); return; }
-		RE::DebugNotification(message.c_str());
+		if (!MCMScript->GetProperty("NotificationColourEnabled")->GetBool()) { RE::SendHUDMessage::ShowHUDMessage(a_msg.c_str()); return; }
+		RE::SendHUDMessage::ShowHUDMessage(message.c_str());
 	}
 
 	//---------------------------------------------------
@@ -661,8 +661,8 @@ namespace CFramework_Master
 	void FrameworkAPI::SendNotificationExt(RE::StaticFunctionTag*, std::string a_msg, std::string a_colour, bool a_enabled) {
 
 		auto message = fmt::format("<font color='{:s}'>{:s}</font>"sv, a_colour, a_msg);
-		if (!a_enabled) { RE::DebugNotification(a_msg.c_str()); return; }
-		RE::DebugNotification(message.c_str());
+		if (!a_enabled) { RE::SendHUDMessage::ShowHUDMessage(a_msg.c_str()); return; }
+		RE::SendHUDMessage::ShowHUDMessage(message.c_str());
 	}
 
 	//---------------------------------------------------

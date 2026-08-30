@@ -78,7 +78,7 @@ namespace CFramework_Enchantments {
 		std::uintptr_t base = REL::RelocationID(50459, 51363).address();
 		auto& trampoline = SKSE::GetTrampoline();
 
-		if (SKSE::WinAPI::GetModuleHandle(L"YesImSure.dll") &&
+		if (REX::W32::GetModuleHandleW(L"YesImSure.dll") &&
 			*RE::stl::adjust_pointer<dku::Hook::OpCode>(AsPointer(base), REL::Relocate(0x1A6, 0x1A6)) == dku::Hook::NOP) {
 			auto offset = REL::Relocate(0x1B4, 0x1B4);
 			auto func = base + offset;
