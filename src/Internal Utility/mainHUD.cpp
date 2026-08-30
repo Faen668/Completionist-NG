@@ -243,7 +243,7 @@ namespace Completionist_MainHUD
 		auto CurrentRef = RE::CrosshairPickData::GetSingleton();
 		if (!CurrentRef || !CurrentRef->target) return;
 
-		auto CurrentObj = CurrentRef->target.get();
+		auto CurrentObj = CurrentRef->target->get();
 		RE::TESForm* Base = CurrentObj->GetBaseObject();
 		if (!Base || !ItemIsCollectable(Base)) return;
 

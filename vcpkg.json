@@ -1,6 +1,6 @@
 {
     "name":  "completionist",
-    "version-string":  "6.3.3.3",
+    "version-string":  "7.0.0.1",
     "description":  "",
     "license":  "MIT",
     "dependencies":  [
