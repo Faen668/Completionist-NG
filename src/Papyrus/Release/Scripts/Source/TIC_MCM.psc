@@ -1,1 +1,0 @@
-scriptname TIC_MCM extends SKI_ConfigBase

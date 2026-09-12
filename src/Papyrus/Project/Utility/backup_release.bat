@@ -12,12 +12,13 @@ mkdir "%modpath%\backup\Project"
 XCOPY "%modpath%\Utility" "%modpath%\backup\Project\Utility\" /e /s /y
 
 ::Copy over the mod files
-XCOPY "%modpath%\Interface" "%modpath%\backup\release\Interface\" /e /s /y
-XCOPY "%modpath%\MapMarkers" "%modpath%\backup\release\MapMarkers\" /e /s /y
-XCOPY "%modpath%\Scripts" "%modpath%\backup\release\Scripts\" /e /s /y
-XCOPY "%modpath%\SKSE" "%modpath%\backup\release\SKSE\" /e /s /y
+XCOPY "%modpath%\Interface\Translations\*.txt" "%modpath%\backup\release\Interface\Translations\" /e /s /y
+XCOPY "%modpath%\Scripts\Source\" "%modpath%\backup\release\Scripts\Source\" /e /s /y
+XCOPY "%modpath%\SKSE" "%modpath%\backup\release\SKSE\" /e /s /y /EXCLUDE:exclude.txt
 XCOPY "%modpath%\Completionist.esp" "%modpath%\backup\release\" /y
 
+::Delete Files that should not be backed up
+rm 
 ::Delete Local Papyrus Folder
 rmdir "%backupPath%\Papyrus" /s /q
 mkdir "%backupPath%\Papyrus"

@@ -244,6 +244,9 @@ namespace Completionist_MainHUD
 		if (!CurrentRef || !CurrentRef->target) return;
 
 		auto CurrentObj = CurrentRef->target->get();
+		if (!CurrentObj)
+			return;
+
 		RE::TESForm* Base = CurrentObj->GetBaseObject();
 		if (!Base || !ItemIsCollectable(Base)) return;
 

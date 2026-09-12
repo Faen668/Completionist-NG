@@ -39,10 +39,6 @@ Completionist_MCMScript3 Property COmpMCM3 Auto
 Completionist_UpdateScript Property CompVer Auto
 Completionist_QuestsScript Property CompQst Auto
 
-GlobalVariable Property Completionist_FishingEnabled Auto
-ObjectReference Property Completionist_FishingSpot_Marker Auto
-Bool Property FishingSpotMarkers = True Auto Hidden
-
 GlobalVariable Property Completionist_Busy Auto
 Quest Property Completionist_Marker Auto
 Int Property State_MarkerDetectionVal = 1500 Auto Hidden
@@ -115,12 +111,12 @@ Int Property State_ColourVal_N_HUD_Crosshair = 4430046 Auto Hidden
 String Property State_ColourString_G_HUD_Crosshair = "#13a81c" Auto Hidden
 String Property State_ColourString_N_HUD_Crosshair = "#4398de" Auto Hidden
 
-Int Property State_ColourVal_Displayable = 1288220 Auto Hidden
-Int Property State_ColourVal_Displayed = 4430046 Auto Hidden
-Int Property State_ColourVal_Occupied = 4430046 Auto Hidden
-String Property State_ColourString_Displayable = "#13a81c" Auto Hidden
-String Property State_ColourString_Displayed = "#4398de" Auto Hidden
-String Property State_ColourString_Occupied = "#4398de" Auto Hidden
+Int Property State_ColourVal_Displayable = 11796224 Auto Hidden
+Int Property State_ColourVal_Displayed = 8388736 Auto Hidden
+Int Property State_ColourVal_Occupied = 16753920 Auto Hidden
+String Property State_ColourString_Displayable = "#b40000" Auto Hidden
+String Property State_ColourString_Displayed = "#8000ff" Auto Hidden
+String Property State_ColourString_Occupied = "#ffaa00" Auto Hidden
 
 Int Property State_ColourVal_G_HUD_Menus = 1288220 Auto Hidden
 Int Property State_ColourVal_N_HUD_Menus = 4430046 Auto Hidden
@@ -282,9 +278,6 @@ Int Property InventoryMode_PrFx_Choice_N = 0 Auto Hidden ;;Hooked By DLL
 Int Property InventoryMode_PrFx_Choice_Displayable = 0 Auto Hidden ;;Hooked By DLL
 Int Property InventoryMode_PrFx_Choice_Displayed = 0 Auto Hidden ;;Hooked By DLL
 Int Property InventoryMode_PrFx_Choice_Occupied = 0 Auto Hidden ;;Hooked By DLL
-
-Bool Property b_moreHUDEnabled_Crosshair = True Auto Hidden ;;Hooked By DLL
-Bool Property b_moreHUDEnabled_Menus = True Auto Hidden ;;Hooked By DLL
 
 String[] OptionName
 String[] OptionText
@@ -1310,13 +1303,7 @@ function Build_Page_Settings2()
 		AddHeaderOption("$State_MapMarkerSettingsHead")
 		AddSliderOptionST("State_MarkerDetection", 	   	"$State_MarkerDetectionText",		State_MarkerDetectionVal, "{0}", 0)
 		AddTextOptionST("State_MarkerDetectionCancel", 	"$State_MarkerDetectionCancelText", "$ConfirmN",  0)
-		
-		if (!Completionist_FishingEnabled.GetValue())
-			AddTextOptionST("State_FishingSpotMarkers",		"$State_FishingSpotMarkers_Text", 	GetEnabledStatus(FishingSpotMarkers),  1)
-		else
-			AddTextOptionST("State_FishingSpotMarkers",		"$State_FishingSpotMarkers_Text", 	GetEnabledStatus(FishingSpotMarkers),  0)
-		endIf
-		
+		AddEmptyOption()
 		AddEmptyOption()
 		AddEmptyOption()
 		AddHeaderOption("$MCMPageSettingsHeader3")
@@ -1417,9 +1404,6 @@ function Build_Page_Settings3()
 		AddColorOptionST("ColourState_N_HUD_Menus", "$ColourState_N_Generic_Text_Menus", State_ColourVal_N_HUD_Menus, (b_CustomColour_N_HUD_Menus as Bool) as Int)
 		OID_CustomColour_N_HUD_Menus = AddInputOption("$ModNotificationsCustomTextN_Menus", GetFontOption(State_CustomColourString_N_HUD_Menus, b_CustomColour_N_HUD_Menus))
 
-		AddEmptyOption()
-		AddHeaderOption("$moreHUD_Header")
-		AddTextOptionST("State_moreHUDEnabled_Crosshair", 	 	"$State_moreHUDEnabled_Crosshair_Text", GetEnabledStatus(b_moreHUDEnabled_Crosshair),  	0)
 		SetCursorPosition(1)
 
 		AddHeaderOption("$MainHUDMode_Header_G")
@@ -1433,10 +1417,6 @@ function Build_Page_Settings3()
 		AddMenuOptionST("InventoryModeOptions_PrFx_G", 	"$InventoryModeOptions_PrFx_Text_G", 			InventoryMode_PrFx_List_G[InventoryMode_PrFx_Choice_G], 0)
 		AddColorOptionST("ColourState_G_HUD_Menus", "$ColourState_G_Generic_Text_Menus", State_ColourVal_G_HUD_Menus, (b_CustomColour_G_HUD_Menus as Bool) as Int)
 		OID_CustomColour_G_HUD_Menus = AddInputOption("$ModNotificationsCustomTextG_Menus", GetFontOption(State_CustomColourString_G_HUD_Menus, b_CustomColour_G_HUD_Menus))	
-
-		AddEmptyOption()
-		AddHeaderOption("")
-		AddTextOptionST("State_moreHUDEnabled_Menus", 	 		"$State_moreHUDEnabled_Menus_Text", 	GetEnabledStatus(b_moreHUDEnabled_Menus),  	0)
 	endIf
 EndFunction
 
@@ -2229,8 +2209,6 @@ Function Begin_Config_Save()
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_DBCounterVal", State_DBCounterVal)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_FishingCounterVal", State_FishingCounterVal)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_BladesCounterVal", State_BladesCounterVal)
-
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!FishingSpotMarkers", FishingSpotMarkers as Int)	
 		
 		;;Colour Options
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!NotificationColourEnabled", NotificationColourEnabled as Int)
@@ -2330,9 +2308,6 @@ Function Begin_Config_Save()
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeWeapons", bCellScanner_ExcludeWeapons as Int)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!iCellScanner_Range", iCellScanner_Range)
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_UseClosestReference", bCellScanner_UseClosestReference as Int)
-
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int)
-		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int)
 		
 		jsonutil.SetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int)
 
@@ -2409,14 +2384,6 @@ Function Begin_Config_Load()
 			State_DBCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_DBCounterVal", State_DBCounterVal))
 			State_FishingCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_FishingCounterVal", State_FishingCounterVal))
 			State_BladesCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_BladesCounterVal", State_BladesCounterVal))
-
-			FishingSpotMarkers = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!FishingSpotMarkers", FishingSpotMarkers as Int))
-			if (FishingSpotMarkers && Completionist_FishingEnabled.GetValue())
-				Completionist_FishingSpot_Marker.Enable()
-			else
-				Completionist_FishingSpot_Marker.Disable()
-				FishingSpotMarkers = false		
-			endIf
 				
 			;;Notification Colours
 			NotificationColourEnabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!NotificationColourEnabled", NotificationColourEnabled as Int))
@@ -2517,9 +2484,6 @@ Function Begin_Config_Load()
 			bCellScanner_ExcludeMiscItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeMiscItems", bCellScanner_ExcludeMiscItems as Int))
 			bCellScanner_ExcludeWeapons = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeWeapons", bCellScanner_ExcludeWeapons as Int))
 		
-			b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
-			b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
-
 			TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
 	
 			jsonutil.Load("../CompletionistData/Profiles/CompConfig")
@@ -2594,14 +2558,6 @@ function AutoLoadConfig()
 		State_DBCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_DBCounterVal", State_DBCounterVal))
 		State_FishingCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_FishingCounterVal", State_FishingCounterVal))
 		State_BladesCounterVal = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!State_BladesCounterVal", State_BladesCounterVal))
-		
-		FishingSpotMarkers = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!FishingSpotMarkers", FishingSpotMarkers as Int))
-		if (FishingSpotMarkers && Completionist_FishingEnabled.GetValue())
-			Completionist_FishingSpot_Marker.Enable()
-		else
-			Completionist_FishingSpot_Marker.Disable()
-			FishingSpotMarkers = false		
-		endIf
 			
 		;;Notification Colours
 		NotificationColourEnabled = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!NotificationColourEnabled", NotificationColourEnabled as Int))
@@ -2701,10 +2657,7 @@ function AutoLoadConfig()
 		bCellScanner_ExcludeBooks = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeBooks", bCellScanner_ExcludeBooks as Int))
 		bCellScanner_ExcludeMiscItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeMiscItems", bCellScanner_ExcludeMiscItems as Int))
 		bCellScanner_ExcludeWeapons = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!bCellScanner_ExcludeWeapons", bCellScanner_ExcludeWeapons as Int))
-			
-		b_moreHUDEnabled_Crosshair = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Crosshair", b_moreHUDEnabled_Crosshair as Int))
-		b_moreHUDEnabled_Menus = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!b_moreHUDEnabled_Menus", b_moreHUDEnabled_Menus as Int))
-		
+
 		TreatBooksAsItems = (jsonutil.GetPathIntValue("../CompletionistData/Profiles/CompConfig", ".!TreatBooksAsItems", TreatBooksAsItems as Int))
 
 		jsonutil.Load("../CompletionistData/Profiles/CompConfig")
@@ -2796,9 +2749,9 @@ Function Begin_Config_Default()
 	
 	State_ColourVal_G_HUD_Crosshair = 1288220
 	State_ColourVal_N_HUD_Crosshair = 4430046
-	State_ColourVal_Displayable = 4430046
-	State_ColourVal_Displayed = 4430046
-	State_ColourVal_Occupied = 4430046
+	State_ColourVal_Displayable = 11796224
+	State_ColourVal_Displayed = 8388736
+	State_ColourVal_Occupied = 16753920
 	State_ColourString_G_HUD_Crosshair = GetHexValue(State_ColourVal_G_HUD_Crosshair)
 	State_ColourString_N_HUD_Crosshair = GetHexValue(State_ColourVal_N_HUD_Crosshair)
 	State_ColourString_Displayable = GetHexValue(State_ColourVal_Displayable)
@@ -2859,14 +2812,6 @@ Function Begin_Config_Default()
 	State_OverRide_Occupied_Name_String = "Occupied!"
 	State_SearchTermString = "Enter Search Term..."
 	
-	if (!Completionist_FishingEnabled.GetValue())
-		FishingSpotMarkers = False
-		Completionist_FishingSpot_Marker.Disable()
-	else
-		FishingSpotMarkers = True
-		Completionist_FishingSpot_Marker.Enable()
-	endIf
-	
 	bCellScanner_CONT = True
 	bCellScanner_DETA = False
 	bCellScanner_NPCS = False
@@ -2880,9 +2825,6 @@ Function Begin_Config_Default()
 	bCellScanner_ExcludeMiscItems = False
 	bCellScanner_ExcludeWeapons = False
 	bCellScanner_UseClosestReference = True
-
-	b_moreHUDEnabled_Crosshair = True
-	b_moreHUDEnabled_Menus = True
 			
 	if IsInMenuMode()
 		ForcePageReset()
@@ -3465,44 +3407,6 @@ state ModNotificationsStartup
 	Event OnHighlightST()
 
 		SetInfoText("$ModNotificationsStartupInfo")
-	EndEvent
-endState
-
-;---------------------------------------------------
-;-- States -----------------------------------------
-;---------------------------------------------------
-
-state State_FishingSpotMarkers
-
-	Event OnSelectST()
-		FishingSpotMarkers = !FishingSpotMarkers
-		
-		if (FishingSpotMarkers)
-			Completionist_FishingSpot_Marker.Enable()
-		else
-		Completionist_FishingSpot_Marker.Disable()
-		endIf
-
-		SetTextOptionValueST(GetEnabledStatus(FishingSpotMarkers))
-		UpdateVariables()
-		BuildMCMPages()
-	EndEvent
-	
-	Event OnDefaultST()
-		if (!Completionist_FishingEnabled.GetValue())
-			Completionist_FishingSpot_Marker.Disable()
-			FishingSpotMarkers = False
-		else
-			Completionist_FishingSpot_Marker.Enable()
-			FishingSpotMarkers = True
-		endIf
-		SetTextOptionValueST(GetEnabledStatus(FishingSpotMarkers))
-		UpdateVariables()
-		BuildMCMPages()
-	EndEvent
-
-	Event OnHighlightST()
-		SetInfoText("$State_FishingSpotMarkers_Info")
 	EndEvent
 endState
 
@@ -4774,7 +4678,7 @@ state ColourState_Displayable
 	event OnColorOpenST()
 	
 		SetColorDialogStartColor(State_ColourVal_Displayable)
-		SetColorDialogDefaultColor(4430046)
+		SetColorDialogDefaultColor(11796224)
 	endEvent
 	
 	event OnColorAcceptST(Int Index)
@@ -4786,7 +4690,7 @@ state ColourState_Displayable
 
 	event OnDefaultST()
 	
-		State_ColourVal_Displayable = 4430046
+		State_ColourVal_Displayable = 11796224
 		State_ColourString_Displayable = GetHexValue(State_ColourVal_Displayable)
 		SetColorOptionValueST(State_ColourVal_Displayable, false)
 	endEvent
@@ -4805,7 +4709,7 @@ state ColourState_Displayed
 	event OnColorOpenST()
 	
 		SetColorDialogStartColor(State_ColourVal_Displayed)
-		SetColorDialogDefaultColor(4430046)
+		SetColorDialogDefaultColor(8388736)
 	endEvent
 	
 	event OnColorAcceptST(Int Index)
@@ -4817,7 +4721,7 @@ state ColourState_Displayed
 
 	event OnDefaultST()
 	
-		State_ColourVal_Displayed = 4430046
+		State_ColourVal_Displayed = 8388736
 		State_ColourString_Displayed = GetHexValue(State_ColourVal_Displayed)
 		SetColorOptionValueST(State_ColourVal_Displayed, false)
 	endEvent
@@ -4836,7 +4740,7 @@ state ColourState_Occupied
 	event OnColorOpenST()
 	
 		SetColorDialogStartColor(State_ColourVal_Occupied)
-		SetColorDialogDefaultColor(4430046)
+		SetColorDialogDefaultColor(16753920)
 	endEvent
 	
 	event OnColorAcceptST(Int Index)
@@ -4848,7 +4752,7 @@ state ColourState_Occupied
 
 	event OnDefaultST()
 	
-		State_ColourVal_Occupied = 4430046
+		State_ColourVal_Occupied = 16753920
 		State_ColourString_Occupied = GetHexValue(State_ColourVal_Occupied)
 		SetColorOptionValueST(State_ColourVal_Occupied, false)
 	endEvent
@@ -5192,50 +5096,6 @@ Function OverRide_N_Colour_Menus(String HexString)
 		
 	endIf
 endFunction
-
-;---------------------------------------------------
-;-- States -----------------------------------------
-;---------------------------------------------------
-
-state State_moreHUDEnabled_Crosshair
-
-	Event OnSelectST()
-		b_moreHUDEnabled_Crosshair = !b_moreHUDEnabled_Crosshair
-		SetTextOptionValueST(GetEnabledStatus(b_moreHUDEnabled_Crosshair))
-	EndEvent
-	
-	Event OnDefaultST()
-		b_moreHUDEnabled_Crosshair = True
-		SetTextOptionValueST(GetEnabledStatus(b_moreHUDEnabled_Crosshair))
-	EndEvent
-
-	Event OnHighlightST()
-
-		SetInfoText("$State_moreHUDEnabled_Crosshair_Info")
-	EndEvent
-endState
-
-;---------------------------------------------------
-;-- States -----------------------------------------
-;---------------------------------------------------
-
-state State_moreHUDEnabled_Menus
-
-	Event OnSelectST()
-		b_moreHUDEnabled_Menus = !b_moreHUDEnabled_Menus
-		SetTextOptionValueST(GetEnabledStatus(b_moreHUDEnabled_Menus))
-	EndEvent
-	
-	Event OnDefaultST()
-		b_moreHUDEnabled_Menus = True
-		SetTextOptionValueST(GetEnabledStatus(b_moreHUDEnabled_Menus))
-	EndEvent
-
-	Event OnHighlightST()
-
-		SetInfoText("$State_moreHUDEnabled_Menus_Info")
-	EndEvent
-endState
 
 ;---------------------------------------------------
 ;-- States -----------------------------------------

@@ -8,7 +8,6 @@ mkdir "%modpath%\release"
 
 :: Copy over the release files
 XCOPY "%modpath%\Interface" "%modpath%\release\Base\Interface\" /e /s /y || echo Copying Interface failed!
-XCOPY "%modpath%\MapMarkers" "%modpath%\release\Base\MapMarkers\" /e /s /y || echo Copying MapMarkers failed!
 XCOPY "%modpath%\Scripts" "%modpath%\release\Base\Scripts\" /e /s /y || echo Copying Scripts failed!
 XCOPY "%modpath%\SKSE" "%modpath%\release\Base\SKSE\" /e /s /y || echo Copying SKSE failed!
 XCOPY "%modpath%\Sound" "%modpath%\release\Base\Sound\" /e /s /y || echo Copying Sound failed!
@@ -29,6 +28,7 @@ copy "%modpath%\release\Base\Interface\Translations\completionist_english.txt" "
 
 :: Delete Unneeded Files
 rmdir /s /q "%modpath%\release\Base\SKSE\Plugins\CompletionistData\Dev Kit"
+rmdir /s /q "%modpath%\release\Base\Interface\SkyUI\"
 del /s /q "%modpath%\release\Base\Interface\constructibleobjectmenu.swf"
 del /s /q "%modpath%\release\Base\Interface\craftingmenu.swf"
 del /s /q "%modpath%\release\Base\Interface\Translations\Update.bat"

@@ -46,10 +46,10 @@ Function DoVersioning() ;Initial versioning on a new game.
 	endif
 	
 	GetSKSEVersion()
-	fVMajor = 4
-	fVMinor = 1
+	fVMajor = 5
+	fVMinor = 0
 	fVPatch = 0
-	fVTweak = 8
+	fVTweak = 4
 	fVersion = (fVMajor * 1000) + (fVMinor * 100) + (fVPatch * 10) + (fVTweak)
 	ModVersion = (fVMajor + "." + fVMinor + "." + fVPatch + "." + fVTweak)
 	
@@ -64,10 +64,10 @@ endFunction
 Function CheckVersioning() ;Versioning ran from OnPlayerLoadGame()
 	
 	GetSKSEVersion()
-	curVMajor = 4
-	curVMinor = 1
+	curVMajor = 5
+	curVMinor = 0
 	curVPatch = 0
-	curVTweak = 8
+	curVTweak = 4
 	curVersion = (curVMajor * 1000) + (curVMinor * 100) + (curVPatch * 10) + (curVTweak)
 	
 	While IsInMenuMode()
@@ -88,11 +88,11 @@ Function UpdateKicker()
 	
 	bUpdated = False
 
-	if (fVersion < 4102)
-		MessageBox("=== Completionist ===\nVersion 4.1.0.2 has undergone extensive changes to the patch framework\nPlease start a new game or alternatively make a manual save, exit the game and clean your save file with 'Resaver' to ensure the mod still works correctly.")
+	if (fVersion < 5000)
+		MessageBox("=== Completionist ===\nVersion 5.0.0.0 has undergone extensive changes to the patch framework\nPlease start a new game or alternatively make a manual save, exit the game and clean your save file with 'Resaver' to ensure the mod still works correctly.")
 	endif
 
-	if (fVersion < 4108)
+	if (fVersion < 5004)
 		fVMajor = curVMajor
 		fVMinor = curVMinor
 		fVPatch = curVPatch
