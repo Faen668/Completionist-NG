@@ -1,105 +1,133 @@
+<div align="center">
+
 # Completionist NG
 
-**Completionist - Skyrim Completion Tracker (NG)**
+**Skyrim Completion Tracker**
 
-[![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Completionist-orange?logo=nexusmods)](https://www.nexusmods.com/skyrimspecialedition/mods/46358)
-[![GitHub](https://img.shields.io/badge/GitHub-Source%20Code-black?logo=github)](https://github.com/Faen668/Completionist-NG)
+[![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Completionist-orange?logo=nexusmods)](https://www.nexusmods.com/skyrimspecialedition/mods/46358) [![GitHub](https://img.shields.io/badge/GitHub-Source%20Code-black?logo=github)](https://github.com/Faen668/Completionist-NG) [![Licence](https://img.shields.io/badge/Licence-GPL--3.0--or--later-blue)](LICENSE)
 
-Completionist is a comprehensive completion-tracking framework for **The Elder Scrolls V: Skyrim Special Edition**.
+Track every quest, collectible, location and shout in Skyrim, its DLC and your mods, from one window in game.
 
-It provides an in-game interface for tracking quests, items and other collectible or completion-related content across Skyrim, the official DLC and supported third-party mods.
+<img src="docs/images/overview.jpg" alt="The Completionist window, overview page" width="100%">
 
-The **NG** version is the native-code continuation of Completionist, built using modern Skyrim modding technologies and **CommonLibSSE-NG**.
+</div>
+
+---
+
+## What it does
+
+Completionist watches what you do and keeps count. Pick up a unique item, read a book, learn a word of power, discover a location, finish a quest: it's ticked off as it happens, and it's all in one window you open with a key press.
+
+The **NG** version is the native-code continuation of Completionist, built on **CommonLibSSE-NG**. Everything runs in the SKSE plugin: no MCM, no Papyrus scripts.
 
 ---
 
 ## Features
 
-### Quest Tracking
+### The Completionist window
 
-Completionist automatically tracks your progress through supported quests and presents completion information through the in-game MCM.
+Press **Home** (or **LB + RB** on a controller) to open it. The game pauses like any other menu.
 
-This includes support for:
+* Quests by type, town and faction, with the conditions the old MCM had (Civil War sides, Dawnguard, the Legacy museum)
+* Collections, locations, shouts, kill counts and a completion log
+* Progress bars everywhere, an overview of what's closest to done and what you found last
+* Mark quests complete by hand, pin items, put a quest marker on a location
+* Full keyboard, mouse and controller support, with Xbox, PlayStation and Switch button prompts
 
-* Main quests
-* Side quests
-* DLC quests
-* Radiant and repeatable quests
-* Supported mod-added quests
-* Quest stages that do not use conventional completion states
+<table>
+<tr>
+<td width="50%"><img src="docs/images/shouts.jpg" alt="Dragon Shouts page"><br><sub><b>Shouts:</b> every word, where it's learnt and what's left to find.</sub></td>
+<td width="50%"><img src="docs/images/find.jpg" alt="Find"><br><sub><b>Find:</b> search every page at once and jump straight to the entry.</sub></td>
+</tr>
+</table>
 
-Where necessary, Completionist records relevant quest-stage information so that quests which stop rather than formally complete can still be tracked accurately.
+### Cell Scanner
 
-### Item & Collectible Tracking
+Shows what's still to be found in the cell you're in: lying around, in containers or carried by someone. You get distance, direction and height, and a warning when taking it would be stealing. Mark anything with a quest marker, or pin an item so it glows and gets marked wherever you find it.
 
-Completionist provides tracking for a wide range of collectible content, including:
+<table>
+<tr>
+<td width="62%"><img src="docs/images/cell-scanner.jpg" alt="Cell Scanner window"></td>
+<td width="38%" valign="top"><img src="docs/images/cell-panel.jpg" alt="Cell Scanner on screen"><br><sub>It can also stay on screen while you play. Press <b>End</b> to open it.</sub></td>
+</tr>
+</table>
 
-* Books
-* Spell tomes
-* Weapons
-* Armour
-* Unique items
-* Collectibles
-* Other supported completion-related content
+### Item lists
 
-The tracking system is designed to provide a single place to monitor overall completion progress.
+With SkyUI installed, the inventory, container, barter and gift menus get icons next to everything Completionist tracks: still needed, already found and, with Legacy of the Dragonborn, museum status. There's also a **Completionist** sort on the name column that groups items by status, with tinted bands between the groups.
 
-### MCM Integration
+Name colours and prefixes are there too if you want them, off by default. All of this works with SkyUI as it is, without replacing any of its files.
 
-Completionist provides extensive **SkyUI MCM** integration, allowing you to configure and monitor your completion progress directly in-game.
+<div align="center">
+<img src="docs/images/inventory-icons.jpg" alt="Item icons and the Completionist sort in the inventory" width="50%">
+</div>
 
-### Inventory Integration
+### Crosshair tags
 
-Completionist can integrate with the player's inventory and provide configurable visual indicators for tracked collectables.
+Look at something you still need and a tag ("Need It!", "Got It!", or the museum ones) appears next to its name. The text and colours are yours to change.
 
-### Dynamic Crosshair Tags
+### Notifications
 
-The Dynamic Crosshair Tags system can identify tracked items while they are being targeted.
+Completionist can show its notifications in its own stack instead of the top-left corner: grouped bursts, a position you pick by dragging, and room for more than one at a time.
 
-The system is configurable, including:
+### Settings
 
-* Tag text
-* Tag colour
-* Category visibility
-* Display behaviour
+Everything is set from the window itself and saved to `Completionist.ini`, so it's the same in every save.
 
-### Extensive Mod Support
+<div align="center">
+<img src="docs/images/settings.jpg" alt="Settings" width="85%">
+</div>
 
-Completionist supports tracking content from a large number of popular Skyrim mods.
+---
 
-The project is designed so that additional tracking data can be maintained and extended without requiring the core tracking system to be rewritten.
+## Themes
+
+Six looks to choose from in **Settings > Window > Theme**.
+
+<table>
+<tr>
+<td align="center" width="33%"><img src="docs/images/theme-completionist.jpg" alt="Completionist theme"><br><b>Completionist</b></td>
+<td align="center" width="33%"><img src="docs/images/theme-skyui.jpg" alt="SkyUI theme"><br><b>SkyUI</b></td>
+<td align="center" width="33%"><img src="docs/images/theme-argonian.jpg" alt="Argonian theme"><br><b>Argonian</b></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/images/theme-bosmer.jpg" alt="Bosmer theme"><br><b>Bosmer</b></td>
+<td align="center"><img src="docs/images/theme-dunmer.jpg" alt="Dunmer theme"><br><b>Dunmer</b></td>
+<td align="center"><img src="docs/images/theme-khajiit.jpg" alt="Khajiit theme"><br><b>Khajiit</b></td>
+</tr>
+</table>
+
+---
+
+## Mod support
+
+Tracking for mods comes from patch files (INI and translation files under `SKSE/Plugins/CompletionistData`). Each patch gets its own page, laid out in the sections its author chose. Patches for Legacy of the Dragonborn, spell packs, quest mods, followers and many more are available, and new ones don't need any changes to the plugin.
+
+Other mods can read Completionist's data through its API. **QuickLootIE** uses it to show the same icons in its loot window.
 
 ---
 
 ## Requirements
 
-The following are required:
-
 * **Skyrim Special Edition / Anniversary Edition**
 * **SKSE64**
 * **Address Library for SKSE Plugins**
-* **PapyrusUtil SE**
-* **SkyUI**
+
+### Optional
+
+* **SkyUI**: item icons, the Completionist sort and name colours in the item lists
+* **Legacy of the Dragonborn**: museum mode
+* **QuickLootIE**: Completionist icons in the loot window
 
 See the [Nexus Mods page](https://www.nexusmods.com/skyrimspecialedition/mods/46358) for the current supported versions and installation information.
-
-### Recommended
-
-Completionist was originally developed and designed with **Dear Diary - Dark Mode** in mind.
-
-Completionist should work with other UI configurations, but UI mods based on Dear Diary Dark Mode may provide the best visual presentation for the MCM.
 
 ---
 
 ## Installation
 
-Install Completionist using your preferred mod manager.
+Install Completionist using your preferred mod manager, along with any patches for the mods you use.
 
-Ensure that all required dependencies are installed and that **SKSE64** is being used to launch Skyrim.
-
-After installation, launch the game and allow Completionist to initialise.
-
-The Completionist MCM can then be accessed through SkyUI.
+Launch the game through **SKSE64**, load a save and press **Home**.
 
 For the latest release and installation instructions, visit:
 
@@ -116,11 +144,11 @@ The project uses:
 
 * C++
 * CommonLibSSE-NG
+* Dear ImGui
 * CMake
 * vcpkg
 * SKSE
 * Address Library
-* Skyrim's native runtime interfaces
 
 Source code is available on GitHub:
 
@@ -135,9 +163,7 @@ git clone https://github.com/Faen668/Completionist-NG.git
 cd Completionist-NG
 ```
 
-Configure and build the project using the supplied CMake configuration.
-
-CommonLibSSE-NG is used as a build dependency and provides the native Skyrim interfaces required by the plugin.
+Configure and build the project using the supplied CMake configuration. vcpkg provides CommonLibSSE-NG and Dear ImGui.
 
 ---
 
@@ -151,6 +177,7 @@ When submitting an issue, please provide as much information as possible, includ
 * SKSE version
 * Completionist version
 * Relevant mod list
+* `Completionist.log` (in `Documents/My Games/Skyrim Special Edition/SKSE`)
 * Crash logs, if applicable
 * Steps required to reproduce the issue
 
@@ -178,13 +205,9 @@ https://skse.silverlock.org/
 
 Address Library provides runtime-independent addresses used by native Skyrim plugins.
 
-### PapyrusUtil
-
-PapyrusUtil provides additional scripting functionality used by Completionist.
-
 ### SkyUI
 
-SkyUI provides the MCM framework used by Completionist.
+Completionist's item icons and sort work inside SkyUI's item lists.
 
 ### Dear ImGui
 
