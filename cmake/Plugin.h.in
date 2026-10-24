@@ -8,22 +8,5 @@ namespace Plugin
 {
 	inline constexpr auto NAME = "@PROJECT_NAME@"sv;
 	inline constexpr auto AUTHOR = "@SKSEPluginAuthor@"sv;
-	inline constexpr REL::Version Version
-	{
-		@PROJECT_VERSION_MAJOR@u,
-		@PROJECT_VERSION_MINOR@u,
-		@PROJECT_VERSION_PATCH@u,
-		@PROJECT_VERSION_TWEAK@u
-	};
+	extern const REL::Version Version;	// stamped each build, BuildStamp.cpp
 }
-
-
-SKSEPluginInfo(
-	.Version = Plugin::Version,
-	.Name = Plugin::NAME,
-	.Author = Plugin::AUTHOR,
-	.SupportEmail = ""sv,
-	.StructCompatibility = SKSE::StructCompatibility::Independent,
-	.RuntimeCompatibility = SKSE::VersionIndependence::AddressLibrary,
-	.MinimumSKSEVersion = 0
-);

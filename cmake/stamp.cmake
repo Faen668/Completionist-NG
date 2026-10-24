@@ -1,0 +1,30 @@
+# Build stamp, run on every build: major.minor from CMakeLists, then like .NET's 1.5.*
+# build = days since 1 Jan 2000, revision = seconds since midnight / 2 (local time)
+
+string(TIMESTAMP YEAR "%Y")
+string(TIMESTAMP DAY "%j")
+string(TIMESTAMP HOUR "%H")
+string(TIMESTAMP MINUTE "%M")
+string(TIMESTAMP SECOND "%S")
+
+math(EXPR BUILD "${DAY} - 1")
+set(Y 2000)
+while(Y LESS YEAR)
+	math(EXPR BY4 "${Y} % 4")
+	math(EXPR BY100 "${Y} % 100")
+	math(EXPR BY400 "${Y} % 400")
+	if((BY4 EQUAL 0 AND NOT BY100 EQUAL 0) OR BY400 EQUAL 0)
+		math(EXPR BUILD "${BUILD} + 366")
+	else()
+		math(EXPR BUILD "${BUILD} + 365")
+	endif()
+	math(EXPR Y "${Y} + 1")
+endwhile()
+math(EXPR REVISION "(${HOUR} * 3600 + ${MINUTE} * 60 + ${SECOND}) / 2")
+
+set(PROJECT_VERSION_PATCH ${BUILD})
+set(PROJECT_VERSION_TWEAK ${REVISION})
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${BUILD}.${REVISION}")
+
+configure_file("${SOURCE_DIR}/cmake/BuildStamp.cpp.in" "${BINARY_DIR}/BuildStamp.cpp" @ONLY)
+configure_file("${SOURCE_DIR}/cmake/version.rc.in" "${BINARY_DIR}/version.rc" @ONLY)

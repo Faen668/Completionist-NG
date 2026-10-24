@@ -156,14 +156,23 @@ https://github.com/Faen668/Completionist-NG
 
 ### Building
 
-Clone the repository:
+You need Visual Studio 2022 with the C++ workload, CMake 3.21 or newer, and vcpkg with `VCPKG_ROOT` set to it.
+
+Clone the repository with its submodules (CommonLibSSE-NG and DKUtil live in `extern`):
 
 ```bash
-git clone https://github.com/Faen668/Completionist-NG.git
+git clone --recursive https://github.com/Faen668/Completionist-NG.git
 cd Completionist-NG
 ```
 
-Configure and build the project using the supplied CMake configuration. vcpkg provides CommonLibSSE-NG and Dear ImGui.
+Configure and build:
+
+```bash
+cmake --preset ALL
+cmake --build --preset ALL
+```
+
+vcpkg fetches Dear ImGui, spdlog and the other libraries on the first configure. The DLL lands in `build/ALL/Release`. The `FLATRIM` preset builds without VR support.
 
 ---
 

@@ -1,23 +1,22 @@
 {
-    "name":  "completionist",
-    "version-string":  "7.0.0.1",
-    "description":  "",
-    "license":  "MIT",
-    "dependencies":  [
-                         "directxtk",
-                         {
-                             "name":  "imgui",
-                             "features":  [
-                                              "dx11-binding",
-                                              "win32-binding"
-                                          ]
-                         },
-                         "spdlog",
-                         "xbyak"
-                     ],
-    "features":  {
-                     "mo2-install":  {
-                                         "description":  "Completionist"
-                                     }
-                 }
+	"$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+	"name": "completionist",
+	"version-string": "7.0",
+	"supports": "windows & x64",
+	"builtin-baseline": "ee12231b20c95013c6638d845d04c91559a1d1ff",
+	"dependencies": [
+		"directxtk",
+		{
+			"name": "imgui",
+			"features": [
+				"dx11-binding",
+				"win32-binding"
+			]
+		},
+		"nlohmann-json",
+		"rapidcsv",
+		"simpleini",
+		"spdlog",
+		"xbyak"
+	]
 }

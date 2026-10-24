@@ -1,0 +1,16 @@
+// Generated on every build by cmake/stamp.cmake
+
+namespace Plugin
+{
+	const REL::Version Version{ @PROJECT_VERSION_MAJOR@u, @PROJECT_VERSION_MINOR@u, @PROJECT_VERSION_PATCH@u, @PROJECT_VERSION_TWEAK@u };
+}
+
+SKSEPluginInfo(
+	.Version = REL::Version{ @PROJECT_VERSION_MAJOR@u, @PROJECT_VERSION_MINOR@u, @PROJECT_VERSION_PATCH@u, @PROJECT_VERSION_TWEAK@u },
+	.Name = Plugin::NAME,
+	.Author = Plugin::AUTHOR,
+	.SupportEmail = ""sv,
+	.StructCompatibility = SKSE::StructCompatibility::Independent,
+	.RuntimeCompatibility = SKSE::VersionIndependence::AddressLibrary,
+	.MinimumSKSEVersion = 0
+);
