@@ -186,6 +186,20 @@ PapyrusUtil provides additional scripting functionality used by Completionist.
 
 SkyUI provides the MCM framework used by Completionist.
 
+### Dear ImGui
+
+The in-game Completionist window is drawn with **Dear ImGui** by Omar Cornut (MIT licence).
+
+https://github.com/ocornut/imgui
+
+### Fonts
+
+The in-game window ships these fonts, each under the **SIL Open Font License 1.1** (licence files are included next to the fonts in `SKSE/Plugins/CompletionistData/Fonts`):
+
+- **Cinzel**: Natanael Gama, The Cinzel Project Authors (https://github.com/NDISCOVER/Cinzel)
+- **Alegreya Sans**: Juan Pablo del Peral, HT Fonts, The Alegreya Sans Project Authors (https://github.com/huertatipografica/Alegreya-Sans)
+- **EB Garamond**: Georg Duffner, Octavio Pardo, The EB Garamond Project Authors (https://github.com/octaviopardo/EBGaramond12)
+
 ---
 
 ## Licence

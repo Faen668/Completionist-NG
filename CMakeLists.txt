@@ -54,6 +54,8 @@ source_group(
 add_subdirectory($ENV{CommonLibSSEPath} CommonLibSSE)
 add_subdirectory($ENV{DKUtilPath} DKUtil)
 find_package(spdlog CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(directxtk CONFIG REQUIRED)
 
 # cmake target
 # runtime
@@ -83,6 +85,8 @@ target_link_libraries(
 		CommonLibSSE::CommonLibSSE
 		DKUtil::DKUtil
 		spdlog::spdlog
+		imgui::imgui
+		Microsoft::DirectXTK
 )
 
 # compiler def
