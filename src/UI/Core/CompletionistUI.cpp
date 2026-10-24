@@ -5406,14 +5406,13 @@ namespace CompletionistUI
 				ImGui::PopID();
 			};
 
-			binding("UI_Setting_OpenKey", "UI_SettingHint_OpenKey", settings.capturingOpenKey ? a_provider.Translate("UI_Setting_PressKey") : settings.openKeyName, settings.capturingOpenKey,
-				settings.openKey == defaults.openKey, KeyNameFor(defaults.openKey), [&]() { settings.openKey = defaults.openKey; });
-			binding("UI_Setting_OpenPad", "UI_SettingHint_OpenPad", settings.capturingOpenPad ? a_provider.Translate("UI_Setting_PressButtons") : GamepadComboName(settings.openPadModifier, settings.openPadButton, settings.padStyle), settings.capturingOpenPad,
-				settings.openPadButton == defaults.openPadButton && settings.openPadModifier == defaults.openPadModifier, GamepadComboName(defaults.openPadModifier, defaults.openPadButton, settings.padStyle),
-				[&]() { settings.openPadButton = defaults.openPadButton; settings.openPadModifier = defaults.openPadModifier; });
-
 			// Delete unbinds, Escape / B cancels
 			const auto unbound = a_provider.Translate("UI_Setting_Unbound");
+			binding("UI_Setting_OpenKey", "UI_SettingHint_OpenKey", settings.capturingOpenKey ? a_provider.Translate("UI_Setting_PressKeyUnbind") : settings.openKey ? settings.openKeyName : unbound, settings.capturingOpenKey,
+				settings.openKey == defaults.openKey, KeyNameFor(defaults.openKey), [&]() { settings.openKey = defaults.openKey; });
+			binding("UI_Setting_OpenPad", "UI_SettingHint_OpenPad", settings.capturingOpenPad ? a_provider.Translate("UI_Setting_PressButtons") : settings.openPadButton ? GamepadComboName(settings.openPadModifier, settings.openPadButton, settings.padStyle) : unbound, settings.capturingOpenPad,
+				settings.openPadButton == defaults.openPadButton && settings.openPadModifier == defaults.openPadModifier, GamepadComboName(defaults.openPadModifier, defaults.openPadButton, settings.padStyle),
+				[&]() { settings.openPadButton = defaults.openPadButton; settings.openPadModifier = defaults.openPadModifier; });
 			binding("UI_Setting_CellKey", "UI_SettingHint_CellKey", settings.capturingCellKey ? a_provider.Translate("UI_Setting_PressKeyUnbind") : settings.cellKey ? settings.cellKeyName : unbound, settings.capturingCellKey,
 				settings.cellKey == defaults.cellKey, KeyNameFor(defaults.cellKey), [&]() { settings.cellKey = defaults.cellKey; });
 			binding("UI_Setting_CellPad", "UI_SettingHint_CellPad", settings.capturingCellPad ? a_provider.Translate("UI_Setting_PressButtons") : settings.cellPadButton ? GamepadComboName(settings.cellPadModifier, settings.cellPadButton, settings.padStyle) : unbound, settings.capturingCellPad,

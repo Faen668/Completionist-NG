@@ -26,7 +26,7 @@ The **NG** version is the native-code continuation of Completionist, built on **
 
 ### The Completionist window
 
-Press **Home** (or **LB + RB** on a controller) to open it. The game pauses like any other menu.
+Press **Home** (or click **both sticks** on a controller: hold the left, press the right) to open it. The game pauses like any other menu.
 
 * Quests by type, town and faction, with the conditions the old MCM had (Civil War sides, Dawnguard, the Legacy museum)
 * Collections, locations, shouts, kill counts and a completion log
