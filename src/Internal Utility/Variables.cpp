@@ -183,8 +183,13 @@ namespace CVariables
 
 		CompletionistUI::UISettings settings;
 		settings.openKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenKey", "199").c_str(), nullptr, 10));
-		settings.openPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadButton", "512").c_str(), nullptr, 10));
-		settings.openPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadModifier", "256").c_str(), nullptr, 10));
+		settings.openPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadButton", "128").c_str(), nullptr, 10));
+		settings.openPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadModifier", "64").c_str(), nullptr, 10));
+		// LB + RB was the old default, it's sprint and shout
+		if (settings.openPadButton == 0x0200 && settings.openPadModifier == 0x0100) {
+			settings.openPadButton = CompletionistUI::UISettings{}.openPadButton;
+			settings.openPadModifier = CompletionistUI::UISettings{}.openPadModifier;
+		}
 		settings.scale = number("Scale", "1.0", 0.5f, 3.0f);
 		settings.widthPercent = number("WidthPercent", "92", 40.0f, 100.0f);
 		settings.heightPercent = number("HeightPercent", "88", 40.0f, 100.0f);

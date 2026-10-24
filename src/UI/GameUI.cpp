@@ -46,6 +46,7 @@ namespace CompletionistUI
 			// Game thread
 			ImVec2        mouse{ 0.0f, 0.0f };
 			std::uint32_t padHeld{ 0 };
+			std::uint32_t padIgnored{ 0 };	// held as the window opened, ignored until let go
 
 			// Shared
 			GameDataProvider                               provider;
@@ -53,8 +54,8 @@ namespace CompletionistUI
 			std::atomic<bool>                              justOpened{ false };
 			std::atomic<std::uint32_t>                     openKey{ 199 };
 			std::atomic<std::int32_t>                      capture{ captureIdle };
-			std::atomic<std::uint32_t>                     openPadButton{ 0x0200 };
-			std::atomic<std::uint32_t>                     openPadModifier{ 0x0100 };
+			std::atomic<std::uint32_t>                     openPadButton{ 0x0080 };
+			std::atomic<std::uint32_t>                     openPadModifier{ 0x0040 };
 			std::atomic<std::int64_t>                      padCapture{ captureIdle };
 			std::atomic<std::uint32_t>                     padRejected{ 0 };
 			std::uint32_t                                  padPending{ 0 };
@@ -367,9 +368,9 @@ namespace CompletionistUI
 				}
 				a_state.padPending = 0;
 
-				const bool keyToggle = device == RE::INPUT_DEVICE::kKeyboard && code == a_state.openKey;
+				const bool keyToggle = device == RE::INPUT_DEVICE::kKeyboard && a_state.openKey != 0 && code == a_state.openKey;
 				const auto modifier = a_state.openPadModifier.load();
-				const bool padToggle = device == RE::INPUT_DEVICE::kGamepad && code == a_state.openPadButton && (modifier == 0 || (heldBefore & modifier) != 0);
+				const bool padToggle = device == RE::INPUT_DEVICE::kGamepad && a_state.openPadButton != 0 && code == a_state.openPadButton && (modifier == 0 || (heldBefore & modifier) != 0);
 				if ((keyToggle || padToggle) && a_button.IsDown()) {
 					if (a_state.open && a_state.inCellView) {
 						a_state.requestedView = 0;
@@ -377,6 +378,7 @@ namespace CompletionistUI
 						GameUI::Close();
 					} else if (GameUI::CanOpen()) {
 						a_state.requestedView = 0;
+						a_state.padIgnored = a_state.padHeld;
 						GameUI::Open();
 					}
 					return;
@@ -393,6 +395,7 @@ namespace CompletionistUI
 						a_state.requestedView = 1;
 					} else if (GameUI::CanOpen()) {
 						a_state.requestedView = 1;
+						a_state.padIgnored = a_state.padHeld;
 						GameUI::Open();
 					}
 					return;
@@ -424,6 +427,13 @@ namespace CompletionistUI
 					}
 					break;
 				case RE::INPUT_DEVICE::kGamepad:
+					// The open combo's buttons would land as fresh presses (L3 folds the sidebar)
+					if (a_state.padIgnored & code) {
+						if (!down) {
+							a_state.padIgnored &= ~code;
+						}
+						break;
+					}
 					// B as back
 					if (const auto key = KeyFromGamepad(code); key != ImGuiKey_None) {
 						const float value = code == leftTrigger || code == rightTrigger ? a_button.Value() : (down ? 1.0f : 0.0f);
@@ -590,7 +600,12 @@ namespace CompletionistUI
 				const auto result = a_state.capture.load();
 				if (result >= 0 || result == captureCancelled) {
 					if (result >= 0) {
-						a_state.settings.openKey = static_cast<std::uint32_t>(result);
+						const auto key = static_cast<std::uint32_t>(result) == deleteKey ? 0 : static_cast<std::uint32_t>(result);
+						if (key == 0 && a_state.settings.openPadButton == 0) {
+							a_state.menu.ShowStatus(a_state.provider.Translate("UI_Setting_KeepOneOpen"), 6.0f);
+						} else {
+							a_state.settings.openKey = key;
+						}
 					}
 					a_state.settings.capturingOpenKey = false;
 					a_state.capture = captureIdle;
@@ -620,10 +635,15 @@ namespace CompletionistUI
 				a_state.padCapture.compare_exchange_strong(expected, captureWaiting);
 
 				const auto result = a_state.padCapture.load();
-				if (result >= 0 || result == captureCancelled) {
+				if (result >= 0 || result == captureCancelled || result == captureUnbind) {
 					if (result >= 0) {
 						a_state.settings.openPadButton = static_cast<std::uint32_t>(result & 0xFFFF);
 						a_state.settings.openPadModifier = static_cast<std::uint32_t>(result >> 16);
+					} else if (result == captureUnbind && a_state.settings.openKey == 0) {
+						a_state.menu.ShowStatus(a_state.provider.Translate("UI_Setting_KeepOneOpen"), 6.0f);
+					} else if (result == captureUnbind) {
+						a_state.settings.openPadButton = 0;
+						a_state.settings.openPadModifier = 0;
 					}
 					a_state.settings.capturingOpenPad = false;
 					a_state.padCapture = captureIdle;
@@ -820,7 +840,7 @@ namespace CompletionistUI
 		auto& state = GetState();
 		state.settings = CVariables::VariablesAPI::GetUISettings();
 		// Old bindings on a button the window needs go back to default
-		if (!IsSafePadBinding(state.settings.openPadModifier, state.settings.openPadButton)) {
+		if (state.settings.openPadButton != 0 && !IsSafePadBinding(state.settings.openPadModifier, state.settings.openPadButton)) {
 			INFO("In-game UI: open buttons {:X}+{:X} clash with the window's own; back to the default", state.settings.openPadModifier, state.settings.openPadButton);
 			state.settings.openPadButton = UISettings{}.openPadButton;
 			state.settings.openPadModifier = UISettings{}.openPadModifier;

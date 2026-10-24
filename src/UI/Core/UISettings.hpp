@@ -29,8 +29,8 @@ namespace CompletionistUI
 		static constexpr std::int32_t maxDescriptionLines{ 20 };
 
 		std::uint32_t openKey{ 199 };	// Home
-		std::uint32_t openPadButton{ 0x0200 };	// RB
-		std::uint32_t openPadModifier{ 0x0100 };	// LB, 0 for none
+		std::uint32_t openPadButton{ 0x0080 };	// RS click
+		std::uint32_t openPadModifier{ 0x0040 };	// LS click, 0 for none
 		Theme         theme{ Theme::kCompletionist };
 		float         scale{ 1.0f };
 		float         widthPercent{ 92.0f };
