@@ -215,7 +215,7 @@ namespace CFramework_MapMa {
 			return false;
 		}
 
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+		auto* a_marker = a_form ? a_form->As<RE::TESObjectREFR>() : nullptr;
 		auto valid = (a_marker && MarkerIsValid(a_marker));
 		
 		if (!valid) { return false; }
@@ -260,7 +260,7 @@ namespace CFramework_MapMa {
 	//---------------------------------------------------
 
 	bool CHandler::MarkerIsCleared(RE::StaticFunctionTag*, RE::TESForm* a_form) {
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+		auto* a_marker = a_form ? a_form->As<RE::TESObjectREFR>() : nullptr;
 
 		if (a_marker) {			
 			auto* location = a_marker->GetEditorLocation1();

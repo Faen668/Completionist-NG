@@ -9,8 +9,6 @@ namespace Completionist
 {
 	void MuseumAPI::Register()
 	{
-		SKSE::GetPapyrusInterface()->Register(RegisterFunctions);
-
 		if (!Serialization::CompletionistData::IsModInstalled("LegacyoftheDragonborn.esm"))
 			return;
 
@@ -46,25 +44,6 @@ namespace Completionist
 		InsertPatchReplacedItems();
 		BuildAllVariations();
 		VerifyAltLists();
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Papyrus Registrations ) --
-	//---------------------------------------------------
-
-	auto MuseumAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
-	{
-		a_vm->RegisterFunction("GetMuseumDisplayStatus", "Completionist_Native", GetMuseumDisplayStatus);
-		return true;
-	};
-
-	RE::BSFixedString MuseumAPI::GetMuseumDisplayStatus(RE::StaticFunctionTag*, RE::TESForm* a_form)
-	{
-		if (!_ready || !a_form || !CVariables::V_MuseumModeEnabled || !IsMuseumDisplayable(a_form))
-			return "";
-
-		bool isVariationDisplayedInstead = false;
-		return IsDisplayed(a_form, isVariationDisplayedInstead) ? "Displayed" : isVariationDisplayedInstead ? "Occupied" : "Displayable";
 	}
 
 	//---------------------------------------------------
@@ -286,7 +265,7 @@ namespace Completionist
 
 	void MuseumAPI::BuildMuseumInventory()
 	{
-		auto* armStorage = _handler->LookupForm(0x6C22C2, "LegacyoftheDragonborn.esm");
+		auto* armStorage = _handler->LookupForm<RE::TESObjectREFR>(0x6C22C2, "LegacyoftheDragonborn.esm");
 		if (armStorage)
 			_museumContainers.emplace(armStorage->AsReference()->GetFormID());
 

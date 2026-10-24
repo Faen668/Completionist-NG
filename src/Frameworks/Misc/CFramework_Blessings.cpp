@@ -72,13 +72,58 @@ namespace CFramework_Blessings {
 
 	void CHandler::SinkEvents() {
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESActivateEvent>*>(GetSingleton()));
+		if (auto* input = RE::BSInputDeviceManager::GetSingleton()) {
+			input->AddEventSink(static_cast<RE::BSTEventSink<RE::InputEvent*>*>(GetSingleton()));
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( Survival Mode Shrines ) -----
+	//---------------------------------------------------
+
+	// Survival's TempleBlessing perk replaces shrine activation so no activate event fires,
+	// count it from the Activate button and the crosshair target instead
+	EventResult CHandler::ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) {
+
+		if (!a_event) { return EventResult::kContinue; }
+
+		for (auto* event = *a_event; event; event = event->next) {
+			const auto* button = event->AsButtonEvent();
+			if (!button || !button->IsDown() || button->QUserEvent() != RE::UserEvents::GetSingleton()->activate) {
+				continue;
+			}
+
+			auto* ui = RE::UI::GetSingleton();
+			if (!ui || ui->GameIsPaused() || ui->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
+				return EventResult::kContinue;
+			}
+			static auto* survival = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Survival_ModeEnabledShared");
+			if (!survival || survival->value < 1.0f) {
+				return EventResult::kContinue;
+			}
+
+			const auto target = RE::CrosshairPickData::GetSingleton()->GetActiveTarget().get();
+			auto*      base = target ? target->GetBaseObject() : nullptr;
+			if (!base) {
+				return EventResult::kContinue;
+			}
+			const auto formID = base->GetFormID();
+			if (CFramework_Blessings_VS::Data.HasForm(formID) || CFramework_Blessings_WS::Data.HasForm(formID)) {
+				INFO("Blessings: Survival Mode shrine activated, {} ({:08X})", base->GetName(), formID);
+				SKSE::GetTaskInterface()->AddTask([formID]() {
+					ActivateShrine(RE::TESForm::LookupByID(formID));
+				});
+			}
+			return EventResult::kContinue;
+		}
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
 	//-- Framework Functions ( Sink Event ) -------------
 	//---------------------------------------------------
 
-	void CHandler::ActivateShrineFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_shrine) {
+	void CHandler::ActivateShrine(RE::TESForm* a_shrine) {
 
 		if (!a_shrine) { return; }
 
@@ -133,6 +178,8 @@ namespace CFramework_Blessings {
 	//---------------------------------------------------
 
 	void CHandler::ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, Section a_section) {
+
+		INFO("Blessings: shrine {:08X} (base {:08X}) counted{}", a_eventID, a_baseID, FoundItemData_NoShow.HasForm(a_baseID) ? ", already found" : "");
 
 		if (!FoundItemData_NoShow.HasForm(a_baseID)) {
 			auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, RE::TESForm::LookupByID(a_eventID)->GetName());
@@ -209,7 +256,6 @@ namespace CFramework_Blessings {
 			CFramework_Blessings_WS::Data.CompileFormArray(CFramework_Blessings::WS_Forms, "Wintersun - Faiths of Skyrim.esp");
 			CFramework_Blessings_WS::Data.CompileVariation(CFramework_Blessings::WS_FormV, "Wintersun - Faiths of Skyrim.esp");
 			CFramework_Blessings_WS::Data.Populate(WS_NameArray, WS_FormArray, WS_BoolArray, WS_TextArray);
-			CHandler::AddFormsToList();
 		}
 
 		CFramework_Blessings_DS::Data.CompileFormArray(CFramework_Blessings::DS_Forms_SK, "Skyrim.esm");
@@ -240,47 +286,6 @@ namespace CFramework_Blessings {
 		}
 		for (auto i = 0; i < WS_NameArray.size(); i++) {
 			CFramework_Master::CItemsDataVec.push_back(std::make_tuple(WS_FormArray[i], WS_NameArray[i], "$MCMPageShrines", std::to_underlying(EntryCategory::kShrine)));
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-	
-	void CHandler::AddFormsToList() {
-
-		auto* ShrineList = Serialization::CompletionistData::GetFullForm<RE::BGSListForm>(0x00081B, "Completionist.esp");
-		if (ShrineList) {
-
-			for (auto formID : WS_Forms) {
-				if (auto* Shrine = Serialization::CompletionistData::GetFullForm(formID, "Wintersun - Faiths of Skyrim.esp")) {
-					ShrineList->AddForm(Shrine);
-				}
-			}
-
-			for (auto formID : WS_FormV) {
-				if (formID.second.empty()) {
-					continue;
-				}
-
-				if (auto* Shrine = Serialization::CompletionistData::GetFullForm(formID.first, "Wintersun - Faiths of Skyrim.esp")) {
-					ShrineList->AddForm(Shrine);
-				}
-
-				for (auto var : formID.second) {
-					if (var) {
-						if (auto* Shrine = Serialization::CompletionistData::GetFullForm(var, "Wintersun - Faiths of Skyrim.esp")) {
-							ShrineList->AddForm(Shrine);
-						}
-					}
-					else {
-						break;
-					}
-				}
-			}
-		}
-		else {
-			INFO("Unable To Retrieve Shrine List");
 		}
 	}
 

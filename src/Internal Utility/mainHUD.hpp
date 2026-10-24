@@ -10,20 +10,12 @@ namespace Completionist_MainHUD
 
 		static void Register();
 
-		static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
-
 		static void	ProcessCrosshairReference(RE::HUDData* data);
-		static std::string GetPrefix(int32_t a_variable);
 
 		static bool ItemIsCollectable(RE::TESForm* a_form);
 		static bool ItemIsCollected(RE::TESForm* a_form);
 
 		static void OnUpdateCrosshairText(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data);
-		static const char* OnUpdateInventoryText(RE::InventoryEntryData* a_this);
-		static const char* OnUpdateCraftingText(RE::TESForm* a_this);
-
-		static const char*	API_GetDisplayNamePrefix(RE::InventoryEntryData* a_object, bool a_collected, bool a_displayed = false, bool a_variationDisplayed = false);
-		static const char*  API_GetDisplayNameMerged(const char* a_this, bool a_collected, RE::TESForm* a_form);
 
 		TextnTagsAPI(TextnTagsAPI const&) = delete;
 		TextnTagsAPI(TextnTagsAPI const&&) = delete;
@@ -35,6 +27,5 @@ namespace Completionist_MainHUD
 		~TextnTagsAPI() = default;
 
 		static inline REL::Relocation<decltype(OnUpdateCrosshairText)> _OnUpdateCrosshairText;
-		static inline REL::Relocation<decltype(OnUpdateInventoryText)> _OnUpdateInventoryText;
 	};
 }

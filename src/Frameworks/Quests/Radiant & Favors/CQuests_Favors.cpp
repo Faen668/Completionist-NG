@@ -62,6 +62,48 @@ namespace CQFramework_FavorQuests
 	{
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESContainerChangedEvent>*>(GetSingleton()));
+		if (auto* ui = RE::UI::GetSingleton()) {
+			ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(GetSingleton()));
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Talking to a merchant --------------------------
+	//---------------------------------------------------
+
+	// Merchant Handler perk replacement, stays registered a few seconds after dialogue
+	namespace
+	{
+		constexpr auto       merchantGrace = std::chrono::seconds(4);
+		std::atomic<std::uint32_t> conversation{ 0 };
+	}
+
+	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*)
+	{
+		if (!a_event || a_event->menuName != RE::DialogueMenu::MENU_NAME) {
+			return EventResult::kContinue;
+		}
+
+		const auto current = ++conversation;
+		if (a_event->opening) {
+			// Speaker is set next frame
+			SKSE::GetTaskInterface()->AddTask([]() {
+				if (auto speaker = RE::MenuTopicManager::GetSingleton()->speaker.get(); speaker) {
+					RegisterMerchant(speaker->As<RE::Actor>());
+				}
+			});
+			return EventResult::kContinue;
+		}
+
+		std::thread([current]() {
+			std::this_thread::sleep_for(merchantGrace);
+			SKSE::GetTaskInterface()->AddTask([current]() {
+				if (conversation == current) {
+					UnRegisterMerchant();
+				}
+			});
+		}).detach();
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -79,7 +121,7 @@ namespace CQFramework_FavorQuests
 	//-- Favors for Chopping Wood and Selling Ore -------
 	//---------------------------------------------------
 
-	void CHandler::RegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
+	void CHandler::RegisterMerchant(RE::Actor* a_actor) {
 
 		auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
 		if (!a_actor || !curspeaker || a_actor->GetFormID() != curspeaker->GetFormID()) { 
@@ -97,7 +139,7 @@ namespace CQFramework_FavorQuests
 		INFO("Registered NPC: REF:{} BASE:{} - [{}]", Serialization::CompletionistData::GetFormIDHexString(activeMerchant.Merchant), Serialization::CompletionistData::GetFormIDHexString(baseActor->GetFormID()), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
 	}
 
-	void CHandler::UnRegisterMerchant(RE::StaticFunctionTag*, RE::Actor* a_actor) {
+	void CHandler::UnRegisterMerchant() {
 
 		if (activeMerchant.Merchant && activeMerchant.BaseActor) {
 			INFO("Unregistered NPC: REF:{} BASE:{} - [{}]", Serialization::CompletionistData::GetFormIDHexString(activeMerchant.Merchant), Serialization::CompletionistData::GetFormIDHexString(activeMerchant.BaseActor->GetFormID()), RE::TESForm::LookupByID<RE::Actor>(activeMerchant.Merchant)->GetName());
@@ -134,9 +176,12 @@ namespace CQFramework_FavorQuests
 			}
 
 			if (a_event->oldContainer == RE::PlayerCharacter::GetSingleton()->GetFormID()) {
-				auto curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+				// Registered merchant, not the live speaker (dialogue can be skipped)
+				auto       curspeaker = RE::MenuTopicManager::GetSingleton()->speaker.get().get();
+				const bool otherSpeaker = curspeaker && curspeaker->GetFormID() != activeMerchant.Merchant;
+				const bool taken = !a_event->reference && (a_event->newContainer == 0 || a_event->newContainer == activeMerchant.Merchant);
 
-				if (activeMerchant.Merchant && curspeaker && activeMerchant.Merchant == curspeaker->GetFormID()) {
+				if (activeMerchant.Merchant && !otherSpeaker && taken) {
 
 					auto* soldForm = RE::TESForm::LookupByID(a_event->baseObj);
 

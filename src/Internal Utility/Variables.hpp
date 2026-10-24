@@ -1,5 +1,6 @@
 #pragma once
 #include "Enums.hpp"
+#include "UI/Core/UISettings.hpp"
 
 namespace CVariables
 {
@@ -16,50 +17,18 @@ namespace CVariables
 	inline bool 			V_HUD_Override_Enabled_Displayable;
 	inline bool 			V_HUD_Override_Enabled_Displayed;
 	inline bool 			V_HUD_Override_Enabled_Occupied;
-	inline std::int32_t		V_HUD_Colour_Displayable;
-	inline std::int32_t		V_HUD_Colour_Displayed;
-	inline std::int32_t		V_HUD_Colour_Occupied;
 	inline std::string 		V_HUD_ColourString_Displayable;
 	inline std::string 		V_HUD_ColourString_Displayed;
 	inline std::string 		V_HUD_ColourString_Occupied;
-
-	inline bool 			V_HUD_Override_Enabled_New_Menus;
-	inline bool 			V_HUD_Override_Enabled_Found_Menus;
-	inline std::int32_t		V_HUD_Colour_New_Menus;
-	inline std::int32_t		V_HUD_Colour_Found_Menus;
-	inline std::string 		V_HUD_ColourString_New_Menus;
-	inline std::string 		V_HUD_ColourString_Found_Menus;
 
 	inline std::int32_t		V_HUD_CustomColour_New_Crosshair;
 	inline std::int32_t		V_HUD_CustomColour_Found_Crosshair;
 	inline std::string 		V_HUD_CustomColourString_New_Crosshair;
 	inline std::string 		V_HUD_CustomColourString_Found_Crosshair;
 
-	inline std::int32_t		V_HUD_CustomColour_Displayable;
-	inline std::int32_t		V_HUD_CustomColour_Displayed;
-	inline std::int32_t		V_HUD_CustomColour_Occupied;
 	inline std::string 		V_HUD_CustomColourString_Displayable;
 	inline std::string 		V_HUD_CustomColourString_Displayed;
 	inline std::string 		V_HUD_CustomColourString_Occupied;
-
-	inline std::int32_t		V_HUD_CustomColour_New_Menus;
-	inline std::int32_t		V_HUD_CustomColour_Found_Menus;
-	inline std::string 		V_HUD_CustomColourString_New_Menus;
-	inline std::string 		V_HUD_CustomColourString_Found_Menus;
-
-	inline std::int32_t		V_TextChoice_N;
-	inline std::int32_t		V_TextChoice_G;
-
-	inline std::int32_t		V_TextChoice_Displayable;
-	inline std::int32_t		V_TextChoice_Displayed;
-	inline std::int32_t		V_TextChoice_Occupied;
-
-	inline std::int32_t		V_PrefixChoice_N;
-	inline std::int32_t		V_PrefixChoice_G;
-
-	inline std::int32_t		V_PrefixChoice_Displayable;
-	inline std::int32_t		V_PrefixChoice_Displayed;
-	inline std::int32_t		V_PrefixChoice_Occupied ;
 
 	inline std::string		V_CrosshairTag_New;
 	inline std::string		V_CrosshairTag_Found;
@@ -98,13 +67,43 @@ namespace CVariables
 	inline bool				V_CellScanner_CONT;
 	inline bool				V_CellScanner_NPCS;
 	inline bool				V_CellScanner_NUMB;
-	inline bool				V_CellScanner_DETA;
 	inline bool				V_CellScanner_Closest;
 	inline bool				V_CellScanner_Markers;
 
 	inline bool				V_CellScanner_ExcludeBooks;
 	inline bool				V_CellScanner_ExcludeArmor;
 	inline bool				V_CellScanner_ExcludeWeapons;
+	inline bool				V_CellScanner_ExcludeOwned;
+
+	// Item icons
+	inline bool				V_ItemIcons{ true };
+	inline std::int32_t		V_ItemIcons_Size{ 100 };
+	inline std::int32_t		V_ItemIcons_Opacity{ 100 };
+	inline bool				V_ItemIcons_Needed{ true };
+	inline bool				V_ItemIcons_Found{ true };
+	inline bool				V_ItemIcons_Museum{ true };
+
+	// Completionist sort
+	inline std::int32_t		V_Sort_Displayable{ 1 };
+	inline std::int32_t		V_Sort_Occupied{ 2 };
+	inline std::int32_t		V_Sort_Displayed{ 3 };
+	inline std::int32_t		V_Sort_Needed{ 4 };
+	inline std::int32_t		V_Sort_Found{ 5 };
+	inline bool				V_Sort_Bands{ true };
+
+	// Item names in the item lists, format 7 is no edits
+	inline std::int32_t		V_MenuFormat_N{ 7 };
+	inline std::int32_t		V_MenuFormat_G{ 7 };
+	inline std::int32_t		V_MenuFormat_Displayable{ 7 };
+	inline std::int32_t		V_MenuFormat_Displayed{ 7 };
+	inline std::int32_t		V_MenuFormat_Occupied{ 7 };
+	inline std::int32_t		V_MenuPrefix_N{ 0 };
+	inline std::int32_t		V_MenuPrefix_G{ 0 };
+	inline std::int32_t		V_MenuPrefix_Displayable{ 0 };
+	inline std::int32_t		V_MenuPrefix_Displayed{ 0 };
+	inline std::int32_t		V_MenuPrefix_Occupied{ 0 };
+	inline std::string		V_MenuColour_N;
+	inline std::string		V_MenuColour_G;
 	inline bool				V_CellScanner_ExcludeAlchemy;
 	inline bool				V_CellScanner_ExcludeMiscItems;
 	inline std::int32_t		V_CellScanner_ScanRange;
@@ -130,11 +129,9 @@ namespace CVariables
 		  static void Register();
 		  static void Update();
 		  static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
-		  static void SetFrameworkQuest(RE::StaticFunctionTag*, RE::TESQuest* a_quest);
 
 		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
 
-		  static bool IsUsingLinux();
 		  static bool IsMuseumAPILoggingEnabled();
 		  static bool IsGlobalPatchInstallLoggingEnabled();
 		  static std::vector<CMiscPatchType> GetTrackedEntityTypes();
@@ -142,6 +139,9 @@ namespace CVariables
 		  static bool IsDebuggingEnabled();
 		  static bool GetIniBoolValue(const std::string& key);
 		  static std::string GetIniStringValue(const std::string& key);
+		  static std::string GetIniValue(const char* a_section, const std::string& a_key, const char* a_default);
+		  static CompletionistUI::UISettings GetUISettings();
+		  static void SaveUISettings(const CompletionistUI::UISettings& a_settings);
 
 		  VariablesAPI(VariablesAPI const&) = delete;
 		  VariablesAPI(VariablesAPI const&&) = delete;

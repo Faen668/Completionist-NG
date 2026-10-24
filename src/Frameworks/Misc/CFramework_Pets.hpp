@@ -22,6 +22,7 @@ namespace CFramework_Pets
 		static void			UpdateFoundForms();
 		static void			InjectAndCompileData();
 		static void			InstallSearchTerms();
-		static void			Framework_UpdatePetOwnership(RE::StaticFunctionTag*, RE::Actor* a_critter);
+		static void			Framework_UpdatePetOwnership(RE::Actor* a_critter);
+		static void			CheckAdoptedPet();
 	};
 }

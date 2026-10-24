@@ -10,14 +10,12 @@ namespace CLocalisation
 	{
 	public:
 		 static void Register();
-		 static bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
 		 static LocalisationAPI* GetSingleton() { static LocalisationAPI singleton; return &singleton; }
 
 		 static void BuildLocalisedMaps();
 
 		 static const char* GetLocStringByKey(const char* s_key);
-		 static std::string GetLocStringByKeyExt(RE::StaticFunctionTag*, std::string s_key);
 
 		 static const char* GetLocNameByKey(const char* s_key);
 		 static std::string GetLocNameByKeyExt(RE::StaticFunctionTag*, std::string s_key);
@@ -25,9 +23,7 @@ namespace CLocalisation
 		 static const char* GetLocDescriptionByKey(const char* s_key);
 		 static std::string GetLocDescriptionByKeyExt(RE::StaticFunctionTag*, std::string s_key);
 
-		 static int32_t GetStringLength(RE::StaticFunctionTag*, RE::BSFixedString);
 
-		 static bool IsMatchingShout(RE::StaticFunctionTag*, std::string s_key, std::string s_key2);
 
 		 LocalisationAPI(LocalisationAPI const&) = delete;
 		 LocalisationAPI(LocalisationAPI const&&) = delete;

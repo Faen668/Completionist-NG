@@ -36,8 +36,6 @@ namespace CEvents
 		static uintptr_t RegisterMapMarkerAddedHook(void (*f)(RE::TESFullName* a_form));
 		static uintptr_t RegisterMapMarkerDiscoveredHook(const char* (*f)(RE::TESFullName* a_form));
 		static uintptr_t RegisterUpdateCrosshairHook(void (*f)(RE::UIMessageQueue* a_this, const RE::BSFixedString& a_menuName, RE::UI_MESSAGE_TYPE a_type, RE::IUIMessageData* a_data));
-		static uintptr_t RegisterUpdateInventoryNameHook(const char* (*f)(RE::InventoryEntryData* a_this));
-		static void RegisterUpdateCraftingMenuHook();
 
 		static void RegisterForEvent_OnBooksReadEvent(void (*f)(FuncParam_Book));
 		static void RegisterForEvent_OnMenuOpenCloseEvent(void (*f)(FuncParam_Menu));

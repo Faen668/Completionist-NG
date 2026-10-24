@@ -9,29 +9,7 @@ namespace CLocalisation {
 
 	void LocalisationAPI::Register() 
 	{
-		SKSE::GetPapyrusInterface()->Register(RegisterFunctions);
 		BuildLocalisedMaps();
-	}
-
-	//---------------------------------------------------
-	//-- Localisation ( Register Papyrus Functions ) ----
-	//---------------------------------------------------
-
-	bool LocalisationAPI::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) {
-		const char* scriptName = "Completionist_Native";
-
-		a_vm->RegisterFunction("GetStringLength",		scriptName, GetStringLength);
-		a_vm->RegisterFunction("IsMatchingShout",		scriptName, IsMatchingShout);
-		a_vm->RegisterFunction("GetLocStringByKeyExt",	scriptName, GetLocStringByKeyExt);
-		return true;
-	}
-
-	//---------------------------------------------------
-	//-- Localisation ( GetString Length. ) -------------
-	//---------------------------------------------------
-
-	int32_t LocalisationAPI::GetStringLength(RE::StaticFunctionTag*, RE::BSFixedString s_key) {
-		return s_key.length();
 	}
 
 	//---------------------------------------------------
@@ -64,18 +42,6 @@ namespace CLocalisation {
 
 	const char* LocalisationAPI::GetLocStringByKey(const char* s_key) {
 		return localisedMap_M.contains(s_key) ? localisedMap_M.at(s_key).c_str() : s_key;
-	}
-
-	std::string LocalisationAPI::GetLocStringByKeyExt(RE::StaticFunctionTag*, std::string s_key) {
-		return localisedMap_M.contains(s_key) ? localisedMap_M.at(s_key) : s_key;
-	}
-
-	//---------------------------------------------------
-	//-- Localisation ( Is Matching Shout ) -------------
-	//---------------------------------------------------
-
-	bool LocalisationAPI::IsMatchingShout(RE::StaticFunctionTag*, std::string s_key, std::string s_key2) {
-		return s_key.find('(') != std::string::npos && DKUtil::string::iequals(s_key.substr(0, s_key.find('(') - 1), s_key2);
 	}
 
 	//---------------------------------------------------

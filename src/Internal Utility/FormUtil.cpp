@@ -32,7 +32,7 @@ auto FormUtil::GetIdentifierFromForm(RE::TESForm* a_form) -> std::string
 
 auto FormUtil::GetIdentifierFromForm(RE::BGSRefAlias* a_form) -> std::string
 {
-	if (!a_form) {
+	if (!a_form || !a_form->owningQuest) {
 		return ""s;
 	}
 
