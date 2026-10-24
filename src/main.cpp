@@ -7,6 +7,10 @@
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
+#include "Internal Utility/WordsOfPower.hpp"
+#include "UI/GameUI.hpp"
+#include "UI/ItemMarks.hpp"
+#include "UI/SettingsPages.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
@@ -18,9 +22,11 @@ static void PerformLoadOrderValidationChecks()
 	const auto& Handler = RE::TESDataHandler::GetSingleton();
 	if (!Handler) {
 		ERROR("Completionist was unable to retrieve TESDataHandler.");
+		return;
 	}
 
-	const auto& frm = Handler->LookupForm(0x000823, modName);
+	// Completionist_Tracker
+	const auto& frm = Handler->LookupForm(0x000802, modName);
 	if (!frm)
 	{
 		INFO("");
@@ -81,6 +87,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CLocalisation::LocalisationAPI::Register();
 
 		Completionist_MainHUD::TextnTagsAPI::Register();
+		CompletionistUI::ItemMarks::Install();
 
 		CQuestMaster::QuestAPI::Register();
 		CFramework_Master::FrameworkAPI::Register();
@@ -89,6 +96,8 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CFramework_Master::FrameworkAPI::FinalizeRegistrations();
 		CHCMHandler::MCMAPI::Register();
 		Completionist::MuseumAPI::Register();
+		CompletionistUI::GameUI::Install();
+		WordsOfPower::StartScan();
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
 	}
@@ -97,12 +106,22 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		Completionist::MuseumAPI::OnPlayerLoadGame();
+		CompletionistUI::SettingsPages::RestoreTargets();
+		CompletionistUI::GameUI::OnGameLoaded();
+		CFramework_Master::FrameworkAPI::OnGameStarted(true);
+		break;
+
+	case SKSE::MessagingInterface::kSaveGame:
+		CompletionistUI::SettingsPages::BeforeSave();
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		Completionist::MuseumAPI::OnPlayerLoadGame();
+		CompletionistUI::SettingsPages::RestoreTargets();
+		CompletionistUI::GameUI::OnGameLoaded();
+		CFramework_Master::FrameworkAPI::OnGameStarted(false);
 		break;
 	}
 }
