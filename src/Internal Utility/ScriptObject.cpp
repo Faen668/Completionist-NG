@@ -3,18 +3,18 @@
 
 auto ScriptObject::FromForm(RE::TESForm* a_form, const std::string& a_scriptName, std::optional<bool> logOutput) -> ScriptObjectPtr
 {
-	if (!a_form) 
+	if (!a_form)
 	{
-		if (logOutput.value())
+		if (logOutput.value_or(true))
 			INFO("Cannot retrieve script object from a None form."sv);
 
 		return nullptr;
 	}
 
 	auto papyrusVM = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-	if (!papyrusVM) 
+	if (!papyrusVM)
 	{
-		if (logOutput.value())
+		if (logOutput.value_or(true))
 			INFO("ScriptObject: Unable To Obtain Papyrus VM.");
 
 		return nullptr;
@@ -30,7 +30,7 @@ auto ScriptObject::FromForm(RE::TESForm* a_form, const std::string& a_scriptName
 	{
 		std::string formIdentifier = FormUtil::GetIdentifierFromForm(a_form);
 
-		if (logOutput.value())
+		if (logOutput.value_or(true))
 			INFO("ScriptObject: Script {} is not attached to form [{}]"sv, a_scriptName, formIdentifier);
 
 		return nullptr;

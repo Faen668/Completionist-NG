@@ -695,7 +695,7 @@ struct CMiscPatch
 
 		for (auto& [formID, unused] : section->data.data)
 		{
-			auto* Shout = static_cast<RE::TESShout*>(RE::TESForm::LookupByID(formID));
+			auto* Shout = RE::TESForm::LookupByID<RE::TESShout>(formID);
 			if (!Shout) { continue; }
 
 			auto* Word1 = static_cast<RE::SpellItem*>(Shout->variations[0].spell);
@@ -770,7 +770,7 @@ struct CMiscPatch
 	//---------------------------------------------------
 
 	void ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, bool from_hook, CMiscPatchData* section) {
-		auto* a_marker = static_cast<RE::TESObjectREFR*>(a_form);
+		auto* a_marker = a_form ? a_form->As<RE::TESObjectREFR>() : nullptr;
 
 		if (a_marker && !CFramework_Master::FoundItemData_NoShow.HasForm(a_form)) {
 			if (auto extraMapMarker = Serialization::CompletionistData::GetMapMarkerInternal(a_marker); extraMapMarker && extraMapMarker->mapData) {
@@ -827,7 +827,7 @@ struct CMiscPatch
 			auto msg = fmt::format("{}{}!", CVariables::V_NotificationText, data->names[pos_t]);
 			master::SendNotification(msg, a_section);
 
-			if (auto* book = static_cast<RE::TESObjectBOOK*>(data->data.GetForm(a_eventID)); book && book->GetSpell()) {
+			if (auto* book = data->data.GetForm<RE::TESObjectBOOK>(a_eventID); book && book->GetSpell()) {
 				master::AddNewEventToLog(Serialization::CompletionistLog::kTome, data->names[pos_t]);
 			}
 			else {
@@ -1113,7 +1113,7 @@ struct CMiscPatch
 			{
 				if (section.type == CMiscPatchType::kEnchantments) {
 					for (auto i = 0; i < section.forms.size(); i++) {
-						if (auto* enchantment = static_cast<RE::EnchantmentItem*>(section.forms[i]); enchantment && enchantment->GetKnown()) {
+						if (auto* enchantment = section.forms[i] ? section.forms[i]->As<RE::EnchantmentItem>() : nullptr; enchantment && enchantment->GetKnown()) {
 							section.bools[i] = true;
 							CFramework_Master::FoundItemData_NoShow.AddForm(enchantment);
 						}

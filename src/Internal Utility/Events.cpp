@@ -46,55 +46,6 @@ namespace CEvents
 	//-- Event Distributor (Register Hooks ) ------------
 	//---------------------------------------------------
 
-	uintptr_t EventHandler::RegisterUpdateInventoryNameHook(const char* (*f)(RE::InventoryEntryData* a_this))
-	{
-		auto& trampoline = SKSE::GetTrampoline();
-		return trampoline.write_branch<5>(RELOCATION_ID(50926, 51803).address() + REL::Relocate(0x4, 0x4), f);
-	}
-
-	//---------------------------------------------------
-	//-- Event Distributor (Register Hooks ) ------------
-	//---------------------------------------------------
-
-	void EventHandler::RegisterUpdateCraftingMenuHook()
-	{
-		const auto base = REL::RelocationID(50511, 51227).address();
-		const auto offset = REL::Relocate(0x28, 0xC4);
-		const auto addr = base + offset;
-
-		auto& trampoline = SKSE::GetTrampoline();
-
-		if (REL::Module::get().IsAE()) {
-			// reroute skse's AE scaleform hook to ret trampoline instead of jmp back
-			const auto skse_trampoline = dku::Hook::GetDisp(addr);
-			const auto skse_scaleform_hook = *RE::stl::adjust_pointer<std::uintptr_t>(AsPointer(skse_trampoline), 0x6);
-			const auto skse_assembly_size = 0x16;
-			const auto skse_detour_return = skse_scaleform_hook + skse_assembly_size;
-			const auto skse_detour_size = sizeof(dku::Hook::JmpRip) + sizeof(std::uintptr_t);
-
-			const auto buffer = trampoline.allocate(skse_detour_size);
-			// prolog
-			dku::Hook::WritePatch(buffer, { AsPointer(skse_detour_return), skse_detour_size });
-			dku::Hook::WriteImm(skse_detour_return + sizeof(dku::Hook::JmpRip), AsAddress(buffer));
-
-			auto ae_hook = dku::Hook::AddCaveHook(
-				AsAddress(buffer),
-				{ 0, skse_detour_size },
-				FUNC_INFO(Completionist_MainHUD::TextnTagsAPI::OnUpdateCraftingText),
-				{ AsPointer(base + 0xBD), 0x7 },
-				{},
-				dku::Hook::HookFlag::kRestoreAfterEpilog);
-			ae_hook->Enable();
-		}
-		else {
-			trampoline.write_call<5>(addr, Completionist_MainHUD::TextnTagsAPI::OnUpdateCraftingText);
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Event Distributor (Register Hooks ) ------------
-	//---------------------------------------------------
-
 	uintptr_t EventHandler::RegisterMapMarkerAddedHook(void (*f)(RE::TESFullName* a_form))
 	{
 		auto& trampoline = SKSE::GetTrampoline();
@@ -249,7 +200,7 @@ namespace CEvents
 
 	EventResult	EventHandler::ProcessEvent(FuncParam_Acti, RE::BSTEventSource<RE::TESActivateEvent>*)
 	{
-		if (!a_event || !a_event->objectActivated || a_event->actionRef.get()->GetFormID() != RE::PlayerCharacter::GetSingleton()->GetFormID()) { return EventResult::kContinue; }
+		if (!a_event || !a_event->objectActivated || !a_event->actionRef || a_event->actionRef.get() != RE::PlayerCharacter::GetSingleton()) { return EventResult::kContinue; }
 
 		for (auto& fn : _OnActivateEvent) {
 			fn(a_event);

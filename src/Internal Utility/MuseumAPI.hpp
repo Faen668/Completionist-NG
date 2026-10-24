@@ -11,7 +11,6 @@ namespace Completionist
 		MuseumAPI operator=(MuseumAPI&&) = delete;
 
 		static void Register();
-		static bool	RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 		static void OnPlayerLoadGame();
 		static void VerifyAltLists();
 
@@ -42,7 +41,6 @@ namespace Completionist
 		static std::unordered_set<RE::TESForm*> GetReplicaItems(const RE::TESForm* element, const RE::BGSListForm* replicaBaseItems, const RE::BGSListForm* replicaItems);
 
 		// Papyrus Functions
-		static RE::BSFixedString GetMuseumDisplayStatus(RE::StaticFunctionTag*, RE::TESForm* a_form);
 
 	private:
 		MuseumAPI() = default;

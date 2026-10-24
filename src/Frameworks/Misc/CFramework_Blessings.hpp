@@ -46,11 +46,12 @@ namespace CFramework_Blessings{
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final : public RE::BSTEventSink<RE::TESActivateEvent> {
+	class CHandler final : public RE::BSTEventSink<RE::TESActivateEvent>, public RE::BSTEventSink<RE::InputEvent*> {
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
 		  EventResult			ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override;
+		  EventResult			ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) override;
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();
@@ -58,8 +59,7 @@ namespace CFramework_Blessings{
 		  static void			InjectAndCompileData();
 		  static void			ProcessFoundForm(RE::FormID a_baseID, RE::FormID a_eventID, Section a_section);
 
-		  static void			AddFormsToList();
-		  static void			ActivateShrineFromPapyrus(RE::StaticFunctionTag*, RE::TESForm* a_shrine);
+		  static void			ActivateShrine(RE::TESForm* a_shrine);
 		  static void			InstallSearchTerms();
 	};
 }

@@ -12,11 +12,30 @@ namespace Completionist
 
 		static void init();
 
+		enum class Place : std::uint8_t
+		{
+			kLoose,
+			kContainer,
+			kCarried,
+		};
+
+		struct Result
+		{
+			RE::ObjectRefHandle ref;	// item, or the container / NPC holding it
+			RE::TESForm*        item{ nullptr };
+			std::string         name;
+			std::string         type;
+			Place               place{ Place::kLoose };
+			bool                stealing{ false };
+		};
+
+		// Game thread, closest first
+		static std::vector<Result> Scan(RE::TESObjectCELL* a_cell, const std::vector<std::pair<RE::FormID, RE::FormID>>& a_tracked = {});
+
 		static void CheckForReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, bool b_logging, bool b_notify);
 
 		static std::string GetQuestMarkerReferenceFormID(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 		static std::string GetQuestMarkerReferenceOwner(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
-		static std::string GetQuestMarkerReferenceIndex(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 		static void ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* cell);
 		static void RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 
@@ -31,10 +50,6 @@ namespace Completionist
 		static std::string	GetPinnedReferenceName(RE::StaticFunctionTag*, RE::TESForm* a_form);
 		static RE::TESObjectREFR* GetPinnedReferenceRefr(RE::StaticFunctionTag*, RE::TESForm* a_form);
 
-		static RE::TESForm* GetTargetReferenceForm(RE::StaticFunctionTag*);
-		static std::string	GetTargetReferenceType(RE::StaticFunctionTag*);
-		static std::string	GetTargetReferenceName(RE::StaticFunctionTag*);
-		static RE::TESObjectREFR* GetTargetReferenceRefr(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell, RE::TESForm* a_lastForm);
 
 		static bool isCellExcluded(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 		static bool IsModAddedReferenceExcluded(RE::FormID a_formID);

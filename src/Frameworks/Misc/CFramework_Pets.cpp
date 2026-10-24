@@ -26,10 +26,36 @@ namespace CFramework_Pets {
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Check Adopted Pet ) ------
+	//---------------------------------------------------
+
+	// HearthFires adoption pet quest, alias 27
+	void CHandler::CheckAdoptedPet() {
+
+		static RE::FormID lastPet = 0;
+		auto* quest = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(0x0042B4, "HearthFires.esm");
+		if (!quest) { return; }
+
+		RE::ObjectRefHandle handle;
+		{
+			RE::BSReadLockGuard lock(quest->aliasAccessLock);
+			if (const auto it = quest->refAliasMap.find(27); it != quest->refAliasMap.end()) {
+				handle = it->second;
+			}
+		}
+		const auto ref = handle.get();
+		auto*      pet = ref ? ref->As<RE::Actor>() : nullptr;
+		if (!pet || pet->GetFormID() == lastPet) { return; }
+		lastPet = pet->GetFormID();
+		INFO("Pets: adopted {} ({:08X})", pet->GetName(), pet->GetFormID());
+		Framework_UpdatePetOwnership(pet);
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Process Found Form ) -----
 	//---------------------------------------------------
 
-	void CHandler::Framework_UpdatePetOwnership(RE::StaticFunctionTag*, RE::Actor* a_critter) {
+	void CHandler::Framework_UpdatePetOwnership(RE::Actor* a_critter) {
 
 		auto* baseActor = a_critter->GetActorBase();
 		if (!baseActor) { return; }

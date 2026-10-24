@@ -13,11 +13,32 @@ namespace Completionist
 	static std::vector<std::string> names;
 	static std::vector<std::string> types;
 	static std::vector<RE::FormID> formIDs;
-	static std::vector<std::tuple<RE::TESObjectREFR*, std::string, std::string, RE::TESForm*>> refsWithNames;
+	static std::vector<std::tuple<RE::ObjectRefHandle, std::string, std::string, RE::TESForm*, CellScanner::Place, bool>> refsWithNames;
 	static std::unordered_map<RE::FormID, RE::FormID> ExcludedVendorChests;
-	static int32_t currentReferencePosition;
+	static int32_t currentReferencePosition = -1;
+	static std::vector<std::pair<RE::FormID, RE::FormID>> trackedTargets;
 
 	using cmd = Serialization::CompletionistData;
+
+	static RE::TESObjectREFR* GetReference(const RE::ObjectRefHandle& a_handle)
+	{
+		return a_handle.get().get();
+	}
+
+	static auto* GetCurrentReferenceEntry()
+	{
+		const bool valid = currentReferencePosition >= 0 && currentReferencePosition < static_cast<int32_t>(refsWithNames.size());
+		return valid ? &refsWithNames[currentReferencePosition] : nullptr;
+	}
+
+	static auto FindPinnedReferenceEntry(RE::TESForm* a_form)
+	{
+		return std::find_if(refsWithNames.begin(), refsWithNames.end(),
+			[a_form](const auto& tuple) {
+				return a_form && std::get<3>(tuple) && std::get<3>(tuple)->GetFormID() == a_form->GetFormID();
+			}
+		);
+	}
 
 	void CellScanner::init()
 	{
@@ -31,26 +52,31 @@ namespace Completionist
 
 	void CellScanner::ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* a_cell)
 	{
+		if (!a_ref || !a_cell) { return; }
 		CFramework_Master::ExcludedCellScannerRefs.AddReference(a_ref->GetFormID(), a_ref->GetDisplayFullName(), a_cell->GetFormID());
 	};
 
 	void CellScanner::RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
 	{
+		if (!a_ref) { return; }
 		CFramework_Master::ExcludedCellScannerRefs.RemoveReference(a_ref->GetFormID());
 	};
 
 	std::vector<std::string> CellScanner::GetReferenceFormIDs(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
+		if (!a_cell) { return {}; }
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceFormIDs(a_cell->GetFormID());
 	}
 
 	std::vector<std::string> CellScanner::GetReferenceNames(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
+		if (!a_cell) { return {}; }
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceNames(a_cell->GetFormID());
 	}
 
 	std::vector<RE::TESObjectREFR*> CellScanner::GetObjectReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell)
 	{
+		if (!a_cell) { return {}; }
 		return CFramework_Master::ExcludedCellScannerRefs.GetReferenceForms(a_cell->GetFormID());
 	}
 
@@ -66,12 +92,6 @@ namespace Completionist
 		return cmd::GetFormOwner(a_ref);
 	}
 
-	std::string CellScanner::GetQuestMarkerReferenceIndex(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref)
-	{
-		if (!a_ref) { return "-"; }
-		return cmd::GetModIndexFromForm(a_ref);
-	}
-
 	//---------------------------------------------------
 	//-- Vendor Chest Functions -------------------------
 	//---------------------------------------------------
@@ -79,6 +99,9 @@ namespace Completionist
 	void CellScanner::ExcludeAllVendorChests() {
 
 		const auto& [allForms, lock] = RE::TESForm::GetAllForms();
+		if (!allForms) { return; }
+
+		const RE::BSReadLockGuard locker{ lock };
 		for (auto& [id, form] : *allForms)
 		{
 			if (form && form->formType == RE::FormType::Faction)
@@ -166,6 +189,22 @@ namespace Completionist
 	//-- Collectability Functions -----------------------
 	//---------------------------------------------------
 
+	// Nameless and non-playable items never show in inventories
+	static bool ShownInInventory(RE::TESBoundObject* a_object)
+	{
+		const char* name = a_object ? a_object->GetName() : nullptr;
+		if (!name || !*name) {
+			return false;
+		}
+		if (const auto* weapon = a_object->As<RE::TESObjectWEAP>()) {
+			return !weapon->weaponData.flags.any(RE::TESObjectWEAP::Data::Flag::kNonPlayable);
+		}
+		if (a_object->Is(RE::FormType::Armor) || a_object->Is(RE::FormType::Misc)) {
+			return (a_object->GetFormFlags() & RE::TESObjectARMO::RecordFlags::kNonPlayable) == 0;
+		}
+		return true;
+	}
+
 	bool CellScanner::ItemIsCollectable(RE::TESForm* a_form) {
 		return cmd::CheckIsCollectable(a_form->GetFormID());
 	}
@@ -187,92 +226,21 @@ namespace Completionist
 		ScanCell(cell, a_logging, b_notify);
 	}
 
-	//---------------------------------------------------
-	//-- Cell Scanner Function --------------------------
-	//---------------------------------------------------
-
-	RE::TESObjectREFR* CellScanner::GetTargetReferenceRefr(RE::StaticFunctionTag*, RE::TESObjectCELL* a_cell, RE::TESForm* a_lastForm)
+	std::vector<CellScanner::Result> CellScanner::Scan(RE::TESObjectCELL* a_cell, const std::vector<std::pair<RE::FormID, RE::FormID>>& a_tracked)
 	{
-		int32_t pos = 0;
-
-		if (!a_cell) {
-			return nullptr;
+		trackedTargets = a_tracked;
+		ScanCell(a_cell, false, false);
+		trackedTargets.clear();
+		std::vector<Result> results;
+		results.reserve(refsWithNames.size());
+		for (const auto& [ref, name, type, form, place, stealing] : refsWithNames) {
+			results.push_back({ ref, form, name, type, place, stealing });
 		}
-
-		CellScanner::CheckForReferences(nullptr, a_cell, false, true);
-
-		//If the list is empty return nothing.
-		if (refsWithNames.size() < 1) {
-			currentReferencePosition = -1;
-			return nullptr;
-		}
-
-		//If the list only has 1 entry or no last reference is provided then return the first reference.
-		if (refsWithNames.size() == 1 || !a_lastForm) {
-			currentReferencePosition = 0;
-			return std::get<0>(refsWithNames[pos]) ? std::get<0>(refsWithNames[pos]) : nullptr;
-		}
-
-		//Using closest reference with a list size of 2 or more
-		//Traverse the list until we come to the closest reference that does not match the last target.
-		if (V_CellScanner_Closest)
-		{
-			for (pos = 0; pos < refsWithNames.size(); pos++) {
-				auto* foundForm = std::get<3>(refsWithNames[pos]);
-				auto* reference = std::get<0>(refsWithNames[pos]);
-
-				if (!reference || !foundForm || foundForm->GetFormID() == a_lastForm->GetFormID()) {
-					continue;
-				}
-
-				currentReferencePosition = pos;
-				return reference;
-			}
-			return nullptr;
-		}
-
-		//Using Random Target
-		else
-		{
-			//Get a random integer and traverse until we find a random ref that was not used previously.
-			pos = CellScanner::GetRandomIndex(refsWithNames.size());
-			while (!std::get<0>(refsWithNames[pos]) || !std::get<3>(refsWithNames[pos]) || std::get<3>(refsWithNames[pos])->GetFormID() == a_lastForm->GetFormID()) {
-				pos = CellScanner::GetRandomIndex(refsWithNames.size());
-			};
-			currentReferencePosition = pos;
-			return std::get<0>(refsWithNames[pos]);
-		}
-
-		return nullptr;
+		return results;
 	}
 
-	std::string CellScanner::GetTargetReferenceName(RE::StaticFunctionTag*)
-	{
-		return currentReferencePosition != -1 ? std::get<1>(refsWithNames[currentReferencePosition]) : "";
-	};
-
-	std::string CellScanner::GetTargetReferenceType(RE::StaticFunctionTag*)
-	{
-		return currentReferencePosition != -1 ? std::get<2>(refsWithNames[currentReferencePosition]) : "";
-	};
-
-	RE::TESForm* CellScanner::GetTargetReferenceForm(RE::StaticFunctionTag*)
-	{
-		return currentReferencePosition != -1 ? std::get<3>(refsWithNames[currentReferencePosition]) : nullptr;
-	};
-
 	bool CellScanner::HasPinnedFormInCell(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, RE::TESForm* a_form) {
-
-		if (!a_form || refsWithNames.size() == 0) {
-			return false;
-		}
-
-		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
-			[a_form](const auto& tuple) {
-				return std::get<3>(tuple)->GetFormID() == a_form->GetFormID();
-			}
-		);
-		return it != refsWithNames.end();
+		return a_form && FindPinnedReferenceEntry(a_form) != refsWithNames.end();
 	}
 
 	bool CellScanner::IsItemPinnable(RE::StaticFunctionTag*, RE::TESForm* a_form) {
@@ -281,54 +249,35 @@ namespace Completionist
 
 	std::string CellScanner::GetPinnedReferenceName(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
-		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
-			[a_form](const auto& tuple) {
-				return std::get<3>(tuple)->GetFormID() == a_form->GetFormID();
-			}
-		);
-
-		if (it != refsWithNames.end()) {
-			return std::get<1>(*it);
-		}
-		return "";
+		auto it = FindPinnedReferenceEntry(a_form);
+		return it != refsWithNames.end() ? std::get<1>(*it) : "";
 	};
 
 	std::string CellScanner::GetPinnedReferenceType(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
-		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
-			[a_form](const auto& tuple) {
-				return std::get<3>(tuple)->GetFormID() == a_form->GetFormID();
-			}
-		);
-
-		if (it != refsWithNames.end()) {
-			return std::get<2>(*it);
-		}
-		return "";
+		auto it = FindPinnedReferenceEntry(a_form);
+		return it != refsWithNames.end() ? std::get<2>(*it) : "";
 	};
 
 	RE::TESObjectREFR* CellScanner::GetPinnedReferenceRefr(RE::StaticFunctionTag*, RE::TESForm* a_form)
 	{
-		auto it = std::find_if(refsWithNames.begin(), refsWithNames.end(),
-			[a_form](const auto& tuple) {
-				return std::get<3>(tuple)->GetFormID() == a_form->GetFormID();
-			}
-		);
-
-		if (it != refsWithNames.end()) {
-			return std::get<0>(*it);
-		}
-		return nullptr;
+		auto it = FindPinnedReferenceEntry(a_form);
+		return it != refsWithNames.end() ? GetReference(std::get<0>(*it)) : nullptr;
 	};
 
 	//---------------------------------------------------
 	//-- Lambda to sort refs based on distance ----------
 	//---------------------------------------------------
 
-	static bool CompareByDistance(const RE::TESObjectREFR* a, const RE::TESObjectREFR* b) {
-		auto distanceA = a->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
-		auto distanceB = b->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
-		return distanceA < distanceB;
+	static bool CompareByDistance(const RE::ObjectRefHandle& a, const RE::ObjectRefHandle& b) {
+		const auto refA = a.get();
+		const auto refB = b.get();
+		if (!refA || !refB) {
+			return refA != nullptr;
+		}
+
+		const auto playerPos = RE::PlayerCharacter::GetSingleton()->GetPosition();
+		return refA->GetPosition().GetDistance(playerPos) < refB->GetPosition().GetDistance(playerPos);
 	}
 
 	//---------------------------------------------------
@@ -344,8 +293,20 @@ namespace Completionist
 			return;
 		};
 
-		const auto& rtd = cell->GetRuntimeData();
-		int32_t cont = 0, loos = 0, npcs = 0;
+		// All loaded exterior cells count, not just the current one
+		std::vector<RE::TESObjectCELL*> cells{ cell };
+		if (!cell->IsInteriorCell()) {
+			const auto* tes = RE::TES::GetSingleton();
+			if (const auto* grid = tes ? tes->gridCells : nullptr) {
+				for (std::uint32_t x = 0; x < grid->length; ++x) {
+					for (std::uint32_t y = 0; y < grid->length; ++y) {
+						if (auto* other = grid->GetCell(x, y); other && other != cell && other->IsAttached()) {
+							cells.push_back(other);
+						}
+					}
+				}
+			}
+		}
 
 		forms.clear();
 		refs.clear();
@@ -353,137 +314,212 @@ namespace Completionist
 		types.clear();
 		formIDs.clear();
 		refsWithNames.clear();
+		currentReferencePosition = -1;
 
 
-		for (auto& ref : rtd.references) {
-			if (!ref || !ref.get() || !ref->GetBaseObject() || ref.get() == RE::PlayerCharacter::GetSingleton() || ref->IsDeleted() || ref->IsDisabled()) {
-				continue;
-			}
+		// Exclude Owned Items
+		auto* const player = RE::PlayerCharacter::GetSingleton();
+		const bool  excludeOwned = CVariables::V_CellScanner_ExcludeOwned && player;
 
-			//Is an excluded reference.
-			if (IsReferenceExcluded(ref.get())) {
-				//INFO("Reference - {} - Is Excluded And Cannot Be Accessed - {}", std::format("{:08X}", ref.get()->GetFormID()), ref.get()->GetFile()->GetFilename());
-				continue;
-			}
+		for (auto* scanCell : cells) {
+			for (auto& ref : scanCell->GetRuntimeData().references) {
+				if (!ref || !ref.get() || !ref->GetBaseObject() || ref.get() == RE::PlayerCharacter::GetSingleton() || ref->IsDeleted() || ref->IsDisabled()) {
+					continue;
+				}
 
-			//Is a vendor chest.
-			if (IsOwnedByVendor(ref.get())) {
-				//INFO("Reference - {} - Is Owned By A Vendor And Cannot Be Accessed - {}", std::format("{:08X}", ref.get()->GetFormID()), ref.get()->GetFile()->GetFilename());
-				continue;
-			}
+				//Is an excluded reference.
+				if (IsReferenceExcluded(ref.get())) {
+					//INFO("Reference - {} - Is Excluded And Cannot Be Accessed - {}", std::format("{:08X}", ref.get()->GetFormID()), ref.get()->GetFile()->GetFilename());
+					continue;
+				}
 
-			auto allowed_distance = (CVariables::V_CellScanner_ScanRange / 0.01428);
+				//Is a vendor chest.
+				if (IsOwnedByVendor(ref.get())) {
+					//INFO("Reference - {} - Is Owned By A Vendor And Cannot Be Accessed - {}", std::format("{:08X}", ref.get()->GetFormID()), ref.get()->GetFile()->GetFilename());
+					continue;
+				}
 
-			switch (ref.get()->GetBaseObject()->GetFormType()) {
-			case RE::FormType::Container:
-			{
-				if (V_CellScanner_CONT) {
-					if (auto* container = ref.get()->GetBaseObject()->As<RE::TESContainer>()) {
-						auto inv = ref.get()->GetInventory();
+				auto allowed_distance = (CVariables::V_CellScanner_ScanRange / 0.01428);
 
-						for (auto& [obj, data] : inv) {
-							if (data.first > 0 && data.second) {
+				switch (ref.get()->GetBaseObject()->GetFormType()) {
+				case RE::FormType::Container:
+				{
+					if (V_CellScanner_CONT) {
+						if (auto* container = ref.get()->GetBaseObject()->As<RE::TESContainer>()) {
+							auto inv = ref.get()->GetInventory();
+							const bool containerIsPlayers = !ref.get()->GetOwner() || ref.get()->IsAnOwner(player, true, false);
 
-								//Is a reference of an excluded type in the MCM.
-								if (IsExcludedFormType(obj)) {
-									continue;
-								}
-
-								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
-									//RE::PlayerCharacter::GetSingleton()->MoveTo(ref.get());
-									//INFO("Found container item: {}", obj->GetName());
-
-									if (!cell->IsInteriorCell()) {
-										auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
-
-										if (distance > allowed_distance) {
-											continue;
-										}
+							for (auto& [obj, data] : inv) {
+								if (data.first > 0 && data.second) {
+									// Taking it would be stealing.
+									const bool stealing = player && !data.second->IsOwnedBy(player, containerIsPlayers);
+									if (excludeOwned && stealing) {
+										continue;
 									}
 
-									forms.emplace(obj);
+									//Is a reference of an excluded type in the MCM.
+									if (IsExcludedFormType(obj)) {
+										continue;
+									}
 
-									refsWithNames.emplace_back(std::make_tuple(ref.get(), obj->GetName(), GetFormType(obj), obj));
-									cont++;
+									if (!ShownInInventory(obj)) {
+										static std::set<RE::FormID> logged;  // once per item, not every scan
+										if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && logged.insert(obj->GetFormID()).second) {
+											INFO("Cell scanner: skipped hidden item {:08X} \"{}\" in {:08X}", obj->GetFormID(), obj->GetName(), ref.get()->GetFormID());
+										}
+										continue;
+									}
+
+									if (ItemIsCollectable(obj) && !ItemIsCollected(obj)) {
+										//RE::PlayerCharacter::GetSingleton()->MoveTo(ref.get());
+										//INFO("Found container item: {}", obj->GetName());
+
+										if (!cell->IsInteriorCell()) {
+											auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
+
+											if (distance > allowed_distance) {
+												continue;
+											}
+										}
+
+										forms.emplace(obj);
+
+										refsWithNames.emplace_back(std::make_tuple(ref->GetHandle(), obj->GetName(), GetFormType(obj), obj, CellScanner::Place::kContainer, stealing));
+									}
+								}
+
+							}
+						}
+					}
+					break;
+				}
+
+				case RE::FormType::NPC:
+				{
+					if (V_CellScanner_NPCS) {
+						if (auto* NPC = ref->As<RE::Actor>()) {
+
+							auto* FollowerFaction = cmd::GetFullForm<RE::TESFaction>(0x05C84E, "Skyrim.esm");
+
+							if (FollowerFaction && NPC->IsInFaction(FollowerFaction)) {
+								//INFO("{} is in the follower faction", NPC->GetName());
+								break;
+							}
+
+							// Pickpocketing, the dead and teammates are fine
+							const bool pickpocketing = !NPC->IsDead() && !NPC->IsPlayerTeammate();
+							if (excludeOwned && pickpocketing) {
+								break;
+							}
+
+							auto inv = NPC->GetInventory();
+							for (auto& [obj, data] : inv) {
+								if (data.first > 0 && data.second) {
+
+									//Is a reference of an excluded type in the MCM.
+									if (IsExcludedFormType(obj)) {
+										continue;
+									}
+
+									if (!ShownInInventory(obj)) {
+										static std::set<RE::FormID> logged;  // once per item, not every scan
+										if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && logged.insert(obj->GetFormID()).second) {
+											INFO("Cell scanner: skipped hidden item {:08X} \"{}\" in {:08X}", obj->GetFormID(), obj->GetName(), ref.get()->GetFormID());
+										}
+										continue;
+									}
+
+									if (ItemIsCollectable(obj) && !ItemIsCollected(obj)) {
+										//INFO("Found NPC Item: {} on - [{}]", obj->GetName(), NPC->GetName());
+
+										if (!cell->IsInteriorCell()) {
+											auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
+
+											if (distance > allowed_distance) {
+												continue;
+											}
+										}
+										refsWithNames.emplace_back(std::make_tuple(ref->GetHandle(), obj->GetName(), GetFormType(obj), obj, CellScanner::Place::kCarried, pickpocketing));
+										forms.emplace(obj);
+									}
+								}
+
+							}
+						}
+					}
+					break;
+				}
+
+				default:
+					if (V_CellScanner_REFS) {
+						auto* obj = ref->GetBaseObject();
+
+						//Is a reference of an excluded type in the MCM.
+						if (IsExcludedFormType(obj)) {
+							continue;
+						}
+
+						// Taking it would be stealing.
+						const bool stealing = ref.get()->IsCrimeToActivate();
+						if (excludeOwned && stealing) {
+							continue;
+						}
+
+						if (ItemIsCollectable(obj) && !ItemIsCollected(obj)) {
+							//INFO("Found loose item: {}", obj->GetName());
+
+							if (!cell->IsInteriorCell()) {
+								auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
+
+								if (distance > allowed_distance) {
+									continue;
 								}
 							}
 
-						}
-					}
-				}
-				break;
-			}
-
-			case RE::FormType::NPC:
-			{
-				if (V_CellScanner_NPCS) {
-					if (auto* NPC = ref->As<RE::Actor>()) {
-
-						auto* FollowerFaction = cmd::GetFullForm<RE::TESFaction>(0x05C84E, "Skyrim.esm");
-
-						if (FollowerFaction && NPC->IsInFaction(FollowerFaction)) {
-							//INFO("{} is in the follower faction", NPC->GetName());
-							break;
-						}
-
-						auto inv = NPC->GetInventory();
-						for (auto& [obj, data] : inv) {
-							if (data.first > 0 && data.second) {
-
-								//Is a reference of an excluded type in the MCM.
-								if (IsExcludedFormType(obj)) {
-									continue;
+							// Nameless ones can't be picked up
+							const char* display = ref.get()->GetDisplayFullName();
+							if (!display || !*display) {
+								static std::unordered_set<RE::FormID> logged;
+								if (logged.insert(obj->GetFormID()).second) {
+									INFO("Cell scanner: skipped nameless item {:08X} at {:08X}, it can't be picked up", obj->GetFormID(), ref.get()->GetFormID());
 								}
-
-								if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
-									//INFO("Found NPC Item: {} on - [{}]", obj->GetName(), NPC->GetName());
-
-									if (!cell->IsInteriorCell()) {
-										auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
-
-										if (distance > allowed_distance) {
-											continue;
-										}
-									}
-									refsWithNames.emplace_back(std::make_tuple(ref.get(), obj->GetName(), GetFormType(obj), obj));
-									forms.emplace(obj);
-									npcs++;
-								}
-							}
-
-						}
-					}
-				}
-				break;
-			}
-
-			default:
-				if (V_CellScanner_REFS) {
-					auto* obj = ref->GetBaseObject();
-
-					//Is a reference of an excluded type in the MCM.
-					if (IsExcludedFormType(obj)) {
-						continue;
-					}
-
-					if (ItemIsCollectable(obj) && !ItemIsCollected(obj) && !forms.contains(obj)) {
-						//INFO("Found loose item: {}", obj->GetName());
-
-						if (!cell->IsInteriorCell()) {
-							auto distance = ref.get()->GetPosition().GetDistance(RE::PlayerCharacter::GetSingleton()->GetPosition());
-
-							if (distance > allowed_distance) {
 								continue;
 							}
-						}
 
-						forms.emplace(ref->GetBaseObject());
-						refsWithNames.emplace_back(std::make_tuple(ref.get(), obj->GetName(), GetFormType(obj), obj));
-						loos++;
+							forms.emplace(ref->GetBaseObject());
+							refsWithNames.emplace_back(std::make_tuple(ref->GetHandle(), obj->GetName(), GetFormType(obj), obj, CellScanner::Place::kLoose, stealing));
+						}
 					}
+					break;
 				}
-				break;
 			}
+		}
+
+		// One row per item, the tracked reference first, then not stolen, then closest
+		{
+			const auto* player = RE::PlayerCharacter::GetSingleton();
+			const auto  rank = [&](const auto& a_entry) {
+				const auto* ref = std::get<0>(a_entry).get().get();
+				const auto* form = std::get<3>(a_entry);
+				const bool  tracked = ref && form && std::ranges::find(trackedTargets, std::pair{ ref->GetFormID(), form->GetFormID() }) != trackedTargets.end();
+				const float distance = ref && player ? ref->GetPosition().GetDistance(player->GetPosition()) : FLT_MAX;
+				return std::tuple{ !tracked, std::get<5>(a_entry), distance };
+			};
+			std::unordered_map<RE::TESForm*, std::size_t> chosen;
+			for (std::size_t i = 0; i < refsWithNames.size(); ++i) {
+				const auto [it, added] = chosen.try_emplace(std::get<3>(refsWithNames[i]), i);
+				if (!added && rank(refsWithNames[i]) < rank(refsWithNames[it->second])) {
+					it->second = i;
+				}
+			}
+			decltype(refsWithNames) kept;
+			kept.reserve(chosen.size());
+			for (std::size_t i = 0; i < refsWithNames.size(); ++i) {
+				if (chosen.at(std::get<3>(refsWithNames[i])) == i) {
+					kept.push_back(std::move(refsWithNames[i]));
+				}
+			}
+			refsWithNames = std::move(kept);
 		}
 
 		// Sort the vector of pairs based on CompareByDistance
@@ -498,18 +534,7 @@ namespace Completionist
 			{
 				if (V_CellScanner_NUMB) 
 				{
-					if (V_CellScanner_DETA)
-					{
-						//detailed
-						auto msg = fmt::format("~~~ {:s} {:s} ~~~"sv, name, CVariables::V_notificationTextCellScan3);
-						msg += loos > 0 ? fmt::format("\n~ {:s} {:s} ~"sv, std::to_string(loos), CVariables::V_notificationTextCellScan4) : "", "";
-						msg += npcs > 0 ? fmt::format("\n~ {:s} {:s} ~"sv, std::to_string(npcs), CVariables::V_notificationTextCellScan5) : "", "";
-						msg += cont > 0 ? fmt::format("\n~ {:s} {:s} ~"sv, std::to_string(cont), CVariables::V_notificationTextCellScan6) : "", "";
-
-						RE::DebugMessageBox(msg.c_str());
-						return;
-					}
-
+					// The detail (what's where) is in the In Current Cell window now, not a message box.
 					//numbers
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}"sv, name, CVariables::V_notificationTextCellScan0, std::to_string(forms.size()), CVariables::V_notificationTextCellScan1);
 					FrameworkAPI::SendNotification(msg, "NotifyMissable");

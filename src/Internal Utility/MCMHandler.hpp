@@ -104,54 +104,34 @@ namespace CHCMHandler
 
 	public:
 		static void						Register();
-		static bool						RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
 		static MCMAPI*					GetSingleton() { static MCMAPI singleton; return &singleton; }
 		static void						OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 
-		static int32_t					GetSkyUIMCMPositionalIndex(RE::StaticFunctionTag*, std::string MCMPage);
-		static int32_t					GetMCMPageIdentifierFromName(RE::StaticFunctionTag*, std::string MCMPage);
 		static void						BuildMCMPages(RE::StaticFunctionTag*);
 		static void						AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
 		static void						AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatch*>> defs);
 		
-		static int32_t					GetValidMainPatchPageID(RE::StaticFunctionTag*, std::string MCMPage);
-		static std::vector<std::string> GetPageConfiguration(RE::StaticFunctionTag*, std::string mcmpage, int32_t pageNumber);
 
-		static bool						IsSettingsPage(RE::StaticFunctionTag*, std::string MCMPage);
 		static bool						CanLoadPage(RE::StaticFunctionTag*, std::string MCMPage);
-		static std::vector<std::string> GetMCMPages(RE::StaticFunctionTag*, std::int32_t menu_identifier);
 
 		static int32_t					GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage);
 		static int32_t					GetMultiPageCount(RE::StaticFunctionTag*, std::string MCMPage);
-		static std::vector<std::string> GetMultiPageSplashScreenConfig(RE::StaticFunctionTag*, std::string mcmpage);
 
-		static int32_t					GetTotalEntriesForPage(RE::StaticFunctionTag*, std::string a_page);
-		static int32_t					GetTotalEntriesFoundForPage(RE::StaticFunctionTag*, std::string a_page);
-		static int32_t					GetPageNumberForForm(RE::StaticFunctionTag*, std::string a_page, std::string a_name);
-		static int32_t					GetPageNumberForSection(RE::StaticFunctionTag*, std::string a_page, std::string a_name);
 
 		static int32_t					GetActivePage(RE::StaticFunctionTag*, std::string a_page);
-		static void						SetActivePage(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
 
 		static int32_t					GetDefaultPage(RE::StaticFunctionTag*, std::string a_page);
-		static void						SetDefaultPage(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
 
-		static std::vector<std::string> GetSearchHistory(RE::StaticFunctionTag*, std::string a_page);
 		static void						ClearSearchHistory(RE::StaticFunctionTag*, std::string a_page);
 		static void						AddSearchTerm(RE::StaticFunctionTag*, std::string a_page, std::string a_value);
 
-		static bool						GetUseDefaultPage(RE::StaticFunctionTag*, std::string a_page);
-		static void						SetUseDefaultPage(RE::StaticFunctionTag*, std::string a_page, bool a_value);
-		static void						ResetPageSettings(RE::StaticFunctionTag*, std::string a_page);
-		static std::string				GetActivePageName(RE::StaticFunctionTag*, int32_t activePage, std::string mcmpage);
 
 		static int						GetDisplayValueForTotalAndFoundItemsByIdentifier(int32_t a_id, int32_t defaultValue);
 
 		static int						ModifyTotals(std::string a_pageName, int value, bool isTotal);
 		static void						DisplayVanillaTrackingPatches();
 		static void						DisplayModAddedTrackingPatches();
-		static std::vector<std::string> SearchMultiPage(RE::StaticFunctionTag*, std::string a_page, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType);
 		static std::string				GetSectionNameForForm(std::string a_page, std::string a_name, bool incPageNumber);
 
 		template <typename T = RE::FormID>

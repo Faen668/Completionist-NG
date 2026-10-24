@@ -286,20 +286,6 @@ namespace CFramework_Shouts {
 	//-- Framework Functions ( Update Found Forms ) -----
 	//---------------------------------------------------
 
-	void CHandler::UpdateFoundFormsExt(RE::StaticFunctionTag*) {
-		
-		VariablesAPI::Update();
-		CHandler::UpdateFoundForms();
-
-		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
-			patchData->UpdateFoundForms();
-		};
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Update Found Forms ) -----
-	//---------------------------------------------------
-
 	void CHandler::UpdateFoundForms() {
 
 		Vanilla_SH_NameOutput.clear();
@@ -545,7 +531,7 @@ namespace CFramework_Shouts {
 
 		auto* Handler = RE::TESDataHandler::GetSingleton();
 
-		auto* Shout = static_cast<RE::TESShout*>(Handler->LookupForm(a_formID, a_Filename));
+		auto* Shout = Handler->LookupForm<RE::TESShout>(a_formID, a_Filename);
 		if (!Shout) { return; }
 
 		auto* Word1 = static_cast<RE::SpellItem*>(Shout->variations[0].spell);

@@ -73,7 +73,6 @@ namespace CFramework_Shouts{
 		  static void			InstallSearchTerms();
 
 		  static void			UpdateFoundForms();
-		  static void			UpdateFoundFormsExt(RE::StaticFunctionTag*);
 
 		  static void			InjectAndCompileData();
 

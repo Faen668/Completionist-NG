@@ -12,7 +12,7 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1018,
+		kVersion = 1021,
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -92,12 +92,12 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				return "";
 			}
 
-			auto a_marker = static_cast<RE::TESObjectREFR*>(a_form);
-			if (!a_marker->extraList.HasType<RE::ExtraMapMarker>()) {
+			auto* extraMapMarker = GetMapMarkerInternal(a_form->As<RE::TESObjectREFR>());
+			if (!extraMapMarker || !extraMapMarker->mapData) {
 				return "";
 			}
 
-			return a_marker->extraList.GetByType<RE::ExtraMapMarker>()->mapData->locationName.fullName.c_str();
+			return extraMapMarker->mapData->locationName.fullName.c_str();
 		}
 
 		//---------------------------------------------------
@@ -115,16 +115,13 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		[[nodiscard]] static std::string GetFormIDHexString(RE::TESObjectREFR* a_form) noexcept
 		{
-			auto idx = GetModIndexFromForm(a_form);
-			auto fID = fmt::format("{:x}", a_form->GetFormID());
-			std::string pID = "";
-
-			if (fID.contains(idx))
-			{
-				pID = fmt::format(" - [{:s}]"sv, fID.substr(fID.find(idx) + idx.length()));
+			const auto* file = a_form ? a_form->GetFile(0) : nullptr;
+			if (!file) {
+				return a_form ? std::format("{:08X}", a_form->GetFormID()) : "";
 			}
 
-			return std::format("{:08X}{:s}", a_form->GetFormID(), pID);
+			const auto localID = file->IsLight() ? fmt::format("{:03X}", a_form->GetFormID() & 0xFFF) : fmt::format("{:06X}", a_form->GetFormID() & 0xFFFFFF);
+			return std::format("{:08X} - [{:s}]", a_form->GetFormID(), localID);
 		}
 
 		//---------------------------------------------------
@@ -237,7 +234,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		//Overload To Pass Through TESObjectREFR (Only useful for SOB)
 		[[nodiscard]] static bool CheckIsCollectable(RE::TESObjectREFR* a_form) noexcept
 		{
-			return a_form ? CheckIsCollectable(a_form->GetBaseObject()->GetFormID()) : false;
+			return a_form && a_form->GetBaseObject() ? CheckIsCollectable(a_form->GetBaseObject()->GetFormID()) : false;
 		}
 
 		//---------------------------------------------------
@@ -369,7 +366,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			if (!a_form || !a_form->GetFormID()) {
 				return;
 			}
-			data.try_emplace(a_form->GetFormID(), a_weapon->GetFormID());
+			data.try_emplace(a_form->GetFormID(), a_weapon ? a_weapon->GetFormID() : 0);
 		}
 
 		[[nodiscard]] bool HasTargetRegistered(RE::FormID a_form) const noexcept
@@ -385,7 +382,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		void UpdateTargetWeapon(RE::TESForm* a_form, RE::TESForm* a_weapon) noexcept
 		{
 			if (HasForm(a_form)) {
-				data[a_form->GetFormID()] = a_weapon->GetFormID();
+				data[a_form->GetFormID()] = a_weapon ? a_weapon->GetFormID() : 0;
 			};
 		};
 
@@ -453,7 +450,9 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		[[nodiscard]] std::string_view GetFileName(RE::FormID a_form) const noexcept
 		{
-			return HasForm(a_form) ? GetForm(a_form)->GetFile()->GetFilename() : std::string_view{};
+			const auto* form = GetForm(a_form);
+			const auto* file = form ? form->GetFile() : nullptr;
+			return file ? file->GetFilename() : std::string_view{};
 		}
 
 		//---------------------------------------------------
@@ -507,6 +506,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			auto* handler = RE::TESDataHandler::GetSingleton();
 			if (!handler) {
 				ERROR("Failed to obtain TESDataHandler*, maybe too early?");
+				return;
 			}
 
 			for (auto idx = 0; idx < N; ++idx) {
@@ -528,13 +528,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			auto* handler = RE::TESDataHandler::GetSingleton();
 			if (!handler) {
 				ERROR("Failed to obtain TESDataHandler*, maybe too early?");
+				return;
 			}
 
 			for (auto idx = 0; idx < N; ++idx) {
-				if (a_variation[idx].second.empty()) {
-					continue;
-				}
-
 				auto baseID = handler->LookupFormID(a_variation[idx].first, a_filename);
 				if (!baseID) {
 					continue;
@@ -578,7 +575,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 					}
 				}
 
-				name[0] = std::toupper(name[0]);  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
+				if (!name.empty()) { name[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(name[0]))); }  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
 				return std::make_pair(std::move(name), std::make_pair(GetForm(f), false));
 					});
 
@@ -599,7 +596,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			case 1:
 			{
 				for (auto* form : a_forms) {
-					auto* book = static_cast<RE::TESObjectBOOK*>(form);
+					auto* book = form ? form->As<RE::TESObjectBOOK>() : nullptr;
 					if (book && book->GetSpell()) {
 						a_texts.push_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSpell()->GetAssociatedSkill()) + "}{" + book->GetSpell()->GetName() + "}");
 					}
@@ -646,7 +643,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				std::views::transform([&](auto f) {
 				std::string name = GetForm(f)->GetName();
 
-				name[0] = std::toupper(name[0]);  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
+				if (!name.empty()) { name[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(name[0]))); }  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
 				return std::make_pair(std::move(name), std::make_pair(GetForm(f), false));
 					});
 
@@ -656,7 +653,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			for (auto& [name, data] : zipped) {
 				auto& [form, status] = data;
 
-				auto* book = static_cast<RE::TESObjectBOOK*>(form);
+				auto* book = form ? form->As<RE::TESObjectBOOK>() : nullptr;
 				if (book && book->GetSpell()) {
 					if (book->GetSpell()->GetAssociatedSkill() == a_actorval) {
 						a_names.emplace_back(name);
@@ -1016,7 +1013,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				return false;
 			}
 
-			auto event = fmt::format("|{}|", a_log);
 			return DKUtil::string::icontains(data[a_date.data()], a_log);
 		}
 
@@ -1342,7 +1338,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 	[[nodiscard]] RE::TESObjectREFR* GetReference(RE::FormID a_formID) noexcept
 	{
-		return static_cast<RE::TESObjectREFR*>(RE::TESObjectREFR::LookupByID(a_formID));
+		return RE::TESForm::LookupByID<RE::TESObjectREFR>(a_formID);
 	}
 
 	// accessor
@@ -1415,7 +1411,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		{
 			if (ShouldInclude(formID, a_cell, pair.second))
 			{
-				auto* ref = static_cast<RE::TESObjectREFR*>(RE::TESObjectREFR::LookupByID(formID));
+				auto* ref = RE::TESForm::LookupByID<RE::TESObjectREFR>(formID);
 
 				if (ref)
 				{
@@ -1556,6 +1552,37 @@ namespace Serialization
 	}
 
 	//---------------------------------------------------
+	//-- SKSE Callback Functions ( Correct Log Dates ) --
+	//---------------------------------------------------
+
+	static void CorrectLoggedDates(std::string_view a_from, std::string_view a_to) noexcept
+	{
+		using namespace CFramework_Master;
+
+		std::vector<std::string> dates;
+		for (auto& [date, events] : LoggingData.data) {
+			if (date.contains(a_from)) {
+				dates.push_back(date);
+			}
+		}
+
+		for (auto& date : dates) {
+			INFO("Correcting Completion Log Date: {}", date);
+
+			auto node = LoggingData.data.extract(date);
+			auto newDate = DKUtil::string::replace_nth_occurrence(date, 0, a_from, a_to);
+
+			if (auto it = LoggingData.data.find(newDate); it != LoggingData.data.end()) {
+				it->second += node.mapped();
+				continue;
+			}
+
+			node.key() = newDate;
+			LoggingData.data.insert(std::move(node));
+		}
+	}
+
+	//---------------------------------------------------
 	//-- SKSE Callback Functions ( Load Callback ) ------
 	//---------------------------------------------------
 
@@ -1613,77 +1640,27 @@ namespace Serialization
 						continue;
 					}
 
+					if (version < 1021 && DKUtil::string::iequals(name, "CellTargets")) {
+						INFO("Skipping loading of Cell Scanner targets.");
+						continue;
+					}
+
 					data->Load(a_intfc, name);
 
 					if (version < 1007 && DKUtil::string::iequals(name, "LoggingData"))
 					{
-						int i = 0;
-						int x = LoggingData.data.size();
+						CorrectLoggedDates("/08/2023", "/09/2023");
 
-						while (i < x) {
-							std::unordered_map<const std::string, std::string>::iterator it = LoggingData.data.begin();
-
-							// Iterating over the map using Iterator till map end.
-							while (it != LoggingData.data.end()) {
-								if (it->first.find("/08/2023") != std::string::npos) {
-									INFO("Correcting Completion Log Date: {}", it->first);
-
-									std::string newNode = it->first;
-									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/08/2023", "/09/2023");
-
-									auto node = LoggingData.data.extract(it->first);
-									if (node) {
-										node.key() = newNode;
-										LoggingData.data.insert(std::move(node));
-									}
-								}
-
-								INFO("Correcting Invalid Formats on event: {}", it->first);
-								it->second = DKUtil::string::replace_nth_occurrence(it->second, 0, ":  ", ": ");
-								it++;
-							}
-							i++;
+						for (auto& [date, events] : LoggingData.data) {
+							INFO("Correcting Invalid Formats on event: {}", date);
+							events = DKUtil::string::replace_nth_occurrence(events, 0, ":  ", ": ");
 						}
 					}
 
 					if (version < 1018 && DKUtil::string::iequals(name, "LoggingData"))
 					{
-						int i = 0;
-						int x = LoggingData.data.size();
-
-						while (i < x) {
-							std::unordered_map<const std::string, std::string>::iterator it = LoggingData.data.begin();
-
-							// Iterating over the map using Iterator till map end.
-							while (it != LoggingData.data.end()) {
-								if (it->first.find("/010/2024") != std::string::npos) {
-									INFO("Correcting Completion Log Date: {}", it->first);
-
-									std::string newNode = it->first;
-									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/010/2024", "/10/2024");
-
-									auto node = LoggingData.data.extract(it->first);
-									if (node) {
-										node.key() = newNode;
-										LoggingData.data.insert(std::move(node));
-									}
-								}
-								if (it->first.find("/011/2024") != std::string::npos) {
-									INFO("Correcting Completion Log Date: {}", it->first);
-
-									std::string newNode = it->first;
-									newNode = DKUtil::string::replace_nth_occurrence(newNode, 0, "/011/2024", "/11/2024");
-
-									auto node = LoggingData.data.extract(it->first);
-									if (node) {
-										node.key() = newNode;
-										LoggingData.data.insert(std::move(node));
-									}
-								}
-								it++;
-							}
-							i++;
-						}
+						CorrectLoggedDates("/010/2024", "/10/2024");
+						CorrectLoggedDates("/011/2024", "/11/2024");
 					}
 				}
 			}

@@ -11,10 +11,8 @@ namespace CExternalPatchHandler
 
 	int32_t CHandler::GetRandomID()
 	{
-		std::random_device rd;     // Only used once to initialise (seed) engine
-		std::mt19937 rng(rd());    // Random-number engine used (Mersenne-Twister in this case)
-		std::uniform_int_distribution<int> uni(500, 999999);
-		int32_t x = uni(rng);
+		static int32_t nextID = 500;
+		int32_t x = nextID++;
 
 		while (std::ranges::find(usedIdentifiers, x) != usedIdentifiers.end())
 		{
@@ -385,6 +383,14 @@ namespace CExternalPatchHandler
 						continue;
 					};
 
+					// Skip nameless items, they can't be picked up
+					const bool itemPatch = PatchData.type == CMiscPatchType::kItems || PatchData.type == CMiscPatchType::kBooks || PatchData.type == CMiscPatchType::kFish;
+					if (const char* name = form->GetName(); itemPatch && (!name || !*name)) {
+						INFO("Skipping nameless item {:08X} ({}) in section {}: it can't be picked up", form->GetFormID(), raw, sec);
+						Idx++;
+						continue;
+					}
+
 					int32_t visibilityStatus = GetCustomVisibilityFlag(sec, fullVariableString, raw);
 					if (visibilityStatus > -1) {
 						MCMAPI::AddVisibilityOption(form->GetFormID(), data->mcmpage, visibilityStatus);
@@ -480,7 +486,8 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kLocations:
 					{
-						if (!static_cast<RE::TESObjectREFR*>(form)->GetBaseObject() || static_cast<RE::TESObjectREFR*>(form)->GetBaseObject()->GetFormID() != 0x000010) {
+						const auto* marker = form->As<RE::TESObjectREFR>();
+						if (!marker || !marker->GetBaseObject() || marker->GetBaseObject()->GetFormID() != 0x000010) {
 							if (data->log_install) {
 								INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Incorrect TypeID");
 								INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
@@ -513,6 +520,14 @@ namespace CExternalPatchHandler
 
 					case CMiscPatchType::kEnchantments:
 					{
+						if (form->formType != RE::FormType::Enchantment)
+						{
+							INFO("Unable to load useable data for entry: {} in section {}: [{}]", Idx, sec, "Incorrect TypeID");
+							INFO("  - FormID={:08X} - Raw={} - FVS={}", formID, raw, fullVariableString);
+							Idx++;
+							continue;
+						}
+
 						auto customHighlightText = GetCustomHighlightText(sec, fullVariableString, raw);
 						if (!customHighlightText.empty()) {
 							PatchData.CustomHighlightText.emplace(form->GetFormID(), customHighlightText);
