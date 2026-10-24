@@ -5,15 +5,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)	# no std modules, VS would build them for every target
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "")
+set(SKSEPluginAuthor "Faen90" CACHE STRING "Author shown in the SKSE plugin info")
 
 include(GNUInstallDirs)
 
 # info
 project(
 	Completionist
-	VERSION 7.0.0.1
+	VERSION 7.0
 	LANGUAGES CXX
 )
 
@@ -29,15 +31,33 @@ configure_file(
 	@ONLY
 )
 
-configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
-	${CMAKE_CURRENT_BINARY_DIR}/version.rc
-	@ONLY
+# build and revision come from the clock on every build, see cmake/stamp.cmake
+set(STAMP_ARGS
+	-DPROJECT_NAME=${PROJECT_NAME}
+	-DPROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+	-DPROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+	-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+	-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
+)
+execute_process(COMMAND ${CMAKE_COMMAND} ${STAMP_ARGS} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stamp.cmake)
+add_custom_target(
+	${PROJECT_NAME}Stamp
+	ALL
+	COMMAND ${CMAKE_COMMAND} ${STAMP_ARGS} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stamp.cmake
+	BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/BuildStamp.cpp ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
 
 # source files
-execute_process(COMMAND powershell -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/!Update.ps1" "SOURCEGEN" "${PROJECT_VERSION}" "${CMAKE_CURRENT_BINARY_DIR}")
-include(${CMAKE_CURRENT_BINARY_DIR}/sourcelist.cmake)
+file(
+	GLOB_RECURSE SOURCES
+	CONFIGURE_DEPENDS
+	RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+		src/*.c
+		src/*.cpp
+		src/*.h
+		src/*.hpp
+		src/*.inl
+)
 source_group(
 	TREE 
 		${CMAKE_CURRENT_SOURCE_DIR}
@@ -50,9 +70,15 @@ source_group(
 	FILES ${CMAKE_CURRENT_BINARY_DIR}/include/Plugin.h
 )
 
-# dependencies
-add_subdirectory($ENV{CommonLibSSEPath} CommonLibSSE)
-add_subdirectory($ENV{DKUtilPath} DKUtil)
+# dependencies, git submodules in extern
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibSSE-NG/CMakeLists.txt)
+	message(FATAL_ERROR "Submodules missing, run: git submodule update --init --recursive")
+endif()
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SKSE_SUPPORT_XBYAK ON CACHE BOOL "" FORCE)
+add_subdirectory(extern/CommonLibSSE-NG EXCLUDE_FROM_ALL)
+add_subdirectory(extern/DKUtil EXCLUDE_FROM_ALL)
+set_target_properties(CommonLibSSE PROPERTIES FOLDER extern)
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(directxtk CONFIG REQUIRED)
@@ -64,10 +90,12 @@ add_library(
 	SHARED
 		${SOURCES}
 		${CMAKE_CURRENT_BINARY_DIR}/include/Plugin.h
+		${CMAKE_CURRENT_BINARY_DIR}/BuildStamp.cpp
 		${CMAKE_CURRENT_BINARY_DIR}/version.rc
 		.clang-format
 		vcpkg.json
 )
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}Stamp)
 
 # include dir
 target_include_directories(
@@ -107,6 +135,7 @@ if (MSVC)
 
 		PRIVATE
 			/MP
+			/utf-8
 			/W0
 			/WX
 			/permissive-
@@ -139,24 +168,3 @@ target_precompile_headers(
 	PRIVATE
 		src/PCH.h
 )
-
-# post build event
-add_custom_command(
-	TARGET 
-		${PROJECT_NAME}
-	POST_BUILD
-		COMMAND 
-			powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/!Update.ps1" "COPY" "${PROJECT_VERSION}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(ConfigurationName)" "${PROJECT_NAME}"
-		COMMENT 
-			"Calling post build control tool"
-)
-
-# called via !Rebuild.ps1
-if(DEFINED GROUP)
-set_target_properties(
-	${PROJECT_NAME}
-	PROPERTIES
-	FOLDER
-	${GROUP}
-)
-endif()
