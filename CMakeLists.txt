@@ -44,7 +44,7 @@ add_custom_target(
 	${PROJECT_NAME}Stamp
 	ALL
 	COMMAND ${CMAKE_COMMAND} ${STAMP_ARGS} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stamp.cmake
-	BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/BuildStamp.cpp ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/BuildStamp.cpp ${CMAKE_CURRENT_BINARY_DIR}/version.rc ${CMAKE_CURRENT_BINARY_DIR}/version.txt
 )
 
 # source files
@@ -96,6 +96,13 @@ add_library(
 		vcpkg.json
 )
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}Stamp)
+
+# version.txt next to the DLL, once it has linked
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/version.txt $<TARGET_FILE_DIR:${PROJECT_NAME}>/version.txt
+)
 
 # include dir
 target_include_directories(

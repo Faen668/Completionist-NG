@@ -28,3 +28,4 @@ set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${BUILD}.
 
 configure_file("${SOURCE_DIR}/cmake/BuildStamp.cpp.in" "${BINARY_DIR}/BuildStamp.cpp" @ONLY)
 configure_file("${SOURCE_DIR}/cmake/version.rc.in" "${BINARY_DIR}/version.rc" @ONLY)
+file(WRITE "${BINARY_DIR}/version.txt" "${PROJECT_VERSION}")
