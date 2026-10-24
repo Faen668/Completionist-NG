@@ -21,9 +21,44 @@ namespace Completionist_MainHUD
 
 	void TextnTagsAPI::Register() 
 	{
-		// Item names are no longer rewritten, UI/ItemMarks does icons instead
+		// SkyUI lists are styled in UI/ItemMarks, the API uses the names below
 		_OnUpdateCrosshairText = events::RegisterUpdateCrosshairHook(&OnUpdateCrosshairText);
 	};
+
+	//---------------------------------------------------
+	//-- Name Processing For Inventory Items ------------
+	//---------------------------------------------------
+
+	// Format 0-2 prefix, 3-5 prefix and colour, 6 colour only, 7 no edits
+	std::string TextnTagsAPI::FormatMenuName(std::string_view a_name, std::int32_t a_format, std::int32_t a_prefix)
+	{
+		const std::string name(a_name);
+		if (a_format < 0 || a_format >= 6) return name;
+
+		const std::string prefix(static_cast<std::size_t>(std::clamp(a_prefix, 0, 2) + 1), '*');
+		switch (a_format % 3) {
+		case 0: return name + " " + prefix;
+		case 1: return prefix + " " + name;
+		default: return prefix + " " + name + " " + prefix;
+		}
+	}
+
+	std::string TextnTagsAPI::API_GetDisplayNamePrefix(RE::InventoryEntryData* a_object, bool a_collected, bool a_displayed, bool a_variationDisplayed)
+	{
+		const char* displayName = a_object->GetDisplayName();
+		if (CVariables::V_MuseumModeEnabled && museum::IsMuseumDisplayable(a_object->GetObject()))
+		{
+			if (a_displayed)
+				return FormatMenuName(displayName, V_MenuFormat_Displayed, V_MenuPrefix_Displayed);
+
+			if (a_variationDisplayed)
+				return FormatMenuName(displayName, V_MenuFormat_Occupied, V_MenuPrefix_Occupied);
+
+			return FormatMenuName(displayName, V_MenuFormat_Displayable, V_MenuPrefix_Displayable);
+		}
+
+		return a_collected ? FormatMenuName(displayName, V_MenuFormat_G, V_MenuPrefix_G) : FormatMenuName(displayName, V_MenuFormat_N, V_MenuPrefix_N);
+	}
 
 	//---------------------------------------------------
 	//-- Crosshair Hook For Main HUD  -------------------
