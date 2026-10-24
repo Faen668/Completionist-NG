@@ -3,6 +3,7 @@
 #include "Import/CompletionistAPI.h"
 #include "Internal Utility/CompletionistAPIServer.hpp"
 #include "Internal Utility/Variables.hpp"
+#include "Internal Utility/mainHUD.hpp"
 #include "UI/SettingsPages.hpp"
 
 namespace CompletionistUI
@@ -230,11 +231,8 @@ namespace CompletionistUI
 			if (style.format < 6) {
 				RE::GFxValue text;
 				if (a_field.GetMember("text", &text) && text.IsString()) {
-					constexpr const char* stars[] = { "*", "**", "***" };
-					const std::string     prefix = stars[std::clamp(style.prefix, 0, 2)];
-					const std::string     name = text.GetString();
-					const auto            shown = style.format % 3 == 0 ? name + " " + prefix : style.format % 3 == 1 ? prefix + " " + name : prefix + " " + name + " " + prefix;
-					RE::GFxValue          value;
+					const auto   shown = Completionist_MainHUD::TextnTagsAPI::FormatMenuName(text.GetString(), style.format, style.prefix);
+					RE::GFxValue value;
 					a_movie->CreateString(&value, shown.c_str());
 					a_field.SetMember("text", value);
 				}

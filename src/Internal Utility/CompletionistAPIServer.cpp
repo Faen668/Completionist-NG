@@ -9,24 +9,80 @@ using hud = Completionist_MainHUD::TextnTagsAPI;
 using dbm = Completionist::MuseumAPI;
 using namespace CVariables;
 
+// "#RRGGBB" from the settings, -1 when it isn't one
+static uint32_t ColourOf(const std::string& a_colour)
+{
+	if (a_colour.size() != 7 || a_colour[0] != '#') return static_cast<uint32_t>(-1);
+
+	char* end = nullptr;
+	const auto value = std::strtoul(a_colour.c_str() + 1, &end, 16);
+	return end && *end == '\0' ? static_cast<uint32_t>(value) : static_cast<uint32_t>(-1);
+}
+
 extern "C" __declspec(dllexport) void* GetCompletionistInterfaceV20()
 {
 	return CompletionistAPIServer::GetInterfaceV20();
 }
 
-// Item colours and name prefixes are gone, the API keeps its functions so
-// mods built against V20 (QuickLootIE) still work: no colour and the plain name
-uint32_t CompletionistAPIServer::InterfaceV20::GetNeededItemTextColor() { return static_cast<uint32_t>(-1); }
-uint32_t CompletionistAPIServer::InterfaceV20::GetCollectedItemTextColor() { return static_cast<uint32_t>(-1); }
-uint32_t CompletionistAPIServer::InterfaceV20::GetOccupiedItemTextColor() { return static_cast<uint32_t>(-1); }
-uint32_t CompletionistAPIServer::InterfaceV20::GetDisplayableItemTextColor() { return static_cast<uint32_t>(-1); }
-uint32_t CompletionistAPIServer::InterfaceV20::GetDisplayedItemTextColor() { return static_cast<uint32_t>(-1); }
+uint32_t CompletionistAPIServer::InterfaceV20::GetNeededItemTextColor()
+{
+	if (!UseNeededItemTextColor()) return -1;
 
-bool CompletionistAPIServer::InterfaceV20::UseNeededItemTextColor() { return false; }
-bool CompletionistAPIServer::InterfaceV20::UseCollectedItemTextColor() { return false; }
-bool CompletionistAPIServer::InterfaceV20::UseDisplayableItemTextColor() { return false; }
-bool CompletionistAPIServer::InterfaceV20::UseDisplayedItemTextColor() { return false; }
-bool CompletionistAPIServer::InterfaceV20::UseOccupiedItemTextColor() { return false; }
+	return ColourOf(V_MenuColour_N);
+}
+
+uint32_t CompletionistAPIServer::InterfaceV20::GetCollectedItemTextColor()
+{
+	if (!UseCollectedItemTextColor()) return -1;
+
+	return ColourOf(V_MenuColour_G);
+}
+
+uint32_t CompletionistAPIServer::InterfaceV20::GetOccupiedItemTextColor()
+{
+	if (!UseOccupiedItemTextColor()) return -1;
+
+	return ColourOf(V_HUD_Override_Enabled_Occupied ? V_HUD_CustomColourString_Occupied : V_HUD_ColourString_Occupied);
+}
+
+uint32_t CompletionistAPIServer::InterfaceV20::GetDisplayableItemTextColor()
+{
+	if (!UseDisplayableItemTextColor()) return -1;
+
+	return ColourOf(V_HUD_Override_Enabled_Displayable ? V_HUD_CustomColourString_Displayable : V_HUD_ColourString_Displayable);
+}
+
+uint32_t CompletionistAPIServer::InterfaceV20::GetDisplayedItemTextColor()
+{
+	if (!UseDisplayedItemTextColor()) return -1;
+
+	return ColourOf(V_HUD_Override_Enabled_Displayed ? V_HUD_CustomColourString_Displayed : V_HUD_ColourString_Displayed);
+}
+
+bool CompletionistAPIServer::InterfaceV20::UseNeededItemTextColor()
+{
+	return V_MenuFormat_N >= 3 && V_MenuFormat_N <= 6;
+}
+
+bool CompletionistAPIServer::InterfaceV20::UseCollectedItemTextColor()
+{
+	return V_MenuFormat_G >= 3 && V_MenuFormat_G <= 6;
+}
+
+bool CompletionistAPIServer::InterfaceV20::UseDisplayableItemTextColor()
+{
+	return V_MenuFormat_Displayable >= 3 && V_MenuFormat_Displayable <= 6;
+}
+
+bool CompletionistAPIServer::InterfaceV20::UseDisplayedItemTextColor()
+{
+	return V_MenuFormat_Displayed >= 3 && V_MenuFormat_Displayed <= 6;
+}
+
+bool CompletionistAPIServer::InterfaceV20::UseOccupiedItemTextColor()
+{
+	return V_MenuFormat_Occupied >= 3 && V_MenuFormat_Occupied <= 6;
+}
 
 bool CompletionistAPIServer::InterfaceV20::TreatOccupiedAsDisplayed()
 {
@@ -61,12 +117,22 @@ void CompletionistAPIServer::InterfaceV20::GetItemInfo(CompletionistAPI::ItemInf
 				currentItem.isOccupied = isVariationDisplayedInstead;
 				currentItem.treatOccupiedAsDisplayed = TreatOccupiedAsDisplayed();
 				currentItem.decoratedName = GetDecoratedItemName(currentItem.entry);
-				currentItem.textColor = static_cast<uint32_t>(-1);
+
+				if (displayed)
+					currentItem.textColor = GetDisplayedItemTextColor();
+				else if (isVariationDisplayedInstead)
+					currentItem.textColor = GetOccupiedItemTextColor();
+				else if (currentItem.isDisplayable)
+					currentItem.textColor = GetDisplayableItemTextColor();
+				else if (collected)
+					currentItem.textColor = GetCollectedItemTextColor();
+				else
+					currentItem.textColor = GetNeededItemTextColor();
 			}
 			else
 			{
 				currentItem.decoratedName = GetDecoratedItemName(currentItem.entry);
-				currentItem.textColor = static_cast<uint32_t>(-1);
+				currentItem.textColor = collected ? GetCollectedItemTextColor() : GetNeededItemTextColor();
 				currentItem.isDisplayable = false;
 				currentItem.isDisplayed = false;
 				currentItem.isOccupied = false;
@@ -132,12 +198,49 @@ void CompletionistAPIServer::InterfaceV20::GetIconInfo(CompletionistAPI::IconInf
 
 RE::BSString CompletionistAPIServer::InterfaceV20::GetDecoratedItemName(RE::InventoryEntryData* entry)
 {
-	return entry ? entry->GetDisplayName() : "";
+	bool isVariationDisplayedInstead = false;
+
+	if (!entry || !entry->object)
+		return entry ? entry->GetDisplayName() : "";
+
+	bool displayed = dbm::IsDisplayed(entry->object, isVariationDisplayedInstead);
+
+	if (isVariationDisplayedInstead && TreatOccupiedAsDisplayed())
+		displayed = true;
+
+	return !IsItemTracked(entry->object)
+		? entry->GetDisplayName()
+		: RE::BSString(hud::API_GetDisplayNamePrefix(entry, IsItemCollected(entry->object), displayed, isVariationDisplayedInstead).c_str());
 }
 
-uint32_t CompletionistAPIServer::InterfaceV20::GetItemTextColor(RE::TESBoundObject*)
+uint32_t CompletionistAPIServer::InterfaceV20::GetItemTextColor(RE::TESBoundObject* object)
 {
-	return static_cast<uint32_t>(-1);
+	if (!object || !IsItemTracked(object)) {
+		return -1;
+	}
+
+	bool isVariationDisplayedInstead = false;
+	bool displayed = dbm::IsDisplayed(object, isVariationDisplayedInstead);
+
+	// Treat variation as displayed if the setting allows it
+	if (isVariationDisplayedInstead && TreatOccupiedAsDisplayed()) {
+		displayed = true;
+	}
+
+	if (CVariables::V_MuseumModeEnabled) {
+		if (displayed) {
+			return GetDisplayedItemTextColor();
+		}
+		if (isVariationDisplayedInstead) {
+			return GetOccupiedItemTextColor();
+		}
+	}
+
+	if (IsItemCollected(object)) {
+		return GetCollectedItemTextColor();
+	}
+
+	return GetNeededItemTextColor();
 }
 
 bool CompletionistAPIServer::InterfaceV20::IsItemNeeded(RE::TESBoundObject* object)

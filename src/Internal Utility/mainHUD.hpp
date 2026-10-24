@@ -12,6 +12,9 @@ namespace Completionist_MainHUD
 
 		static void	ProcessCrosshairReference(RE::HUDData* data);
 
+		static std::string	FormatMenuName(std::string_view a_name, std::int32_t a_format, std::int32_t a_prefix);
+		static std::string	API_GetDisplayNamePrefix(RE::InventoryEntryData* a_object, bool a_collected, bool a_displayed = false, bool a_variationDisplayed = false);
+
 		static bool ItemIsCollectable(RE::TESForm* a_form);
 		static bool ItemIsCollected(RE::TESForm* a_form);
 
