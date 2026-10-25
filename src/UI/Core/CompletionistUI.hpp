@@ -14,6 +14,21 @@ struct ImVec2;
 
 namespace CompletionistUI
 {
+	// Trainer panel perk trees, laid out by depth
+	struct PerkTreeLayout
+	{
+		std::vector<std::int32_t> column;
+		std::vector<std::int32_t> row;
+		std::vector<float>        place;	// row, centred on the column's middle
+		std::vector<float>        x;	// across, in column gaps; zigzagged perks sit half a gap on
+		std::vector<float>        labelUnits;	// how much of a gap its label may take
+		float                     width{ 0.0f };	// first column to last, in column gaps
+		std::int32_t              columns{ 0 };
+		std::int32_t              rows{ 0 };	// the busiest column
+	};
+	PerkTreeLayout LayoutPerkTree(const std::vector<TrainerPerk>& a_perks);
+	std::int32_t   PerkTreeRows(const std::vector<TrainerPerk>& a_perks);
+
 	class Menu
 	{
 	public:
@@ -152,6 +167,9 @@ namespace CompletionistUI
 		void                       DrawShoutWords(IDataProvider& a_provider, const Entry& a_entry, bool a_sideBySide);
 		[[nodiscard]] static float ShoutWordsHeight();
 		void DrawShoutPanel(IDataProvider& a_provider, const Page& a_page, float a_height, float a_gap);
+		void                       DrawTrainerInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
+		[[nodiscard]] float TrainerInfoHeight() const;
+		std::int32_t               _trainerRows{ 1 };	// most perks in one tree column on the page, so the panel keeps its height
 
 		[[nodiscard]] float DescriptionPanelHeight() const;
 		void                UpdateDescriptionPanel(float a_available, float a_gap);

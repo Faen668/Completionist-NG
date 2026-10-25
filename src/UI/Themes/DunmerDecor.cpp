@@ -412,3 +412,50 @@ namespace CompletionistUI::DunmerDecor
 		}
 	}
 }
+
+namespace CompletionistUI::DunmerDecor
+{
+	//---------------------------------------------------
+	//-- Dunmer Decor ( Perk Node ) ------------------
+	//---------------------------------------------------
+
+	// Embers from Red Mountain: burning when taken, banked when next, ash when locked
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		if (a_state == PerkState::kLocked) {
+			a_drawList->AddCircleFilled(a_centre, a_radius * 0.45f, IM_COL32(26, 17, 16, 255), 16);
+			a_drawList->AddCircle(a_centre, a_radius * 0.45f, a_colour, 16, 1.0f);
+			return;
+		}
+		Ember(a_drawList, a_centre, a_radius * 2.6f, a_colour, a_state == PerkState::kTaken ? 1.0f : 0.0f);
+		if (a_state == PerkState::kNext) {
+			a_drawList->AddCircleFilled(a_centre, std::max(1.5f, a_radius * 0.2f), a_colour, 10);
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Dunmer Decor ( Perk Link ) ------------------
+	//---------------------------------------------------
+
+	// Cracks in the ash, glowing with magma between taken perks
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		const auto curve = PerkCurve(a_from, a_to, a_radius * 0.9f);
+		Random     random{ static_cast<std::uint32_t>(a_from.x * 13.0f + a_to.y * 7.0f) | 1u };
+		std::vector<ImVec2> crack;
+		crack.reserve(curve.size());
+		for (std::size_t i = 0; i < curve.size(); ++i) {
+			const bool  end = i == 0 || i + 1 == curve.size();
+			const float jitter = end ? 0.0f : random.Range(-1.0f, 1.0f) * a_radius * 0.3f;
+			const auto  normal = NormalAt(curve, i);
+			crack.emplace_back(curve[i].x + normal.x * jitter, curve[i].y + normal.y * jitter);
+		}
+		const int count = static_cast<int>(crack.size());
+		if (!a_lit) {
+			a_drawList->AddPolyline(crack.data(), count, a_colour, ImDrawFlags_None, std::max(1.0f, a_radius * 0.12f));
+			return;
+		}
+		a_drawList->AddPolyline(crack.data(), count, WithAlpha(a_colour, 0.25f), ImDrawFlags_None, std::max(3.0f, a_radius * 0.6f));
+		a_drawList->AddPolyline(crack.data(), count, a_colour, ImDrawFlags_None, std::max(1.5f, a_radius * 0.18f));
+	}
+}

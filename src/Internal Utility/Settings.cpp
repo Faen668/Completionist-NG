@@ -157,6 +157,9 @@ namespace CSettings
 			{ "bItemIcons_Found", Type::kBool, "true" },
 			{ "bItemIcons_Museum", Type::kBool, "true" },
 
+			// Skill trainers, 0 after a lesson, 1 when offered
+			{ "iTrainers_CountWhen", Type::kInt, "0" },
+
 			// Completionist sort, 1 first
 			{ "iSort_Displayable", Type::kInt, "1" },
 			{ "iSort_Occupied", Type::kInt, "2" },

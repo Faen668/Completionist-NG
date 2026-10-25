@@ -471,3 +471,42 @@ namespace CompletionistUI::KhajiitDecor
 		}
 	}
 }
+
+namespace CompletionistUI::KhajiitDecor
+{
+	//---------------------------------------------------
+	//-- Khajiit Decor ( Perk Node ) -----------------
+	//---------------------------------------------------
+
+	// Moons: full when taken, a waxing crescent when next, new and dark when locked
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		if (a_state == PerkState::kTaken) {
+			SoftSpot(a_drawList, a_centre, a_radius * 1.6f, WithAlpha(a_colour, 0.06f));
+			a_drawList->AddCircleFilled(a_centre, a_radius * 0.8f, a_colour, 28);
+			return;
+		}
+		const float radius = a_radius * (a_state == PerkState::kLocked ? 0.5f : 0.8f);
+		a_drawList->AddCircle(a_centre, radius, WithAlpha(a_colour, a_state == PerkState::kLocked ? 1.0f : 0.5f), 24, 1.0f);
+		if (a_state == PerkState::kNext) {
+			Moon(a_drawList, a_centre, radius, a_colour, 0.3f);
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Khajiit Decor ( Perk Link ) -----------------
+	//---------------------------------------------------
+
+	// A trail of stars across the night sky, joined by a thread of moonlight once both are taken
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		const auto points = PerkCurve(a_from, a_to, a_radius * 0.6f);
+		if (a_lit) {
+			a_drawList->AddPolyline(points.data(), static_cast<int>(points.size()), WithAlpha(a_colour, 0.7f), ImDrawFlags_None, std::max(1.0f, a_radius * 0.08f));
+		}
+		for (std::size_t i = 1; i + 1 < points.size(); i += a_lit ? 2 : 1) {
+			const float twinkle = (i % 3 == 0) ? 1.0f : 0.6f;
+			a_drawList->AddCircleFilled(points[i], std::max(1.0f, a_radius * (a_lit ? 0.12f : 0.08f) * twinkle), WithAlpha(a_colour, a_lit ? 1.0f : 0.8f), 8);
+		}
+	}
+}

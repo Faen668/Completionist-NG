@@ -9,6 +9,7 @@
 #include "Frameworks/Misc/CFramework_Pets.hpp"
 #include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
+#include "Frameworks/Misc/CFramework_Trainers.hpp"
 
 //Custom Patches
 #include "Internal Utility/PatchListener.hpp"

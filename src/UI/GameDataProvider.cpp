@@ -1,6 +1,7 @@
 #include "UI/GameDataProvider.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
+#include "Frameworks/Misc/CFramework_Trainers.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/MCMHandler.hpp"
@@ -760,6 +761,202 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Is Within ) ------------------------
+		//---------------------------------------------------
+
+		bool IsWithin(const RE::BGSLocation* a_location, const RE::BGSLocation* a_parent) {
+
+			for (auto* location = a_location; location; location = location->parentLoc) {
+				if (location == a_parent) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Hold Of ) --------------------------
+		//---------------------------------------------------
+
+		// The hold, else the furthest named place above it (e.g. Solstheim)
+		const RE::BGSLocation* HoldOf(const RE::BGSLocation* a_location) {
+
+			const RE::BGSLocation* top = nullptr;
+			for (auto* location = a_location ? a_location->parentLoc : nullptr; location; location = location->parentLoc) {
+				if (location->HasKeywordString("LocTypeHold")) {
+					return location;
+				}
+				if (location->parentLoc && location->GetFullName() && *location->GetFullName()) {
+					top = location;
+				}
+			}
+			return top;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Place Name ) -----------------------
+		//---------------------------------------------------
+
+		// "Warmaiden's, Whiterun Hold"
+		std::string PlaceName(const RE::BGSLocation* a_location, const RE::TESObjectREFR* a_ref) {
+
+			const auto* name = a_location ? a_location->GetFullName() : nullptr;
+			if (!name || !*name) {
+				const auto* cell = a_ref ? a_ref->GetSaveParentCell() : nullptr;
+				return cell && cell->GetFullName() ? cell->GetFullName() : std::string{};
+			}
+			const auto* hold = HoldOf(a_location);
+			const auto* holdName = hold ? hold->GetFullName() : nullptr;
+			return holdName && *holdName ? fmt::format("{}, {}", name, holdName) : std::string(name);
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Required Level ) -------------------
+		//---------------------------------------------------
+
+		// The perk's own GetBaseActorValue condition on the skill, as the Skills menu shows it
+		std::int32_t RequiredLevel(RE::BGSPerk* a_perk, RE::ActorValue a_skill) {
+
+			for (auto* item = a_perk ? a_perk->perkConditions.head : nullptr; item; item = item->next) {
+				const auto& data = item->data;
+				if (data.functionData.function.get() == RE::FUNCTION_DATA::FunctionID::kGetBaseActorValue && !data.flags.global &&
+					static_cast<RE::ActorValue>(reinterpret_cast<std::uintptr_t>(data.functionData.params[0])) == a_skill) {
+					return static_cast<std::int32_t>(data.comparisonValue.f);
+				}
+			}
+			return 0;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Perk Tree ) ------------------------
+		//---------------------------------------------------
+
+		// From the skill's own tree, so perk overhauls show as they are in game
+		std::vector<TrainerPerk> PerkTree(RE::ActorValue a_skill, RE::PlayerCharacter* a_player) {
+
+			const auto* info = RE::ActorValueList::GetActorValueInfo(a_skill);
+			auto*       root = info ? info->perkTree : nullptr;
+			if (!root) {
+				return {};
+			}
+
+			// Every node with a perk, the root holds none
+			std::vector<RE::BGSSkillPerkTreeNode*>                  nodes;
+			std::unordered_map<RE::BGSSkillPerkTreeNode*, std::int32_t> index;
+			std::vector<RE::BGSSkillPerkTreeNode*>                  pending{ root };
+			std::unordered_set<RE::BGSSkillPerkTreeNode*>           seen{ root };
+			while (!pending.empty() && nodes.size() < 256) {
+				auto* node = pending.back();
+				pending.pop_back();
+				if (node->perk) {
+					index.emplace(node, static_cast<std::int32_t>(nodes.size()));
+					nodes.push_back(node);
+				}
+				for (auto* child : node->children) {
+					if (child && seen.insert(child).second) {
+						pending.push_back(child);
+					}
+				}
+			}
+
+			std::vector<TrainerPerk> perks;
+			perks.reserve(nodes.size());
+			for (auto* node : nodes) {
+				auto& perk = perks.emplace_back();
+				perk.name = node->perk->GetName();
+				perk.depth = static_cast<float>(node->perkGridY) + node->verticalPosition;
+				perk.lane = static_cast<float>(node->perkGridX) + node->horizontalPosition;
+				perk.level = RequiredLevel(node->perk, a_skill);
+				perk.ranks = 0;
+				std::unordered_set<RE::BGSPerk*> ranks;
+				for (auto* rank = node->perk; rank && perk.ranks < 10 && ranks.insert(rank).second; rank = rank->nextPerk) {
+					++perk.ranks;
+					perk.rank += a_player && a_player->HasPerk(rank) ? 1 : 0;
+				}
+				for (auto* child : node->children) {
+					if (const auto it = index.find(child); it != index.end()) {
+						perk.children.push_back(it->second);
+					}
+				}
+			}
+			return perks;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Build Trainer Page ) ---------------
+		//---------------------------------------------------
+
+		// A tab per specialisation, a section per skill, as the Skills menu
+		Page BuildTrainerPage(IDataProvider& a_provider) {
+
+			using CFramework_Trainers::CHandler;
+
+			Page page{ "$MCMPageTrainers", "$MCMPageTrainers", {} };
+			page.tabs = { { "UI_Trainers_Combat" }, { "UI_Trainers_Magic" }, { "UI_Trainers_Stealth" } };
+			const auto tabOf = [](std::int32_t a_skill) { return a_skill <= 6 ? 0 : a_skill >= 12 ? 1 : 2; };
+
+			auto*      player = RE::PlayerCharacter::GetSingleton();
+			const auto tier = [&](std::int32_t a_level) {
+				return a_provider.Translate(a_level <= 50 ? "UI_Trainers_Tier0" : a_level <= 75 ? "UI_Trainers_Tier1" : "UI_Trainers_Tier2") + "  \xC2\xB7  " + std::to_string(a_level);
+			};
+
+			std::vector<const CFramework_Trainers::Trainer*> placed;
+			for (const auto& trainer : CFramework_Trainers::Trainers) {
+				if (trainer.ref) {
+					placed.push_back(std::addressof(trainer));
+				}
+			}
+			std::ranges::sort(placed, [](const auto* a_left, const auto* a_right) {
+				return std::tuple(a_left->maxLevel, std::string_view(a_left->npc->GetName())) < std::tuple(a_right->maxLevel, std::string_view(a_right->npc->GetName()));
+			});
+
+			for (const auto tab : { 0, 1, 2 }) {
+				for (std::int32_t skill = 0; skill <= 17; ++skill) {
+					if (tabOf(skill) != tab) {
+						continue;
+					}
+
+					Section    section{ CHandler::SkillName(skill), {}, tab };
+					const auto perks = PerkTree(CHandler::SkillValue(skill), player);
+					for (const auto* trainer : placed) {
+						if (trainer->skill != skill) {
+							continue;
+						}
+						const auto  ref = trainer->ref.get();
+						const auto* home = ref ? ref->GetEditorLocation() : nullptr;
+
+						auto& entry = section.entries.emplace_back();
+						entry.name = trainer->npc->GetName();
+						entry.detail = tier(trainer->maxLevel);
+						entry.state = CHandler::IsTrained(*trainer) ? EntryState::kFound : EntryState::kNeeded;
+						entry.formID = trainer->npc->GetFormID();
+						entry.frameworkID = CFramework_Trainers::FrameworkID;
+						entry.canToggle = true;
+						entry.refID = ref ? ref->GetFormID() : 0;
+						entry.canMark = ref && !ref->IsDisabled() && ref->GetSaveParentCell();
+
+						auto& info = entry.trainer;
+						info.skill = skill;
+						info.skillName = section.title;
+						info.maxLevel = trainer->maxLevel;
+						info.playerLevel = player ? static_cast<std::int32_t>(player->AsActorValueOwner()->GetBaseActorValue(CHandler::SkillValue(skill))) : 0;
+						info.location = PlaceName(home, ref.get());
+						const auto* now = ref ? ref->GetCurrentLocation() : nullptr;
+						if (now && home && !IsWithin(now, home) && !IsWithin(home, now)) {
+							info.now = PlaceName(now, ref.get());
+						}
+						info.perks = perks;
+					}
+
+					if (!section.entries.empty()) {
+						page.sections.push_back(std::move(section));
+					}
+				}
+			}
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Summarise ) ------------------------
 		//---------------------------------------------------
 
@@ -809,6 +1006,12 @@ namespace CompletionistUI
 
 			auto& category = framework.category == std::string_view("UI_Category_Locations") ? categories[1] : categories[0];
 			category.pages.push_back(Summarise(page));
+			pages.emplace(page.id, std::move(page));
+		}
+
+		// Skill trainers, after the MCM's own collections
+		if (auto page = BuildTrainerPage(*this); !page.sections.empty()) {
+			categories[0].pages.push_back(Summarise(page));
 			pages.emplace(page.id, std::move(page));
 		}
 
@@ -946,6 +1149,29 @@ namespace CompletionistUI
 	void GameDataProvider::SetCompleted(std::string_view a_pageID, const Entry& a_entry, bool a_completed) {
 
 		if (!a_entry.canToggle) {
+			return;
+		}
+
+		// Trainers keep their own found list
+		if (a_entry.frameworkID == CFramework_Trainers::FrameworkID) {
+			{
+				std::scoped_lock lock(_lock);
+				if (auto it = _pages.find(std::string(a_pageID)); it != _pages.end()) {
+					for (auto& section : it->second.sections) {
+						for (auto& entry : section.entries) {
+							if (entry.formID == a_entry.formID) {
+								entry.state = a_completed ? EntryState::kFound : EntryState::kNeeded;
+							}
+						}
+					}
+				}
+			}
+			SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.formID, a_completed]() {
+				auto& found = CFramework_Master::FoundItemData_NoShow;
+				a_completed ? found.AddForm(formID) : found.RemoveForm(formID);
+				INFO("Trainers: marked {:08X} {} by hand", formID, a_completed ? "trained" : "not trained");
+				Rebuild();
+			});
 			return;
 		}
 
@@ -1479,11 +1705,11 @@ namespace CompletionistUI
 
 	void GameDataProvider::SetLocationMarker(const Entry& a_entry) {
 
-		if (!a_entry.canMark || !a_entry.formID) {
+		if (!a_entry.canMark || !a_entry.MarkerID()) {
 			return;
 		}
-		_locationMarker = a_entry.formID;
-		SKSE::GetTaskInterface()->AddTask([formID = a_entry.formID, name = a_entry.name]() {
+		_locationMarker = a_entry.MarkerID();
+		SKSE::GetTaskInterface()->AddTask([formID = a_entry.MarkerID(), name = a_entry.name]() {
 			SettingsPages::PlaceLocationMarker(RE::TESForm::LookupByID<RE::TESObjectREFR>(formID), name);
 		});
 	}

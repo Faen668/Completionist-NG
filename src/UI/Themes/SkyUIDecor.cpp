@@ -166,3 +166,31 @@ namespace CompletionistUI::SkyUIDecor
 		a_drawList->AddLine(ImVec2(a_max.x, midY), ImVec2(bodyRight, a_max.y), edge);
 	}
 }
+
+namespace CompletionistUI::SkyUIDecor
+{
+	//---------------------------------------------------
+	//-- SkyUI Decor ( Perk Node ) -------------------
+	//---------------------------------------------------
+
+	// Plain rings, filled when taken
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		const float radius = a_radius * (a_state == PerkState::kLocked ? 0.45f : 0.65f);
+		if (a_state == PerkState::kTaken) {
+			a_drawList->AddCircleFilled(a_centre, radius, a_colour, 24);
+		} else {
+			a_drawList->AddCircle(a_centre, radius, a_colour, 24, std::max(1.0f, a_radius * 0.1f));
+		}
+	}
+
+	//---------------------------------------------------
+	//-- SkyUI Decor ( Perk Link ) -------------------
+	//---------------------------------------------------
+
+	// Straight lines, brighter between taken perks
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		a_drawList->AddLine(a_from, a_to, a_colour, a_lit ? std::max(1.5f, a_radius * 0.12f) : 1.0f);
+	}
+}

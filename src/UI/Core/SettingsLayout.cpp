@@ -131,6 +131,9 @@ namespace CompletionistUI
 				Toggle("CompletionLog_ColoursEnabledState", "$CompletionLog_ColoursEnabledText", logColours),
 				Colour("CompletionLog_QuestsTextColourState", "$CompletionLog_QuestsTextColourText", "CompletionLog_QuestsTextColourVal", "CompletionLog_QuestsTextColourString", "$CompletionLog_QuestsTextColourInfo", logColours),
 				Colour("CompletionLog_ItemsTextColourState", "$CompletionLog_ItemsTextColourText", "CompletionLog_ItemsTextColourVal", "CompletionLog_ItemsTextColourString", "$CompletionLog_ItemsTextColourInfo", logColours),
+				Spacer(),
+				Header("UI_Trainers_Header"),
+				Choice("Trainers_CountWhen", "UI_Trainers_CountWhen", "iTrainers_CountWhen", Keys("UI_Trainers_CountWhen", 2), "UI_Trainers_CountWhenInfo"),
 			};
 
 			page.columns[1] = {

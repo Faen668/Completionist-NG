@@ -901,6 +901,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			kBook,
 			kTome,
 			kQuestComplete,
+			kTrained,
 		};
 
 		// modifier
@@ -976,6 +977,9 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				break;
 			case Serialization::CompletionistLog::kQuestComplete:
 				return GET_LOC_STRING_BY_KEY("LogPrefix_Qst");
+				break;
+			case Serialization::CompletionistLog::kTrained:
+				return GET_LOC_STRING_BY_KEY("LogPrefix_Tra");
 				break;
 			default:
 				break;

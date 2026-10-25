@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UI/Core/Decor.hpp"
+
 #include <imgui.h>
 
 // Bosmer theme: the Green Pact's dark forest, bark, thorns and leaves
@@ -15,4 +17,6 @@ namespace CompletionistUI::BosmerDecor
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem);
 	void PanelCorners(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state);
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius);
 }
