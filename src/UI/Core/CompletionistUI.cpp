@@ -163,6 +163,25 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Completionist UI ( Inset Colour ) --------------
+		//---------------------------------------------------
+
+		// The opacity setting as the open window uses it, so the panels inside go see-through with it
+		float windowOpacity = 0.95f;
+
+		// Behind a panel: a bit darker than the window, or a bit whiter on a light theme
+		ImVec4 InsetColour() {
+
+			auto       colour = Themes::GetPalette().background;
+			const bool light = colour.x * 0.3f + colour.y * 0.59f + colour.z * 0.11f > 0.5f;
+			for (float* channel : { &colour.x, &colour.y, &colour.z }) {
+				*channel = light ? *channel + (1.0f - *channel) * 0.4f : *channel * 0.72f;
+			}
+			colour.w = windowOpacity;
+			return colour;
+		}
+
+		//---------------------------------------------------
 		//-- Completionist UI ( Corner Marks ) --------------
 		//---------------------------------------------------
 
@@ -763,10 +782,7 @@ namespace CompletionistUI
 
 			const auto& palette = Themes::GetPalette();
 			const auto& style = ImGui::GetStyle();
-			auto        background = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-			background.x *= 0.72f;
-			background.y *= 0.72f;
-			background.z *= 0.72f;
+			const auto  background = InsetColour();
 
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, background);
 			ImGui::BeginChild(a_id, ImVec2(a_width, 0.0f), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -885,12 +901,7 @@ namespace CompletionistUI
 		void BeginFramedPanel(const char* a_id, ImVec2 a_size, bool a_emblem = false) {
 
 			const auto& palette = Themes::GetPalette();
-			// A bit darker than the window
-			auto inset = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-			inset.x *= 0.72f;
-			inset.y *= 0.72f;
-			inset.z *= 0.72f;
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, inset);
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, InsetColour());
 			ImGui::BeginChild(a_id, a_size, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_NavFlattened, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			ImGui::PopStyleColor();
 
@@ -1095,6 +1106,7 @@ namespace CompletionistUI
 		ImGui::PushFont(Themes::BodyFont());
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
+		windowOpacity = background.w;
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 		const float pad = ImGui::GetFontSize() * 1.4f;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
@@ -3372,6 +3384,7 @@ namespace CompletionistUI
 		ImGui::PushFont(Themes::BodyFont());
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
+		windowOpacity = background.w;
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 		const float pad = ImGui::GetFontSize() * 1.4f;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
@@ -3996,6 +4009,7 @@ namespace CompletionistUI
 		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, panelY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		auto background = palette.background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
+		windowOpacity = background.w;
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 		const float frameDepth = Decor::FrameDepth();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(fontSize * 1.4f + frameDepth, fontSize * 1.1f + frameDepth));
@@ -4064,6 +4078,7 @@ namespace CompletionistUI
 
 		auto background = palette.background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f) * 0.85f;
+		windowOpacity = background.w;
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(fontSize * 0.9f + frameDepth, fontSize * 0.7f + frameDepth));
 		constexpr auto flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoSavedSettings |
