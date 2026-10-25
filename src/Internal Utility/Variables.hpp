@@ -63,9 +63,6 @@ namespace CVariables
 	inline std::string		V_notificationTextCellScan5;
 	inline std::string		V_notificationTextCellScan6;
 
-	inline bool				V_CellScanner_REFS;
-	inline bool				V_CellScanner_CONT;
-	inline bool				V_CellScanner_NPCS;
 	inline bool				V_CellScanner_NUMB;
 	inline bool				V_CellScanner_Closest;
 	inline bool				V_CellScanner_Markers;
@@ -74,6 +71,7 @@ namespace CVariables
 	inline bool				V_CellScanner_ExcludeArmor;
 	inline bool				V_CellScanner_ExcludeWeapons;
 	inline bool				V_CellScanner_ExcludeOwned;
+	inline bool				V_CellScanner_ExcludeLiving;
 
 	// Item icons
 	inline bool				V_ItemIcons{ true };
@@ -106,6 +104,7 @@ namespace CVariables
 	inline std::string		V_MenuColour_N;
 	inline std::string		V_MenuColour_G;
 	inline bool				V_CellScanner_ExcludeAlchemy;
+	inline bool				V_CellScanner_ExcludeIngredients;
 	inline bool				V_CellScanner_ExcludeMiscItems;
 	inline std::int32_t		V_CellScanner_ScanRange;
 

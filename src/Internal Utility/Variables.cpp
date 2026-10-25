@@ -348,21 +348,6 @@ namespace CVariables
 			V_TreatBooksAsItems = prop->GetBool();
 		}
 
-		V_CellScanner_CONT = true;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_CONT")) {
-			V_CellScanner_CONT = prop->GetBool();
-		}
-
-		V_CellScanner_REFS = true;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_REFS")) {
-			V_CellScanner_REFS = prop->GetBool();
-		}
-
-		V_CellScanner_NPCS = true;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_NPCS")) {
-			V_CellScanner_NPCS = prop->GetBool();
-		}
-
 		V_CellScanner_NUMB = true;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_NUMB")) {
 			V_CellScanner_NUMB = prop->GetBool();
@@ -382,6 +367,11 @@ namespace CVariables
 		V_CellScanner_ExcludeAlchemy = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_ExcludeAlchemy")) {
 			V_CellScanner_ExcludeAlchemy = prop->GetBool();
+		}
+
+		V_CellScanner_ExcludeIngredients = false;
+		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_ExcludeIngredients")) {
+			V_CellScanner_ExcludeIngredients = prop->GetBool();
 		}
 
 		V_CellScanner_ExcludeArmor = false;
@@ -407,6 +397,11 @@ namespace CVariables
 		V_CellScanner_ExcludeOwned = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_ExcludeOwned")) {
 			V_CellScanner_ExcludeOwned = prop->GetBool();
+		}
+
+		V_CellScanner_ExcludeLiving = false;
+		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_ExcludeLiving")) {
+			V_CellScanner_ExcludeLiving = prop->GetBool();
 		}
 
 		const auto flag = [](const char* a_name, bool a_default) {
