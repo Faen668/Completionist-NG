@@ -28,6 +28,8 @@ namespace CompletionistUI
 		[[nodiscard]] static bool Argonian() noexcept { return _theme == Theme::kArgonian; }
 		[[nodiscard]] static bool Khajiit() noexcept { return _theme == Theme::kKhajiit; }
 		[[nodiscard]] static bool Dunmer() noexcept { return _theme == Theme::kDunmer; }
+		[[nodiscard]] static bool Nord() noexcept { return _theme == Theme::kNord; }
+		[[nodiscard]] static bool Altmer() noexcept { return _theme == Theme::kAltmer; }
 		// The race themes, as against Completionist and SkyUI
 		[[nodiscard]] static bool Race() noexcept { return _theme != Theme::kCompletionist && _theme != Theme::kSkyUI; }
 		// How far a race's frame reaches in past the plain one, for padding small panels

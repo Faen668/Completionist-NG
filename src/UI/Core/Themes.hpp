@@ -39,10 +39,12 @@ namespace CompletionistUI
 	inline constexpr ThemeInfo themeList[] = {
 		{ Theme::kCompletionist, "Completionist", "UI_Theme_Completionist" },
 		{ Theme::kSkyUI, "SkyUI", "UI_Theme_SkyUI" },
+		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer" },
 		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian" },
 		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer" },
 		{ Theme::kDunmer, "Dunmer", "UI_Theme_Dunmer" },
 		{ Theme::kKhajiit, "Khajiit", "UI_Theme_Khajiit" },
+		{ Theme::kNord, "Nord", "UI_Theme_Nord" },
 	};
 
 	struct FontPaths
@@ -50,6 +52,7 @@ namespace CompletionistUI
 		std::string regular;
 		std::string bold;
 		std::string heading;
+		std::string title;	// window title, heading when empty
 		std::string fallback;	// for missing glyphs
 	};
 

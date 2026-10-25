@@ -82,18 +82,22 @@ Everything is set from the window itself and saved to `Completionist.ini`, so it
 
 ## Themes
 
-Six looks to choose from in **Settings > Window > Theme**.
+Eight looks to choose from in **Settings > Window > Theme**.
 
 <table>
 <tr>
 <td align="center" width="33%"><img src="docs/images/theme-completionist.jpg" alt="Completionist theme"><br><b>Completionist</b></td>
 <td align="center" width="33%"><img src="docs/images/theme-skyui.jpg" alt="SkyUI theme"><br><b>SkyUI</b></td>
-<td align="center" width="33%"><img src="docs/images/theme-argonian.jpg" alt="Argonian theme"><br><b>Argonian</b></td>
+<td align="center" width="33%"><img src="docs/images/theme-altmer.jpg" alt="Altmer theme"><br><b>Altmer</b></td>
 </tr>
 <tr>
+<td align="center"><img src="docs/images/theme-argonian.jpg" alt="Argonian theme"><br><b>Argonian</b></td>
 <td align="center"><img src="docs/images/theme-bosmer.jpg" alt="Bosmer theme"><br><b>Bosmer</b></td>
 <td align="center"><img src="docs/images/theme-dunmer.jpg" alt="Dunmer theme"><br><b>Dunmer</b></td>
+</tr>
+<tr>
 <td align="center"><img src="docs/images/theme-khajiit.jpg" alt="Khajiit theme"><br><b>Khajiit</b></td>
+<td align="center"><img src="docs/images/theme-nord.jpg" alt="Nord theme"><br><b>Nord</b></td>
 </tr>
 </table>
 
