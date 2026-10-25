@@ -12,19 +12,32 @@ namespace Serialization
 			std::string type;
 		};
 
+		// Saved as one byte, older saves have 0 and 1
+		enum class Kind : std::uint8_t
+		{
+			kMark,	 // cell scanner marker, ends when its cell unloads
+			kPin,	 // pinned item, placed while in the player's cell
+			kFind,	 // NPC or placed item from a page, wherever it is
+			kTravel	 // map marker from a page
+		};
+
 		struct Tracked
 		{
 			RE::FormID   form{ 0 };
 			RE::FormID   ref{ 0 };	// item, or the container / NPC holding it
 			std::string  name;
 			std::string  type;
-			bool         pinned{ false };
+			Kind         kind{ Kind::kMark };
 			std::int32_t slot{ -1 };	// -1 for a pin not in this cell
 			bool         active{ true };
+
+			[[nodiscard]] bool Pinned() const noexcept { return kind == Kind::kPin; }
+			// Tracked from a page, not tied to the loaded cells
+			[[nodiscard]] bool Located() const noexcept { return kind == Kind::kFind || kind == Kind::kTravel; }
 		};
 
 		std::vector<Tracked> tracked;
-		Target               location;
+		Target               location;	// the old single location marker, read from older saves only
 
 		virtual void Save(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
@@ -34,20 +47,21 @@ namespace Serialization
 				return;
 			}
 			for (const auto& item : tracked) {
-				const std::uint8_t pinned = item.pinned ? 1 : 0;
+				const auto         kind = static_cast<std::uint8_t>(item.kind);
 				const std::uint8_t active = item.active ? 1 : 0;
 				if (!a_intfc->WriteRecordData(&item.form, sizeof(item.form)) || !a_intfc->WriteRecordData(&item.ref, sizeof(item.ref)) ||
-					!WriteText(a_intfc, item.name) || !WriteText(a_intfc, item.type) || !a_intfc->WriteRecordData(&pinned, sizeof(pinned)) ||
+					!WriteText(a_intfc, item.name) || !WriteText(a_intfc, item.type) || !a_intfc->WriteRecordData(&kind, sizeof(kind)) ||
 					!a_intfc->WriteRecordData(&item.slot, sizeof(item.slot)) || !a_intfc->WriteRecordData(&active, sizeof(active))) {
 					ERROR("Failed to write serialized form data: {}", a_name);
 					return;
 				}
 			}
-			if (!a_intfc->WriteRecordData(&location.form, sizeof(location.form)) || !WriteText(a_intfc, location.name) || !WriteText(a_intfc, location.type)) {
+			const Target none;
+			if (!a_intfc->WriteRecordData(&none.form, sizeof(none.form)) || !WriteText(a_intfc, none.name) || !WriteText(a_intfc, none.type)) {
 				ERROR("Failed to write serialized form data: {}", a_name);
 				return;
 			}
-			INFO("Saved {} to co-save ({} tracked, location {:08X})", a_name, tracked.size(), location.form);
+			INFO("Saved {} to co-save ({} tracked)", a_name, tracked.size());
 		}
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
@@ -65,10 +79,10 @@ namespace Serialization
 			};
 			for (std::uint32_t i = 0; i < count; ++i) {
 				Tracked      item;
-				std::uint8_t pinned = 0;
+				std::uint8_t kind = 0;
 				std::uint8_t active = 1;
 				if (!a_intfc->ReadRecordData(&item.form, sizeof(item.form)) || !a_intfc->ReadRecordData(&item.ref, sizeof(item.ref)) ||
-					!ReadText(a_intfc, item.name) || !ReadText(a_intfc, item.type) || !a_intfc->ReadRecordData(&pinned, sizeof(pinned)) ||
+					!ReadText(a_intfc, item.name) || !ReadText(a_intfc, item.type) || !a_intfc->ReadRecordData(&kind, sizeof(kind)) ||
 					!a_intfc->ReadRecordData(&item.slot, sizeof(item.slot)) || !a_intfc->ReadRecordData(&active, sizeof(active))) {
 					ERROR("Failed to read serialized form data: {}", a_name);
 					tracked.clear();
@@ -76,7 +90,7 @@ namespace Serialization
 				}
 				item.form = resolve(item.form);
 				item.ref = resolve(item.ref);
-				item.pinned = pinned != 0;
+				item.kind = kind <= static_cast<std::uint8_t>(Kind::kTravel) ? static_cast<Kind>(kind) : Kind::kMark;
 				item.active = active != 0;
 				if (item.form) {
 					tracked.push_back(std::move(item));

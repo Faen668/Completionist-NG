@@ -198,7 +198,6 @@ namespace CompletionistUI
 		std::vector<KillRecord>                       _kills;
 		PinList                                       _pins;
 		std::uint32_t                                 _shownMarker{ 0 };
-		std::uint32_t                                 _locationMarker{ 0 };
 		bool                                          _cellView{ false };
 		int                                           _cellOptionsSection{ 0 };	// Searching, Filters, Item Pinning
 		std::unordered_map<std::string, std::int32_t> _pendingCellNumbers;

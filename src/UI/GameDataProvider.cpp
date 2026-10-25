@@ -12,6 +12,7 @@
 #include "Internal Utility/WordsOfPower.hpp"
 #include "Internal Utility/CellScanner.hpp"
 #include "UI/Core/TranslationFile.hpp"
+#include "UI/Tracker.hpp"
 
 #undef GetObject
 
@@ -1334,14 +1335,16 @@ namespace CompletionistUI
 
 		PinList list;
 		list.enabled = ReadBool("bCellScanner_Pinning_Enabled");
-		for (const auto& item : SettingsPages::Tracked()) {
+		for (const auto& item : Tracker::Tracked()) {
 			if (item.pinned) {
 				const auto* form = RE::TESForm::LookupByID(item.form);
 				list.pins.insert(list.pins.begin(), { item.form, form ? std::string(form->GetName()) : item.name, {} });
 			}
 		}
 
-		_locationMarker = SettingsPages::LocationMarker();
+		for (const auto ref : Tracker::Located()) {
+			list.located.push_back(ref);
+		}
 
 		std::scoped_lock lock(_lock);
 		for (auto& pin : list.pins) {
@@ -1376,7 +1379,7 @@ namespace CompletionistUI
 			}
 		}
 		SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.formID, name = a_entry.name]() {
-			SettingsPages::Pin(RE::TESForm::LookupByID(formID), name);
+			Tracker::Pin(RE::TESForm::LookupByID(formID), name);
 			RebuildSettings();
 		});
 	}
@@ -1412,11 +1415,11 @@ namespace CompletionistUI
 		scan.excluded = SettingsPages::IsCellExcluded(cell);
 		scan.interior = cell->IsInteriorCell();
 		if (scan.excluded && _pruneTracking.exchange(false)) {
-			SettingsPages::DropUnlisted({});
+			Tracker::DropUnlisted({});
 		}
 		if (!scan.excluded) {
 			std::vector<std::pair<RE::FormID, RE::FormID>> tracking;
-			for (const auto& item : SettingsPages::Tracked()) {
+			for (const auto& item : Tracker::Tracked()) {
 				if (item.placed) {
 					tracking.emplace_back(item.ref, item.form);
 				}
@@ -1430,7 +1433,7 @@ namespace CompletionistUI
 						listed.emplace_back(ref->GetFormID(), result.item->GetFormID());
 					}
 				}
-				SettingsPages::DropUnlisted(listed);
+				Tracker::DropUnlisted(listed);
 			}
 
 			std::vector<RE::FormID> found;
@@ -1439,10 +1442,10 @@ namespace CompletionistUI
 					found.push_back(result.item->GetFormID());
 				}
 			}
-			SettingsPages::PlacePinsFound(found);
+			Tracker::PlacePinsFound(found);
 
 			std::vector<std::pair<RE::FormID, RE::FormID>> marked;
-			for (const auto& item : SettingsPages::Tracked()) {
+			for (const auto& item : Tracker::Tracked()) {
 				if (!item.pinned) {
 					marked.emplace_back(item.ref, item.form);
 				}
@@ -1580,7 +1583,7 @@ namespace CompletionistUI
 			}
 		}
 		SKSE::GetTaskInterface()->AddTask([this, item = a_item]() {
-			if (!SettingsPages::MarkReference(RE::TESForm::LookupByID<RE::TESObjectREFR>(item.refID), RE::TESForm::LookupByID(item.formID), item.name, item.type)) {
+			if (!Tracker::MarkReference(RE::TESForm::LookupByID<RE::TESObjectREFR>(item.refID), RE::TESForm::LookupByID(item.formID), item.name, item.type)) {
 				std::scoped_lock lock(_lock);
 				for (auto& record : _cellRecords) {
 					if (record.item.refID == item.refID && record.item.formID == item.formID) {
@@ -1638,7 +1641,7 @@ namespace CompletionistUI
 		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
 			player->AsBGSActorCellEventSource()->AddEventSink(this);
 		}
-		SettingsPages::WatchTargets();
+		Tracker::Watch();
 		SettingsPages::translate = [this](std::string_view a_key) { return Translate(a_key); };
 	}
 
@@ -1681,7 +1684,7 @@ namespace CompletionistUI
 				}
 			}
 		}
-		SKSE::GetTaskInterface()->AddTask([ref = a_item.refID, form = a_item.formID]() { SettingsPages::ClearMarker(ref, form); });
+		SKSE::GetTaskInterface()->AddTask([ref = a_item.refID, form = a_item.formID]() { Tracker::ClearMarker(ref, form); });
 	}
 
 	//---------------------------------------------------
@@ -1696,7 +1699,7 @@ namespace CompletionistUI
 				record.item.marked = false;
 			}
 		}
-		SKSE::GetTaskInterface()->AddTask([]() { SettingsPages::ClearMarkers(); });
+		SKSE::GetTaskInterface()->AddTask([]() { Tracker::ClearMarkers(); });
 	}
 
 	//---------------------------------------------------
@@ -1708,9 +1711,15 @@ namespace CompletionistUI
 		if (!a_entry.canMark || !a_entry.MarkerID()) {
 			return;
 		}
-		_locationMarker = a_entry.MarkerID();
-		SKSE::GetTaskInterface()->AddTask([formID = a_entry.MarkerID(), name = a_entry.name]() {
-			SettingsPages::PlaceLocationMarker(RE::TESForm::LookupByID<RE::TESObjectREFR>(formID), name);
+		{
+			std::scoped_lock lock(_lock);
+			if (!_pins.Locates(a_entry.MarkerID())) {
+				_pins.located.push_back(a_entry.MarkerID());
+			}
+		}
+		SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.MarkerID(), name = a_entry.name]() {
+			Tracker::Locate(RE::TESForm::LookupByID<RE::TESObjectREFR>(formID), name);
+			RebuildPins();
 		});
 	}
 
@@ -1718,10 +1727,16 @@ namespace CompletionistUI
 	//-- Game Data ( Clear Location Marker ) ------------
 	//---------------------------------------------------
 
-	void GameDataProvider::ClearLocationMarker() {
+	void GameDataProvider::ClearLocationMarker(std::uint32_t a_refID) {
 
-		_locationMarker = 0;
-		SKSE::GetTaskInterface()->AddTask([]() { SettingsPages::ClearLocationMarker(false); });
+		{
+			std::scoped_lock lock(_lock);
+			std::erase(_pins.located, a_refID);
+		}
+		SKSE::GetTaskInterface()->AddTask([this, a_refID]() {
+			Tracker::Unlocate(a_refID);
+			RebuildPins();
+		});
 	}
 
 	//---------------------------------------------------
@@ -1735,7 +1750,7 @@ namespace CompletionistUI
 			std::erase_if(_pins.pins, [&](const PinInfo& a_pin) { return a_pin.formID == a_formID; });
 		}
 		SKSE::GetTaskInterface()->AddTask([this, a_formID]() {
-			SettingsPages::Unpin(a_formID);
+			Tracker::Unpin(a_formID);
 			RebuildSettings();
 		});
 	}
@@ -1751,7 +1766,7 @@ namespace CompletionistUI
 			_pins.pins.clear();
 		}
 		SKSE::GetTaskInterface()->AddTask([this]() {
-			SettingsPages::UnpinAll();
+			Tracker::UnpinAll();
 			RebuildSettings();
 		});
 	}
