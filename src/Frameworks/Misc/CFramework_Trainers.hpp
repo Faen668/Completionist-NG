@@ -30,10 +30,5 @@ namespace CFramework_Trainers
 		[[nodiscard]] static bool               IsTrained(const Trainer& a_trainer);
 		[[nodiscard]] static RE::ActorValue     SkillValue(std::int32_t a_skill) { return static_cast<RE::ActorValue>(std::to_underlying(RE::ActorValue::kOneHanded) + a_skill); }
 		[[nodiscard]] static std::string        SkillName(std::int32_t a_skill);
-
-	private:
-		RE::FormID   _lessonTrainer{ 0 };
-		RE::ActorValue _lessonSkill{ RE::ActorValue::kNone };
-		float        _lessonStart{ 0.0f };
 	};
 }
