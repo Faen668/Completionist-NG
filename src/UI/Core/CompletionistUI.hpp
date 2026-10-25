@@ -147,7 +147,8 @@ namespace CompletionistUI
 		void         JumpTo(const FindItem& a_item);
 		bool DrawSection(IDataProvider& a_provider, const Section& a_section, bool a_showTitle);
 		void DrawEntry(IDataProvider& a_provider, const Entry& a_entry);
-		void DrawDescriptionPanel(IDataProvider& a_provider, float a_height, float a_gap);
+		void DrawDescriptionPanel(IDataProvider& a_provider, float a_height, float a_gap, const Page* a_journal = nullptr, const Entry* a_quest = nullptr);
+		void DrawQuestDetail(IDataProvider& a_provider, const Page& a_page, const Entry& a_entry);
 		void                       DrawShoutWords(IDataProvider& a_provider, const Entry& a_entry, bool a_sideBySide);
 		[[nodiscard]] static float ShoutWordsHeight();
 		void DrawShoutPanel(IDataProvider& a_provider, const Page& a_page, float a_height, float a_gap);
@@ -156,6 +157,21 @@ namespace CompletionistUI
 		void                UpdateDescriptionPanel(float a_available, float a_gap);
 
 		[[nodiscard]] bool PassesFilter(const Entry& a_entry) const;
+
+		struct TabItem
+		{
+			std::string id;
+			std::string title;
+			std::string count;
+		};
+		enum class TabKeys : std::uint8_t
+		{
+			kNone,
+			kLeft,
+			kBoth,
+		};
+		bool                      TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected, bool a_leftOnly = false);	// true when it changed
+		[[nodiscard]] const Page& TabView(const Page& a_page, std::int32_t a_tab);
 
 		std::vector<Category>                         _categories;
 		std::vector<SettingsPage>                     _settingsPages;
@@ -205,7 +221,11 @@ namespace CompletionistUI
 		bool                  _forcePadHints{ false };
 		std::string           _padActionKey;
 		std::string           _padTriggerKey;
-		bool                  _settingsTabsShown{ false };
+		TabKeys               _tabsShown{ TabKeys::kNone };
+		std::unordered_map<std::string, std::string> _pageTabs;	// page id to tab
+		Page                  _tabView;
+		std::string           _tabViewKey;
+		std::uint32_t         _pageLoads{ 0 };
 		std::vector<NavSpot>  _entrySpots;
 		std::vector<NavSpot>  _entrySpotsLast;
 		std::vector<NavSpot>  _controlSpots;
@@ -243,6 +263,10 @@ namespace CompletionistUI
 		float                 _descriptionOpen{ -1.0f };	// 1 open, 0 collapsed
 		float                 _navigationOpen{ -1.0f };
 		float                 _descriptionDragLines{ -1.0f };
+		bool                  _descriptionHeld{ false };	// Y held, so its release isn't a tap
+		bool                  _fitDescription{ false };	// fit the panel to the text once it's measured
+		float                 _descriptionFitLines{ -1.0f };	// Y's fit, -1 for the saved height
+		std::int32_t          _descriptionFitBase{ 0 };	// saved height when it was fitted
 		float                 _descriptionMaxLines{ 12.0f };
 		bool                  _descriptionDragged{ false };
 	};

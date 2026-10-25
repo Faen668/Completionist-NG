@@ -23,6 +23,7 @@ namespace CompletionistUI
 		std::vector<Category>     GetCategories() override;
 		Page                      GetPage(std::string_view a_id) override;
 		void                      SetCompleted(std::string_view a_pageID, const Entry& a_entry, bool a_completed) override;
+		void                      SetPageChoice(std::string_view a_pageID, std::int32_t a_choice) override;
 		std::vector<SettingsPage> GetSettingsPages() override;
 		void                      ApplySetting(std::string_view a_pageID, const SettingItem& a_item) override;
 		AboutInfo                 GetAbout() override;
