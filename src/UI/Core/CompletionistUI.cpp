@@ -965,6 +965,9 @@ namespace CompletionistUI
 			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0, 0, 0, 0));
+			// A table cell takes the row's text baseline from the cells before it, which pushes a Selectable
+			// down and makes it taller in every column but the first. Rows start from the top of the line.
+			ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset = 0.0f;
 			const bool clicked = ImGui::Selectable(a_id, a_selected, a_flags, a_size);
 			ImGui::PopStyleColor(3);
 			NoteControl();
@@ -2144,7 +2147,8 @@ namespace CompletionistUI
 		const auto& style = ImGui::GetStyle();
 		const auto  closeLabel = a_provider.Translate("UI_Close");
 		const auto  shotLabel = a_provider.Translate("UI_Screenshot");
-		float width = ButtonWidth(closeLabel.c_str());
+		const float cogSide = ImGui::GetFrameHeight();
+		float width = ButtonWidth(closeLabel.c_str()) + cogSide + style.ItemSpacing.x;
 		if (_showScreenshotButton) {
 			width += ButtonWidth(shotLabel.c_str()) + style.ItemSpacing.x;
 		}
@@ -2163,6 +2167,22 @@ namespace CompletionistUI
 			}
 			ImGui::SameLine();
 		}
+
+		// Settings cog beside Close, lit while Settings is open
+		if (ThemedButton("##SettingsCog", cogSide)) {
+			OpenPage(settingsPage);
+		}
+		{
+			const auto& palette = Themes::GetPalette();
+			const bool  lit = ImGui::IsItemHovered() || ImGui::IsItemFocused() || _selectedPage == settingsPage;
+			const auto  min = ImGui::GetItemRectMin();
+			const auto  max = ImGui::GetItemRectMax();
+			Decor::DrawIcon(ImGui::GetWindowDrawList(), Icon::kSettings, ImVec2((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f), ImGui::GetFontSize() * 0.9f, Colour(lit ? palette.accent : palette.needed));
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("%s", a_provider.Translate("UI_Settings").c_str());
+			}
+		}
+		ImGui::SameLine();
 		if (ThemedButton(closeLabel.c_str())) {
 			a_open = false;
 		}
@@ -2333,10 +2353,8 @@ namespace CompletionistUI
 			}
 		}
 
+		// The last divider closes the list; Settings is the cog beside Close
 		divider();
-		if (centredRow("##Settings", "UI_Settings", _selectedPage == settingsPage)) {
-			OpenPage(settingsPage);
-		}
 		if (_focusSidebar && !_sidebarSpots.empty()) {
 			if (_showSidebarFocus) {
 				_pendingFocus = _sidebarSpots.front().id;
@@ -4187,7 +4205,7 @@ namespace CompletionistUI
 				const auto min = ImGui::GetItemRectMin();
 				const auto max = ImGui::GetItemRectMax();
 
-				// Tick to mark complete, X on a controller
+				// Tick to mark complete for the mouse, Square on a controller
 				float right = max.x - style.FramePadding.x;
 				if (entry->canToggle) {
 					const float side = rowHeight;
@@ -4200,8 +4218,8 @@ namespace CompletionistUI
 							DoRowAction(a_provider, *entry, action);
 						}
 					}
-					if (hovered || (rowFocused && _padActive)) {
-						if (RowActionButton(a_provider, action, entry->IsComplete(), ImVec2(max.x - side, min.y), side, hovered)) {
+					if (hovered) {
+						if (RowActionButton(a_provider, action, entry->IsComplete(), ImVec2(right - side, std::round((min.y + max.y - side) * 0.5f)), side, hovered)) {
 							_journalKey = keyOf(*entry);
 							DoRowAction(a_provider, *entry, action);
 						}
@@ -4381,6 +4399,9 @@ namespace CompletionistUI
 			_pinnedEntry = a_entry;
 			_pinnedKey = key;
 		}
+		// The highlight box, which ImGui sizes per column, so the buttons sit inside it
+		const auto boxMin = ImGui::GetItemRectMin();
+		const auto boxMax = ImGui::GetItemRectMax();
 		RecordSpot(_entrySpots, _spotNext.section, _spotNext.index, _spotNext.columns, _spotNext.count);
 		KeepFocus(key);
 		if (!_scrollToKey.empty() && _scrollToKey == key) {
@@ -4440,11 +4461,14 @@ namespace CompletionistUI
 			ImGui::TextColored(palette.textDim, "%s", a_entry.detail.c_str());
 		}
 
-		// Row action button
+		// Row action button; the tick is for the mouse, a controller has its button
 		const bool lit = on && action != RowAction::kComplete;
-		if (action != RowAction::kNone && (rowHovered || (rowFocused && _padActive) || lit)) {
+		const bool padShown = rowFocused && _padActive && action != RowAction::kComplete;
+		if (action != RowAction::kNone && (rowHovered || padShown || lit)) {
 			const float side = ImGui::GetFrameHeight();
-			if (RowActionButton(a_provider, action, on, ImVec2(rowMax.x - side, start.y), side, rowHovered)) {
+			const float buttonsRight = boxMax.x - ImGui::GetStyle().FramePadding.x;
+			const float buttonsY = std::round((boxMin.y + boxMax.y - side) * 0.5f);
+			if (RowActionButton(a_provider, action, on, ImVec2(buttonsRight - side, buttonsY), side, rowHovered)) {
 				DoRowAction(a_provider, a_entry, action);
 			}
 		}
