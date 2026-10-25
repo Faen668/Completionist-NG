@@ -13,13 +13,12 @@ namespace Completionist
 			return;
 
 		_handler = RE::TESDataHandler::GetSingleton();
-		if (!_handler) INFO("MuseumAPI: Unable to retrieve VM");
-
 		_vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-		if (!_vm) INFO("MuseumAPI: Unable to retrieve VM");
-
-		_policy = _vm->GetObjectHandlePolicy();
-		if (!_policy) INFO("MuseumAPI: Unable to retrieve VM Policy");
+		_policy = _vm ? _vm->GetObjectHandlePolicy() : nullptr;
+		if (!_handler || !_vm || !_policy) {
+			INFO("MuseumAPI: Unable to retrieve the data handler, VM or VM policy");
+			return;
+		}
 
 		_logging = CVariables::VariablesAPI::IsMuseumAPILoggingEnabled();
 
@@ -42,6 +41,7 @@ namespace Completionist
 		FindAndTrackMuseumItems();
 		FindAndTrackMuseumPatchItems();
 		InsertPatchReplacedItems();
+		FindAndTrackMuseumAltItems();
 		BuildAllVariations();
 		VerifyAltLists();
 	}
@@ -54,6 +54,27 @@ namespace Completionist
 	{
 		using ft = RE::FormType;
 		return a_type == ft::Activator || a_type == ft::MovableStatic || a_type == ft::NPC;
+	}
+
+	static std::string_view FileOf(RE::TESForm* a_form)
+	{
+		auto* file = a_form ? a_form->GetFile(0) : nullptr;
+		return file ? file->GetFilename() : "Unknown Filename";
+	}
+
+	// "Snow Prince's Boots (Replica)" -> "Snow Prince's Boots"
+	static std::string OriginalName(std::string_view a_name)
+	{
+		constexpr std::string_view suffix = " (replica)";
+		if (a_name.size() <= suffix.size())
+			return {};
+
+		const auto tail = a_name.substr(a_name.size() - suffix.size());
+		const auto same = [](char a, char b) { return std::tolower(static_cast<unsigned char>(a)) == b; };
+		if (!std::ranges::equal(tail, suffix, same))
+			return {};
+
+		return std::string(a_name.substr(0, a_name.size() - suffix.size()));
 	}
 
 	bool MuseumAPI::SetDisplayable(RE::FormID a_formID, std::unordered_set<RE::FormID> a_variations)
@@ -91,7 +112,8 @@ namespace Completionist
 					INFO("Set {:08X} - {} as displayable with the following variations:", a_form->GetFormID(), a_form->GetName());
 
 					for (const auto& variation : a_variations) {
-						INFO("  - {:08X} - {}", variation->GetFormID(), variation->GetName());
+						if (variation)
+							INFO("  - {:08X} - {}", variation->GetFormID(), variation->GetName());
 					}
 				}
 			}
@@ -187,13 +209,20 @@ namespace Completionist
 		if (!a_event || a_event->itemCount <= 0)
 			return;
 
-		if (_museumContainers.contains(a_event->newContainer))
+		const bool toMuseum = _museumContainers.contains(a_event->newContainer);
+		const bool fromMuseum = _museumContainers.contains(a_event->oldContainer);
+
+		// Moved between two museum containers, so the count doesn't change
+		if (toMuseum && fromMuseum)
+			return;
+
+		if (toMuseum)
 		{
 			_museumInventory[a_event->baseObj] += a_event->itemCount;
 			return;
 		}
 
-		if (_museumContainers.contains(a_event->oldContainer))
+		if (fromMuseum)
 		{
 			auto it = _museumInventory.find(a_event->baseObj);
 			if (it != _museumInventory.end()) {
@@ -213,17 +242,36 @@ namespace Completionist
 	void MuseumAPI::BuildAllVariations()
 	{
 		_AllVariations.clear();
-		for (const auto& [baseID, variations] : _DisplayableFormIDs) {
-			std::unordered_set<RE::FormID> group = variations;
-			group.insert(baseID);
 
+		// Groups that share an item become one group
+		std::unordered_map<RE::FormID, RE::FormID> parent;
+		const auto root = [&parent](RE::FormID a_id) {
+			parent.try_emplace(a_id, a_id);
+			while (parent[a_id] != a_id) {
+				parent[a_id] = parent[parent[a_id]];
+				a_id = parent[a_id];
+			}
+			return a_id;
+		};
+
+		for (const auto& [baseID, variations] : _DisplayableFormIDs) {
+			const auto baseRoot = root(baseID);
+			for (const auto& id : variations) {
+				const auto other = root(id);
+				if (other != baseRoot)
+					parent[other] = baseRoot;
+			}
+		}
+
+		std::unordered_map<RE::FormID, std::unordered_set<RE::FormID>> groups;
+		for (const auto& [id, _] : parent)
+			groups[root(id)].insert(id);
+
+		for (const auto& [_, group] : groups) {
 			for (const auto& id : group) {
-				std::unordered_set<RE::FormID> others;
-				for (const auto& otherID : group) {
-					if (otherID != id)
-						others.insert(otherID);
-				}
-				_AllVariations[id] = std::move(others);
+				auto& others = _AllVariations[id];
+				others = group;
+				others.erase(id);
 			}
 		}
 
@@ -242,21 +290,44 @@ namespace Completionist
 				if (variations.empty())
 				{
 					INFO("Variation group for [{}] {:08X} - {} has no other linked items", isTracked ? "Tracked Item" : "Untracked Item", id, name);
-					INFO("  - {}", form ? form->GetFile(0)->GetFilename() : "Unknown Filename");
+					INFO("  - {}", FileOf(form));
 				}
 				else
 				{
-					INFO("Variation group for [{}] {:08X} [{}] {} includes the following:", isTracked ? "Tracked Item" : "Untracked Item", id, form ? form->GetFile(0)->GetFilename() : "Unknown Filename", name);
+					INFO("Variation group for [{}] {:08X} [{}] {} includes the following:", isTracked ? "Tracked Item" : "Untracked Item", id, FileOf(form), name);
 					for (const auto& variationID : variations) {
 						auto* varForm = RE::TESForm::LookupByID(variationID);
 						std::string varName = varForm ? varForm->GetName() : "<unknown>";
 						INFO("  - {:08X} - {}", variationID, varName);
-						INFO("    - {}", varForm ? varForm->GetFile(0)->GetFilename() : "Unknown Filename");
+						INFO("    - {}", FileOf(varForm));
 					}
 				}
 			}
 		}
 		INFO("MuseumAPI variations map built with {} items.", _AllVariations.size());
+
+		// Items the museum displays that Completionist doesn't track
+		std::vector<std::pair<RE::TESForm*, bool>> untracked;
+		for (const auto& [id, variations] : _AllVariations)
+		{
+			auto* form = RE::TESForm::LookupByID(id);
+			if (!form || Serialization::CompletionistData::CheckIsCollectable(form))
+				continue;
+
+			const bool variationTracked = std::ranges::any_of(variations, [](RE::FormID a_id) {
+				return Serialization::CompletionistData::CheckIsCollectable(a_id);
+			});
+			untracked.emplace_back(form, variationTracked);
+		}
+
+		std::ranges::sort(untracked, [](const auto& a, const auto& b) {
+			return a.second != b.second ? !a.second : std::string_view(a.first->GetName()) < b.first->GetName();
+		});
+
+		INFO("Museum check: {} displayable items aren't tracked", untracked.size());
+		for (const auto& [form, variationTracked] : untracked) {
+			INFO("  - {:08X} [{}] {}{}", form->GetFormID(), FileOf(form), form->GetName(), variationTracked ? " (another version is tracked)" : "");
+		}
 	}
 
 	//---------------------------------------------------
@@ -422,6 +493,7 @@ namespace Completionist
 			for (auto i = 0; i < formlist->forms.size(); i++)
 			{
 				const auto& element = formlist->forms[i];
+				if (!element) continue;
 
 				if (auto nestedList = element->As<RE::BGSListForm>())
 				{
@@ -502,6 +574,7 @@ namespace Completionist
 						for (auto i = 0; i < formlist->forms.size(); i++)
 						{
 							const auto& element = formlist->forms[i];
+							if (!element) continue;
 
 							if (auto nestedList = element->As<RE::BGSListForm>())
 							{
@@ -535,6 +608,131 @@ namespace Completionist
 						}
 					}
 				}
+			}
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Functions --------------------------------------
+	//---------------------------------------------------
+
+	// Alt lists hold items a display also takes that the replica lists don't link,
+	// such as the Snow Prince armour replicas and the empty Bloodstone Chalice
+	void MuseumAPI::FindAndTrackMuseumAltItems()
+	{
+		if (!_handler) return;
+
+		const auto& replicaBaseItems = _handler->LookupForm<RE::BGSListForm>(0x138795, "LegacyoftheDragonborn.esm");
+		const auto& replicaItems = _handler->LookupForm<RE::BGSListForm>(0x138796, "LegacyoftheDragonborn.esm");
+		if (!replicaBaseItems || !replicaItems) {
+			if (_logging)
+				INFO("Unable to get replicaBaseItems or replicaItems formlists.");
+
+			return;
+		}
+
+		// Everything tracked so far, and by name for replicas
+		std::unordered_set<RE::FormID> tracked;
+		std::unordered_map<std::string, RE::FormID> trackedByName;
+		const auto track = [&](RE::FormID a_id) {
+			if (!tracked.insert(a_id).second)
+				return;
+			auto* form = RE::TESForm::LookupByID(a_id);
+			if (form && *form->GetName())
+				trackedByName.try_emplace(form->GetName(), a_id);
+		};
+
+		for (const auto& [baseID, variations] : _DisplayableFormIDs) {
+			track(baseID);
+			for (const auto& id : variations)
+				track(id);
+		}
+
+		// A replica's recipe checks the player has the original
+		std::unordered_map<RE::FormID, RE::FormID> originalOf;
+		std::unordered_map<RE::FormID, RE::FormID> replicaOf;
+		for (auto* recipe : _handler->GetFormArray<RE::BGSConstructibleObject>())
+		{
+			if (!recipe || !recipe->createdItem)
+				continue;
+
+			for (auto* condition = recipe->conditions.head; condition; condition = condition->next)
+			{
+				if (condition->data.functionData.function != RE::FUNCTION_DATA::FunctionID::kGetItemCount)
+					continue;
+
+				if (auto* original = static_cast<RE::TESForm*>(condition->data.functionData.params[0])) {
+					originalOf.try_emplace(recipe->createdItem->GetFormID(), original->GetFormID());
+					replicaOf.try_emplace(original->GetFormID(), recipe->createdItem->GetFormID());
+					break;
+				}
+			}
+		}
+
+		// Tracked item to link to: one already in the group, the other end of a replica recipe, or the name without "(Replica)"
+		const auto findAnchor = [&](const std::vector<RE::TESForm*>& a_group) -> RE::TESForm* {
+			for (auto* form : a_group) {
+				if (tracked.contains(form->GetFormID()))
+					return form;
+			}
+			for (const auto* links : { &originalOf, &replicaOf }) {
+				for (auto* form : a_group) {
+					auto it = links->find(form->GetFormID());
+					if (it != links->end() && tracked.contains(it->second))
+						return RE::TESForm::LookupByID(it->second);
+				}
+			}
+			for (auto* form : a_group) {
+				auto it = trackedByName.find(OriginalName(form->GetName()));
+				if (it != trackedByName.end())
+					return RE::TESForm::LookupByID(it->second);
+			}
+			return nullptr;
+		};
+
+		for (const auto& [mappedFormID, mappedFileName, formListName] : museumItemAltListsMap)
+		{
+			const auto& formlist = _handler->LookupForm<RE::BGSListForm>(mappedFormID, mappedFileName);
+			if (!formlist) { continue; }
+
+			for (const auto& element : formlist->forms)
+			{
+				if (!element)
+					continue;
+
+				std::vector<RE::TESForm*> members;
+				if (auto nestedList = element->As<RE::BGSListForm>()) {
+					for (const auto& form : nestedList->forms) {
+						if (form)
+							members.push_back(form);
+					}
+				}
+				else {
+					members.push_back(element);
+				}
+
+				std::vector<RE::TESForm*> group;
+				for (auto* form : members) {
+					group.push_back(form);
+					for (auto* replica : GetReplicaItems(form, replicaBaseItems, replicaItems))
+						group.push_back(replica);
+				}
+
+				if (group.empty())
+					continue;
+
+				auto* anchor = findAnchor(group);
+				if (!anchor)
+					anchor = group.front();
+
+				std::unordered_set<RE::TESForm*> variations(group.begin(), group.end());
+				variations.erase(anchor);
+
+				SetDisplayable(anchor, std::move(variations));
+
+				track(anchor->GetFormID());
+				for (auto* form : group)
+					track(form->GetFormID());
 			}
 		}
 	}
@@ -585,6 +783,7 @@ namespace Completionist
 			for (auto i = 0; i < formlist->forms.size(); i++)
 			{
 				const auto& element = formlist->forms[i];
+				if (!element) continue;
 
 				if (auto nestedList = element->As<RE::BGSListForm>())
 				{

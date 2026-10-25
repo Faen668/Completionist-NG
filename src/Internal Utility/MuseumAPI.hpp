@@ -38,6 +38,7 @@ namespace Completionist
 
 		static void FindAndTrackMuseumItems();
 		static void FindAndTrackMuseumPatchItems();
+		static void FindAndTrackMuseumAltItems();
 		static std::unordered_set<RE::TESForm*> GetReplicaItems(const RE::TESForm* element, const RE::BGSListForm* replicaBaseItems, const RE::BGSListForm* replicaItems);
 
 		// Papyrus Functions
