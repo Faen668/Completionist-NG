@@ -135,19 +135,18 @@ namespace CSettings
 			{ "iMenuPrefix_Occupied", Type::kInt, "0" },
 
 			// Cell Scanner
-			{ "bCellScanner_REFS", Type::kBool, "true" },
-			{ "bCellScanner_CONT", Type::kBool, "true" },
-			{ "bCellScanner_NPCS", Type::kBool, "false" },
 			{ "bCellScanner_NUMB", Type::kBool, "true" },
 			{ "bCellScanner_DETA", Type::kBool, "false" },
 			{ "bCellScanner_MARK", Type::kBool, "false" },
 			{ "bCellScanner_UseClosestReference", Type::kBool, "true" },
 			{ "bCellScanner_ExcludeAlchemy", Type::kBool, "false" },
+			{ "bCellScanner_ExcludeIngredients", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeArmor", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeBooks", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeMiscItems", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeWeapons", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeOwned", Type::kBool, "false" },
+			{ "bCellScanner_ExcludeLiving", Type::kBool, "false" },
 
 			// Item icons
 			{ "bItemIcons", Type::kBool, "true" },
