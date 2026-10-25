@@ -34,9 +34,8 @@ namespace CompletionistUI
 		void                      SetPin(const Entry& a_entry) override;
 		void                      ClearPin(std::uint32_t a_formID) override;
 		void                      ClearPins() override;
-		std::uint32_t             GetLocationMarker() override { return _locationMarker; }
 		void                      SetLocationMarker(const Entry& a_entry) override;
-		void                      ClearLocationMarker() override;
+		void                      ClearLocationMarker(std::uint32_t a_refID) override;
 		CellScan                  GetCellScan() override;
 		void                      RescanCell() override;
 		void                      MarkCellItem(const CellItem& a_item) override;
@@ -73,7 +72,6 @@ namespace CompletionistUI
 
 		std::vector<KillRecord>    _kills;
 		PinList                    _pins;
-		std::atomic<std::uint32_t> _locationMarker{ 0 };
 
 		void ScanCellNow();
 		struct CellRecord

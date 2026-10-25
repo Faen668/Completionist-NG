@@ -11,6 +11,7 @@
 #include "UI/GameUI.hpp"
 #include "UI/ItemMarks.hpp"
 #include "UI/SettingsPages.hpp"
+#include "UI/Tracker.hpp"
 
 const SKSE::MessagingInterface* g_messaging = nullptr;
 const SKSE::LoadInterface* g_LoadInterface = nullptr;
@@ -106,20 +107,20 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		Completionist::MuseumAPI::OnPlayerLoadGame();
-		CompletionistUI::SettingsPages::RestoreTargets();
+		CompletionistUI::Tracker::Restore();
 		CompletionistUI::GameUI::OnGameLoaded();
 		CFramework_Master::FrameworkAPI::OnGameStarted(true);
 		break;
 
 	case SKSE::MessagingInterface::kSaveGame:
-		CompletionistUI::SettingsPages::BeforeSave();
+		CompletionistUI::Tracker::BeforeSave();
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		Completionist::MuseumAPI::OnPlayerLoadGame();
-		CompletionistUI::SettingsPages::RestoreTargets();
+		CompletionistUI::Tracker::Restore();
 		CompletionistUI::GameUI::OnGameLoaded();
 		CFramework_Master::FrameworkAPI::OnGameStarted(false);
 		break;

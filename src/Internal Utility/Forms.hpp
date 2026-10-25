@@ -8,36 +8,20 @@ namespace CForms
 	// Tracker slots are made from this template
 	inline constexpr RE::FormID   TrackerTemplate = 0x802;  // Completionist_Tracker
 	inline constexpr std::int32_t TrackerSlots = 32;
-	inline constexpr RE::FormID MarkerQuest = 0x8AB;      // Completionist_Marker
-	inline constexpr RE::FormID LocMarker = 0x8AA;	// LocMarker (REFR)
 	inline constexpr RE::FormID ExcludedCells = 0x821;    // Completionist_ExcludedCells (FLST)
 
-	inline constexpr RE::FormID LocationText = 0x8AE;  // CompletionistLocationString
+	// The old single location marker, only hidden on older saves
+	inline constexpr RE::FormID OldMarkerQuest = 0x8AB;  // Completionist_Marker
 
 	// Index 0 is no sound
 	inline constexpr RE::FormID PinnedItemShader = 0x810;  // Completionist_PinnedItemShader (EFSH)
 	inline constexpr RE::FormID PinnedItemSounds = 0x838;  // Completionist_PinnedItemSoundList (FLST)
-
-	inline constexpr std::uint32_t LocationAlias = 0;
-	inline constexpr std::uint32_t LocationNameAlias = 1;
 
 	template <class T>
 	T* Get(RE::FormID a_id)
 	{
 		auto* handler = RE::TESDataHandler::GetSingleton();
 		return handler ? handler->LookupForm<T>(a_id, plugin) : nullptr;
-	}
-
-	inline RE::BGSRefAlias* Alias(RE::FormID a_quest, std::uint32_t a_alias)
-	{
-		if (auto* quest = Get<RE::TESQuest>(a_quest)) {
-			for (auto* alias : quest->aliases) {
-				if (alias && alias->aliasID == a_alias) {
-					return skyrim_cast<RE::BGSRefAlias*>(alias);
-				}
-			}
-		}
-		return nullptr;
 	}
 
 	inline RE::BSScript::IVirtualMachine* VM()
@@ -98,13 +82,4 @@ namespace CForms
 		Call(NativeObject(HandleFor(Get<RE::TESQuest>(a_quest)), "Quest"), "SetObjectiveDisplayed"sv, a_index, a_displayed, a_force);
 	}
 
-	inline void CompleteObjective(RE::FormID a_quest, bool a_completed)
-	{
-		Call(NativeObject(HandleFor(Get<RE::TESQuest>(a_quest)), "Quest"), "SetObjectiveCompleted"sv, std::int32_t{ 10 }, a_completed);
-	}
-
-	inline void ClearAlias(RE::FormID a_quest, std::uint32_t a_alias)
-	{
-		Call(NativeObject(HandleFor(Alias(a_quest, a_alias)), "ReferenceAlias"), "Clear"sv);
-	}
 }

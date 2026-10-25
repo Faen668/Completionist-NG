@@ -232,12 +232,18 @@ namespace CompletionistUI
 
 	struct PinList
 	{
-		bool                 enabled{ false };
-		std::vector<PinInfo> pins;
+		bool                       enabled{ false };
+		std::vector<PinInfo>       pins;
+		std::vector<std::uint32_t> located;	 // NPCs, items and map markers tracked from the pages
 
 		[[nodiscard]] bool Has(std::uint32_t a_formID) const
 		{
 			return enabled && a_formID != 0 && std::ranges::any_of(pins, [&](const PinInfo& a_pin) { return a_pin.formID == a_formID; });
+		}
+
+		[[nodiscard]] bool Locates(std::uint32_t a_refID) const
+		{
+			return a_refID != 0 && std::ranges::find(located, a_refID) != located.end();
 		}
 	};
 

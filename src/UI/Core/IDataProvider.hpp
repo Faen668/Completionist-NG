@@ -33,9 +33,8 @@ namespace CompletionistUI
 		virtual void                  ClearPin(std::uint32_t /*a_formID*/) {}
 		virtual void                  ClearPins() {}
 
-		[[nodiscard]] virtual std::uint32_t GetLocationMarker() { return 0; }
-		virtual void                        SetLocationMarker(const Entry&) {}
-		virtual void                        ClearLocationMarker() {}
+		virtual void SetLocationMarker(const Entry&) {}
+		virtual void ClearLocationMarker(std::uint32_t /*a_refID*/) {}
 
 		[[nodiscard]] virtual CellScan GetCellScan() { return {}; }
 		virtual void                   RescanCell() {}

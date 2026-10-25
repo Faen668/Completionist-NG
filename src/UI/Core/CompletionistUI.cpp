@@ -1304,7 +1304,6 @@ namespace CompletionistUI
 			_recent = a_provider.GetRecentEvents();
 			_kills = a_provider.GetKills();
 			_pins = a_provider.GetPins();
-			_locationMarker = a_provider.GetLocationMarker();
 			_settingsPages = a_provider.GetSettingsPages();
 			_about = a_provider.GetAbout();
 			// Put the focus back on the same entry after a rebuild
@@ -4959,7 +4958,7 @@ namespace CompletionistUI
 		// Square always marks complete, R2 pins or sets the location marker
 		const auto action = RowActionFor(a_entry);
 		const auto place = action == RowAction::kMarker || action == RowAction::kPin ? action : RowAction::kNone;
-		const bool on = place == RowAction::kMarker ? _locationMarker != 0 && a_entry.MarkerID() == _locationMarker
+		const bool on = place == RowAction::kMarker ? _pins.Locates(a_entry.MarkerID())
 		              : place == RowAction::kPin && _pins.Has(a_entry.formID);
 		const bool tick = a_entry.canToggle;
 		const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
@@ -5142,12 +5141,12 @@ namespace CompletionistUI
 
 	void Menu::ToggleLocationMarker(IDataProvider& a_provider, const Entry& a_entry) {
 
-		if (_locationMarker != 0 && _locationMarker == a_entry.MarkerID()) {
-			a_provider.ClearLocationMarker();
+		if (_pins.Locates(a_entry.MarkerID())) {
+			a_provider.ClearLocationMarker(a_entry.MarkerID());
 		} else {
 			a_provider.SetLocationMarker(a_entry);
 		}
-		_locationMarker = a_provider.GetLocationMarker();
+		_pins = a_provider.GetPins();
 	}
 
 	//---------------------------------------------------
