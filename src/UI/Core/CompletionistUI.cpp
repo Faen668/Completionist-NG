@@ -359,8 +359,22 @@ namespace CompletionistUI
 			const float fill = Decor::Animate(ImGui::GetItemID(), a_value, 14.0f);
 			const float glow = Decor::Animate(ImGui::GetItemID() + 1, hovered, 12.0f);
 			const auto  min = ImGui::GetItemRectMin();
+			const auto  max = ImGui::GetItemRectMax();
 			const auto  centre = ImVec2(min.x + size * 0.5f, min.y + height * 0.5f);
 			auto*       drawList = ImGui::GetWindowDrawList();
+
+			// Focused from a controller or the keys: the marker alone is too small to spot, so a band
+			// and underline run across the control's space, as the dropdowns and sliders show
+			const float navGlow = Decor::Animate(ImGui::GetItemID() + 2, ImGui::IsItemFocused() && ImGui::GetCurrentContext()->NavCursorVisible, 12.0f);
+			if (navGlow > 0.0f) {
+				const float  reach = std::max(max.x + size, std::min(ImGui::GetCurrentWindow()->WorkRect.Max.x, min.x + size * 12.0f));
+				const ImVec2 bandMin(min.x - size * 0.35f, min.y);
+				const ImVec2 bandMax(reach, max.y);
+				const ImU32  strong = Colour(palette.accent, 0.16f * navGlow);
+				const ImU32  clear = Colour(palette.accent, 0.0f);
+				drawList->AddRectFilledMultiColor(bandMin, bandMax, strong, clear, clear, strong);
+				Decor::FadedLine(drawList, ImVec2(bandMin.x, max.y - 1.0f), ImVec2(bandMax.x, max.y - 1.0f), Colour(palette.accent, navGlow));
+			}
 
 			const ImVec4 on = a_onColour ? *a_onColour : palette.accent;
 			const ImVec4 off = hovered ? palette.text : palette.textDim;
@@ -538,6 +552,29 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Completionist UI ( Dress Popup ) ---------------
+		//---------------------------------------------------
+
+		// Inside the current popup: the theme's panel texture and corners, else the accent diamonds
+		void DressPopup() {
+
+			const auto& palette = Themes::GetPalette();
+			auto*       drawList = ImGui::GetWindowDrawList();
+			const auto  min = ImGui::GetWindowPos();
+			const auto  max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
+			const float corner = ImGui::GetFontSize() * 0.2f;
+			drawList->PushClipRect(min, max, false);
+			if (Decor::Panel(drawList, min, max, false)) {
+				Decor::PanelCorners(drawList, min, max);
+			} else if (!SkyUI()) {
+				for (const auto& point : { min, ImVec2(max.x, min.y), ImVec2(min.x, max.y), max }) {
+					Decor::Diamond(drawList, point, corner, Colour(palette.accent), true);
+				}
+			}
+			drawList->PopClipRect();
+		}
+
+		//---------------------------------------------------
 		//-- Completionist UI ( Themed Begin Combo ) --------
 		//---------------------------------------------------
 
@@ -550,10 +587,12 @@ namespace CompletionistUI
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(palette.accent.x, palette.accent.y, palette.accent.z, 0.06f));
 			ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(palette.accent.x, palette.accent.y, palette.accent.z, 0.10f));
-			ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.06f, 0.055f, 0.05f, 0.98f));
+			// The theme's own ground, near solid so the list reads over anything; light on Altmer
+			ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(palette.background.x, palette.background.y, palette.background.z, 0.98f));
 			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(palette.accent.x, palette.accent.y, palette.accent.z, 0.6f));
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 1.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(ImGui::GetFontSize() * 0.6f, ImGui::GetFontSize() * 0.5f));
 			if (SkyUI()) {
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 0));
 			}
@@ -561,8 +600,13 @@ namespace CompletionistUI
 			if (SkyUI()) {
 				ImGui::PopStyleColor();
 			}
-			ImGui::PopStyleVar(2);
+			ImGui::PopStyleVar(3);
 			ImGui::PopStyleColor(5);
+
+			// Inside the open list: dressed as the theme dresses its panels
+			if (open) {
+				DressPopup();
+			}
 
 			if (SkyUI()) {
 				if (!open) {
@@ -602,6 +646,18 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Completionist UI ( Type On Activate ) ----------
+		//---------------------------------------------------
+
+		// A / Cross on a focused text box starts typing; ImGui only does that from Triangle, which is ours
+		void TypeOnActivate() {
+
+			if (ImGui::IsItemFocused() && !ImGui::IsItemActive() && ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown, false)) {
+				ImGui::SetKeyboardFocusHere(-1);
+			}
+		}
+
+		//---------------------------------------------------
 		//-- Completionist UI ( Themed Filter Input ) -------
 		//---------------------------------------------------
 
@@ -618,6 +674,7 @@ namespace CompletionistUI
 			ImGui::SetNextItemWidth(a_width);
 			ImGui::InputTextWithHint(a_id, a_hint, a_buffer, a_size);
 			NoteControl();
+			TypeOnActivate();
 			ImGui::PopStyleVar(2);
 			ImGui::PopStyleColor();
 
@@ -649,6 +706,7 @@ namespace CompletionistUI
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			ImGui::InputText(a_id, a_buffer, a_size);
 			NoteControl();
+			TypeOnActivate();
 			ImGui::PopStyleVar();
 			ImGui::PopStyleColor();
 
@@ -681,56 +739,50 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Completionist UI ( Spectrum At ) ---------------
+		//-- Completionist UI ( Hue Of ) --------------------
 		//---------------------------------------------------
 
-		// White, every hue, then black
-		ImVec4 SpectrumAt(float a_position) {
+		float HueOf(std::int32_t a_rgb) {
 
-			static const ImVec4 stops[] = {
-				ImVec4(1, 1, 1, 1), ImVec4(1, 0, 0, 1), ImVec4(1, 1, 0, 1), ImVec4(0, 1, 0, 1), ImVec4(0, 1, 1, 1),
-				ImVec4(0, 0, 1, 1), ImVec4(1, 0, 1, 1), ImVec4(1, 0, 0, 1), ImVec4(0, 0, 0, 1),
-			};
-			constexpr int intervals = static_cast<int>(std::size(stops)) - 1;
-			const float   position = std::clamp(a_position, 0.0f, 1.0f) * intervals;
-			const int     index = std::min(static_cast<int>(position), intervals - 1);
-			const float   blend = position - static_cast<float>(index);
-			const auto&   from = stops[index];
-			const auto&   to = stops[index + 1];
-			return ImVec4(from.x + (to.x - from.x) * blend, from.y + (to.y - from.y) * blend, from.z + (to.z - from.z) * blend, 1.0f);
+			const auto colour = ColourFromRGB(a_rgb);
+			float      hue = 0.0f;
+			float      saturation = 0.0f;
+			float      value = 0.0f;
+			ImGui::ColorConvertRGBtoHSV(colour.x, colour.y, colour.z, hue, saturation, value);
+			return hue;
 		}
 
 		//---------------------------------------------------
-		//-- Completionist UI ( Spectrum Position ) ---------
+		//-- Completionist UI ( HSV Colour ) ----------------
 		//---------------------------------------------------
 
-		// Nearest match on the spectrum
-		float SpectrumPosition(std::int32_t a_rgb) {
+		ImVec4 HSVColour(float a_hue, float a_saturation, float a_value) {
 
-			const auto target = ColourFromRGB(a_rgb);
-			float      best = 0.0f;
-			float      bestDistance = FLT_MAX;
-			for (int i = 0; i <= 512; ++i) {
-				const float position = static_cast<float>(i) / 512.0f;
-				const auto  colour = SpectrumAt(position);
-				const float distance = (colour.x - target.x) * (colour.x - target.x) + (colour.y - target.y) * (colour.y - target.y) + (colour.z - target.z) * (colour.z - target.z);
-				if (distance < bestDistance) {
-					bestDistance = distance;
-					best = position;
-				}
-			}
-			return best;
+			ImVec4 colour(0.0f, 0.0f, 0.0f, 1.0f);
+			ImGui::ColorConvertHSVtoRGB(std::clamp(a_hue, 0.0f, 0.9999f), std::clamp(a_saturation, 0.0f, 1.0f), std::clamp(a_value, 0.0f, 1.0f), colour.x, colour.y, colour.z);
+			return colour;
 		}
 
 		//---------------------------------------------------
 		//-- Completionist UI ( Colour Swatch ) -------------
 		//---------------------------------------------------
 
+		// A cut gem of colour: lit along the top, shaded at the foot, ringed in the accent when picked
 		void ColourSwatch(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, std::int32_t a_rgb, bool a_highlight) {
 
 			const auto& palette = Themes::GetPalette();
-			a_drawList->AddRectFilled(a_min, a_max, Colour(ColourFromRGB(a_rgb)));
-			a_drawList->AddRect(a_min, a_max, Colour(a_highlight ? palette.accent : palette.separator), 0.0f, 0, a_highlight ? 2.0f : 1.0f);
+			const float height = a_max.y - a_min.y;
+			const float rounding = SkyUI() ? 0.0f : std::min(a_max.x - a_min.x, height) * 0.2f;
+			if (a_highlight) {
+				const float grow = std::max(2.0f, height * 0.1f);
+				a_drawList->AddRectFilled(ImVec2(a_min.x - grow, a_min.y - grow), ImVec2(a_max.x + grow, a_max.y + grow), Colour(palette.accent, 0.3f), rounding + grow);
+			}
+			a_drawList->AddRectFilled(a_min, a_max, Colour(ColourFromRGB(a_rgb)), rounding);
+			if (height > 8.0f) {
+				a_drawList->AddRectFilled(a_min, ImVec2(a_max.x, a_min.y + height * 0.42f), IM_COL32(255, 255, 255, 34), rounding, ImDrawFlags_RoundCornersTop);
+				a_drawList->AddRectFilled(ImVec2(a_min.x, a_max.y - height * 0.28f), a_max, IM_COL32(0, 0, 0, 40), rounding, ImDrawFlags_RoundCornersBottom);
+			}
+			a_drawList->AddRect(a_min, a_max, Colour(a_highlight ? palette.accent : palette.separator), rounding, 0, a_highlight ? 2.0f : 1.0f);
 		}
 
 		//---------------------------------------------------
@@ -758,6 +810,115 @@ namespace CompletionistUI
 			return clicked;
 		}
 
+		// A focused colour bar uses left and right itself; navigation leaves them alone next frame
+		bool sidewaysTaken = false;
+
+		// Just opened: ImGui's focus is put in the popup once, so Back closes it
+		bool colourFocusPending = false;
+
+		// The picker's own controller focus: 0-19 the swatches, 20-22 the bars, 23 Done. ImGui's
+		// navigation found nothing to move to in the popup and scrolled it instead, so the picker
+		// steers itself and cancels ImGui's move while a controller or the arrow keys drive it
+		int  colourFocus = 0;
+		bool colourPadNav = false;
+		// The button press that opened the picker isn't also a pick; armed once it's let go
+		bool colourActivateArmed = false;
+
+		constexpr std::int32_t colourSwatches[] = {
+			0xFFFFFF, 0xC0C0C0, 0x808080, 0x404040, 0xC6A262, 0xFFD700, 0xEAAB00, 0xFFA500, 0xE37222, 0xBD4F19,
+			0xCC3333, 0x990033, 0xB3FF00, 0x9EAB05, 0x13A81C, 0x99FFFF, 0x4398DE, 0x8C6CD0, 0x800080, 0xFF66CC,
+		};
+
+		// Where the picker's focus starts: the swatch of the current colour, else the hue bar
+		int ColourStartFocus(std::int32_t a_rgb) {
+
+			const auto it = std::ranges::find(colourSwatches, a_rgb);
+			return it != std::end(colourSwatches) ? static_cast<int>(it - std::begin(colourSwatches)) : static_cast<int>(std::size(colourSwatches));
+		}
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Colour Bar ) ----------------
+		//---------------------------------------------------
+
+		// One custom colour bar: 0 hue, 1 saturation, 2 brightness. Drag it, or with it focused
+		// nudge it with left and right on the keys, d-pad or stick, held to keep going
+		bool ColourBar(const char* a_id, const char* a_label, float& a_value, int a_kind, float a_hue, float a_saturation, float a_brightness, float a_width, bool a_padFocus) {
+
+			const auto& palette = Themes::GetPalette();
+			const float size = ImGui::GetFontSize();
+			const float barHeight = std::max(size * 0.5f, 6.0f);
+			ImGui::PushFont(Themes::SmallFont());
+			const float labelHeight = ImGui::GetTextLineHeight();
+			ImGui::PopFont();
+
+			ImGui::InvisibleButton(a_id, ImVec2(a_width, labelHeight + barHeight * 2.2f));
+			NoteControl();
+			const bool  active = ImGui::IsItemActive();
+			const bool  focused = a_padFocus || (!colourPadNav && ImGui::IsItemFocused());
+			const float glow = Decor::Animate(ImGui::GetItemID(), focused || active || ImGui::IsItemHovered(), 12.0f);
+			const auto  min = ImGui::GetItemRectMin();
+			const auto  max = ImGui::GetItemRectMax();
+			const ImVec2 barMin(min.x + barHeight * 0.6f, max.y - barHeight * 1.5f);
+			const ImVec2 barMax(max.x - barHeight * 0.6f, barMin.y + barHeight);
+
+			bool changed = false;
+			if (active) {
+				a_value = std::clamp((ImGui::GetIO().MousePos.x - barMin.x) / (barMax.x - barMin.x), 0.0f, 1.0f);
+				changed = true;
+			}
+			if (focused) {
+				sidewaysTaken = true;
+			}
+			if (focused && !active) {
+				const auto pressed = [](ImGuiKey a_key, ImGuiKey a_pad, ImGuiKey a_stick) {
+					return ImGui::IsKeyPressed(a_key) || ImGui::IsKeyPressed(a_pad) || ImGui::IsKeyPressed(a_stick);
+				};
+				const bool left = pressed(ImGuiKey_LeftArrow, ImGuiKey_GamepadDpadLeft, ImGuiKey_GamepadLStickLeft);
+				const bool right = pressed(ImGuiKey_RightArrow, ImGuiKey_GamepadDpadRight, ImGuiKey_GamepadLStickRight);
+				if (left != right) {
+					a_value = std::clamp(a_value + (right ? 0.01f : -0.01f), 0.0f, 1.0f);
+					changed = true;
+				}
+			}
+
+			const auto colourAt = [&](float a_t) {
+				switch (a_kind) {
+				case 0:
+					return HSVColour(a_t, 1.0f, 1.0f);
+				case 1:
+					return HSVColour(a_hue, a_t, a_brightness);
+				default:
+					return HSVColour(a_hue, a_saturation, a_t);
+				}
+			};
+
+			auto* drawList = ImGui::GetWindowDrawList();
+			ImGui::PushFont(Themes::SmallFont());
+			drawList->AddText(ImVec2(barMin.x, min.y), Colour(focused || active ? palette.accent : palette.heading), a_label);
+			const auto percent = std::to_string(static_cast<int>(std::lround(a_value * (a_kind == 0 ? 360.0f : 100.0f)))) + (a_kind == 0 ? "\xC2\xB0" : "%");
+			const auto percentSize = ImGui::CalcTextSize(percent.c_str());
+			drawList->AddText(ImVec2(barMax.x - percentSize.x, min.y), Colour(palette.textDim), percent.c_str());
+			ImGui::PopFont();
+
+			constexpr int segments = 24;
+			const float   span = barMax.x - barMin.x;
+			for (int i = 0; i < segments; ++i) {
+				const float t0 = static_cast<float>(i) / segments;
+				const float t1 = static_cast<float>(i + 1) / segments;
+				const auto  left = Colour(colourAt(t0));
+				const auto  right = Colour(colourAt(t1));
+				drawList->AddRectFilledMultiColor(ImVec2(barMin.x + span * t0, barMin.y), ImVec2(barMin.x + span * t1, barMax.y), left, right, right, left);
+			}
+			drawList->AddRect(ImVec2(barMin.x - 1.0f, barMin.y - 1.0f), ImVec2(barMax.x + 1.0f, barMax.y + 1.0f), Colour(glow > 0.0f ? palette.accent : palette.separator, 0.6f + 0.4f * glow));
+			const ImVec2 knob(barMin.x + span * a_value, (barMin.y + barMax.y) * 0.5f);
+			if (glow > 0.0f) {
+				drawList->AddCircleFilled(knob, barHeight * 1.3f, Colour(palette.accent, 0.15f * glow));
+			}
+			Decor::Diamond(drawList, knob, barHeight * (0.95f + 0.1f * glow), Colour(palette.accent), true);
+			Decor::Diamond(drawList, knob, barHeight * 0.55f, Colour(colourAt(a_value)), true);
+			return changed;
+		}
+
 		struct ColourPanelText
 		{
 			const char* swatches;
@@ -765,44 +926,126 @@ namespace CompletionistUI
 			const char* current;
 			const char* next;
 			const char* done;
+			const char* hue;
+			const char* saturation;
+			const char* brightness;
 		};
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Begin Colour Popup ) --------
+		//---------------------------------------------------
+
+		// The colour picker floats over the page under its button, or above it when the button is low,
+		// so the rows don't move and a controller stays inside it until Done or Back
+		bool BeginColourPopup(const char* a_id, ImVec2 a_anchorMin, ImVec2 a_anchorMax, float a_width) {
+
+			const auto& palette = Themes::GetPalette();
+			const float size = ImGui::GetFontSize();
+			const float width = std::max(a_width, size * 20.0f);
+			const auto* viewport = ImGui::GetMainViewport();
+			const float top = viewport->WorkPos.y;
+			const float bottom = top + viewport->WorkSize.y;
+			const bool  below = a_anchorMax.y < top + (bottom - top) * 0.5f;
+			const float x = std::clamp(a_anchorMin.x, viewport->WorkPos.x + size, viewport->WorkPos.x + viewport->WorkSize.x - width - size);
+			// Whole pixels, so there's no fraction of a pixel left for it to scroll through
+			ImGui::SetNextWindowPos(ImVec2(std::floor(x), std::floor(below ? a_anchorMax.y + size * 0.3f : a_anchorMin.y - size * 0.3f)), ImGuiCond_Always, ImVec2(0.0f, below ? 0.0f : 1.0f));
+			ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, FLT_MAX));
+
+			ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(palette.background.x, palette.background.y, palette.background.z, 0.98f));
+			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(palette.accent.x, palette.accent.y, palette.accent.z, 0.6f));
+			ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 1.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(size * 0.9f, size * 0.7f));
+			const bool open = ImGui::BeginPopup(a_id, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+			ImGui::PopStyleVar(2);
+			ImGui::PopStyleColor(2);
+			if (open) {
+				// It fits its contents; the swatches' glow mustn't nudge it into scrolling
+				ImGui::SetScrollY(0.0f);
+				DressPopup();
+			}
+			return open;
+		}
 
 		//---------------------------------------------------
 		//-- Completionist UI ( Colour Panel ) --------------
 		//---------------------------------------------------
 
-		// Colour picker, stays open until Done
-		bool ColourPanel(const char* a_id, std::int32_t& a_rgb, float& a_position, std::int32_t a_original, const ColourPanelText& a_text, float a_width, bool& a_close) {
+		// The colour picker's contents, inside its popup. a_hue is kept apart from the colour so
+		// greys and black don't lose it
+		bool ColourPanel(std::int32_t& a_rgb, float& a_hue, std::int32_t a_original, const ColourPanelText& a_text, bool& a_close) {
 
-			static constexpr std::int32_t swatches[] = {
-				0xFFFFFF, 0xC0C0C0, 0x808080, 0x404040, 0xC6A262, 0xFFD700, 0xEAAB00, 0xFFA500, 0xE37222, 0xBD4F19,
-				0xCC3333, 0x990033, 0xB3FF00, 0x9EAB05, 0x13A81C, 0x99FFFF, 0x4398DE, 0x8C6CD0, 0x800080, 0xFF66CC,
-			};
+			const auto&   swatches = colourSwatches;
 			constexpr int columns = 10;
+			constexpr int swatchCount = static_cast<int>(std::size(swatches));
+			constexpr int firstBar = swatchCount;
+			constexpr int doneSpot = firstBar + 3;
 
 			const auto& palette = Themes::GetPalette();
 			const auto& style = ImGui::GetStyle();
-			const auto  background = InsetColour();
-
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, background);
-			ImGui::BeginChild(a_id, ImVec2(a_width, 0.0f), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-			ImGui::PopStyleColor();
-
+			const auto& io = ImGui::GetIO();
 			auto*       drawList = ImGui::GetWindowDrawList();
-			const auto  frameMin = ImGui::GetWindowPos();
-			const auto  frameMax = ImVec2(frameMin.x + ImGui::GetWindowWidth(), frameMin.y + ImGui::GetWindowHeight());
-			const float corner = ImGui::GetFontSize() * 0.2f;
-			drawList->PushClipRect(ImVec2(frameMin.x - corner, frameMin.y - corner), ImVec2(frameMax.x + corner, frameMax.y + corner), false);
-			drawList->AddRect(frameMin, frameMax, Colour(palette.separator, 0.8f));
-			for (const auto& point : { frameMin, ImVec2(frameMax.x, frameMin.y), ImVec2(frameMin.x, frameMax.y), frameMax }) {
-				if (!SkyUI()) {
-					Decor::Diamond(drawList, point, corner, Colour(palette.accent), true);
-				}
+
+			//---------------------------------------------------
+			// The picker's own steering
+			//---------------------------------------------------
+
+			if (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f) {
+				colourPadNav = false;
 			}
-			drawList->PopClipRect();
+			const auto pressed = [](ImGuiKey a_key, ImGuiKey a_pad, ImGuiKey a_stick) {
+				return ImGui::IsKeyPressed(a_key) || ImGui::IsKeyPressed(a_pad) || ImGui::IsKeyPressed(a_stick);
+			};
+			const bool up = pressed(ImGuiKey_UpArrow, ImGuiKey_GamepadDpadUp, ImGuiKey_GamepadLStickUp);
+			const bool down = pressed(ImGuiKey_DownArrow, ImGuiKey_GamepadDpadDown, ImGuiKey_GamepadLStickDown);
+			const bool left = pressed(ImGuiKey_LeftArrow, ImGuiKey_GamepadDpadLeft, ImGuiKey_GamepadLStickLeft);
+			const bool right = pressed(ImGuiKey_RightArrow, ImGuiKey_GamepadDpadRight, ImGuiKey_GamepadLStickRight);
+			if (up || down || left || right) {
+				colourPadNav = true;
+			}
+
+			bool activate = false;
+			if (colourPadNav) {
+				// ImGui's own move would only scroll the popup
+				if (ImGui::GetCurrentContext()->NavMoveSubmitted) {
+					ImGui::NavMoveRequestCancel();
+				}
+				ImGui::SetNavCursorVisible(false);
+
+				static int lastColumn = 0;
+				if (colourFocus < swatchCount) {
+					const int row = colourFocus / columns;
+					const int column = colourFocus % columns;
+					if (left && column > 0) {
+						--colourFocus;
+					} else if (right && column + 1 < columns) {
+						++colourFocus;
+					} else if (up && row > 0) {
+						colourFocus -= columns;
+					} else if (down) {
+						colourFocus = (row + 1) * columns < swatchCount ? colourFocus + columns : firstBar;
+					}
+					if (colourFocus < swatchCount) {
+						lastColumn = colourFocus % columns;
+					}
+				} else if (colourFocus < doneSpot) {
+					// Left and right belong to the bar itself
+					if (up) {
+						colourFocus = colourFocus == firstBar ? swatchCount - columns + lastColumn : colourFocus - 1;
+					} else if (down) {
+						++colourFocus;
+					}
+				} else if (up) {
+					colourFocus = doneSpot - 1;
+				}
+				activate = colourActivateArmed && (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown, false) || ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false));
+			}
+			if (!ImGui::IsKeyDown(ImGuiKey_GamepadFaceDown) && !ImGui::IsKeyDown(ImGuiKey_Enter) && !ImGui::IsKeyDown(ImGuiKey_KeypadEnter)) {
+				colourActivateArmed = true;
+			}
 
 			const float inner = ImGui::GetContentRegionAvail().x;
-			const float cell = (inner - style.ItemSpacing.x * (columns - 1)) / columns;
+			const float gap = style.ItemSpacing.x;
+			const float cell = (inner - gap * (columns - 1)) / columns;
 			bool        changed = false;
 
 			const auto heading = [&](const char* a_label) {
@@ -810,74 +1053,79 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.heading, "%s", a_label);
 				ImGui::PopFont();
 			};
+			// The picker's focus ring, brighter than the picked one
+			const auto padRing = [&](float a_grow) {
+				const auto min = ImGui::GetItemRectMin();
+				const auto max = ImGui::GetItemRectMax();
+				drawList->AddRect(ImVec2(min.x - a_grow, min.y - a_grow), ImVec2(max.x + a_grow, max.y + a_grow), Colour(palette.text), 3.0f, 0, 2.0f);
+			};
 
 			heading(a_text.swatches);
-			for (int i = 0; i < static_cast<int>(std::size(swatches)); ++i) {
+			for (int i = 0; i < swatchCount; ++i) {
 				if (i % columns != 0) {
-					ImGui::SameLine();
+					ImGui::SameLine(0.0f, gap);
 				}
 				ImGui::PushID(i);
-				if (ImGui::InvisibleButton("##Swatch", ImVec2(cell, cell))) {
+				// Keeps ImGui's focus in the popup, so Back closes it
+				if (i == 0 && colourFocusPending) {
+					ImGui::SetKeyboardFocusHere();
+				}
+				const bool clicked = ImGui::InvisibleButton("##Swatch", ImVec2(cell, cell * 0.8f));
+				if (i == 0) {
+					colourFocusPending = false;
+				}
+				NoteControl();
+				const bool padHere = colourPadNav && colourFocus == i;
+				if ((clicked && !colourPadNav) || (padHere && activate)) {
 					a_rgb = swatches[i];
-					a_position = SpectrumPosition(a_rgb);
+					a_hue = HueOf(a_rgb);
 					changed = true;
 				}
-				const bool highlight = ImGui::IsItemHovered() || ImGui::IsItemFocused() || swatches[i] == a_rgb;
+				const bool highlight = padHere || swatches[i] == a_rgb || (!colourPadNav && (ImGui::IsItemHovered() || ImGui::IsItemFocused()));
 				ColourSwatch(drawList, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), swatches[i], highlight);
+				if (padHere) {
+					padRing(std::max(3.0f, cell * 0.12f));
+				}
 				ImGui::PopID();
 			}
 
+			// Hue, saturation and brightness, each its own bar
 			ImGui::Spacing();
 			heading(a_text.custom);
-			const float height = std::max(ImGui::GetFontSize() * 0.8f, 8.0f);
-			ImGui::InvisibleButton("##Spectrum", ImVec2(inner, height * 1.6f));
-			const auto  hitMin = ImGui::GetItemRectMin();
-			const auto  hitMax = ImGui::GetItemRectMax();
-			const auto  min = ImVec2(hitMin.x, (hitMin.y + hitMax.y - height) * 0.5f);
-			const auto  max = ImVec2(hitMax.x, min.y + height);
-			if (ImGui::IsItemActive()) {
-				a_position = std::clamp((ImGui::GetIO().MousePos.x - min.x) / inner, 0.0f, 1.0f);
-			}
-			if (ImGui::IsItemDeactivated()) {
-				a_rgb = RGBFromColour(SpectrumAt(a_position));
+			const auto current = ColourFromRGB(a_rgb);
+			float      rgbHue = 0.0f;
+			float      saturation = 0.0f;
+			float      brightness = 0.0f;
+			ImGui::ColorConvertRGBtoHSV(current.x, current.y, current.z, rgbHue, saturation, brightness);
+			float hue = a_hue;
+			bool  barChanged = false;
+			barChanged |= ColourBar("##Hue", a_text.hue, hue, 0, hue, saturation, brightness, inner, colourPadNav && colourFocus == firstBar);
+			barChanged |= ColourBar("##Saturation", a_text.saturation, saturation, 1, hue, saturation, brightness, inner, colourPadNav && colourFocus == firstBar + 1);
+			barChanged |= ColourBar("##Brightness", a_text.brightness, brightness, 2, hue, saturation, brightness, inner, colourPadNav && colourFocus == firstBar + 2);
+			if (barChanged) {
+				a_hue = hue;
+				a_rgb = RGBFromColour(HSVColour(hue, saturation, brightness));
 				changed = true;
 			}
-			if (ImGui::IsItemFocused()) {
-				const bool left = ImGui::IsKeyPressed(ImGuiKey_LeftArrow) || ImGui::IsKeyPressed(ImGuiKey_GamepadDpadLeft);
-				const bool right = ImGui::IsKeyPressed(ImGuiKey_RightArrow) || ImGui::IsKeyPressed(ImGuiKey_GamepadDpadRight);
-				if (left || right) {
-					a_position = std::clamp(a_position + (right ? 1.0f : -1.0f) / 128.0f, 0.0f, 1.0f);
-					a_rgb = RGBFromColour(SpectrumAt(a_position));
-					changed = true;
-				}
-			}
-			constexpr int intervals = 8;
-			for (int i = 0; i < intervals; ++i) {
-				const float x0 = min.x + inner * static_cast<float>(i) / intervals;
-				const float x1 = min.x + inner * static_cast<float>(i + 1) / intervals;
-				const auto  left = Colour(SpectrumAt(static_cast<float>(i) / intervals));
-				const auto  right = Colour(SpectrumAt(static_cast<float>(i + 1) / intervals));
-				drawList->AddRectFilledMultiColor(ImVec2(x0, min.y), ImVec2(x1, max.y), left, right, right, left);
-			}
-			drawList->AddRect(min, max, Colour(palette.separator));
-			const ImVec2 knob(min.x + inner * a_position, (min.y + max.y) * 0.5f);
-			Decor::Diamond(drawList, knob, height * 0.95f, Colour(palette.accent), true);
-			Decor::Diamond(drawList, knob, height * 0.6f, Colour(SpectrumAt(a_position)), true);
 
+			// Before and after, side by side, then Done
 			ImGui::Spacing();
-			const float preview = cell * 1.6f;
+			const float chip = cell * 1.6f;
 			const auto  previewSwatch = [&](const char* a_label, std::int32_t a_colour) {
 				ImGui::AlignTextToFramePadding();
 				ImGui::TextColored(palette.textDim, "%s", a_label);
 				ImGui::SameLine();
 				const auto pos = ImGui::GetCursorScreenPos();
-				const auto top = pos.y + (ImGui::GetFrameHeight() - cell * 0.6f) * 0.5f;
-				ImGui::Dummy(ImVec2(preview, ImGui::GetFrameHeight()));
-				ColourSwatch(drawList, ImVec2(pos.x, top), ImVec2(pos.x + preview, top + cell * 0.6f), a_colour, false);
+				const auto top = pos.y + (ImGui::GetFrameHeight() - cell * 0.7f) * 0.5f;
+				ImGui::Dummy(ImVec2(chip, ImGui::GetFrameHeight()));
+				ColourSwatch(drawList, ImVec2(pos.x, top), ImVec2(pos.x + chip, top + cell * 0.7f), a_colour, false);
 			};
 			previewSwatch(a_text.current, a_original);
 			ImGui::SameLine(0.0f, cell);
 			previewSwatch(a_text.next, a_rgb);
+			ImGui::SameLine();
+			ImGui::AlignTextToFramePadding();
+			ImGui::TextColored(palette.textDim, "%s", HexColour(static_cast<std::uint32_t>(std::max(a_rgb, 0))).c_str());
 
 			const float doneWidth = ButtonWidth(a_text.done) + ImGui::GetFontSize() * 2.0f;
 			ImGui::SameLine();
@@ -885,11 +1133,14 @@ namespace CompletionistUI
 				ImGui::NewLine();
 			}
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - doneWidth));
-			if (ThemedButton(a_text.done, doneWidth)) {
+			const bool doneClicked = ThemedButton(a_text.done, doneWidth);
+			const bool padDone = colourPadNav && colourFocus == doneSpot;
+			if (padDone) {
+				padRing(2.0f);
+			}
+			if ((doneClicked && !colourPadNav) || (padDone && activate)) {
 				a_close = true;
 			}
-
-			ImGui::EndChild();
 			return changed;
 		}
 
@@ -1194,6 +1445,10 @@ namespace CompletionistUI
 
 	void Menu::HandleGamepadShortcuts(bool& a_open) {
 
+		// Triangle is ours (autofit and fold the description). ImGui's navigation reads it as its
+		// "input" key, which also presses whatever is focused, so it's given an owner nav won't use
+		ImGui::SetKeyOwner(ImGuiKey_GamepadFaceUp, ImGui::GetID("##DescriptionKey"));
+
 		// B / Escape step back to the sidebar, then close
 		const bool backPressed = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
 		if (backPressed && !_backHandledByImGui) {
@@ -1382,11 +1637,21 @@ namespace CompletionistUI
 		_focusedSpotLast = std::exchange(_focusedSpot, 0);
 		_spotSection = 0;
 
-		auto& g = *ImGui::GetCurrentContext();
+		auto&      g = *ImGui::GetCurrentContext();
+		const bool sideways = std::exchange(sidewaysTaken, false);
+		// A popup (a dropdown, the colour picker) keeps the controller inside it; ImGui does that
+		// itself, and last frame's focus out on the page must not pull it back out
+		if (ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+			return;
+		}
 		if (!g.NavMoveSubmitted || g.NavMoveDir == ImGuiDir_None || (g.NavMoveFlags & (ImGuiNavMoveFlags_IsTabbing | ImGuiNavMoveFlags_IsPageMove)) != 0) {
 			return;
 		}
 		const auto dir = g.NavMoveDir;
+		if (sideways && (dir == ImGuiDir_Left || dir == ImGuiDir_Right)) {
+			ImGui::NavMoveRequestCancel();
+			return;
+		}
 		if (const auto parked = std::exchange(_cellParkedRow, 0); parked != 0) {
 			ImGui::NavMoveRequestCancel();
 			_pendingFocus = parked;
@@ -6307,28 +6572,42 @@ namespace CompletionistUI
 						case SettingKind::kColour:
 							{
 								label(text);
-								const bool open = _colourKey == key;
+								constexpr auto popupId = "##ColourPopup";
 								if (ColourButton("##Colour", item.number, controlWidth)) {
-									if (open) {
-										_colourKey.clear();
-									} else {
-										_colourKey = key;
-										_colourOriginal = item.number;
-										_spectrumPosition = SpectrumPosition(item.number);
-									}
-								}
-								if (open && _colourOriginal < 0) {
+									_colourKey = key;
 									_colourOriginal = item.number;
-									_spectrumPosition = SpectrumPosition(item.number);
+									_spectrumPosition = HueOf(item.number);
+									// The picker's own focus starts once, as it opens: on the current colour's swatch, else the hue bar
+									colourFocusPending = true;
+									colourFocus = ColourStartFocus(item.number);
+									colourPadNav = _padActive;
+									colourActivateArmed = false;
+									ImGui::OpenPopup(popupId);
 								}
-								if (open) {
-									const auto texts = std::array{ a_provider.Translate("UI_ColourSwatches"), a_provider.Translate("UI_ColourCustom"), a_provider.Translate("UI_ColourCurrent"), a_provider.Translate("UI_ColourNew"), a_provider.Translate("UI_Done") };
-									bool       close = false;
-									ImGui::SetCursorPosX(columnX + labelWidth);
-									edited = ColourPanel("##ColourPanel", item.number, _spectrumPosition, _colourOriginal, { texts[0].c_str(), texts[1].c_str(), texts[2].c_str(), texts[3].c_str(), texts[4].c_str() }, controlWidth, close);
-									if (close) {
-										_colourKey.clear();
+								const auto buttonMin = ImGui::GetItemRectMin();
+								const auto buttonMax = ImGui::GetItemRectMax();
+								// Its picker just closed: ImGui leaves the focus half there, so A wouldn't open it again
+								if (_colourReturnKey == key) {
+									auto* window = ImGui::GetCurrentWindow();
+									ImGui::SetFocusID(ImGui::GetItemID(), window);
+									window->NavRectRel[0] = ImGui::WindowRectAbsToRel(window, ImRect(buttonMin, buttonMax));
+									if (_padActive) {
+										ImGui::SetNavCursorVisible(true);
 									}
+									_colourReturnKey.clear();
+								}
+								if (BeginColourPopup(popupId, buttonMin, buttonMax, controlWidth)) {
+									const auto texts = std::array{ a_provider.Translate("UI_ColourSwatches"), a_provider.Translate("UI_ColourCustom"), a_provider.Translate("UI_ColourCurrent"), a_provider.Translate("UI_ColourNew"), a_provider.Translate("UI_Done"), a_provider.Translate("UI_ColourHue"), a_provider.Translate("UI_ColourSaturation"), a_provider.Translate("UI_ColourBrightness") };
+									bool       close = false;
+									edited = ColourPanel(item.number, _spectrumPosition, _colourOriginal, { texts[0].c_str(), texts[1].c_str(), texts[2].c_str(), texts[3].c_str(), texts[4].c_str(), texts[5].c_str(), texts[6].c_str(), texts[7].c_str() }, close);
+									if (close) {
+										ImGui::CloseCurrentPopup();
+									}
+									ImGui::EndPopup();
+								} else if (_colourKey == key) {
+									_colourKey.clear();
+									colourFocusPending = false;
+									_colourReturnKey = key;
 								}
 							}
 							break;

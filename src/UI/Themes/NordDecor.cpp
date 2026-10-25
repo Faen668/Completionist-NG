@@ -16,7 +16,7 @@ namespace CompletionistUI::NordDecor
 	{
 		constexpr float pi = std::numbers::pi_v<float>;
 
-		// Timber, iron, stone, snow and ice
+		// Timber, iron, stone, snow and the hearth
 		constexpr ImU32 timber = IM_COL32(82, 62, 44, 255);
 		constexpr ImU32 timberLight = IM_COL32(128, 100, 72, 255);
 		constexpr ImU32 timberDark = IM_COL32(30, 23, 18, 255);
@@ -24,9 +24,11 @@ namespace CompletionistUI::NordDecor
 		constexpr ImU32 ironLight = IM_COL32(138, 146, 156, 255);
 		constexpr ImU32 ironDark = IM_COL32(16, 18, 22, 255);
 		constexpr ImU32 ironWorn = IM_COL32(96, 102, 112, 255);
-		constexpr ImU32 snow = IM_COL32(226, 234, 242, 255);
-		constexpr ImU32 frost = IM_COL32(150, 206, 236, 255);
-		constexpr ImU32 shadow = IM_COL32(6, 8, 12, 255);
+		constexpr ImU32 snow = IM_COL32(222, 222, 218, 255);
+		constexpr ImU32 hearth = IM_COL32(214, 122, 52, 255);
+		constexpr ImU32 ochre = IM_COL32(192, 71, 46, 255);
+		constexpr ImU32 brass = IM_COL32(194, 135, 62, 255);
+		constexpr ImU32 shadow = IM_COL32(8, 6, 4, 255);
 
 		//---------------------------------------------------
 		//-- Nord Decor ( Lerp ) ----------------------------
@@ -82,7 +84,7 @@ namespace CompletionistUI::NordDecor
 		//-- Nord Decor ( Snowfall ) ------------------------
 		//---------------------------------------------------
 
-		// Backdrop: cold night over dark stone, the Throat of the World, snow drifting down
+		// Backdrop: a mead hall's dark stone, the hearth glowing below, the range beyond and snow drifting down
 		void Snowfall(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 			const float width = a_max.x - a_min.x;
@@ -91,34 +93,35 @@ namespace CompletionistUI::NordDecor
 			const bool  full = height > size * 20.0f;
 			a_drawList->PushClipRect(a_min, a_max, true);
 
-			// Pale cold sky above, dark stone below
+			// Warm stone above, darker towards the floor
 			const ImVec2 sky[4] = { a_min, ImVec2(a_max.x, a_min.y), a_max, ImVec2(a_min.x, a_max.y) };
-			GradientQuad(a_drawList, sky, { IM_COL32(58, 72, 92, 60), IM_COL32(58, 72, 92, 60), IM_COL32(10, 12, 16, 60), IM_COL32(10, 12, 16, 60) });
+			GradientQuad(a_drawList, sky, { IM_COL32(40, 34, 28, 60), IM_COL32(40, 34, 28, 60), IM_COL32(12, 10, 8, 60), IM_COL32(12, 10, 8, 60) });
 
 			Random random{ 0x5C0u };
 
 			if (full) {
 				// Mist over the far range, then the depth one
 				const float rise = height * 0.16f;
-				SoftSpot(a_drawList, ImVec2(a_min.x + width * 0.7f, a_max.y - rise * 2.2f), size * 14.0f, IM_COL32(120, 150, 180, 3));
-				Range(a_drawList, a_min, a_max, random, rise * 1.1f, IM_COL32(30, 36, 46, 220), 0.32f, 0.7f, rise * 1.5f);
-				a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - rise * 1.2f), a_max, IM_COL32(150, 170, 190, 0), IM_COL32(150, 170, 190, 0), IM_COL32(150, 170, 190, 14), IM_COL32(150, 170, 190, 14));
-				Range(a_drawList, a_min, a_max, random, rise * 0.55f, IM_COL32(14, 16, 20, 235), 0.18f, 0.2f, rise * 0.35f);
+				Range(a_drawList, a_min, a_max, random, rise * 1.1f, IM_COL32(30, 27, 24, 200), 0.14f, 0.7f, rise * 1.5f);
+				Range(a_drawList, a_min, a_max, random, rise * 0.55f, IM_COL32(16, 14, 12, 230), 0.08f, 0.2f, rise * 0.35f);
 			}
 
-			// Snow, the large flakes nearer and softer
-			const int flakes = std::clamp(static_cast<int>(width * height / (size * size * 3.0f)), 30, 420);
+			// The hearth, out of sight below, warming the room
+			SoftSpot(a_drawList, ImVec2(a_min.x + width * 0.5f, a_max.y + size * 2.0f), std::max(width * 0.45f, size * 10.0f), WithAlpha(hearth, 0.012f));
+
+			// Snow: fewer, larger flakes than a sky of stars, the near ones soft
+			const int flakes = std::clamp(static_cast<int>(width * height / (size * size * 9.0f)), 16, 160);
 			for (int i = 0; i < flakes; ++i) {
 				const ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
 				const float  depth = random.Next();
-				const float  radius = 0.7f + depth * depth * size * 0.12f;
-				if (depth > 0.85f) {
-					SoftSpot(a_drawList, at, radius * 2.5f, WithAlpha(snow, 0.025f));
+				const float  radius = 1.2f + depth * size * 0.16f;
+				if (depth > 0.7f) {
+					SoftSpot(a_drawList, at, radius * 2.0f, WithAlpha(snow, 0.03f));
 				}
-				a_drawList->AddCircleFilled(at, radius, WithAlpha(snow, random.Range(0.12f, 0.42f) * (0.5f + depth * 0.5f)), 8);
+				a_drawList->AddCircleFilled(at, radius, WithAlpha(snow, random.Range(0.12f, 0.3f) * (0.6f + depth * 0.4f)), 10);
 			}
 
-			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.15f, IM_COL32(4, 5, 8, 200));
+			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.15f, IM_COL32(6, 4, 2, 200));
 			a_drawList->PopClipRect();
 		}
 
@@ -175,7 +178,7 @@ namespace CompletionistUI::NordDecor
 		//-- Nord Decor ( Snow Cap ) ------------------------
 		//---------------------------------------------------
 
-		// Snow lying along the top of the frame, icicles hanging under it
+		// Snow lying along the top of the frame
 		void SnowCap(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_band) {
 
 			const float width = a_max.x - a_min.x;
@@ -188,21 +191,9 @@ namespace CompletionistUI::NordDecor
 				const float nextDepth = std::clamp(depth + random.Range(-0.08f, 0.08f) * a_band, a_band * 0.18f, a_band * 0.42f);
 				const ImVec2 quad[4] = { ImVec2(x, a_min.y), ImVec2(next, a_min.y), ImVec2(next, a_min.y + nextDepth), ImVec2(x, a_min.y + depth) };
 				a_drawList->AddConvexPolyFilled(quad, 4, WithAlpha(snow, 0.85f));
-				a_drawList->AddLine(quad[3], quad[2], WithAlpha(IM_COL32(150, 170, 190, 255), 0.7f), 1.0f);
+				a_drawList->AddLine(quad[3], quad[2], WithAlpha(IM_COL32(150, 146, 140, 255), 0.7f), 1.0f);
 				x = next;
 				depth = nextDepth;
-			}
-
-			// Icicles under the top band, kept short so they clear the header
-			for (float at = a_min.x + a_band * 2.5f; at < a_max.x - a_band * 2.5f; at += a_band * random.Range(1.2f, 3.5f)) {
-				if (random.Next() < 0.45f) {
-					continue;
-				}
-				const float  length = a_band * random.Range(0.2f, 0.55f);
-				const float  half = a_band * random.Range(0.08f, 0.14f);
-				const ImVec2 icicle[3] = { ImVec2(at - half, a_max.y), ImVec2(at + half, a_max.y), ImVec2(at + half * 0.2f, a_max.y + length) };
-				a_drawList->AddConvexPolyFilled(icicle, 3, WithAlpha(IM_COL32(190, 220, 240, 255), 0.55f));
-				a_drawList->AddLine(icicle[0], icicle[2], WithAlpha(snow, 0.6f), 1.0f);
 			}
 		}
 
@@ -210,7 +201,7 @@ namespace CompletionistUI::NordDecor
 		//-- Nord Decor ( Iron Corner ) ---------------------
 		//---------------------------------------------------
 
-		// Iron plate at each corner, riveted, the star struck into it
+		// Iron plate at each corner, riveted, a boss in the middle
 		void IronCorner(ImDrawList* a_drawList, ImVec2 a_centre, float a_size) {
 
 			const ImVec2 min(a_centre.x - a_size, a_centre.y - a_size);
@@ -223,63 +214,55 @@ namespace CompletionistUI::NordDecor
 			for (const auto& rivet : { ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), ImVec2(min.x + inset, max.y - inset) }) {
 				a_drawList->AddCircleFilled(rivet, a_size * 0.09f, ironLight, 8);
 			}
-			SoftSpot(a_drawList, a_centre, a_size * 0.8f, WithAlpha(frost, 0.04f));
-			Star(a_drawList, a_centre, a_size * 0.55f, frost, true);
+			Boss(a_drawList, a_centre, a_size * 0.42f, brass, true);
 		}
 
 		//---------------------------------------------------
-		//-- Nord Decor ( Frost ) ---------------------------
+		//-- Nord Decor ( Dragon Head ) ---------------------
 		//---------------------------------------------------
 
-		// Rime spreading in from a corner: short branches, side shoots at sixty degrees, fading as they go
-		void Frost(ImDrawList* a_drawList, ImVec2 a_corner, float a_dirX, float a_dirY, float a_reach, Random& a_random) {
+		// A carved dragon's head on the gable end, as on Dragonsreach and the longhouses; a_facing is -1 or 1
+		void DragonHead(ImDrawList* a_drawList, ImVec2 a_base, float a_size, float a_facing) {
 
-			const float base = std::atan2(a_dirY, a_dirX);
-			for (int branch = 0; branch < 7; ++branch) {
-				const float  angle = base + a_random.Range(-0.7f, 0.7f);
-				const float  reach = a_reach * a_random.Range(0.3f, 1.0f);
-				const ImVec2 tip(a_corner.x + std::cos(angle) * reach, a_corner.y + std::sin(angle) * reach);
-				constexpr int pieces = 4;
-				for (int piece = 0; piece < pieces; ++piece) {
-					const float t = static_cast<float>(piece) / pieces;
-					a_drawList->AddLine(Lerp(a_corner, tip, t), Lerp(a_corner, tip, t + 1.0f / pieces), WithAlpha(frost, 0.2f * (1.0f - t)), 1.0f);
-				}
-				for (float t = 0.2f; t < 0.85f; t += 0.16f) {
-					const ImVec2 from = Lerp(a_corner, tip, t);
-					const float  shoot = reach * 0.2f * (1.0f - t);
-					const float  fade = 0.16f * (1.0f - t);
-					for (const float side : { -1.0f, 1.0f }) {
-						const float  turn = angle + side * pi / 3.0f;
-						const ImVec2 to(from.x + std::cos(turn) * shoot, from.y + std::sin(turn) * shoot);
-						a_drawList->AddLine(from, to, WithAlpha(frost, fade), 1.0f);
-					}
-				}
+			const auto at = [&](float a_x, float a_y) { return ImVec2(a_base.x + a_x * a_size * a_facing, a_base.y + a_y * a_size); };
+			// Neck rising from the beam, curling out into the head, the jaw open
+			const ImVec2 outline[] = {
+				at(-0.10f, 0.00f), at(-0.14f, -0.30f), at(-0.06f, -0.58f), at(0.12f, -0.78f), at(0.36f, -0.86f),
+				at(0.58f, -0.80f), at(0.66f, -0.70f), at(0.52f, -0.64f), at(0.70f, -0.56f), at(0.48f, -0.52f),
+				at(0.34f, -0.56f), at(0.24f, -0.48f), at(0.30f, -0.36f), at(0.20f, -0.30f), at(0.16f, -0.14f), at(0.18f, 0.00f),
+			};
+			for (const auto& point : outline) {
+				a_drawList->PathLineTo(point);
 			}
-			SoftSpot(a_drawList, a_corner, a_reach * 0.5f, WithAlpha(frost, 0.01f));
+			a_drawList->PathFillConcave(timber);
+			for (const auto& point : outline) {
+				a_drawList->PathLineTo(point);
+			}
+			a_drawList->PathStroke(timberDark, ImDrawFlags_Closed, std::max(1.0f, a_size * 0.03f));
+
+			// Carved scales down the neck, the horn swept back, an eye
+			for (float t = 0.15f; t < 0.8f; t += 0.16f) {
+				a_drawList->PathArcTo(at(0.02f, -t * 0.7f), a_size * 0.08f, 0.2f, 2.9f, 6);
+				a_drawList->PathStroke(WithAlpha(timberLight, 0.6f), ImDrawFlags_None, 1.0f);
+			}
+			a_drawList->AddBezierQuadratic(at(0.28f, -0.82f), at(0.10f, -0.98f), at(-0.12f, -0.94f), timberLight, std::max(1.0f, a_size * 0.05f), 10);
+			a_drawList->AddCircleFilled(at(0.42f, -0.74f), std::max(1.2f, a_size * 0.035f), brass, 8);
 		}
 	}
 
 	//---------------------------------------------------
-	//-- Nord Decor ( Star ) ----------------------------
+	//-- Nord Decor ( Boss ) ----------------------------
 	//---------------------------------------------------
 
-	// In place of the diamond: an eight-pointed star, long points to the four winds
-	void Star(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled) {
+	// In place of the diamond: an iron shield boss, the dome brass-bright when filled
+	void Boss(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled) {
 
-		const float radius = a_radius * 1.25f;
-		ImVec2      points[16];
-		for (int i = 0; i < 16; ++i) {
-			const float angle = static_cast<float>(i) * pi / 8.0f - pi * 0.5f;
-			const float reach = i % 2 == 1 ? 0.24f : (i % 4 == 0 ? 1.0f : 0.55f);
-			points[i] = ImVec2(a_centre.x + std::cos(angle) * radius * reach, a_centre.y + std::sin(angle) * radius * reach);
-		}
-		for (const auto& point : points) {
-			a_drawList->PathLineTo(point);
-		}
+		const float radius = a_radius * 1.05f;
+		a_drawList->AddCircleFilled(a_centre, radius, WithAlpha(ironDark, 0.9f), 16);
+		a_drawList->AddCircle(a_centre, radius, a_filled ? ironLight : a_colour, 16, std::max(1.0f, radius * 0.2f));
 		if (a_filled) {
-			a_drawList->PathFillConcave(a_colour);
-		} else {
-			a_drawList->PathStroke(a_colour, ImDrawFlags_Closed, std::max(1.0f, a_radius * 0.16f));
+			a_drawList->AddCircleFilled(a_centre, radius * 0.55f, a_colour, 12);
+			a_drawList->AddCircleFilled(ImVec2(a_centre.x - radius * 0.18f, a_centre.y - radius * 0.18f), radius * 0.18f, WithAlpha(IM_COL32(255, 236, 200, 255), 0.6f), 8);
 		}
 	}
 
@@ -287,7 +270,7 @@ namespace CompletionistUI::NordDecor
 	//-- Nord Decor ( Rune Stone ) ----------------------
 	//---------------------------------------------------
 
-	// Marker: a standing stone, its rune lit when found
+	// Marker: a standing stone, its rune painted in red ochre when found, as the Nords painted theirs
 	void RuneStone(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill) {
 
 		const float halfWidth = a_size * 0.24f;
@@ -295,15 +278,12 @@ namespace CompletionistUI::NordDecor
 		const float top = a_centre.y - halfHeight + halfWidth;
 		const float bottom = a_centre.y + halfHeight;
 		const float stroke = std::max(1.0f, a_size * 0.07f);
-		if (a_fill >= 1.0f) {
-			SoftSpot(a_drawList, a_centre, halfHeight * 1.7f, WithAlpha(frost, 0.04f));
-		}
 		a_drawList->PathLineTo(ImVec2(a_centre.x - halfWidth, bottom));
 		a_drawList->PathArcTo(ImVec2(a_centre.x, top), halfWidth, pi, pi * 2.0f, 12);
 		a_drawList->PathLineTo(ImVec2(a_centre.x + halfWidth, bottom));
 		if (a_fill > 0.0f) {
 			ImDrawList& list = *a_drawList;
-			list.PathFillConvex(WithAlpha(a_colour, 0.18f * a_fill));
+			list.PathFillConvex(WithAlpha(IM_COL32(78, 74, 68, 255), a_fill));
 			list.PathLineTo(ImVec2(a_centre.x - halfWidth, bottom));
 			list.PathArcTo(ImVec2(a_centre.x, top), halfWidth, pi, pi * 2.0f, 12);
 			list.PathLineTo(ImVec2(a_centre.x + halfWidth, bottom));
@@ -313,13 +293,13 @@ namespace CompletionistUI::NordDecor
 		a_drawList->AddLine(ImVec2(a_centre.x - halfWidth * 1.5f, bottom), ImVec2(a_centre.x + halfWidth * 1.5f, bottom), a_colour, stroke);
 
 		if (a_fill > 0.0f) {
-			// The rune: a stave with arms raised, growing in as it's found
+			// The rune: a stave with arms raised, painted in as it's found
 			const float  reach = 0.5f + 0.5f * a_fill;
 			const ImVec2 head(a_centre.x, a_centre.y - halfHeight * 0.45f * reach);
 			const ImVec2 foot(a_centre.x, a_centre.y + halfHeight * 0.6f * reach);
 			const ImVec2 left(a_centre.x - halfWidth * 0.6f * reach, head.y + halfHeight * 0.4f * reach);
 			const ImVec2 right(a_centre.x + halfWidth * 0.6f * reach, head.y + halfHeight * 0.4f * reach);
-			for (const auto& [colour, thick] : { std::pair{ a_colour, stroke * 1.1f }, std::pair{ WithAlpha(snow, a_fill * 0.8f), std::max(1.0f, stroke * 0.45f) } }) {
+			for (const auto& [colour, thick] : { std::pair{ WithAlpha(ochre, a_fill), stroke * 1.4f }, std::pair{ WithAlpha(IM_COL32(232, 120, 84, 255), a_fill * 0.5f), std::max(1.0f, stroke * 0.45f) } }) {
 				a_drawList->AddLine(head, foot, colour, thick);
 				a_drawList->AddLine(head, left, colour, thick);
 				a_drawList->AddLine(head, right, colour, thick);
@@ -403,14 +383,14 @@ namespace CompletionistUI::NordDecor
 		const float gap = ImGui::GetFontSize() * 0.9f;
 		Knotwork(a_drawList, a_from, ImVec2(midX - gap, a_to.y), a_colour, gap * 0.8f);
 		Knotwork(a_drawList, ImVec2(midX + gap, a_from.y), a_to, a_colour, gap * 0.8f);
-		Knot(a_drawList, ImVec2(midX, a_from.y), gap * 0.42f, a_colour);
+		Boss(a_drawList, ImVec2(midX, a_from.y), gap * 0.32f, a_colour, true);
 	}
 
 	//---------------------------------------------------
 	//-- Nord Decor ( Frame ) ---------------------------
 	//---------------------------------------------------
 
-	// Timber and iron over the snow, snow lying on top, iron plates at the corners
+	// Timber beams and iron straps, snow lying on top, dragon heads carved on the top corners
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 		const float size = ImGui::GetFontSize();
@@ -426,20 +406,29 @@ namespace CompletionistUI::NordDecor
 		TimberBand(a_drawList, ImVec2(a_min.x, a_min.y + band), ImVec2(a_min.x + band, a_max.y - band), false, 0x4E03u);
 		TimberBand(a_drawList, ImVec2(a_max.x - band, a_min.y + band), ImVec2(a_max.x, a_max.y - band), false, 0x4E04u);
 		SnowCap(a_drawList, a_min, ImVec2(a_max.x, a_min.y + band), band);
-		a_drawList->AddRect(ImVec2(a_min.x + band + 1.0f, a_min.y + band + 1.0f), ImVec2(a_max.x - band - 1.0f, a_max.y - band - 1.0f), WithAlpha(frost, 0.25f), 0.0f, 0, 1.0f);
+		a_drawList->AddRect(ImVec2(a_min.x + band + 1.0f, a_min.y + band + 1.0f), ImVec2(a_max.x - band - 1.0f, a_max.y - band - 1.0f), WithAlpha(brass, 0.25f), 0.0f, 0, 1.0f);
 
 		const float corner = band * 1.05f;
 		IronCorner(a_drawList, ImVec2(a_min.x + band * 0.5f, a_min.y + band * 0.5f), corner);
 		IronCorner(a_drawList, ImVec2(a_max.x - band * 0.5f, a_min.y + band * 0.5f), corner);
 		IronCorner(a_drawList, ImVec2(a_max.x - band * 0.5f, a_max.y - band * 0.5f), corner);
 		IronCorner(a_drawList, ImVec2(a_min.x + band * 0.5f, a_max.y - band * 0.5f), corner);
+
+		// Only on the main window; small panels keep plain corners. Behind the window, so they
+		// rise above it and their necks go in behind the top beam
+		if (compact >= 0.8f) {
+			auto*       behind = ImGui::GetBackgroundDrawList();
+			const float head = band * 2.6f;
+			DragonHead(behind, ImVec2(a_min.x + band * 1.4f, a_min.y + band * 0.6f), head, -1.0f);
+			DragonHead(behind, ImVec2(a_max.x - band * 1.4f, a_min.y + band * 0.6f), head, 1.0f);
+		}
 	}
 
 	//---------------------------------------------------
 	//-- Nord Decor ( Panel ) ---------------------------
 	//---------------------------------------------------
 
-	// Inside a panel: dark stone at the edges clearing towards the text, rime in the corners, the knot in the empty corner
+	// Inside a panel: dark stone at the edges clearing towards the text, hearth light from below, a round shield in the empty corner
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem) {
 
 		const float width = a_max.x - a_min.x;
@@ -450,10 +439,9 @@ namespace CompletionistUI::NordDecor
 		}
 		const float band = std::min(width, height) * 0.3f + size * 2.0f;
 
-		// Cold light from above, snow-glow along the bottom
-		const float glow = std::min(height * 0.3f, size * 5.0f);
-		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_max.x, a_min.y + glow), WithAlpha(frost, 0.05f), WithAlpha(frost, 0.05f), WithAlpha(frost, 0.0f), WithAlpha(frost, 0.0f));
-		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - glow), a_max, WithAlpha(snow, 0.0f), WithAlpha(snow, 0.0f), WithAlpha(snow, 0.04f), WithAlpha(snow, 0.04f));
+		// Firelight rising from the bottom edge
+		const float glow = std::min(height * 0.35f, size * 6.0f);
+		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - glow), a_max, WithAlpha(hearth, 0.0f), WithAlpha(hearth, 0.0f), WithAlpha(hearth, 0.07f), WithAlpha(hearth, 0.07f));
 
 		// Stone grain
 		Random    random{ static_cast<std::uint32_t>(width) * 37u + static_cast<std::uint32_t>(height) };
@@ -465,34 +453,29 @@ namespace CompletionistUI::NordDecor
 				continue;
 			}
 			const bool  light = random.Next() < 0.55f;
-			const ImU32 colour = light ? IM_COL32(120, 132, 146, 255) : IM_COL32(0, 0, 0, 255);
+			const ImU32 colour = light ? IM_COL32(140, 128, 112, 255) : IM_COL32(0, 0, 0, 255);
 			a_drawList->AddCircleFilled(at, random.Range(0.6f, 1.6f), WithAlpha(colour, weight * (light ? 0.22f : 0.4f)), 5);
 		}
 
-		// Rime creeping in from the corners
-		const float reach = std::min({ width * 0.15f, height * 0.35f, size * 3.5f });
-		Frost(a_drawList, a_min, 1.0f, 1.0f, reach, random);
-		Frost(a_drawList, ImVec2(a_max.x, a_min.y), -1.0f, 1.0f, reach, random);
-		Frost(a_drawList, a_max, -1.0f, -1.0f, reach, random);
-		Frost(a_drawList, ImVec2(a_min.x, a_max.y), 1.0f, -1.0f, reach, random);
-
-		// The knot, large and faint, ringed with rune marks, in the lower right
+		// A round shield, large and faint, in the lower right: planks, an iron rim and the boss
 		if (a_emblem) {
 			const float  radius = std::min(height * 0.42f, width * 0.16f);
 			const ImVec2 centre(a_max.x - radius * 1.25f, a_max.y - radius * 0.95f);
-			const ImU32  faint = WithAlpha(IM_COL32(200, 220, 236, 255), 0.08f);
-			SoftSpot(a_drawList, centre, radius * 1.2f, WithAlpha(frost, 0.008f));
-			a_drawList->AddCircle(centre, radius * 1.12f, faint, 64, std::max(1.0f, radius * 0.02f));
-			a_drawList->AddCircle(centre, radius * 0.98f, WithAlpha(faint, 0.6f), 64, std::max(1.0f, radius * 0.015f));
-			for (int mark = 0; mark < 24; ++mark) {
-				const float  angle = static_cast<float>(mark) * pi / 12.0f;
-				const ImVec2 out(std::cos(angle), std::sin(angle));
-				const float  tilt = mark % 3 == 0 ? 0.0f : (mark % 3 == 1 ? 0.25f : -0.25f);
-				const ImVec2 inner(centre.x + out.x * radius * 1.0f, centre.y + out.y * radius * 1.0f);
-				const ImVec2 outer(centre.x + (out.x + -out.y * tilt) * radius * 1.1f, centre.y + (out.y + out.x * tilt) * radius * 1.1f);
-				a_drawList->AddLine(inner, outer, faint, std::max(1.0f, radius * 0.02f));
+			const float  alpha = 0.16f;
+			a_drawList->AddCircleFilled(centre, radius, WithAlpha(timber, alpha), 48);
+			for (int plank = -3; plank <= 3; ++plank) {
+				const float x = centre.x + static_cast<float>(plank) * radius * 0.27f;
+				const float half = std::sqrt(std::max(0.0f, radius * radius - (x - centre.x) * (x - centre.x)));
+				a_drawList->AddLine(ImVec2(x, centre.y - half), ImVec2(x, centre.y + half), WithAlpha(timberDark, alpha * 1.6f), 1.0f);
 			}
-			Knot(a_drawList, centre, radius * 0.55f, WithAlpha(faint, 0.9f));
+			a_drawList->AddCircle(centre, radius, WithAlpha(ironLight, alpha * 1.2f), 48, std::max(2.0f, radius * 0.07f));
+			for (int rivet = 0; rivet < 12; ++rivet) {
+				const float angle = static_cast<float>(rivet) * pi / 6.0f;
+				a_drawList->AddCircleFilled(ImVec2(centre.x + std::cos(angle) * radius * 0.9f, centre.y + std::sin(angle) * radius * 0.9f), std::max(1.0f, radius * 0.025f), WithAlpha(ironLight, alpha * 1.5f), 6);
+			}
+			a_drawList->AddCircleFilled(centre, radius * 0.24f, WithAlpha(iron, alpha * 2.0f), 24);
+			a_drawList->AddCircle(centre, radius * 0.24f, WithAlpha(ironLight, alpha * 1.5f), 24, std::max(1.0f, radius * 0.03f));
+			a_drawList->AddCircleFilled(centre, radius * 0.1f, WithAlpha(brass, alpha * 2.0f), 16);
 		}
 	}
 
@@ -528,7 +511,7 @@ namespace CompletionistUI::NordDecor
 	//-- Nord Decor ( Perk Node ) --------------------
 	//---------------------------------------------------
 
-	// Rune stones: lit with frost when taken, cut but dark when next, rough when locked
+	// Rune stones: painted when taken, cut but bare when next, rough when locked
 	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
 
 		const float size = a_radius * (a_state == PerkState::kLocked ? 1.7f : 2.5f);

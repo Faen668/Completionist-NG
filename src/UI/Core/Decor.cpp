@@ -65,7 +65,7 @@ namespace CompletionistUI
 			AltmerDecor::Crystal(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kNord:
-			NordDecor::Star(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			NordDecor::Boss(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		default:
 			break;
@@ -323,7 +323,7 @@ namespace CompletionistUI
 			SkyUIDecor::Knot(a_drawList, a_centre, a_radius * 2.4f, a_colour);
 			return;
 		case Theme::kArgonian:
-			ArgonianDecor::Eye(a_drawList, a_centre, a_radius * 1.05f, a_colour);
+			ArgonianDecor::Leaf(a_drawList, a_centre, a_radius * 1.1f, a_colour);
 			return;
 		case Theme::kBosmer:
 			BosmerDecor::Sprig(a_drawList, ImVec2(a_centre.x, a_centre.y + a_radius * 0.4f), a_radius * 1.5f, -std::numbers::pi_v<float> * 0.5f, a_colour);
