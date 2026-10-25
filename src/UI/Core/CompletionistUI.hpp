@@ -204,6 +204,7 @@ namespace CompletionistUI
 		bool                  _padActive{ false };
 		bool                  _forcePadHints{ false };
 		std::string           _padActionKey;
+		std::string           _padTriggerKey;
 		bool                  _settingsTabsShown{ false };
 		std::vector<NavSpot>  _entrySpots;
 		std::vector<NavSpot>  _entrySpotsLast;
