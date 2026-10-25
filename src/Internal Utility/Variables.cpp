@@ -444,7 +444,6 @@ namespace CVariables
 		V_MenuPrefix_Displayable = choice("iMenuPrefix_Displayable", 0, 2);
 		V_MenuPrefix_Displayed = choice("iMenuPrefix_Displayed", 0, 2);
 		V_MenuPrefix_Occupied = choice("iMenuPrefix_Occupied", 0, 2);
-		V_Trainers_CountOnOffer = choice("iTrainers_CountWhen", 0, 1) == 1;
 
 		// Custom colour wins, as on the crosshair
 		const auto colour = [](const char* a_custom, const char* a_customString, const char* a_string, const char* a_default) {

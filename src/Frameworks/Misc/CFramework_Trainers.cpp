@@ -107,41 +107,19 @@ namespace CFramework_Trainers
 	}
 
 	//---------------------------------------------------
-	//-- Framework Events ( Training Menu ) -------------
+	//-- Framework Events ( Dialogue Menu ) -------------
 	//---------------------------------------------------
 
-	// A lesson counts once the skill goes up, or on opening if the setting says so
+	// Talking to a trainer counts, lesson or not, so trainers you've outgrown still complete
 	RE::BSEventNotifyControl CHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) {
 
-		if (!a_event || a_event->menuName != RE::TrainingMenu::MENU_NAME) { return RE::BSEventNotifyControl::kContinue; }
+		if (!a_event || !a_event->opening || a_event->menuName != RE::DialogueMenu::MENU_NAME) { return RE::BSEventNotifyControl::kContinue; }
 
-		if (a_event->opening) {
-			SKSE::GetTaskInterface()->AddTask([this]() {
-				auto* ui = RE::UI::GetSingleton();
-				auto  menu = ui ? ui->GetMenu<RE::TrainingMenu>() : nullptr;
-				auto* player = RE::PlayerCharacter::GetSingleton();
-				if (!menu || !player) { return; }
-
-				auto& data = menu->GetRuntimeData();
-				auto* trainer = data.trainer;
-				auto* npc = trainer ? trainer->GetActorBase() : nullptr;
-				_lessonTrainer = npc ? npc->GetFormID() : 0;
-				_lessonSkill = data.skill;
-				_lessonStart = player->AsActorValueOwner()->GetBaseActorValue(data.skill);
-				if (npc && CVariables::V_Trainers_CountOnOffer) {
-					MarkTrained(npc);
-				}
-			});
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
-		SKSE::GetTaskInterface()->AddTask([this]() {
-			auto* player = RE::PlayerCharacter::GetSingleton();
-			const auto trainer = std::exchange(_lessonTrainer, 0);
-			if (!player || !trainer || _lessonSkill == RE::ActorValue::kNone) { return; }
-			if (player->AsActorValueOwner()->GetBaseActorValue(_lessonSkill) > _lessonStart) {
-				MarkTrained(RE::TESForm::LookupByID<RE::TESNPC>(trainer));
-			}
+		// Speaker is set next frame
+		SKSE::GetTaskInterface()->AddTask([]() {
+			auto  speaker = RE::MenuTopicManager::GetSingleton()->speaker.get();
+			auto* actor = speaker ? speaker->As<RE::Actor>() : nullptr;
+			MarkTrained(actor ? actor->GetActorBase() : nullptr);
 		});
 		return RE::BSEventNotifyControl::kContinue;
 	}
