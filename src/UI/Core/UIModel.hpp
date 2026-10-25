@@ -39,7 +39,9 @@ namespace CompletionistUI
 		EntryState    state{ EntryState::kNeeded };
 		bool          showState{ true };	// false for settings
 		bool          canToggle{ false };
+		bool          marked{ false };	// marked complete by hand
 		std::uint32_t formID{ 0 };
+		std::int32_t  frameworkID{ -1 };	// framework or patch section, for marking by hand
 		std::string   key;	// quest key
 		std::string   status;
 		std::string   type;

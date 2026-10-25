@@ -218,6 +218,9 @@ namespace CompletionistUI
 				entry.state = i < bools.size() && bools[i] ? EntryState::kFound : EntryState::kNeeded;
 				entry.formID = i < forms.size() && forms[i] ? forms[i]->GetFormID() : 0;
 				entry.canPin = i < forms.size() && Completionist::CellScanner::IsItemPinnable(nullptr, forms[i]);
+				// Locations (1-5) come from discovery, as in the MCM
+				entry.frameworkID = a_id;
+				entry.canToggle = entry.formID != 0 && (a_id < 1 || a_id > 5);
 				AddMapMarker(entry, i < forms.size() ? forms[i] : nullptr, a_provider);
 				if (i < texts.size() && texts[i] != "NO_HIGHLIGHT") {
 					entry.description = a_provider.Translate(texts[i]);
@@ -264,6 +267,8 @@ namespace CompletionistUI
 					entry.state = i < data.bools.size() && data.bools[i] ? EntryState::kFound : EntryState::kNeeded;
 					entry.formID = i < data.forms.size() && data.forms[i] ? data.forms[i]->GetFormID() : 0;
 					entry.canPin = i < data.forms.size() && Completionist::CellScanner::IsItemPinnable(nullptr, data.forms[i]);
+					entry.frameworkID = data.ID;
+					entry.canToggle = entry.formID != 0 && data.type != CMiscPatchType::kLocations;
 					if (data.type == CMiscPatchType::kLocations) {
 						AddMapMarker(entry, i < data.forms.size() ? data.forms[i] : nullptr, a_provider);
 					}
@@ -586,6 +591,7 @@ namespace CompletionistUI
 				entry.description = CleanQuestText(data->GetHighlight());
 				entry.state = status > 0 || manual ? EntryState::kFound : EntryState::kNeeded;
 				entry.canToggle = status != 2;
+				entry.marked = manual;
 				entry.key = key;
 				entry.status = entry.IsComplete() ? "UI_QuestState_Done" : "UI_QuestState_Pending";
 				entry.type = data->GetType() == std::to_underlying(CFlagEnum::kMain) ? "UI_QuestType_Main" : data->GetType() == std::to_underlying(CFlagEnum::kSide) ? "UI_QuestType_Side" : "UI_QuestType_Radiant";
@@ -846,8 +852,32 @@ namespace CompletionistUI
 
 	void GameDataProvider::SetCompleted(std::string_view a_pageID, const Entry& a_entry, bool a_completed) {
 
-		// Quests only for now
-		if (!a_pageID.starts_with(questPrefix) || a_entry.key.empty() || !a_entry.canToggle) {
+		if (!a_entry.canToggle) {
+			return;
+		}
+
+		// Collections and patches, as the MCM's SetOptionCompleted
+		if (a_entry.frameworkID >= 0) {
+			{
+				std::scoped_lock lock(_lock);
+				if (auto it = _pages.find(std::string(a_pageID)); it != _pages.end()) {
+					for (auto& section : it->second.sections) {
+						for (auto& entry : section.entries) {
+							if (entry.formID == a_entry.formID && entry.frameworkID == a_entry.frameworkID) {
+								entry.state = a_completed ? EntryState::kFound : EntryState::kNeeded;
+							}
+						}
+					}
+				}
+			}
+			SKSE::GetTaskInterface()->AddTask([this, id = a_entry.frameworkID, formID = a_entry.formID, a_completed]() {
+				CFramework_Master::FrameworkAPI::SetOptionCompleted(id, RE::TESForm::LookupByID(formID), a_completed);
+				Rebuild();
+			});
+			return;
+		}
+
+		if (!a_pageID.starts_with(questPrefix) || a_entry.key.empty()) {
 			return;
 		}
 
@@ -863,7 +893,11 @@ namespace CompletionistUI
 						if (entry.key == a_entry.key) {
 							entry.state = a_completed ? EntryState::kFound : EntryState::kNeeded;
 							entry.status = a_completed ? "UI_QuestState_Done" : "UI_QuestState_Pending";
-							entry.detail = a_completed ? Translate("UI_QuestMarked") : std::string{};
+							entry.marked = a_completed;
+							// Radiant quests keep their count there
+							if (entry.detail.empty() || entry.detail == Translate("UI_QuestMarked")) {
+								entry.detail = a_completed ? Translate("UI_QuestMarked") : std::string{};
+							}
 						}
 					}
 				}

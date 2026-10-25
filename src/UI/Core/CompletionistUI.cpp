@@ -1059,6 +1059,7 @@ namespace CompletionistUI
 		_statusTime = std::max(0.0f, _statusTime - ImGui::GetIO().DeltaTime);
 		TrackInputDevice();
 		_padActionKey.clear();
+		_padTriggerKey.clear();
 
 		rightStickTaken = false;
 
@@ -1097,6 +1098,8 @@ namespace CompletionistUI
 		const float pad = ImGui::GetFontSize() * 1.4f;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
 		constexpr auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+		// The panels scroll, the window never does (controller focus near the bottom nudged it)
+		ImGui::SetNextWindowScroll(ImVec2(0.0f, 0.0f));
 		const bool     visible = ImGui::Begin("##Completionist", nullptr, flags);
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
@@ -1942,6 +1945,9 @@ namespace CompletionistUI
 		if (!_padActionKey.empty()) {
 			hints.push_back({ { PadButton::kFaceLeft }, a_provider.Translate(_padActionKey) });
 		}
+		if (!_padTriggerKey.empty()) {
+			hints.push_back({ { PadButton::kRightTrigger }, a_provider.Translate(_padTriggerKey) });
+		}
 		if (a_cellWindow) {
 			// Cell Scanner
 			hints.push_back({ { PadButton::kFaceRight }, a_provider.Translate("UI_Pad_Close") });
@@ -2661,14 +2667,16 @@ namespace CompletionistUI
 			return std::ranges::any_of(a_section.entries, [](const Entry& a_entry) { return a_entry.placesKnown; });
 		});
 		float panelHeight = 0.0f;
+		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 		if (shoutPage) {
+			// Folds with the description
 			const auto& style = ImGui::GetStyle();
 			ImGui::PushFont(Themes::HeaderFont());
 			const float title = ImGui::GetFontSize() + style.ItemSpacing.y * 2.0f;
 			ImGui::PopFont();
-			panelHeight = style.WindowPadding.y * 2.0f + title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
+			const float t = std::clamp(_descriptionOpen, 0.0f, 1.0f);
+			panelHeight = (style.WindowPadding.y * 2.0f + title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f) * t * t * (3.0f - 2.0f * t);
 		} else {
-			UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 			panelHeight = DescriptionPanelHeight();
 		}
 
@@ -2683,7 +2691,8 @@ namespace CompletionistUI
 		}
 		EndFramedPanel();
 
-		if (shoutPage) {
+		// Folded, the description panel's grabber is all that's left either way
+		if (shoutPage && panelHeight >= 1.0f) {
 			DrawShoutPanel(a_provider, page, panelHeight, gap);
 		} else {
 			DrawDescriptionPanel(a_provider, panelHeight, gap);
@@ -3638,8 +3647,9 @@ namespace CompletionistUI
 					_shownMarker = item.refID;
 				}
 				if (_pins.enabled && ImGui::IsItemFocused() && ImGui::GetIO().NavVisible) {
-					_padActionKey = pinned ? "UI_Unpin" : "UI_Pin";
-					if (ImGui::IsKeyPressed(rowActionKey, false)) {
+					// R2 pins, as on the pages
+					_padTriggerKey = pinned ? "UI_Unpin" : "UI_Pin";
+					if (ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false)) {
 						TogglePin(a_provider, entry);
 					}
 				}
@@ -4311,6 +4321,9 @@ namespace CompletionistUI
 		append(a_provider.Translate(a_page.title));
 		append(a_provider.Translate(selected->status.empty() ? std::string(StateKey(selected->state)) : selected->status));
 		append(selected->detail);
+		if (selected->marked && selected->detail != a_provider.Translate("UI_QuestMarked")) {
+			append(a_provider.Translate("UI_QuestMarked"));
+		}
 		ImGui::TextColored(complete ? palette.found : palette.textDim, "%s", subtitle.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, fontSize * 0.6f));
@@ -4454,20 +4467,38 @@ namespace CompletionistUI
 		}
 
 		// Row action, X on a controller
+		// Square always marks complete, R2 pins or sets the location marker
 		const auto action = RowActionFor(a_entry);
-		const bool on = action == RowAction::kMarker ? _locationMarker != 0 && a_entry.formID == _locationMarker
-		              : action == RowAction::kPin    ? _pins.Has(a_entry.formID)
-		              : action == RowAction::kComplete && a_entry.IsComplete();
+		const auto place = action == RowAction::kMarker || action == RowAction::kPin ? action : RowAction::kNone;
+		const bool on = place == RowAction::kMarker ? _locationMarker != 0 && a_entry.formID == _locationMarker
+		              : place == RowAction::kPin && _pins.Has(a_entry.formID);
+		const bool tick = a_entry.canToggle;
 		const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
-		if (action != RowAction::kNone && rowFocused) {
-			_padActionKey = RowActionKey(action, on);
+		if (rowFocused && tick) {
+			_padActionKey = RowActionKey(RowAction::kComplete, a_entry.IsComplete());
 			if (ImGui::IsKeyPressed(rowActionKey, false)) {
-				DoRowAction(a_provider, a_entry, action);
+				DoRowAction(a_provider, a_entry, RowAction::kComplete);
+			}
+		}
+		if (rowFocused && place != RowAction::kNone) {
+			_padTriggerKey = RowActionKey(place, on);
+			if (ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false)) {
+				DoRowAction(a_provider, a_entry, place);
 			}
 		}
 		const auto rowMax = ImVec2(start.x + cellWidth, start.y + ImGui::GetFrameHeight());
 		const bool rowHovered = !_padActive && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseHoveringRect(start, rowMax);
+		const bool showButtons = rowHovered || (rowFocused && _padActive);
+		const bool showPlace = place != RowAction::kNone && (showButtons || on);
+		// The tick is for the mouse, a controller has Square
+		const bool showTick = tick && rowHovered;
+		const float side = ImGui::GetFrameHeight();
+		const float buttonsRight = boxMax.x - ImGui::GetStyle().FramePadding.x;
+		const float buttonsY = std::round((boxMin.y + boxMax.y - side) * 0.5f);
 
+		// Text stops short of the buttons
+		const float buttons = (showPlace ? side : 0.0f) + (showTick ? side : 0.0f);
+		ImGui::PushClipRect(start, ImVec2(std::min(rowMax.x, buttonsRight - buttons), rowMax.y), true);
 		ImGui::SetCursorScreenPos(start);
 		StateMarker(a_entry.state);
 
@@ -4490,17 +4521,18 @@ namespace CompletionistUI
 			ImGui::SameLine();
 			ImGui::TextColored(palette.textDim, "%s", a_entry.detail.c_str());
 		}
+		ImGui::PopClipRect();
 
-		// Row action button; the tick is for the mouse, a controller has its button
-		const bool lit = on && action != RowAction::kComplete;
-		const bool padShown = rowFocused && _padActive && action != RowAction::kComplete;
-		if (action != RowAction::kNone && (rowHovered || padShown || lit)) {
-			const float side = ImGui::GetFrameHeight();
-			const float buttonsRight = boxMax.x - ImGui::GetStyle().FramePadding.x;
-			const float buttonsY = std::round((boxMin.y + boxMax.y - side) * 0.5f);
-			if (RowActionButton(a_provider, action, on, ImVec2(buttonsRight - side, buttonsY), side, rowHovered)) {
-				DoRowAction(a_provider, a_entry, action);
+		// Pin or marker at the right, the tick beside it
+		if (showPlace && RowActionButton(a_provider, place, on, ImVec2(buttonsRight - side, buttonsY), side, rowHovered)) {
+			DoRowAction(a_provider, a_entry, place);
+		}
+		if (showTick) {
+			ImGui::PushID("##Tick");
+			if (RowActionButton(a_provider, RowAction::kComplete, a_entry.IsComplete(), ImVec2(buttonsRight - side * (showPlace ? 2.0f : 1.0f), buttonsY), side, rowHovered)) {
+				DoRowAction(a_provider, a_entry, RowAction::kComplete);
 			}
+			ImGui::PopID();
 		}
 	}
 
@@ -4739,6 +4771,29 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Completionist UI ( Draw Panel Grip ) -----------
+	//---------------------------------------------------
+
+	// The grabber above the description and shout panels
+	static void DrawPanelGrip(ImDrawList* a_drawList, float a_centreX, float a_edgeY, float a_width, bool a_hot) {
+
+		const ImU32 colour = Colour(Themes::GetPalette().accent, a_hot ? 1.0f : 0.6f);
+		const float half = a_width * 0.5f;
+		const float offset = ImGui::GetFontSize() * 0.22f;
+		const float thickness = std::max(1.5f, ImGui::GetFontSize() * 0.08f);
+		if (SkyUI()) {
+			const float knot = ImGui::GetFontSize() * 0.5f;
+			Decor::DoubleRule(a_drawList, ImVec2(a_centreX - half, a_edgeY), ImVec2(a_centreX - knot * 1.3f, a_edgeY), colour);
+			Decor::DoubleRule(a_drawList, ImVec2(a_centreX + knot * 1.3f, a_edgeY), ImVec2(a_centreX + half, a_edgeY), colour);
+			Decor::Knot(a_drawList, ImVec2(a_centreX, a_edgeY), knot, colour);
+			return;
+		}
+		Decor::FadedLine(a_drawList, ImVec2(a_centreX - half, a_edgeY - offset), ImVec2(a_centreX + half, a_edgeY - offset), colour, thickness);
+		Decor::FadedLine(a_drawList, ImVec2(a_centreX - half * 0.6f, a_edgeY + offset), ImVec2(a_centreX + half * 0.6f, a_edgeY + offset), colour, thickness);
+		Decor::Diamond(a_drawList, ImVec2(a_centreX, a_edgeY), ImGui::GetFontSize() * 0.3f, colour, true);
+	}
+
+	//---------------------------------------------------
 	//-- Completionist UI ( Draw Description Panel ) ----
 	//---------------------------------------------------
 
@@ -4786,22 +4841,7 @@ namespace CompletionistUI
 			}
 		}
 
-		const auto drawGrip = [&](ImDrawList* a_drawList) {
-			const ImU32 colour = Colour(palette.accent, hovered || active ? 1.0f : 0.6f);
-			const float half = gripWidth * 0.5f;
-			const float offset = ImGui::GetFontSize() * 0.22f;
-			const float thickness = std::max(1.5f, ImGui::GetFontSize() * 0.08f);
-			if (SkyUI()) {
-				const float knot = ImGui::GetFontSize() * 0.5f;
-				Decor::DoubleRule(a_drawList, ImVec2(centreX - half, edgeY), ImVec2(centreX - knot * 1.3f, edgeY), colour);
-				Decor::DoubleRule(a_drawList, ImVec2(centreX + knot * 1.3f, edgeY), ImVec2(centreX + half, edgeY), colour);
-				Decor::Knot(a_drawList, ImVec2(centreX, edgeY), knot, colour);
-				return;
-			}
-			Decor::FadedLine(a_drawList, ImVec2(centreX - half, edgeY - offset), ImVec2(centreX + half, edgeY - offset), colour, thickness);
-			Decor::FadedLine(a_drawList, ImVec2(centreX - half * 0.6f, edgeY + offset), ImVec2(centreX + half * 0.6f, edgeY + offset), colour, thickness);
-			Decor::Diamond(a_drawList, ImVec2(centreX, edgeY), ImGui::GetFontSize() * 0.3f, colour, true);
-		};
+		const auto drawGrip = [&](ImDrawList* a_drawList) { DrawPanelGrip(a_drawList, centreX, edgeY, gripWidth, hovered || active); };
 
 		ImGui::SetCursorScreenPos(ImVec2(start.x, edgeY));
 		if (a_height < 1.0f) {
@@ -4927,9 +4967,24 @@ namespace CompletionistUI
 			}
 		}
 
-		(void)a_height;
-		ImGui::Dummy(ImVec2(0.0f, a_gap - ImGui::GetStyle().ItemSpacing.y));
-		BeginFramedPanel("##Shout", ImVec2(0.0f, 0.0f));
+		// Grabber in the gap, double-click folds it like the description
+		const auto  start = ImGui::GetCursorScreenPos();
+		const float gapTop = start.y - ImGui::GetStyle().ItemSpacing.y;
+		const float centreX = start.x + ImGui::GetContentRegionAvail().x * 0.5f;
+		const float gripWidth = ImGui::GetFontSize() * 4.0f;
+		ImGui::SetCursorScreenPos(ImVec2(centreX - gripWidth * 0.5f, gapTop));
+		ImGui::InvisibleButton("##ShoutGrip", ImVec2(gripWidth, a_gap + ImGui::GetFontSize() * 0.4f));
+		const bool gripHovered = ImGui::IsItemHovered();
+		if (gripHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && _settings) {
+			_settings->descriptionCollapsed = true;
+			_settingsChanged = true;
+		}
+		ImGui::SetCursorScreenPos(ImVec2(start.x, gapTop + a_gap));
+		BeginFramedPanel("##Shout", ImVec2(0.0f, a_height));
+		auto* gripList = ImGui::GetWindowDrawList();
+		gripList->PushClipRect(ImVec2(start.x, gapTop), ImVec2(centreX * 2.0f - start.x, gapTop + a_gap + a_height), false);
+		DrawPanelGrip(gripList, centreX, gapTop + a_gap, gripWidth, gripHovered);
+		gripList->PopClipRect();
 		ScrollWithRightStick();
 		if (entry) {
 			ImGui::PushFont(Themes::HeaderFont());

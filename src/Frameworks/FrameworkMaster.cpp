@@ -659,6 +659,36 @@ namespace CFramework_Master
 	}
 
 	//---------------------------------------------------
+	//-- Framework Functions ( Set Option Completed ) ---
+	//---------------------------------------------------
+
+	// Marking an entry found or not by hand, its variations follow it
+	void FrameworkAPI::SetOptionCompleted(std::int32_t a_ID, RE::TESForm* a_form, bool a_completed) {
+
+		auto& forms = HandleFormSet(a_ID);
+		auto& bools = HandleBoolSet(a_ID);
+		const auto t_pos = std::ranges::find(forms, a_form);
+		if (!a_form || t_pos == forms.end()) { return; }
+
+		const auto b_pos = static_cast<std::size_t>(std::distance(forms.begin(), t_pos));
+		if (b_pos >= bools.size() || bools[b_pos] == a_completed) { return; }
+
+		bools[b_pos] = a_completed;
+		auto& found = HandleNoShow(a_ID) ? FoundItemData_NoShow : FoundItemData;
+		const auto formID = a_form->GetFormID();
+		a_completed ? found.AddForm(formID) : found.RemoveForm(formID);
+		for (auto var : HandleDataSet(a_ID).GetAllVariations()) {
+			if (HandleDataSet(a_ID).GetBase(var) == formID) {
+				a_completed ? found.AddForm(var) : found.RemoveForm(var);
+			}
+		}
+
+		HandleTotalSet(a_ID) = static_cast<std::int32_t>(forms.size());
+		HandleFoundSet(a_ID) = static_cast<std::int32_t>(std::ranges::count(bools, true));
+		INFO("Marked {:08X} {} by hand", formID, a_completed ? "found" : "not found");
+	}
+
+	//---------------------------------------------------
 	//-- Framework Functions ( Getter - Names ) ---------
 	//---------------------------------------------------
 

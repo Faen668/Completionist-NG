@@ -117,6 +117,7 @@ namespace CFramework_Master
 		static std::vector<std::string>		GetNameArrayByID(RE::StaticFunctionTag*, std::int32_t a_FrameworkID);
 		static std::vector<std::string>		GetTextArrayByID(RE::StaticFunctionTag*, std::int32_t a_FrameworkID);
 		static std::vector<bool>			GetBoolArrayByID(RE::StaticFunctionTag*, std::int32_t a_FrameworkID);
+		static void							SetOptionCompleted(std::int32_t a_FrameworkID, RE::TESForm* a_form, bool a_completed);
 
 
 		static std::int32_t					GetPatchCount(RE::StaticFunctionTag*);
