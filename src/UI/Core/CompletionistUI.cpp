@@ -1447,6 +1447,28 @@ namespace CompletionistUI
 			}
 			return best ? best->spot : nullptr;
 		};
+		// Closest item up or down when nothing lines up, such as the log's date filter under its tab
+		const auto closest = [&](const NavSpot& a_from, std::initializer_list<const std::vector<NavSpot>*> a_lists) -> const NavSpot* {
+			const NavSpot* best = nullptr;
+			float          bestDistance = FLT_MAX;
+			for (const auto* list : a_lists) {
+				for (const auto& candidate : *list) {
+					if (candidate.id == a_from.id || (candidate.section == -1 && dir != ImGuiDir_Up) || (!candidate.visible && candidate.window != a_from.window)) {
+						continue;
+					}
+					const float along = dir == ImGuiDir_Down ? candidate.minY - a_from.maxY : a_from.minY - candidate.maxY;
+					if (along < -2.0f) {
+						continue;
+					}
+					const float distance = along + std::abs((candidate.minX + candidate.maxX) - (a_from.minX + a_from.maxX)) * 0.5f;
+					if (distance < bestDistance) {
+						bestDistance = distance;
+						best = std::addressof(candidate);
+					}
+				}
+			}
+			return best;
+		};
 
 		const auto sidebarFor = [&](const NavSpot& a_from) -> const NavSpot* {
 			if (const auto* selected = find(_sidebarSpotsLast, _sidebarSelectedLast)) {
@@ -1530,11 +1552,19 @@ namespace CompletionistUI
 				if (target && std::min(control->maxX, target->maxX) - std::max(control->minX, target->minX) <= 0.0f) {
 					target = nullptr;
 				}
+				// Buttons over the sidebar go into it, the rest (the Settings cog) into the page
+				const bool overSidebar = !_sidebarSpotsLast.empty() && control->minX < _sidebarSpotsLast.front().maxX;
+				if (!target && !overSidebar) {
+					target = closest(*control, { &_controlSpotsLast, &_entrySpotsLast });
+				}
 				if (!target && !_sidebarSpotsLast.empty()) {
 					target = std::addressof(_sidebarSpotsLast.front());
 				}
 			} else {
 				target = nearest(*control, { &_controlSpotsLast, &_entrySpotsLast });
+				if (!target && (dir == ImGuiDir_Up || dir == ImGuiDir_Down)) {
+					target = closest(*control, { &_controlSpotsLast, &_entrySpotsLast });
+				}
 			}
 			if (!target && dir == ImGuiDir_Left) {
 				target = sidebarFor(*control);
@@ -5559,7 +5589,53 @@ namespace CompletionistUI
 						labelWidth = ImGui::GetFontSize() * 10.0f;
 						controlWidth = ImGui::GetFontSize() * 14.0f;
 					}
+					// The completion log, read down then across in up to three columns
+					const auto  isLogRow = [&](const SettingItem& a_item) { return !table && a_item.kind == SettingKind::kText && !a_item.value.empty(); };
+					std::size_t logSkip = 0;
 					for (auto& item : column) {
+						if (logSkip > 0) {
+							--logSkip;
+							continue;
+						}
+						if (isLogRow(item)) {
+							const auto  first = static_cast<std::size_t>(std::addressof(item) - column.data());
+							std::size_t count = 0;
+							while (first + count < column.size() && isLogRow(column[first + count])) {
+								++count;
+							}
+							logSkip = count - 1;
+							const int   logColumns = std::clamp(static_cast<int>(ImGui::GetContentRegionAvail().x / (ImGui::GetFontSize() * 22.0f)), 1, 3);
+							const auto  logRows = (count + logColumns - 1) / logColumns;
+							const float timeWidth = ImGui::GetFontSize() * 4.5f;
+							if (ImGui::BeginTable("##Log", logColumns, ImGuiTableFlags_SizingStretchSame)) {
+								for (std::size_t row = 0; row < logRows; ++row) {
+									for (int logColumn = 0; logColumn < logColumns; ++logColumn) {
+										ImGui::TableNextColumn();
+										const auto index = static_cast<std::size_t>(logColumn) * logRows + row;
+										if (index >= count) {
+											continue;
+										}
+										const auto& entry = column[first + index];
+										const auto  cellX = ImGui::GetCursorPosX();
+										const float cellWidth = ImGui::GetContentRegionAvail().x;
+										const auto  what = a_provider.Translate(entry.value);
+										const auto  shown = FitText(what, cellWidth - timeWidth - style.ItemSpacing.x);
+										ImGui::AlignTextToFramePadding();
+										ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(entry.label).c_str());
+										ImGui::SameLine();
+										ImGui::SetCursorPosX(cellX + timeWidth);
+										ImGui::TextColored(entry.number > 0 ? ColourFromRGB(entry.number) : palette.text, "%s", shown.c_str());
+										if (shown != what && ImGui::IsItemHovered()) {
+											ImGui::SetTooltip("%s", what.c_str());
+										}
+										const auto pos = ImGui::GetCursorScreenPos();
+										Decor::FadedLine(ImGui::GetWindowDrawList(), ImVec2(pos.x, pos.y - style.ItemSpacing.y * 0.5f), ImVec2(pos.x + cellWidth, pos.y - style.ItemSpacing.y * 0.5f), Colour(palette.separator, 0.5f));
+									}
+								}
+								ImGui::EndTable();
+							}
+							continue;
+						}
 						ImGui::PushID(item.id.c_str());
 						const auto text = a_provider.Translate(item.label);
 						const auto key = page.id + '/' + item.id;
