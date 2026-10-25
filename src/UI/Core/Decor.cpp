@@ -1,10 +1,12 @@
 #include "UI/Core/Decor.hpp"
 #include "UI/Core/Themes.hpp"
+#include "UI/Themes/AltmerDecor.hpp"
 #include "UI/Themes/ArgonianDecor.hpp"
 #include "UI/Themes/BosmerDecor.hpp"
 #include "UI/Themes/DecorDraw.hpp"
 #include "UI/Themes/DunmerDecor.hpp"
 #include "UI/Themes/KhajiitDecor.hpp"
+#include "UI/Themes/NordDecor.hpp"
 #include "UI/Themes/SkyUIDecor.hpp"
 
 #include <algorithm>
@@ -59,6 +61,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::Crescent(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
+		case Theme::kAltmer:
+			AltmerDecor::Crystal(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kNord:
+			NordDecor::Star(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
 		default:
 			break;
 		}
@@ -99,6 +107,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Phase(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kAltmer:
+			AltmerDecor::Shard(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kNord:
+			NordDecor::RuneStone(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		default:
 			break;
@@ -146,6 +160,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
+			return;
+		case Theme::kAltmer:
+			AltmerDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
+			return;
+		case Theme::kNord:
+			NordDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
 			return;
 		default:
 			break;
@@ -198,6 +218,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::TwinMoons(a_drawList, a_centre, a_radius * 1.7f);
 			return;
+		case Theme::kAltmer:
+			AltmerDecor::Gem(a_drawList, a_centre, a_radius * 1.5f, a_colour);
+			return;
+		case Theme::kNord:
+			NordDecor::Knot(a_drawList, a_centre, a_radius * 1.15f, a_colour);
+			return;
 		default:
 			Diamond(a_drawList, a_centre, a_radius, a_colour, true);
 			return;
@@ -227,6 +253,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
+		case Theme::kAltmer:
+			AltmerDecor::Filigree(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			return;
+		case Theme::kNord:
+			NordDecor::Knotwork(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			return;
 		default:
 			FadedLine(a_drawList, a_from, a_to, a_colour);
 			return;
@@ -255,6 +287,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kAltmer:
+			AltmerDecor::Filigree(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kNord:
+			NordDecor::Knotwork(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		default:
 			FadedLine(a_drawList, a_from, a_to, a_rule);
@@ -293,6 +331,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kAltmer:
+			AltmerDecor::Frame(a_drawList, a_min, a_max);
+			return;
+		case Theme::kNord:
+			NordDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		default:
 			break;
 		}
@@ -322,6 +366,8 @@ namespace CompletionistUI
 		case Theme::kArgonian:
 		case Theme::kDunmer:
 		case Theme::kKhajiit:
+		case Theme::kAltmer:
+		case Theme::kNord:
 			return size * 0.6f;
 		default:
 			return 0.0f;
@@ -347,6 +393,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
+		case Theme::kAltmer:
+			AltmerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kNord:
+			NordDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
 		default:
 			return false;
 		}
@@ -371,6 +423,12 @@ namespace CompletionistUI
 		case Theme::kKhajiit:
 			KhajiitDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
+		case Theme::kAltmer:
+			AltmerDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kNord:
+			NordDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
 		default:
 			return;
 		}
@@ -393,7 +451,7 @@ namespace CompletionistUI
 
 		if (Race()) {
 			// Rising out of the shadow, no hard edges
-			const ImU32 moss = WithAlpha(Shade(a_colour, 0.6f), 0.55f * a_alpha);
+			const ImU32 moss = Altmer() ? WithAlpha(a_colour, 0.45f * a_alpha) : WithAlpha(Shade(a_colour, 0.6f), 0.55f * a_alpha);	// Altmer is light, shading it would turn it brown
 			const ImU32 none = WithAlpha(a_colour, 0.0f);
 			const float midY = (a_min.y + a_max.y) * 0.5f;
 			a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_max.x, midY), none, none, none, moss);

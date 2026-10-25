@@ -108,9 +108,13 @@ namespace CompletionistUI
 
 			const std::string folder = "Data/SKSE/Plugins/CompletionistData/Fonts/";
 			if (a_theme == Theme::kCompletionist) {
-				return { folder + "AlegreyaSans-Regular.ttf", {}, folder + "Cinzel.ttf", folder + "EBGaramond.ttf" };
+				return { folder + "AlegreyaSans-Regular.ttf", {}, folder + "Cinzel.ttf", {}, folder + "EBGaramond.ttf" };
 			}
-			return { folder + "AlegreyaSans-Regular.ttf", {}, {}, folder + "EBGaramond.ttf" };
+			// Summerset serif, the title in Cinzel capitals
+			if (a_theme == Theme::kAltmer) {
+				return { folder + "EBGaramond.ttf", {}, {}, folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf" };
+			}
+			return { folder + "AlegreyaSans-Regular.ttf", {}, {}, {}, folder + "EBGaramond.ttf" };
 		}
 
 		//---------------------------------------------------

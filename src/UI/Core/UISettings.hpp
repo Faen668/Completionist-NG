@@ -13,6 +13,8 @@ namespace CompletionistUI
 		kArgonian,
 		kKhajiit,
 		kDunmer,
+		kNord,
+		kAltmer,
 	};
 
 	// Button names for each pad, same buttons through XInput

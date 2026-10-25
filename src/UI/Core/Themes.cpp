@@ -110,6 +110,33 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Themes ( Altmer Palette ) ----------------------
+		//---------------------------------------------------
+
+		// Summerset, the one light theme: white marble, dark ink, gold
+		Palette AltmerPalette() {
+
+			return {
+				.background = RGBA(238, 233, 219, 0.95f),
+				.panel = RGBA(246, 242, 232, 0.0f),
+				.text = RGBA(52, 46, 38),
+				.textDim = RGBA(128, 116, 96),
+				.accent = RGBA(184, 140, 46),
+				.heading = RGBA(36, 32, 26),
+				.count = RGBA(112, 96, 66),
+				.bar = RGBA(204, 160, 60),
+				.found = RGBA(136, 96, 18),
+				.needed = RGBA(52, 46, 38),
+				.displayable = RGBA(52, 104, 168),
+				.occupied = RGBA(146, 70, 124),
+				.barBackground = RGBA(224, 214, 192),
+				.separator = RGBA(200, 176, 122),
+				.pinned = RGBA(44, 104, 170),
+				.stealing = RGBA(184, 44, 66),
+			};
+		}
+
+		//---------------------------------------------------
 		//-- Themes ( Argonian Palette ) --------------------
 		//---------------------------------------------------
 
@@ -216,6 +243,33 @@ namespace CompletionistUI
 				.stealing = RGBA(232, 118, 128),
 			};
 		}
+
+		//---------------------------------------------------
+		//-- Themes ( Nord Palette ) ------------------------
+		//---------------------------------------------------
+
+		// Snow over dark stone: slate, steel blue, bone headings, rune frost for found
+		Palette NordPalette() {
+
+			return {
+				.background = RGBA(11, 13, 17, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(224, 228, 232),
+				.textDim = RGBA(124, 134, 146),
+				.accent = RGBA(122, 160, 190),
+				.heading = RGBA(232, 220, 190),
+				.count = RGBA(170, 182, 196),
+				.bar = RGBA(82, 118, 148),
+				.found = RGBA(150, 210, 236),
+				.needed = RGBA(224, 228, 232),
+				.displayable = RGBA(176, 196, 150),
+				.occupied = RGBA(186, 140, 176),
+				.barBackground = RGBA(30, 36, 44),
+				.separator = RGBA(78, 86, 98),
+				.pinned = RGBA(226, 180, 104),
+				.stealing = RGBA(232, 112, 122),
+			};
+		}
 	}
 
 	//---------------------------------------------------
@@ -274,10 +328,11 @@ namespace CompletionistUI
 
 		const auto& bold = a_paths.bold.empty() ? a_paths.regular : a_paths.bold;
 		const auto& heading = a_paths.heading.empty() ? bold : a_paths.heading;
+		const auto& title = a_paths.title.empty() ? heading : a_paths.title;
 		_body = AddFont(a_paths.regular, a_paths.fallback, 18.0f * a_scale, ranges.Data);
 		_small = AddFont(a_paths.regular, a_paths.fallback, 15.0f * a_scale, ranges.Data);
 		_header = AddFont(heading, a_paths.fallback, 22.0f * a_scale, ranges.Data);
-		_title = AddFont(heading, a_paths.fallback, 30.0f * a_scale, ranges.Data);
+		_title = AddFont(title, a_paths.fallback, 30.0f * a_scale, ranges.Data);
 
 		io.FontDefault = _body;
 		io.Fonts->Build();
@@ -306,6 +361,12 @@ namespace CompletionistUI
 			break;
 		case Theme::kDunmer:
 			_palette = DunmerPalette();
+			break;
+		case Theme::kNord:
+			_palette = NordPalette();
+			break;
+		case Theme::kAltmer:
+			_palette = AltmerPalette();
 			break;
 		default:
 			_palette = CompletionistPalette();
