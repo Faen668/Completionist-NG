@@ -15,20 +15,21 @@ namespace CompletionistUI::ArgonianDecor
 	{
 		constexpr float pi = std::numbers::pi_v<float>;
 
-		// Xanmeer stone, Hist sap, swamp water
-		constexpr ImU32 stone = IM_COL32(50, 60, 52, 255);
-		constexpr ImU32 stoneLight = IM_COL32(84, 98, 84, 255);
-		constexpr ImU32 stoneDark = IM_COL32(22, 28, 24, 255);
-		constexpr ImU32 sap = IM_COL32(232, 168, 58, 255);
-		constexpr ImU32 root = IM_COL32(40, 36, 26, 255);
-		constexpr ImU32 hangingMoss = IM_COL32(96, 124, 90, 190);
-		constexpr ImU32 water = IM_COL32(110, 180, 160, 255);
+		// Xanmeer stone, Hist sap, mangrove roots, Black Marsh water
+		constexpr ImU32 stone = IM_COL32(59, 65, 52, 255);
+		constexpr ImU32 stoneLight = IM_COL32(92, 102, 80, 255);
+		constexpr ImU32 stoneDark = IM_COL32(26, 30, 22, 255);
+		constexpr ImU32 sap = IM_COL32(227, 164, 60, 255);
+		constexpr ImU32 root = IM_COL32(34, 27, 16, 255);
+		constexpr ImU32 hangingMoss = IM_COL32(90, 112, 62, 190);
+		constexpr ImU32 water = IM_COL32(150, 170, 128, 255);
+		constexpr ImU32 mist = IM_COL32(170, 188, 150, 255);
 
 		//---------------------------------------------------
 		//-- Argonian Decor ( Glyph ) -----------------------
 		//---------------------------------------------------
 
-		// Carving on a stone block: step pyramid, spiral or eye
+		// Carving on a stone block: step pyramid, spiral or a stepped band
 		void Glyph(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, int a_kind, ImU32 a_colour) {
 
 			const float stroke = std::max(1.0f, a_size * 0.12f);
@@ -46,10 +47,16 @@ namespace CompletionistUI::ArgonianDecor
 				a_drawList->PathArcTo(a_centre, a_size * 0.18f, pi, pi * 2.4f, 8);
 				a_drawList->PathStroke(a_colour, ImDrawFlags_None, stroke);
 				break;
-			default:
-				a_drawList->AddLine(ImVec2(a_centre.x - a_size * 0.45f, a_centre.y), ImVec2(a_centre.x + a_size * 0.45f, a_centre.y), a_colour, stroke);
-				a_drawList->AddCircle(a_centre, a_size * 0.18f, a_colour, 8, stroke);
+			default: {
+				const float  u = a_size * 0.15f;
+				const ImVec2 steps[] = {
+					ImVec2(a_centre.x - u * 3.0f, a_centre.y + u), ImVec2(a_centre.x - u * 2.0f, a_centre.y + u), ImVec2(a_centre.x - u * 2.0f, a_centre.y),
+					ImVec2(a_centre.x - u, a_centre.y), ImVec2(a_centre.x - u, a_centre.y - u), ImVec2(a_centre.x + u, a_centre.y - u),
+					ImVec2(a_centre.x + u, a_centre.y), ImVec2(a_centre.x + u * 2.0f, a_centre.y), ImVec2(a_centre.x + u * 2.0f, a_centre.y + u), ImVec2(a_centre.x + u * 3.0f, a_centre.y + u),
+				};
+				a_drawList->AddPolyline(steps, 10, a_colour, ImDrawFlags_None, stroke);
 				break;
+			}
 			}
 		}
 
@@ -84,7 +91,7 @@ namespace CompletionistUI::ArgonianDecor
 					for (int dot = 0; dot < 10; ++dot) {
 						const float angle = a_random.Range(0.0f, 2.0f * pi);
 						const float reach = depth * 0.7f * std::sqrt(a_random.Next());
-						a_drawList->AddCircleFilled(ImVec2(centre.x + std::cos(angle) * reach, centre.y + std::sin(angle) * reach * 0.6f), depth * a_random.Range(0.06f, 0.14f), IM_COL32(70, 120, 104, static_cast<int>(a_random.Range(90.0f, 180.0f))), 6);
+						a_drawList->AddCircleFilled(ImVec2(centre.x + std::cos(angle) * reach, centre.y + std::sin(angle) * reach * 0.6f), depth * a_random.Range(0.06f, 0.14f), IM_COL32(96, 118, 62, static_cast<int>(a_random.Range(90.0f, 180.0f))), 6);
 					}
 				}
 				along = end;
@@ -96,7 +103,7 @@ namespace CompletionistUI::ArgonianDecor
 		//-- Argonian Decor ( Step Pyramid ) ----------------
 		//---------------------------------------------------
 
-		// Xanmeer in the frame's corners, an eye on the top step
+		// Xanmeer in the frame's corners, a bead of sap on the top step
 		void StepPyramid(ImDrawList* a_drawList, ImVec2 a_centre, float a_size) {
 
 			for (int step = 0; step < 3; ++step) {
@@ -107,7 +114,7 @@ namespace CompletionistUI::ArgonianDecor
 				a_drawList->AddLine(ImVec2(min.x, min.y + 1.0f), ImVec2(max.x, min.y + 1.0f), stoneLight);
 				a_drawList->AddRect(min, max, stoneDark, 0.0f, 0, 1.5f);
 			}
-			Eye(a_drawList, a_centre, a_size * 0.22f, Shade(stone, 0.5f));
+			a_drawList->AddCircleFilled(a_centre, a_size * 0.12f, WithAlpha(sap, 0.85f), 8);
 		}
 
 		//---------------------------------------------------
@@ -198,7 +205,7 @@ namespace CompletionistUI::ArgonianDecor
 		//-- Argonian Decor ( Swamp ) -----------------------
 		//---------------------------------------------------
 
-		// Backdrop: murky water, the Hist, spores, bubbles, scales at the edges
+		// Backdrop: dark marsh water, mist lying over it, the Hist, sap spores and bubbles
 		void Swamp(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 			const float width = a_max.x - a_min.x;
@@ -207,33 +214,24 @@ namespace CompletionistUI::ArgonianDecor
 			a_drawList->PushClipRect(a_min, a_max, true);
 
 			// Murk rising from below
-			const ImU32 murk = IM_COL32(28, 64, 56, 70);
+			const ImU32 murk = IM_COL32(44, 52, 30, 80);
 			a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - height * 0.45f), a_max, WithAlpha(murk, 0.0f), WithAlpha(murk, 0.0f), murk, murk);
 
-			// Faint scales near the edges, like hide
-			{
-				const float r = size * 1.1f;
-				const float band = std::min(width, height) * 0.14f;
-				int         row = 0;
-				for (float y = a_min.y; y < a_max.y + r; y += r * 0.55f, ++row) {
-					const float offset = (row % 2) * r;
-					for (float x = a_min.x - r + offset; x < a_max.x + r; x += r * 2.0f) {
-						const float edge = std::min({ x - a_min.x, a_max.x - x, y - a_min.y, a_max.y - y });
-						if (edge > band) {
-							continue;
-						}
-						const float fade = 1.0f - std::max(0.0f, edge) / band;
-						a_drawList->PathArcTo(ImVec2(x, y), r, 0.15f, pi - 0.15f, 10);
-						a_drawList->PathStroke(IM_COL32(70, 120, 104, static_cast<int>(26.0f * fade)), ImDrawFlags_None, 1.0f);
-					}
-				}
+			// Mist in soft bands over the water
+			for (int band = 0; band < 4; ++band) {
+				const float y = a_min.y + height * (0.3f + 0.17f * band);
+				const float half = size * (1.2f + 0.5f * band);
+				const ImU32 thick = WithAlpha(mist, 0.035f + 0.01f * band);
+				const ImU32 clear = WithAlpha(mist, 0.0f);
+				a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, y - half), ImVec2(a_max.x, y), clear, clear, thick, thick);
+				a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, y), ImVec2(a_max.x, y + half), thick, thick, clear, clear);
 			}
 
 			// The Hist, only in the main window; small panels stay clear
 			Random           random{ 0x4157u };
 			ImVector<ImVec2> tips;
 			if (height > size * 20.0f) {
-				const ImU32  tree = IM_COL32(30, 60, 50, 46);
+				const ImU32  tree = IM_COL32(44, 54, 32, 52);
 				const ImVec2 trunk(a_min.x + width * 0.68f, a_max.y + size);
 				HistBranch(a_drawList, trunk, -pi * 0.5f, height * 0.3f, size * 2.2f, 5, random, tree, tips);
 				// Roots spreading into the water
@@ -241,7 +239,7 @@ namespace CompletionistUI::ArgonianDecor
 					HistBranch(a_drawList, ImVec2(trunk.x, trunk.y - height * 0.08f), angle, height * 0.12f, size * 1.1f, 1, random, tree, tips);
 				}
 				for (const auto& tip : tips) {
-					SoftSpot(a_drawList, tip, size * random.Range(1.0f, 2.0f), IM_COL32(60, 110, 92, 2));
+					SoftSpot(a_drawList, tip, size * random.Range(1.0f, 2.0f), IM_COL32(110, 120, 70, 2));
 				}
 			}
 
@@ -279,7 +277,7 @@ namespace CompletionistUI::ArgonianDecor
 				}
 			}
 
-			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.16f, IM_COL32(2, 8, 7, 210));
+			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.16f, IM_COL32(4, 6, 2, 210));
 			a_drawList->PopClipRect();
 		}
 	}
@@ -391,6 +389,28 @@ namespace CompletionistUI::ArgonianDecor
 	}
 
 	//---------------------------------------------------
+	//-- Argonian Decor ( Leaf ) ------------------------
+	//---------------------------------------------------
+
+	// A Hist leaf: long and pointed, a vein down the middle, lying flat
+	void Leaf(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour) {
+
+		constexpr int steps = 8;
+		const float   length = a_radius * 2.4f;
+		const float   width = a_radius * 0.9f;
+		ImVec2        outline[steps * 2];
+		for (int i = 0; i < steps; ++i) {
+			const float t = static_cast<float>(i) / (steps - 1);
+			const float x = a_centre.x - length * 0.5f + length * t;
+			const float half = width * 0.5f * std::sin(pi * std::pow(t, 0.75f));
+			outline[i] = ImVec2(x, a_centre.y - half);
+			outline[steps * 2 - 1 - i] = ImVec2(x, a_centre.y + half);
+		}
+		a_drawList->AddConvexPolyFilled(outline, steps * 2, a_colour);
+		a_drawList->AddLine(ImVec2(a_centre.x - length * 0.45f, a_centre.y), ImVec2(a_centre.x + length * 0.4f, a_centre.y), Shade(a_colour, 0.55f), std::max(1.0f, a_radius * 0.12f));
+	}
+
+	//---------------------------------------------------
 	//-- Argonian Decor ( Ridge ) -----------------------
 	//---------------------------------------------------
 
@@ -425,7 +445,7 @@ namespace CompletionistUI::ArgonianDecor
 		const float gap = ImGui::GetFontSize() * 0.9f;
 		Ridge(a_drawList, a_from, ImVec2(midX - gap, a_to.y), a_colour, gap * 0.8f);
 		Ridge(a_drawList, ImVec2(midX + gap, a_from.y), a_to, a_colour, gap * 0.8f);
-		Eye(a_drawList, ImVec2(midX, a_from.y), gap * 0.3f, a_colour);
+		Leaf(a_drawList, ImVec2(midX, a_from.y), gap * 0.32f, a_colour);
 	}
 
 	//---------------------------------------------------
@@ -463,13 +483,19 @@ namespace CompletionistUI::ArgonianDecor
 			MossClump(a_drawList, ImVec2(a_max.x - band * 0.5f, a_min.y + height * at), size * 1.2f * compact, moss);
 		}
 
-		// Mangrove roots creeping out of the bottom corners
+		// Mangrove roots creeping out of the bottom corners and hanging over the top ones
 		Random roots{ 0x2007u };
 		const float thick = band * 0.7f;
 		Root(a_drawList, ImVec2(a_min.x + band, a_max.y - band * 0.55f), 0.0f, width * 0.16f, thick, 1.0f, roots);
 		Root(a_drawList, ImVec2(a_min.x + band * 0.5f, a_max.y - band), -pi * 0.5f, height * 0.24f, thick, -1.0f, roots);
 		Root(a_drawList, ImVec2(a_max.x - band, a_max.y - band * 0.55f), pi, width * 0.16f, thick, -1.0f, roots);
 		Root(a_drawList, ImVec2(a_max.x - band * 0.5f, a_max.y - band), -pi * 0.5f, height * 0.24f, thick, 1.0f, roots);
+		if (compact >= 0.8f) {
+			Root(a_drawList, ImVec2(a_min.x + band * 0.5f, a_min.y + band), pi * 0.5f, height * 0.16f, thick * 0.8f, 1.0f, roots);
+			Root(a_drawList, ImVec2(a_min.x + band, a_min.y + band * 0.5f), 0.0f, width * 0.07f, thick * 0.7f, 1.0f, roots);
+			Root(a_drawList, ImVec2(a_max.x - band * 0.5f, a_min.y + band), pi * 0.5f, height * 0.16f, thick * 0.8f, -1.0f, roots);
+			Root(a_drawList, ImVec2(a_max.x - band, a_min.y + band * 0.5f), pi, width * 0.07f, thick * 0.7f, -1.0f, roots);
+		}
 
 		const float pyramid = band * 1.25f;
 		StepPyramid(a_drawList, ImVec2(a_min.x + band * 0.5f, a_min.y + band * 0.5f), pyramid);
@@ -482,7 +508,7 @@ namespace CompletionistUI::ArgonianDecor
 	//-- Argonian Decor ( Panel ) -----------------------
 	//---------------------------------------------------
 
-	// Inside a panel: scales at the edges, water light below, the Hist in the empty corner
+	// Inside a panel: mist and water light below, the Hist in the empty corner with its eye in the trunk
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem) {
 
 		const float width = a_max.x - a_min.x;
@@ -496,21 +522,6 @@ namespace CompletionistUI::ArgonianDecor
 		// Murk rising from the bottom edge
 		const float glow = std::min(height * 0.3f, size * 5.0f);
 		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - glow), a_max, WithAlpha(water, 0.0f), WithAlpha(water, 0.0f), WithAlpha(water, 0.07f), WithAlpha(water, 0.07f));
-
-		// Scales, fading towards the middle
-		const float r = size * 0.9f;
-		int         row = 0;
-		for (float y = a_min.y; y < a_max.y + r; y += r * 0.55f, ++row) {
-			const float offset = (row % 2) * r;
-			for (float x = a_min.x - r + offset; x < a_max.x + r; x += r * 2.0f) {
-				const float weight = EdgeWeight(ImVec2(x, y), a_min, a_max, band);
-				if (weight < 0.03f) {
-					continue;
-				}
-				a_drawList->PathArcTo(ImVec2(x, y), r, 0.15f, pi - 0.15f, 10);
-				a_drawList->PathStroke(WithAlpha(IM_COL32(90, 150, 130, 255), 0.16f * weight), ImDrawFlags_None, 1.0f);
-			}
-		}
 
 		// Water light rippling along the bottom
 		Random random{ static_cast<std::uint32_t>(width) * 17u + 3u };
@@ -527,24 +538,24 @@ namespace CompletionistUI::ArgonianDecor
 			}
 		}
 
-		// The Hist in a ring, large and faint, in the lower right
+		// The Hist, large and faint, in the lower right; its sap glows and one slit eye watches from the trunk
 		if (a_emblem) {
 			const float      radius = std::min(height * 0.42f, width * 0.16f);
 			const ImVec2     centre(a_max.x - radius * 1.25f, a_max.y - radius * 0.95f);
-			const ImU32      faint = WithAlpha(IM_COL32(214, 200, 150, 255), 0.08f);
+			const ImU32      faint = WithAlpha(IM_COL32(150, 170, 110, 255), 0.14f);
 			Random           tree{ 0x4157u };
 			ImVector<ImVec2> tips;
-			a_drawList->AddCircle(centre, radius * 1.1f, faint, 64, std::max(1.0f, radius * 0.03f));
-			a_drawList->AddCircle(centre, radius * 0.98f, WithAlpha(faint, 0.5f), 64, 1.0f);
-			a_drawList->PushClipRect(ImVec2(centre.x - radius, centre.y - radius), ImVec2(centre.x + radius, centre.y + radius), true);
+			SoftSpot(a_drawList, ImVec2(centre.x, centre.y + radius * 0.35f), radius * 0.6f, WithAlpha(sap, 0.012f));
+			a_drawList->PushClipRect(ImVec2(centre.x - radius * 1.2f, centre.y - radius * 1.1f), ImVec2(centre.x + radius * 1.2f, centre.y + radius), true);
 			HistBranch(a_drawList, ImVec2(centre.x, centre.y + radius * 0.75f), -pi * 0.5f, radius * 0.6f, radius * 0.12f, 4, tree, faint, tips);
 			for (const float angle : { 0.35f, pi - 0.35f }) {
 				HistBranch(a_drawList, ImVec2(centre.x, centre.y + radius * 0.7f), angle, radius * 0.3f, radius * 0.06f, 1, tree, faint, tips);
 			}
 			a_drawList->PopClipRect();
 			for (const auto& tip : tips) {
-				a_drawList->AddCircleFilled(tip, std::max(1.5f, radius * 0.025f), WithAlpha(sap, 0.12f), 8);
+				a_drawList->AddCircleFilled(tip, std::max(1.5f, radius * 0.025f), WithAlpha(sap, 0.3f), 8);
 			}
+			Eye(a_drawList, ImVec2(centre.x, centre.y + radius * 0.42f), radius * 0.08f, WithAlpha(sap, 0.45f));
 		}
 	}
 

@@ -216,8 +216,9 @@ namespace CompletionistUI
 		std::unordered_set<std::string>                        _editingText;
 		std::string                                            _settingsTab{ "window" };
 		std::string                                            _confirmKey;
-		float                                                  _spectrumPosition{ 0.0f };
+		float                                                  _spectrumPosition{ 0.0f };	// the colour picker's hue
 		std::string                                            _colourKey;
+		std::string                                            _colourReturnKey;	// focus goes back to this colour button after its picker closes
 		std::int32_t                                           _colourOriginal{ 0 };
 		std::optional<Page>   _page;
 		std::string           _selectedPage;

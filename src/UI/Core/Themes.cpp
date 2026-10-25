@@ -140,24 +140,24 @@ namespace CompletionistUI
 		//-- Themes ( Argonian Palette ) --------------------
 		//---------------------------------------------------
 
-		// Swamp teal-black, jade, bone-pale stone headings, Hist sap amber for found
+		// Black Marsh: murky olive water, moss-green headings, Hist sap amber for found
 		Palette ArgonianPalette() {
 
 			return {
-				.background = RGBA(7, 15, 14, 0.95f),
+				.background = RGBA(11, 16, 10, 0.95f),
 				.panel = RGBA(0, 0, 0, 0.0f),
-				.text = RGBA(214, 222, 204),
-				.textDim = RGBA(110, 132, 122),
-				.accent = RGBA(78, 160, 138),
-				.heading = RGBA(214, 200, 150),
-				.count = RGBA(166, 160, 122),
-				.bar = RGBA(46, 112, 96),
-				.found = RGBA(232, 168, 58),
-				.needed = RGBA(214, 222, 204),
+				.text = RGBA(214, 216, 196),
+				.textDim = RGBA(125, 134, 112),
+				.accent = RGBA(138, 163, 90),
+				.heading = RGBA(164, 179, 106),
+				.count = RGBA(170, 166, 128),
+				.bar = RGBA(124, 148, 80),
+				.found = RGBA(227, 164, 60),
+				.needed = RGBA(214, 216, 196),
 				.displayable = RGBA(130, 172, 204),
 				.occupied = RGBA(170, 130, 170),
-				.barBackground = RGBA(22, 38, 34),
-				.separator = RGBA(70, 88, 78),
+				.barBackground = RGBA(31, 40, 30),
+				.separator = RGBA(74, 82, 64),
 				.pinned = RGBA(120, 182, 214),
 				.stealing = RGBA(230, 110, 120),
 			};
@@ -248,25 +248,25 @@ namespace CompletionistUI
 		//-- Themes ( Nord Palette ) ------------------------
 		//---------------------------------------------------
 
-		// Snow over dark stone: slate, steel blue, bone headings, rune frost for found
+		// A mead hall: dark timber and iron, bone text, hearth amber headings, gold for found
 		Palette NordPalette() {
 
 			return {
-				.background = RGBA(11, 13, 17, 0.95f),
+				.background = RGBA(18, 15, 12, 0.95f),
 				.panel = RGBA(0, 0, 0, 0.0f),
-				.text = RGBA(224, 228, 232),
-				.textDim = RGBA(124, 134, 146),
-				.accent = RGBA(122, 160, 190),
-				.heading = RGBA(232, 220, 190),
-				.count = RGBA(170, 182, 196),
-				.bar = RGBA(82, 118, 148),
-				.found = RGBA(150, 210, 236),
-				.needed = RGBA(224, 228, 232),
-				.displayable = RGBA(176, 196, 150),
+				.text = RGBA(230, 220, 200),
+				.textDim = RGBA(140, 132, 120),
+				.accent = RGBA(216, 154, 74),
+				.heading = RGBA(216, 154, 74),
+				.count = RGBA(176, 166, 150),
+				.bar = RGBA(194, 135, 62),
+				.found = RGBA(226, 180, 92),
+				.needed = RGBA(230, 220, 200),
+				.displayable = RGBA(150, 180, 200),
 				.occupied = RGBA(186, 140, 176),
-				.barBackground = RGBA(30, 36, 44),
-				.separator = RGBA(78, 86, 98),
-				.pinned = RGBA(226, 180, 104),
+				.barBackground = RGBA(44, 40, 36),
+				.separator = RGBA(90, 84, 76),
+				.pinned = RGBA(130, 170, 200),
 				.stealing = RGBA(232, 112, 122),
 			};
 		}
