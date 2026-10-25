@@ -126,6 +126,122 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Decor ( Perk Colour ) --------------------------
+	//---------------------------------------------------
+
+	// Taken perks in the found colour, the next ones in the accent; the Bosmer leaves
+	// are green and their buds amber, and SkyUI's found grey would read as locked
+	ImU32 Decor::PerkColour(PerkState a_state) {
+
+		const auto& palette = Themes::GetPalette();
+		const bool  swap = _theme == Theme::kBosmer || _theme == Theme::kSkyUI;
+		switch (a_state) {
+		case PerkState::kTaken:
+			return ImGui::GetColorU32(swap ? palette.accent : palette.found);
+		case PerkState::kNext:
+			return ImGui::GetColorU32(swap ? palette.found : palette.accent);
+		default:
+			return ImGui::GetColorU32(palette.separator);
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Decor ( Perk Node ) ----------------------------
+	//---------------------------------------------------
+
+	// Completionist's own: gold stars, a cut diamond for the next ones
+	void Decor::PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, PerkState a_state) {
+
+		const auto colour = PerkColour(a_state);
+		switch (_theme) {
+		case Theme::kSkyUI:
+			SkyUIDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kArgonian:
+			ArgonianDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kBosmer:
+			BosmerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kDunmer:
+			DunmerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kKhajiit:
+			KhajiitDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kAltmer:
+			AltmerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kNord:
+			NordDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		default:
+			break;
+		}
+
+		if (a_state != PerkState::kTaken) {
+			Diamond(a_drawList, a_centre, a_radius * (a_state == PerkState::kLocked ? 0.45f : 0.7f), colour, false);
+			return;
+		}
+		SoftSpot(a_drawList, a_centre, a_radius * 1.5f, WithAlpha(colour, 0.06f));
+		Diamond(a_drawList, a_centre, a_radius * 0.95f, colour, true);
+		const ImVec2 wide[4] = {
+			ImVec2(a_centre.x - a_radius * 1.25f, a_centre.y),
+			ImVec2(a_centre.x, a_centre.y - a_radius * 0.18f),
+			ImVec2(a_centre.x + a_radius * 1.25f, a_centre.y),
+			ImVec2(a_centre.x, a_centre.y + a_radius * 0.18f),
+		};
+		a_drawList->AddConvexPolyFilled(wide, 4, colour);
+	}
+
+	//---------------------------------------------------
+	//-- Decor ( Perk Link ) ----------------------------
+	//---------------------------------------------------
+
+	// Completionist's own: a gold line between stars, dotted until both are taken
+	void Decor::PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, float a_radius, bool a_lit) {
+
+		const auto colour = PerkColour(a_lit ? PerkState::kTaken : PerkState::kLocked);
+		switch (_theme) {
+		case Theme::kSkyUI:
+			SkyUIDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kArgonian:
+			ArgonianDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kBosmer:
+			BosmerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kDunmer:
+			DunmerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kKhajiit:
+			KhajiitDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kAltmer:
+			AltmerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kNord:
+			NordDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		default:
+			break;
+		}
+
+		if (a_lit) {
+			a_drawList->AddLine(a_from, a_to, colour, std::max(1.0f, a_radius * 0.14f));
+			return;
+		}
+		const float length = std::hypot(a_to.x - a_from.x, a_to.y - a_from.y);
+		const float dash = std::max(2.0f, a_radius * 0.3f);
+		for (float along = 0.0f; along < length; along += dash * 2.6f) {
+			const float t0 = along / length;
+			const float t1 = std::min(1.0f, (along + dash) / length);
+			a_drawList->AddLine(ImVec2(a_from.x + (a_to.x - a_from.x) * t0, a_from.y + (a_to.y - a_from.y) * t0), ImVec2(a_from.x + (a_to.x - a_from.x) * t1, a_from.y + (a_to.y - a_from.y) * t1), colour, 1.0f);
+		}
+	}
+
+	//---------------------------------------------------
 	//-- Decor ( Faded Line ) ---------------------------
 	//---------------------------------------------------
 

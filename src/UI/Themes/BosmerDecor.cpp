@@ -496,3 +496,59 @@ namespace CompletionistUI::BosmerDecor
 		}
 	}
 }
+
+namespace CompletionistUI::BosmerDecor
+{
+	//---------------------------------------------------
+	//-- Bosmer Decor ( Perk Node ) ------------------
+	//---------------------------------------------------
+
+	// Taken perks are leaves in full growth, the next ones open buds, locked ones closed buds
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		constexpr float angle = -0.6f;
+		if (a_state == PerkState::kLocked) {
+			a_drawList->AddCircleFilled(a_centre, a_radius * 0.42f, WithAlpha(a_colour, 0.35f), 12);
+			a_drawList->AddCircle(a_centre, a_radius * 0.42f, a_colour, 12, 1.0f);
+			return;
+		}
+		const float  length = a_radius * 2.3f;
+		const ImVec2 base(a_centre.x - std::cos(angle) * length * 0.5f, a_centre.y - std::sin(angle) * length * 0.5f);
+		if (a_state == PerkState::kTaken) {
+			SoftSpot(a_drawList, a_centre, a_radius * 1.5f, WithAlpha(a_colour, 0.05f));
+			Leaf(a_drawList, base, length, angle, a_colour, true);
+			return;
+		}
+		Leaf(a_drawList, base, length, angle, a_colour, false, false);
+		a_drawList->AddCircleFilled(a_centre, std::max(1.5f, a_radius * 0.16f), a_colour, 10);
+	}
+
+	//---------------------------------------------------
+	//-- Bosmer Decor ( Perk Link ) ------------------
+	//---------------------------------------------------
+
+	// A living stem between taken perks, with leaves along it; a bare twig otherwise
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		const auto  points = PerkCurve(a_from, a_to, a_radius * 0.4f);
+		const float length = std::hypot(a_to.x - a_from.x, a_to.y - a_from.y);
+		if (!a_lit) {
+			a_drawList->AddPolyline(points.data(), static_cast<int>(points.size()), WithAlpha(a_colour, 0.8f), ImDrawFlags_None, std::max(1.0f, a_radius * 0.12f));
+			return;
+		}
+
+		// Thick at the parent, thinning towards the child
+		for (std::size_t i = 1; i < points.size(); ++i) {
+			const float t = static_cast<float>(i) / points.size();
+			a_drawList->AddLine(points[i - 1], points[i], a_colour, std::max(1.0f, a_radius * (0.34f - 0.18f * t)));
+		}
+		Random random{ static_cast<std::uint32_t>(length * 7.0f + a_from.y) | 1u };
+		float  side = 1.0f;
+		for (std::size_t i = points.size() / 4; i + 2 < points.size(); i += std::max<std::size_t>(3, points.size() / 3)) {
+			const auto  normal = NormalAt(points, i);
+			const float angle = std::atan2(normal.y * side, normal.x * side) + random.Range(-0.3f, 0.3f);
+			Leaf(a_drawList, points[i], a_radius * 0.9f, angle, Shade(a_colour, random.Range(0.7f, 1.0f)), true, false);
+			side = -side;
+		}
+	}
+}

@@ -18,6 +18,14 @@ namespace CompletionistUI
 		kSettings,
 	};
 
+	// A perk on the trainer panel's tree
+	enum class PerkState : std::uint8_t
+	{
+		kTaken,
+		kNext,	// a perk it leads from is taken
+		kLocked,
+	};
+
 	// Drawn ornaments for every theme; each theme's own drawing is in UI/Themes
 	class Decor
 	{
@@ -52,6 +60,11 @@ namespace CompletionistUI
 		static void HeadingTail(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_ornament, ImU32 a_rule);
 		static void Banner(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, ImU32 a_fill, ImU32 a_edge);
 		static void DrawIcon(ImDrawList* a_drawList, Icon a_icon, ImVec2 a_centre, float a_size, ImU32 a_colour);
+
+		// Perk trees in each theme's own style, coloured from its palette
+		static void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, PerkState a_state);
+		static void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, float a_radius, bool a_lit);
+		[[nodiscard]] static ImU32 PerkColour(PerkState a_state);
 
 		[[nodiscard]] static Icon IconFor(std::string_view a_categoryKey) noexcept;
 

@@ -521,3 +521,37 @@ namespace CompletionistUI::NordDecor
 		}
 	}
 }
+
+namespace CompletionistUI::NordDecor
+{
+	//---------------------------------------------------
+	//-- Nord Decor ( Perk Node ) --------------------
+	//---------------------------------------------------
+
+	// Rune stones: lit with frost when taken, cut but dark when next, rough when locked
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		const float size = a_radius * (a_state == PerkState::kLocked ? 1.7f : 2.5f);
+		RuneStone(a_drawList, a_centre, size, a_colour, a_state == PerkState::kTaken ? 1.0f : 0.0f);
+	}
+
+	//---------------------------------------------------
+	//-- Nord Decor ( Perk Link ) --------------------
+	//---------------------------------------------------
+
+	// Carved channels, straight runs and a sharp turn, doubled where the perks are taken
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		const float  bend = std::min(std::abs(a_to.y - a_from.y) * 0.5f, (a_to.x - a_from.x) * 0.3f);
+		const float  middle = (a_from.x + a_to.x) * 0.5f;
+		std::vector<ImVec2> points{ a_from, ImVec2(middle - bend, a_from.y), ImVec2(middle + bend, a_to.y), a_to };
+		if (!a_lit) {
+			a_drawList->AddPolyline(points.data(), 4, a_colour, ImDrawFlags_None, 1.0f);
+			return;
+		}
+		for (const float side : { -1.0f, 1.0f }) {
+			const auto offset = OffsetPath(points, side * std::max(1.5f, a_radius * 0.14f));
+			a_drawList->AddPolyline(offset.data(), 4, a_colour, ImDrawFlags_None, std::max(1.0f, a_radius * 0.08f));
+		}
+	}
+}

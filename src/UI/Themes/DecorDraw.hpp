@@ -3,7 +3,9 @@
 #include <imgui.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
+#include <vector>
 
 // Drawing helpers shared by the theme ornaments
 namespace CompletionistUI::DecorDraw
@@ -111,5 +113,62 @@ namespace CompletionistUI::DecorDraw
 		const float distance = std::min({ a_point.x - a_min.x, a_max.x - a_point.x, a_point.y - a_min.y, a_max.y - a_point.y });
 		const float t = 1.0f - std::clamp(distance / a_band, 0.0f, 1.0f);
 		return t * t;
+	}
+}
+
+namespace CompletionistUI::DecorDraw
+{
+	//---------------------------------------------------
+	//-- Decor Draw ( Perk Curve ) ----------------------
+	//---------------------------------------------------
+
+	// A perk tree link: leaves one perk and reaches the next level, so branches read left to right
+	inline std::vector<ImVec2> PerkCurve(ImVec2 a_from, ImVec2 a_to, float a_step) {
+
+		const float reach = (a_to.x - a_from.x) * 0.5f;
+		const ImVec2 c1(a_from.x + reach, a_from.y);
+		const ImVec2 c2(a_to.x - reach, a_to.y);
+		const float length = std::hypot(a_to.x - a_from.x, a_to.y - a_from.y);
+		const int   steps = std::clamp(static_cast<int>(length / std::max(1.0f, a_step)), 2, 96);
+
+		std::vector<ImVec2> points;
+		points.reserve(static_cast<std::size_t>(steps) + 1);
+		for (int i = 0; i <= steps; ++i) {
+			const float t = static_cast<float>(i) / steps;
+			const float u = 1.0f - t;
+			const float a = u * u * u, b = 3.0f * u * u * t, c = 3.0f * u * t * t, d = t * t * t;
+			points.emplace_back(a * a_from.x + b * c1.x + c * c2.x + d * a_to.x, a * a_from.y + b * c1.y + c * c2.y + d * a_to.y);
+		}
+		return points;
+	}
+
+	//---------------------------------------------------
+	//-- Decor Draw ( Normal At ) -----------------------
+	//---------------------------------------------------
+
+	// Unit normal of a polyline at a point, for strokes that sit either side of it
+	inline ImVec2 NormalAt(const std::vector<ImVec2>& a_points, std::size_t a_index) {
+
+		const auto& a = a_points[a_index == 0 ? 0 : a_index - 1];
+		const auto& b = a_points[std::min(a_index + 1, a_points.size() - 1)];
+		const float dx = b.x - a.x;
+		const float dy = b.y - a.y;
+		const float length = std::max(0.001f, std::hypot(dx, dy));
+		return ImVec2(-dy / length, dx / length);
+	}
+
+	//---------------------------------------------------
+	//-- Decor Draw ( Offset Path ) ---------------------
+	//---------------------------------------------------
+
+	inline std::vector<ImVec2> OffsetPath(const std::vector<ImVec2>& a_points, float a_offset) {
+
+		std::vector<ImVec2> out;
+		out.reserve(a_points.size());
+		for (std::size_t i = 0; i < a_points.size(); ++i) {
+			const auto normal = NormalAt(a_points, i);
+			out.emplace_back(a_points[i].x + normal.x * a_offset, a_points[i].y + normal.y * a_offset);
+		}
+		return out;
 	}
 }

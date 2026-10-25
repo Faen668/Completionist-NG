@@ -82,6 +82,7 @@ namespace CVariables
 	inline bool				V_ItemIcons_Needed{ true };
 	inline bool				V_ItemIcons_Found{ true };
 	inline bool				V_ItemIcons_Museum{ true };
+	inline bool				V_Trainers_CountOnOffer{ false };
 
 	// Completionist sort
 	inline std::int32_t		V_Sort_Displayable{ 1 };

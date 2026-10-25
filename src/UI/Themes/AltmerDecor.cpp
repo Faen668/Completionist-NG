@@ -519,3 +519,38 @@ namespace CompletionistUI::AltmerDecor
 		}
 	}
 }
+
+namespace CompletionistUI::AltmerDecor
+{
+	//---------------------------------------------------
+	//-- Altmer Decor ( Perk Node ) ------------------
+	//---------------------------------------------------
+
+	// Crystal-Like-Law shards: cut and shining when taken, outlined when next, small when locked
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		if (a_state == PerkState::kTaken) {
+			SoftSpot(a_drawList, a_centre, a_radius * 1.6f, WithAlpha(a_colour, 0.06f));
+		}
+		Crystal(a_drawList, a_centre, a_radius * (a_state == PerkState::kLocked ? 0.6f : 1.0f), a_colour, a_state == PerkState::kTaken);
+	}
+
+	//---------------------------------------------------
+	//-- Altmer Decor ( Perk Link ) ------------------
+	//---------------------------------------------------
+
+	// Gilded curves, a fine double line of gold where both perks are taken
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		const auto points = PerkCurve(a_from, a_to, a_radius * 0.4f);
+		const int  count = static_cast<int>(points.size());
+		if (!a_lit) {
+			a_drawList->AddPolyline(points.data(), count, WithAlpha(a_colour, 0.8f), ImDrawFlags_None, 1.0f);
+			return;
+		}
+		for (const float side : { -1.0f, 1.0f }) {
+			const auto offset = OffsetPath(points, side * std::max(1.5f, a_radius * 0.12f));
+			a_drawList->AddPolyline(offset.data(), count, a_colour, ImDrawFlags_None, std::max(1.0f, a_radius * 0.07f));
+		}
+	}
+}

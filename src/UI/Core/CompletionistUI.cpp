@@ -2861,10 +2861,20 @@ namespace CompletionistUI
 		_hoveredEntry.reset();
 		const float gap = ImGui::GetFontSize() * 0.75f;
 
-		// Shout pages show the words and places instead of the description
-		const bool shoutPage = std::ranges::any_of(view->sections, [](const Section& a_section) {
-			return std::ranges::any_of(a_section.entries, [](const Entry& a_entry) { return a_entry.placesKnown; });
-		});
+		// Shout and trainer pages show their panel instead of the description
+		const auto pageHas = [&](bool (*a_test)(const Entry&)) {
+			return std::ranges::any_of(view->sections, [&](const Section& a_section) { return std::ranges::any_of(a_section.entries, a_test); });
+		};
+		const bool trainerPage = pageHas([](const Entry& a_entry) { return a_entry.IsTrainer(); });
+		if (trainerPage) {
+			_trainerRows = 1;
+			for (const auto& section : view->sections) {
+				if (!section.entries.empty() && section.entries.front().IsTrainer()) {
+					_trainerRows = std::max(_trainerRows, PerkTreeRows(section.entries.front().trainer.perks));
+				}
+			}
+		}
+		const bool shoutPage = trainerPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
 		float panelHeight = 0.0f;
 		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 		if (shoutPage) {
@@ -2874,7 +2884,9 @@ namespace CompletionistUI
 			const float title = ImGui::GetFontSize() + style.ItemSpacing.y * 2.0f;
 			ImGui::PopFont();
 			const float t = std::clamp(_descriptionOpen, 0.0f, 1.0f);
-			panelHeight = (style.WindowPadding.y * 2.0f + title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f) * t * t * (3.0f - 2.0f * t);
+			// Trainers have no title row, so the padding below matches the padding above
+			const float content = trainerPage ? TrainerInfoHeight() + 1.0f : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
+			panelHeight = (style.WindowPadding.y * 2.0f + content) * t * t * (3.0f - 2.0f * t);
 		} else {
 			panelHeight = DescriptionPanelHeight();
 		}
@@ -4682,7 +4694,7 @@ namespace CompletionistUI
 		// Square always marks complete, R2 pins or sets the location marker
 		const auto action = RowActionFor(a_entry);
 		const auto place = action == RowAction::kMarker || action == RowAction::kPin ? action : RowAction::kNone;
-		const bool on = place == RowAction::kMarker ? _locationMarker != 0 && a_entry.formID == _locationMarker
+		const bool on = place == RowAction::kMarker ? _locationMarker != 0 && a_entry.MarkerID() == _locationMarker
 		              : place == RowAction::kPin && _pins.Has(a_entry.formID);
 		const bool tick = a_entry.canToggle;
 		const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
@@ -4865,7 +4877,7 @@ namespace CompletionistUI
 
 	void Menu::ToggleLocationMarker(IDataProvider& a_provider, const Entry& a_entry) {
 
-		if (_locationMarker != 0 && _locationMarker == a_entry.formID) {
+		if (_locationMarker != 0 && _locationMarker == a_entry.MarkerID()) {
 			a_provider.ClearLocationMarker();
 		} else {
 			a_provider.SetLocationMarker(a_entry);
@@ -5116,8 +5128,13 @@ namespace CompletionistUI
 
 			ImGui::PushTextWrapPos(0.0f);
 
-			const bool shoutWords = !entry->words.empty() && entry->placesKnown;
-			if (shoutWords) {
+			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer();
+			if (entry->IsTrainer()) {
+				DrawTrainerInfo(a_provider, *entry, false);
+				if (!text.empty()) {
+					ImGui::Spacing();
+				}
+			} else if (shoutWords) {
 				DrawShoutWords(a_provider, *entry, true);
 				if (!text.empty()) {
 					ImGui::Spacing();
@@ -5194,10 +5211,11 @@ namespace CompletionistUI
 		const auto& palette = Themes::GetPalette();
 
 		// Hovered, else pinned, else the first
-		const Entry* entry = _hoveredEntry && _hoveredEntry->placesKnown ? std::addressof(*_hoveredEntry) : _pinnedEntry && _pinnedEntry->placesKnown ? std::addressof(*_pinnedEntry) : nullptr;
+		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer(); };
+		const Entry* entry = _hoveredEntry && hasPanel(*_hoveredEntry) ? std::addressof(*_hoveredEntry) : _pinnedEntry && hasPanel(*_pinnedEntry) ? std::addressof(*_pinnedEntry) : nullptr;
 		for (const auto& section : a_page.sections) {
 			for (const auto& candidate : section.entries) {
-				if (!entry && candidate.placesKnown && PassesFilter(candidate)) {
+				if (!entry && hasPanel(candidate) && PassesFilter(candidate)) {
 					entry = std::addressof(candidate);
 				}
 			}
@@ -5222,7 +5240,9 @@ namespace CompletionistUI
 		DrawPanelGrip(gripList, centreX, gapTop + a_gap, gripWidth, gripHovered);
 		gripList->PopClipRect();
 		ScrollWithRightStick();
-		if (entry) {
+		if (entry && entry->IsTrainer()) {
+			DrawTrainerInfo(a_provider, *entry, true);
+		} else if (entry) {
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
 			ImGui::PopFont();
@@ -5400,6 +5420,363 @@ namespace CompletionistUI
 		}
 
 		ImGui::Dummy(ImVec2(width, sideBySide ? std::max(stripHeight, cardHeight) : stripHeight + cardGap + cardHeight));
+	}
+
+	namespace TrainerLayout
+	{
+		//---------------------------------------------------
+		//-- Completionist UI ( Info Content ) --------------
+		//---------------------------------------------------
+
+		// Trainer, skill, the skill bar, home, away, then what's left to learn
+		static float InfoContent() {
+
+			ImGui::PushFont(Themes::HeaderFont());
+			const float name = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			ImGui::PushFont(Themes::TitleFont());
+			const float title = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			return name + title + ImGui::GetTextLineHeightWithSpacing() * 4.0f;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Sizes ) ---------------------
+		//---------------------------------------------------
+
+		static float Radius() { return ImGui::GetFontSize() * 0.5f; }
+		static float Slot() { return Radius() * 2.3f + ImGui::GetTextLineHeight() + ImGui::GetFontSize() * 0.2f; }	// one perk and its label
+		static float ColumnGap() { return ImGui::GetFontSize() * 12.0f; }	// at most, so short trees keep short lines
+		static float TreeHeight(std::int32_t a_rows) { return Slot() * static_cast<float>(std::max(1, a_rows)) + ShoutLayout::Padding(); }
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Perk Tree Layout ) ----------
+	//---------------------------------------------------
+
+	// A column per step from the first perk, each perk near the one it comes from; the game's
+	// own grid is drawn for its tall Skills menu and crowds when laid on its side. Past three
+	// perks a column zigzags, so the tree spreads across rather than down
+	PerkTreeLayout LayoutPerkTree(const std::vector<TrainerPerk>& a_perks) {
+
+		PerkTreeLayout layout;
+		const auto     count = a_perks.size();
+		layout.column.assign(count, 0);
+		layout.row.assign(count, 0);
+		if (count == 0) {
+			return layout;
+		}
+
+		// Longest path from a root, so a perk sits after everything it needs
+		for (std::size_t pass = 0; pass < count; ++pass) {
+			bool moved = false;
+			for (std::size_t i = 0; i < count; ++i) {
+				for (const auto child : a_perks[i].children) {
+					if (layout.column[child] < layout.column[i] + 1) {
+						layout.column[child] = layout.column[i] + 1;
+						moved = true;
+					}
+				}
+			}
+			if (!moved) {
+				break;
+			}
+		}
+		const auto columns = *std::ranges::max_element(layout.column) + 1;
+		layout.columns = columns;
+
+		// Each column ordered by where its parents sit, the game's left to right breaking ties
+		std::vector<std::vector<std::int32_t>> parents(count);
+		for (std::size_t i = 0; i < count; ++i) {
+			for (const auto child : a_perks[i].children) {
+				parents[child].push_back(static_cast<std::int32_t>(i));
+			}
+		}
+		constexpr std::int32_t maxRows = 3;
+		layout.x.assign(count, 0.0f);
+		layout.labelUnits.assign(count, 1.0f);
+		std::vector<float> place(count, 0.0f);
+		float              x = 0.0f;
+		for (std::int32_t column = 0; column < columns; ++column) {
+			std::vector<std::int32_t> members;
+			for (std::size_t i = 0; i < count; ++i) {
+				if (layout.column[i] == column) {
+					members.push_back(static_cast<std::int32_t>(i));
+				}
+			}
+			const auto key = [&](std::int32_t a_index) {
+				float sum = 0.0f;
+				for (const auto parent : parents[a_index]) {
+					sum += place[parent];
+				}
+				return parents[a_index].empty() ? 0.0f : sum / static_cast<float>(parents[a_index].size());
+			};
+			std::ranges::sort(members, [&](std::int32_t a_left, std::int32_t a_right) {
+				return std::pair(key(a_left), a_perks[a_left].lane) < std::pair(key(a_right), a_perks[a_right].lane);
+			});
+			const auto  size = static_cast<std::int32_t>(members.size());
+			const auto  split = std::max(1, (size + maxRows - 1) / maxRows);
+			const auto  span = (size + split - 1) / split;
+			const float centre = (static_cast<float>(span) - 1.0f) * 0.5f;
+			for (std::int32_t i = 0; i < size; ++i) {
+				const auto lane = i % split;
+				const auto index = static_cast<std::size_t>(members[i]);
+				layout.row[index] = i / split;
+				place[index] = static_cast<float>(i / split) + static_cast<float>(lane) / static_cast<float>(split) - centre;
+				layout.x[index] = x + 0.5f * static_cast<float>(lane);
+				layout.labelUnits[index] = split > 1 ? 0.5f : 1.0f;
+			}
+			layout.rows = std::max(layout.rows, span);
+			x += 1.0f + 0.5f * static_cast<float>(split - 1);
+		}
+		layout.width = std::max(0.0f, x - 1.0f);
+		layout.place = std::move(place);
+		return layout;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Perk Tree Rows ) ------------
+	//---------------------------------------------------
+
+	std::int32_t PerkTreeRows(const std::vector<TrainerPerk>& a_perks) {
+
+		return std::max(1, LayoutPerkTree(a_perks).rows);
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Trainer Info Height ) -------
+	//---------------------------------------------------
+
+	float Menu::TrainerInfoHeight() const {
+
+		return std::max(ShoutLayout::Padding() * 2.0f + TrainerLayout::InfoContent(), TrainerLayout::TreeHeight(_trainerRows));
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Trainer Info ) ---------
+	//---------------------------------------------------
+
+	// Who and where on the left, the skill's perk tree in the theme's own style on the right;
+	// stacked when the window is narrow. The description panel already shows the name
+	void Menu::DrawTrainerInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName) {
+
+		const auto& palette = Themes::GetPalette();
+		const auto& info = a_entry.trainer;
+		const auto& perks = info.perks;
+		const float fontSize = ImGui::GetFontSize();
+		const float width = ImGui::GetContentRegionAvail().x;
+		auto*       drawList = ImGui::GetWindowDrawList();
+
+		const auto panel = [&](ImVec2 a_min, ImVec2 a_max) {
+			drawList->AddRectFilled(a_min, a_max, Colour(palette.accent, 0.04f));
+			drawList->AddRect(a_min, a_max, Colour(palette.separator, 0.7f));
+			CornerMarks(drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
+		};
+
+		const float padding = ShoutLayout::Padding();
+		const float gap = ShoutLayout::CardGap();
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+		const bool  sideBySide = width >= fontSize * 40.0f;
+		const float infoWidth = sideBySide ? std::floor(std::clamp(width * 0.28f, fontSize * 15.0f, fontSize * 24.0f)) : width;
+		const auto  layout = LayoutPerkTree(perks);
+		const auto  rows = std::max(layout.rows, a_withName ? _trainerRows : 1);
+		const float infoHeight = padding * 2.0f + TrainerLayout::InfoContent();
+		const float boxHeight = sideBySide ? std::max(infoHeight, TrainerLayout::TreeHeight(rows)) : infoHeight;
+		const auto  origin = ImGui::GetCursorScreenPos();
+
+		//---------------------------------------------------
+		// Trainer and skill
+		//---------------------------------------------------
+
+		const auto infoMin = origin;
+		const auto infoMax = ImVec2(origin.x + infoWidth, origin.y + boxHeight);
+		panel(infoMin, infoMax);
+		drawList->PushClipRect(infoMin, ImVec2(infoMax.x - padding * 0.5f, infoMax.y), true);
+
+		const bool  outgrown = info.playerLevel >= info.maxLevel;
+		const float textX = infoMin.x + padding;
+		const float textWidth = infoWidth - padding * 2.0f;
+		float       y = infoMin.y + (boxHeight - TrainerLayout::InfoContent()) * 0.5f;
+
+		ImGui::PushFont(Themes::HeaderFont());
+		const float nameLine = ImGui::GetTextLineHeightWithSpacing();
+		if (a_withName) {
+			drawList->AddText(ImVec2(textX, y), Colour(palette.heading), FitText(a_entry.name, textWidth).c_str());
+		}
+		ImGui::PopFont();
+		y += nameLine;
+		ImGui::PushFont(Themes::TitleFont());
+		const float titleLine = ImGui::GetTextLineHeightWithSpacing();
+		drawList->AddText(ImVec2(textX, y), Colour(a_entry.IsComplete() ? palette.found : palette.text), FitText(info.skillName, textWidth).c_str());
+		ImGui::PopFont();
+		y += titleLine;
+
+		// Your level, the bar, and what this trainer can take you to
+		const auto  levels = std::to_string(info.playerLevel) + " / " + std::to_string(info.maxLevel);
+		const auto  levelsSize = ImGui::CalcTextSize(levels.c_str());
+		const float barWidth = std::max(fontSize * 3.0f, textWidth - levelsSize.x - fontSize * 0.8f);
+		const float barY = y + ImGui::GetTextLineHeight() * 0.5f;
+		const float barHeight = std::max(2.0f, std::floor(fontSize * 0.18f));
+		const auto  at = [&](std::int32_t a_level) { return textX + barWidth * std::clamp(static_cast<float>(a_level) / 100.0f, 0.0f, 1.0f); };
+		drawList->AddRectFilled(ImVec2(textX, barY - barHeight * 0.5f), ImVec2(textX + barWidth, barY + barHeight * 0.5f), Colour(palette.barBackground));
+		drawList->AddRectFilled(ImVec2(textX, barY - barHeight * 0.5f), ImVec2(at(info.playerLevel), barY + barHeight * 0.5f), Colour(outgrown ? palette.found : palette.bar));
+		for (const auto tick : { 50, 75 }) {
+			drawList->AddRectFilled(ImVec2(at(tick), barY - fontSize * 0.3f), ImVec2(at(tick) + 1.0f, barY + fontSize * 0.3f), Colour(palette.separator));
+		}
+		Decor::Diamond(drawList, ImVec2(at(info.maxLevel), barY), fontSize * 0.28f, Colour(palette.accent), true);
+		drawList->AddText(ImVec2(textX + textWidth - levelsSize.x, y), Colour(palette.textDim), levels.c_str());
+		y += line;
+
+		// Home, where they are when away, what's left to learn and the perks taken
+		std::int32_t taken = 0;
+		for (const auto& perk : perks) {
+			taken += perk.rank > 0 ? 1 : 0;
+		}
+		const auto dimLine = [&](const std::string& a_text) {
+			drawList->AddText(ImVec2(textX, y), Colour(palette.textDim), FitText(a_text, textWidth).c_str());
+			y += line;
+		};
+		if (!info.location.empty()) {
+			dimLine(a_provider.Translate("UI_Trainers_Home{" + info.location + "}"));
+		}
+		if (!info.now.empty()) {
+			dimLine(a_provider.Translate("UI_Trainers_Now{" + info.now + "}"));
+		}
+		auto learn = a_provider.Translate(outgrown ? std::string("UI_Trainers_Outgrown") : "UI_Trainers_CanTeach{" + std::to_string(info.maxLevel - info.playerLevel) + "}");
+		if (!perks.empty()) {
+			learn += "  \xC2\xB7  " + a_provider.Translate("UI_Trainers_Perks{" + std::to_string(taken) + "}{" + std::to_string(perks.size()) + "}");
+		}
+		dimLine(learn);
+		drawList->PopClipRect();
+
+		//---------------------------------------------------
+		// Perk tree
+		//---------------------------------------------------
+
+		const float treeHeight = sideBySide ? boxHeight : TrainerLayout::TreeHeight(rows);
+		const auto  treeMin = sideBySide ? ImVec2(infoMax.x + gap, origin.y) : ImVec2(origin.x, infoMax.y + gap);
+		const auto  treeMax = ImVec2(origin.x + width, treeMin.y + treeHeight);
+		panel(treeMin, treeMax);
+		ImGui::Dummy(ImVec2(width, sideBySide ? boxHeight : boxHeight + gap + treeHeight));
+
+		if (perks.empty()) {
+			const auto none = a_provider.Translate("UI_Trainers_NoPerks");
+			const auto size = ImGui::CalcTextSize(none.c_str());
+			drawList->AddText(ImVec2((treeMin.x + treeMax.x - size.x) * 0.5f, (treeMin.y + treeMax.y - size.y) * 0.5f), Colour(palette.textDim), none.c_str());
+			return;
+		}
+
+		const float labelSize = ImGui::GetTextLineHeight();
+		const float radius = TrainerLayout::Radius();
+		const float slot = TrainerLayout::Slot();
+		const float edge = padding * 0.6f;
+
+		// Next once a perk it leads from is taken, or it starts the tree
+		std::vector<bool> hasParent(perks.size(), false);
+		std::vector<bool> parentTaken(perks.size(), false);
+		for (std::size_t i = 0; i < perks.size(); ++i) {
+			for (const auto child : perks[i].children) {
+				hasParent[child] = true;
+				parentTaken[child] = parentTaken[child] || perks[i].rank > 0;
+			}
+		}
+		const auto stateOf = [&](std::size_t a_index) {
+			return perks[a_index].rank > 0 ? PerkState::kTaken : !hasParent[a_index] || parentTaken[a_index] ? PerkState::kNext : PerkState::kLocked;
+		};
+
+		std::vector<std::string> labels;
+		labels.reserve(perks.size());
+		for (std::size_t i = 0; i < perks.size(); ++i) {
+			auto label = perks[i].name;
+			if (perks[i].ranks > 1) {
+				label += " " + std::to_string(perks[i].rank) + "/" + std::to_string(perks[i].ranks);
+			}
+			if (stateOf(i) != PerkState::kTaken && perks[i].level > 0) {
+				label += "  \xC2\xB7  " + std::to_string(perks[i].level);
+			}
+			labels.push_back(std::move(label));
+		}
+
+		// Columns evenly spaced up to a cap and centred, the first and last columns' labels kept inside
+		float leftRoom = radius * 1.5f;
+		float rightRoom = radius * 1.5f;
+		for (std::size_t i = 0; i < perks.size(); ++i) {
+			const float half = ImGui::CalcTextSize(labels[i].c_str()).x * 0.5f;
+			if (layout.x[i] <= 0.0f) {
+				leftRoom = std::max(leftRoom, half);
+			}
+			if (layout.x[i] >= layout.width) {
+				rightRoom = std::max(rightRoom, half);
+			}
+		}
+		const float inner = (treeMax.x - treeMin.x) - edge * 2.0f;
+		leftRoom = std::min(leftRoom, inner * 0.25f);
+		rightRoom = std::min(rightRoom, inner * 0.25f);
+		const float available = inner - leftRoom - rightRoom;
+		const float unit = layout.width > 0.0f ? std::min(TrainerLayout::ColumnGap(), available / layout.width) : 0.0f;
+		const float treeWidth = unit * layout.width;
+		const float firstX = treeMin.x + edge + leftRoom + (available - treeWidth) * 0.5f;
+		const float middleY = (treeMin.y + treeMax.y) * 0.5f - labelSize * 0.5f;
+
+		std::vector<ImVec2> spots;
+		spots.reserve(perks.size());
+		for (std::size_t i = 0; i < perks.size(); ++i) {
+			spots.emplace_back(firstX + unit * layout.x[i], middleY + layout.place[i] * slot);
+			const float room = layout.width > 0.0f ? std::max(fontSize * 4.0f, unit * layout.labelUnits[i] * (layout.labelUnits[i] < 1.0f ? 2.0f : 1.0f) - radius * 2.0f) : inner;
+			labels[i] = FitText(labels[i], room);
+		}
+
+		drawList->PushClipRect(treeMin, treeMax, true);
+		for (const bool lit : { false, true }) {
+			for (std::size_t i = 0; i < perks.size(); ++i) {
+				for (const auto child : perks[i].children) {
+					if ((perks[i].rank > 0 && perks[child].rank > 0) == lit) {
+						Decor::PerkLink(drawList, spots[i], spots[child], radius, lit);
+					}
+				}
+			}
+		}
+
+		const auto  mouse = ImGui::GetMousePos();
+		const bool  hoverable = ImGui::IsWindowHovered();
+		std::size_t hovered = perks.size();
+		for (std::size_t i = 0; i < perks.size(); ++i) {
+			const auto& perk = perks[i];
+			const auto  state = stateOf(i);
+			Decor::PerkNode(drawList, spots[i], radius, state);
+
+			const auto& label = labels[i];
+			const auto  size = ImGui::CalcTextSize(label.c_str());
+			const float labelX = std::clamp(spots[i].x - size.x * 0.5f, treeMin.x + edge, treeMax.x - edge - size.x);
+			const float labelY = spots[i].y + radius * 1.3f;
+			const auto  colour = state == PerkState::kTaken ? Colour(palette.text) : state == PerkState::kNext ? Decor::PerkColour(PerkState::kNext) : Colour(palette.textDim);
+
+			// Links pass behind the labels, not through them
+			const float pad = fontSize * 0.2f;
+			drawList->AddRectFilled(ImVec2(labelX - pad, labelY), ImVec2(labelX + size.x + pad, labelY + size.y), Colour(palette.background, 0.85f), pad);
+			drawList->AddText(ImVec2(labelX, labelY), colour, label.c_str());
+
+			const float dx = mouse.x - spots[i].x;
+			const float dy = mouse.y - spots[i].y;
+			if (hoverable && dx * dx + dy * dy <= radius * radius * 2.2f) {
+				hovered = i;
+			}
+		}
+		drawList->PopClipRect();
+
+		if (hovered < perks.size()) {
+			const auto& perk = perks[hovered];
+			ImGui::BeginTooltip();
+			ImGui::TextColored(palette.heading, "%s", perk.name.c_str());
+			if (perk.ranks > 1) {
+				ImGui::TextUnformatted(a_provider.Translate("UI_Trainers_PerkRank{" + std::to_string(perk.rank) + "}{" + std::to_string(perk.ranks) + "}").c_str());
+			}
+			if (perk.level > 0) {
+				ImGui::TextColored(info.playerLevel >= perk.level ? palette.found : palette.textDim, "%s", a_provider.Translate("UI_Trainers_PerkNeeds{" + std::to_string(perk.level) + "}").c_str());
+			}
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
+			ImGui::EndTooltip();
+		}
 	}
 
 	//---------------------------------------------------

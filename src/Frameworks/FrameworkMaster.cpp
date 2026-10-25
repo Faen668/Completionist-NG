@@ -54,6 +54,7 @@ namespace CFramework_Master
 		CFramework_Pets::CHandler::InstallFramework();
 		CFramework_PlayerHomes::CHandler::InstallFramework();
 		CFramework_Shouts::CHandler::InstallFramework();
+		CFramework_Trainers::CHandler::InstallFramework();
 	};
 
 	void FrameworkAPI::RegisterCustomPatches()
@@ -241,6 +242,7 @@ namespace CFramework_Master
 
 		INFO("Start-up: {}", a_newGame ? "new game" : "game loaded");
 		CFramework_Pets::CHandler::CheckAdoptedPet();
+		CFramework_Trainers::CHandler::FindPlacedTrainers();
 		GameMenus::Get()->NotifyWhenLoaded();
 	}
 

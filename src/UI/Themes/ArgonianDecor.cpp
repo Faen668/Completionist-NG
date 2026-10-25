@@ -575,3 +575,39 @@ namespace CompletionistUI::ArgonianDecor
 		}
 	}
 }
+
+namespace CompletionistUI::ArgonianDecor
+{
+	//---------------------------------------------------
+	//-- Argonian Decor ( Perk Node ) ----------------
+	//---------------------------------------------------
+
+	// Hist sap: a full egg when taken, an empty shell when next, a dull scale when locked
+	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
+
+		if (a_state == PerkState::kLocked) {
+			Scale(a_drawList, a_centre, a_radius * 0.55f, a_colour, false);
+			return;
+		}
+		Egg(a_drawList, a_centre, a_radius * 2.4f, a_colour, a_state == PerkState::kTaken ? 1.0f : 0.0f);
+	}
+
+	//---------------------------------------------------
+	//-- Argonian Decor ( Perk Link ) ----------------
+	//---------------------------------------------------
+
+	// Roots winding through the marsh, swollen with sap between taken perks
+	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
+
+		auto        points = PerkCurve(a_from, a_to, a_radius * 0.4f);
+		const float wave = a_radius * 0.18f;
+		for (std::size_t i = 1; i + 1 < points.size(); ++i) {
+			const auto  normal = NormalAt(points, i);
+			const float t = static_cast<float>(i) / points.size();
+			const float side = std::sin(t * 3.14159f * 3.0f) * wave;
+			points[i].x += normal.x * side;
+			points[i].y += normal.y * side;
+		}
+		a_drawList->AddPolyline(points.data(), static_cast<int>(points.size()), a_colour, ImDrawFlags_None, std::max(1.0f, a_radius * (a_lit ? 0.22f : 0.1f)));
+	}
+}

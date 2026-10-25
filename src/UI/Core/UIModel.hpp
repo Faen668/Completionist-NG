@@ -31,6 +31,29 @@ namespace CompletionistUI
 		bool         discovered{ false };	// word walls: map marker found
 	};
 
+	// A perk on the skill's tree, placed as the game's Skills menu places it
+	struct TrainerPerk
+	{
+		std::string               name;
+		float                     depth{ 0.0f };	// up the tree in the Skills menu, across on the panel
+		float                     lane{ 0.0f };	// across the tree in the Skills menu, down on the panel
+		std::int32_t              level{ 0 };	// skill needed, 0 when none
+		std::int32_t              rank{ 0 };	// ranks taken
+		std::int32_t              ranks{ 1 };
+		std::vector<std::int32_t> children;
+	};
+
+	struct EntryTrainer
+	{
+		std::int32_t             skill{ -1 };	// -1 when not a trainer
+		std::string              skillName;
+		std::int32_t             maxLevel{ 0 };
+		std::int32_t             playerLevel{ 0 };
+		std::string              location;
+		std::string              now;	// where they are, when away from home
+		std::vector<TrainerPerk> perks;
+	};
+
 	struct Entry
 	{
 		std::string   name;
@@ -51,6 +74,11 @@ namespace CompletionistUI
 		bool                    canPin{ false };
 		bool                    canMark{ false };
 		bool                    placesKnown{ false };
+		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
+		EntryTrainer            trainer;
+
+		[[nodiscard]] bool          IsTrainer() const noexcept { return trainer.skill >= 0; }
+		[[nodiscard]] std::uint32_t MarkerID() const noexcept { return refID ? refID : formID; }
 
 		[[nodiscard]] bool IsComplete() const noexcept { return state == EntryState::kFound || state == EntryState::kDisplayed; }
 	};
