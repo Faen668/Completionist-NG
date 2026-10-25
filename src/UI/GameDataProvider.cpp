@@ -233,7 +233,38 @@ namespace CompletionistUI
 		//-- Game Data ( Add Patch Sections ) ---------------
 		//---------------------------------------------------
 
+		Entry QuestEntry(const CQuestData& a_data, std::int32_t a_id, IDataProvider& a_provider);
+		void  AddPatchItems(Page& a_page, const CMiscPatch& a_patch, std::int32_t a_subPage, std::int32_t a_choice, IDataProvider& a_provider);
+
+		//---------------------------------------------------
+		//-- Game Data ( Add Journal Sections ) -------------
+		//---------------------------------------------------
+
+		// Main, side, radiant and completed, as the quest pages
+		void AddJournalSections(Page& a_page, std::vector<Entry> a_entries, std::int32_t a_tab) {
+
+			Section main{ "UI_QuestSection_Main", {}, a_tab };
+			Section side{ "UI_QuestSection_Side", {}, a_tab };
+			Section radiant{ "UI_QuestSection_Radiant", {}, a_tab };
+			Section completed{ "UI_QuestSection_Completed", {}, a_tab };
+			for (auto& entry : a_entries) {
+				auto& section = entry.IsComplete() ? completed : entry.type == "UI_QuestType_Main" ? main : entry.type == "UI_QuestType_Side" ? side : radiant;
+				section.entries.push_back(std::move(entry));
+			}
+			for (auto* section : { &main, &side, &radiant, &completed }) {
+				if (!section->entries.empty()) {
+					a_page.sections.push_back(std::move(*section));
+				}
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Add Patch Sections ) ---------------
+		//---------------------------------------------------
+
 		void AddPatchSections(Page& a_page, const CMiscPatch& a_patch, IDataProvider& a_provider) {
+
+			using CHCMHandler::MCMAPI;
 
 			// MCM headers end in ": "
 			const auto clean = [](std::string a_text) {
@@ -243,24 +274,89 @@ namespace CompletionistUI
 				return a_text;
 			};
 
+			// The dropdown hides the entries for other choices
+			const auto& pageName = a_page.title;
+			const auto  choice = a_patch.HasDropDownMenu ? MCMAPI::GetCurrentUserOption(nullptr, pageName) : 0;
+			if (a_patch.HasDropDownMenu && !a_patch.DropDownMenu.options.empty()) {
+				a_page.choice.name = clean(a_patch.DropDownMenu.name);
+				a_page.choice.info = a_patch.DropDownMenu.highlight;
+				a_page.choice.options = a_patch.DropDownMenu.options;
+				a_page.choice.selected = std::clamp(choice, 0, static_cast<std::int32_t>(a_patch.DropDownMenu.options.size()) - 1);
+			}
+
 			// Sections kept together by the patch's sub-page
 			std::set<std::int32_t> subPages;
 			for (const auto& data : a_patch.type_sections) {
-				if (!data.IsEmpty() && data.enabled && data.type != CMiscPatchType::kQuests) {
+				if (!data.IsEmpty() && data.enabled) {
 					subPages.insert(data.displayOnPage);
 				}
 			}
 
-			for (const auto subPage : subPages)
+			// A tab per sub-page, quests in the journal layout
+			for (const auto subPage : subPages) {
+				const auto named = a_patch.section_defs.find(subPage);
+				const auto tabTitle = named != a_patch.section_defs.end() ? clean(named->second) : std::string{};
+				const auto tab = static_cast<std::int32_t>(a_page.tabs.size());
+
+				std::vector<Entry> quests;
+				for (const auto& data : a_patch.type_sections) {
+					if (data.IsEmpty() || !data.enabled || data.displayOnPage != subPage || data.type != CMiscPatchType::kQuests) {
+						continue;
+					}
+					for (const auto* quest : data.quest_data_array) {
+						if (quest && quest->GetQuest() && MCMAPI::IsQuestVisible(nullptr, pageName, quest->GetEditorID(), choice)) {
+							quests.push_back(QuestEntry(*quest, data.quest_data_id, a_provider));
+						}
+					}
+				}
+				if (!quests.empty()) {
+					AddJournalSections(a_page, std::move(quests), tab);
+					a_page.tabs.push_back({ tabTitle, PageLayout::kJournal });
+				}
+
+				const auto itemTab = static_cast<std::int32_t>(a_page.tabs.size());
+				const auto firstItems = a_page.sections.size();
+				AddPatchItems(a_page, a_patch, subPage, choice, a_provider);
+				if (a_page.sections.size() > firstItems) {
+					for (auto i = firstItems; i < a_page.sections.size(); ++i) {
+						a_page.sections[i].tab = itemTab;
+						a_page.sections[i].title = clean(a_page.sections[i].title);
+					}
+					a_page.tabs.push_back({ tabTitle, PageLayout::kList });
+				}
+			}
+
+			// One tab is just the page
+			if (a_page.tabs.size() == 1) {
+				a_page.layout = a_page.tabs.front().layout;
+				a_page.tabs.clear();
+				for (auto& section : a_page.sections) {
+					section.tab = -1;
+				}
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Add Patch Items ) ------------------
+		//---------------------------------------------------
+
+		void AddPatchItems(Page& a_page, const CMiscPatch& a_patch, std::int32_t a_subPage, std::int32_t a_choice, IDataProvider& a_provider) {
+
+			using CHCMHandler::MCMAPI;
+
+			const auto& pageName = a_page.title;
 			for (const auto& data : a_patch.type_sections) {
-				if (data.IsEmpty() || !data.enabled || data.type == CMiscPatchType::kQuests || data.displayOnPage != subPage) {
+				if (data.IsEmpty() || !data.enabled || data.displayOnPage != a_subPage || data.type == CMiscPatchType::kQuests) {
 					continue;
 				}
 
 				const auto& names = data.type == CMiscPatchType::kShouts ? data.shout_names : data.names;
 				auto&       section = a_page.sections.emplace_back();
-				section.title = clean(data.pageheaderL);
+				section.title = data.pageheaderL;
 				for (std::size_t i = 0; i < names.size(); ++i) {
+					if (i < data.forms.size() && !MCMAPI::IsFormVisible(nullptr, pageName, data.forms[i], a_choice)) {
+						continue;
+					}
 					auto& entry = section.entries.emplace_back();
 					entry.name = names[i];
 					SplitFontTags(entry);
@@ -278,6 +374,9 @@ namespace CompletionistUI
 					if (data.type == CMiscPatchType::kShouts) {
 						AddWordPlaces(entry);
 					}
+				}
+				if (section.entries.empty()) {
+					a_page.sections.pop_back();
 				}
 			}
 		}
@@ -555,18 +654,42 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Quest Entry ) ----------------------
+		//---------------------------------------------------
+
+		Entry QuestEntry(const CQuestData& a_data, std::int32_t a_id, IDataProvider& a_provider) {
+
+			using CQuestMaster::QuestAPI;
+
+			const auto key = a_data.GetKey();
+			const auto status = QuestAPI::qIsOptionCompleted(nullptr, a_id, key);
+			const bool manual = QuestAPI::qIsOptionToggled(nullptr, a_id, key);
+
+			Entry entry;
+			entry.name = a_data.GetName();
+			entry.description = CleanQuestText(a_data.GetHighlight());
+			entry.state = status > 0 || manual ? EntryState::kFound : EntryState::kNeeded;
+			entry.canToggle = status != 2;
+			entry.marked = manual;
+			entry.questPage = a_id;
+			entry.key = key;
+			entry.status = entry.IsComplete() ? "UI_QuestState_Done" : "UI_QuestState_Pending";
+			entry.type = a_data.GetType() == std::to_underlying(CFlagEnum::kMain) ? "UI_QuestType_Main" : a_data.GetType() == std::to_underlying(CFlagEnum::kSide) ? "UI_QuestType_Side" : "UI_QuestType_Radiant";
+			if (a_data.HasRadiantData()) {
+				entry.detail = fmt::format("{} / {}", CFramework_Master::RadiantCountData.GetCount(key), a_data.GetRadiantTimesRequired());
+			} else if (manual) {
+				entry.detail = a_provider.Translate("UI_QuestMarked");
+			}
+			return entry;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Build Quest Page ) -----------------
 		//---------------------------------------------------
 
 		Page BuildQuestPage(std::int32_t a_id, const std::string& a_title, GameDataProvider& a_provider) {
 
-			using CQuestMaster::QuestAPI;
-
-			Page    page{ std::string(questPrefix) + std::to_string(a_id), a_title, {}, PageLayout::kJournal };
-			Section main{ "UI_QuestSection_Main", {} };
-			Section side{ "UI_QuestSection_Side", {} };
-			Section radiant{ "UI_QuestSection_Radiant", {} };
-			Section completed{ "UI_QuestSection_Completed", {} };
+			Page page{ std::string(questPrefix) + std::to_string(a_id), a_title, {}, PageLayout::kJournal };
 
 			const auto filter = QuestPageFilterFor(a_id, a_title);
 			if (!filter.notice.empty()) {
@@ -574,7 +697,8 @@ namespace CompletionistUI
 				return page;
 			}
 
-			std::size_t index = 0;
+			std::vector<Entry> entries;
+			std::size_t        index = 0;
 			for (const auto& [data, name, id, key] : CQuestMaster::CQuestDataVec) {
 				if (id != a_id || !data || !data->GetQuest()) {
 					continue;
@@ -582,41 +706,10 @@ namespace CompletionistUI
 				if (const auto at = index++; filter.shows && !filter.shows(at, data->editor_id)) {
 					continue;
 				}
-
-				const auto status = QuestAPI::qIsOptionCompleted(nullptr, id, key);
-				const bool manual = QuestAPI::qIsOptionToggled(nullptr, id, key);
-
-				Entry entry;
-				entry.name = data->GetName();
-				entry.description = CleanQuestText(data->GetHighlight());
-				entry.state = status > 0 || manual ? EntryState::kFound : EntryState::kNeeded;
-				entry.canToggle = status != 2;
-				entry.marked = manual;
-				entry.key = key;
-				entry.status = entry.IsComplete() ? "UI_QuestState_Done" : "UI_QuestState_Pending";
-				entry.type = data->GetType() == std::to_underlying(CFlagEnum::kMain) ? "UI_QuestType_Main" : data->GetType() == std::to_underlying(CFlagEnum::kSide) ? "UI_QuestType_Side" : "UI_QuestType_Radiant";
-				if (data->HasRadiantData()) {
-					entry.detail = fmt::format("{} / {}", CFramework_Master::RadiantCountData.GetCount(key), data->GetRadiantTimesRequired());
-				} else if (manual) {
-					entry.detail = a_provider.Translate("UI_QuestMarked");
-				}
-
-				if (entry.IsComplete()) {
-					completed.entries.push_back(std::move(entry));
-				} else if (data->GetType() == std::to_underlying(CFlagEnum::kMain)) {
-					main.entries.push_back(std::move(entry));
-				} else if (data->GetType() == std::to_underlying(CFlagEnum::kSide)) {
-					side.entries.push_back(std::move(entry));
-				} else {
-					radiant.entries.push_back(std::move(entry));
-				}
+				entries.push_back(QuestEntry(*data, id, a_provider));
 			}
 
-			for (auto* section : { &main, &side, &radiant, &completed }) {
-				if (!section->entries.empty()) {
-					page.sections.push_back(std::move(*section));
-				}
-			}
+			AddJournalSections(page, std::move(entries), -1);
 			return page;
 		}
 
@@ -877,13 +970,11 @@ namespace CompletionistUI
 			return;
 		}
 
-		if (!a_pageID.starts_with(questPrefix) || a_entry.key.empty()) {
+		// Quest pages and patch quests
+		if (a_entry.questPage < 0 || a_entry.key.empty()) {
 			return;
 		}
-
-		std::int32_t id = 0;
-		const auto   idText = a_pageID.substr(questPrefix.size());
-		std::from_chars(idText.data(), idText.data() + idText.size(), id);
+		const auto id = a_entry.questPage;
 
 		{
 			std::scoped_lock lock(_lock);
@@ -908,6 +999,28 @@ namespace CompletionistUI
 			if (CQuestMaster::QuestAPI::qIsOptionToggled(nullptr, id, key) != a_completed) {
 				CQuestMaster::QuestAPI::qSetOptionCompleted(nullptr, id, key, a_completed);
 			}
+			Rebuild();
+		});
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Set Page Choice ) ------------------
+	//---------------------------------------------------
+
+	void GameDataProvider::SetPageChoice(std::string_view a_pageID, std::int32_t a_choice) {
+
+		if (!a_pageID.starts_with(patchPrefix)) {
+			return;
+		}
+
+		{
+			std::scoped_lock lock(_lock);
+			if (auto it = _pages.find(std::string(a_pageID)); it != _pages.end()) {
+				it->second.choice.selected = a_choice;
+			}
+		}
+		SKSE::GetTaskInterface()->AddTask([this, pageName = std::string(a_pageID.substr(patchPrefix.size())), a_choice]() {
+			CHCMHandler::MCMAPI::SetCurrentUserOption(nullptr, pageName, a_choice);
 			Rebuild();
 		});
 	}

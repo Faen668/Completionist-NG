@@ -42,6 +42,7 @@ namespace CompletionistUI
 		bool          marked{ false };	// marked complete by hand
 		std::uint32_t formID{ 0 };
 		std::int32_t  frameworkID{ -1 };	// framework or patch section, for marking by hand
+		std::int32_t  questPage{ -1 };	// patch quests, for marking by hand
 		std::string   key;	// quest key
 		std::string   status;
 		std::string   type;
@@ -58,6 +59,7 @@ namespace CompletionistUI
 	{
 		std::string        title;
 		std::vector<Entry> entries;
+		std::int32_t       tab{ -1 };	// index into Page::tabs, -1 when the page has none
 
 		[[nodiscard]] std::int32_t Found() const noexcept
 		{
@@ -77,6 +79,22 @@ namespace CompletionistUI
 		kJournal,	// quests
 	};
 
+	// A patch's own sub-page, e.g. Quests or Gear
+	struct PageTab
+	{
+		std::string title;
+		PageLayout  layout{ PageLayout::kList };
+	};
+
+	// A patch's dropdown, e.g. which faction's quests to show
+	struct PageChoice
+	{
+		std::string              name;
+		std::string              info;
+		std::vector<std::string> options;
+		std::int32_t             selected{ 0 };
+	};
+
 	struct Page
 	{
 		std::string          id;
@@ -84,6 +102,13 @@ namespace CompletionistUI
 		std::vector<Section> sections;
 		PageLayout           layout{ PageLayout::kList };
 		std::string          notice{};	// translation key shown instead of entries
+		PageChoice           choice{};	// no options when the patch has none
+		std::vector<PageTab> tabs{};	// sections say which tab they're on
+
+		[[nodiscard]] PageLayout LayoutOf(const Section& a_section) const noexcept
+		{
+			return a_section.tab >= 0 && a_section.tab < static_cast<std::int32_t>(tabs.size()) ? tabs[a_section.tab].layout : layout;
+		}
 	};
 
 	struct PageSummary

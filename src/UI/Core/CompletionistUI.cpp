@@ -1048,6 +1048,7 @@ namespace CompletionistUI
 			// Put the focus back on the same entry after a rebuild
 			_restoreFocusKey = _focusKey;
 			_page.reset();
+			++_pageLoads;
 			_findIndexDirty = true;
 			if (!_selectedPage.empty() && !_selectedPage.starts_with('#')) {
 				_page = a_provider.GetPage(_selectedPage);
@@ -1195,6 +1196,26 @@ namespace CompletionistUI
 				a_open = false;
 			}
 		}
+		// Y fits the description panel to the text, held collapses or expands it
+		// Ahead of the active check, as Y down also activates the focused row
+		if (_settings && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+			constexpr float holdTime = 0.4f;
+			const auto*     faceUp = ImGui::GetKeyData(ImGuiKey_GamepadFaceUp);
+			if (faceUp->Down && faceUp->DownDuration >= holdTime && !_descriptionHeld) {
+				_descriptionHeld = true;
+				_descriptionFitLines = -1.0f;
+				_settings->descriptionCollapsed = !_settings->descriptionCollapsed;
+				_settingsChanged = true;
+			}
+			if (ImGui::IsKeyReleased(ImGuiKey_GamepadFaceUp) && !std::exchange(_descriptionHeld, false)) {
+				_fitDescription = true;
+				if (_settings->descriptionCollapsed) {
+					_settings->descriptionCollapsed = false;
+					_settingsChanged = true;
+				}
+			}
+		}
+
 		if (_backHandledByImGui || ImGui::IsAnyItemActive()) {
 			return;
 		}
@@ -1227,11 +1248,7 @@ namespace CompletionistUI
 			OpenPage(pages[static_cast<std::size_t>(index)]);
 		}
 
-		// Y toggles the description panel, LS the sidebar
-		if (_settings && ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp, false)) {
-			_settings->descriptionCollapsed = !_settings->descriptionCollapsed;
-			_settingsChanged = true;
-		}
+		// LS folds the sidebar
 		if (_settings && ImGui::IsKeyPressed(ImGuiKey_GamepadL3, false)) {
 			_settings->navigationCollapsed = !_settings->navigationCollapsed;
 			_settingsChanged = true;
@@ -1955,10 +1972,15 @@ namespace CompletionistUI
 		} else {
 		hints.push_back({ { PadButton::kFaceRight }, a_provider.Translate(ImGui::GetIO().NavVisible && !_sidebarFocused ? "UI_Pad_Back" : "UI_Pad_Close") });
 		hints.push_back({ { PadButton::kLeftBumper, PadButton::kRightBumper }, a_provider.Translate("UI_Pad_Pages") });
-		if (std::exchange(_settingsTabsShown, false)) {
-			hints.push_back({ { PadButton::kLeftTrigger, PadButton::kRightTrigger }, a_provider.Translate("UI_Pad_Tabs") });
+		if (const auto tabKeys = std::exchange(_tabsShown, TabKeys::kNone); tabKeys != TabKeys::kNone) {
+			if (tabKeys == TabKeys::kLeft) {
+				hints.push_back({ { PadButton::kLeftTrigger }, a_provider.Translate("UI_Pad_Tabs") });
+			} else {
+				hints.push_back({ { PadButton::kLeftTrigger, PadButton::kRightTrigger }, a_provider.Translate("UI_Pad_Tabs") });
+			}
 		}
 		hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate("UI_Pad_Description") });
+		hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate(_settings && _settings->descriptionCollapsed ? "UI_Pad_DescriptionHoldExpand" : "UI_Pad_DescriptionHoldCollapse") });
 		hints.push_back({ { PadButton::kLeftStickPress }, a_provider.Translate("UI_Pad_Sidebar") });
 		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Scroll") });
 		hints.push_back({ { PadButton::kView }, a_provider.Translate("UI_Pad_Find") });
@@ -2582,6 +2604,101 @@ namespace CompletionistUI
 	//---------------------------------------------------
 
 	//---------------------------------------------------
+	//-- Completionist UI ( Tab Row ) -------------------
+	//---------------------------------------------------
+
+	// Settings and patch sub-pages, LT / RT to switch
+	// Pages keep RT for pinning, so LT cycles through the tabs there
+	bool Menu::TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected, bool a_leftOnly) {
+
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const auto  before = a_selected;
+
+		_tabsShown = a_leftOnly ? TabKeys::kLeft : TabKeys::kBoth;
+		if (!ImGui::IsAnyItemActive() && !a_tabs.empty()) {
+			const bool previous = !a_leftOnly && ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
+			const bool next = ImGui::IsKeyPressed(a_leftOnly ? ImGuiKey_GamepadL2 : ImGuiKey_GamepadR2, false);
+			if (previous || next) {
+				const auto current = std::ranges::find(a_tabs, a_selected, &TabItem::id);
+				const auto count = static_cast<std::ptrdiff_t>(a_tabs.size());
+				const auto index = (static_cast<std::ptrdiff_t>(current - a_tabs.begin()) + (next ? 1 : count - 1)) % count;
+				a_selected = a_tabs[static_cast<std::size_t>(index)].id;
+			}
+		}
+
+		const float tabGap = fontSize * 1.6f;
+		const float countGap = fontSize * 0.4f;
+		const auto  width = [&](const TabItem& a_tab) {
+			const float count = a_tab.count.empty() ? 0.0f : ImGui::CalcTextSize(a_tab.count.c_str()).x + countGap;
+			return ImGui::CalcTextSize(a_tab.title.c_str()).x + count;
+		};
+		float total = 0.0f;
+		for (const auto& tab : a_tabs) {
+			total += width(tab) + tabGap;
+		}
+		ImGui::Spacing();
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - total + tabGap) * 0.5f));
+		for (std::size_t i = 0; i < a_tabs.size(); ++i) {
+			const auto& tab = a_tabs[i];
+			if (i > 0) {
+				ImGui::SameLine(0.0f, tabGap);
+			}
+			const auto size = ImGui::CalcTextSize(tab.title.c_str());
+			ImGui::PushID(tab.id.c_str());
+			if (ImGui::InvisibleButton("##Tab", ImVec2(width(tab), ImGui::GetFrameHeight()))) {
+				a_selected = tab.id;
+			}
+			NoteControl();
+			const bool selected = tab.id == a_selected;
+			const bool focused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
+			const bool hovered = ImGui::IsItemHovered() || focused;
+			const auto min = ImGui::GetItemRectMin();
+			const auto max = ImGui::GetItemRectMax();
+			const float textY = min.y + (max.y - min.y - size.y) * 0.5f;
+			auto*      drawList = ImGui::GetWindowDrawList();
+			if (focused) {
+				const float pad = fontSize * 0.4f;
+				drawList->AddRect(ImVec2(min.x - pad, min.y), ImVec2(max.x + pad, max.y), Colour(palette.accent, 0.8f), fontSize * 0.2f, 0, 1.5f);
+			}
+			drawList->AddText(ImVec2(min.x, textY), Colour(selected ? palette.heading : (hovered ? palette.text : palette.textDim)), tab.title.c_str());
+			if (!tab.count.empty()) {
+				drawList->AddText(ImVec2(min.x + size.x + countGap, textY), Colour(palette.textDim), tab.count.c_str());
+			}
+			if (selected) {
+				if (SkyUI()) {
+					Decor::DoubleRule(drawList, ImVec2(min.x - tabGap * 0.25f, max.y), ImVec2(max.x + tabGap * 0.25f, max.y), Colour(palette.accent));
+				} else {
+					Decor::FadedLine(drawList, ImVec2(min.x - tabGap * 0.25f, max.y), ImVec2(max.x + tabGap * 0.25f, max.y), Colour(palette.accent), 1.5f);
+				}
+			}
+			ImGui::PopID();
+		}
+		return a_selected != before;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Tab View ) ------------------
+	//---------------------------------------------------
+
+	// The page with only one tab's sections, kept until the page or tab changes
+	const Page& Menu::TabView(const Page& a_page, std::int32_t a_tab) {
+
+		const auto key = a_page.id + '\x1f' + std::to_string(a_tab) + '\x1f' + std::to_string(_pageLoads);
+		if (key != _tabViewKey) {
+			_tabViewKey = key;
+			_tabView = Page{ a_page.id, a_page.title, {} };
+			_tabView.layout = a_page.tabs[a_tab].layout;
+			for (const auto& section : a_page.sections) {
+				if (section.tab == a_tab) {
+					_tabView.sections.push_back(section);
+				}
+			}
+		}
+		return _tabView;
+	}
+
+	//---------------------------------------------------
 	//-- Completionist UI ( Draw Page ) -----------------
 	//---------------------------------------------------
 
@@ -2624,14 +2741,45 @@ namespace CompletionistUI
 		ImGui::SameLine(0.0f, ImGui::GetFontSize() * 2.0f);
 		{
 			const float available = ImGui::GetContentRegionAvail().x;
-			const float barWidth = std::min(available, std::max(ImGui::GetFontSize() * 10.0f, available * 0.4f));
-			const float barHeight = ImGui::GetFontSize() * 0.45f;
 			const auto  percent = PercentText(found, total);
 			const float percentWidth = ImGui::CalcTextSize(percent.c_str()).x;
 			const auto  rowStart = ImGui::GetCursorPos();
-			const float barX = rowStart.x + available - barWidth;
 
-			ImGui::SetCursorPos(ImVec2(barX - percentWidth - ImGui::GetFontSize() * 0.6f, rowStart.y));
+			// Only for patches with a dropdown, e.g. which faction's quests to show
+			const auto& choice = page.choice;
+			float       choiceWidth = 0.0f;
+			if (!choice.options.empty()) {
+				for (const auto& option : choice.options) {
+					choiceWidth = std::max(choiceWidth, ImGui::CalcTextSize(option.c_str()).x);
+				}
+				choiceWidth += ImGui::GetStyle().FramePadding.x * 2.0f + ImGui::GetFontSize() * 1.5f;
+			}
+			const float choiceSpace = choiceWidth > 0.0f ? choiceWidth + ImGui::GetFontSize() * 1.5f : 0.0f;
+
+			const float barWidth = std::max(0.0f, std::min(available - choiceSpace - percentWidth, std::max(ImGui::GetFontSize() * 10.0f, available * 0.4f)));
+			const float barHeight = ImGui::GetFontSize() * 0.45f;
+			const float barX = rowStart.x + available - barWidth;
+			const float percentX = barX - percentWidth - ImGui::GetFontSize() * 0.6f;
+
+			if (choiceWidth > 0.0f) {
+				ImGui::SetCursorPos(ImVec2(percentX - choiceSpace, rowStart.y));
+				const auto selected = std::clamp(choice.selected, 0, static_cast<std::int32_t>(choice.options.size()) - 1);
+				const bool open = ThemedBeginCombo("##PageChoice", choice.options[selected].c_str(), choiceWidth);
+				if (!open && ImGui::IsItemHovered() && !choice.name.empty()) {
+					ImGui::SetTooltip("%s\n%s", choice.name.c_str(), choice.info.c_str());
+				}
+				if (open) {
+					for (std::int32_t i = 0; i < static_cast<std::int32_t>(choice.options.size()); ++i) {
+						if (ImGui::Selectable(choice.options[i].c_str(), i == selected) && i != selected) {
+							a_provider.SetPageChoice(page.id, i);
+							_page->choice.selected = i;
+						}
+					}
+					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::SetCursorPos(ImVec2(percentX, rowStart.y));
 			ImGui::AlignTextToFramePadding();
 			ImGui::TextColored(total > 0 && found >= total ? palette.found : palette.textDim, "%s", percent.c_str());
 			ImGui::SameLine();
@@ -2654,8 +2802,47 @@ namespace CompletionistUI
 			return;
 		}
 
-		if (page.layout == PageLayout::kJournal) {
-			DrawJournal(a_provider, page);
+		// A patch's own sub-pages, e.g. Quests, Gear, Books
+		const Page* view = &page;
+		if (!page.tabs.empty()) {
+			auto& selected = _pageTabs[page.id];
+
+			// Find and pins open the tab holding the entry
+			if (!_scrollToKey.empty()) {
+				for (const auto& section : page.sections) {
+					const bool holds = std::ranges::any_of(section.entries, [&](const Entry& a_entry) {
+						return (a_entry.key.empty() ? a_entry.name : a_entry.key) == _scrollToKey || a_entry.name + '\x1f' + a_entry.detail == _scrollToKey;
+					});
+					if (holds && section.tab >= 0) {
+						selected = std::to_string(section.tab);
+						break;
+					}
+				}
+			}
+
+			std::vector<TabItem> tabs;
+			for (std::size_t i = 0; i < page.tabs.size(); ++i) {
+				std::int32_t tabFound = 0;
+				std::int32_t tabTotal = 0;
+				for (const auto& section : page.sections) {
+					if (section.tab == static_cast<std::int32_t>(i)) {
+						tabFound += section.Found();
+						tabTotal += section.Total();
+					}
+				}
+				const auto& title = page.tabs[i].title;
+				tabs.push_back({ std::to_string(i), a_provider.Translate(title.empty() ? page.title : title), CountText(tabFound, tabTotal) });
+			}
+			if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == selected; })) {
+				selected = tabs.front().id;
+			}
+			TabRow(tabs, selected, true);
+			ImGui::Spacing();
+			view = &TabView(page, std::stoi(selected));
+		}
+
+		if (view->layout == PageLayout::kJournal) {
+			DrawJournal(a_provider, *view);
 			return;
 		}
 
@@ -2663,7 +2850,7 @@ namespace CompletionistUI
 		const float gap = ImGui::GetFontSize() * 0.75f;
 
 		// Shout pages show the words and places instead of the description
-		const bool shoutPage = std::ranges::any_of(page.sections, [](const Section& a_section) {
+		const bool shoutPage = std::ranges::any_of(view->sections, [](const Section& a_section) {
 			return std::ranges::any_of(a_section.entries, [](const Entry& a_entry) { return a_entry.placesKnown; });
 		});
 		float panelHeight = 0.0f;
@@ -2682,8 +2869,8 @@ namespace CompletionistUI
 
 		BeginFramedPanel("##Entries", ImVec2(0.0f, -(panelHeight + gap)));
 		bool anyShown = false;
-		for (const auto& section : page.sections) {
-			const bool showTitle = page.sections.size() > 1 || section.title != page.title;
+		for (const auto& section : view->sections) {
+			const bool showTitle = view->sections.size() > 1 || section.title != page.title;
 			anyShown |= DrawSection(a_provider, section, showTitle);
 		}
 		if (!anyShown) {
@@ -2693,7 +2880,7 @@ namespace CompletionistUI
 
 		// Folded, the description panel's grabber is all that's left either way
 		if (shoutPage && panelHeight >= 1.0f) {
-			DrawShoutPanel(a_provider, page, panelHeight, gap);
+			DrawShoutPanel(a_provider, *view, panelHeight, gap);
 		} else {
 			DrawDescriptionPanel(a_provider, panelHeight, gap);
 		}
@@ -3971,7 +4158,7 @@ namespace CompletionistUI
 				const auto title = a_provider.Translate(summary.title);
 				for (const auto& section : page.sections) {
 					for (const auto& entry : section.entries) {
-						_findIndex.push_back({ summary.id, title, category.Group(), entry, page.layout == PageLayout::kJournal });
+						_findIndex.push_back({ summary.id, title, category.Group(), entry, page.LayoutOf(section) == PageLayout::kJournal });
 					}
 				}
 			}
@@ -4196,120 +4383,134 @@ namespace CompletionistUI
 			selected = first;
 		}
 
-		//---------------------------------------------------
-		// Quest list
-		//---------------------------------------------------
+		// Open quests on the left, completed ones above the description
+		const auto completedSection = [](const Section& a_section) { return a_section.title == "UI_QuestSection_Completed"; };
+		const auto drawSections = [&](bool a_completed) {
+			bool anyShown = false;
+			for (const auto& section : a_page.sections) {
+				if (completedSection(section) != a_completed) {
+					continue;
+				}
+				std::vector<const Entry*> entries;
+				for (const auto& entry : section.entries) {
+					if (PassesFilter(entry)) {
+						entries.push_back(std::addressof(entry));
+					}
+				}
+				if (entries.empty()) {
+					continue;
+				}
+				if (_sort == SortMode::kName) {
+					std::ranges::stable_sort(entries, [](const Entry* a, const Entry* b) { return Lower(a->name) < Lower(b->name); });
+				}
+				anyShown = true;
+				const int journalSection = _spotSection++;
+				int       journalIndex = 0;
+
+				ImGui::PushID(section.title.c_str());
+				ImGui::Spacing();
+				HeadingWithCount(a_provider.Translate(section.title), std::to_string(entries.size()), palette.heading);
+				HeadingRule(4.0f);
+
+				for (const auto* entry : entries) {
+					ImGui::PushID(keyOf(*entry).c_str());
+					const float rowHeight = ImGui::GetFrameHeight();
+					if (RowSelectable("##Quest", entry == selected, ImVec2(0.0f, rowHeight), ImGuiSelectableFlags_AllowOverlap)) {
+						_journalKey = keyOf(*entry);
+					}
+					const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
+					RecordSpot(_entrySpots, journalSection, journalIndex++, 1, static_cast<int>(entries.size()));
+					KeepFocus("quest\x1f" + keyOf(*entry));
+					if (rowFocused && _padActive && keyOf(*entry) != _journalKey) {
+						_journalKey = keyOf(*entry);
+					}
+					if (!_scrollToKey.empty() && _scrollToKey == keyOf(*entry)) {
+						ImGui::SetScrollHereY(0.35f);
+						ImGui::SetFocusID(ImGui::GetItemID(), ImGui::GetCurrentWindow());
+						_scrollToKey.clear();
+					}
+					const auto min = ImGui::GetItemRectMin();
+					const auto max = ImGui::GetItemRectMax();
+
+					// Tick to mark complete for the mouse, Square on a controller
+					float right = max.x - style.FramePadding.x;
+					if (entry->canToggle) {
+						const float side = rowHeight;
+						const bool  hovered = !_padActive && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseHoveringRect(min, max);
+						const auto  action = RowAction::kComplete;
+						if (rowFocused) {
+							_padActionKey = RowActionKey(action, entry->IsComplete());
+							if (ImGui::IsKeyPressed(rowActionKey, false)) {
+								_journalKey = keyOf(*entry);
+								DoRowAction(a_provider, *entry, action);
+							}
+						}
+						if (hovered) {
+							if (RowActionButton(a_provider, action, entry->IsComplete(), ImVec2(right - side, std::round((min.y + max.y - side) * 0.5f)), side, hovered)) {
+								_journalKey = keyOf(*entry);
+								DoRowAction(a_provider, *entry, action);
+							}
+						}
+						right -= side;
+					}
+					ImGui::PopID();
+
+					auto*       drawList = ImGui::GetWindowDrawList();
+					const float marker = ImGui::GetTextLineHeight();
+					const float centreY = (min.y + max.y) * 0.5f;
+					DrawMarker(drawList, ImVec2(min.x + style.FramePadding.x + marker * 0.5f, centreY), marker, Colour(StateColour(entry->state)), entry->IsComplete() ? 1.0f : 0.0f);
+
+					const float textX = min.x + style.FramePadding.x * 2.0f + marker;
+					const float textY = centreY - fontSize * 0.5f;
+					if (!entry->detail.empty()) {
+						const float detailWidth = ImGui::CalcTextSize(entry->detail.c_str()).x;
+						right -= detailWidth;
+						drawList->AddText(ImVec2(right, textY), Colour(palette.textDim), entry->detail.c_str());
+						right -= style.FramePadding.x;
+					}
+					drawList->PushClipRect(min, ImVec2(right, max.y), true);
+					drawList->AddText(ImVec2(textX, textY), Colour(entry->IsComplete() ? palette.textDim : palette.text), entry->name.c_str());
+					drawList->PopClipRect();
+				}
+				ImGui::PopID();
+			}
+			return anyShown;
+		};
+
+		const float gap = fontSize * 0.75f;
+		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
+		const float panelHeight = DescriptionPanelHeight();
 
 		const float listWidth = std::max(fontSize * 16.0f, ImGui::GetContentRegionAvail().x * 0.42f);
 		BeginFramedPanel("##JournalList", ImVec2(listWidth, 0.0f));
-		bool anyShown = false;
-		for (const auto& section : a_page.sections) {
-			std::vector<const Entry*> entries;
-			for (const auto& entry : section.entries) {
-				if (PassesFilter(entry)) {
-					entries.push_back(std::addressof(entry));
-				}
-			}
-			if (entries.empty()) {
-				continue;
-			}
-			if (_sort == SortMode::kName) {
-				std::ranges::stable_sort(entries, [](const Entry* a, const Entry* b) { return Lower(a->name) < Lower(b->name); });
-			}
-			anyShown = true;
-			const int journalSection = _spotSection++;
-			int       journalIndex = 0;
-
-			ImGui::PushID(section.title.c_str());
-			ImGui::Spacing();
-			HeadingWithCount(a_provider.Translate(section.title), std::to_string(entries.size()), palette.heading);
-			HeadingRule(4.0f);
-
-			for (const auto* entry : entries) {
-				ImGui::PushID(keyOf(*entry).c_str());
-				const float rowHeight = ImGui::GetFrameHeight();
-				if (RowSelectable("##Quest", entry == selected, ImVec2(0.0f, rowHeight), ImGuiSelectableFlags_AllowOverlap)) {
-					_journalKey = keyOf(*entry);
-				}
-				const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
-				RecordSpot(_entrySpots, journalSection, journalIndex++, 1, static_cast<int>(entries.size()));
-				KeepFocus("quest\x1f" + keyOf(*entry));
-				if (rowFocused && _padActive && keyOf(*entry) != _journalKey) {
-					_journalKey = keyOf(*entry);
-				}
-				if (!_scrollToKey.empty() && _scrollToKey == keyOf(*entry)) {
-					ImGui::SetScrollHereY(0.35f);
-					ImGui::SetFocusID(ImGui::GetItemID(), ImGui::GetCurrentWindow());
-					_scrollToKey.clear();
-				}
-				const auto min = ImGui::GetItemRectMin();
-				const auto max = ImGui::GetItemRectMax();
-
-				// Tick to mark complete for the mouse, Square on a controller
-				float right = max.x - style.FramePadding.x;
-				if (entry->canToggle) {
-					const float side = rowHeight;
-					const bool  hovered = !_padActive && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseHoveringRect(min, max);
-					const auto  action = RowAction::kComplete;
-					if (rowFocused) {
-						_padActionKey = RowActionKey(action, entry->IsComplete());
-						if (ImGui::IsKeyPressed(rowActionKey, false)) {
-							_journalKey = keyOf(*entry);
-							DoRowAction(a_provider, *entry, action);
-						}
-					}
-					if (hovered) {
-						if (RowActionButton(a_provider, action, entry->IsComplete(), ImVec2(right - side, std::round((min.y + max.y - side) * 0.5f)), side, hovered)) {
-							_journalKey = keyOf(*entry);
-							DoRowAction(a_provider, *entry, action);
-						}
-					}
-					right -= side;
-				}
-				ImGui::PopID();
-
-				auto*       drawList = ImGui::GetWindowDrawList();
-				const float marker = ImGui::GetTextLineHeight();
-				const float centreY = (min.y + max.y) * 0.5f;
-				DrawMarker(drawList, ImVec2(min.x + style.FramePadding.x + marker * 0.5f, centreY), marker, Colour(StateColour(entry->state)), entry->IsComplete() ? 1.0f : 0.0f);
-
-				const float textX = min.x + style.FramePadding.x * 2.0f + marker;
-				const float textY = centreY - fontSize * 0.5f;
-				if (!entry->detail.empty()) {
-					const float detailWidth = ImGui::CalcTextSize(entry->detail.c_str()).x;
-					right -= detailWidth;
-					drawList->AddText(ImVec2(right, textY), Colour(palette.textDim), entry->detail.c_str());
-					right -= style.FramePadding.x;
-				}
-				drawList->PushClipRect(min, ImVec2(right, max.y), true);
-				drawList->AddText(ImVec2(textX, textY), Colour(entry->IsComplete() ? palette.textDim : palette.text), entry->name.c_str());
-				drawList->PopClipRect();
-			}
-			ImGui::PopID();
-		}
-		if (!anyShown) {
+		if (!drawSections(false)) {
 			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_NothingMatches").c_str());
 		}
 		EndFramedPanel();
 
-		//---------------------------------------------------
-		// Selected quest
-		//---------------------------------------------------
-
-		ImGui::SameLine(0.0f, fontSize * 0.75f);
-		BeginFramedPanel("##JournalDetail", ImVec2(0.0f, 0.0f), true);
-		ScrollWithRightStick();
-		if (!selected) {
-			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_QuestSelect").c_str());
-			EndFramedPanel();
-			return;
+		ImGui::SameLine(0.0f, gap);
+		ImGui::BeginGroup();
+		BeginFramedPanel("##JournalCompleted", ImVec2(0.0f, -(panelHeight + gap)));
+		if (!drawSections(true)) {
+			ImGui::Spacing();
+			HeadingWithCount(a_provider.Translate("UI_QuestSection_Completed"), "0", palette.heading);
+			HeadingRule(4.0f);
 		}
+		EndFramedPanel();
+		DrawDescriptionPanel(a_provider, panelHeight, gap, &a_page, selected);
+		ImGui::EndGroup();
+	}
 
-		const bool complete = selected->IsComplete();
-		ImGui::PushTextWrapPos(0.0f);
-		ImGui::PushFont(Themes::TitleFont());
-		ImGui::TextColored(palette.heading, "%s", selected->name.c_str());
-		ImGui::PopFont();
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Quest Detail ) ---------
+	//---------------------------------------------------
+
+	// Type, page and status, then "Label: text" lines with their own small heading
+	void Menu::DrawQuestDetail(IDataProvider& a_provider, const Page& a_page, const Entry& a_entry) {
+
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const bool  complete = a_entry.IsComplete();
 
 		std::string subtitle;
 		const auto  append = [&](const std::string& a_part) {
@@ -4317,19 +4518,17 @@ namespace CompletionistUI
 				subtitle += (subtitle.empty() ? "" : "  \xC2\xB7  ") + a_part;
 			}
 		};
-		append(selected->type.empty() ? std::string{} : a_provider.Translate(selected->type));
+		append(a_entry.type.empty() ? std::string{} : a_provider.Translate(a_entry.type));
 		append(a_provider.Translate(a_page.title));
-		append(a_provider.Translate(selected->status.empty() ? std::string(StateKey(selected->state)) : selected->status));
-		append(selected->detail);
-		if (selected->marked && selected->detail != a_provider.Translate("UI_QuestMarked")) {
+		append(a_provider.Translate(a_entry.status.empty() ? std::string(StateKey(a_entry.state)) : a_entry.status));
+		append(a_entry.detail);
+		if (a_entry.marked && a_entry.detail != a_provider.Translate("UI_QuestMarked")) {
 			append(a_provider.Translate("UI_QuestMarked"));
 		}
 		ImGui::TextColored(complete ? palette.found : palette.textDim, "%s", subtitle.c_str());
+		ImGui::Spacing();
 
-		ImGui::Dummy(ImVec2(0.0f, fontSize * 0.6f));
-
-		// "Label: text" lines get their own small heading
-		std::string_view text = selected->description;
+		std::string_view text = a_entry.description;
 		while (!text.empty()) {
 			const auto lineEnd = text.find('\n');
 			auto       line = text.substr(0, lineEnd);
@@ -4356,13 +4555,11 @@ namespace CompletionistUI
 			}
 			ImGui::Dummy(ImVec2(0.0f, fontSize * 0.4f));
 		}
-		ImGui::PopTextWrapPos();
 
-		if (!selected->canToggle && complete) {
+		if (!a_entry.canToggle && complete) {
 			ImGui::Dummy(ImVec2(0.0f, fontSize * 0.6f));
 			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_QuestCompletedInGame").c_str());
 		}
-		EndFramedPanel();
 	}
 
 	//---------------------------------------------------
@@ -4746,7 +4943,7 @@ namespace CompletionistUI
 
 	float Menu::DescriptionPanelHeight() const {
 
-		const float lines = _descriptionDragLines >= 0.0f ? _descriptionDragLines : static_cast<float>(_settings ? _settings->descriptionLines : 5);
+		const float lines = _descriptionDragLines >= 0.0f ? _descriptionDragLines : _descriptionFitLines >= 0.0f ? _descriptionFitLines : static_cast<float>(_settings ? _settings->descriptionLines : 5);
 		const float open = (std::min(lines, _descriptionMaxLines) + 2.4f) * ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().WindowPadding.y * 2.0f;
 		const float t = std::clamp(_descriptionOpen, 0.0f, 1.0f);
 		return open * t * t * (3.0f - 2.0f * t);
@@ -4761,6 +4958,11 @@ namespace CompletionistUI
 		const float lineHeight = ImGui::GetTextLineHeightWithSpacing();
 		const float frame = 2.4f * lineHeight + ImGui::GetStyle().WindowPadding.y * 2.0f;
 		_descriptionMaxLines = std::clamp(std::floor((a_available - a_gap - frame) / lineHeight) - 6.0f, 1.0f, static_cast<float>(UISettings::maxDescriptionLines));
+
+		// The setting changed, so it wins over Y's fit
+		if (_settings && _settings->descriptionLines != _descriptionFitBase) {
+			_descriptionFitLines = -1.0f;
+		}
 
 		const bool open = !(_settings && _settings->descriptionCollapsed);
 		if (_descriptionOpen < 0.0f) {
@@ -4797,12 +4999,13 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Description Panel ) ----
 	//---------------------------------------------------
 
-	void Menu::DrawDescriptionPanel(IDataProvider& a_provider, float a_height, float a_gap) {
+	// Quest pages pass the selected quest, the others show the hovered or pinned entry
+	void Menu::DrawDescriptionPanel(IDataProvider& a_provider, float a_height, float a_gap, const Page* a_journal, const Entry* a_quest) {
 
 		const auto& palette = Themes::GetPalette();
 		const auto& style = ImGui::GetStyle();
 		const auto& io = ImGui::GetIO();
-		const auto* entry = _hoveredEntry ? std::addressof(*_hoveredEntry) : (_pinnedEntry ? std::addressof(*_pinnedEntry) : nullptr);
+		const auto* entry = a_journal ? a_quest : _hoveredEntry ? std::addressof(*_hoveredEntry) : (_pinnedEntry ? std::addressof(*_pinnedEntry) : nullptr);
 
 		// Grabber, drag to resize, double-click to collapse
 		const auto  start = ImGui::GetCursorScreenPos();
@@ -4813,8 +5016,9 @@ namespace CompletionistUI
 		const float gripWidth = ImGui::GetFontSize() * 4.0f;
 		const float lineHeight = ImGui::GetTextLineHeightWithSpacing();
 
+		// Collapsed, the grip sits on the bottom edge and mustn't reach past it
 		ImGui::SetCursorScreenPos(ImVec2(centreX - gripWidth * 0.5f, gapTop));
-		ImGui::InvisibleButton("##DescriptionGrip", ImVec2(gripWidth, a_gap + ImGui::GetFontSize() * 0.4f));
+		ImGui::InvisibleButton("##DescriptionGrip", ImVec2(gripWidth, a_gap + (a_height < 1.0f ? 0.0f : ImGui::GetFontSize() * 0.4f)));
 		const bool hovered = ImGui::IsItemHovered();
 		const bool active = ImGui::IsItemActive();
 		if (hovered || active) {
@@ -4825,10 +5029,12 @@ namespace CompletionistUI
 			auto& settings = *_settings;
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				settings.descriptionCollapsed = !settings.descriptionCollapsed;
+				_descriptionFitLines = -1.0f;
 				_settingsChanged = true;
 			} else if (active && io.MouseDelta.y != 0.0f && !settings.descriptionCollapsed) {
 				if (!_descriptionDragged) {
-					_descriptionDragLines = std::min(static_cast<float>(settings.descriptionLines), _descriptionMaxLines);
+					_descriptionDragLines = std::min(_descriptionFitLines >= 0.0f ? _descriptionFitLines : static_cast<float>(settings.descriptionLines), _descriptionMaxLines);
+					_descriptionFitLines = -1.0f;
 					_descriptionDragged = true;
 				}
 				_descriptionDragLines = std::clamp(_descriptionDragLines - io.MouseDelta.y / lineHeight, 1.0f, _descriptionMaxLines);
@@ -4861,7 +5067,14 @@ namespace CompletionistUI
 		gripList->PopClipRect();
 
 		if (!entry) {
-			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_DescriptionEmpty").c_str());
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(a_journal ? "UI_QuestSelect" : "UI_DescriptionEmpty").c_str());
+		} else if (a_journal) {
+			ImGui::PushFont(Themes::HeaderFont());
+			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
+			ImGui::PopFont();
+			ImGui::PushTextWrapPos(0.0f);
+			DrawQuestDetail(a_provider, *a_journal, *entry);
+			ImGui::PopTextWrapPos();
 		} else {
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
@@ -4902,6 +5115,14 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_DescriptionNone").c_str());
 			}
 			ImGui::PopTextWrapPos();
+		}
+
+		// Y: as many lines as the text needs, as DescriptionPanelHeight counts them
+		// Until held Y or the grip, the saved height stays as it is
+		if (std::exchange(_fitDescription, false)) {
+			const float content = ImGui::GetCursorPosY() - ImGui::GetCursorStartPos().y;
+			_descriptionFitLines = std::clamp(std::ceil(content / lineHeight - 2.4f), 1.0f, _descriptionMaxLines);
+			_descriptionFitBase = _settings ? _settings->descriptionLines : 0;
 		}
 
 		EndFramedPanel();
@@ -5316,70 +5537,17 @@ namespace CompletionistUI
 		// Tabs
 		//---------------------------------------------------
 
-		std::vector<std::pair<std::string, std::string>> tabs{ { std::string(windowTab), a_provider.Translate("UI_SettingsSection_Window") } };
+		std::vector<TabItem> tabs{ { std::string(windowTab), a_provider.Translate("UI_SettingsSection_Window"), {} } };
 		for (const auto& page : _settingsPages) {
 			if (page.tab) {
-				tabs.emplace_back(page.id, a_provider.Translate(page.title));
+				tabs.push_back({ page.id, a_provider.Translate(page.title), {} });
 			}
 		}
-		if (std::ranges::none_of(tabs, [&](const auto& a_tab) { return a_tab.first == _settingsTab; })) {
+		if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == _settingsTab; })) {
 			_settingsTab = windowTab;
 		}
-
-		// LT / RT
-		_settingsTabsShown = true;
-		if (!ImGui::IsAnyItemActive()) {
-			const bool previous = ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
-			const bool next = ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false);
-			if (previous || next) {
-				const auto current = std::ranges::find(tabs, _settingsTab, &std::pair<std::string, std::string>::first);
-				const auto count = static_cast<std::ptrdiff_t>(tabs.size());
-				const auto index = (static_cast<std::ptrdiff_t>(current - tabs.begin()) + (next ? 1 : count - 1)) % count;
-				_settingsTab = tabs[static_cast<std::size_t>(index)].first;
-				_confirmKey.clear();
-			}
-		}
-
-		{
-			const float tabGap = ImGui::GetFontSize() * 1.6f;
-			float       total = 0.0f;
-			for (const auto& [id, title] : tabs) {
-				total += ImGui::CalcTextSize(title.c_str()).x + tabGap;
-			}
-			ImGui::Spacing();
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - total + tabGap) * 0.5f));
-			for (std::size_t i = 0; i < tabs.size(); ++i) {
-				const auto& [id, title] = tabs[i];
-				if (i > 0) {
-					ImGui::SameLine(0.0f, tabGap);
-				}
-				const auto size = ImGui::CalcTextSize(title.c_str());
-				ImGui::PushID(id.c_str());
-				if (ImGui::InvisibleButton("##Tab", ImVec2(size.x, ImGui::GetFrameHeight()))) {
-					_settingsTab = id;
-					_confirmKey.clear();
-				}
-				NoteControl();
-				const bool selected = id == _settingsTab;
-				const bool focused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
-				const bool hovered = ImGui::IsItemHovered() || focused;
-				const auto min = ImGui::GetItemRectMin();
-				const auto max = ImGui::GetItemRectMax();
-				auto*      drawList = ImGui::GetWindowDrawList();
-				if (focused) {
-					const float pad = ImGui::GetFontSize() * 0.4f;
-					drawList->AddRect(ImVec2(min.x - pad, min.y), ImVec2(max.x + pad, max.y), Colour(palette.accent, 0.8f), ImGui::GetFontSize() * 0.2f, 0, 1.5f);
-				}
-				drawList->AddText(ImVec2(min.x, min.y + (max.y - min.y - size.y) * 0.5f), Colour(selected ? palette.heading : (hovered ? palette.text : palette.textDim)), title.c_str());
-				if (selected) {
-					if (SkyUI()) {
-						Decor::DoubleRule(drawList, ImVec2(min.x - tabGap * 0.25f, max.y), ImVec2(max.x + tabGap * 0.25f, max.y), Colour(palette.accent));
-					} else {
-						Decor::FadedLine(drawList, ImVec2(min.x - tabGap * 0.25f, max.y), ImVec2(max.x + tabGap * 0.25f, max.y), Colour(palette.accent), 1.5f);
-					}
-				}
-				ImGui::PopID();
-			}
+		if (TabRow(tabs, _settingsTab)) {
+			_confirmKey.clear();
 		}
 
 		if (!settings.captureTarget.empty() && settings.captureResult != UISettings::captureNone) {

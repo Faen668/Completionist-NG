@@ -15,6 +15,7 @@ namespace CompletionistUI
 		[[nodiscard]] virtual Page                  GetPage(std::string_view a_id) = 0;
 
 		virtual void SetCompleted(std::string_view a_pageID, const Entry& a_entry, bool a_completed) = 0;
+		virtual void SetPageChoice(std::string_view, std::int32_t) {}
 
 		[[nodiscard]] virtual std::vector<SettingsPage> GetSettingsPages() { return {}; }
 		virtual void                                    ApplySetting(std::string_view, const SettingItem&) {}
