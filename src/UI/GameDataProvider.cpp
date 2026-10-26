@@ -1,12 +1,12 @@
 #include "UI/GameDataProvider.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
+#include "Frameworks/Misc/CFramework_Shouts.hpp"
 #include "Frameworks/Misc/CFramework_Trainers.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/MCMHandler.hpp"
 #include "Internal Utility/PatchListener.hpp"
-#include "Internal Utility/ScriptObject.hpp"
 #include "Internal Utility/Settings.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Internal Utility/WordsOfPower.hpp"
@@ -75,52 +75,21 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Game Data ( Split Font Tags ) ------------------
+		//-- Game Data ( Shout Words ) ----------------------
 		//---------------------------------------------------
 
-		// Strip the MCM's font tags, the window draws the words itself
-		void SplitFontTags(Entry& a_entry) {
+		// A shout's words, the first a_learnt of them learnt
+		void AddShoutWords(Entry& a_entry, const RE::TESForm* a_form, std::int32_t a_learnt) {
 
-			const auto& name = a_entry.name;
-			const auto  first = name.find("<font");
-			if (first == std::string::npos) {
+			const auto* shout = a_form ? a_form->As<RE::TESShout>() : nullptr;
+			if (!shout || a_learnt < 0) {
 				return;
 			}
-
-			std::uint32_t learnt = 0;
-			const auto&   learntText = CVariables::V_ShoutColour_Found;
-			if (const auto hash = learntText.find('#'); hash != std::string::npos) {
-				std::from_chars(learntText.data() + hash + 1, learntText.data() + learntText.size(), learnt, 16);
-			}
-
-			std::vector<EntryWord> words;
-			for (auto pos = first; (pos = name.find("<font", pos)) != std::string::npos;) {
-				const auto tagEnd = name.find('>', pos);
-				const auto close = tagEnd == std::string::npos ? std::string::npos : name.find("</font>", tagEnd);
-				if (close == std::string::npos) {
-					break;
+			for (std::int32_t i = 0; i < static_cast<std::int32_t>(std::size(shout->variations)); ++i) {
+				if (const auto* word = shout->variations[i].word) {
+					a_entry.words.push_back({ word->translation.c_str() ? word->translation.c_str() : word->GetName(), i < a_learnt });
 				}
-				EntryWord word;
-				word.text = name.substr(tagEnd + 1, close - tagEnd - 1);
-				if (const auto hash = name.find('#', pos); hash != std::string::npos && hash < tagEnd) {
-					std::uint32_t rgb = 0;
-					if (std::from_chars(name.data() + hash + 1, name.data() + std::min(hash + 7, tagEnd), rgb, 16).ec == std::errc{}) {
-						word.done = rgb == learnt;
-					}
-				}
-				words.push_back(std::move(word));
-				pos = close + 7;
 			}
-
-			auto plain = name.substr(0, first);
-			if (const auto bracket = plain.rfind('('); bracket != std::string::npos) {
-				plain.erase(bracket);
-			}
-			while (!plain.empty() && plain.back() == ' ') {
-				plain.pop_back();
-			}
-			a_entry.name = std::move(plain);
-			a_entry.words = std::move(words);
 		}
 
 		//---------------------------------------------------
@@ -216,7 +185,9 @@ namespace CompletionistUI
 			for (std::size_t i = 0; i < names.size(); ++i) {
 				auto& entry = section.entries.emplace_back();
 				entry.name = names[i];
-				SplitFontTags(entry);
+				if (i < forms.size()) {
+					AddShoutWords(entry, forms[i], CFramework_Shouts::CHandler::LearntWords(forms[i]));
+				}
 				entry.state = i < bools.size() && bools[i] ? EntryState::kFound : EntryState::kNeeded;
 				entry.formID = i < forms.size() && forms[i] ? forms[i]->GetFormID() : 0;
 				entry.canPin = i < forms.size() && Completionist::CellScanner::IsItemPinnable(nullptr, forms[i]);
@@ -352,7 +323,7 @@ namespace CompletionistUI
 					continue;
 				}
 
-				const auto& names = data.type == CMiscPatchType::kShouts ? data.shout_names : data.names;
+				const auto& names = data.names;
 				auto&       section = a_page.sections.emplace_back();
 				section.title = data.pageheaderL;
 				for (std::size_t i = 0; i < names.size(); ++i) {
@@ -361,7 +332,9 @@ namespace CompletionistUI
 					}
 					auto& entry = section.entries.emplace_back();
 					entry.name = names[i];
-					SplitFontTags(entry);
+					if (data.type == CMiscPatchType::kShouts && i < data.forms.size()) {
+						AddShoutWords(entry, data.forms[i], CMiscPatch::LearntWords(data, i));
+					}
 					entry.state = i < data.bools.size() && data.bools[i] ? EntryState::kFound : EntryState::kNeeded;
 					entry.formID = i < data.forms.size() && data.forms[i] ? data.forms[i]->GetFormID() : 0;
 					entry.canPin = i < data.forms.size() && Completionist::CellScanner::IsItemPinnable(nullptr, data.forms[i]);
@@ -453,21 +426,6 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Game Data ( Find Value ) -----------------------
-		//---------------------------------------------------
-
-		RE::BSScript::Variable* FindValue(const ScriptObjectPtr& a_script, const char* a_name) {
-
-			if (!a_script) {
-				return nullptr;
-			}
-			if (auto* property = a_script->GetProperty(a_name)) {
-				return property;
-			}
-			return ScriptObject::GetVariable(a_script, a_name);
-		}
-
-		//---------------------------------------------------
 		//-- Game Data ( Read Int ) -------------------------
 		//---------------------------------------------------
 
@@ -517,7 +475,6 @@ namespace CompletionistUI
 			values.legacyChoice = ReadInt("Legacy_Faction_Choice");
 
 			values.treatBooksAsItems = ReadBool("TreatBooksAsItems");
-			values.debug = ReadBool("bDebug");
 
 			values.dllVersion = CFramework_Master::FrameworkAPI::GetVersion(nullptr);
 			values.patchCount = CFramework_Master::FrameworkAPI::GetPatchCount(nullptr);
@@ -542,7 +499,6 @@ namespace CompletionistUI
 			}
 			left.push_back({ .id = "spacer1", .kind = SettingKind::kSpacer });
 			left.push_back({ .id = "books", .kind = SettingKind::kToggle, .label = "$TreatBooksAsItemsState_Text", .info = "$TreatBooksAsItemsState_Info", .on = a_values.treatBooksAsItems });
-			left.push_back({ .id = "debug", .kind = SettingKind::kToggle, .label = "$State_DebuggingText", .info = "$State_DebuggingInfo", .on = a_values.debug });
 
 			right.push_back({ .id = "header2", .kind = SettingKind::kHeader, .label = "$MCMPageSettingsHeader2" });
 			right.push_back({ .id = "dawnguard", .kind = SettingKind::kChoice, .label = "$DGFaction", .info = "$DGFactionInfo", .choice = a_values.dawnguardChoice, .options = a_values.dawnguardOptions });
@@ -1062,12 +1018,6 @@ namespace CompletionistUI
 				addQuestHeader(pageKey);
 			} else {
 				addQuestPage(id, pageKey);
-			}
-		}
-		if (!CHCMHandler::MainPatchesMCMPagesDefs.empty()) {
-			addQuestHeader("$HeaderU");
-			for (const auto& [pageKey, plugin, id] : CHCMHandler::MainPatchesMCMPagesDefs) {
-				addQuestPage(static_cast<std::int32_t>(id), pageKey);
 			}
 		}
 
@@ -1845,10 +1795,6 @@ namespace CompletionistUI
 			} else if (a_item.id == "books") {
 				values.treatBooksAsItems = a_item.on;
 				property = "TreatBooksAsItems";
-				on = a_item.on;
-			} else if (a_item.id == "debug") {
-				values.debug = a_item.on;
-				property = "bDebug";
 				on = a_item.on;
 			} else if (a_item.id == "dawnguard") {
 				values.dawnguardChoice = a_item.choice;

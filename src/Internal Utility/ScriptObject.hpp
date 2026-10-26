@@ -8,7 +8,6 @@ namespace ScriptObject
 	auto GetVariable(ScriptObjectPtr a_object, std::string_view a_variableName)
 		->RE::BSScript::Variable*;
 
-	auto IsType(ScriptObjectPtr a_object, const char* a_scriptName) -> bool;
 
 	auto GetBool(ScriptObjectPtr a_object, std::string_view a_variableName) -> bool;
 
@@ -31,10 +30,4 @@ namespace ScriptObject
 
 	auto GetArray(ScriptObjectPtr a_object, std::string_view a_variableName)->ScriptArrayPtr;
 
-	void RegisterForModEvent(
-		ScriptObjectPtr a_object,
-		RE::BSFixedString a_eventName,
-		RE::BSFixedString a_callbackName);
-
-	void UnregisterForModEvent(ScriptObjectPtr a_object, RE::BSFixedString a_eventName);
 }

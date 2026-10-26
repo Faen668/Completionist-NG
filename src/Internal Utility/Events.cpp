@@ -9,12 +9,8 @@ namespace CEvents
 {
 	std::vector<std::function<void(FuncParam_oHit)>> _OnHitEvent;
 	std::vector<std::function<void(FuncParam_Deth)>> _OnDeathEvent;
-	std::vector<std::function<void(FuncParam_Book)>> _OnBooksRead;
-	std::vector<std::function<void(FuncParam_Equp)>> _OnEquipEvent;
 	std::vector<std::function<void(FuncParam_Acti)>> _OnActivateEvent;
-	std::vector<std::function<void(FuncParam_Menu)>> _OnMenuOpenCloseEvent;
 	std::vector<std::function<void(FuncParam_Cont)>> _OnTESContainerChangedEvent;
-	std::vector<std::function<void(FuncParam_Stag)>> _OnStageTriggered;
 
 	//---------------------------------------------------
 	//-- Event Distributor (Register Events ) -----------
@@ -25,7 +21,6 @@ namespace CEvents
 		RE::BooksRead::GetEventSource()->AddEventSink(EventHandler::GetSingleton());
 		RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(EventHandler::GetSingleton()));
 		REGISTER_EVENT(RE::TESContainerChangedEvent);
-		REGISTER_EVENT(RE::TESEquipEvent);
 		REGISTER_EVENT(RE::TESActivateEvent);
 		REGISTER_EVENT(RE::TESDeathEvent);
 		REGISTER_EVENT(RE::TESHitEvent);
@@ -63,49 +58,12 @@ namespace CEvents
 	}
 
 	//---------------------------------------------------
-	//-- Event Distributor (Register Hooks ) ------------
-	//---------------------------------------------------
-
-	uintptr_t EventHandler::RegisterEnchantmentHook(const char* (*f)(RE::TESForm* a_form), bool a_yesImSureCompat = false)
-	{
-		auto& trampoline = SKSE::GetTrampoline();
-		return trampoline.write_call<5>(RELOCATION_ID(50459, 51363).address() + REL::Relocate(0x1B1, 0x1B1), f);
-	}
-
-	//---------------------------------------------------
-	//-- Event Distributor (Register Function ) ---------
-	//---------------------------------------------------
-
-	void EventHandler::RegisterForEvent_OnBooksReadEvent(void (*f)(FuncParam_Book))
-	{
-		_OnBooksRead.push_back(f);
-	};
-
-	//---------------------------------------------------
-	//-- Event Distributor (Register Function ) ---------
-	//---------------------------------------------------
-
-	void EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(void (*f)(FuncParam_Menu))
-	{
-		_OnMenuOpenCloseEvent.push_back(f);
-	};
-
-	//---------------------------------------------------
 	//-- Event Distributor (Register Function ) ---------
 	//---------------------------------------------------
 
 	void EventHandler::RegisterForEvent_OnContainerChangedEvent(void (*f)(FuncParam_Cont))
 	{
 		_OnTESContainerChangedEvent.push_back(f);
-	};
-
-	//---------------------------------------------------
-	//-- Event Distributor (Register Function ) ---------
-	//---------------------------------------------------
-
-	void EventHandler::RegisterForEvent_OnEquipEvent(void (*f)(FuncParam_Equp))
-	{
-		_OnEquipEvent.push_back(f);
 	};
 
 	//---------------------------------------------------
@@ -136,25 +94,12 @@ namespace CEvents
 	};
 
 	//---------------------------------------------------
-	//-- Event Distributor (Register Function ) ---------
-	//---------------------------------------------------
-
-	void EventHandler::RegisterForEvent_OnStageTriggeredEvent(void (*f)(FuncParam_Stag))
-	{
-		_OnStageTriggered.push_back(f);
-	};
-
-	//---------------------------------------------------
 	//-- Event Distributor ( On Stage Triggered / Set ) -
 	//---------------------------------------------------
 
 	EventResult	EventHandler::ProcessEvent(FuncParam_Stag, RE::BSTEventSource<RE::TESQuestStageEvent>*)
 	{
 		if (!a_event) { return EventResult::kContinue; }
-
-		for (auto& fn : _OnStageTriggered) {
-			fn(a_event);
-		};
 
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->OnQuestStageTriggered(a_event);
@@ -183,10 +128,6 @@ namespace CEvents
 	EventResult	EventHandler::ProcessEvent(FuncParam_Menu, RE::BSTEventSource<RE::MenuOpenCloseEvent>*)
 	{
 		if (!a_event) { return EventResult::kContinue; }
-
-		for (auto& fn : _OnMenuOpenCloseEvent) {
-			fn(a_event);
-		};
 
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->OnMenuOpenCloseEvent(a_event);
@@ -238,10 +179,6 @@ namespace CEvents
 	{
 		if (!a_event) { return EventResult::kContinue; }
 
-		for (auto& fn : _OnBooksRead) {
-			fn(a_event);
-		}; 
-
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->OnBooksReadEvent(a_event);
 		};
@@ -249,21 +186,7 @@ namespace CEvents
 	};
 
 	//---------------------------------------------------
-	//-- Event Distributor ( On Equip ) -----------------
-	//---------------------------------------------------
-
-	EventResult EventHandler::ProcessEvent(FuncParam_Equp, RE::BSTEventSource<RE::TESEquipEvent>*)
-	{
-		if (!a_event) { return EventResult::kContinue; }
-
-		for (auto& fn : _OnEquipEvent) {
-			fn(a_event);
-		};
-		return EventResult::kContinue;
-	};
-
-	//---------------------------------------------------
-	//-- Event Distributor ( On Equip ) -----------------
+	//-- Event Distributor ( On Death ) -----------------
 	//---------------------------------------------------
 
 	EventResult EventHandler::ProcessEvent(FuncParam_Deth, RE::BSTEventSource<RE::TESDeathEvent>*)

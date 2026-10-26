@@ -25,7 +25,6 @@ namespace CFramework_Shouts{
 	};
 
 	//Vanilla Shouts
-	inline std::vector<std::string>				Vanilla_SH_NameOutput;
 	inline std::vector<std::string>				Vanilla_SH_NameArray;
 	inline std::vector<std::string>				Vanilla_SH_TextArray;
 	inline std::vector<RE::TESForm*>			Vanilla_SH_FormArray;
@@ -37,7 +36,6 @@ namespace CFramework_Shouts{
 	inline std::int32_t							Vanilla_SH_EntriesFound;
 
 	//Thunderchild Shouts
-	inline std::vector<std::string>				Thunderchild_SH_NameOutput;
 	inline std::vector<std::string>				Thunderchild_SH_NameArray;
 	inline std::vector<std::string>				Thunderchild_SH_TextArray;
 	inline std::vector<RE::TESForm*>			Thunderchild_SH_FormArray;
@@ -49,7 +47,6 @@ namespace CFramework_Shouts{
 	inline std::int32_t							Thunderchild_SH_EntriesFound;
 
 	//Miscellaneous Shouts
-	inline std::vector<std::string>				Miscellaneous_SH_NameOutput;
 	inline std::vector<std::string>				Miscellaneous_SH_NameArray;
 	inline std::vector<std::string>				Miscellaneous_SH_TextArray;
 	inline std::vector<RE::TESForm*>			Miscellaneous_SH_FormArray;
@@ -84,9 +81,7 @@ namespace CFramework_Shouts{
 
 		  static void			ProcessFoundForm(Section a_section, RE::FormID a_formID);
 
-		  static std::string	GetCompletedTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
-		  static std::string	GetSecondWordTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
-		  static std::string	GetFirstWordTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
-		  static std::string	GetBaseTemplate(RE::TESWordOfPower*, RE::TESWordOfPower*, RE::TESWordOfPower*);
+		  [[nodiscard]] static std::int32_t LearntWords(const RE::TESForm* a_shout);
+
 	};
 }

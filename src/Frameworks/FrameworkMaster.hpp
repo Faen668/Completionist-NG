@@ -9,7 +9,6 @@ namespace CFramework_Master
 {	
 	inline Serialization::CompletionistKey CQuestKeys_Natural;
 	inline Serialization::CompletionistKey CQuestKeys_Manual;
-	inline Serialization::CompletionistKey CQuestKeys_Stages;
 
 	inline Serialization::CompletionistData FoundItemData;
 	inline Serialization::CompletionistData FoundItemData_NoShow;
@@ -18,7 +17,6 @@ namespace CFramework_Master
 	inline Serialization::CompletionistRadiantCounter RadiantCountData;
 
 	inline Serialization::CompletionistExcludedReferences ExcludedCellScannerRefs;
-	inline Serialization::CompletionistExcludedReferences ExcludedMerchantContainers;
 
 	inline Serialization::CompletionistPatchSettings PatchSettings;
 
@@ -28,9 +26,6 @@ namespace CFramework_Master
 	inline Serialization::CompletionistCellTargets CellTargets;
 
 	inline int InstalledPatchesForMCMDisplay;
-	inline bool InMenuMode;
-
-	inline constexpr std::int32_t ArraySize = 128;
 
 	//Form, Name, Page
 	inline std::vector<std::tuple<RE::TESForm*, std::string, std::string, int32_t>> CItemsDataVec;
@@ -104,13 +99,11 @@ namespace CFramework_Master
 		static void							SendNotification(std::string a_msg, std::string a_setting);
 
 		static std::string					ReplaceStr(std::string const& in, std::string const& from, std::string const& to);
-		static std::string					GetHexValue(RE::StaticFunctionTag*, std::uint32_t IntVal);
 		static std::string					GetVersion(RE::StaticFunctionTag*);
 
 		static void							NotifyStartup();
 
 		static void							AddNewEventToLog(Serialization::CompletionistLog::logType kType, std::string a_log);
-		static Serialization::CompletionistLog::logType GetBookLogType(RE::TESForm* a_form);
 
 		//Items Functions
 		static std::vector<RE::TESForm*>	GetFormArrayByID(RE::StaticFunctionTag*, std::int32_t a_FrameworkID);
@@ -122,22 +115,18 @@ namespace CFramework_Master
 
 		static std::int32_t					GetPatchCount(RE::StaticFunctionTag*);
 		
-		static bool							IsInActualMenuMode(RE::StaticFunctionTag*);
 		static bool							IsBookKnown(RE::TESForm* a_form);
 		static bool							IsItemKnown(RE::TESForm* a_form, Serialization::CompletionistData* a_data);
 		static bool							IsEnchantmentKnown(RE::TESForm* a_form);
 
-		static std::vector<std::string>		SearchAndReportPage(const std::string& s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType);
 
 		static void							ProcessCaughtFish(RE::TESForm* a_form);
 		static void							WatchFishing();
-		static std::string					GetLocalisedCategory(int32_t);
-		static std::string					GetLocalizedCategoryString(const std::string& key);
 
 		static std::int32_t					GetBookCategoryType(RE::TESForm*);
 
 		static std::vector<std::string>		GetLoggingDates(RE::StaticFunctionTag*);
-		static std::vector<std::string>		GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_prefix, bool b_colour, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc);
+		static std::vector<std::string>		GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_prefix);
 
 		static const char*					OnMapMarkerDiscovered(RE::TESFullName* a_form);
 		static void							OnMapMarkerAdded(RE::TESFullName* a_form);
@@ -145,7 +134,6 @@ namespace CFramework_Master
 
 		static void							OnHit(RE::TESHitEvent const* a_event);
 		static void							OnDeath(RE::TESDeathEvent const* a_event);
-		static std::string					GetCombinedKillString(RE::StaticFunctionTag*, std::string a_name);
 	private:
 		static inline REL::Relocation<decltype(OnMapMarkerDiscovered)> _OnMapMarkerDiscovered;
 		static inline REL::Relocation<decltype(OnMapMarkerAdded)> _OnMapMarkerAdded;

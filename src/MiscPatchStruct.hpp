@@ -2,6 +2,7 @@
 #include "Serialization.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
+#include "UI/GameUI.hpp"
 
 #ifndef LOG_IF_ENABLED
 #define LOG_IF_ENABLED(...) if (CVariables::V_Global_Patch_Logging || log_install) { INFO(__VA_ARGS__); }
@@ -37,7 +38,6 @@ struct CMiscPatchData
 	int32_t displayOnPage{};
 
 	//Shout Specific
-	std::vector<std::string> shout_names{};
 	std::vector<RE::SpellItem*> words_1{};
 	std::vector<RE::SpellItem*> words_2{};
 	std::vector<RE::SpellItem*> words_3{};
@@ -77,8 +77,6 @@ enum CMiscPatchSortMode
 
 struct CMiscPatch
 {
-#define LOG_IF_ENABLED(...) if (CVariables::V_Global_Patch_Logging || log_install) { INFO(__VA_ARGS__); }
-
 	using master = CFramework_Master::FrameworkAPI;
 	
 	std::string mcmpage{};
@@ -97,13 +95,11 @@ struct CMiscPatch
 
 	std::unordered_map<std::string, std::string> translations{};
 
-	//Sets the mods priority, this determines the display order in the MCM.
+	//Sets the mods priority, this determines the display order in the window.
 	std::int32_t priority{};
 
 	//True if this patch handles vanilla / creation club tracking.
 	bool isVanillaTracking{};
-
-	bool CanLoadPage;
 
 	// Sorting Mode
 	CMiscPatchSortMode sortMode = kDefault;
@@ -111,49 +107,6 @@ struct CMiscPatch
 	//---------------------------------------------------
 	//-- function ---------------------------------------
 	//---------------------------------------------------
-
-	void ValidatePageSizeRules()
-	{
-		bool failedValidation = false;
-		std::unordered_map<int32_t, std::vector<const CMiscPatchData*>> sectionsByPage;
-
-		// Step 1: Group by displayOnPage
-		for (const auto& section : type_sections) {
-			if (!section.IsEmpty()) {
-				sectionsByPage[section.displayOnPage].push_back(&section);
-			}
-		}
-
-		// Step 2: Validate each page
-		for (const auto& [page, sections] : sectionsByPage) {
-			int totalForms = 0;
-			for (const auto* section : sections) {
-				totalForms += static_cast<int>(std::ranges::distance(section->data.GetAllBases()));
-			}
-
-			int sectionCount = sections.size();
-
-			// Compute max allowed forms for this count
-			int maxFormsAllowed = 128 - (sectionCount * 2); // 2 headers per section
-			if (sectionCount > 1) {
-				maxFormsAllowed -= ((sectionCount - 1) * 2); // 2 "spacer" slots per additional section
-			}
-
-			if (totalForms > maxFormsAllowed) {
-				failedValidation = true;
-				INFO("Critical Error: Page [{}] has too many entries: {} forms across {} sections. Max allowed: {}",
-					page, totalForms, sectionCount, maxFormsAllowed);
-			}
-			else
-			{
-				LOG_IF_ENABLED("Page Size Validation Passed: Page [{}] has {} forms across {} sections. Max allowed: {}",
-					page, totalForms, sectionCount, maxFormsAllowed);
-			}
-		}
-
-		CanLoadPage = !failedValidation;
-		LOG_IF_ENABLED("{} CanLoadPage: {}", mcmpage, CanLoadPage);
-	}
 
 	void CleanEmptyPages()
 	{
@@ -241,14 +194,6 @@ struct CMiscPatch
 		section_defs = std::move(updatedSectionDefs);
 
 		LOG_IF_ENABLED("[{}] CleanEmptyPages() completed successfully.", mcmpage);
-	}
-
-	//---------------------------------------------------
-	//-- function ---------------------------------------
-	//---------------------------------------------------
-
-	CMiscPatchType IntToEnum(int32_t value) {
-		return static_cast<CMiscPatchType>(value);
 	}
 
 	//---------------------------------------------------
@@ -594,84 +539,19 @@ struct CMiscPatch
 
 				case CMiscPatchType::kShouts:
 				{
-					section.shout_names.clear();
-
-					for (size_t i = 0; i < section.forms.size(); i++)
-					{
-						auto* shout = static_cast<RE::TESShout*>(section.forms[i]);
-						if (!shout) {
-							ERROR("Null shout pointer at index {}", i);
-							section.shout_names.push_back("<Invalid shout>");
-							section.bools[i] = false;
-							continue;
-						}
-
-						auto* Word1 = shout->variations[0].word;
-						auto* Word2 = shout->variations[1].word;
-						auto* Word3 = shout->variations[2].word;
-
-						if (!Word1 || !Word2 || !Word3) {
-							ERROR("Null word pointer(s) in shout index {}", i);
-							section.shout_names.push_back("<Missing word(s)>");
-							section.bools[i] = false;
-							continue;
-						}
-
-						if (i >= section.names.size()) {
-							ERROR("Index {} out of bounds for section.names (size = {})", i, section.names.size());
-							section.shout_names.push_back("<Invalid name>");
-							section.bools[i] = false;
-							continue;
-						}
-
-						// --- Begin the original logic with logging ---
-						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_3[i])) {
-							section.shout_names.push_back(section.names[i] + GetCompletedTemplate(Word1, Word2, Word3));
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_3[i]);
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_2[i]);
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
-							section.bools[i] = true;
-							continue;
-						}
-
-						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_2[i])) {
-							section.shout_names.push_back(section.names[i] + GetSecondWordTemplate(Word1, Word2, Word3));
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_2[i]);
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
-							section.bools[i] = false;
-							continue;
-						}
-
-						if (CFramework_Master::FoundItemData_NoShow.HasForm(section.words_1[i])) {
-							section.shout_names.push_back(section.names[i] + GetFirstWordTemplate(Word1, Word2, Word3));
-							CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[i]);
-							section.bools[i] = false;
-							continue;
-						}
-
-						// --- Problematic line: log everything before we touch it ---
-						INFO(
-							"Processing shout index {} | FormID {:08X} | Name = '{}' | Words = [{}, {}, {}]",
-							i,
-							section.forms[i] ? section.forms[i]->GetFormID() : 0,
-							section.names[i],
-							Word1->GetFullName(),
-							Word2->GetFullName(),
-							Word3->GetFullName()
-						);
-
-						try {
-							section.shout_names.push_back(section.names[i] + GetBaseTemplate(Word1, Word2, Word3));
-						}
-						catch (const std::exception& e) {
-							ERROR("Exception adding shout name at index {}: {}", i, e.what());
-						}
-						catch (...) {
-							ERROR("Unknown exception adding shout name at index {}", i);
-						}
-
-						section.bools[i] = false;
+					// Each word learnt also counts the ones before it
+					auto& found = CFramework_Master::FoundItemData_NoShow;
+					const auto learnt = LearntWords(section, i);
+					if (learnt >= 1) {
+						found.AddForm(section.words_1[i]);
 					}
+					if (learnt >= 2) {
+						found.AddForm(section.words_2[i]);
+					}
+					if (learnt >= 3) {
+						found.AddForm(section.words_3[i]);
+					}
+					section.bools[i] = learnt == 3;
 					break;
 				}
 				} // end switch
@@ -723,27 +603,14 @@ struct CMiscPatch
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions ( Get Shout Template ) -----
+	//-- Framework Functions ( Learnt Words ) ----------
 	//---------------------------------------------------
 
-	std::string GetCompletedTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
+	// Words learnt from a shout's word spells found: 0 to 3
+	[[nodiscard]] static int32_t LearntWords(const CMiscPatchData& a_section, std::size_t a_index)
 	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_Found, w3->translation.c_str());
-	}
-
-	std::string GetSecondWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
-	}
-
-	std::string GetFirstWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
-	}
-
-	std::string GetBaseTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_New, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
+		const auto has = [&](const auto& a_words) { return a_index < a_words.size() && CFramework_Master::FoundItemData_NoShow.HasForm(a_words[a_index]); };
+		return has(a_section.words_3) ? 3 : has(a_section.words_2) ? 2 : has(a_section.words_1) ? 1 : 0;
 	}
 
 	//---------------------------------------------------
@@ -864,12 +731,6 @@ struct CMiscPatch
 			if (auto a_pos = std::ranges::find(section.words_3, Spell); a_pos != section.words_3.end()) { // Player Knows All Words
 				auto b_pos = std::distance(section.words_3.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[2].word;
-
-				section.shout_names[b_pos] = section.names[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
-
 				if (!CFramework_Master::FoundItemData_NoShow.HasForm(section.words_3[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, section.forms[b_pos]->GetName());
 					CFramework_Master::FrameworkAPI::SendNotification(msg, "NotifySpecial");
@@ -887,11 +748,7 @@ struct CMiscPatch
 			if (auto a_pos = std::ranges::find(section.words_2, Spell); a_pos != section.words_2.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(section.words_2.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[2].word;
-
-				section.shout_names[b_pos] = section.names[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!CFramework_Master::FoundItemData_NoShow.HasForm(section.words_2[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -908,10 +765,6 @@ struct CMiscPatch
 				auto b_pos = std::distance(section.words_1.begin(), a_pos);
 
 				auto* Word1 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[2].word;
-
-				section.shout_names[b_pos] = section.names[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!CFramework_Master::FoundItemData_NoShow.HasForm(section.words_1[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -1107,7 +960,7 @@ struct CMiscPatch
 			return;
 		}
 
-		if (a_event->menuName == RE::JournalMenu::MENU_NAME && a_event->opening) {
+		if (CompletionistUI::GameUI::IsStatusCheck(a_event)) {
 
 			for (auto& section : type_sections)
 			{

@@ -10,24 +10,11 @@ namespace CVariables
 
 	void VariablesAPI::Register()
 	{
-		//Register menu open to periodically clear the formattedStringHolder.
-		CEvents::EventHandler::RegisterForEvent_OnMenuOpenCloseEvent(&OnMenuOpenCloseEvent);
 		V_Global_Patch_Logging = VariablesAPI::IsGlobalPatchInstallLoggingEnabled();
 		V_TrackedEntityTypes = VariablesAPI::GetTrackedEntityTypes();
 		V_RestrictBooksToTomesAndSkillBooks = VariablesAPI::GetRestrictBooksToTomesAndSkillBooks();
 		CSettings::SettingsAPI::Load();
 	};
-
-	//---------------------------------------------------
-	//-- Variables Functions ( On Menu Open / Close ) ---
-	//---------------------------------------------------
-
-	void VariablesAPI::OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event)
-	{
-		if (!a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME) {
-			Update();
-		};
-	}
 
 	//---------------------------------------------------
 	//-- Variables Functions ( Get Setting ) ------------
@@ -40,15 +27,6 @@ namespace CVariables
 			INFO("Variables API: no setting named [{}]", a_prop ? a_prop : "");
 		}
 		return setting;
-	};
-
-	//---------------------------------------------------
-	//-- Variables Functions ( Is Debugging Enabled ) ---
-	//---------------------------------------------------
-
-	bool VariablesAPI::IsDebuggingEnabled()
-	{
-		return V_Debugging;
 	};
 
 	bool VariablesAPI::GetIniBoolValue(const std::string& key)
@@ -348,22 +326,6 @@ namespace CVariables
 			V_TreatBooksAsItems = prop->GetBool();
 		}
 
-		V_CellScanner_NUMB = true;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_NUMB")) {
-			V_CellScanner_NUMB = prop->GetBool();
-		}
-
-
-		V_CellScanner_Markers = false;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_MARK")) {
-			V_CellScanner_Markers = prop->GetBool();
-		}
-
-		V_CellScanner_Closest = true;
-		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_UseClosestReference")) {
-			V_CellScanner_Closest = prop->GetBool();
-		}
-
 		V_CellScanner_ExcludeAlchemy = false;
 		if (const auto* prop = VariablesAPI::GetProperty("bCellScanner_ExcludeAlchemy")) {
 			V_CellScanner_ExcludeAlchemy = prop->GetBool();
@@ -461,20 +423,6 @@ namespace CVariables
 
 		V_NotificationText = "Completionist: Entry Complete - ";
 
-		V_notificationTextCellScan0 = " Has ";
-
-		V_notificationTextCellScan1 = " Collectable Items!";
-
-		V_notificationTextCellScan2 = " Has Collectable Items!";
-
-		V_notificationTextCellScan3 = "Collectables";
-
-		V_notificationTextCellScan4 = "Loose Items";
-
-		V_notificationTextCellScan5 = "Items On NPC's";
-
-		V_notificationTextCellScan6 = "Items In Containers";
-
 		V_NotificationTextShout0 = "Completionist: ";
 
 		V_NotificationTextShout1 = " - Word 1 (";
@@ -535,16 +483,6 @@ namespace CVariables
 			V_HUD_Override_Enabled_Occupied = prop->GetBool();
 		}
 
-		V_HUD_Colour_New_Crosshair = 4430046;
-		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_N_HUD_Crosshair")) {
-			V_HUD_Colour_New_Crosshair = prop->GetSInt();
-		}
-
-		V_HUD_Colour_Found_Crosshair = 1288220;
-		if (const auto* prop = VariablesAPI::GetProperty("State_ColourVal_G_HUD_Crosshair")) {
-			V_HUD_Colour_Found_Crosshair = prop->GetSInt();
-		}
-
 		V_HUD_ColourString_New_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_ColourString_N_HUD_Crosshair")) {
 			V_HUD_ColourString_New_Crosshair = prop->GetString();
@@ -570,16 +508,6 @@ namespace CVariables
 			V_HUD_ColourString_Occupied = prop->GetString();
 		}
 
-		V_HUD_CustomColour_New_Crosshair = -1;
-		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourVal_N_HUD_Crosshair")) {
-			V_HUD_CustomColour_New_Crosshair = prop->GetSInt();
-		}
-
-		V_HUD_CustomColour_Found_Crosshair = -1;
-		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourVal_G_HUD_Crosshair")) {
-			V_HUD_CustomColour_Found_Crosshair = prop->GetSInt();
-		}
-
 		V_HUD_CustomColourString_New_Crosshair = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_N_HUD_Crosshair")) {
 			V_HUD_CustomColourString_New_Crosshair = prop->GetString();
@@ -603,16 +531,6 @@ namespace CVariables
 		V_HUD_CustomColourString_Occupied = "";
 		if (const auto* prop = VariablesAPI::GetProperty("State_CustomColourString_Occupied")) {
 			V_HUD_CustomColourString_Occupied = prop->GetString();
-		}
-
-		V_ShoutColour_New = "";
-		if (const auto* prop = VariablesAPI::GetProperty("StateShout_NotColourString")) {
-			V_ShoutColour_New = prop->GetString();
-		}
-
-		V_ShoutColour_Found = "";
-		if (const auto* prop = VariablesAPI::GetProperty("StateShout_GotColourString")) {
-			V_ShoutColour_Found = prop->GetString();
 		}
 
 		V_Radiant_FavorVal = 5;
@@ -668,11 +586,6 @@ namespace CVariables
 		V_Radiant_BladesVal = 5;
 		if (const auto* prop = VariablesAPI::GetProperty("State_BladesCounterVal")) {
 			V_Radiant_BladesVal = prop->GetSInt();
-		}
-
-		V_Debugging = false;
-		if (const auto* prop = VariablesAPI::GetProperty("bDebug")) {
-			V_Debugging = prop->GetBool();
 		}
 
 		V_MuseumModeEnabled = false;

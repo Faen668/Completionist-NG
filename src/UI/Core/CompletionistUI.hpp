@@ -84,6 +84,18 @@ namespace CompletionistUI
 		[[nodiscard]] std::string DescribeFocus(std::uint32_t a_id) const;
 		[[nodiscard]] std::string DescribeControls() const;
 		std::string               lastRoute;
+		struct SpotView
+		{
+			std::uint32_t id{ 0 };
+			char          kind{ 'E' };	// E entry, C page control, H header control, S sidebar
+			int           section{ 0 };
+			int           index{ 0 };
+			void*         window{ nullptr };
+			float         minX{ 0.0f }, minY{ 0.0f }, maxX{ 0.0f }, maxY{ 0.0f };
+			bool          visible{ false };
+		};
+		[[nodiscard]] std::vector<SpotView> Spots() const;
+		void OpenPageTab(std::string_view a_page, int a_tab) { _pageTabs[std::string(a_page)] = std::to_string(a_tab); }
 
 		void RecordControl();
 
@@ -253,6 +265,9 @@ namespace CompletionistUI
 		std::uint32_t         _sidebarSelectedID{ 0 };
 		std::uint32_t         _sidebarSelectedLast{ 0 };
 		std::uint32_t         _lastEntryFocus{ 0 };
+		std::uint32_t         _lastMoveFrom{ 0 };	// last routed move, to come straight back
+		std::uint32_t         _lastMoveTo{ 0 };
+		int                   _lastMoveDir{ -1 };
 		std::uint32_t         _pendingFocus{ 0 };
 		std::uint32_t         _focusedSpot{ 0 };
 		std::uint32_t         _focusedSpotLast{ 0 };

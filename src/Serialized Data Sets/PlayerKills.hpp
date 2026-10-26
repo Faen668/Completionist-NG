@@ -114,38 +114,6 @@ namespace Serialization
 			return list;
 		};
 
-		[[nodiscard]] std::string GetCombinedKillString(const std::string& a_name) noexcept 
-		{
-			auto it = data.find(a_name);
-			if (it != data.end()) {
-				if (it->second.assistCount > 0) {
-					return fmt::format("{}/{}", it->second.killCount, it->second.assistCount);
-				}
-				else {
-					return std::to_string(it->second.killCount);
-				}
-			}
-			return "0";
-		}
-
-		[[nodiscard]] int32_t GetKillCountFor(const std::string& a_name) noexcept
-		{
-			auto it = data.find(a_name);
-			return (it != data.end()) ? it->second.killCount : 0;
-		}
-
-		[[nodiscard]] int32_t GetAssistCountFor(const std::string& a_name) noexcept
-		{
-			auto it = data.find(a_name);
-			return (it != data.end()) ? it->second.assistCount : 0;
-		}
-
-		[[nodiscard]] std::string GetDeathStringFor(const std::string& a_name) noexcept
-		{
-			auto it = data.find(a_name);
-			return (it != data.end()) ? it->second.highlight : "";
-		}
-
 		//---------------------------------------------------
 		//-- Completionist Serialization ( SKSE APIs ) ------
 		//---------------------------------------------------

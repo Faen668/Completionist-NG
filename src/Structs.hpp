@@ -88,7 +88,6 @@ struct PlayerHomesData
 	RE::FormID KEY;
 	const char* PROVIDER;
 
-	const char* MODNAME;
 };
 
 struct PlayerHomesDataStruct
@@ -359,45 +358,19 @@ struct CQuestData
 	auto GetEditorID()				const -> std::string		{ return editor_id; }
 	auto GetHighlight()				const -> std::string		{ return search_description; }
 	auto ShouldProcess()			const -> CQuestProcessor	{ return should_process; }
-	auto GetQuestProcessorType()	const -> int32_t			{ return std::to_underlying(should_process); }
 	auto GetCompletionType()		const -> int32_t			{ return std::to_underlying(completion_type); }
-	auto GetCompletionTypeString()	const -> std::string		{ for (const auto& [value, string] : CCompEnum_Map) { if (value == completion_type) { return string; } } return ""; }
 	auto GetType()					const -> int32_t			{ return std::to_underlying(quest_type); }
-	auto GetTypeString()			const -> std::string		{ for (auto& [value, string] : CFlagEnum_Map) { if (value == quest_type) { return string; } } return ""; }
 	bool IsCompleted()				const						{ return is_completed; }
 	void Switch()												{ is_completed = !is_completed; }
-
-	auto GetQuestProcessorTypeString() const -> std::string {
-		for (const auto& [value, string] : CQuestProcessor_Map) {
-			if (value == should_process) {
-				return string;
-			}
-		}
-		return "";
-	}
 
 	// Stage Data
 	
 	auto GetStage()					const -> int32_t			{ return stage_data ? stage_data->stage : 0; }
 	auto GetStageTypeEnum()			const -> CStageEnum			{ return stage_data ? stage_data->type : CStageEnum::kNone; }
 	auto GetOptionalStage()			const -> int32_t			{ return stage_data ? stage_data->optional_stage : 0; }
-	auto GetStageLink()				const -> std::string		{ return stage_data ? stage_data->link : "ERROR"; }
 	auto GetStageType()				const -> int32_t			{ return stage_data ? std::to_underlying(stage_data->type) : 0; }
-	bool HasStageData()				const						{ return stage_data != nullptr; }
 	bool HasOptionalStage()			const						{ return GetOptionalStage() != 0; }
-	auto GetStageTypeString() const -> std::string {
-		for (const auto& [value, string] : CStageEnum_Map) {
-			if (value == GetStageTypeEnum()) {
-				return string;
-			}
-		}
-		return "";
-	}
-
 	//Search Data
-	bool HasSearchData()			const						{ return !search_term.empty(); }
-	auto GetSearchTerm()			const -> std::string		{ return !search_term.empty() ? search_term : "ERROR"; }
-	auto GetSearchDescription()		const -> std::string		{ return !search_description.empty() ? search_description : "ERROR"; }
 
 	//Civil War Data
 	bool HasCivilWarData()			const						{ return civil_war_data != nullptr; }
@@ -405,7 +378,6 @@ struct CQuestData
 
 	//Favor Data
 	bool HasFavorData()				const						{ return favor_data != nullptr; }
-	auto GetFavorLink()				const -> std::string		{ return favor_data ? favor_data->link : "ERROR"; }
 	auto GetActor()					const -> RE::TESNPC*		{ return HasFavorData() ? GetFullForm<RE::TESNPC>(favor_data->actor, favor_data->actor_provider) : nullptr; }
 	auto GetActorFaction()			const -> RE::TESFaction*	{ return HasFavorData() ? GetFullForm<RE::TESFaction>(favor_data->faction, favor_data->faction_provider) : nullptr; }
 
@@ -434,20 +406,6 @@ struct CQuestData
 
 	//Radiant Data
 	bool HasRadiantData()					const { return radiant_data != nullptr; }
-	auto GetRadiantType()					const -> int32_t { return std::to_underlying(radiant_data->value); }
-	auto GetRadiantLink()					const -> std::string { return radiant_data->link; }
-	auto GetRadiantBaseFormID()				const -> RE::FormID { return radiant_data->baseID; }
-	auto GetRadiantVariFormID()				const -> RE::FormID { return radiant_data->variID; }
-	auto GetRadiantTypeEnum()				const -> CRadiantEnum { return radiant_data->value; }
-
-	auto GetRadiantTypeString()	const -> std::string {
-		for (const auto& [value, string] : CRadiantEnum_Map) {
-			if (value == radiant_data->value) {
-				return string;
-			}
-		}
-		return "";
-	}
 
 	auto GetradiantQuest() const -> RE::TESQuest* {
 		if (radiant_data && radiant_data->isFavorQuest == false) {
@@ -496,95 +454,4 @@ struct CQuestData
 		}
 	}
 
-	auto DumpToLog(int32_t idx, int32_t ID) {
-
-		switch (completion_type)
-		{
-		case CCompEnum::kStand:
-			if (thane_data || stage_data || radiant_data || favor_data || civil_war_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		case CCompEnum::kStage:
-			if (!stage_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		case CCompEnum::kGlobl:
-			if (!radiant_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		case CCompEnum::kThane:
-			if (!thane_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		case CCompEnum::kFavor:
-			if (!favor_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		case CCompEnum::kCiWar:
-			if (!civil_war_data) {
-				ERROR("completion_type Error on quest {}", unique_identifier);
-			};
-			break;
-		default:
-			break;
-		}
-
-		INFO("Quest {}: [{} Initialised with ID: {}", idx, GetKey(), ID);
-		INFO("          ~Quest Data: editorID = {}", GetEditorID());
-		INFO("          ~Quest Data: type = {}[{}]", GetTypeString(), GetType());
-		INFO("          ~Quest Data: name = {}", GetName());
-		INFO("          ~Quest Data: data = {}", GetHighlight());
-		INFO("          ~Quest Data: process = {}[{}]", GetQuestProcessorTypeString(), GetQuestProcessorType());
-
-		if (stage_data)
-		{
-			INFO("          ~Stage Data: type = {}[{}]", GetStageTypeString(), GetStageType());
-			INFO("          ~Stage Data: stage = {}", GetStage());
-			INFO("          ~Stage Data: optional stage = {}", GetOptionalStage());
-		}
-
-		if (radiant_data)
-		{
-			INFO("          ~Radiant Data: type = {}[{}]", GetRadiantTypeString(), GetRadiantType());
-			INFO("          ~Radiant Data: base formID = {}", GetRadiantBaseFormID());
-			INFO("          ~Radiant Data: vari formID = {}", GetRadiantVariFormID());
-			INFO("          ~Radiant Data: quest stage = {}", radiant_data->stage);
-			INFO("          ~Radiant Data: quest valid = {}", GetradiantQuest() ? "True" : "False");
-		}
-
-		if (favor_data)
-		{
-			INFO("          ~Favor Data: link = {}", GetFavorLink());
-			INFO("          ~Favor Data: faction = {}", GetActorFaction()->GetFormID());
-			INFO("          ~Favor Data: faction owner = {}", favor_data->faction_provider);
-			INFO("          ~Favor Data: actor = {}", GetActor()->GetName());
-			INFO("          ~Favor Data: actor owner = {}", favor_data->actor_provider);
-		}
-
-		if (thane_data)
-		{
-			auto script = ScriptObject::FromForm(GetFullForm(0x087E24, "Skyrim.esm"), "FavorJarlsMakeFriendsScript");
-
-			INFO("          ~Thane Data: link = {}", thane_data->link);
-			INFO("          ~Thane Data: stage = {}", thane_data->stage);
-			INFO("          ~Thane Data: Imp = [{} - {}]", thane_data->Imps, script->GetProperty(thane_data->Imps)->GetSInt());
-			INFO("          ~Thane Data: Son = [{} - {}]", thane_data->Sons, script->GetProperty(thane_data->Sons)->GetSInt());
-			INFO("          ~Thane Data: script state = {}", script->IsConstructed() ? "Constructed" : "Un-Constructed");
-		}
-
-		if (!search_term.empty())
-		{
-			INFO("          ~Search Data: Term       = {}", GetSearchTerm());
-			INFO("          ~Search Data: MCM Page   = {}", mcmPage);
-			INFO("          ~Search Data: official   = {}", official);
-		}
-
-		INFO(" ");
-		return this;
-	};
 };

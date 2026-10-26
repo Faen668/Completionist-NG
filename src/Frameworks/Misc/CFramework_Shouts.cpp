@@ -25,6 +25,7 @@ namespace CFramework_Shouts {
 	//---------------------------------------------------
 
 	void CHandler::SinkEvents() {
+
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESSpellCastEvent>*>(GetSingleton()));
 	}
 
@@ -69,22 +70,15 @@ namespace CFramework_Shouts {
 		switch (a_section)
 		{
 		case CFramework_Shouts::Section::kVanilla: {
-
 			if (auto a_pos = std::ranges::find(Vanilla_W3_FormArray, Spell); a_pos != Vanilla_W3_FormArray.end()) { // Player Knows All Words
 				auto b_pos = std::distance(Vanilla_W3_FormArray.begin(), a_pos);
-
-				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Vanilla_SH_FormArray[b_pos]->GetName());
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
 					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kShout, Vanilla_SH_FormArray[b_pos]->GetName());
 				}
-				
+
 				FoundItemData_NoShow.AddForm(Vanilla_W3_FormArray[b_pos]);
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[b_pos]);
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[b_pos]);
@@ -96,11 +90,7 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Vanilla_W2_FormArray, Spell); a_pos != Vanilla_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Vanilla_W2_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-				
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -112,15 +102,11 @@ namespace CFramework_Shouts {
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[b_pos]);
 				return;
 			}
-			
+
 			if (auto a_pos = std::ranges::find(Vanilla_W1_FormArray, Spell); a_pos != Vanilla_W1_FormArray.end()) { // Player Knows 1st Word
 				auto b_pos = std::distance(Vanilla_W1_FormArray.begin(), a_pos);
 
 				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[2].word;
-
-				Vanilla_SH_NameOutput[b_pos] = Vanilla_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -133,17 +119,10 @@ namespace CFramework_Shouts {
 			}
 			break;
 		}
-			
-		case CFramework_Shouts::Section::kThunderchild: {
 
+		case CFramework_Shouts::Section::kThunderchild: {
 			if (auto a_pos = std::ranges::find(Thunderchild_W3_FormArray, Spell); a_pos != Thunderchild_W3_FormArray.end()) { // Player Knows All Words
 				auto b_pos = std::distance(Thunderchild_W3_FormArray.begin(), a_pos);
-
-				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-				
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Thunderchild_SH_FormArray[b_pos]->GetName());
@@ -162,11 +141,7 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Thunderchild_W2_FormArray, Spell); a_pos != Thunderchild_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Thunderchild_W2_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -183,10 +158,6 @@ namespace CFramework_Shouts {
 				auto b_pos = std::distance(Thunderchild_W1_FormArray.begin(), a_pos);
 
 				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[2].word;
-
-				Thunderchild_SH_NameOutput[b_pos] = Thunderchild_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -201,15 +172,8 @@ namespace CFramework_Shouts {
 		}
 
 		case CFramework_Shouts::Section::kMiscellaneous: {
-
 			if (auto a_pos = std::ranges::find(Miscellaneous_W3_FormArray, Spell); a_pos != Miscellaneous_W3_FormArray.end()) { // Player Knows All Words
 				auto b_pos = std::distance(Miscellaneous_W3_FormArray.begin(), a_pos);
-
-				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetCompletedTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, Miscellaneous_SH_FormArray[b_pos]->GetName());
@@ -228,11 +192,7 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Miscellaneous_W2_FormArray, Spell); a_pos != Miscellaneous_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Miscellaneous_W2_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
 				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetSecondWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -249,10 +209,6 @@ namespace CFramework_Shouts {
 				auto b_pos = std::distance(Miscellaneous_W1_FormArray.begin(), a_pos);
 
 				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
-				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
-				auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[2].word;
-
-				Miscellaneous_SH_NameOutput[b_pos] = Miscellaneous_SH_NameArray[b_pos] + GetFirstWordTemplate(Word1, Word2, Word3);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
 					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
@@ -288,20 +244,8 @@ namespace CFramework_Shouts {
 
 	void CHandler::UpdateFoundForms() {
 
-		Vanilla_SH_NameOutput.clear();
-		Thunderchild_SH_NameOutput.clear();
-		Miscellaneous_SH_NameOutput.clear();
-
 		for (auto i = 0; i < Vanilla_SH_FormArray.size(); i++) {
-			
-			auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[i])->variations[0].word;
-			auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[i])->variations[1].word;
-			auto* Word3 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[i])->variations[2].word;
-
 			if (FoundItemData_NoShow.HasForm(Vanilla_W3_FormArray[i])) {
-
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
-
 				FoundItemData_NoShow.AddForm(Vanilla_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
@@ -310,9 +254,6 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[i])) {
-
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
-
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
 				Vanilla_SH_BoolArray[i] = false;
@@ -320,13 +261,10 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[i])) {
-				
-				Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[i]);
 				continue;
 			}
 
-			Vanilla_SH_NameOutput.push_back(Vanilla_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Vanilla_SH_BoolArray[i] = false;
 		}
 
@@ -334,14 +272,7 @@ namespace CFramework_Shouts {
 		//-------------------------
 
 		for (auto i = 0; i < Thunderchild_SH_FormArray.size(); i++) {
-
-			auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[i])->variations[0].word;
-			auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[i])->variations[1].word;
-			auto* Word3 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[i])->variations[2].word;
-
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W3_FormArray[i])) {
-
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
@@ -350,8 +281,6 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[i])) {
-
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
 				Thunderchild_SH_BoolArray[i] = false;
@@ -359,13 +288,10 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[i])) {
-
-				Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[i]);
 				continue;
 			}
 
-			Thunderchild_SH_NameOutput.push_back(Thunderchild_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Thunderchild_SH_BoolArray[i] = false;
 		}
 
@@ -373,14 +299,7 @@ namespace CFramework_Shouts {
 		//-------------------------
 
 		for (auto i = 0; i < Miscellaneous_SH_FormArray.size(); i++) {
-
-			auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[i])->variations[0].word;
-			auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[i])->variations[1].word;
-			auto* Word3 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[i])->variations[2].word;
-
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W3_FormArray[i])) {
-
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetCompletedTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W3_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
@@ -389,8 +308,6 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[i])) {
-
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetSecondWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[i]);
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
 				Miscellaneous_SH_BoolArray[i] = false;
@@ -398,25 +315,19 @@ namespace CFramework_Shouts {
 			}
 
 			if (FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[i])) {
-
-				Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetFirstWordTemplate(Word1, Word2, Word3));
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[i]);
 				continue;
 			}
 
-			Miscellaneous_SH_NameOutput.push_back(Miscellaneous_SH_NameArray[i] + GetBaseTemplate(Word1, Word2, Word3));
 			Miscellaneous_SH_BoolArray[i] = false;
 		}
 
-		Vanilla_SH_NameOutput.resize(Vanilla_SH_FormArray.size());
 		Vanilla_SH_EntriesTotal = Vanilla_SH_FormArray.size();
 		Vanilla_SH_EntriesFound = std::ranges::count(Vanilla_SH_BoolArray, true);
 
-		Thunderchild_SH_NameOutput.resize(Thunderchild_SH_FormArray.size());
 		Thunderchild_SH_EntriesTotal = Thunderchild_SH_FormArray.size();
 		Thunderchild_SH_EntriesFound = std::ranges::count(Thunderchild_SH_BoolArray, true);
 
-		Miscellaneous_SH_NameOutput.resize(Miscellaneous_SH_FormArray.size());
 		Miscellaneous_SH_EntriesTotal = Miscellaneous_SH_FormArray.size();
 		Miscellaneous_SH_EntriesFound = std::ranges::count(Miscellaneous_SH_BoolArray, true);
 	}
@@ -439,12 +350,13 @@ namespace CFramework_Shouts {
 	//---------------------------------------------------
 
 	void CHandler::BuildArrays() {
+
 		using namespace CLocalisation;
 
 		std::string SKName = "Skyrim.esm";
 		std::string DGName = "Dawnguard.esm";
 		std::string DBName = "Dragonborn.esm";
-		
+
 		std::string FSName = "Falskaar.esm";
 		std::string WYName = "Wyrmstooth.esp";
 		std::string THName = "Thunderchild - Epic Shout Package.esp";
@@ -508,7 +420,7 @@ namespace CFramework_Shouts {
 		CHandler::AddToArray(Section::kThunderchild, 0x0043A8, "T_ShoutName26", "T_ShoutText26", THName); //Wail of the Banshee
 		CHandler::AddToArray(Section::kThunderchild, 0x01FFDE, "T_ShoutName27", "T_ShoutText27", THName); //Wanderlust
 		CHandler::AddToArray(Section::kThunderchild, 0x004925, "T_ShoutName28", "T_ShoutText28", THName); //Warcry
-	
+
 		CHandler::AddToArray(Section::kMiscellaneous, 0x0D228F,"MiscDataShout_FSK_Name", "MiscDataShout_FSK_Data", FSName);	//Champion's Spirit (Falskaar)
 
 		if (Serialization::CompletionistData::IsModInstalled("ForcefulTongue - Wyrmstooth Patch.esp")) {
@@ -543,7 +455,6 @@ namespace CFramework_Shouts {
 		switch (a_section)
 		{
 		case CFramework_Shouts::Section::kVanilla: {
-
 			Vanilla_SH_FormArray.push_back(Shout);
 			Vanilla_W1_FormArray.push_back(Word1);
 			Vanilla_W2_FormArray.push_back(Word2);
@@ -559,7 +470,6 @@ namespace CFramework_Shouts {
 		}
 
 		case CFramework_Shouts::Section::kThunderchild: {
-
 			Thunderchild_SH_FormArray.push_back(Shout);
 			Thunderchild_W1_FormArray.push_back(Word1);
 			Thunderchild_W2_FormArray.push_back(Word2);
@@ -575,7 +485,6 @@ namespace CFramework_Shouts {
 		}
 
 		case CFramework_Shouts::Section::kMiscellaneous: {
-
 			Miscellaneous_SH_FormArray.push_back(Shout);
 			Miscellaneous_W1_FormArray.push_back(Word1);
 			Miscellaneous_W2_FormArray.push_back(Word2);
@@ -645,23 +554,28 @@ namespace CFramework_Shouts {
 		Miscellaneous_SH_BoolArray.resize(Miscellaneous_SH_FormArray.size());
 	}
 
-	std::string CHandler::GetCompletedTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_Found, w3->translation.c_str());
-	}
+	// Words learnt by the word spells found: 0 to 3, -1 when it isn't one of these shouts
+	std::int32_t CHandler::LearntWords(const RE::TESForm* a_shout) {
 
-	std::string CHandler::GetSecondWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_Found, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
-	}
-
-	std::string CHandler::GetFirstWordTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_Found, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
-	}
-
-	std::string CHandler::GetBaseTemplate(RE::TESWordOfPower* w1, RE::TESWordOfPower* w2, RE::TESWordOfPower* w3)
-	{
-		return fmt::format(" (<font color = '{}'>{}</font>, <font color = '{}'>{}</font>, <font color = '{}'>{}</font>)", V_ShoutColour_New, w1->translation.c_str(), V_ShoutColour_New, w2->translation.c_str(), V_ShoutColour_New, w3->translation.c_str());
+		const auto learnt = [&](const std::vector<RE::TESForm*>& a_shouts, const std::vector<RE::SpellItem*>& a_w1, const std::vector<RE::SpellItem*>& a_w2, const std::vector<RE::SpellItem*>& a_w3) -> std::int32_t {
+			const auto it = std::ranges::find(a_shouts, a_shout);
+			if (it == a_shouts.end()) {
+				return -1;
+			}
+			const auto i = static_cast<std::size_t>(std::distance(a_shouts.begin(), it));
+			const auto has = [&](const std::vector<RE::SpellItem*>& a_words) { return i < a_words.size() && FoundItemData_NoShow.HasForm(a_words[i]); };
+			return has(a_w3) ? 3 : has(a_w2) ? 2 : has(a_w1) ? 1 : 0;
+		};
+		if (!a_shout) {
+			return -1;
+		}
+		for (const auto count : { learnt(Vanilla_SH_FormArray, Vanilla_W1_FormArray, Vanilla_W2_FormArray, Vanilla_W3_FormArray),
+				 learnt(Thunderchild_SH_FormArray, Thunderchild_W1_FormArray, Thunderchild_W2_FormArray, Thunderchild_W3_FormArray),
+				 learnt(Miscellaneous_SH_FormArray, Miscellaneous_W1_FormArray, Miscellaneous_W2_FormArray, Miscellaneous_W3_FormArray) }) {
+			if (count >= 0) {
+				return count;
+			}
+		}
+		return -1;
 	}
 }

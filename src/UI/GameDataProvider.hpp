@@ -53,7 +53,6 @@ namespace CompletionistUI
 			std::int32_t                                  radiantChoice{ 0 };
 			std::unordered_map<std::string, std::int32_t> counters;
 			bool                                          treatBooksAsItems{ false };
-			bool                                          debug{ false };
 			std::vector<std::string>                      dawnguardOptions;
 			std::int32_t                                  dawnguardChoice{ 0 };
 			std::vector<std::string>                      legacyOptions;

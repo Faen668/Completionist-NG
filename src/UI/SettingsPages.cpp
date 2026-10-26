@@ -157,8 +157,7 @@ namespace CompletionistUI
 			}
 			a_date = std::clamp(a_date, 0, static_cast<std::int32_t>(log.dates.size()) - 1);
 			const auto* prefix = SettingsAPI::Get("CompletionLog_PrefixEnabled");
-			log.entries = CFramework_Master::FrameworkAPI::GetLoggedEventsForDate(nullptr, log.dates[a_date], prefix && prefix->GetBool(), false, "", "", "", "");
-			log.entries.resize(std::min(log.entries.size(), std::size_t{ 126 }));
+			log.entries = CFramework_Master::FrameworkAPI::GetLoggedEventsForDate(nullptr, log.dates[a_date], prefix && prefix->GetBool());
 
 			const auto* coloured = SettingsAPI::Get("CompletionLog_ColoursEnabled");
 			const auto  text = [](const char* a_name) {

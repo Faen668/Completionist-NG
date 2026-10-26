@@ -517,7 +517,6 @@ namespace CompletionistUI::ArgonianDecor
 		if (width < size * 4.0f || height < size * 2.0f) {
 			return;
 		}
-		const float band = std::min(width, height) * 0.3f + size * 2.0f;
 
 		// Murk rising from the bottom edge
 		const float glow = std::min(height * 0.3f, size * 5.0f);

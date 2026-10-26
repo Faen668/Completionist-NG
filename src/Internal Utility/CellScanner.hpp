@@ -32,10 +32,6 @@ namespace Completionist
 		// Game thread, closest first
 		static std::vector<Result> Scan(RE::TESObjectCELL* a_cell, const std::vector<std::pair<RE::FormID, RE::FormID>>& a_tracked = {});
 
-		static void CheckForReferences(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, bool b_logging, bool b_notify);
-
-		static std::string GetQuestMarkerReferenceFormID(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
-		static std::string GetQuestMarkerReferenceOwner(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 		static void ExcludeReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref, RE::TESObjectCELL* cell);
 		static void RemoveExcludedReference(RE::StaticFunctionTag*, RE::TESObjectREFR* a_ref);
 
@@ -43,7 +39,6 @@ namespace Completionist
 		static std::vector<std::string> GetReferenceFormIDs(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 		static std::vector<std::string> GetReferenceNames(RE::StaticFunctionTag*, RE::TESObjectCELL* cell);
 
-		static bool HasPinnedFormInCell(RE::StaticFunctionTag*, RE::TESObjectCELL* cell, RE::TESForm* a_form);
 		static bool IsItemPinnable(RE::StaticFunctionTag*, RE::TESForm* a_form);
 
 		static std::string	GetPinnedReferenceType(RE::StaticFunctionTag*, RE::TESForm* a_form);
@@ -68,14 +63,6 @@ namespace Completionist
 		static bool IsExcludedFormType(RE::TESForm* a_form);
 		static bool IsReferenceExcluded(RE::TESObjectREFR* a_chest);
 
-		static void ScanCell(RE::TESObjectCELL* cell, bool b_logging, bool b_notify);
-
-		static int GetRandomIndex(const int32_t size)
-		{
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			std::uniform_int_distribution<int> dist(0, (size - 1));
-			return dist(gen);
-		}
+		static void ScanCell(RE::TESObjectCELL* cell);
 	};
 }

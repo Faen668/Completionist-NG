@@ -1,5 +1,6 @@
  #include "PCH.h"
 #include "CQuestMaster.hpp"
+#include "UI/GameUI.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Internal Utility/MCMHandler.hpp"
@@ -127,101 +128,12 @@ namespace CQuestMaster
 	};
 
 	//---------------------------------------------------
-	//-- Quest Functions ( MCM Quest Search ) -----------
-	//---------------------------------------------------
-
-	std::vector<std::string> QuestAPI::SearchAndReportPage(RE::StaticFunctionTag*, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType)
-	{
-		auto maxResults = i_maxResults * 4;
-		auto process = false;
-
-		std::vector<std::string> list = CFramework_Master::FrameworkAPI::SearchAndReportPage(s_term, b_ignoreCompleted, maxResults, i_searchType);
-
-		auto result = (list.size() / 4) + 1;
-
-		INFO("Running Search For {} with a type of {}", s_term, i_searchType);
-
-		for (auto& [data, name, ID, key] : CQuestMaster::CQuestDataVec)
-		{
-			if (!CHCMHandler::MCMAPI::IsQuestVisible(nullptr, data->mcmPage, data->GetEditorID(), -1))
-			{
-				INFO("Quest: {} is hidden and cannot be processed", data->GetName());
-				continue;
-			}
-
-			if (list.size() >= maxResults)
-				break;
-
-			switch (i_searchType)
-			{
-			case 0: { process = data->HasSearchData() && DKUtil::string::icontains(data->GetSearchTerm(), s_term); break; }
-			case 1: { process = data->HasSearchData() && data->GetSearchTerm().starts_with(s_term); break; }
-			case 2: { process = data->HasSearchData() && DKUtil::string::iequals(data->GetSearchTerm(), s_term); break; }
-
-			default:
-				break;
-			}
-
-			if (process) {
-					
-				if (b_ignoreCompleted && (CFramework_Master::CQuestKeys_Manual.HasKey(key) || CFramework_Master::CQuestKeys_Natural.HasKey(key))) {
-					continue;
-				}
-
-				if (!data->official)
-				{
-					list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + data->mcmPage + "}{" + GET_LOC_STRING_BY_KEY("Category_Quest") + "}{" + name + "}");
-					list.push_back(data->mcmPage);
-					list.push_back(data->GetSearchTerm());
-					list.push_back("Misc");
-				}
-				else
-				{
-					list.push_back("$PageResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + GetLocalisedPageName(ID) + "}{" + data->GetName() + "}");
-					list.push_back(GetLocalisedPageName(ID));
-					list.push_back(data->GetSearchTerm());
-					list.push_back("Quest");
-				}
-				result++;
-			}
-		};
-
-		for (auto i = 0; i < list.size(); i += 4)
-		{
-			list[i].replace(list[i].find("["), 9, std::to_string(list.size() / 4));
-		}
-
-		return list;
-	};
-
-	//---------------------------------------------------
-	//-- Quest Functions ( MCM Quest Search ) -----------
-	//---------------------------------------------------
-
-	std::string QuestAPI::GetLocalisedPageName(int32_t ID)
-	{
-		for (auto& [page, mod, id] : CHCMHandler::MainMCMPagesDefs) {
-			if (ID == id) {
-				return page;
-			}
-		}
-
-		for (auto& [page, mod, id] : CHCMHandler::MainPatchesMCMPagesDefs) {
-			if (ID == id) {
-				return page;
-			}
-		}
-
-		return "";
-	}
-
-	//---------------------------------------------------
 	//-- Quest Events ( On Menu Open ) ------------------
 	//---------------------------------------------------
 
 	EventResult QuestAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
 	{
-		if (a_event && a_event->menuName == RE::JournalMenu::MENU_NAME && a_event->opening)
+		if (CompletionistUI::GameUI::IsStatusCheck(a_event))
 		{
 			for (auto& [data, name, ID, key] : CQuestDataVec)
 			{
@@ -329,23 +241,6 @@ namespace CQuestMaster
 		}
 		return nullptr;
 	}
-
-	//---------------------------------------------------
-	//-- Quest Functions ( Getter - Totals ) ------------
-	//---------------------------------------------------
-
-	std::pair<int32_t, int32_t>	QuestAPI::qGetQuestCompletionTotals(std::vector<CQuestData*> data) {
-
-		std::pair<int32_t, int32_t> totals{};
-
-		for (auto& q : data)
-		{
-			totals.first += IsQuestCompleted(q) ? 1 : 0;
-			totals.second += q->GetQuest() ? 1 : 0;
-		};
-
-		return totals;
-	};
 
 	//---------------------------------------------------
 	//-- Quest Functions ( Completion Checks ) ----------

@@ -18,7 +18,7 @@ namespace CompletionistUI
 	{
 		using Microsoft::WRL::ComPtr;
 
-		constexpr std::string_view menuName = "CompletionistMenu";
+		constexpr std::string_view menuName = GameUI::menuName;
 		constexpr std::uint32_t    escapeKey = 1;	// DIK_ESCAPE
 		constexpr std::uint32_t    gamepadB = 0x2000;
 

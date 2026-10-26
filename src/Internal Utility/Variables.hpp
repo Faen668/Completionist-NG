@@ -4,13 +4,9 @@
 
 namespace CVariables
 {
-	inline std::string 		V_ShoutColour_New;
-	inline std::string 		V_ShoutColour_Found;
 
 	inline bool 			V_HUD_Override_Enabled_New_Crosshair;
 	inline bool 			V_HUD_Override_Enabled_Found_Crosshair;
-	inline std::int32_t		V_HUD_Colour_New_Crosshair;
-	inline std::int32_t		V_HUD_Colour_Found_Crosshair;
 	inline std::string 		V_HUD_ColourString_New_Crosshair;
 	inline std::string 		V_HUD_ColourString_Found_Crosshair;
 
@@ -21,8 +17,6 @@ namespace CVariables
 	inline std::string 		V_HUD_ColourString_Displayed;
 	inline std::string 		V_HUD_ColourString_Occupied;
 
-	inline std::int32_t		V_HUD_CustomColour_New_Crosshair;
-	inline std::int32_t		V_HUD_CustomColour_Found_Crosshair;
 	inline std::string 		V_HUD_CustomColourString_New_Crosshair;
 	inline std::string 		V_HUD_CustomColourString_Found_Crosshair;
 
@@ -55,17 +49,7 @@ namespace CVariables
 	inline std::string		V_NotificationTextShout3;
 	inline std::string		V_NotificationTextBarenziah;
 
-	inline std::string		V_notificationTextCellScan0;
-	inline std::string		V_notificationTextCellScan1;
-	inline std::string		V_notificationTextCellScan2;
-	inline std::string		V_notificationTextCellScan3;
-	inline std::string		V_notificationTextCellScan4;
-	inline std::string		V_notificationTextCellScan5;
-	inline std::string		V_notificationTextCellScan6;
 
-	inline bool				V_CellScanner_NUMB;
-	inline bool				V_CellScanner_Closest;
-	inline bool				V_CellScanner_Markers;
 
 	inline bool				V_CellScanner_ExcludeBooks;
 	inline bool				V_CellScanner_ExcludeArmor;
@@ -108,7 +92,6 @@ namespace CVariables
 	inline std::int32_t		V_CellScanner_ScanRange;
 
 	inline bool				V_TreatBooksAsItems;
-	inline bool				V_Debugging;
 	inline bool				V_Global_Patch_Logging;
 	inline std::vector<CMiscPatchType> V_TrackedEntityTypes;
 	inline bool				V_RestrictBooksToTomesAndSkillBooks;
@@ -127,7 +110,6 @@ namespace CVariables
 
 		  static void Register();
 		  static void Update();
-		  static void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 
 		  static RE::BSScript::Variable* GetProperty(const char* a_prop);
 
@@ -135,7 +117,6 @@ namespace CVariables
 		  static bool IsGlobalPatchInstallLoggingEnabled();
 		  static std::vector<CMiscPatchType> GetTrackedEntityTypes();
 		  static bool GetRestrictBooksToTomesAndSkillBooks();
-		  static bool IsDebuggingEnabled();
 		  static bool GetIniBoolValue(const std::string& key);
 		  static std::string GetIniStringValue(const std::string& key);
 		  static std::string GetIniValue(const char* a_section, const std::string& a_key, const char* a_default);
