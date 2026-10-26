@@ -152,13 +152,13 @@ namespace ArrayHolder {
 		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_VPH), &CFramework_PlayerHomes::VH_NameArray, &CFramework_PlayerHomes::VH_TextArray, &CFramework_PlayerHomes::VH_BoolArray, &CFramework_PlayerHomes::VH_FormArray, &CFramework_PlayerHomes::VH_EntriesFound, &CFramework_PlayerHomes::VH_EntriesTotal, &CFramework_PlayerHomes_VH::Data, true);
 
 		//Frameworks - Misc (Shouts) (Start) ----------------
-		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_VNS), &CFramework_Shouts::Vanilla_SH_NameOutput, &CFramework_Shouts::Vanilla_SH_TextArray, &CFramework_Shouts::Vanilla_SH_BoolArray, &CFramework_Shouts::Vanilla_SH_FormArray, &CFramework_Shouts::Vanilla_SH_EntriesFound, &CFramework_Shouts::Vanilla_SH_EntriesTotal, &CFramework_Shouts_VS::Data, true);
-		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_TCS), &CFramework_Shouts::Thunderchild_SH_NameOutput, &CFramework_Shouts::Thunderchild_SH_TextArray, &CFramework_Shouts::Thunderchild_SH_BoolArray, &CFramework_Shouts::Thunderchild_SH_FormArray, &CFramework_Shouts::Thunderchild_SH_EntriesFound, &CFramework_Shouts::Thunderchild_SH_EntriesTotal, &CFramework_Shouts_TS::Data, true);
-		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_MCS), &CFramework_Shouts::Miscellaneous_SH_NameOutput, &CFramework_Shouts::Miscellaneous_SH_TextArray, &CFramework_Shouts::Miscellaneous_SH_BoolArray, &CFramework_Shouts::Miscellaneous_SH_FormArray, &CFramework_Shouts::Miscellaneous_SH_EntriesFound, &CFramework_Shouts::Miscellaneous_SH_EntriesTotal, &CFramework_Shouts_MS::Data, true);
+		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_VNS), &CFramework_Shouts::Vanilla_SH_NameArray, &CFramework_Shouts::Vanilla_SH_TextArray, &CFramework_Shouts::Vanilla_SH_BoolArray, &CFramework_Shouts::Vanilla_SH_FormArray, &CFramework_Shouts::Vanilla_SH_EntriesFound, &CFramework_Shouts::Vanilla_SH_EntriesTotal, &CFramework_Shouts_VS::Data, true);
+		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_TCS), &CFramework_Shouts::Thunderchild_SH_NameArray, &CFramework_Shouts::Thunderchild_SH_TextArray, &CFramework_Shouts::Thunderchild_SH_BoolArray, &CFramework_Shouts::Thunderchild_SH_FormArray, &CFramework_Shouts::Thunderchild_SH_EntriesFound, &CFramework_Shouts::Thunderchild_SH_EntriesTotal, &CFramework_Shouts_TS::Data, true);
+		AttemptToAdd(std::to_underlying(FrameworkID::kFramework_MCS), &CFramework_Shouts::Miscellaneous_SH_NameArray, &CFramework_Shouts::Miscellaneous_SH_TextArray, &CFramework_Shouts::Miscellaneous_SH_BoolArray, &CFramework_Shouts::Miscellaneous_SH_FormArray, &CFramework_Shouts::Miscellaneous_SH_EntriesFound, &CFramework_Shouts::Miscellaneous_SH_EntriesTotal, &CFramework_Shouts_MS::Data, true);
 		//Custom Patches
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			for (auto& section : patchData->type_sections) {
-				AttemptToAdd(section.ID, section.type == CMiscPatchType::kShouts ? &section.shout_names : &section.names, &section.texts, &section.bools, &section.forms, &section.found, &section.total, &section.data, static_cast<int32_t>(section.type) > 1);
+				AttemptToAdd(section.ID, &section.names, &section.texts, &section.bools, &section.forms, &section.found, &section.total, &section.data, static_cast<int32_t>(section.type) > 1);
 			};
 		};
 		INFO("Registered {} Framework Arrays - {} Hidden as NoShow and {} Merged as Collectable", i_Ssize, i_Nsize, (i_Ssize - i_Nsize));

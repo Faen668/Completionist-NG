@@ -95,7 +95,6 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		CExternalPatchHandler::CHandler::Register();
 		CFramework_Master::FrameworkAPI::RegisterCustomPatches();
 		CFramework_Master::FrameworkAPI::FinalizeRegistrations();
-		CHCMHandler::MCMAPI::Register();
 		Completionist::MuseumAPI::Register();
 		CompletionistUI::GameUI::Install();
 		WordsOfPower::StartScan();

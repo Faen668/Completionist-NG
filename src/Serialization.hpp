@@ -12,7 +12,8 @@ namespace Serialization
 	enum : std::uint32_t
 	{
 		kHeader = 'COMP',
-		kVersion = 1021,
+		kVersion = 2000,
+		kFirstVersion = 2000,	// a new game is needed for anything older
 	};
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
@@ -104,15 +105,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		//-- Utility Functions ( Get FormID Hex String ) ----
 		//---------------------------------------------------
 
-		[[nodiscard]] static auto IsFormExcludable(RE::TESObjectREFR* a_form) noexcept
-		{
-			return a_form && a_form->GetFile(0) && !GetFormIDHexString(a_form).starts_with("FF");
-		}
-
-		//---------------------------------------------------
-		//-- Utility Functions ( Get FormID Hex String ) ----
-		//---------------------------------------------------
-
 		[[nodiscard]] static std::string GetFormIDHexString(RE::TESObjectREFR* a_form) noexcept
 		{
 			const auto* file = a_form ? a_form->GetFile(0) : nullptr;
@@ -136,49 +128,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		[[nodiscard]] static std::string GetFormIDHexString(RE::FormID a_formID) noexcept
 		{
 			return std::format("0x{:06X}", a_formID);
-		}
-
-		//---------------------------------------------------
-		//-- Utility Functions ( Get FormID Hex String ) ----
-		//---------------------------------------------------
-
-		[[nodiscard]] static std::string GetFormOwner(RE::TESObjectREFR* a_form) noexcept
-		{
-			if (!a_form || !a_form->GetFile(0))
-			{
-				return "";
-			};
-
-			auto idx = GetModIndexFromForm(a_form);
-			return fmt::format("{:s}{:s}", a_form->GetFile(0)->GetFilename(), idx == "0" ? "" : fmt::format(" - [{:s}]",idx));
-		}
-
-		//---------------------------------------------------
-		//-- Utility Functions ( Get FormID Hex String ) ----
-		//---------------------------------------------------
-
-		[[nodiscard]] static std::string GetModIndexFromForm(const RE::TESObjectREFR* a_form) noexcept
-		{
-			if (!a_form || !a_form->GetFile(0))
-			{
-				return "";
-			};
-
-			return fmt::format("{:x}", a_form->GetFile(0)->GetPartialIndex());
-		}
-
-		//---------------------------------------------------
-		//-- Utility Functions ( Get FormID Hex String ) ----
-		//---------------------------------------------------
-
-		[[nodiscard]] static std::string GetModIndexFromForm(RE::TESForm* a_form) noexcept
-		{
-			if (!a_form || !a_form->GetFile(0))
-			{
-				return "";
-			};
-
-			return fmt::format("{:x}", a_form->GetFile(0)->GetPartialIndex());
 		}
 
 		//---------------------------------------------------
@@ -445,17 +394,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		//---------------------------------------------------
-		//-- Completionist Data Functions ( Get File Name ) -
-		//---------------------------------------------------
-
-		[[nodiscard]] std::string_view GetFileName(RE::FormID a_form) const noexcept
-		{
-			const auto* form = GetForm(a_form);
-			const auto* file = form ? form->GetFile() : nullptr;
-			return file ? file->GetFilename() : std::string_view{};
-		}
-
-		//---------------------------------------------------
 		//-- Completionist Data Functions ( Get All Forms ) -
 		//---------------------------------------------------
 
@@ -625,47 +563,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 		}
 
 		//---------------------------------------------------
-		//-- Completionist Data Functions ( Populate Array )-
-		//---------------------------------------------------
-
-		void PopulateSpellTomes(
-			std::vector<std::string>& a_names, std::vector<RE::TESForm*>& a_forms, std::vector<bool>& a_bools, std::vector<std::string>& a_texts, RE::ActorValue a_actorval)
-		{
-			a_names.clear();
-			a_forms.clear();
-			a_bools.clear();
-			a_texts.clear();
-
-			using zipped_t = std::pair<std::string, std::pair<RE::TESForm*, bool>>;
-
-			auto bases = GetAllBases() |
-				std::views::filter([&](auto f) { return GetForm(f) && GetForm(f)->GetName(); }) |
-				std::views::transform([&](auto f) {
-				std::string name = GetForm(f)->GetName();
-
-				if (!name.empty()) { name[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(name[0]))); }  // in case some mod forms have lower case name e.g wraithguard / sunder etc...
-				return std::make_pair(std::move(name), std::make_pair(GetForm(f), false));
-					});
-
-			std::vector<zipped_t> zipped = { std::ranges::begin(bases), std::ranges::end(bases) };
-			std::ranges::sort(zipped);
-
-			for (auto& [name, data] : zipped) {
-				auto& [form, status] = data;
-
-				auto* book = form ? form->As<RE::TESObjectBOOK>() : nullptr;
-				if (book && book->GetSpell()) {
-					if (book->GetSpell()->GetAssociatedSkill() == a_actorval) {
-						a_names.emplace_back(name);
-						a_bools.emplace_back(status);
-						a_forms.emplace_back(form);
-						a_texts.emplace_back("$AddSpellTomeHighlight{" + std::string(form->GetName()) + "}{" + GetBookSkill(book->GetSpell()->GetAssociatedSkill()) + "}{" + book->GetSpell()->GetName() + "}");
-					}
-				}
-			}
-		}
-
-		//---------------------------------------------------
 		//-- Completionist Serialization ( SKSE APIs ) ------
 		//---------------------------------------------------
 
@@ -745,17 +642,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			}
 		}
 
-		void AddStage(std::string_view a_editorID, int a_stage, std::string_view a_name) noexcept
-		{
-			if (HasStage(a_editorID, a_stage)) {
-				return;
-			}
-
-			auto stage = fmt::format("|{}|", a_stage);
-			data[a_editorID.data()] += stage;
-			INFO("Stage Recorder Added Stage {} to '{}' Serialized Map.", a_stage, fmt::format("{:s} [{}]"sv, a_editorID, a_name));
-		}
-
 		void RemoveKey(std::string_view a_key) noexcept
 		{
 			if (HasKey(a_key)) {
@@ -763,45 +649,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			}
 		}
 
-		void RemoveStage(std::string_view a_key, int a_stage) noexcept
-		{
-			if (HasKey(a_key)) {
-				auto stage = fmt::format("|{}|", a_stage);
-				data[a_key.data()] = DKUtil::string::replace_nth_occurrence(data[a_key.data()], 0, stage, {});
-			}
-		}
-
 		// accessor
 		[[nodiscard]] bool HasKey(std::string_view a_key) const noexcept
 		{
 			return data.contains(a_key.data());
-		}
-
-		[[nodiscard]] bool HasStage(std::string_view a_key, int a_stage) noexcept
-		{
-			if (!HasKey(a_key)) {
-				return false;
-			}
-
-			auto stage = fmt::format("|{}|", a_stage);
-			return DKUtil::string::icontains(data[a_key.data()], stage);
-		}
-
-		[[nodiscard]] std::vector<int> GetAllStages(std::string_view a_key) noexcept
-		{
-			if (!HasKey(a_key)) {
-				return {};
-			}
-
-			std::vector<int> list;
-			auto raw = DKUtil::string::split(data[a_key.data()], "|");
-			for (auto& r : raw) {
-				if (!r.empty()) {
-					list.push_back(std::stoi(r));
-				}
-			}
-
-			return list;
 		}
 
 		//---------------------------------------------------
@@ -1032,23 +883,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			return list;
 		}
 
-		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents() noexcept
-		{
-			std::vector<std::string> list;
-
-			for (auto& x : data)
-			{
-				auto raw = DKUtil::string::split(x.second, "|");
-				for (auto& r : raw) {
-					if (!r.empty()) {
-						list.push_back(fmt::format("{} {}", x.first, r));
-					}
-				}
-			}
-			return list;
-		}
-
-		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date, bool b_prefix, bool b_colour, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc) noexcept
+		[[nodiscard]] std::vector<std::string> GetAllLoggedEvents(std::string_view a_date, bool b_prefix) noexcept
 		{
 			if (!HasDate(a_date)) {
 				return {};
@@ -1059,17 +894,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			for (auto& r : raw) {
 				if (!r.empty()) 
 				{
-					std::string x{};
-					auto colourprefix = !b_colour ? "" : GetEntryTypeByLogPrefx(r, qc, ic, bc, sc);
-
-					x = b_prefix ? fmt::format("{}", r) : fmt::format("{}", r.substr(r.find_first_of("~ ") + 2));
-
-					if (b_colour)
-					{
-						x = fmt::format("<font color='{}'>{}{}", colourprefix.data(), x, "</font>");
-					}
-
-					list.push_back(x);
+					list.push_back(b_prefix ? std::string(r) : std::string(r.substr(r.find_first_of("~ ") + 2)));
 				}
 			}
 			return list;
@@ -1187,30 +1012,6 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 			data[a_key.data()]++;
 			INFO("Radiant Quest Handler Incremented key {} to a value of: {}", a_key, data[a_key.data()]);
-		}
-
-		void SetCount(std::string_view a_key, int32_t value) noexcept
-		{
-			if (!HasKey(a_key)) {
-				AddKey(a_key);
-			}
-
-			data[a_key.data()] = value;
-			INFO("Radiant Quest Handler set key {} to a value of: {}", a_key, data[a_key.data()]);
-		}
-
-		void DecreaseCount(std::string_view a_key, int32_t value) noexcept
-		{
-			if (!HasKey(a_key)) {
-				return;
-			}
-
-			if (data[a_key.data()] == 0) {
-				return;
-			}
-
-			data[a_key.data()]--;
-			INFO("Radiant Quest Handler Decreased key {} to a value of: {}", a_key, data[a_key.data()]);
 		}
 
 		void ResetCount(std::string_view a_key) noexcept
@@ -1528,12 +1329,9 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 namespace CFramework_Master
 {
 	extern Serialization::CompletionistData FoundItemData;
-	extern Serialization::CompletionistData ExcludedCellData;
 	extern Serialization::CompletionistData FoundItemData_NoShow;
 	extern Serialization::CompletionistKey CQuestKeys_Natural;
 	extern Serialization::CompletionistKey CQuestKeys_Manual;
-	extern Serialization::CompletionistKey CQuestKeys_Stages;
-	extern Serialization::CompletionistLog LoggingData;
 };
 
 namespace Serialization
@@ -1556,48 +1354,21 @@ namespace Serialization
 	}
 
 	//---------------------------------------------------
-	//-- SKSE Callback Functions ( Correct Log Dates ) --
-	//---------------------------------------------------
-
-	static void CorrectLoggedDates(std::string_view a_from, std::string_view a_to) noexcept
-	{
-		using namespace CFramework_Master;
-
-		std::vector<std::string> dates;
-		for (auto& [date, events] : LoggingData.data) {
-			if (date.contains(a_from)) {
-				dates.push_back(date);
-			}
-		}
-
-		for (auto& date : dates) {
-			INFO("Correcting Completion Log Date: {}", date);
-
-			auto node = LoggingData.data.extract(date);
-			auto newDate = DKUtil::string::replace_nth_occurrence(date, 0, a_from, a_to);
-
-			if (auto it = LoggingData.data.find(newDate); it != LoggingData.data.end()) {
-				it->second += node.mapped();
-				continue;
-			}
-
-			node.key() = newDate;
-			LoggingData.data.insert(std::move(node));
-		}
-	}
-
-	//---------------------------------------------------
 	//-- SKSE Callback Functions ( Load Callback ) ------
 	//---------------------------------------------------
 
 	static void LoadCallback([[maybe_unused]] SKSE::SerializationInterface* a_intfc) noexcept
 	{
-		using namespace CFramework_Master;
-
 		std::uint32_t type, version, length;
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
 			if (type != kHeader) {
 				break;
+			}
+
+			// Saves from before 2000 laid the data out differently; this version needs a new game
+			if (version < kFirstVersion) {
+				INFO("Save made with an older Completionist (version {}), its data isn't loaded: start a new game", version);
+				return;
 			}
 
 			if (version > kVersion) {
@@ -1605,73 +1376,9 @@ namespace Serialization
 			}
 
 			for (auto& [data, name] : ISerializable::ManagedData) {
-
-				if (data)
-				{
-					/*Add new serialised data sets here for first load... e.g if (version < kVersion && name == "EXAMPLE DATA NAME") { continue; }*/
-					if (version < 1006 && DKUtil::string::iequals(name, "LoggingData")) { 
-						INFO("Skipping loading of Logging Data.");
-						continue; 
-					}
-
-					if (version < 1008 && DKUtil::string::iequals(name, "RadiantCountData")) {
-						INFO("Skipping loading of Radiant Count Data.");
-						continue;
-					}
-
-					if (version < 1011 && DKUtil::string::iequals(name, "ExcludedCellScannerRefs")) {
-						INFO("Skipping loading of Excluded Cell Scanner Refs.");
-						continue;
-					}
-
-					if (version < 1011 && DKUtil::string::iequals(name, "ExcludedMerchantContainers")) {
-						INFO("Skipping loading of Excluded Merchant Containers.");
-						continue;
-					}
-
-					if (version < 1013 && DKUtil::string::iequals(name, "PatchSettings")) {
-						INFO("Skipping loading of Patch Page Settings.");
-						continue;
-					}
-
-					if (version < 1016 && DKUtil::string::iequals(name, "PlayerHits")) {
-						INFO("Skipping loading of Player hits.");
-						continue;
-					}
-
-					if (version < 1017 && DKUtil::string::iequals(name, "PlayerKills")) {
-						INFO("Skipping loading of Player Kills.");
-						continue;
-					}
-
-					if (version < 1021 && DKUtil::string::iequals(name, "CellTargets")) {
-						INFO("Skipping loading of Cell Scanner targets.");
-						continue;
-					}
-
+				if (data) {
 					data->Load(a_intfc, name);
-
-					if (version < 1007 && DKUtil::string::iequals(name, "LoggingData"))
-					{
-						CorrectLoggedDates("/08/2023", "/09/2023");
-
-						for (auto& [date, events] : LoggingData.data) {
-							INFO("Correcting Invalid Formats on event: {}", date);
-							events = DKUtil::string::replace_nth_occurrence(events, 0, ":  ", ": ");
-						}
-					}
-
-					if (version < 1018 && DKUtil::string::iequals(name, "LoggingData"))
-					{
-						CorrectLoggedDates("/010/2024", "/10/2024");
-						CorrectLoggedDates("/011/2024", "/11/2024");
-					}
 				}
-			}
-
-			if (version < kVersion) {
-				/*if somehow the serialized data structure changed, thus resulting a kVersion change
-				  it must be able to patch/regress the backward compatibility or it will ERROR*/
 			}
 		}
 	}

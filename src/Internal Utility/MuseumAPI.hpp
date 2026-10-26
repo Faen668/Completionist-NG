@@ -23,8 +23,6 @@ namespace Completionist
 		static bool IsMuseumDisplayable(RE::TESForm* a_form);
 		static bool IsMuseumDisplayable(RE::FormID a_formID);
 
-		static bool HasVariations(RE::TESForm* a_form);
-		static bool HasVariations(RE::FormID a_formID);
 
 		static std::unordered_set<RE::FormID> GetVariations(RE::FormID a_formID);
 

@@ -2,8 +2,6 @@
 #include "Structs.hpp"
 #include "Serialization.hpp"
 
-constexpr auto CArraySize = 128;
-
 namespace CQuestMaster
 {
 	inline std::vector<std::tuple<CQuestData*, std::string, int32_t, std::string>> CQuestDataVec;
@@ -38,12 +36,8 @@ namespace CQuestMaster
 		  static void							qSetOptionCompleted(RE::StaticFunctionTag*, std::int32_t q_questID, std::string a_key, bool b_completed);
 		  static void							ValidateLocalisation();
 
-		  static std::vector<std::string>		SearchAndReportPage(RE::StaticFunctionTag*, std::string s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t searchType);
-		  static std::string                    GetLocalisedPageName(int32_t ID);
 		  static CQuestData*					GetQuestDataByKey(std::string a_key);
 		  static void							AddQuestData(CQuestData* a_data, std::string a_name, int32_t a_ID, std::string a_key);
 
-
-		  static std::pair<int32_t, int32_t>	qGetQuestCompletionTotals(std::vector<CQuestData*> data);
 	};
 };

@@ -90,17 +90,6 @@ auto ScriptObject::GetVariable(ScriptObjectPtr a_object, std::string_view a_vari
 	return std::addressof(a_object->variables[offset + idx]);
 }
 
-auto ScriptObject::IsType(ScriptObjectPtr a_object, const char* a_scriptName) -> bool
-{
-	for (auto cls = a_object ? a_object->type.get() : nullptr; cls; cls = cls->GetParent()) {
-		if (_stricmp(cls->GetName(), a_scriptName) == 0) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 auto ScriptObject::GetBool(ScriptObjectPtr a_object, std::string_view a_variableName) -> bool
 {
 	auto variable = GetVariable(a_object, a_variableName);	
@@ -169,30 +158,4 @@ auto ScriptObject::GetArray(ScriptObjectPtr a_object, std::string_view a_variabl
 {
 	auto variable = GetVariable(a_object, a_variableName);
 	return variable ? variable->GetArray() : nullptr;
-}
-
-void ScriptObject::RegisterForModEvent(ScriptObjectPtr a_object, RE::BSFixedString a_eventName, RE::BSFixedString a_callbackName) 
-{
-	const auto skyrimVM = RE::SkyrimVM::GetSingleton();
-	const auto vm = skyrimVM ? skyrimVM->GetVMRuntimeData().impl : nullptr;
-
-	if (vm) {
-		auto args = RE::MakeFunctionArguments(std::move(a_eventName), std::move(a_callbackName));
-		ScriptCallbackPtr nullCallback;
-		vm->DispatchMethodCall(a_object, "RegisterForModEvent"sv, args, nullCallback);
-		delete args;
-	}
-}
-
-void ScriptObject::UnregisterForModEvent(ScriptObjectPtr a_object, RE::BSFixedString a_eventName)
-{
-	const auto skyrimVM = RE::SkyrimVM::GetSingleton();
-	const auto vm = skyrimVM ? skyrimVM->GetVMRuntimeData().impl : nullptr;
-
-	if (vm) {
-		auto args = RE::MakeFunctionArguments(std::move(a_eventName));
-		ScriptCallbackPtr nullCallback;
-		vm->DispatchMethodCall(a_object, "UnregisterForModEvent"sv, args, nullCallback);
-		delete args;
-	}
 }

@@ -36,11 +36,9 @@ namespace CFramework_Master
 		SetSerializableInfo(FoundItemData_NoShow);
 		SetSerializableInfo(CQuestKeys_Natural);
 		SetSerializableInfo(CQuestKeys_Manual);
-		SetSerializableInfo(CQuestKeys_Stages);
 		SetSerializableInfo(LoggingData);
 		SetSerializableInfo(RadiantCountData);
 		SetSerializableInfo(ExcludedCellScannerRefs);
-		SetSerializableInfo(ExcludedMerchantContainers);
 		SetSerializableInfo(PatchSettings);
 		SetSerializableInfo(PlayerKills);
 		SetSerializableInfo(PlayerHits);
@@ -72,10 +70,6 @@ namespace CFramework_Master
 		//Exclude Vendor Chests.
 		Completionist::CellScanner::init();
 	}
-
-	static void HideTrackedItem(RE::TESForm* a_item) {
-		
-	};
 
 	static std::string GetDeathPrefix(const std::string&  a_location)
 	{
@@ -176,10 +170,6 @@ namespace CFramework_Master
 		PlayerHits.AddTarget(target, weapon);
 	};
 
-	std::string FrameworkAPI::GetCombinedKillString(RE::StaticFunctionTag*, std::string a_name) {
-		return PlayerKills.GetCombinedKillString(a_name);
-	}
-
 	//---------------------------------------------------
 	//-- Framework Functions ( Game Started ) -----------
 	//---------------------------------------------------
@@ -267,16 +257,6 @@ namespace CFramework_Master
 	}
 
 	//---------------------------------------------------
-	//-- Framework Functions (IsInActualMenuMode ) ------
-	//---------------------------------------------------
-
-	bool FrameworkAPI::IsInActualMenuMode(RE::StaticFunctionTag*)
-	{
-		auto map = RE::ControlMap::GetSingleton();
-		return !map->IsMovementControlsEnabled();
-	}
-
-	//---------------------------------------------------
 	//-- Framework Functions (Logging Functions ) -------
 	//---------------------------------------------------
 
@@ -315,88 +295,11 @@ namespace CFramework_Master
 	//-- Framework Functions (Logging Functions ) -------
 	//---------------------------------------------------
 
-	std::vector<std::string> FrameworkAPI::GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_prefix, bool b_colour, std::string_view qc, std::string_view ic, std::string_view bc, std::string_view sc)
+	std::vector<std::string> FrameworkAPI::GetLoggedEventsForDate(RE::StaticFunctionTag*, std::string a_date, bool b_prefix)
 	{
-		auto list = LoggingData.GetAllLoggedEvents(a_date, b_prefix, b_colour, qc, ic, bc, sc);
-		while (list.size() > 126) { list.erase(list.begin()); }
+		auto list = LoggingData.GetAllLoggedEvents(a_date, b_prefix);
 		std::reverse(list.begin(), list.end());
 		return list;
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( MCM Quest Search ) -------
-	//---------------------------------------------------
-
-	std::vector<std::string> FrameworkAPI::SearchAndReportPage(const std::string& s_term, bool b_ignoreCompleted, std::int32_t i_maxResults, std::int32_t i_searchType)
-	{
-		std::vector<std::string> list{};
-		auto result = 1;
-
-		for (const auto& [form, name, mcmPage, Category] : CFramework_Master::CItemsDataVec)
-		{
-			if (!CHCMHandler::MCMAPI::IsFormVisible(nullptr, mcmPage, form, -1))
-			{
-				INFO("Form: {} is hidden and cannot be processed", form->GetName());
-				continue;
-			}
-
-			if (list.size() >= i_maxResults)
-				break;
-
-			bool process = false;
-
-			switch (i_searchType)
-			{
-			case 0: process = DKUtil::string::icontains(name, s_term); break;
-			case 1: process = name.starts_with(s_term); break;
-			case 2: process = DKUtil::string::iequals(name, s_term); break;
-			default: break;
-			}
-
-			if (process)
-			{
-				if (b_ignoreCompleted && (FoundItemData.HasForm(form) || FoundItemData_NoShow.HasForm(form)))
-				{
-					continue;
-				}
-
-				list.push_back("$MiscResult{" + std::to_string(result) + "}{" + "[REPLACE]" + "}{" + mcmPage + "}{" + GetLocalisedCategory(Category) + "}{" + name + "}");
-				list.push_back(mcmPage);
-				list.push_back(name);
-				list.push_back("Misc");
-				result++;
-			}
-		}
-
-		return list;
-	}
-
-	std::string FrameworkAPI::GetLocalisedCategory(int32_t ID)
-	{
-		switch (static_cast<EntryCategory>(ID))
-		{
-		case CFramework_Master::kNone:      return "";
-		case CFramework_Master::kItem:      return GetLocalizedCategoryString("Category_Item");
-		case CFramework_Master::kBook:      return GetLocalizedCategoryString("Category_Book");
-		case CFramework_Master::kMapM:      return GetLocalizedCategoryString("Category_MapP");
-		case CFramework_Master::kShou:      return GetLocalizedCategoryString("Category_Shou");
-		case CFramework_Master::kEnch:      return GetLocalizedCategoryString("Category_Ench");
-		case CFramework_Master::kHome:      return GetLocalizedCategoryString("Category_Home");
-		case CFramework_Master::kPets:      return GetLocalizedCategoryString("Category_Pets");
-		case CFramework_Master::kClaw:      return GetLocalizedCategoryString("Category_Claw");
-		case CFramework_Master::kMask:      return GetLocalizedCategoryString("Category_Mask");
-		case CFramework_Master::kFish:      return GetLocalizedCategoryString("Category_Fish");
-		case CFramework_Master::kShrine:    return GetLocalizedCategoryString("Category_Shrine");
-		case CFramework_Master::kStones:    return GetLocalizedCategoryString("Category_Stones");
-		case CFramework_Master::kBarenziah: return GetLocalizedCategoryString("Category_Barenziah");
-		case CFramework_Master::kShard:		return GetLocalizedCategoryString("Category_Skyshard");
-		default:                            return "";
-		}
-	}
-
-	std::string FrameworkAPI::GetLocalizedCategoryString(const std::string& key)
-	{
-		return CLocalisation::LocalisationAPI::GetSingleton()->GetLocStringByKey(key.c_str());
 	}
 
 	std::int32_t FrameworkAPI::GetBookCategoryType(RE::TESForm* a_form)
@@ -421,15 +324,6 @@ namespace CFramework_Master
 	void FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::logType kType, std::string a_log)
 	{
 		LoggingData.AddLoggedEvent(kType, a_log);
-	}
-
-	Serialization::CompletionistLog::logType FrameworkAPI::GetBookLogType(RE::TESForm* a_form)
-	{
-		if (auto* book = a_form ? a_form->As<RE::TESObjectBOOK>() : nullptr; book && book->GetSpell()) {
-			return Serialization::CompletionistLog::logType::kTome;
-		}
-
-		return Serialization::CompletionistLog::logType::kBook;
 	}
 
 	//---------------------------------------------------
@@ -496,7 +390,6 @@ namespace CFramework_Master
 	//---------------------------------------------------
 
 	std::string FrameworkAPI::GetVersion(RE::StaticFunctionTag*) { return std::string(FrameworkAPI::ReplaceStr(Plugin::Version.string(), "-", ".")); }
-	std::string FrameworkAPI::GetHexValue(RE::StaticFunctionTag*, uint32_t IntVal) { if (!IntVal) { return ""; } return fmt::format("#{:X}", IntVal); }
 	std::string FrameworkAPI::ReplaceStr(std::string const& in, std::string const& from, std::string const& to) { return std::regex_replace(in, std::regex(from), to); }
 
 	//---------------------------------------------------

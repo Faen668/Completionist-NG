@@ -20,20 +20,12 @@ namespace CLocalisation {
 		return localisedMap_N.contains(s_key) ? localisedMap_N.at(s_key).c_str() : s_key;
 	}
 
-	std::string LocalisationAPI::GetLocNameByKeyExt(RE::StaticFunctionTag*, std::string s_key) {
-		return localisedMap_N.contains(s_key) ? localisedMap_N.at(s_key) : s_key;
-	}
-
 	//---------------------------------------------------
 	//-- Localisation ( GetLocalised Desc With Ext. ) ---
 	//---------------------------------------------------
 
 	const char* LocalisationAPI::GetLocDescriptionByKey(const char* s_key) {
 		return localisedMap_D.contains(s_key) ? localisedMap_D.at(s_key).c_str() : s_key;
-	}
-
-	std::string LocalisationAPI::GetLocDescriptionByKeyExt(RE::StaticFunctionTag*, std::string s_key) {
-		return localisedMap_D.contains(s_key) ? localisedMap_D.at(s_key) : s_key;
 	}
 
 	//---------------------------------------------------

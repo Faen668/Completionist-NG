@@ -103,7 +103,6 @@ namespace CExternalPatchHandler
 		for (auto& patch : CustomPatches)
 		{
 			patch.second->CleanEmptyPages();
-			patch.second->ValidatePageSizeRules();
 		}
 
 		if (CustomPatches.size() > 0)

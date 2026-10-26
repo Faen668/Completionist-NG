@@ -1588,6 +1588,25 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Completionist UI ( Spots ) ---------------------
+	//---------------------------------------------------
+
+	std::vector<Menu::SpotView> Menu::Spots() const {
+
+		std::vector<SpotView> spots;
+		const auto add = [&](const std::vector<NavSpot>& a_list, char a_kind) {
+			for (const auto& spot : a_list) {
+				const char kind = a_kind == 'C' && spot.section == -1 ? 'H' : a_kind;
+				spots.push_back({ spot.id, kind, spot.section, spot.index, spot.window, spot.minX, spot.minY, spot.maxX, spot.maxY, spot.visible });
+			}
+		};
+		add(_entrySpots, 'E');
+		add(_controlSpots, 'C');
+		add(_sidebarSpots, 'S');
+		return spots;
+	}
+
+	//---------------------------------------------------
 	//-- Completionist UI ( Describe Focus ) ------------
 	//---------------------------------------------------
 
@@ -1703,8 +1722,11 @@ namespace CompletionistUI
 					}
 					const float overlap = vertical ? std::min(a_from.maxX, candidate.maxX) - std::max(a_from.minX, candidate.minX) : std::min(a_from.maxY, candidate.maxY) - std::max(a_from.minY, candidate.minY);
 					const float offset = vertical ? std::abs((candidate.minX + candidate.maxX) - (a_from.minX + a_from.maxX)) * 0.5f : std::abs((candidate.minY + candidate.maxY) - (a_from.minY + a_from.maxY)) * 0.5f;
-					const float slack = vertical ? 3.0f * std::max(0.0f, along) + 6.0f * ImGui::GetFrameHeight() : std::max(0.0f, along) + ImGui::GetFrameHeight();
-					if (overlap <= 0.0f && offset > slack) {
+					// Up and down reach items a little to the side; how far is measured edge to edge, so a
+					// row further away doesn't win over a nearer one just off to the side
+					const float sideGap = vertical ? -overlap : offset;
+					const float slack = vertical ? std::max(0.0f, along) + 6.0f * ImGui::GetFrameHeight() : std::max(0.0f, along) + ImGui::GetFrameHeight();
+					if (overlap <= 0.0f && sideGap > slack) {
 						continue;
 					}
 					candidates.push_back({ std::addressof(candidate), std::max(0.0f, along), offset, overlap > 0.0f });
@@ -1743,20 +1765,29 @@ namespace CompletionistUI
 			}
 			return best ? best->spot : nullptr;
 		};
-		// Closest item up or down when nothing lines up, such as the log's date filter under its tab
+		// Closest item up or down when nothing lines up, such as the log's date filter under its tab:
+		// the next row that way, then the item in it nearest across
 		const auto closest = [&](const NavSpot& a_from, std::initializer_list<const std::vector<NavSpot>*> a_lists) -> const NavSpot* {
+			const auto along = [&](const NavSpot& a_candidate) { return dir == ImGuiDir_Down ? a_candidate.minY - a_from.maxY : a_from.minY - a_candidate.maxY; };
+			const auto usable = [&](const NavSpot& a_candidate) {
+				return a_candidate.id != a_from.id && !(a_candidate.section == -1 && dir != ImGuiDir_Up) && (a_candidate.visible || a_candidate.window == a_from.window) && along(a_candidate) >= -2.0f;
+			};
+			float nextRow = FLT_MAX;
+			for (const auto* list : a_lists) {
+				for (const auto& candidate : *list) {
+					if (usable(candidate)) {
+						nextRow = std::min(nextRow, std::max(0.0f, along(candidate)));
+					}
+				}
+			}
 			const NavSpot* best = nullptr;
 			float          bestDistance = FLT_MAX;
 			for (const auto* list : a_lists) {
 				for (const auto& candidate : *list) {
-					if (candidate.id == a_from.id || (candidate.section == -1 && dir != ImGuiDir_Up) || (!candidate.visible && candidate.window != a_from.window)) {
+					if (!usable(candidate) || along(candidate) > nextRow + ImGui::GetFrameHeight() * 0.75f) {
 						continue;
 					}
-					const float along = dir == ImGuiDir_Down ? candidate.minY - a_from.maxY : a_from.minY - candidate.maxY;
-					if (along < -2.0f) {
-						continue;
-					}
-					const float distance = along + std::abs((candidate.minX + candidate.maxX) - (a_from.minX + a_from.maxX)) * 0.5f;
+					const float distance = std::abs((candidate.minX + candidate.maxX) - (a_from.minX + a_from.maxX)) * 0.5f;
 					if (distance < bestDistance) {
 						bestDistance = distance;
 						best = std::addressof(candidate);
@@ -1804,20 +1835,42 @@ namespace CompletionistUI
 				const int cols = std::max(1, spot->columns);
 				const int row = spot->index / cols;
 				const int col = spot->index % cols;
+				// Sections carry on in the same list; the quest journal has its Completed list beside the others
+				const auto sameList = [&](const NavSpot* a_other) { return a_other && a_other->window == spot->window; };
+				// The closest entry in the list beside this one, left or right
+				const auto beside = [&]() -> const NavSpot* {
+					const NavSpot* best = nullptr;
+					float          bestDistance = FLT_MAX;
+					for (const auto& candidate : _entrySpotsLast) {
+						if (candidate.window == spot->window || !candidate.visible) {
+							continue;
+						}
+						const float gap = dir == ImGuiDir_Right ? candidate.minX - spot->maxX : spot->minX - candidate.maxX;
+						if (gap < -2.0f) {
+							continue;
+						}
+						const float distance = gap + std::abs((candidate.minY + candidate.maxY) - (spot->minY + spot->maxY)) * 0.5f;
+						if (distance < bestDistance) {
+							bestDistance = distance;
+							best = std::addressof(candidate);
+						}
+					}
+					return best;
+				};
 				switch (dir) {
 				case ImGuiDir_Down:
 					if ((row + 1) * cols + col < spot->count) {
 						target = at(spot->section, (row + 1) * cols + col);
 					} else if ((row + 1) * cols < spot->count) {
 						target = at(spot->section, spot->count - 1);
-					} else if (const auto* next = sectionInfo(spot->section + 1)) {
+					} else if (const auto* next = sectionInfo(spot->section + 1); sameList(next)) {
 						target = at(next->section, std::min({ col, next->columns - 1, next->count - 1 }));
 					}
 					break;
 				case ImGuiDir_Up:
 					if (row > 0) {
 						target = at(spot->section, (row - 1) * cols + col);
-					} else if (const auto* previous = sectionInfo(spot->section - 1)) {
+					} else if (const auto* previous = sectionInfo(spot->section - 1); sameList(previous)) {
 						const int lastRow = (previous->count - 1) / std::max(1, previous->columns);
 						target = at(previous->section, std::min(lastRow * previous->columns + col, previous->count - 1));
 					} else {
@@ -1827,13 +1880,15 @@ namespace CompletionistUI
 				case ImGuiDir_Left:
 					if (col > 0) {
 						target = at(spot->section, spot->index - 1);
-					} else {
+					} else if (!(target = beside())) {
 						target = sidebarFor(*spot);
 					}
 					break;
 				case ImGuiDir_Right:
 					if (col + 1 < cols && spot->index + 1 < spot->count) {
 						target = at(spot->section, spot->index + 1);
+					} else {
+						target = beside();
 					}
 					break;
 				default:
@@ -1911,11 +1966,31 @@ namespace CompletionistUI
 			}
 		}
 
+		// Straight back the way it came: Down then Up returns to the same control, whichever is nearest.
+		// It may have scrolled out of view in the same panel; focusing it scrolls it back
+		const auto opposite = dir == ImGuiDir_Up ? ImGuiDir_Down : dir == ImGuiDir_Down ? ImGuiDir_Up : dir == ImGuiDir_Left ? ImGuiDir_Right : ImGuiDir_Left;
+		if (handled && _lastMoveTo == current && _lastMoveDir == static_cast<int>(opposite)) {
+			const NavSpot* now = nullptr;
+			for (const auto* list : { &_entrySpotsLast, &_controlSpotsLast, &_sidebarSpotsLast }) {
+				now = now ? now : find(*list, current);
+			}
+			for (const auto* list : { &_entrySpotsLast, &_controlSpotsLast, &_sidebarSpotsLast }) {
+				if (const auto* back = find(*list, _lastMoveFrom); back && (back->visible || (now && back->window == now->window))) {
+					target = back;
+				}
+			}
+		}
+		_lastMoveFrom = handled && target ? current : 0;
+		_lastMoveTo = handled && target ? target->id : 0;
+		_lastMoveDir = static_cast<int>(dir);
+
 		lastRoute = std::string(handled ? "routed" : "imgui") + (target ? " to " + std::to_string(target->section) + "/" + std::to_string(target->index) : " nowhere");
 		if (!handled) {
 			return;
 		}
 		ImGui::NavMoveRequestCancel();
+		// The press shows the focus box even at the end of a list
+		ImGui::SetNavCursorVisible(true);
 		if (!target && g.NavId == 0) {
 			// End of a list, stay put
 			_pendingFocus = current;
@@ -2277,6 +2352,11 @@ namespace CompletionistUI
 			total += measure(buttons, label) + spacing;
 		}
 		total -= spacing;
+		// The least needed go first in a narrow window, rather than running off the edge
+		while (total > width && hints.size() > 1) {
+			total -= measure(hints.back().first, hints.back().second) + spacing;
+			hints.pop_back();
+		}
 
 		float      x = start.x + std::max(0.0f, (width - total) * 0.5f);
 		const auto centreY = start.y + height * 0.5f + 1.0f;
@@ -2903,22 +2983,33 @@ namespace CompletionistUI
 			}
 		}
 
-		const float tabGap = fontSize * 1.6f;
 		const float countGap = fontSize * 0.4f;
 		const auto  width = [&](const TabItem& a_tab) {
 			const float count = a_tab.count.empty() ? 0.0f : ImGui::CalcTextSize(a_tab.count.c_str()).x + countGap;
 			return ImGui::CalcTextSize(a_tab.title.c_str()).x + count;
 		};
-		float total = 0.0f;
+		float tabs = 0.0f;
 		for (const auto& tab : a_tabs) {
-			total += width(tab) + tabGap;
+			tabs += width(tab);
 		}
+		// Closer together when they don't fit, then onto more lines in a narrow window
+		const float available = ImGui::GetContentRegionAvail().x;
+		const float gaps = static_cast<float>(a_tabs.size() > 0 ? a_tabs.size() - 1 : 0);
+		const float tabGap = tabs + gaps * fontSize * 1.6f <= available ? fontSize * 1.6f : fontSize * 0.9f;
+		const float total = tabs + gaps * tabGap;
+		const bool  wraps = total > available;
 		ImGui::Spacing();
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - total + tabGap) * 0.5f));
+		const float rowX = ImGui::GetCursorPosX() + (wraps ? 0.0f : std::max(0.0f, (available - total) * 0.5f));
+		const float rowRight = ImGui::GetCursorScreenPos().x + available;
+		ImGui::SetCursorPosX(rowX);
 		for (std::size_t i = 0; i < a_tabs.size(); ++i) {
 			const auto& tab = a_tabs[i];
 			if (i > 0) {
-				ImGui::SameLine(0.0f, tabGap);
+				if (wraps && ImGui::GetItemRectMax().x + tabGap + width(tab) > rowRight) {
+					ImGui::SetCursorPosX(rowX);
+				} else {
+					ImGui::SameLine(0.0f, tabGap);
+				}
 			}
 			const auto size = ImGui::CalcTextSize(tab.title.c_str());
 			ImGui::PushID(tab.id.c_str());
@@ -3151,6 +3242,8 @@ namespace CompletionistUI
 			// Trainers have no title row, so the padding below matches the padding above
 			const float content = trainerPage ? TrainerInfoHeight() + 1.0f : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
 			panelHeight = (style.WindowPadding.y * 2.0f + content) * t * t * (3.0f - 2.0f * t);
+			// Leaves the list room for a few rows, as the description panel does, on a short window or a big scale
+			panelHeight = std::min(panelHeight, std::max(0.0f, ImGui::GetContentRegionAvail().y - gap - 6.0f * ImGui::GetTextLineHeightWithSpacing()));
 		} else {
 			panelHeight = DescriptionPanelHeight();
 		}
@@ -3650,14 +3743,15 @@ namespace CompletionistUI
 	bool Menu::DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings) {
 
 		const auto& io = ImGui::GetIO();
-		const auto  size = ImVec2(
-			std::clamp(io.DisplaySize.x * 0.4f, std::min(io.DisplaySize.x, 620.0f), io.DisplaySize.x),
-			std::clamp(io.DisplaySize.y * 0.76f, std::min(io.DisplaySize.y, 460.0f), io.DisplaySize.y));
+		ImGui::PushFont(Themes::BodyFont());
+		// Grows with the text scale, so the options keep to their columns and the list keeps some rows
+		const auto size = ImVec2(
+			std::clamp(std::max(io.DisplaySize.x * 0.4f, ImGui::GetFontSize() * 42.0f), std::min(io.DisplaySize.x, 620.0f), io.DisplaySize.x),
+			std::clamp(std::max(io.DisplaySize.y * 0.76f, ImGui::GetFontSize() * 45.0f), std::min(io.DisplaySize.y, 460.0f), io.DisplaySize.y));
 		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(size, ImGuiCond_Always);
 
 		bool open = true;
-		ImGui::PushFont(Themes::BodyFont());
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
 		windowOpacity = background.w;
@@ -4567,8 +4661,13 @@ namespace CompletionistUI
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::SameLine(0.0f, fontSize);
-		if (MarkerToggle("##FindIgnoreCompleted", options.findIgnoreCompleted, a_provider.Translate("UI_Find_IgnoreCompleted").c_str())) {
+		// On the next line when the window is too narrow for it
+		const auto ignoreLabel = a_provider.Translate("UI_Find_IgnoreCompleted");
+		const float ignoreWidth = ImGui::GetFrameHeight() * 2.0f + ImGui::CalcTextSize(ignoreLabel.c_str()).x;
+		if (ImGui::GetItemRectMax().x + fontSize + ignoreWidth <= ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x) {
+			ImGui::SameLine(0.0f, fontSize);
+		}
+		if (MarkerToggle("##FindIgnoreCompleted", options.findIgnoreCompleted, ignoreLabel.c_str())) {
 			_settingsChanged = true;
 		}
 
@@ -6005,7 +6104,6 @@ namespace CompletionistUI
 		const bool  hoverable = ImGui::IsWindowHovered();
 		std::size_t hovered = perks.size();
 		for (std::size_t i = 0; i < perks.size(); ++i) {
-			const auto& perk = perks[i];
 			const auto  state = stateOf(i);
 			Decor::PerkNode(drawList, spots[i], radius, state);
 

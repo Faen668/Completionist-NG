@@ -18,11 +18,7 @@ namespace CLocalisation
 		 static const char* GetLocStringByKey(const char* s_key);
 
 		 static const char* GetLocNameByKey(const char* s_key);
-		 static std::string GetLocNameByKeyExt(RE::StaticFunctionTag*, std::string s_key);
-
 		 static const char* GetLocDescriptionByKey(const char* s_key);
-		 static std::string GetLocDescriptionByKeyExt(RE::StaticFunctionTag*, std::string s_key);
-
 
 
 		 LocalisationAPI(LocalisationAPI const&) = delete;

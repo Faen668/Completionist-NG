@@ -175,23 +175,6 @@ namespace Completionist
 	//---------------------------------------------------
 
 	/// <summary>
-	/// Returns true if the targetted formID has variations.
-	/// </summary>
-	bool MuseumAPI::HasVariations(RE::FormID a_formID)
-	{
-		auto it = _AllVariations.find(a_formID);
-		return it != _AllVariations.end() && !it->second.empty();
-	}
-
-	/// <summary>
-	/// Returns true if the targetted form has variations.
-	/// </summary>
-	bool MuseumAPI::HasVariations(RE::TESForm* a_form)
-	{
-		return a_form && HasVariations(a_form->GetFormID());
-	}
-
-	/// <summary>
 	/// Gets all variations of the target formID including the base if the passed in formID is a variation itself.
 	/// </summary>
 	std::unordered_set<RE::FormID> MuseumAPI::GetVariations(RE::FormID a_formID)

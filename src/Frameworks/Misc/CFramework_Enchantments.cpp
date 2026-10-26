@@ -1,4 +1,5 @@
 #include "CFramework_Enchantments.hpp"
+#include "UI/GameUI.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
@@ -252,7 +253,7 @@ namespace CFramework_Enchantments {
 
 	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
 
-		if (!a_event || a_event->menuName != RE::JournalMenu::MENU_NAME || !a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
+		if (!CompletionistUI::GameUI::IsStatusCheck(a_event)) { return RE::BSEventNotifyControl::kContinue; }
 
 		for (auto i = 0; i < VA_FormArray.size(); i++) {
 			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(VA_FormArray[i]); enchantment && enchantment->GetKnown()) {

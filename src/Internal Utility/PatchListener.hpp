@@ -38,29 +38,8 @@ namespace CExternalPatchHandler
 			return new CRadiantData;
 		}
 
-		static auto GetNewDrunkData() {
-			return new CDrunkData;
-		}
-
 		static auto GetNewPatchData() {
 			return new CMiscPatch;
-		}
-
-		[[nodiscard]] static std::string CreateGUID() noexcept
-		{
-			GUID guid;
-			if (CoCreateGuid(&guid) != S_OK) {
-				return "";
-			}
-
-			char guidString[39]; // 38 characters + null terminator
-			snprintf(guidString, sizeof(guidString),
-				"{%08x-%04x-%04x-%04x-%012llx}",
-				guid.Data1, guid.Data2, guid.Data3,
-				(guid.Data4[0] << 8) | guid.Data4[1],
-				*(reinterpret_cast<uint64_t*>(&guid.Data4[2])));
-
-			return std::string(guidString);
 		}
 
 		//---------------------------------------------------
@@ -147,20 +126,6 @@ namespace CExternalPatchHandler
 		//-- INI Value Getters ------------------------------
 		//---------------------------------------------------
 
-		[[nodiscard]] static RE::BGSListForm* GetFormlist(RE::FormID a_formID, const char* a_modname) noexcept
-		{
-			try
-			{
-				return RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSListForm>(a_formID, a_modname);
-			}
-			catch (const std::exception& e)
-			{
-				// Handle the conversion failure appropriately
-				INFO("Failed to convert FormID: {}", e.what());
-				return nullptr;
-			}
-		}
-
 		//---------------------------------------------------
 		//-- INI Value Getters ------------------------------
 		//---------------------------------------------------
@@ -177,39 +142,9 @@ namespace CExternalPatchHandler
 			return static_cast<T>(GetIntValueWithDefault(section, key, a_default));
 		}
 
-		[[nodiscard]] static int GetPatchID() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "PatchID");
-		};
-
-		[[nodiscard]] static int GetCustomPatchType() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "axPlt");
-		};
-
-		[[nodiscard]] static std::string GetPatchType() noexcept
-		{
-			return GetStringValue("Completionist Patch Data", "PatchType");
-		};
-
-		[[nodiscard]] static bool IsGroupingEnabled() noexcept
-		{
-			return GetBoolValue("Completionist Patch Data", "UseMCMPageGrouping");
-		};
-		
-		[[nodiscard]] static int GetMultiPageCount() noexcept
-		{
-			return GetIntValue("Completionist Patch Data", "PageCount");
-		};
-
 		[[nodiscard]] static CMiscPatchSortMode GetSortMode() noexcept
 		{
 			return GetEnumValueWithDefault<CMiscPatchSortMode>("Completionist Patch Data", "SortMode", 0);
-		};
-
-		[[nodiscard]] static int GetQuestID(const char* section) noexcept
-		{
-			return GetIntValue(section, "QuestID");
 		};
 
 		[[nodiscard]] static std::string GetHeaderName() noexcept
@@ -217,11 +152,6 @@ namespace CExternalPatchHandler
 			return GetStringValueWithDefault("Completionist Patch Data", "Header", "");
 		};
 
-
-		[[nodiscard]] static std::string GetRequiredMod(const char* section) noexcept
-		{
-			return GetStringValueWithDefault(section, "RequiresMod", "None");
-		};
 
 		[[nodiscard]] static std::string GetOverrideLocalisationFileName() noexcept
 		{
@@ -236,11 +166,6 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static bool GetMultiPagePrependPageNumber() noexcept
 		{
 			return GetBoolValue("Completionist Patch Data", "PrependPageNumber");
-		};
-
-		[[nodiscard]] static bool GetRequiredModValue(const char* section) noexcept
-		{
-			return GetBoolValue(section, "RequiresMod_Value");
 		};
 
 		[[nodiscard]] static bool HasCustomDropDownMenu() noexcept
@@ -787,11 +712,6 @@ namespace CExternalPatchHandler
 			return GetStringValue("Completionist Patch Data", "PluginFileName");
 		};
 
-		[[nodiscard]] static std::string GetModName(const char* section) noexcept
-		{
-			return GetStringValue(section, "ModName");
-		};
-
 		[[nodiscard]] static std::string GetEditorID(const char* section) noexcept
 		{
 			return GetStringValue(section, "EditorID");
@@ -883,11 +803,6 @@ namespace CExternalPatchHandler
 			return GetIntValueWithDefault(section, "GenericFavorQuestType");
 		};
 
-		[[nodiscard]] static int GetQuestLink(const char* section) noexcept
-		{
-			return GetIntValueWithDefault(section, "QuestLink");
-		};
-		
 		[[nodiscard]] static CMiscPatchType GetItemType(const char* section) noexcept
 		{
 			return GetEnumValue<CMiscPatchType>(section, "Type");
@@ -908,11 +823,6 @@ namespace CExternalPatchHandler
 		[[nodiscard]] static int GetPlayerHomeType(const char* section, const std::string& rawFormID) noexcept
 		{
 			return GetIntValue(section, fmt::format("{}_Type", rawFormID).c_str());
-		};
-
-		[[nodiscard]] static std::string GetPlayerHomeEditorID(const char* section, const std::string& rawFormID) noexcept
-		{
-			return GetStringValueWithDefault(section, fmt::format("{}_EditorID", rawFormID).c_str(), "ERROR");
 		};
 
 		[[nodiscard]] static int GetPlayerHomeStage(const char* section, const std::string& rawFormID) noexcept

@@ -10,7 +10,6 @@ namespace CHCMHandler
 	inline std::unordered_map<std::string, std::pair<std::string, int32_t>> questVisibilityMap{};
 
 	inline std::vector<std::pair<std::string, CMiscPatch*>> CustomPatches{};	
-	inline std::vector<std::tuple<std::string, std::string, uint32_t>> MainPatchesMCMPagesDefs{};
 	inline std::vector<std::tuple<const char*, const char*, int32_t>> MainMCMPagesDefs =
 	{ {
 		{"$MCMPageSettings", "", -1},
@@ -67,35 +66,6 @@ namespace CHCMHandler
 		{"$MCMPageJournals", "LegacyoftheDragonborn.esm", 55},
 	} };
 
-	inline std::vector< std::tuple<const char*, const char*, int32_t>> MiscMCMPagesDefs =
-	{ {
-		{"$Header9", "", -1},
-		{"$MCMPagePets", "", -1},
-		{"$MCMPageShouts", "", -1},
-		{"$MCMPageHouses", "", -1},
-		{"$MCMPageShrines", "", -1},
-		{"$MCMPageDoomstone", "", -1},
-		{"$MCMPageBarenziah", "", -1},
-		{"$MCMPageKillCounts", "", -1},
-
-		{" ", "", -1},
-		{"$HeaderLocations", "", -1},
-		{"$MCMPageLocations1", "", -1},
-		{"$MCMPageLocations2", "", -1},
-		{"$MCMPageLocations3", "", -1},
-		{"$MCMPageLocations4", "", -1},
-		{"$MCMPageLocations5", "", -1},
-
-		{" ", "", -1},
-		{"$HeaderEnchantments", "", -1},
-		{"$MCMPageAEnchantments", "", -1},
-		{"$MCMPageWEnchantments", "", -1},
-	} };
-
-	inline std::vector<std::string> MainMCMPages{};
-	inline std::vector<std::string> MiscMCMPages{};
-	inline std::vector<std::string> PatchPages{};
-
 	class MCMAPI final 
 	{
 	private:
@@ -103,36 +73,10 @@ namespace CHCMHandler
 		~MCMAPI() = default;
 
 	public:
-		static void						Register();
-
 		static MCMAPI*					GetSingleton() { static MCMAPI singleton; return &singleton; }
-		static void						OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event);
 
-		static void						BuildMCMPages(RE::StaticFunctionTag*);
-		static void						AddMainPatchedPageDefinitions(std::vector<std::tuple<std::string, std::string, uint32_t>>);
 		static void						AddMiscPatchedPageDefinitions(std::vector<std::pair<std::string, CMiscPatch*>> defs);
-		
 
-		static bool						CanLoadPage(RE::StaticFunctionTag*, std::string MCMPage);
-
-		static int32_t					GetQuestID(RE::StaticFunctionTag*, std::string a_page, int32_t activePage);
-		static int32_t					GetMultiPageCount(RE::StaticFunctionTag*, std::string MCMPage);
-
-
-		static int32_t					GetActivePage(RE::StaticFunctionTag*, std::string a_page);
-
-		static int32_t					GetDefaultPage(RE::StaticFunctionTag*, std::string a_page);
-
-		static void						ClearSearchHistory(RE::StaticFunctionTag*, std::string a_page);
-		static void						AddSearchTerm(RE::StaticFunctionTag*, std::string a_page, std::string a_value);
-
-
-		static int						GetDisplayValueForTotalAndFoundItemsByIdentifier(int32_t a_id, int32_t defaultValue);
-
-		static int						ModifyTotals(std::string a_pageName, int value, bool isTotal);
-		static void						DisplayVanillaTrackingPatches();
-		static void						DisplayModAddedTrackingPatches();
-		static std::string				GetSectionNameForForm(std::string a_page, std::string a_name, bool incPageNumber);
 
 		template <typename T = RE::FormID>
 		static void						AddVisibilityOption(const T& identifier, const std::string& pageName, int32_t optSelection)
@@ -148,10 +92,6 @@ namespace CHCMHandler
 
 		static bool						IsFormVisible(RE::StaticFunctionTag*, std::string pageName, RE::TESForm* a_form, int32_t optSelection);
 		static bool						IsQuestVisible(RE::StaticFunctionTag*, std::string pageName, std::string editorID, int32_t optSelection);
-		static bool						HasDropDownMenu(RE::StaticFunctionTag*, std::string a_page);
-		static std::string				GetDropDownMenuName(RE::StaticFunctionTag*, std::string a_page);
-		static std::string				GetDropDownMenuHighlight(RE::StaticFunctionTag*, std::string a_page);
-		static std::vector<std::string> GetDropDownMenuOptions(RE::StaticFunctionTag*, std::string a_page);
 		static void						SetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page, int32_t a_value);
 		static int32_t					GetCurrentUserOption(RE::StaticFunctionTag*, std::string a_page);
 
