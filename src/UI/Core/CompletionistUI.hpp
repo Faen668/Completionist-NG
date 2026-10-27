@@ -243,6 +243,9 @@ namespace CompletionistUI
 		bool                  _backHandledByImGui{ false };
 		bool                  _justOpened{ true };
 		bool                  _focusSidebar{ false };
+		bool                  _focusPage{ false };	// sidebar folded at opening: the page takes the focus
+		std::uint32_t         _revealFocus{ 0 };	// that focus, shown by the first press
+		std::uint32_t         _pendingHidden{ 0 };	// this _pendingFocus goes on without showing the focus box
 		bool                  _focusCellList{ false };
 		std::uint32_t         _cellParkedRow{ 0 };
 		bool                  _showSidebarFocus{ false };

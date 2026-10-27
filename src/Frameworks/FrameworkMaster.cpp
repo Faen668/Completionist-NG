@@ -5,6 +5,7 @@
 #include "FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
+#include "Frameworks/Misc/CFramework_Enchantments.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
 #include "Internal Utility/MCMHandler.hpp"
@@ -407,6 +408,20 @@ namespace CFramework_Master
 
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->UpdateFoundForms();
+		};
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Refresh Completion ) -----
+	//---------------------------------------------------
+
+	// What the game changed without an event the mod saw, checked as the window opens
+	void FrameworkAPI::RefreshCompletion()
+	{
+		CQuestMaster::QuestAPI::RefreshCompletion();
+		CFramework_Enchantments::CHandler::RefreshKnown();
+		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+			patchData->RefreshKnownEnchantments();
 		};
 	}
 

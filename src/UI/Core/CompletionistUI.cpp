@@ -1402,6 +1402,8 @@ namespace CompletionistUI
 			} else {
 				ImGui::SetCursorScreenPos(bodyTop);
 				_sidebarFocused = false;
+				// Folded, the opening focus goes to the page instead
+				_focusPage = _focusPage || (_focusSidebar && !_showSidebarFocus);
 				_focusSidebar = _focusSidebar && _showSidebarFocus;
 			}
 			DrawNavigationGrip(ImGui::GetFontSize() * 0.8f);
@@ -1423,6 +1425,18 @@ namespace CompletionistUI
 			controlRecorder = nullptr;
 			ImGui::EndChild();
 			ImGui::PopStyleColor();
+			// The page's first entry (or control), hidden until the first press shows it
+			if (std::exchange(_focusPage, false)) {
+				const auto start = std::ranges::find_if(_entrySpots, &NavSpot::visible);
+				const auto control = std::ranges::find_if(_controlSpots, [](const NavSpot& a_spot) { return a_spot.visible && a_spot.section != -1; });
+				const NavSpot* spot = start != _entrySpots.end() ? std::addressof(*start) : control != _controlSpots.end() ? std::addressof(*control) : nullptr;
+				if (spot) {
+					// Placed as the item is drawn next frame, inside its own window
+					_pendingFocus = spot->id;
+					_pendingHidden = spot->id;
+					_revealFocus = spot->id;
+				}
+			}
 			if (PadHintsShown()) {
 				DrawPadHints(a_provider);
 			}
@@ -1568,9 +1582,12 @@ namespace CompletionistUI
 		if (_pendingFocus != 0 && _pendingFocus == id) {
 			ImGui::SetFocusID(id, window);
 			window->NavRectRel[0] = ImGui::WindowRectAbsToRel(window, ImRect(min, max));
-			ImGui::SetNavCursorVisible(true);
+			ImGui::SetNavCursorVisible(std::exchange(_pendingHidden, 0) != id);
 			ImGui::ScrollToItem(ImGuiScrollFlags_KeepVisibleEdgeY);
 			_pendingFocus = 0;
+			// Held, the repeat can press again next frame while ImGui has dropped the nav id: the router
+			// then goes from this, and without it went from the row before or from nothing (the sidebar)
+			_focusedSpot = id;
 		}
 	}
 
@@ -1678,6 +1695,12 @@ namespace CompletionistUI
 		}
 		// ImGui can drop the nav id, use last frame's
 		const auto current = g.NavId != 0 ? g.NavId : _focusedSpotLast;
+		// The opening focus on the page: the first press shows it rather than moving off it
+		if (const auto reveal = std::exchange(_revealFocus, 0); reveal != 0 && reveal == current && !g.NavCursorVisible) {
+			ImGui::NavMoveRequestCancel();
+			_pendingFocus = current;	// ImGui drops the hidden focus on the press
+			return;
+		}
 		const auto find = [](const std::vector<NavSpot>& a_spots, std::uint32_t a_id) -> const NavSpot* {
 			const auto it = std::ranges::find(a_spots, a_id, &NavSpot::id);
 			return it == a_spots.end() ? nullptr : std::addressof(*it);
@@ -1687,6 +1710,45 @@ namespace CompletionistUI
 			return it == _entrySpotsLast.end() ? nullptr : std::addressof(*it);
 		};
 		const auto sectionInfo = [&](int a_section) -> const NavSpot* { return at(a_section, 0); };
+		// How much of a spot its panel shows, 0 to 1
+		const auto shown = [](const NavSpot& a_spot) {
+			const auto* window = static_cast<const ImGuiWindow*>(a_spot.window);
+			const float height = a_spot.maxY - a_spot.minY;
+			if (!window || height <= 0.0f) {
+				return a_spot.visible ? 1.0f : 0.0f;
+			}
+			return std::clamp((std::min(a_spot.maxY, window->ClipRect.Max.y) - std::max(a_spot.minY, window->ClipRect.Min.y)) / height, 0.0f, 1.0f);
+		};
+
+		// Scrolled away with the right stick: Up or Down picks up from what's on screen, the row at the edge
+		// the focus went past, rather than jumping back to it. Focusing a row scrolls it fully into view.
+		if (dir == ImGuiDir_Up || dir == ImGuiDir_Down) {
+			for (const auto* list : { &_entrySpotsLast, &_controlSpotsLast, &_sidebarSpotsLast }) {
+				const auto* spot = find(*list, current);
+				if (!spot || shown(*spot) >= 0.5f) {
+					continue;
+				}
+				const auto* window = static_cast<const ImGuiWindow*>(spot->window);
+				const bool  above = window && spot->maxY <= (window->ClipRect.Min.y + window->ClipRect.Max.y) * 0.5f;
+				const NavSpot* edge = nullptr;
+				for (const auto& candidate : *list) {
+					if (candidate.id == current || candidate.window != spot->window || shown(candidate) < 0.5f) {
+						continue;
+					}
+					if (!edge || (above ? candidate.minY < edge->minY : candidate.minY > edge->minY)) {
+						edge = std::addressof(candidate);
+					}
+				}
+				if (edge) {
+					ImGui::NavMoveRequestCancel();
+					ImGui::SetNavCursorVisible(true);
+					_pendingFocus = edge->id;
+					_lastMoveFrom = _lastMoveTo = 0;
+					lastRoute = "routed to the edge on screen";
+					return;
+				}
+			}
+		}
 
 		// Nearest item in a direction
 		const auto nearest = [&](const NavSpot& a_from, std::initializer_list<const std::vector<NavSpot>*> a_lists) -> const NavSpot* {
@@ -1797,20 +1859,19 @@ namespace CompletionistUI
 			return best;
 		};
 
-		const auto sidebarFor = [&](const NavSpot& a_from) -> const NavSpot* {
-			if (const auto* selected = find(_sidebarSpotsLast, _sidebarSelectedLast)) {
+		const auto sidebarFor = [&](const NavSpot&) -> const NavSpot* {
+			// The open page's row while the sidebar shows it, otherwise the top row showing in its scroll
+			// (snapped fully into view), rather than scrolling all the way back to the open page
+			if (const auto* selected = find(_sidebarSpotsLast, _sidebarSelectedLast); selected && selected->visible) {
 				return selected;
 			}
-			const NavSpot* best = nullptr;
-			float          bestDistance = FLT_MAX;
+			const NavSpot* top = nullptr;
 			for (const auto& row : _sidebarSpotsLast) {
-				const float distance = std::abs((row.minY + row.maxY) - (a_from.minY + a_from.maxY));
-				if (row.visible && distance < bestDistance) {
-					bestDistance = distance;
-					best = std::addressof(row);
+				if (row.visible && (!top || row.minY < top->minY)) {
+					top = std::addressof(row);
 				}
 			}
-			return best ? best : _sidebarSpotsLast.empty() ? nullptr : std::addressof(_sidebarSpotsLast.front());
+			return top ? top : _sidebarSpotsLast.empty() ? nullptr : std::addressof(_sidebarSpotsLast.front());
 		};
 		std::vector<NavSpot> topSpots;
 		std::vector<NavSpot> pageControls;
@@ -1822,78 +1883,67 @@ namespace CompletionistUI
 			handled = true;
 			_lastEntryFocus = current;
 
-			if (!spot->visible && (dir == ImGuiDir_Up || dir == ImGuiDir_Down)) {
+			const int cols = std::max(1, spot->columns);
+			const int row = spot->index / cols;
+			const int col = spot->index % cols;
+			// Sections carry on in the same list; the quest journal has its Completed list beside the others
+			const auto sameList = [&](const NavSpot* a_other) { return a_other && a_other->window == spot->window; };
+			// The closest entry in the list beside this one, left or right
+			const auto beside = [&]() -> const NavSpot* {
+				const NavSpot* best = nullptr;
+				float          bestDistance = FLT_MAX;
 				for (const auto& candidate : _entrySpotsLast) {
-					if (candidate.visible && candidate.window == spot->window) {
-						target = std::addressof(candidate);
-						if (dir == ImGuiDir_Down) {
-							break;
-						}
+					if (candidate.window == spot->window || !candidate.visible) {
+						continue;
+					}
+					const float gap = dir == ImGuiDir_Right ? candidate.minX - spot->maxX : spot->minX - candidate.maxX;
+					if (gap < -2.0f) {
+						continue;
+					}
+					const float distance = gap + std::abs((candidate.minY + candidate.maxY) - (spot->minY + spot->maxY)) * 0.5f;
+					if (distance < bestDistance) {
+						bestDistance = distance;
+						best = std::addressof(candidate);
 					}
 				}
-			} else {
-				const int cols = std::max(1, spot->columns);
-				const int row = spot->index / cols;
-				const int col = spot->index % cols;
-				// Sections carry on in the same list; the quest journal has its Completed list beside the others
-				const auto sameList = [&](const NavSpot* a_other) { return a_other && a_other->window == spot->window; };
-				// The closest entry in the list beside this one, left or right
-				const auto beside = [&]() -> const NavSpot* {
-					const NavSpot* best = nullptr;
-					float          bestDistance = FLT_MAX;
-					for (const auto& candidate : _entrySpotsLast) {
-						if (candidate.window == spot->window || !candidate.visible) {
-							continue;
-						}
-						const float gap = dir == ImGuiDir_Right ? candidate.minX - spot->maxX : spot->minX - candidate.maxX;
-						if (gap < -2.0f) {
-							continue;
-						}
-						const float distance = gap + std::abs((candidate.minY + candidate.maxY) - (spot->minY + spot->maxY)) * 0.5f;
-						if (distance < bestDistance) {
-							bestDistance = distance;
-							best = std::addressof(candidate);
-						}
-					}
-					return best;
-				};
-				switch (dir) {
-				case ImGuiDir_Down:
-					if ((row + 1) * cols + col < spot->count) {
-						target = at(spot->section, (row + 1) * cols + col);
-					} else if ((row + 1) * cols < spot->count) {
-						target = at(spot->section, spot->count - 1);
-					} else if (const auto* next = sectionInfo(spot->section + 1); sameList(next)) {
-						target = at(next->section, std::min({ col, next->columns - 1, next->count - 1 }));
-					}
-					break;
-				case ImGuiDir_Up:
-					if (row > 0) {
-						target = at(spot->section, (row - 1) * cols + col);
-					} else if (const auto* previous = sectionInfo(spot->section - 1); sameList(previous)) {
-						const int lastRow = (previous->count - 1) / std::max(1, previous->columns);
-						target = at(previous->section, std::min(lastRow * previous->columns + col, previous->count - 1));
-					} else {
-						target = nearest(*spot, { &_controlSpotsLast });
-					}
-					break;
-				case ImGuiDir_Left:
-					if (col > 0) {
-						target = at(spot->section, spot->index - 1);
-					} else if (!(target = beside())) {
-						target = sidebarFor(*spot);
-					}
-					break;
-				case ImGuiDir_Right:
-					if (col + 1 < cols && spot->index + 1 < spot->count) {
-						target = at(spot->section, spot->index + 1);
-					} else {
-						target = beside();
-					}
-					break;
-				default:
-					break;
+				return best;
+			};
+			switch (dir) {
+			case ImGuiDir_Down:
+				if ((row + 1) * cols + col < spot->count) {
+					target = at(spot->section, (row + 1) * cols + col);
+				} else if ((row + 1) * cols < spot->count) {
+					target = at(spot->section, spot->count - 1);
+				} else if (const auto* next = sectionInfo(spot->section + 1); sameList(next)) {
+					target = at(next->section, std::min({ col, next->columns - 1, next->count - 1 }));
 				}
+				break;
+			case ImGuiDir_Up:
+				if (row > 0) {
+					target = at(spot->section, (row - 1) * cols + col);
+				} else if (const auto* previous = sectionInfo(spot->section - 1); sameList(previous)) {
+					const int lastRow = (previous->count - 1) / std::max(1, previous->columns);
+					target = at(previous->section, std::min(lastRow * previous->columns + col, previous->count - 1));
+				} else {
+					target = nearest(*spot, { &_controlSpotsLast });
+				}
+				break;
+			case ImGuiDir_Left:
+				if (col > 0) {
+					target = at(spot->section, spot->index - 1);
+				} else if (!(target = beside())) {
+					target = sidebarFor(*spot);
+				}
+				break;
+			case ImGuiDir_Right:
+				if (col + 1 < cols && spot->index + 1 < spot->count) {
+					target = at(spot->section, spot->index + 1);
+				} else {
+					target = beside();
+				}
+				break;
+			default:
+				break;
 			}
 		} else if (const auto* control = find(_controlSpotsLast, current)) {
 			handled = true;
@@ -1943,7 +1993,9 @@ namespace CompletionistUI
 						handled = false;
 						break;
 					}
-					if (const auto* last = find(_entrySpotsLast, _lastEntryFocus); last && last->visible) {
+					// Back to the last entry, if it's in the list next to the sidebar rather than one further across
+					const auto leftmost = std::ranges::min_element(_entrySpotsLast, {}, [](const NavSpot& a_spot) { return a_spot.visible ? a_spot.minX : FLT_MAX; });
+					if (const auto* last = find(_entrySpotsLast, _lastEntryFocus); last && last->visible && leftmost != _entrySpotsLast.end() && last->window == leftmost->window) {
 						target = last;
 						break;
 					}
@@ -1964,6 +2016,19 @@ namespace CompletionistUI
 			default:
 				break;
 			}
+		} else {
+			// The focus is on nothing the window placed (or nothing at all): start from the open page's
+			// sidebar row, or the page's first entry or control, rather than wherever ImGui lands
+			const auto pageControl = std::ranges::find_if(_controlSpotsLast, [](const NavSpot& a_spot) { return a_spot.visible && a_spot.section != -1; });
+			const auto entry = std::ranges::find_if(_entrySpotsLast, &NavSpot::visible);
+			if (const auto* selected = find(_sidebarSpotsLast, _sidebarSelectedLast); selected && selected->visible) {
+				target = selected;
+			} else if (entry != _entrySpotsLast.end()) {
+				target = std::addressof(*entry);
+			} else if (pageControl != _controlSpotsLast.end()) {
+				target = std::addressof(*pageControl);
+			}
+			handled = target != nullptr;
 		}
 
 		// Straight back the way it came: Down then Up returns to the same control, whichever is nearest.
@@ -2996,20 +3061,24 @@ namespace CompletionistUI
 		const float available = ImGui::GetContentRegionAvail().x;
 		const float gaps = static_cast<float>(a_tabs.size() > 0 ? a_tabs.size() - 1 : 0);
 		const float tabGap = tabs + gaps * fontSize * 1.6f <= available ? fontSize * 1.6f : fontSize * 0.9f;
-		const float total = tabs + gaps * tabGap;
-		const bool  wraps = total > available;
+
+		// Each line centred, wrapped ones too: the width of the line each tab starts
+		std::vector<float> lineWidths(a_tabs.size(), -1.0f);
+		for (std::size_t i = 0, start = 0; i < a_tabs.size(); ++i) {
+			const float tab = width(a_tabs[i]);
+			if (i > start && lineWidths[start] + tabGap + tab > available) {
+				start = i;
+			}
+			lineWidths[start] = i == start ? tab : lineWidths[start] + tabGap + tab;
+		}
 		ImGui::Spacing();
-		const float rowX = ImGui::GetCursorPosX() + (wraps ? 0.0f : std::max(0.0f, (available - total) * 0.5f));
-		const float rowRight = ImGui::GetCursorScreenPos().x + available;
-		ImGui::SetCursorPosX(rowX);
+		const float lineX = ImGui::GetCursorPosX();
 		for (std::size_t i = 0; i < a_tabs.size(); ++i) {
 			const auto& tab = a_tabs[i];
-			if (i > 0) {
-				if (wraps && ImGui::GetItemRectMax().x + tabGap + width(tab) > rowRight) {
-					ImGui::SetCursorPosX(rowX);
-				} else {
-					ImGui::SameLine(0.0f, tabGap);
-				}
+			if (lineWidths[i] >= 0.0f) {
+				ImGui::SetCursorPosX(lineX + std::max(0.0f, (available - lineWidths[i]) * 0.5f));
+			} else {
+				ImGui::SameLine(0.0f, tabGap);
 			}
 			const auto size = ImGui::CalcTextSize(tab.title.c_str());
 			ImGui::PushID(tab.id.c_str());
@@ -4752,25 +4821,15 @@ namespace CompletionistUI
 		const float fontSize = ImGui::GetFontSize();
 		_hoveredEntry.reset();
 
-		// Kept by key so it survives refreshes
+		// Kept by key so it survives refreshes; nothing is picked until the player picks it
 		const auto   keyOf = [](const Entry& a_entry) { return a_entry.key.empty() ? a_entry.name : a_entry.key; };
 		const Entry* selected = nullptr;
-		const Entry* first = nullptr;
 		for (const auto& section : a_page.sections) {
 			for (const auto& entry : section.entries) {
-				if (!PassesFilter(entry)) {
-					continue;
-				}
-				if (!first) {
-					first = std::addressof(entry);
-				}
-				if (keyOf(entry) == _journalKey) {
+				if (PassesFilter(entry) && keyOf(entry) == _journalKey) {
 					selected = std::addressof(entry);
 				}
 			}
-		}
-		if (!selected) {
-			selected = first;
 		}
 
 		// Open quests on the left, completed ones above the description

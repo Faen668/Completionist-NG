@@ -59,13 +59,9 @@ namespace CFramework_Enchantments {
 
 	using EventResult = RE::BSEventNotifyControl;
 
-	class CHandler final :
-
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+	class CHandler final {
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
-
-		  EventResult		ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
 		  static void			SinkEvents();
 		  static void			InstallFramework();
@@ -74,6 +70,7 @@ namespace CFramework_Enchantments {
 
 		  static void			UpdateFoundForms();
 		  static void			UpdateCounts();
+		  static void			RefreshKnown();
 		  static void			InjectAndCompileData();
 
 		  static void			ProcessEnchantment(RE::EnchantmentItem* a_ench);

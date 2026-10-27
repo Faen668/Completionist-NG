@@ -11,13 +11,6 @@ namespace CompletionistUI
 
 		static void Install();
 
-		// This window opening: completion is checked again then, for what the game changed
-		// without an event, e.g. quests done before an old save had the mod
-		[[nodiscard]] static bool IsStatusCheck(const RE::MenuOpenCloseEvent* a_event) noexcept
-		{
-			return a_event && a_event->opening && a_event->menuName == menuName;
-		}
-
 		static void Open();
 		static void Close();
 		static void SetOpen(bool a_open);

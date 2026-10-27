@@ -2,7 +2,6 @@
 #include "Serialization.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
-#include "UI/GameUI.hpp"
 
 #ifndef LOG_IF_ENABLED
 #define LOG_IF_ENABLED(...) if (CVariables::V_Global_Patch_Logging || log_install) { INFO(__VA_ARGS__); }
@@ -943,6 +942,22 @@ struct CMiscPatch
 	//-- Framework Events ( On Menu Open ) --------------
 	//---------------------------------------------------
 
+	// Enchantments learnt without an event, e.g. before an old save had the mod
+	void RefreshKnownEnchantments() {
+
+		for (auto& section : type_sections)
+		{
+			if (section.type == CMiscPatchType::kEnchantments) {
+				for (auto i = 0; i < section.forms.size(); i++) {
+					if (auto* enchantment = section.forms[i] ? section.forms[i]->As<RE::EnchantmentItem>() : nullptr; enchantment && enchantment->GetKnown()) {
+						section.bools[i] = true;
+						CFramework_Master::FoundItemData_NoShow.AddForm(enchantment);
+					}
+				}
+			}
+		}
+	}
+
 	void OnMenuOpenCloseEvent(RE::MenuOpenCloseEvent const* a_event) {
 		using cmd = Serialization::CompletionistLog::logType;
 
@@ -954,22 +969,6 @@ struct CMiscPatch
 						auto base = section.data.GetBase(target) ? section.data.GetBase(target) : target;
 						ProcessFoundForm(base, target, &section, cmd::kBook, "NotifyBooks");
 						return;
-					}
-				}
-			}
-			return;
-		}
-
-		if (CompletionistUI::GameUI::IsStatusCheck(a_event)) {
-
-			for (auto& section : type_sections)
-			{
-				if (section.type == CMiscPatchType::kEnchantments) {
-					for (auto i = 0; i < section.forms.size(); i++) {
-						if (auto* enchantment = section.forms[i] ? section.forms[i]->As<RE::EnchantmentItem>() : nullptr; enchantment && enchantment->GetKnown()) {
-							section.bools[i] = true;
-							CFramework_Master::FoundItemData_NoShow.AddForm(enchantment);
-						}
 					}
 				}
 			}
