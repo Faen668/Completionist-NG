@@ -93,6 +93,7 @@ namespace CFramework_Master
 		static void							FinalizeRegistrations();
 
 		static void							Update();
+		static void							RefreshCompletion();
 		// New game or load, called from main.cpp
 		static void							OnGameStarted(bool a_newGame);
 

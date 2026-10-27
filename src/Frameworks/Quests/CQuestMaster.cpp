@@ -1,6 +1,5 @@
  #include "PCH.h"
 #include "CQuestMaster.hpp"
-#include "UI/GameUI.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/ScriptObject.hpp"
 #include "Internal Utility/MCMHandler.hpp"
@@ -101,9 +100,7 @@ namespace CQuestMaster
 
 	void QuestAPI::SinkEvents()
 	{
-		auto UserInterface = RE::UI::GetSingleton();
 		auto ESourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(QuestAPI::GetSingleton()));
 		ESourceHolder->AddEventSink(static_cast<RE::BSTEventSink<RE::TESQuestStageEvent>*>(QuestAPI::GetSingleton()));
 	};
 
@@ -128,19 +125,16 @@ namespace CQuestMaster
 	};
 
 	//---------------------------------------------------
-	//-- Quest Events ( On Menu Open ) ------------------
+	//-- Quest Functions ( Refresh Completion ) --------
 	//---------------------------------------------------
 
-	EventResult QuestAPI::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
+	// Quests done without a stage event the mod saw, e.g. before an old save had the mod
+	void QuestAPI::RefreshCompletion()
 	{
-		if (CompletionistUI::GameUI::IsStatusCheck(a_event))
+		for (auto& [data, name, ID, key] : CQuestDataVec)
 		{
-			for (auto& [data, name, ID, key] : CQuestDataVec)
-			{
-				data->is_completed = IsQuestCompleted(data);
-			};
-		}
-		return EventResult::kContinue;
+			data->is_completed = IsQuestCompleted(data);
+		};
 	};
 
 	//---------------------------------------------------

@@ -1,5 +1,4 @@
 #include "CFramework_Enchantments.hpp"
-#include "UI/GameUI.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
@@ -73,9 +72,6 @@ namespace CFramework_Enchantments {
 
 	void CHandler::SinkEvents() 
 	{
-		auto UserInterface = RE::UI::GetSingleton();
-		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
-
 		std::uintptr_t base = REL::RelocationID(50459, 51363).address();
 		auto& trampoline = SKSE::GetTrampoline();
 
@@ -251,9 +247,8 @@ namespace CFramework_Enchantments {
 	//-- Framework Events ( On Menu Open ) --------------
 	//---------------------------------------------------
 
-	EventResult CHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) {
-
-		if (!CompletionistUI::GameUI::IsStatusCheck(a_event)) { return RE::BSEventNotifyControl::kContinue; }
+	// Enchantments learnt without an event, e.g. before an old save had the mod
+	void CHandler::RefreshKnown() {
 
 		for (auto i = 0; i < VA_FormArray.size(); i++) {
 			if (auto* enchantment = static_cast<RE::EnchantmentItem*>(VA_FormArray[i]); enchantment && enchantment->GetKnown()) {
@@ -284,7 +279,6 @@ namespace CFramework_Enchantments {
 		}
 
 		CHandler::UpdateCounts();
-		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------

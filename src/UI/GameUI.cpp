@@ -2,6 +2,7 @@
 #include "UI/Core/CompletionistUI.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/GameDataProvider.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
 #include "UI/KeyNames.hpp"
 #include "Internal Utility/Variables.hpp"
 
@@ -920,9 +921,13 @@ namespace CompletionistUI
 		}
 
 		if (a_open) {
+			// Before the snapshot, so the window opens on the current state
+			CFramework_Master::FrameworkAPI::RefreshCompletion();
 			state.provider.Rebuild();
 			state.mouse = ImVec2(state.displayWidth * 0.5f, state.displayHeight * 0.5f);
-			const auto mouse = state.mouse;
+			// Opened from a controller, the mouse stays off the window until it moves: parked in the
+			// middle it lit up whichever row sat there
+			const auto mouse = state.usingGamepad ? ImVec2(-FLT_MAX, -FLT_MAX) : state.mouse;
 			QueueInput([mouse](ImGuiIO& a_io) {
 				a_io.ClearInputKeys();
 				a_io.AddMousePosEvent(mouse.x, mouse.y);
