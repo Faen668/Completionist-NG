@@ -144,7 +144,7 @@ namespace CompletionistUI
 		[[nodiscard]] float PadHintsHeight() const;
 		void                DrawPadHints(IDataProvider& a_provider, bool a_cellWindow = false);
 		float UpdateNavigationOpen();
-		void  DrawNavigationGrip(float a_gap);
+		void  DrawNavigationGrip(float a_gap, float a_footer);
 		void DrawHeader(IDataProvider& a_provider, bool& a_open);
 		void DrawHeaderButtons(IDataProvider& a_provider, bool& a_open, float a_right, float a_y);
 		void DrawNavigation(IDataProvider& a_provider);

@@ -331,6 +331,10 @@ namespace CompletionistUI
 
 		void NoteControl() {
 
+			// Greyed out controls can't be used, so the controller passes over them
+			if (ImGui::GetItemFlags() & ImGuiItemFlags_Disabled) {
+				return;
+			}
 			if (controlRecorder && !(ImGui::GetCurrentWindow()->Flags & (ImGuiWindowFlags_Popup | ImGuiWindowFlags_Tooltip))) {
 				controlRecorder->RecordControl();
 			}
@@ -572,6 +576,15 @@ namespace CompletionistUI
 				}
 			}
 			drawList->PopClipRect();
+		}
+
+		// One choice in an open dropdown; the controller starts on the current one
+		bool ComboOption(const char* a_label, bool a_selected) {
+			const bool clicked = ImGui::Selectable(a_label, a_selected);
+			if (a_selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+			return clicked;
 		}
 
 		//---------------------------------------------------
@@ -1177,6 +1190,13 @@ namespace CompletionistUI
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 			ImGui::BeginChild("##Scroll", ImVec2(0.0f, 0.0f), ImGuiChildFlags_NavFlattened);
 			ImGui::PopStyleColor();
+
+			// The scrollbar's room is kept when there's none, so content doesn't shift as it comes and goes
+			if (auto* window = ImGui::GetCurrentWindow(); !window->ScrollbarY) {
+				const float scrollbar = ImGui::GetStyle().ScrollbarSize;
+				window->WorkRect.Max.x -= scrollbar;
+				window->ContentRegionRect.Max.x -= scrollbar;
+			}
 		}
 
 		//---------------------------------------------------
@@ -1407,7 +1427,7 @@ namespace CompletionistUI
 				_focusPage = _focusPage || (_focusSidebar && !_showSidebarFocus);
 				_focusSidebar = _focusSidebar && _showSidebarFocus;
 			}
-			DrawNavigationGrip(ImGui::GetFontSize() * 0.8f);
+			DrawNavigationGrip(ImGui::GetFontSize() * 0.8f, footer);
 
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 			ImGui::BeginChild("##Body", ImVec2(0.0f, -footer), ImGuiChildFlags_NavFlattened);
@@ -1581,6 +1601,10 @@ namespace CompletionistUI
 			_focusedSpot = id;
 		}
 		if (_pendingFocus != 0 && _pendingFocus == id) {
+			// Let go of a slider being dragged with the d-pad, as ImGui's own moves do, or it keeps Left and Right
+			if (const auto active = ImGui::GetActiveID(); active != 0 && active != id) {
+				ImGui::ClearActiveID();
+			}
 			ImGui::SetFocusID(id, window);
 			window->NavRectRel[0] = ImGui::WindowRectAbsToRel(window, ImRect(min, max));
 			ImGui::SetNavCursorVisible(std::exchange(_pendingHidden, 0) != id);
@@ -2458,12 +2482,13 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Navigation Grip ) ------
 	//---------------------------------------------------
 
-	void Menu::DrawNavigationGrip(float a_gap) {
+	void Menu::DrawNavigationGrip(float a_gap, float a_footer) {
 
 		// Sidebar grabber, double-click to fold it
 		const auto& palette = Themes::GetPalette();
 		const auto  pos = ImGui::GetCursorScreenPos();
-		const float height = ImGui::GetContentRegionAvail().y;
+		// Stops above the controller hints, like the sidebar and page beside it
+		const float height = ImGui::GetContentRegionAvail().y - a_footer;
 		const float lineX = std::floor(pos.x + a_gap * 0.35f);
 		const float centreY = pos.y + height * 0.5f;
 		const float gripHeight = ImGui::GetFontSize() * 4.0f;
@@ -3074,6 +3099,31 @@ namespace CompletionistUI
 		}
 		ImGui::Spacing();
 		const float lineX = ImGui::GetCursorPosX();
+
+		// Past two lines that would crowd the list out, a dropdown of the tabs in their place
+		const auto lines = std::ranges::count_if(lineWidths, [](float a_width) { return a_width >= 0.0f; });
+		if (lines > 2 && static_cast<float>(lines) * (ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y) > ImGui::GetContentRegionAvail().y * 0.25f) {
+			const auto label = [](const TabItem& a_tab) { return a_tab.count.empty() ? a_tab.title : a_tab.title + "  " + a_tab.count; };
+			const auto current = std::ranges::find(a_tabs, a_selected, &TabItem::id);
+			float      widest = 0.0f;
+			for (const auto& tab : a_tabs) {
+				widest = std::max(widest, ImGui::CalcTextSize(label(tab).c_str()).x);
+			}
+			const float comboWidth = std::min(available, widest + fontSize * 3.0f);
+			ImGui::SetCursorPosX(lineX + std::max(0.0f, (available - comboWidth) * 0.5f));
+			if (ThemedBeginCombo("##Tabs", label(current != a_tabs.end() ? *current : a_tabs.front()).c_str(), comboWidth)) {
+				for (const auto& tab : a_tabs) {
+					ImGui::PushID(tab.id.c_str());
+					if (ComboOption(label(tab).c_str(), tab.id == a_selected)) {
+						a_selected = tab.id;
+					}
+					ImGui::PopID();
+				}
+				ImGui::EndCombo();
+			}
+			return a_selected != before;
+		}
+
 		for (std::size_t i = 0; i < a_tabs.size(); ++i) {
 			const auto& tab = a_tabs[i];
 			if (lineWidths[i] >= 0.0f) {
@@ -3173,7 +3223,7 @@ namespace CompletionistUI
 			auto sortIndex = static_cast<int>(_sort);
 			if (ThemedBeginCombo("##Sort", sortLabels[sortIndex].c_str(), ImGui::GetFontSize() * 9.0f)) {
 				for (int i = 0; i < 3; ++i) {
-					if (ImGui::Selectable(sortLabels[i].c_str(), i == sortIndex)) {
+					if (ComboOption(sortLabels[i].c_str(), i == sortIndex)) {
 						_sort = static_cast<SortMode>(i);
 					}
 				}
@@ -3212,7 +3262,7 @@ namespace CompletionistUI
 					}
 					if (open) {
 						for (std::int32_t i = 0; i < static_cast<std::int32_t>(choice.options.size()); ++i) {
-							if (ImGui::Selectable(choice.options[i].c_str(), i == selected) && i != selected) {
+							if (ComboOption(choice.options[i].c_str(), i == selected) && i != selected) {
 								a_provider.SetPageChoice(page.id, i);
 								_page->choice.selected = i;
 							}
@@ -3459,7 +3509,7 @@ namespace CompletionistUI
 		_killSort = std::clamp(_killSort, 0, 2);
 		if (ThemedBeginCombo("##KillSort", sortLabels[_killSort].c_str(), fontSize * 11.0f)) {
 			for (int i = 0; i < 3; ++i) {
-				if (ImGui::Selectable(sortLabels[i].c_str(), i == _killSort)) {
+				if (ComboOption(sortLabels[i].c_str(), i == _killSort)) {
 					_killSort = i;
 				}
 			}
@@ -4173,7 +4223,7 @@ namespace CompletionistUI
 							const auto preview = item.choice >= 0 && item.choice < static_cast<int>(item.options.size()) ? a_provider.Translate(item.options[item.choice]) : std::string{};
 							if (ThemedBeginCombo("##Choice", preview.c_str(), controlWidth)) {
 								for (int option = 0; option < static_cast<int>(item.options.size()); ++option) {
-									if (ImGui::Selectable(a_provider.Translate(item.options[option]).c_str(), option == item.choice)) {
+									if (ComboOption(a_provider.Translate(item.options[option]).c_str(), option == item.choice)) {
 										item.choice = option;
 										apply(item);
 									}
@@ -4741,11 +4791,11 @@ namespace CompletionistUI
 		ImGui::SameLine(0.0f, fontSize);
 		const auto allLabel = a_provider.Translate("UI_Find_All");
 		if (ThemedBeginCombo("##FindCategory", _findCategory.empty() ? allLabel.c_str() : a_provider.Translate(_findCategory).c_str(), fontSize * 10.0f)) {
-			if (ImGui::Selectable(allLabel.c_str(), _findCategory.empty())) {
+			if (ComboOption(allLabel.c_str(), _findCategory.empty())) {
 				_findCategory.clear();
 			}
 			for (const auto& group : groups) {
-				if (ImGui::Selectable(a_provider.Translate(group).c_str(), group == _findCategory)) {
+				if (ComboOption(a_provider.Translate(group).c_str(), group == _findCategory)) {
 					_findCategory = group;
 				}
 			}
@@ -4756,7 +4806,7 @@ namespace CompletionistUI
 		ImGui::SameLine(0.0f, fontSize);
 		if (ThemedBeginCombo("##FindMatch", a_provider.Translate(matchKeys[matchMode]).c_str(), fontSize * 11.0f)) {
 			for (int i = 0; i < 3; ++i) {
-				if (ImGui::Selectable(a_provider.Translate(matchKeys[i]).c_str(), i == matchMode) && i != matchMode) {
+				if (ComboOption(a_provider.Translate(matchKeys[i]).c_str(), i == matchMode) && i != matchMode) {
 					options.findMatch = i;
 					_settingsChanged = true;
 				}
@@ -6580,7 +6630,7 @@ namespace CompletionistUI
 			label(a_provider.Translate("UI_Setting_Theme"));
 			if (ThemedBeginCombo("##Theme", a_provider.Translate(current != std::end(themeList) ? current->key : themeList[0].key).c_str(), controlWidth)) {
 				for (const auto& info : themeList) {
-					if (ImGui::Selectable(a_provider.Translate(info.key).c_str(), info.theme == settings.theme)) {
+					if (ComboOption(a_provider.Translate(info.key).c_str(), info.theme == settings.theme)) {
 						settings.theme = info.theme;
 						changed = true;
 					}
@@ -6629,7 +6679,7 @@ namespace CompletionistUI
 			if (ThemedBeginCombo("##Columns", settings.columns > 0 ? std::to_string(settings.columns).c_str() : autoColumns.c_str(), controlWidth)) {
 				for (int i = 0; i <= 4; ++i) {
 					const auto text = i == 0 ? autoColumns : std::to_string(i);
-					if (ImGui::Selectable(text.c_str(), i == settings.columns)) {
+					if (ComboOption(text.c_str(), i == settings.columns)) {
 						settings.columns = i;
 						changed = true;
 					}
@@ -6700,7 +6750,7 @@ namespace CompletionistUI
 			label(a_provider.Translate("UI_Setting_PadStyle"));
 			if (ThemedBeginCombo("##PadStyle", a_provider.Translate(padStyleKeys[static_cast<int>(settings.padStyle)]).c_str(), controlWidth)) {
 				for (int i = 0; i < 4; ++i) {
-					if (ImGui::Selectable(a_provider.Translate(padStyleKeys[i]).c_str(), i == static_cast<int>(settings.padStyle))) {
+					if (ComboOption(a_provider.Translate(padStyleKeys[i]).c_str(), i == static_cast<int>(settings.padStyle))) {
 						settings.padStyle = static_cast<PadStyle>(i);
 						changed = true;
 					}
@@ -6714,6 +6764,7 @@ namespace CompletionistUI
 			toggle("UI_Setting_PrintScreen", "UI_SettingHint_PrintScreen", settings.printScreen);
 			toggle("UI_Setting_Screenshot", "UI_SettingHint_Screenshot", settings.screenshotButton);
 			toggle("UI_Setting_CellPanel", "UI_SettingHint_CellPanel", settings.cellPanel);
+			toggle("UI_Setting_PauseGame", "UI_SettingHint_PauseGame", settings.pauseGame);
 
 			ImGui::Spacing();
 			ImGui::SetCursorPosX(columnX + labelWidth);
@@ -6756,7 +6807,7 @@ namespace CompletionistUI
 				label(a_provider.Translate("UI_Setting_ToastsOrder"));
 				if (ThemedBeginCombo("##ToastsOrder", orders[settings.toastsNewestFirst ? 0 : 1].c_str(), controlWidth)) {
 					for (int i = 0; i < 2; ++i) {
-						if (ImGui::Selectable(orders[i].c_str(), (i == 0) == settings.toastsNewestFirst)) {
+						if (ComboOption(orders[i].c_str(), (i == 0) == settings.toastsNewestFirst)) {
 							settings.toastsNewestFirst = i == 0;
 							changed = true;
 						}
@@ -6781,7 +6832,7 @@ namespace CompletionistUI
 				label(a_provider.Translate("UI_Setting_ToastsPosition"));
 				if (ThemedBeginCombo("##ToastsPosition", position.c_str(), controlWidth)) {
 					for (int i = 0; i < 4; ++i) {
-						if (ImGui::Selectable(a_provider.Translate(cornerKeys[i]).c_str(), i == corner)) {
+						if (ComboOption(a_provider.Translate(cornerKeys[i]).c_str(), i == corner)) {
 							settings.toastX = corners[i].x;
 							settings.toastY = corners[i].y;
 							changed = true;
@@ -6884,7 +6935,7 @@ namespace CompletionistUI
 								const auto preview = item.choice >= 0 && item.choice < static_cast<int>(item.options.size()) ? a_provider.Translate(item.options[item.choice]) : std::string{};
 								if (ThemedBeginCombo("##Choice", preview.c_str(), controlWidth)) {
 									for (int i = 0; i < static_cast<int>(item.options.size()); ++i) {
-										if (ImGui::Selectable(a_provider.Translate(item.options[i]).c_str(), i == item.choice)) {
+										if (ComboOption(a_provider.Translate(item.options[i]).c_str(), i == item.choice)) {
 											item.choice = i;
 											edited = true;
 										}
