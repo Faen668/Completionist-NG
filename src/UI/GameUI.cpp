@@ -48,6 +48,7 @@ namespace CompletionistUI
 			ImVec2        mouse{ 0.0f, 0.0f };
 			std::uint32_t padHeld{ 0 };
 			std::uint32_t padIgnored{ 0 };	// held as the window opened, ignored until let go
+			std::uint32_t padHeldBack{ 0 };	// a combo's hold button, passed on when let go unless the combo used it
 
 			// Shared
 			GameDataProvider                               provider;
@@ -220,7 +221,7 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Menu ( Pauses the game while the window shows )-
+		//-- Menu ( The window as a game menu ) -----------
 		//---------------------------------------------------
 
 		class CompletionistMenu final : public RE::IMenu
@@ -228,7 +229,11 @@ namespace CompletionistUI
 		public:
 			CompletionistMenu() {
 
-				menuFlags.set(Flag::kPausesGame, Flag::kUsesMenuContext, Flag::kModal, Flag::kDisablePauseMenu);
+				menuFlags.set(Flag::kUsesMenuContext, Flag::kModal, Flag::kDisablePauseMenu);
+				// Made on each open, so a change to the setting applies the next time
+				if (GetState().settings.pauseGame) {
+					menuFlags.set(Flag::kPausesGame);
+				}
 				inputContext = Context::kMenuMode;
 				depthPriority = 10;
 			}
@@ -377,6 +382,7 @@ namespace CompletionistUI
 				const auto modifier = a_state.openPadModifier.load();
 				const bool padToggle = device == RE::INPUT_DEVICE::kGamepad && a_state.openPadButton != 0 && code == a_state.openPadButton && (modifier == 0 || (heldBefore & modifier) != 0);
 				if ((keyToggle || padToggle) && a_button.IsDown()) {
+					a_state.padHeldBack = 0;
 					if (a_state.open && a_state.inCellView) {
 						a_state.requestedView = 0;
 					} else if (a_state.open) {
@@ -394,6 +400,7 @@ namespace CompletionistUI
 				const bool cellKeyToggle = device == RE::INPUT_DEVICE::kKeyboard && a_state.cellKey != 0 && code == a_state.cellKey;
 				const bool cellPadToggle = device == RE::INPUT_DEVICE::kGamepad && a_state.cellPadButton != 0 && code == a_state.cellPadButton && (cellModifier == 0 || (heldBefore & cellModifier) != 0);
 				if ((cellKeyToggle || cellPadToggle) && a_button.IsDown()) {
+					a_state.padHeldBack = 0;
 					if (a_state.open && a_state.inCellView) {
 						GameUI::Close();
 					} else if (a_state.open) {
@@ -438,6 +445,28 @@ namespace CompletionistUI
 							a_state.padIgnored &= ~code;
 						}
 						break;
+					}
+					// Holding a combo's first button (L3 of L3 + R3) mustn't fold the sidebar on the way to closing:
+					// it's held back, and only a tap on its own reaches the window
+					if (a_state.padHeldBack & code) {
+						if (!down) {
+							a_state.padHeldBack &= ~code;
+							if (const auto key = KeyFromGamepad(code); key != ImGuiKey_None) {
+								QueueInput([key](ImGuiIO& a_io) {
+									a_io.AddKeyEvent(key, true);
+									a_io.AddKeyEvent(key, false);
+								});
+							}
+						}
+						break;
+					}
+					if (a_button.IsDown()) {
+						if (code == a_state.openPadModifier.load() || code == a_state.cellPadModifier.load()) {
+							a_state.padHeldBack |= code;
+							break;
+						}
+						// Another button with it held: not a tap, so it's dropped
+						a_state.padHeldBack = 0;
 					}
 					// B as back
 					if (const auto key = KeyFromGamepad(code); key != ImGuiKey_None) {

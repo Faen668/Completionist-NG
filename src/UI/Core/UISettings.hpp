@@ -48,6 +48,7 @@ namespace CompletionistUI
 		bool          hideCompleted{ false };
 		bool          screenshotButton{ false };
 		bool          printScreen{ true };
+		bool          pauseGame{ true };	// Off leaves the world running while the window is open
 		PadStyle      padStyle{ PadStyle::kXbox };
 		std::string   lastPage{};
 

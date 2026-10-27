@@ -187,6 +187,7 @@ namespace CVariables
 		settings.hideCompleted = flag("HideCompleted", "false");
 		settings.screenshotButton = flag("ShowScreenshotButton", "false");
 		settings.printScreen = flag("PrintScreenCapture", "true");
+		settings.pauseGame = flag("PauseGame", "true");
 		const auto padStyle = GetIniValue("UI", "ControllerButtons", "Xbox");
 		settings.padStyle = DKUtil::string::iequals(padStyle, "PlayStation") ? CompletionistUI::PadStyle::kPlayStation
 		                  : DKUtil::string::iequals(padStyle, "Switch")      ? CompletionistUI::PadStyle::kSwitch
@@ -239,6 +240,7 @@ namespace CVariables
 		ini.SetValue(section, "HideCompleted", a_settings.hideCompleted ? "true" : "false");
 		ini.SetValue(section, "ShowScreenshotButton", a_settings.screenshotButton ? "true" : "false");
 		ini.SetValue(section, "PrintScreenCapture", a_settings.printScreen ? "true" : "false");
+		ini.SetValue(section, "PauseGame", a_settings.pauseGame ? "true" : "false");
 		constexpr const char* padStyles[] = { "Xbox", "PlayStation", "Switch", "SteamDeck" };
 		ini.SetValue(section, "ControllerButtons", padStyles[static_cast<int>(a_settings.padStyle)]);
 		ini.SetValue(section, "CellKey", std::to_string(a_settings.cellKey).c_str());
