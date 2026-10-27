@@ -54,6 +54,15 @@ namespace CompletionistUI
 		std::vector<TrainerPerk> perks;
 	};
 
+	// A named dragon: what its name means, where it's met, its story
+	struct EntryDragon
+	{
+		std::string fate;	// empty when not a dragon
+		std::string meaning;
+		std::string place;
+		std::string lore;
+	};
+
 	struct Entry
 	{
 		std::string   name;
@@ -76,8 +85,10 @@ namespace CompletionistUI
 		bool                    placesKnown{ false };
 		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
 		EntryTrainer            trainer;
+		EntryDragon             dragon;
 
 		[[nodiscard]] bool          IsTrainer() const noexcept { return trainer.skill >= 0; }
+		[[nodiscard]] bool          IsDragon() const noexcept { return !dragon.fate.empty(); }
 		[[nodiscard]] std::uint32_t MarkerID() const noexcept { return refID ? refID : formID; }
 
 		[[nodiscard]] bool IsComplete() const noexcept { return state == EntryState::kFound || state == EntryState::kDisplayed; }
@@ -105,6 +116,7 @@ namespace CompletionistUI
 	{
 		kList,
 		kJournal,	// quests
+		kKills,	// a kill list, as Kill Counts
 	};
 
 	// A patch's own sub-page, e.g. Quests or Gear

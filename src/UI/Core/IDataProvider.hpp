@@ -27,6 +27,8 @@ namespace CompletionistUI
 
 		[[nodiscard]] virtual std::vector<KillRecord> GetKills() { return {}; }
 		virtual void                                  ResetKills(std::string_view, bool /*a_remove*/) {}
+		[[nodiscard]] virtual std::vector<KillRecord> GetDragonKills() { return {}; }
+		virtual void                                  ResetDragonKills(std::string_view, bool /*a_remove*/) {}
 
 		[[nodiscard]] virtual PinList GetPins() { return {}; }
 		virtual void                  SetPin(const Entry&) {}

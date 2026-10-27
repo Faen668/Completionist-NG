@@ -1303,6 +1303,7 @@ namespace CompletionistUI
 			});
 			_recent = a_provider.GetRecentEvents();
 			_kills = a_provider.GetKills();
+			_dragonKills = a_provider.GetDragonKills();
 			_pins = a_provider.GetPins();
 			_settingsPages = a_provider.GetSettingsPages();
 			_about = a_provider.GetAbout();
@@ -1414,7 +1415,7 @@ namespace CompletionistUI
 			if (_selectedPage == settingsPage) {
 				DrawSettings(a_provider);
 			} else if (_selectedPage == killsPage) {
-				DrawKills(a_provider);
+				DrawKills(a_provider, _kills);
 			} else if (_selectedPage == findPage) {
 				DrawFind(a_provider);
 			} else if (_page) {
@@ -3154,76 +3155,82 @@ namespace CompletionistUI
 		HeadingRule(2.0f);
 		ImGui::Spacing();
 
-		ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
-		ImGui::SameLine(0.0f, ImGui::GetFontSize());
-		MarkerToggle("##HideCompleted", _hideCompleted, a_provider.Translate("UI_HideCompleted").c_str());
-		ImGui::SameLine(0.0f, ImGui::GetFontSize());
+		// A kill list tab has its own filter and sort, and nothing to complete
+		const auto tab = _pageTabs.find(page.id);
+		const auto shownTab = tab != _pageTabs.end() && !tab->second.empty() ? std::atoi(tab->second.c_str()) : 0;
+		const bool killsTab = shownTab >= 0 && shownTab < static_cast<int>(page.tabs.size()) && page.tabs[shownTab].layout == PageLayout::kKills;
+		if (!killsTab) {
+			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
+			ImGui::SameLine(0.0f, ImGui::GetFontSize());
+			MarkerToggle("##HideCompleted", _hideCompleted, a_provider.Translate("UI_HideCompleted").c_str());
+			ImGui::SameLine(0.0f, ImGui::GetFontSize());
 
-		const std::string sortLabels[] = {
-			a_provider.Translate("UI_SortDefault"),
-			a_provider.Translate("UI_SortName"),
-			a_provider.Translate("UI_SortNeeded"),
-		};
-		auto sortIndex = static_cast<int>(_sort);
-		if (ThemedBeginCombo("##Sort", sortLabels[sortIndex].c_str(), ImGui::GetFontSize() * 9.0f)) {
-			for (int i = 0; i < 3; ++i) {
-				if (ImGui::Selectable(sortLabels[i].c_str(), i == sortIndex)) {
-					_sort = static_cast<SortMode>(i);
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-		ImGui::SameLine(0.0f, ImGui::GetFontSize() * 2.0f);
-		{
-			const float available = ImGui::GetContentRegionAvail().x;
-			const auto  percent = PercentText(found, total);
-			const float percentWidth = ImGui::CalcTextSize(percent.c_str()).x;
-			const auto  rowStart = ImGui::GetCursorPos();
-
-			// Only for patches with a dropdown, e.g. which faction's quests to show
-			const auto& choice = page.choice;
-			float       choiceWidth = 0.0f;
-			if (!choice.options.empty()) {
-				for (const auto& option : choice.options) {
-					choiceWidth = std::max(choiceWidth, ImGui::CalcTextSize(option.c_str()).x);
-				}
-				choiceWidth += ImGui::GetStyle().FramePadding.x * 2.0f + ImGui::GetFontSize() * 1.5f;
-			}
-			const float choiceSpace = choiceWidth > 0.0f ? choiceWidth + ImGui::GetFontSize() * 1.5f : 0.0f;
-
-			const float barWidth = std::max(0.0f, std::min(available - choiceSpace - percentWidth, std::max(ImGui::GetFontSize() * 10.0f, available * 0.4f)));
-			const float barHeight = ImGui::GetFontSize() * 0.45f;
-			const float barX = rowStart.x + available - barWidth;
-			const float percentX = barX - percentWidth - ImGui::GetFontSize() * 0.6f;
-
-			if (choiceWidth > 0.0f) {
-				ImGui::SetCursorPos(ImVec2(percentX - choiceSpace, rowStart.y));
-				const auto selected = std::clamp(choice.selected, 0, static_cast<std::int32_t>(choice.options.size()) - 1);
-				const bool open = ThemedBeginCombo("##PageChoice", choice.options[selected].c_str(), choiceWidth);
-				if (!open && ImGui::IsItemHovered() && !choice.name.empty()) {
-					ImGui::SetTooltip("%s\n%s", choice.name.c_str(), choice.info.c_str());
-				}
-				if (open) {
-					for (std::int32_t i = 0; i < static_cast<std::int32_t>(choice.options.size()); ++i) {
-						if (ImGui::Selectable(choice.options[i].c_str(), i == selected) && i != selected) {
-							a_provider.SetPageChoice(page.id, i);
-							_page->choice.selected = i;
-						}
+			const std::string sortLabels[] = {
+				a_provider.Translate("UI_SortDefault"),
+				a_provider.Translate("UI_SortName"),
+				a_provider.Translate("UI_SortNeeded"),
+			};
+			auto sortIndex = static_cast<int>(_sort);
+			if (ThemedBeginCombo("##Sort", sortLabels[sortIndex].c_str(), ImGui::GetFontSize() * 9.0f)) {
+				for (int i = 0; i < 3; ++i) {
+					if (ImGui::Selectable(sortLabels[i].c_str(), i == sortIndex)) {
+						_sort = static_cast<SortMode>(i);
 					}
-					ImGui::EndCombo();
 				}
+				ImGui::EndCombo();
 			}
 
-			ImGui::SetCursorPos(ImVec2(percentX, rowStart.y));
-			ImGui::AlignTextToFramePadding();
-			ImGui::TextColored(total > 0 && found >= total ? palette.found : palette.textDim, "%s", percent.c_str());
-			ImGui::SameLine();
-			ImGui::SetCursorPos(ImVec2(barX, rowStart.y + (ImGui::GetFrameHeight() - barHeight) * 0.5f));
-			ProgressBar(Fraction(found, total), barHeight);
-		}
+			ImGui::SameLine(0.0f, ImGui::GetFontSize() * 2.0f);
+			{
+				const float available = ImGui::GetContentRegionAvail().x;
+				const auto  percent = PercentText(found, total);
+				const float percentWidth = ImGui::CalcTextSize(percent.c_str()).x;
+				const auto  rowStart = ImGui::GetCursorPos();
 
-		DividerRow();
+				// Only for patches with a dropdown, e.g. which faction's quests to show
+				const auto& choice = page.choice;
+				float       choiceWidth = 0.0f;
+				if (!choice.options.empty()) {
+					for (const auto& option : choice.options) {
+						choiceWidth = std::max(choiceWidth, ImGui::CalcTextSize(option.c_str()).x);
+					}
+					choiceWidth += ImGui::GetStyle().FramePadding.x * 2.0f + ImGui::GetFontSize() * 1.5f;
+				}
+				const float choiceSpace = choiceWidth > 0.0f ? choiceWidth + ImGui::GetFontSize() * 1.5f : 0.0f;
+
+				const float barWidth = std::max(0.0f, std::min(available - choiceSpace - percentWidth, std::max(ImGui::GetFontSize() * 10.0f, available * 0.4f)));
+				const float barHeight = ImGui::GetFontSize() * 0.45f;
+				const float barX = rowStart.x + available - barWidth;
+				const float percentX = barX - percentWidth - ImGui::GetFontSize() * 0.6f;
+
+				if (choiceWidth > 0.0f) {
+					ImGui::SetCursorPos(ImVec2(percentX - choiceSpace, rowStart.y));
+					const auto selected = std::clamp(choice.selected, 0, static_cast<std::int32_t>(choice.options.size()) - 1);
+					const bool open = ThemedBeginCombo("##PageChoice", choice.options[selected].c_str(), choiceWidth);
+					if (!open && ImGui::IsItemHovered() && !choice.name.empty()) {
+						ImGui::SetTooltip("%s\n%s", choice.name.c_str(), choice.info.c_str());
+					}
+					if (open) {
+						for (std::int32_t i = 0; i < static_cast<std::int32_t>(choice.options.size()); ++i) {
+							if (ImGui::Selectable(choice.options[i].c_str(), i == selected) && i != selected) {
+								a_provider.SetPageChoice(page.id, i);
+								_page->choice.selected = i;
+							}
+						}
+						ImGui::EndCombo();
+					}
+				}
+
+				ImGui::SetCursorPos(ImVec2(percentX, rowStart.y));
+				ImGui::AlignTextToFramePadding();
+				ImGui::TextColored(total > 0 && found >= total ? palette.found : palette.textDim, "%s", percent.c_str());
+				ImGui::SameLine();
+				ImGui::SetCursorPos(ImVec2(barX, rowStart.y + (ImGui::GetFrameHeight() - barHeight) * 0.5f));
+				ProgressBar(Fraction(found, total), barHeight);
+			}
+
+			DividerRow();
+		}
 
 		// Shown instead of the list, e.g. Civil War before picking a side
 		if (!page.notice.empty()) {
@@ -3267,7 +3274,13 @@ namespace CompletionistUI
 					}
 				}
 				const auto& title = page.tabs[i].title;
-				tabs.push_back({ std::to_string(i), a_provider.Translate(title.empty() ? page.title : title), CountText(tabFound, tabTotal) });
+				// A kill list counts kills, as Kill Counts does in the sidebar
+				std::int64_t kills = 0;
+				for (const auto& record : _dragonKills) {
+					kills += record.kills;
+				}
+				const auto count = page.tabs[i].layout == PageLayout::kKills ? std::to_string(kills) : CountText(tabFound, tabTotal);
+				tabs.push_back({ std::to_string(i), a_provider.Translate(title.empty() ? page.title : title), count });
 			}
 			if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == selected; })) {
 				selected = tabs.front().id;
@@ -3279,6 +3292,10 @@ namespace CompletionistUI
 
 		if (view->layout == PageLayout::kJournal) {
 			DrawJournal(a_provider, *view);
+			return;
+		}
+		if (view->layout == PageLayout::kKills) {
+			DrawKills(a_provider, _dragonKills, true);
 			return;
 		}
 
@@ -3298,7 +3315,17 @@ namespace CompletionistUI
 				}
 			}
 		}
-		const bool shoutPage = trainerPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
+		const bool dragonPage = pageHas([](const Entry& a_entry) { return a_entry.IsDragon(); });
+		if (dragonPage) {
+			const float width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().WindowPadding.x * 2.0f;
+			_dragonLore = 0.0f;
+			for (const auto& section : view->sections) {
+				for (const auto& entry : section.entries) {
+					_dragonLore = std::max(_dragonLore, DragonLoreHeight(entry.dragon.lore, width));
+				}
+			}
+		}
+		const bool shoutPage = trainerPage || dragonPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
 		float panelHeight = 0.0f;
 		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 		if (shoutPage) {
@@ -3309,7 +3336,10 @@ namespace CompletionistUI
 			ImGui::PopFont();
 			const float t = std::clamp(_descriptionOpen, 0.0f, 1.0f);
 			// Trainers have no title row, so the padding below matches the padding above
-			const float content = trainerPage ? TrainerInfoHeight() + 1.0f : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
+			const float panelWidth = ImGui::GetContentRegionAvail().x - style.WindowPadding.x * 2.0f;
+			const float content = trainerPage ? TrainerInfoHeight() + 1.0f
+			                    : dragonPage  ? DragonInfoHeight(_dragonLore, panelWidth) + 1.0f
+			                                  : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
 			panelHeight = (style.WindowPadding.y * 2.0f + content) * t * t * (3.0f - 2.0f * t);
 			// Leaves the list room for a few rows, as the description panel does, on a short window or a big scale
 			panelHeight = std::min(panelHeight, std::max(0.0f, ImGui::GetContentRegionAvail().y - gap - 6.0f * ImGui::GetTextLineHeightWithSpacing()));
@@ -3344,7 +3374,7 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Kills ) ----------------
 	//---------------------------------------------------
 
-	void Menu::DrawKills(IDataProvider& a_provider) {
+	void Menu::DrawKills(IDataProvider& a_provider, const std::vector<KillRecord>& a_records, bool a_dragons) {
 
 		const auto& palette = Themes::GetPalette();
 		const auto& style = ImGui::GetStyle();
@@ -3364,7 +3394,7 @@ namespace CompletionistUI
 		std::int64_t      totalAssists = 0;
 		std::int32_t      mostKills = 0;
 		const KillRecord* mostSlain = nullptr;
-		for (const auto& record : _kills) {
+		for (const auto& record : a_records) {
 			totalKills += record.kills;
 			totalAssists += record.assists;
 			if (!mostSlain || record.kills > mostSlain->kills) {
@@ -3373,9 +3403,12 @@ namespace CompletionistUI
 			mostKills = std::max(mostKills, record.kills);
 		}
 
-		HeadingWithCount(a_provider.Translate("UI_Kills_Title"), std::to_string(_kills.size()), palette.heading);
-		HeadingRule(2.0f);
-		ImGui::Spacing();
+		// On a page's tab the page has the heading
+		if (!a_dragons) {
+			HeadingWithCount(a_provider.Translate("UI_Kills_Title"), std::to_string(a_records.size()), palette.heading);
+			HeadingRule(2.0f);
+			ImGui::Spacing();
+		}
 
 		//---------------------------------------------------
 		// Totals
@@ -3384,10 +3417,10 @@ namespace CompletionistUI
 		const std::string cardValues[] = {
 			std::to_string(totalKills),
 			std::to_string(totalAssists),
-			std::to_string(_kills.size()),
+			std::to_string(a_records.size()),
 			mostSlain && mostSlain->kills > 0 ? displayName(mostSlain->name) : std::string("-"),
 		};
-		constexpr const char* cardTitles[] = { "UI_Kills_Total", "UI_Kills_Assists", "UI_Kills_Types", "UI_Kills_MostSlain" };
+		const char* cardTitles[] = { "UI_Kills_Total", "UI_Kills_Assists", a_dragons ? "UI_Dragons_Kinds" : "UI_Kills_Types", "UI_Kills_MostSlain" };
 		const float           cardHeight = fontSize * 4.0f;
 		if (ImGui::BeginTable("##KillCards", 4, ImGuiTableFlags_SizingStretchSame)) {
 			for (int i = 0; i < 4; ++i) {
@@ -3435,16 +3468,16 @@ namespace CompletionistUI
 
 		DividerRow();
 
-		if (_kills.empty()) {
+		if (a_records.empty()) {
 			ImGui::PushTextWrapPos(0.0f);
-			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Kills_Empty").c_str());
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(a_dragons ? "UI_Dragons_KillsEmpty" : "UI_Kills_Empty").c_str());
 			ImGui::PopTextWrapPos();
 			return;
 		}
 
 		const auto filter = Lower(std::string(_filter.data()));
 		std::vector<const KillRecord*> shown;
-		for (const auto& record : _kills) {
+		for (const auto& record : a_records) {
 			if (filter.empty() || Lower(record.name).find(filter) != std::string::npos) {
 				shown.push_back(std::addressof(record));
 			}
@@ -3480,7 +3513,7 @@ namespace CompletionistUI
 		const float rowHeight = ImGui::GetFrameHeight();
 
 		const std::string headers[] = {
-			a_provider.Translate("UI_Kills_Creature"),
+			a_provider.Translate(a_dragons ? "UI_Dragons_Kind" : "UI_Kills_Creature"),
 			a_provider.Translate("UI_Kills_Share"),
 			a_provider.Translate("UI_Kills_Kills"),
 			a_provider.Translate("UI_Kills_Assists"),
@@ -3611,7 +3644,7 @@ namespace CompletionistUI
 				if (ThemedButton(caption.c_str(), buttonWidth)) {
 					if (armed) {
 						_confirmKey.clear();
-						a_provider.ResetKills(selected->name, a_remove);
+						a_dragons ? a_provider.ResetDragonKills(selected->name, a_remove) : a_provider.ResetKills(selected->name, a_remove);
 					} else {
 						_confirmKey = key;
 					}
@@ -5550,8 +5583,12 @@ namespace CompletionistUI
 
 			ImGui::PushTextWrapPos(0.0f);
 
-			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer();
-			if (entry->IsTrainer()) {
+			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon();
+			if (entry->IsDragon()) {
+				// The story's in the panel
+				DrawDragonInfo(a_provider, *entry, false);
+				text = {};
+			} else if (entry->IsTrainer()) {
 				DrawTrainerInfo(a_provider, *entry, false);
 				if (!text.empty()) {
 					ImGui::Spacing();
@@ -5615,6 +5652,51 @@ namespace CompletionistUI
 		}
 	}
 
+	namespace DragonLayout
+	{
+		//---------------------------------------------------
+		//-- Completionist UI ( Info Content ) --------------
+		//---------------------------------------------------
+
+		// Dragon, fate, what the name means, where it's met
+		static float InfoContent() {
+
+			ImGui::PushFont(Themes::HeaderFont());
+			const float name = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			ImGui::PushFont(Themes::TitleFont());
+			const float title = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			return name + title + ImGui::GetTextLineHeightWithSpacing() * 2.0f;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Sizes ) ---------------------
+		//---------------------------------------------------
+
+		static bool  SideBySide(float a_width) { return a_width >= ImGui::GetFontSize() * 40.0f; }
+		static float InfoWidth(float a_width) { return SideBySide(a_width) ? std::floor(std::clamp(a_width * 0.32f, ImGui::GetFontSize() * 16.0f, ImGui::GetFontSize() * 26.0f)) : a_width; }
+		static float LoreWidth(float a_width) { return std::max(ImGui::GetFontSize() * 4.0f, (SideBySide(a_width) ? a_width - InfoWidth(a_width) - ShoutLayout::CardGap() : a_width) - ShoutLayout::Padding() * 2.0f); }
+
+		static float LoreHeight(const std::string& a_lore, float a_width) {
+
+			return a_lore.empty() ? 0.0f : ImGui::CalcTextSize(a_lore.c_str(), nullptr, false, LoreWidth(a_width)).y;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Height ) --------------------
+		//---------------------------------------------------
+
+		// Both boxes, side by side or stacked
+		static float Height(float a_lore, float a_width) {
+
+			const float padding = ShoutLayout::Padding();
+			const float info = padding * 2.0f + InfoContent();
+			const float lore = padding * 2.0f + std::max(a_lore, ImGui::GetTextLineHeightWithSpacing());
+			return SideBySide(a_width) ? std::max(info, lore) : info + ShoutLayout::CardGap() + lore;
+		}
+	}
+
 	//---------------------------------------------------
 	//-- Completionist UI ( Shout Words Height ) --------
 	//---------------------------------------------------
@@ -5633,7 +5715,7 @@ namespace CompletionistUI
 		const auto& palette = Themes::GetPalette();
 
 		// Hovered, else pinned, else the first
-		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer(); };
+		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer() || a_entry.IsDragon(); };
 		const Entry* entry = _hoveredEntry && hasPanel(*_hoveredEntry) ? std::addressof(*_hoveredEntry) : _pinnedEntry && hasPanel(*_pinnedEntry) ? std::addressof(*_pinnedEntry) : nullptr;
 		for (const auto& section : a_page.sections) {
 			for (const auto& candidate : section.entries) {
@@ -5664,6 +5746,8 @@ namespace CompletionistUI
 		ScrollWithRightStick();
 		if (entry && entry->IsTrainer()) {
 			DrawTrainerInfo(a_provider, *entry, true);
+		} else if (entry && entry->IsDragon()) {
+			DrawDragonInfo(a_provider, *entry, true);
 		} else if (entry) {
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
@@ -6198,6 +6282,109 @@ namespace CompletionistUI
 			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
 			ImGui::EndTooltip();
 		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Dragon Info Height ) --------
+	//---------------------------------------------------
+
+	float Menu::DragonInfoHeight(float a_lore, float a_width) {
+
+		return DragonLayout::Height(a_lore, a_width);
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Dragon Lore Height ) --------
+	//---------------------------------------------------
+
+	float Menu::DragonLoreHeight(const std::string& a_lore, float a_width) {
+
+		return DragonLayout::LoreHeight(a_lore, a_width);
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Dragon Info ) ----------
+	//---------------------------------------------------
+
+	// Who and what became of them on the left, their story on the right, as the trainers'
+	// panel; stacked when the window is narrow. The description panel already shows the name
+	void Menu::DrawDragonInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName) {
+
+		const auto& palette = Themes::GetPalette();
+		const auto& info = a_entry.dragon;
+		const float fontSize = ImGui::GetFontSize();
+		const float width = ImGui::GetContentRegionAvail().x;
+		auto*       drawList = ImGui::GetWindowDrawList();
+
+		const auto panel = [&](ImVec2 a_min, ImVec2 a_max) {
+			drawList->AddRectFilled(a_min, a_max, Colour(palette.accent, 0.04f));
+			drawList->AddRect(a_min, a_max, Colour(palette.separator, 0.7f));
+			CornerMarks(drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
+		};
+
+		const float padding = ShoutLayout::Padding();
+		const float gap = ShoutLayout::CardGap();
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+		const bool  sideBySide = DragonLayout::SideBySide(width);
+		const float infoWidth = DragonLayout::InfoWidth(width);
+		const float loreWidth = DragonLayout::LoreWidth(width);
+		const float lore = a_withName ? std::max(_dragonLore, DragonLayout::LoreHeight(info.lore, width)) : DragonLayout::LoreHeight(info.lore, width);
+		const float infoHeight = padding * 2.0f + DragonLayout::InfoContent();
+		const float loreHeight = padding * 2.0f + std::max(lore, line);
+		const float boxHeight = sideBySide ? std::max(infoHeight, loreHeight) : infoHeight;
+		const auto  origin = ImGui::GetCursorScreenPos();
+
+		//---------------------------------------------------
+		// Dragon and fate
+		//---------------------------------------------------
+
+		const auto infoMin = origin;
+		const auto infoMax = ImVec2(origin.x + infoWidth, origin.y + boxHeight);
+		panel(infoMin, infoMax);
+		drawList->PushClipRect(infoMin, ImVec2(infoMax.x - padding * 0.5f, infoMax.y), true);
+
+		const float textX = infoMin.x + padding;
+		const float textWidth = infoWidth - padding * 2.0f;
+		float       y = infoMin.y + (boxHeight - DragonLayout::InfoContent()) * 0.5f;
+
+		ImGui::PushFont(Themes::HeaderFont());
+		const float nameLine = ImGui::GetTextLineHeightWithSpacing();
+		if (a_withName) {
+			drawList->AddText(ImVec2(textX, y), Colour(palette.heading), FitText(a_entry.name, textWidth).c_str());
+		}
+		ImGui::PopFont();
+		y += nameLine;
+		ImGui::PushFont(Themes::TitleFont());
+		const float titleLine = ImGui::GetTextLineHeightWithSpacing();
+		drawList->AddText(ImVec2(textX, y), Colour(a_entry.IsComplete() ? palette.found : palette.text), FitText(info.fate, textWidth).c_str());
+		ImGui::PopFont();
+		y += titleLine;
+
+		const auto dimLine = [&](const std::string& a_text) {
+			drawList->AddText(ImVec2(textX, y), Colour(palette.textDim), FitText(a_text, textWidth).c_str());
+			y += line;
+		};
+		if (!info.meaning.empty()) {
+			dimLine(a_provider.Translate("UI_Dragons_Means{" + info.meaning + "}"));
+		}
+		if (!info.place.empty()) {
+			dimLine(a_provider.Translate("UI_Dragons_Place{" + info.place + "}"));
+		}
+		drawList->PopClipRect();
+
+		//---------------------------------------------------
+		// Their story
+		//---------------------------------------------------
+
+		const float storyHeight = sideBySide ? boxHeight : loreHeight;
+		const auto  storyMin = sideBySide ? ImVec2(infoMax.x + gap, origin.y) : ImVec2(origin.x, infoMax.y + gap);
+		const auto  storyMax = ImVec2(origin.x + width, storyMin.y + storyHeight);
+		panel(storyMin, storyMax);
+		ImGui::Dummy(ImVec2(width, sideBySide ? boxHeight : boxHeight + gap + storyHeight));
+
+		const auto& story = info.lore.empty() ? a_provider.Translate("UI_DescriptionNone") : info.lore;
+		const float storyY = storyMin.y + (storyHeight - DragonLayout::LoreHeight(story, width)) * 0.5f;
+		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(storyMin.x + padding, std::max(storyMin.y + padding, storyY)), Colour(info.lore.empty() ? palette.textDim : palette.text), story.c_str(), nullptr, loreWidth);
 	}
 
 	//---------------------------------------------------

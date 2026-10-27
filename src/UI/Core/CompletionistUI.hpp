@@ -152,7 +152,7 @@ namespace CompletionistUI
 		void DrawPage(IDataProvider& a_provider);
 		void DrawSettings(IDataProvider& a_provider);
 		void DrawJournal(IDataProvider& a_provider, const Page& a_page);
-		void DrawKills(IDataProvider& a_provider);
+		void DrawKills(IDataProvider& a_provider, const std::vector<KillRecord>& a_records, bool a_dragons = false);	// dragons: the Dragons page's tab
 		void DrawPinnedBar(IDataProvider& a_provider);
 		bool DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings);	// false when it should close
 		void DrawToastPlacement(IDataProvider& a_provider, UISettings& a_settings);
@@ -182,6 +182,10 @@ namespace CompletionistUI
 		void                       DrawTrainerInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
 		[[nodiscard]] float TrainerInfoHeight() const;
 		std::int32_t               _trainerRows{ 1 };	// most perks in one tree column on the page, so the panel keeps its height
+		void                       DrawDragonInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
+		[[nodiscard]] static float DragonInfoHeight(float a_lore, float a_width);
+		[[nodiscard]] static float DragonLoreHeight(const std::string& a_lore, float a_width);
+		float                      _dragonLore{ 0.0f };	// the page's longest story, so the panel keeps its height
 
 		[[nodiscard]] float DescriptionPanelHeight() const;
 		void                UpdateDescriptionPanel(float a_available, float a_gap);
@@ -208,6 +212,7 @@ namespace CompletionistUI
 		AboutInfo                                     _about;
 		std::vector<RecentEvent>                      _recent;
 		std::vector<KillRecord>                       _kills;
+		std::vector<KillRecord>                       _dragonKills;
 		PinList                                       _pins;
 		std::uint32_t                                 _shownMarker{ 0 };
 		bool                                          _cellView{ false };
