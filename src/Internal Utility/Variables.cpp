@@ -2,6 +2,7 @@
 #include "DKUtil/Utility.hpp"
 #include "Events.hpp"
 #include "Settings.hpp"
+#include "SettingsFile.hpp"
 #include "SimpleIni.h"
 #include "UI/Core/Themes.hpp"
 
@@ -31,96 +32,13 @@ namespace CVariables
 
 	bool VariablesAPI::GetIniBoolValue(const std::string& key)
 	{
-		CSimpleIniA ini;
-		const char* completionistSection = "Completionist";
-		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
-
-		// Load the INI file
-		SI_Error rc = ini.LoadFile(iniFilePath);
-
-		// If the file doesn't exist, create it and add the required lines
-		if (rc == SI_FILE) {
-			// Create the section and set the value
-			ini.SetValue(completionistSection, key.c_str(), "false");
-
-			// Save the INI file
-			if (ini.SaveFile(iniFilePath) < 0) {
-				INFO("Failed to create and save completionist.ini");
-				return false;
-			}
-
-			// Log creation
-			INFO("Created completionist.ini");
-			return false;
-		}
-
-		// If there was another error loading the file, log it and return false
-		if (rc < 0) {
-			INFO("Unable to load completionist.ini");
-			return false;
-		}
-
-		// If the section or key doesn't exist, add them
-		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, key.c_str())) {
-			ini.SetValue(completionistSection, key.c_str(), "false");
-
-			// Save the INI file
-			if (ini.SaveFile(iniFilePath) < 0) {
-				INFO("Failed to save completionist.ini");
-				return false;
-			}
-
-			// Log addition
-			INFO("Added missing section or key to completionist.ini");
-			return false;
-		}
-
-		// Return the value
-		return ini.GetBoolValue(completionistSection, key.c_str(), false);
+		const auto value = GetIniValue("Completionist", key, "false");
+		return DKUtil::string::iequals(value, "true") || DKUtil::string::iequals(value, "yes") || DKUtil::string::iequals(value, "on") || value == "1";
 	}
 
 	std::string VariablesAPI::GetIniStringValue(const std::string& key)
 	{
-		CSimpleIniA ini;
-		const char* completionistSection = "Completionist";
-		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
-		const char* defaultValue = "0,1,2,3,4,5,6,7,8,9";
-		// Load the INI file
-		SI_Error rc = ini.LoadFile(iniFilePath);
-		// If the file doesn't exist, create it and add the required lines
-		if (rc == SI_FILE) {
-			// Create the section and set the value
-			ini.SetValue(completionistSection, key.c_str(), defaultValue);
-			// Save the INI file
-			if (ini.SaveFile(iniFilePath) < 0) {
-				INFO("Failed to create and save completionist.ini");
-				return defaultValue;
-			}
-			// Log creation
-			INFO("Created completionist.ini");
-			return defaultValue;
-		}
-		// If there was another error loading the file, log it and return the default
-		if (rc < 0) {
-			INFO("Unable to load completionist.ini");
-			return defaultValue;
-		}
-		// If the section or key doesn't exist, add them
-		if (!ini.GetSection(completionistSection) || !ini.GetValue(completionistSection, key.c_str()))
-		{
-			ini.SetValue(completionistSection, key.c_str(), defaultValue);
-
-			// Save the INI file
-			if (ini.SaveFile(iniFilePath) < 0) {
-				INFO("Failed to save completionist.ini");
-				return defaultValue;
-			}
-
-			// Log addition
-			INFO("Added missing section or key to completionist.ini");
-			return defaultValue;
-		}
-		return ini.GetValue(completionistSection, key.c_str(), "");
+		return GetIniValue("Completionist", key, "0,1,2,3,4,5,6,7,8,9");
 	}
 
 	//---------------------------------------------------
@@ -130,11 +48,8 @@ namespace CVariables
 	std::string VariablesAPI::GetIniValue(const char* a_section, const std::string& a_key, const char* a_default)
 	{
 		CSimpleIniA ini;
-		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
-
-		const SI_Error rc = ini.LoadFile(iniFilePath);
+		const SI_Error rc = CSettingsFile::Load(ini);
 		if (rc < 0 && rc != SI_FILE) {
-			INFO("Unable to load completionist.ini");
 			return a_default;
 		}
 
@@ -143,8 +58,10 @@ namespace CVariables
 		}
 
 		// Write the default back so the key shows up for users to edit.
-		ini.SetValue(a_section, a_key.c_str(), a_default);
-		if (ini.SaveFile(iniFilePath) < 0) {
+		CSimpleIniA user;
+		CSettingsFile::LoadUser(user);
+		user.SetValue(a_section, a_key.c_str(), a_default);
+		if (CSettingsFile::SaveUser(user) < 0) {
 			INFO("Failed to save completionist.ini");
 		}
 		return a_default;
@@ -212,10 +129,9 @@ namespace CVariables
 	void VariablesAPI::SaveUISettings(const CompletionistUI::UISettings& a_settings)
 	{
 		CSimpleIniA ini;
-		const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
 		const char* section = "UI";
 
-		const SI_Error rc = ini.LoadFile(iniFilePath);
+		const SI_Error rc = CSettingsFile::LoadUser(ini);
 		if (rc < 0 && rc != SI_FILE) {
 			INFO("Unable to load completionist.ini, UI settings not saved");
 			return;
@@ -254,7 +170,7 @@ namespace CVariables
 		ini.SetValue(section, "NotificationsX", fmt::format("{:.3f}", a_settings.toastX).c_str());
 		ini.SetValue(section, "NotificationsY", fmt::format("{:.3f}", a_settings.toastY).c_str());
 
-		if (ini.SaveFile(iniFilePath) < 0) {
+		if (CSettingsFile::SaveUser(ini) < 0) {
 			INFO("Failed to save UI settings to completionist.ini");
 			return;
 		}
