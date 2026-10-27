@@ -1,6 +1,7 @@
 #include "UI/GameDataProvider.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
+#include "Frameworks/Misc/CFramework_Dragons.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
 #include "Frameworks/Misc/CFramework_Trainers.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
@@ -914,6 +915,69 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Build Dragon Page ) ----------------
+		//---------------------------------------------------
+
+		// The named dragons by game, and the dragon kills on a tab of their own
+		Page BuildDragonPage(IDataProvider& a_provider) {
+
+			using namespace CFramework_Dragons;
+
+			Page page{ "$MCMPageDragons", "$MCMPageDragons", {} };
+			page.tabs = { { "UI_Dragons_Unique" }, { "UI_Dragons_Kills", PageLayout::kKills } };
+
+			const auto sectionFor = [&](const std::string& a_plugin) -> Section& {
+				const auto title = a_plugin == "Skyrim.esm" ? std::string("UI_Dragons_Skyrim") : a_plugin == "Dawnguard.esm" ? std::string("UI_Dragons_Dawnguard") : a_plugin == "Dragonborn.esm" ? std::string("UI_Dragons_Dragonborn") : a_plugin;
+				const auto it = std::ranges::find(page.sections, title, &Section::title);
+				return it != page.sections.end() ? *it : page.sections.emplace_back(Section{ title, {}, 0 });
+			};
+
+			for (const auto& dragon : Dragons) {
+				const auto fate = CHandler::FateOf(dragon);
+
+				// The marker goes on one that's alive and out in the world
+				RE::NiPointer<RE::TESObjectREFR> placed;
+				for (const auto& handle : dragon.refs) {
+					auto        ref = handle.get();
+					const auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
+					if (actor && !actor->IsDead() && !ref->IsDisabled() && ref->GetSaveParentCell()) {
+						placed = ref;
+						break;
+					}
+				}
+
+				auto& entry = sectionFor(dragon.plugin).entries.emplace_back();
+				entry.name = dragon.name;
+				entry.detail = a_provider.Translate(CHandler::FateKey(fate));
+				entry.state = CHandler::IsDone(dragon, fate) ? EntryState::kFound : EntryState::kNeeded;
+				entry.formID = dragon.formID;
+				entry.frameworkID = FrameworkID;
+				entry.canToggle = true;
+				entry.refID = placed ? placed->GetFormID() : 0;
+				entry.canMark = placed != nullptr;
+
+				auto& info = entry.dragon;
+				info.fate = entry.detail;
+				if (!dragon.key.empty()) {
+					// None for a dragon without a name in the dragon tongue
+					const auto meaningKey = "UI_Dragons_Meaning_" + dragon.key;
+					if (auto meaning = a_provider.Translate(meaningKey); meaning != meaningKey) {
+						info.meaning = std::move(meaning);
+					}
+					info.place = a_provider.Translate("UI_Dragons_Where_" + dragon.key);
+					info.lore = a_provider.Translate("UI_Dragons_Lore_" + dragon.key);
+				} else {
+					auto        ref = dragon.refs.empty() ? RE::NiPointer<RE::TESObjectREFR>{} : dragon.refs.front().get();
+					const auto* home = ref ? ref->GetEditorLocation() : nullptr;
+					info.place = PlaceName(home, ref.get());
+					info.lore = a_provider.Translate("UI_Dragons_Lore_Mod{" + dragon.plugin + "}");
+				}
+				entry.description = info.lore;
+			}
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Summarise ) ------------------------
 		//---------------------------------------------------
 
@@ -968,6 +1032,10 @@ namespace CompletionistUI
 
 		// Skill trainers, after the MCM's own collections
 		if (auto page = BuildTrainerPage(*this); !page.sections.empty()) {
+			categories[0].pages.push_back(Summarise(page));
+			pages.emplace(page.id, std::move(page));
+		}
+		if (auto page = BuildDragonPage(*this); !page.sections.empty()) {
 			categories[0].pages.push_back(Summarise(page));
 			pages.emplace(page.id, std::move(page));
 		}
@@ -1103,8 +1171,8 @@ namespace CompletionistUI
 			return;
 		}
 
-		// Trainers keep their own found list
-		if (a_entry.frameworkID == CFramework_Trainers::FrameworkID) {
+		// Trainers and dragons keep their own found list
+		if (a_entry.frameworkID == CFramework_Trainers::FrameworkID || a_entry.frameworkID == CFramework_Dragons::FrameworkID) {
 			{
 				std::scoped_lock lock(_lock);
 				if (auto it = _pages.find(std::string(a_pageID)); it != _pages.end()) {
@@ -1117,10 +1185,10 @@ namespace CompletionistUI
 					}
 				}
 			}
-			SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.formID, a_completed]() {
+			SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.formID, a_completed, trainer = a_entry.frameworkID == CFramework_Trainers::FrameworkID]() {
 				auto& found = CFramework_Master::FoundItemData_NoShow;
 				a_completed ? found.AddForm(formID) : found.RemoveForm(formID);
-				INFO("Trainers: marked {:08X} {} by hand", formID, a_completed ? "trained" : "not trained");
+				INFO("{}: marked {:08X} {} by hand", trainer ? "Trainers" : "Dragons", formID, a_completed ? "done" : "not done");
 				Rebuild();
 			});
 			return;
@@ -1224,8 +1292,14 @@ namespace CompletionistUI
 			kills.push_back({ name, data.killCount, data.assistCount, data.highlight });
 		}
 
+		std::vector<KillRecord> dragons;
+		for (const auto& [name, data] : CFramework_Master::PlayerDragonKills.data) {
+			dragons.push_back({ name, data.killCount, data.assistCount, data.highlight });
+		}
+
 		std::scoped_lock lock(_lock);
 		_kills = std::move(kills);
+		_dragonKills = std::move(dragons);
 	}
 
 	//---------------------------------------------------
@@ -1236,6 +1310,33 @@ namespace CompletionistUI
 
 		std::scoped_lock lock(_lock);
 		return _kills;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Get Dragon Kills ) -----------------
+	//---------------------------------------------------
+
+	std::vector<KillRecord> GameDataProvider::GetDragonKills() {
+
+		std::scoped_lock lock(_lock);
+		return _dragonKills;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Reset Dragon Kills ) ---------------
+	//---------------------------------------------------
+
+	// The named dragons go by these too, so the page is rebuilt with them
+	void GameDataProvider::ResetDragonKills(std::string_view a_name, bool a_remove) {
+
+		SKSE::GetTaskInterface()->AddTask([this, name = std::string(a_name), a_remove]() {
+			if (a_remove) {
+				CFramework_Master::PlayerDragonKills.RemoveEnemy(name);
+			} else {
+				CFramework_Master::PlayerDragonKills.ResetCount(name);
+			}
+			Rebuild();
+		});
 	}
 
 	//---------------------------------------------------

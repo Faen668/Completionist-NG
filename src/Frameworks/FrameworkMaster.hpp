@@ -25,6 +25,9 @@ namespace CFramework_Master
 
 	inline Serialization::CompletionistCellTargets CellTargets;
 
+	// Dragons by the name they died with, e.g. Blood Dragon or Mirmulnir
+	inline Serialization::CompletionistDeathSentance PlayerDragonKills;
+
 	inline int InstalledPatchesForMCMDisplay;
 
 	//Form, Name, Page

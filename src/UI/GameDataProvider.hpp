@@ -30,6 +30,8 @@ namespace CompletionistUI
 		std::vector<RecentEvent>  GetRecentEvents() override;
 		std::vector<KillRecord>   GetKills() override;
 		void                      ResetKills(std::string_view a_name, bool a_remove) override;
+		std::vector<KillRecord>   GetDragonKills() override;
+		void                      ResetDragonKills(std::string_view a_name, bool a_remove) override;
 		PinList                   GetPins() override;
 		void                      SetPin(const Entry& a_entry) override;
 		void                      ClearPin(std::uint32_t a_formID) override;
@@ -70,6 +72,7 @@ namespace CompletionistUI
 		[[nodiscard]] std::string PageListing(std::uint32_t a_formID);
 
 		std::vector<KillRecord>    _kills;
+		std::vector<KillRecord>    _dragonKills;
 		PinList                    _pins;
 
 		void ScanCellNow();

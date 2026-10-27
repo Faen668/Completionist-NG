@@ -6,6 +6,7 @@
 #include "Internal Utility/ScriptObject.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Frameworks/Misc/CFramework_Enchantments.hpp"
+#include "Frameworks/Misc/CFramework_Dragons.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
 #include "Internal Utility/MCMHandler.hpp"
@@ -44,6 +45,8 @@ namespace CFramework_Master
 		SetSerializableInfo(PlayerKills);
 		SetSerializableInfo(PlayerHits);
 		SetSerializableInfo(CellTargets);
+		// Last, so saves from before it load the rest as they were
+		SetSerializableInfo(PlayerDragonKills);
 
 		//Frameworks
 		CFramework_Others::CHandler::InstallFramework();
@@ -54,6 +57,7 @@ namespace CFramework_Master
 		CFramework_PlayerHomes::CHandler::InstallFramework();
 		CFramework_Shouts::CHandler::InstallFramework();
 		CFramework_Trainers::CHandler::InstallFramework();
+		CFramework_Dragons::CHandler::InstallFramework();
 	};
 
 	void FrameworkAPI::RegisterCustomPatches()
@@ -144,6 +148,11 @@ namespace CFramework_Master
 
 		auto* killer = a_event->actorKiller.get();
 		PlayerKills.AddKillOrAssist(name, deathString, (killer == RE::PlayerCharacter::GetSingleton()));
+		// Dragons again, by kind, under the name they show: the story's aliases name some
+		if (CFramework_Dragons::CHandler::IsDragon(NPC)) {
+			const auto* shown = NPC->GetDisplayFullName();
+			PlayerDragonKills.AddKillOrAssist(shown && *shown ? shown : NPC->GetName(), deathString, (killer == RE::PlayerCharacter::GetSingleton()));
+		}
 		PlayerHits.RemoveTarget(NPC->GetFormID());
 	}
 
@@ -234,6 +243,7 @@ namespace CFramework_Master
 		INFO("Start-up: {}", a_newGame ? "new game" : "game loaded");
 		CFramework_Pets::CHandler::CheckAdoptedPet();
 		CFramework_Trainers::CHandler::FindPlacedTrainers();
+		CFramework_Dragons::CHandler::FindPlacedDragons();
 		GameMenus::Get()->NotifyWhenLoaded();
 	}
 
