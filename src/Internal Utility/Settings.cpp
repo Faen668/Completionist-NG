@@ -1,12 +1,11 @@
 #include "Settings.hpp"
 #include "DKUtil/Utility.hpp"
-#include "SimpleIni.h"
+#include "SettingsFile.hpp"
 
 namespace CSettings
 {
 	namespace
 	{
-		constexpr const char* iniFilePath = "Data/SKSE/Plugins/Completionist.ini";
 		constexpr const char* section = "Settings";
 
 		enum class Type
@@ -217,7 +216,7 @@ namespace CSettings
 	void SettingsAPI::Load() {
 
 		CSimpleIniA ini;
-		ini.LoadFile(iniFilePath);
+		CSettingsFile::Load(ini);
 
 		entries.clear();
 		for (const auto& definition : defaults) {
@@ -237,7 +236,7 @@ namespace CSettings
 	void SettingsAPI::Save() {
 
 		CSimpleIniA ini;
-		const SI_Error rc = ini.LoadFile(iniFilePath);
+		const SI_Error rc = CSettingsFile::LoadUser(ini);
 		if (rc < 0 && rc != SI_FILE) {
 			INFO("Settings: unable to load completionist.ini, not saved");
 			return;
@@ -253,7 +252,7 @@ namespace CSettings
 			ini.Delete(section, retired);
 		}
 
-		if (ini.SaveFile(iniFilePath) < 0) {
+		if (CSettingsFile::SaveUser(ini) < 0) {
 			INFO("Settings: failed to save completionist.ini");
 		}
 	}
