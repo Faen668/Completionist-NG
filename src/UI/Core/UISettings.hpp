@@ -35,9 +35,9 @@ namespace CompletionistUI
 		std::uint32_t openPadModifier{ 0x0040 };	// LS click, 0 for none
 		Theme         theme{ Theme::kCompletionist };
 		float         scale{ 1.0f };
-		float         widthPercent{ 92.0f };
-		float         heightPercent{ 88.0f };
-		float         opacity{ 0.95f };
+		float         widthPercent{ 98.0f };
+		float         heightPercent{ 93.0f };
+		float         opacity{ 1.0f };
 		std::int32_t  columns{ 0 };	// 0 = automatic
 		std::int32_t  descriptionLines{ 5 };
 		bool          descriptionCollapsed{ false };
@@ -56,15 +56,15 @@ namespace CompletionistUI
 		std::uint32_t cellKey{ 207 };	// End
 		std::uint32_t cellPadButton{ 0 };
 		std::uint32_t cellPadModifier{ 0 };
-		bool          cellPanel{ false };
-		bool          cellOptionsOpen{ false };
+		bool          cellPanel{ true };
+		bool          cellOptionsOpen{ true };
 		bool          cellHeight{ true };
 
 		// Notifications
-		bool  toasts{ false };
+		bool  toasts{ true };
 		bool  toastsNewestFirst{ true };
 		float toastX{ 0.0f };
-		float toastY{ 0.0f };
+		float toastY{ 0.317f };
 
 		std::string openKeyName{};
 		bool capturingOpenKey{ false };

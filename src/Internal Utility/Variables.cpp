@@ -86,9 +86,9 @@ namespace CVariables
 			settings.openPadModifier = CompletionistUI::UISettings{}.openPadModifier;
 		}
 		settings.scale = number("Scale", "1.0", 0.5f, 3.0f);
-		settings.widthPercent = number("WidthPercent", "92", 40.0f, 100.0f);
-		settings.heightPercent = number("HeightPercent", "88", 40.0f, 100.0f);
-		settings.opacity = number("Opacity", "0.95", 0.3f, 1.0f);
+		settings.widthPercent = number("WidthPercent", "98", 40.0f, 100.0f);
+		settings.heightPercent = number("HeightPercent", "93", 40.0f, 100.0f);
+		settings.opacity = number("Opacity", "1.0", 0.3f, 1.0f);
 		settings.columns = static_cast<std::int32_t>(number("Columns", "0", 0.0f, 4.0f));
 		settings.descriptionLines = static_cast<std::int32_t>(number("DescriptionLines", "5", 0.0f, static_cast<float>(CompletionistUI::UISettings::maxDescriptionLines)));
 		settings.descriptionCollapsed = flag("DescriptionCollapsed", "false");
@@ -113,13 +113,13 @@ namespace CVariables
 		settings.cellKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellKey", "207").c_str(), nullptr, 10));
 		settings.cellPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadButton", "0").c_str(), nullptr, 10));
 		settings.cellPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadModifier", "0").c_str(), nullptr, 10));
-		settings.cellPanel = flag("CellPanel", "false");
-		settings.cellOptionsOpen = flag("CellOptionsOpen", "false");
+		settings.cellPanel = flag("CellPanel", "true");
+		settings.cellOptionsOpen = flag("CellOptionsOpen", "true");
 		settings.cellHeight = flag("CellShowHeight", "true");
-		settings.toasts = flag("Notifications", "false");
+		settings.toasts = flag("Notifications", "true");
 		settings.toastsNewestFirst = flag("NotificationsNewestFirst", "true");
 		settings.toastX = number("NotificationsX", "0", 0.0f, 1.0f);
-		settings.toastY = number("NotificationsY", "0", 0.0f, 1.0f);
+		settings.toastY = number("NotificationsY", "0.317", 0.0f, 1.0f);
 
 		const auto theme = GetIniValue("UI", "Theme", "Completionist");
 		settings.theme = CompletionistUI::Themes::FromName(theme);
