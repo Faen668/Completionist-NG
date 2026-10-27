@@ -48,8 +48,8 @@ namespace CSettings
 			{ "NotifySpecial", Type::kBool, "true" },
 			{ "NotifyStartup", Type::kBool, "true" },
 			{ "NotificationColourEnabled", Type::kBool, "true" },
-			{ "IndexColour", Type::kInt, "14905890" },
-			{ "ColourString", Type::kString, "#E37222" },
+			{ "IndexColour", Type::kInt, "16777215" },
+			{ "ColourString", Type::kString, "#FFFFFF" },
 			{ "State_MarkerDetectionVal", Type::kInt, "1500" },
 			{ "CompletionLog_ColoursEnabled", Type::kBool, "true" },
 			{ "CompletionLog_PrefixEnabled", Type::kBool, "true" },
@@ -124,7 +124,7 @@ namespace CSettings
 			{ "bCellScanner_ExcludeMiscItems", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeWeapons", Type::kBool, "false" },
 			{ "bCellScanner_ExcludeOwned", Type::kBool, "false" },
-			{ "bCellScanner_ExcludeLiving", Type::kBool, "false" },
+			{ "bCellScanner_ExcludeLiving", Type::kBool, "true" },
 
 			// Item icons
 			{ "bItemIcons", Type::kBool, "true" },
