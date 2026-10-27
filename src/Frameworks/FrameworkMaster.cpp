@@ -45,7 +45,8 @@ namespace CFramework_Master
 		SetSerializableInfo(PlayerKills);
 		SetSerializableInfo(PlayerHits);
 		SetSerializableInfo(CellTargets);
-		// Last, so saves from before it load the rest as they were
+		// Last, so saves from before it load the rest as they were and simply don't have it
+		PlayerDragonKills.newerThanSave = true;
 		SetSerializableInfo(PlayerDragonKills);
 
 		//Frameworks
