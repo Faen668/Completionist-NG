@@ -1082,6 +1082,14 @@ namespace CompletionistUI
 				return false;
 			}
 		}
+		// Any menu the player works in (journal, skills, inventory, crafting, mods' own menus), also when
+		// something keeps the game running under it; HUD-style menus that are always open don't count
+		using Flag = RE::UI_MENU_FLAGS;
+		for (const auto& menu : ui->menuStack) {
+			if (menu && !menu->AlwaysOpen() && menu->menuFlags.any(Flag::kPausesGame, Flag::kUsesCursor, Flag::kApplicationMenu, Flag::kInventoryItemMenu, Flag::kModal)) {
+				return false;
+			}
+		}
 		return true;
 	}
 }
