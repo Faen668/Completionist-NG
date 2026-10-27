@@ -149,6 +149,11 @@ namespace Serialization
 		{
 			std::size_t total;
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
+				// A save from before this set was added ends here, nothing's wrong with it
+				if (newerThanSave) {
+					INFO("{} isn't in this save yet, starting it empty", a_name);
+					return;
+				}
 				ERROR("Failed to read serialized form data: size");
 				return;
 			}
@@ -212,5 +217,6 @@ namespace Serialization
 		}
 
 		std::unordered_map<std::string, KillData> data;
+		bool                                      newerThanSave{ false };	// added after older saves were made, so they won't have it
 	};
 };
