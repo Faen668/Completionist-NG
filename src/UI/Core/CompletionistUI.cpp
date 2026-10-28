@@ -1247,11 +1247,13 @@ namespace CompletionistUI
 			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0, 0, 0, 0));
+			// Focus from a controller shows the same glow as the mouse: ImGui's own box would cover the row's progress bar
+			ImGui::PushStyleColor(ImGuiCol_NavCursor, ImVec4(0, 0, 0, 0));
 			// A table cell takes the row's text baseline from the cells before it, which pushes a Selectable
 			// down and makes it taller in every column but the first. Rows start from the top of the line.
 			ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset = 0.0f;
 			const bool clicked = ImGui::Selectable(a_id, a_selected, a_flags, a_size);
-			ImGui::PopStyleColor(3);
+			ImGui::PopStyleColor(4);
 			NoteControl();
 
 			const bool  focused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
