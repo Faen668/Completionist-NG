@@ -5335,8 +5335,14 @@ namespace CompletionistUI
 		bool        clicked = false;
 		bool        hovered = false;
 		if (a_clickable) {
-			ImGui::SetCursorScreenPos(a_min);
-			clicked = ImGui::InvisibleButton("##RowAction", ImVec2(a_side, a_side));
+			// Added without taking layout space: placed on a whole pixel, it could stretch the row by one
+			// and every row under it jumped while hovered
+			const ImRect  box(a_min, max);
+			const ImGuiID id = ImGui::GetID("##RowAction");
+			if (ImGui::ItemAdd(box, id)) {
+				bool held = false;
+				clicked = ImGui::ButtonBehavior(box, id, &hovered, &held);
+			}
 			hovered = ImGui::IsItemHovered();
 			if (hovered) {
 				drawList->AddRect(a_min, max, Colour(palette.accent, 0.6f));

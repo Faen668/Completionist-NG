@@ -46,6 +46,7 @@ namespace CompletionistUI
 
 			// Game thread
 			ImVec2        mouse{ 0.0f, 0.0f };
+			bool          mousePlaced{ false };
 			std::uint32_t padHeld{ 0 };
 			std::uint32_t padIgnored{ 0 };	// held as the window opened, ignored until let go
 			std::uint32_t padHeldBack{ 0 };	// a combo's hold button, passed on when let go unless the combo used it
@@ -298,8 +299,8 @@ namespace CompletionistUI
 						const auto* stick = static_cast<RE::ThumbstickEvent*>(event);
 						const float x = stick->xValue;
 						const float y = stick->yValue;
-						if (std::abs(x) > 0.3f || std::abs(y) > 0.3f) {
-							state.usingGamepad = true;
+						if ((std::abs(x) > 0.3f || std::abs(y) > 0.3f) && !state.usingGamepad.exchange(true)) {
+							INFO("In-game UI: controller in use, {} stick {:.2f}, {:.2f}; the mouse cursor hides until the mouse moves", stick->IsLeft() ? "left" : "right", x, y);
 						}
 						// Left stick as d-pad, right stick scrolls
 						const bool left = stick->IsLeft();
@@ -325,8 +326,13 @@ namespace CompletionistUI
 				if (device == RE::INPUT_DEVICE::kGamepad && IsButtonMask(code)) {
 					a_state.padHeld = down ? (a_state.padHeld | code) : (a_state.padHeld & ~code);
 				}
-				if (device == RE::INPUT_DEVICE::kGamepad) {
-					a_state.usingGamepad = true;
+				// Only a real press counts: a pad, or a virtual one like Steam's, can send idle or resting
+				// trigger events, which hid the mouse cursor for good
+				const bool trigger = code == leftTrigger || code == rightTrigger;
+				if (device == RE::INPUT_DEVICE::kGamepad && (trigger ? a_button.Value() > 0.3f : a_button.IsDown())) {
+					if (!a_state.usingGamepad.exchange(true) && a_state.open) {
+						INFO("In-game UI: controller in use, button {:X} value {:.2f}; the mouse cursor hides until the mouse moves", code, a_button.Value());
+					}
 				} else if (device == RE::INPUT_DEVICE::kMouse) {
 					a_state.usingGamepad = false;
 				}
@@ -953,7 +959,16 @@ namespace CompletionistUI
 			// Before the snapshot, so the window opens on the current state
 			CFramework_Master::FrameworkAPI::RefreshCompletion();
 			state.provider.Rebuild();
-			state.mouse = ImVec2(state.displayWidth * 0.5f, state.displayHeight * 0.5f);
+			// The mouse comes back where it was left, the middle the first time
+			if (!state.mousePlaced) {
+				state.mouse = ImVec2(state.displayWidth * 0.5f, state.displayHeight * 0.5f);
+				state.mousePlaced = true;
+			}
+			state.mouse.x = std::clamp(state.mouse.x, 0.0f, state.displayWidth.load());
+			state.mouse.y = std::clamp(state.mouse.y, 0.0f, state.displayHeight.load());
+			if (state.usingGamepad) {
+				INFO("In-game UI: opened in controller mode, so no mouse cursor until the mouse moves");
+			}
 			// Opened from a controller, the mouse stays off the window until it moves: parked in the
 			// middle it lit up whichever row sat there
 			const auto mouse = state.usingGamepad ? ImVec2(-FLT_MAX, -FLT_MAX) : state.mouse;

@@ -423,5 +423,8 @@ namespace CompletionistUI
 		c[ImGuiCol_NavCursor] = p.accent;
 
 		style.ScaleAllSizes(a_scale);
+		// ImGui rounds the cursor scale down to a whole number: below 1 (720p, a small UI scale) it hit 0
+		// and the mouse cursor vanished
+		style.MouseCursorScale = std::max(style.MouseCursorScale, 1.0f);
 	}
 }
