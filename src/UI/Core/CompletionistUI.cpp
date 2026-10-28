@@ -3351,6 +3351,14 @@ namespace CompletionistUI
 			return;
 		}
 
+		// A line above the entries, e.g. why achievements don't unlock
+		if (!page.hint.empty()) {
+			ImGui::PushTextWrapPos(0.0f);
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(page.hint).c_str());
+			ImGui::PopTextWrapPos();
+			ImGui::Spacing();
+		}
+
 		_hoveredEntry.reset();
 		const float gap = ImGui::GetFontSize() * 0.75f;
 
@@ -3377,7 +3385,17 @@ namespace CompletionistUI
 				}
 			}
 		}
-		const bool shoutPage = trainerPage || dragonPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
+		const bool achievementPage = pageHas([](const Entry& a_entry) { return a_entry.IsAchievement(); });
+		if (achievementPage) {
+			const float width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().WindowPadding.x * 2.0f;
+			_achievementBody = 0.0f;
+			for (const auto& section : view->sections) {
+				for (const auto& entry : section.entries) {
+					_achievementBody = std::max(_achievementBody, AchievementBodyHeight(a_provider, entry, width));
+				}
+			}
+		}
+		const bool shoutPage = trainerPage || dragonPage || achievementPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
 		float panelHeight = 0.0f;
 		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 		if (shoutPage) {
@@ -3391,6 +3409,7 @@ namespace CompletionistUI
 			const float panelWidth = ImGui::GetContentRegionAvail().x - style.WindowPadding.x * 2.0f;
 			const float content = trainerPage ? TrainerInfoHeight() + 1.0f
 			                    : dragonPage  ? DragonInfoHeight(_dragonLore, panelWidth) + 1.0f
+			                    : achievementPage ? AchievementInfoHeight(_achievementBody, panelWidth) + 1.0f
 			                                  : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
 			panelHeight = (style.WindowPadding.y * 2.0f + content) * t * t * (3.0f - 2.0f * t);
 			// Leaves the list room for a few rows, as the description panel does, on a short window or a big scale
@@ -5641,8 +5660,11 @@ namespace CompletionistUI
 
 			ImGui::PushTextWrapPos(0.0f);
 
-			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon();
-			if (entry->IsDragon()) {
+			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon() || entry->IsAchievement();
+			if (entry->IsAchievement()) {
+				DrawAchievementInfo(a_provider, *entry, false);
+				text = {};
+			} else if (entry->IsDragon()) {
 				// The story's in the panel
 				DrawDragonInfo(a_provider, *entry, false);
 				text = {};
@@ -5773,7 +5795,7 @@ namespace CompletionistUI
 		const auto& palette = Themes::GetPalette();
 
 		// Hovered, else pinned, else the first
-		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer() || a_entry.IsDragon(); };
+		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer() || a_entry.IsDragon() || a_entry.IsAchievement(); };
 		const Entry* entry = _hoveredEntry && hasPanel(*_hoveredEntry) ? std::addressof(*_hoveredEntry) : _pinnedEntry && hasPanel(*_pinnedEntry) ? std::addressof(*_pinnedEntry) : nullptr;
 		for (const auto& section : a_page.sections) {
 			for (const auto& candidate : section.entries) {
@@ -5806,6 +5828,8 @@ namespace CompletionistUI
 			DrawTrainerInfo(a_provider, *entry, true);
 		} else if (entry && entry->IsDragon()) {
 			DrawDragonInfo(a_provider, *entry, true);
+		} else if (entry && entry->IsAchievement()) {
+			DrawAchievementInfo(a_provider, *entry, true);
 		} else if (entry) {
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
@@ -6443,6 +6467,234 @@ namespace CompletionistUI
 		const auto& story = info.lore.empty() ? a_provider.Translate("UI_DescriptionNone") : info.lore;
 		const float storyY = storyMin.y + (storyHeight - DragonLayout::LoreHeight(story, width)) * 0.5f;
 		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(storyMin.x + padding, std::max(storyMin.y + padding, storyY)), Colour(info.lore.empty() ? palette.textDim : palette.text), story.c_str(), nullptr, loreWidth);
+	}
+
+	namespace AchievementLayout
+	{
+		//---------------------------------------------------
+		//-- Completionist UI ( Info Content ) --------------
+		//---------------------------------------------------
+
+		// Name, when, then game, rarity and missable
+		static float InfoContent() {
+
+			ImGui::PushFont(Themes::HeaderFont());
+			const float name = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			ImGui::PushFont(Themes::TitleFont());
+			const float title = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			return name + title + ImGui::GetTextLineHeightWithSpacing() * 3.0f;
+		}
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Icon Size ) -----------------
+		//---------------------------------------------------
+
+		// As tall as the name and the line under it
+		static float IconSize() {
+
+			ImGui::PushFont(Themes::HeaderFont());
+			const float name = ImGui::GetTextLineHeight();
+			ImGui::PopFont();
+			ImGui::PushFont(Themes::TitleFont());
+			const float title = ImGui::GetTextLineHeight();
+			ImGui::PopFont();
+			return std::floor(name + title + ImGui::GetStyle().ItemSpacing.y);
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Achievement Info Height ) ---
+	//---------------------------------------------------
+
+	float Menu::AchievementInfoHeight(float a_body, float a_width) {
+
+		const float padding = ShoutLayout::Padding();
+		const float info = padding * 2.0f + AchievementLayout::InfoContent();
+		const float body = padding * 2.0f + std::max(a_body, ImGui::GetTextLineHeightWithSpacing());
+		return DragonLayout::SideBySide(a_width) ? std::max(info, body) : info + ShoutLayout::CardGap() + body;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Achievement Body Height ) ---
+	//---------------------------------------------------
+
+	// What it takes, the tip, this save's progress and the page link
+	float Menu::AchievementBodyHeight(IDataProvider& a_provider, const Entry& a_entry, float a_width) {
+
+		if (!a_entry.IsAchievement()) { return 0.0f; }
+		const auto& info = a_entry.achievement;
+		const float width = DragonLayout::LoreWidth(a_width);
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+
+		ImGui::PushFont(Themes::TitleFont());
+		float height = ImGui::CalcTextSize(info.goal.c_str(), nullptr, false, width).y;
+		ImGui::PopFont();
+		if (!info.tip.empty()) {
+			height += line * 0.5f + ImGui::CalcTextSize(info.tip.c_str(), nullptr, false, width).y;
+		}
+		if (!info.progress.empty()) {
+			height += line * 0.5f + line * static_cast<float>(info.progress.size() + 1);
+		}
+		if (!info.page.empty()) {
+			height += line * 0.5f + ImGui::CalcTextSize(a_provider.Translate("UI_Achievements_Track{" + info.pageTitle + "}").c_str(), nullptr, false, width).y;
+		}
+		return height;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Achievement Info ) -----
+	//---------------------------------------------------
+
+	// Icon, name and when on the left as the dragons' panel, how to get it on the right; stacked when narrow
+	void Menu::DrawAchievementInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName) {
+
+		const auto& palette = Themes::GetPalette();
+		const auto& info = a_entry.achievement;
+		const float fontSize = ImGui::GetFontSize();
+		const float width = ImGui::GetContentRegionAvail().x;
+		auto*       drawList = ImGui::GetWindowDrawList();
+
+		const auto panel = [&](ImVec2 a_min, ImVec2 a_max) {
+			drawList->AddRectFilled(a_min, a_max, Colour(palette.accent, 0.04f));
+			drawList->AddRect(a_min, a_max, Colour(palette.separator, 0.7f));
+			CornerMarks(drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
+		};
+
+		const float padding = ShoutLayout::Padding();
+		const float gap = ShoutLayout::CardGap();
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+		const bool  sideBySide = DragonLayout::SideBySide(width);
+		const float infoWidth = DragonLayout::InfoWidth(width);
+		const float bodyWidth = DragonLayout::LoreWidth(width);
+		const float content = AchievementBodyHeight(a_provider, a_entry, width);
+		const float body = a_withName ? std::max(_achievementBody, content) : content;
+		const float infoHeight = padding * 2.0f + AchievementLayout::InfoContent();
+		const float bodyHeight = padding * 2.0f + std::max(body, line);
+		const float boxHeight = sideBySide ? std::max(infoHeight, bodyHeight) : infoHeight;
+		const auto  origin = ImGui::GetCursorScreenPos();
+
+		//---------------------------------------------------
+		// Icon, name and when
+		//---------------------------------------------------
+
+		const auto infoMin = origin;
+		const auto infoMax = ImVec2(origin.x + infoWidth, origin.y + boxHeight);
+		panel(infoMin, infoMax);
+		drawList->PushClipRect(infoMin, ImVec2(infoMax.x - padding * 0.5f, infoMax.y), true);
+
+		float       textX = infoMin.x + padding;
+		float       y = infoMin.y + (boxHeight - AchievementLayout::InfoContent()) * 0.5f;
+		const float icon = AchievementLayout::IconSize();
+		if (auto* texture = a_provider.AchievementIcon(info.icon)) {
+			drawList->AddImage(reinterpret_cast<ImTextureID>(texture), ImVec2(textX, y), ImVec2(textX + icon, y + icon));
+			drawList->AddRect(ImVec2(textX, y), ImVec2(textX + icon, y + icon), Colour(a_entry.IsComplete() ? palette.found : palette.separator, 0.8f));
+			textX += icon + padding * 0.75f;
+		}
+		const float textWidth = infoMax.x - padding - textX;
+
+		ImGui::PushFont(Themes::HeaderFont());
+		const float nameLine = ImGui::GetTextLineHeightWithSpacing();
+		if (a_withName) {
+			drawList->AddText(ImVec2(textX, y), Colour(palette.heading), FitText(a_entry.name, textWidth).c_str());
+		}
+		ImGui::PopFont();
+		y += nameLine;
+		ImGui::PushFont(Themes::TitleFont());
+		const float titleLine = ImGui::GetTextLineHeightWithSpacing();
+		const auto  when = info.unlocked.empty() ? a_provider.Translate("UI_Achievements_Locked") : info.unlocked;
+		drawList->AddText(ImVec2(textX, y), Colour(a_entry.IsComplete() ? palette.found : palette.text), FitText(when, textWidth).c_str());
+		ImGui::PopFont();
+		y += titleLine;
+
+		const float lineX = infoMin.x + padding;
+		const float lineWidth = infoWidth - padding * 2.0f;
+		const auto  infoLine = [&](const std::string& a_text, const ImVec4& a_colour) {
+			drawList->AddText(ImVec2(lineX, y), Colour(a_colour), FitText(a_text, lineWidth).c_str());
+			y += line;
+		};
+		infoLine(info.game, palette.textDim);
+		if (!info.rarity.empty()) {
+			infoLine(info.rarity, palette.textDim);
+		}
+		if (info.missable && !a_entry.IsComplete()) {
+			infoLine(a_provider.Translate("UI_Achievements_Missable"), palette.stealing);
+		}
+		drawList->PopClipRect();
+
+		//---------------------------------------------------
+		// How to get it
+		//---------------------------------------------------
+
+		const float howHeight = sideBySide ? boxHeight : bodyHeight;
+		const auto  howMin = sideBySide ? ImVec2(infoMax.x + gap, origin.y) : ImVec2(origin.x, infoMax.y + gap);
+		const auto  howMax = ImVec2(origin.x + width, howMin.y + howHeight);
+		panel(howMin, howMax);
+
+		const float x = howMin.x + padding;
+		y = std::max(howMin.y + padding, howMin.y + (howHeight - content) * 0.5f);
+
+		ImGui::PushFont(Themes::TitleFont());
+		drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(x, y), Colour(palette.heading), info.goal.c_str(), nullptr, bodyWidth);
+		y += ImGui::CalcTextSize(info.goal.c_str(), nullptr, false, bodyWidth).y;
+		ImGui::PopFont();
+
+		if (!info.tip.empty()) {
+			y += line * 0.5f;
+			drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(x, y), Colour(palette.text), info.tip.c_str(), nullptr, bodyWidth);
+			y += ImGui::CalcTextSize(info.tip.c_str(), nullptr, false, bodyWidth).y;
+		}
+
+		// Label, bar, count
+		if (!info.progress.empty()) {
+			y += line * 0.5f;
+			drawList->AddText(ImVec2(x, y), Colour(palette.textDim), a_provider.Translate("UI_Achievements_ThisSave").c_str());
+			y += line;
+			const float labelWidth = std::floor(bodyWidth * 0.42f);
+			const float countWidth = ImGui::CalcTextSize("000000 / 000000").x;
+			const float barHeight = std::max(2.0f, fontSize * 0.18f);
+			for (const auto& goal : info.progress) {
+				const bool  done = goal.value >= goal.target;
+				const auto  count = goal.flag ? a_provider.Translate(done ? "UI_Achievements_FlagDone" : "UI_Achievements_FlagNotYet") : std::to_string(std::min(goal.value, goal.target)) + " / " + std::to_string(goal.target);
+				const float barLeft = x + labelWidth + padding * 0.5f;
+				const float barRight = x + bodyWidth - countWidth - padding * 0.5f;
+				drawList->AddText(ImVec2(x, y), Colour(done ? palette.found : palette.text), FitText(goal.label, labelWidth).c_str());
+				if (!goal.flag && barRight - barLeft > fontSize * 2.0f) {
+					const float barY = y + (ImGui::GetTextLineHeight() - barHeight) * 0.5f;
+					ThinBar(drawList, ImVec2(barLeft, barY), ImVec2(barRight, barY + barHeight), std::clamp(static_cast<float>(goal.value) / static_cast<float>(std::max(goal.target, 1)), 0.0f, 1.0f));
+				}
+				drawList->AddText(ImVec2(x + bodyWidth - ImGui::CalcTextSize(count.c_str()).x, y), Colour(done ? palette.found : palette.textDim), count.c_str());
+				y += line;
+			}
+		}
+
+		ImGui::Dummy(ImVec2(width, sideBySide ? boxHeight : boxHeight + gap + howHeight));
+		if (info.page.empty()) {
+			return;
+		}
+
+		// The page that tracks it
+		const auto after = ImGui::GetCursorScreenPos();
+		const auto link = a_provider.Translate("UI_Achievements_Track{" + info.pageTitle + "}");
+		const auto size = ImGui::CalcTextSize(link.c_str(), nullptr, false, bodyWidth);
+		y += line * 0.5f;
+		ImGui::SetCursorScreenPos(ImVec2(x, y));
+		ImGui::PushID(a_entry.key.c_str());
+		const bool clicked = ImGui::InvisibleButton("##Track", ImVec2(std::max(size.x, 1.0f), std::max(size.y, 1.0f)));
+		ImGui::PopID();
+		const bool lit = ImGui::IsItemHovered() || ImGui::IsItemFocused();
+		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(x, y), Colour(lit ? palette.heading : palette.accent), link.c_str(), nullptr, bodyWidth);
+		if (lit) {
+			drawList->AddLine(ImVec2(x, y + size.y), ImVec2(x + size.x, y + size.y), Colour(palette.heading, 0.7f));
+		}
+		ImGui::SetCursorScreenPos(after);
+		ImGui::Dummy(ImVec2(0.0f, 0.0f));
+		if (clicked) {
+			// A copy: opening a page drops the entry this one is from
+			const auto page = info.page;
+			OpenPage(page);
+		}
 	}
 
 	//---------------------------------------------------

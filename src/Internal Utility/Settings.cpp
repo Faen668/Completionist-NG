@@ -42,6 +42,13 @@ namespace CSettings
 			{ "State_FishingCounterVal", Type::kInt, "4" },
 			{ "State_BladesCounterVal", Type::kInt, "5" },
 
+			// Achievements
+			{ "AchievementsShow", Type::kBool, "true" },
+			{ "AchievementsProgress", Type::kBool, "true" },
+			{ "AchievementsTips", Type::kBool, "true" },
+			{ "AchievementsRarity", Type::kBool, "true" },
+			{ "AchievementsMissable", Type::kBool, "true" },
+
 			// UI Settings
 			{ "NotifyItems", Type::kBool, "true" },
 			{ "NotifyBooks", Type::kBool, "true" },

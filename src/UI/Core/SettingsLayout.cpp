@@ -337,6 +337,11 @@ namespace CompletionistUI
 		void AddHelpTexts(std::vector<SettingsPageLayout>& a_layouts) {
 
 			static const std::unordered_map<std::string_view, std::string_view> help{
+			{ "Achievements_Show", "UI_Achievements_SettingShowInfo" },
+			{ "Achievements_Progress", "UI_Achievements_SettingProgressInfo" },
+			{ "Achievements_Tips", "UI_Achievements_SettingTipsInfo" },
+			{ "Achievements_Rarity", "UI_Achievements_SettingRarityInfo" },
+			{ "Achievements_Missable", "UI_Achievements_SettingMissableInfo" },
 			{ "CellScanner_Setting_ExcludeAlchemy", "$CellScanner_Setting_ExcludeAlchemy_Info" },
 			{ "CellScanner_Setting_ExcludeIngredients", "$CellScanner_Setting_ExcludeIngredients_Info" },
 			{ "CellScanner_Setting_ExcludeArmor", "$CellScanner_Setting_ExcludeArmor_Info" },
@@ -398,6 +403,28 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Settings Layout ( Achievements Page ) ----------
+		//---------------------------------------------------
+
+		// What counts as unlocked, and what the details show
+		SettingsPageLayout AchievementsPage() {
+
+			SettingsPageLayout page{ "achievements", "UI_SettingsSection_Achievements", {}, {} };
+			page.columns[0] = {
+				Header("UI_Achievements_SettingsTracking"),
+				Toggle("Achievements_Show", "UI_Achievements_SettingShow", "AchievementsShow"),
+			};
+			page.columns[1] = {
+				Header("UI_Achievements_SettingsDetails"),
+				Toggle("Achievements_Progress", "UI_Achievements_SettingProgress", "AchievementsProgress", "AchievementsShow"),
+				Toggle("Achievements_Tips", "UI_Achievements_SettingTips", "AchievementsTips", "AchievementsShow"),
+				Toggle("Achievements_Rarity", "UI_Achievements_SettingRarity", "AchievementsRarity", "AchievementsShow"),
+				Toggle("Achievements_Missable", "UI_Achievements_SettingMissable", "AchievementsMissable", "AchievementsShow"),
+			};
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Settings Layout ( Completion Log Page ) --------
 		//---------------------------------------------------
 
@@ -418,7 +445,7 @@ namespace CompletionistUI
 	const std::vector<SettingsPageLayout>& MCMSettingsLayouts() {
 
 		static const std::vector<SettingsPageLayout> layouts = [] {
-			std::vector<SettingsPageLayout> pages{ NotificationsPage(), HudPage(), MuseumPage(), InterfacePage(), CellScannerPage(), CompletionLogPage(), CellWindowPage() };
+			std::vector<SettingsPageLayout> pages{ NotificationsPage(), HudPage(), MuseumPage(), InterfacePage(), CellScannerPage(), CompletionLogPage(), CellWindowPage(), AchievementsPage() };
 			AddHelpTexts(pages);
 			return pages;
 		}();

@@ -63,6 +63,30 @@ namespace CompletionistUI
 		std::string lore;
 	};
 
+	// Progress on an achievement from this save
+	struct AchievementGoal
+	{
+		std::string  label;
+		std::int32_t value{ 0 };
+		std::int32_t target{ 1 };
+		bool         flag{ false };	// done or not, rather than a count
+	};
+
+	// A Steam or GOG achievement: how it's won, and the page that tracks it
+	struct EntryAchievement
+	{
+		std::string                  game;	// empty when not an achievement
+		std::string                  unlocked;	// when, empty while locked
+		std::string                  rarity;
+		std::string                  goal;	// what the store says it takes
+		std::string                  tip;
+		std::string                  page;	// page id to jump to, empty for none
+		std::string                  pageTitle;
+		bool                         missable{ false };
+		std::int32_t                 icon{ 0 };
+		std::vector<AchievementGoal> progress;
+	};
+
 	struct Entry
 	{
 		std::string   name;
@@ -86,9 +110,11 @@ namespace CompletionistUI
 		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
 		EntryTrainer            trainer;
 		EntryDragon             dragon;
+		EntryAchievement        achievement;
 
 		[[nodiscard]] bool          IsTrainer() const noexcept { return trainer.skill >= 0; }
 		[[nodiscard]] bool          IsDragon() const noexcept { return !dragon.fate.empty(); }
+		[[nodiscard]] bool          IsAchievement() const noexcept { return !achievement.game.empty(); }
 		[[nodiscard]] std::uint32_t MarkerID() const noexcept { return refID ? refID : formID; }
 
 		[[nodiscard]] bool IsComplete() const noexcept { return state == EntryState::kFound || state == EntryState::kDisplayed; }
@@ -144,6 +170,7 @@ namespace CompletionistUI
 		std::string          notice{};	// translation key shown instead of entries
 		PageChoice           choice{};	// no options when the patch has none
 		std::vector<PageTab> tabs{};	// sections say which tab they're on
+		std::string          hint{};	// a line above the entries
 
 		[[nodiscard]] PageLayout LayoutOf(const Section& a_section) const noexcept
 		{
