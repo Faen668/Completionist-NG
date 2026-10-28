@@ -46,6 +46,8 @@ namespace CompletionistUI
 		virtual void ExcludeCurrentCell() {}
 		virtual void ExcludeCellItem(const CellItem&) {}
 
+		[[nodiscard]] virtual void* AchievementIcon(std::int32_t /*a_icon*/) { return nullptr; }	// render thread
+
 		[[nodiscard]] virtual std::string Translate(std::string_view a_key) = 0;
 	};
 }

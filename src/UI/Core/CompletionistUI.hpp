@@ -186,6 +186,10 @@ namespace CompletionistUI
 		[[nodiscard]] static float DragonInfoHeight(float a_lore, float a_width);
 		[[nodiscard]] static float DragonLoreHeight(const std::string& a_lore, float a_width);
 		float                      _dragonLore{ 0.0f };	// the page's longest story, so the panel keeps its height
+		void                       DrawAchievementInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
+		[[nodiscard]] static float AchievementInfoHeight(float a_body, float a_width);
+		[[nodiscard]] static float AchievementBodyHeight(IDataProvider& a_provider, const Entry& a_entry, float a_width);
+		float                      _achievementBody{ 0.0f };	// the page's tallest, so the panel keeps its height
 
 		[[nodiscard]] float DescriptionPanelHeight() const;
 		void                UpdateDescriptionPanel(float a_available, float a_gap);

@@ -47,6 +47,7 @@ namespace CompletionistUI
 		void                      ExcludeCellItem(const CellItem& a_item) override;
 		std::uint32_t             Revision() override { return _revision.load(); }
 		std::string               Translate(std::string_view a_key) override;
+		void*                     AchievementIcon(std::int32_t a_icon) override;
 
 		struct GeneralSettings
 		{
@@ -100,5 +101,6 @@ namespace CompletionistUI
 		std::unordered_map<std::string, std::string> _uiStrings;
 		std::unordered_map<std::string, std::string> _translations;
 		bool                                         _translationsLoaded{ false };
+		std::unordered_map<std::int32_t, void*>      _icons;	// shader resource views, render thread
 	};
 }

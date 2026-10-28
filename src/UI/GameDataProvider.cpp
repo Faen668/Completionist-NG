@@ -2,6 +2,7 @@
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
 #include "Frameworks/Misc/CFramework_Dragons.hpp"
+#include "Frameworks/Misc/CFramework_Achievements.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
 #include "Frameworks/Misc/CFramework_Trainers.hpp"
 #include "Frameworks/Quests/CQuestMaster.hpp"
@@ -14,6 +15,8 @@
 #include "Internal Utility/CellScanner.hpp"
 #include "UI/Core/TranslationFile.hpp"
 #include "UI/Tracker.hpp"
+
+#include <d3d11.h>
 
 #undef GetObject
 
@@ -978,6 +981,147 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Build Achievement Page ) -----------
+		//---------------------------------------------------
+
+		// The account's achievements from Steam or GOG, so the same on every save, with this
+		// save's progress where the game counts it. Nothing when the store can't be read
+		Page BuildAchievementPage(IDataProvider& a_provider, const std::unordered_map<std::string, Page>& a_pages) {
+
+			using namespace CFramework_Achievements;
+
+			const auto setting = [](const char* a_name) {
+				const auto* variable = CSettings::SettingsAPI::Get(a_name);
+				return !variable ? 1 : variable->IsBool() ? (variable->GetBool() ? 1 : 0) : variable->GetSInt();
+			};
+
+			Page page{ "achievements", "UI_Achievements", {} };
+			if (!setting("AchievementsShow")) {
+				return page;
+			}
+
+			std::vector<Achievement> achievements;
+			if (!CHandler::Refresh(achievements)) {
+				return page;
+			}
+			if (!CHandler::CanUnlock()) {
+				page.hint = "UI_Achievements_Disabled";
+			}
+
+			const auto gameOf = [](std::int32_t a_number) {
+				return a_number <= 50 ? "UI_Achievements_Skyrim" : a_number <= 60 ? "UI_Achievements_Dawnguard" : a_number <= 65 ? "UI_Achievements_Hearthfire" : "UI_Achievements_Dragonborn";
+			};
+			const auto pageOf = [](std::int32_t a_number) -> std::string {
+				if (a_number <= 8) { return "quest:0"; }
+				if (a_number <= 11) { return "quest:22"; }
+				if (a_number <= 14) { return "quest:21"; }
+				if (a_number <= 17) { return "quest:25"; }
+				if (a_number <= 20) { return "quest:23"; }
+				if (a_number <= 23) { return "quest:1"; }
+				if (a_number >= 51 && a_number <= 54) { return "quest:2"; }
+				if (a_number >= 66 && a_number <= 69) { return "quest:3"; }
+				switch (a_number) {
+				case 24: return "quest:28";
+				case 29:
+				case 30: return "$MCMPageDoomstone";
+				case 31:
+				case 62:
+				case 63:
+				case 64:
+				case 65:
+				case 74: return "$MCMPageHouses";
+				case 38: return "$MCMPageTrainers";
+				case 43:
+				case 44:
+				case 60:
+				case 73: return "$MCMPageDragons";
+				case 45:
+				case 46:
+				case 55:
+				case 70: return "$MCMPageShouts";
+				default: return {};
+				}
+			};
+			constexpr std::int32_t missable[] = { 17, 18, 19, 20, 22, 42, 56, 57, 72 };
+
+			const auto date = [](std::int64_t a_time) {
+				const auto time = static_cast<std::time_t>(a_time);
+				std::tm    local{};
+				localtime_s(&local, &time);
+				char text[32];
+				std::strftime(text, sizeof(text), "%d/%m/%Y", &local);
+				return std::string(text);
+			};
+
+			const auto statValue = [&](std::string_view a_stat) {
+				if (a_stat.starts_with('#')) { return CHandler::Value(a_stat); }
+				std::int32_t total = 0;
+				while (!a_stat.empty()) {
+					const auto plus = a_stat.find('+');
+					const auto value = CHandler::Stat(a_stat.substr(0, plus));
+					if (value < 0) { return -1; }
+					total += value;
+					a_stat = plus == std::string_view::npos ? std::string_view{} : a_stat.substr(plus + 1);
+				}
+				return total;
+			};
+
+			const auto store = a_provider.Translate(CHandler::StoreInUse() == Store::kSteam ? "UI_Achievements_Steam" : "UI_Achievements_GOG");
+			for (const auto& achievement : achievements) {
+				const auto  number = std::to_string(achievement.number);
+				const auto* title = gameOf(achievement.number);
+				auto        section = std::ranges::find(page.sections, std::string(title), &Section::title);
+				if (section == page.sections.end()) {
+					section = page.sections.insert(page.sections.end(), Section{ title, {} });
+				}
+
+				auto& entry = section->entries.emplace_back();
+				entry.name = achievement.name.empty() ? a_provider.Translate("UI_Achievements_Name_" + number) : achievement.name;
+				entry.key = "achievement:" + number;
+				entry.state = achievement.unlocked ? EntryState::kFound : EntryState::kNeeded;
+
+				auto& info = entry.achievement;
+				info.game = a_provider.Translate(title) + "  \xC2\xB7  " + store;
+				info.goal = achievement.description.empty() ? a_provider.Translate("UI_Achievements_Goal_" + number) : achievement.description;
+				info.icon = achievement.icon;
+				if (achievement.unlocked) {
+					info.unlocked = achievement.time ? a_provider.Translate("UI_Achievements_Unlocked{" + date(achievement.time) + "}") : a_provider.Translate("UI_Achievements_UnlockedUndated");
+				}
+				if (setting("AchievementsTips")) {
+					info.tip = a_provider.Translate("UI_Achievements_Tip_" + number);
+				}
+				if (setting("AchievementsMissable")) {
+					info.missable = std::ranges::find(missable, achievement.number) != std::end(missable);
+				}
+				if (setting("AchievementsRarity") && achievement.percent >= 0.0f) {
+					info.rarity = a_provider.Translate("UI_Achievements_Rarity{" + fmt::format("{:.1f}", achievement.percent) + "}");
+				}
+				if (const auto link = pageOf(achievement.number); !link.empty()) {
+					if (const auto it = a_pages.find(link); it != a_pages.end()) {
+						info.page = link;
+						info.pageTitle = a_provider.Translate(it->second.title);
+					}
+				}
+
+				if (setting("AchievementsProgress")) {
+					for (const auto& goal : CHandler::Goals()) {
+						const auto value = goal.number == achievement.number ? statValue(goal.stat) : -1;
+						if (value >= 0) {
+							info.progress.push_back({ a_provider.Translate(std::string("UI_Achievements_Stat_") + goal.label), value, goal.target, goal.flag });
+						}
+					}
+				}
+
+				entry.detail = achievement.unlocked && achievement.time ? date(achievement.time) : std::string{};
+				if (!achievement.unlocked && info.progress.size() == 1 && !info.progress.front().flag) {
+					entry.detail = fmt::format("{} / {}", std::min(info.progress.front().value, info.progress.front().target), info.progress.front().target);
+				}
+				entry.description = info.tip;
+			}
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Summarise ) ------------------------
 		//---------------------------------------------------
 
@@ -1088,6 +1232,13 @@ namespace CompletionistUI
 				addQuestPage(id, pageKey);
 			}
 		}
+
+		// Last, so it can point at the quest pages
+		if (auto page = BuildAchievementPage(*this, pages); !page.sections.empty()) {
+			categories.push_back({ "UI_Category_Achievements", {}, { Summarise(page) } });
+			pages.emplace(page.id, std::move(page));
+		}
+		CFramework_Achievements::CHandler::QueryStats([this]() { Rebuild(); });
 
 		std::erase_if(categories, [](const Category& a_category) { return a_category.pages.empty(); });
 
@@ -1310,6 +1461,44 @@ namespace CompletionistUI
 
 		std::scoped_lock lock(_lock);
 		return _kills;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Achievement Icon ) -----------------
+	//---------------------------------------------------
+
+	// Steam's icon as a texture, made once; Steam may still be fetching it, so nothing until then
+	void* GameDataProvider::AchievementIcon(std::int32_t a_icon) {
+
+		if (a_icon <= 0) { return nullptr; }
+		if (const auto it = _icons.find(a_icon); it != _icons.end()) { return it->second; }
+
+		std::vector<std::uint8_t> pixels;
+		std::uint32_t             width = 0;
+		std::uint32_t             height = 0;
+		const auto*               data = RE::BSGraphics::Renderer::GetRendererDataSingleton();
+		auto*                     device = data ? reinterpret_cast<ID3D11Device*>(data->forwarder) : nullptr;
+		if (!device || !CFramework_Achievements::CHandler::IconPixels(a_icon, pixels, width, height)) { return nullptr; }
+
+		D3D11_TEXTURE2D_DESC desc{};
+		desc.Width = width;
+		desc.Height = height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		const D3D11_SUBRESOURCE_DATA initial{ pixels.data(), width * 4, 0 };
+
+		ID3D11Texture2D*          texture = nullptr;
+		ID3D11ShaderResourceView* view = nullptr;
+		if (SUCCEEDED(device->CreateTexture2D(&desc, &initial, &texture))) {
+			device->CreateShaderResourceView(texture, nullptr, &view);
+			texture->Release();
+		}
+		_icons.emplace(a_icon, view);
+		return view;
 	}
 
 	//---------------------------------------------------
@@ -1862,7 +2051,12 @@ namespace CompletionistUI
 		if (a_pageID != "general") {
 			SKSE::GetTaskInterface()->AddTask([this, page = std::string(a_pageID), item = a_item]() {
 				_settingsBuilder.Apply(page, item);
-				RebuildSettings();
+				// The achievements page is built from its settings
+				if (page == "achievements") {
+					Rebuild();
+				} else {
+					RebuildSettings();
+				}
 				_pruneTracking = true;
 				ScanCellNow();
 			});
