@@ -1467,6 +1467,7 @@ namespace CompletionistUI
 			ScrollFocusWithRightStick();
 			_restoreFocusKey.clear();
 		}
+		DrawPicturesDialog(a_provider);
 		// B / Escape close a dropdown first
 		_backHandledByImGui = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) || ImGui::IsAnyItemActive();
 		ImGui::End();
@@ -2890,8 +2891,6 @@ namespace CompletionistUI
 		const auto& style = ImGui::GetStyle();
 		const float fontSize = ImGui::GetFontSize();
 
-		DrawPicturesOffer(a_provider);
-		DrawPicturesProgress(a_provider);
 
 		//---------------------------------------------------
 		// Overview cards
@@ -3220,7 +3219,6 @@ namespace CompletionistUI
 
 		const auto& palette = Themes::GetPalette();
 		const auto& page = *_page;
-		DrawPicturesProgress(a_provider);
 
 		std::int32_t found = 0;
 		std::int32_t total = 0;
@@ -6961,74 +6959,112 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
-	//-- Completionist UI ( Draw Pictures Offer ) -------
+	//-- Completionist UI ( Draw Pictures Dialog ) ------
 	//---------------------------------------------------
 
-	// Asked once, on the overview: draw every item's picture now, so no page waits for them
-	// the first time it's opened. Either answer puts it away; Settings has the button for later
-	void Menu::DrawPicturesOffer(IDataProvider& a_provider) {
+	// Over the window, the rest dimmed: offered when pictures are switched on, then their
+	// progress with Cancel, or that they're ready with Close
+	void Menu::DrawPicturesDialog(IDataProvider& a_provider) {
 
-		if (!a_provider.OfferPictures() || a_provider.PicturesProgress().second > 0) {
+		if (_picturesDialog == PicturesDialog::kNone) {
 			return;
 		}
+		constexpr const char* popupID = "##PicturesDialog";
+		if (!ImGui::IsPopupOpen(popupID)) {
+			ImGui::OpenPopup(popupID);
+		}
+		// The window under it dimmed, as ImGui's own dimming reads its colour after we've gone
+		{
+			const auto windowMin = ImGui::GetWindowPos();
+			const auto windowMax = ImVec2(windowMin.x + ImGui::GetWindowWidth(), windowMin.y + ImGui::GetWindowHeight());
+			ImGui::GetWindowDrawList()->AddRectFilled(windowMin, windowMax, IM_COL32(0, 0, 0, 120));
+		}
+
 		const auto& palette = Themes::GetPalette();
 		const float fontSize = ImGui::GetFontSize();
-		const float padding = fontSize * 0.8f;
-		const float width = ImGui::GetContentRegionAvail().x;
-		const auto  title = a_provider.Translate("UI_ItemPictures_OfferTitle");
-		const auto  text = a_provider.Translate("UI_ItemPictures_OfferText");
-		const auto  prepare = a_provider.Translate("UI_ItemPictures_Prepare");
-		const auto  later = a_provider.Translate("UI_ItemPictures_NotNow");
-		const float buttons = ButtonWidth(prepare.c_str()) + fontSize + ButtonWidth(later.c_str());
-		const float textWidth = std::max(fontSize * 10.0f, width - padding * 3.0f - buttons);
-		ImGui::PushFont(Themes::HeaderFont());
-		const float titleHeight = ImGui::GetTextLineHeightWithSpacing();
-		ImGui::PopFont();
-		const float height = padding * 2.0f + titleHeight + ImGui::CalcTextSize(text.c_str(), nullptr, false, textWidth).y;
-
-		const auto min = ImGui::GetCursorScreenPos();
-		const auto max = ImVec2(min.x + width, min.y + height);
-		auto*      drawList = ImGui::GetWindowDrawList();
-		drawList->AddRectFilled(min, max, Colour(palette.accent, 0.06f));
-		drawList->AddRect(min, max, Colour(palette.accent, 0.5f));
-		CornerMarks(drawList, min, max, fontSize * 0.18f, Colour(palette.accent, 0.7f));
-		ImGui::PushFont(Themes::HeaderFont());
-		drawList->AddText(ImVec2(min.x + padding, min.y + padding), Colour(palette.heading), title.c_str());
-		ImGui::PopFont();
-		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(min.x + padding, min.y + padding + titleHeight), Colour(palette.textDim), text.c_str(), nullptr, textWidth);
-
-		ImGui::SetCursorScreenPos(ImVec2(max.x - padding - buttons, min.y + (height - ImGui::GetFrameHeight()) * 0.5f));
-		if (ThemedButton(prepare.c_str())) {
-			a_provider.AnswerPictures(true);
-		}
-		ImGui::SameLine(0.0f, fontSize);
-		if (ThemedButton(later.c_str())) {
-			a_provider.AnswerPictures(false);
-		}
-		ImGui::SetCursorScreenPos(ImVec2(min.x, max.y + fontSize * 0.6f));
-		ImGui::Dummy(ImVec2(width, 0.0f));
-	}
-
-	//---------------------------------------------------
-	//-- Completionist UI ( Draw Pictures Progress ) ----
-	//---------------------------------------------------
-
-	// A line while pictures are being prepared, on whatever page is open
-	void Menu::DrawPicturesProgress(IDataProvider& a_provider) {
-
-		const auto [prepared, total] = a_provider.PicturesProgress();
-		if (total <= 0) {
+		const float width = fontSize * 26.0f;
+		const auto* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f, viewport->WorkPos.y + viewport->WorkSize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, FLT_MAX));
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(palette.background.x, palette.background.y, palette.background.z, 0.98f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(palette.accent.x, palette.accent.y, palette.accent.z, 0.6f));
+		ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 1.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(fontSize * 1.2f, fontSize * 1.0f));
+		const bool open = ImGui::BeginPopupModal(popupID, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(2);
+		if (!open) {
 			return;
 		}
-		const auto& palette = Themes::GetPalette();
-		const auto  text = a_provider.Translate("UI_ItemPictures_Preparing{" + std::to_string(prepared) + "}{" + std::to_string(total) + "}");
-		ImGui::TextColored(palette.textDim, "%s", text.c_str());
-		ImGui::SameLine(0.0f, ImGui::GetFontSize());
-		const auto  at = ImGui::GetCursorScreenPos();
-		const float width = ImGui::GetContentRegionAvail().x;
-		const float y = at.y + ImGui::GetTextLineHeight() * 0.5f;
-		ThinBar(ImGui::GetWindowDrawList(), ImVec2(at.x, y - 1.0f), ImVec2(at.x + width, y + 1.0f), Fraction(prepared, total));
-		ImGui::NewLine();
+		DressPopup();
+
+		const auto heading = [&](const std::string& a_text) {
+			ImGui::PushFont(Themes::HeaderFont());
+			ImGui::TextColored(palette.heading, "%s", a_text.c_str());
+			ImGui::PopFont();
+			ImGui::Spacing();
+		};
+		const auto close = [&]() {
+			_picturesDialog = PicturesDialog::kNone;
+			_picturesStarted = false;
+			ImGui::CloseCurrentPopup();
+		};
+		// Buttons at the right, the first the one a controller starts on
+		const auto buttons = [&](const std::string& a_first, const std::string& a_second) {
+			const float row = ButtonWidth(a_first.c_str()) + (a_second.empty() ? 0.0f : fontSize + ButtonWidth(a_second.c_str()));
+			ImGui::Spacing();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - row));
+			int pressed = ThemedButton(a_first.c_str()) ? 1 : 0;
+			if (ImGui::IsWindowAppearing()) {
+				ImGui::SetKeyboardFocusHere(-1);
+			}
+			if (!a_second.empty()) {
+				ImGui::SameLine(0.0f, fontSize);
+				pressed = ThemedButton(a_second.c_str()) ? 2 : pressed;
+			}
+			return pressed;
+		};
+
+		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + width - fontSize * 2.4f);
+		if (_picturesDialog == PicturesDialog::kOffer) {
+			heading(a_provider.Translate("UI_ItemPictures_OfferTitle"));
+			ImGui::TextColored(palette.text, "%s", a_provider.Translate("UI_ItemPictures_OfferText").c_str());
+			switch (buttons(a_provider.Translate("UI_ItemPictures_Prepare"), a_provider.Translate("UI_ItemPictures_Later"))) {
+			case 1:
+				a_provider.PreparePictures();
+				_picturesDialog = PicturesDialog::kProgress;
+				_picturesStarted = false;
+				break;
+			case 2:
+				close();
+				break;
+			default:
+				break;
+			}
+		} else {
+			const auto [prepared, total] = a_provider.PicturesProgress();
+			_picturesStarted |= total > 0;
+			const bool ready = _picturesStarted && total <= 0;
+			heading(a_provider.Translate(ready ? "UI_ItemPictures_Ready" : "UI_ItemPictures_Preparing"));
+			if (ready) {
+				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_ItemPictures_ReadyText").c_str());
+			} else {
+				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(total > 0 ? "UI_ItemPictures_Progress{" + std::to_string(prepared) + "}{" + std::to_string(total) + "}" : "UI_ItemPictures_Starting").c_str());
+				ImGui::Spacing();
+				const auto  at = ImGui::GetCursorScreenPos();
+				const float barWidth = ImGui::GetContentRegionAvail().x;
+				ThinBar(ImGui::GetWindowDrawList(), ImVec2(at.x, at.y + fontSize * 0.3f), ImVec2(at.x + barWidth, at.y + fontSize * 0.3f + 3.0f), Fraction(prepared, std::max(total, 1)));
+				ImGui::Dummy(ImVec2(barWidth, fontSize * 0.8f));
+			}
+			if (buttons(a_provider.Translate(ready ? "UI_ItemPictures_Close" : "UI_ItemPictures_Cancel"), {}) == 1) {
+				if (!ready) {
+					a_provider.CancelPictures();
+				}
+				close();
+			}
+		}
+		ImGui::PopTextWrapPos();
+		ImGui::EndPopup();
 	}
 
 	//---------------------------------------------------
@@ -7616,7 +7652,6 @@ namespace CompletionistUI
 		const auto& style = ImGui::GetStyle();
 		bool        changed = false;
 		_hoveredEntry.reset();
-		DrawPicturesProgress(a_provider);
 
 		// Applied on release
 		if (_pendingScale < 0.0f) {
@@ -8302,6 +8337,12 @@ namespace CompletionistUI
 						if (edited) {
 							a_provider.ApplySetting(page.id, item);
 							_dirty = page.id == "general";
+							if (item.id == "Item_Pictures" && item.kind == SettingKind::kToggle && item.on) {
+								_picturesDialog = PicturesDialog::kOffer;
+							} else if (item.id == "Item_PicturesPrepare" || item.id == "Item_PicturesRedraw") {
+								_picturesDialog = PicturesDialog::kProgress;
+								_picturesStarted = false;
+							}
 						}
 						ImGui::PopID();
 					}

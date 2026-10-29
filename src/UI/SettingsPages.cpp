@@ -351,8 +351,6 @@ namespace CompletionistUI
 		} else if (action == "clearPin") {
 			Tracker::UnpinAll();
 		} else if (action == "picturesPrepare" || action == "picturesRedraw") {
-			// Asked and answered from here as well
-			SettingsAPI::SetBool("ItemPicturesOffered", true);
 			ModelPictures::PrepareAll(action == "picturesRedraw");
 		}
 

@@ -50,8 +50,8 @@ namespace CompletionistUI
 		void*                     AchievementIcon(std::int32_t a_icon) override;
 		void*                     ItemPicture(std::uint32_t a_formID) override;
 		void                      UpdatePictures() override;
-		bool                      OfferPictures() override;
-		void                      AnswerPictures(bool a_prepare) override;
+		void                      PreparePictures() override;
+		void                      CancelPictures() override;
 		std::pair<int, int>       PicturesProgress() override;
 
 		struct GeneralSettings
@@ -93,7 +93,6 @@ namespace CompletionistUI
 		std::chrono::steady_clock::time_point _lastCellScan{};
 		std::atomic<bool>                     _cellScanQueued{ false };
 		std::atomic<bool>                     _pruneTracking{ false };
-		std::atomic<bool>                     _offerPictures{ false };	// ask about preparing every picture
 		GeneralSettings          _general;
 		std::vector<RecentEvent> _recent;
 		SettingsPages            _settingsBuilder;

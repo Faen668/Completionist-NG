@@ -27,7 +27,7 @@ namespace CompletionistUI
 		// Prepared so far and how many in all; 0 of 0 when nothing's being prepared
 		[[nodiscard]] static std::pair<int, int> Progress();
 
-		// Game thread: how many items have no picture kept yet
-		[[nodiscard]] static std::size_t Missing();
+		// Stop preparing; what's drawn so far is kept
+		static void Cancel();
 	};
 }

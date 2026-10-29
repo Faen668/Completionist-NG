@@ -1101,19 +1101,11 @@ float4 PS(VertexOut input) : SV_TARGET
 		return { prepared, total };
 	}
 
-	// Game thread, before asking: how many items have no picture kept yet
-	std::size_t ModelPictures::Missing() {
+	void ModelPictures::Cancel() {
 
-		std::vector<std::uint32_t> list;
-		{
-			std::unique_lock guard(lock);
-			list = items;
-		}
-		std::size_t missing = 0;
-		for (const auto formID : list) {
-			const auto path = CachePath(formID);
-			missing += path && !std::filesystem::exists(*path) ? 1 : 0;
-		}
-		return missing;
+		std::unique_lock guard(lock);
+		queue.clear();
+		total = 0;
+		prepared = 0;
 	}
 }

@@ -107,6 +107,7 @@ namespace CompletionistUI
 		[[nodiscard]] std::vector<SpotView> Spots() const;
 		void OpenPageTab(std::string_view a_page, int a_tab) { _pageTabs[std::string(a_page)] = std::to_string(a_tab); }
 		void SetMixSlots(const std::array<std::uint32_t, 3>& a_slots) { _mixSlots = a_slots; }
+		void ShowPicturesDialog(bool a_progress) { _picturesDialog = a_progress ? PicturesDialog::kProgress : PicturesDialog::kOffer; }
 		void OpenMixPotion(std::string a_effect) { _mixOpenName = std::move(a_effect); }	// by its main effect's name
 
 		void RecordControl();
@@ -200,8 +201,15 @@ namespace CompletionistUI
 		float                      _dragonLore{ 0.0f };	// the page's longest story, so the panel keeps its height
 		void                       DrawIngredientInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
 		void                       DrawMixing(IDataProvider& a_provider, const Page& a_page);
-		void                       DrawPicturesOffer(IDataProvider& a_provider);
-		static void                DrawPicturesProgress(IDataProvider& a_provider);
+		enum class PicturesDialog : std::uint8_t
+		{
+			kNone,
+			kOffer,	// pictures just switched on: prepare them all now?
+			kProgress,	// preparing, with Cancel; ready, with Close
+		};
+		void                       DrawPicturesDialog(IDataProvider& a_provider);
+		PicturesDialog             _picturesDialog{ PicturesDialog::kNone };
+		bool                       _picturesStarted{ false };	// preparing has been seen under way
 		void                       MixToggle(std::uint32_t a_formID);
 		[[nodiscard]] static std::string BrewName(IDataProvider& a_provider, const Brew& a_brew);
 		std::array<std::uint32_t, 3>      _mixSlots{};	// the Mixing Station's ingredients
