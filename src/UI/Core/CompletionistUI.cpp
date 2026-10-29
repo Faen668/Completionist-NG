@@ -2909,13 +2909,25 @@ namespace CompletionistUI
 			it->total += category.Total();
 		}
 
-		const int   cards = std::clamp(static_cast<int>(groups.size()), 1, 4);
+		// Four to a row; the last row's cards share its width, and one alone there is a banner
+		// with its text centred
+		const int   columns = std::clamp(static_cast<int>(groups.size()), 1, 4);
 		const float cardHeight = fontSize * 5.2f;
-		if (ImGui::BeginTable("##Cards", cards, ImGuiTableFlags_SizingStretchSame)) {
-			for (const auto& group : groups) {
-				ImGui::TableNextColumn();
-				const auto  min = ImGui::GetCursorScreenPos();
-				const auto  max = ImVec2(min.x + ImGui::GetContentRegionAvail().x, min.y + cardHeight);
+		const float cardGap = style.ItemSpacing.x;
+		const float rowWidth = ImGui::GetContentRegionAvail().x;
+		const auto  origin = ImGui::GetCursorScreenPos();
+		const int   groupCount = static_cast<int>(groups.size());
+		const int   rows = (groupCount + columns - 1) / columns;
+		for (int index = 0; index < groupCount; ++index) {
+			const auto& group = groups[static_cast<std::size_t>(index)];
+			{
+				const int   row = index / columns;
+				const int   inRow = std::min(columns, groupCount - row * columns);
+				const float width = (rowWidth - cardGap * static_cast<float>(columns - 1)) / static_cast<float>(columns);
+				const float span = inRow < columns ? (rowWidth - cardGap * static_cast<float>(inRow - 1)) / static_cast<float>(inRow) : width;
+				const bool  banner = inRow == 1 && groupCount > 1;
+				const auto  min = ImVec2(origin.x + (span + cardGap) * static_cast<float>(index % columns), origin.y + (cardHeight + style.ItemSpacing.y) * static_cast<float>(row));
+				const auto  max = ImVec2(min.x + span, min.y + cardHeight);
 				const float padding = fontSize * 0.8f;
 				auto*       drawList = ImGui::GetWindowDrawList();
 
@@ -2924,27 +2936,32 @@ namespace CompletionistUI
 				const float corner = fontSize * 0.18f;
 				CornerMarks(drawList, min, max, corner, Colour(palette.accent, 0.6f));
 
-				float y = min.y + padding * 0.7f;
+				const auto centred = [&](float a_width) { return banner ? min.x + (span - a_width) * 0.5f : min.x + padding; };
+				float      y = min.y + padding * 0.7f;
 				ImGui::PushFont(Themes::HeaderFont());
-				drawList->AddText(ImVec2(min.x + padding, y), Colour(palette.heading), a_provider.Translate(group.title).c_str());
+				const auto title = a_provider.Translate(group.title);
+				drawList->AddText(ImVec2(centred(ImGui::CalcTextSize(title.c_str()).x), y), Colour(palette.heading), title.c_str());
 				y += ImGui::GetFontSize() + fontSize * 0.2f;
 				ImGui::PopFont();
 
+				// A banner has its count beside the percentage, a card at its right edge
+				const auto counted = CountText(group.found, group.total);
+				const auto countSize = ImGui::CalcTextSize(counted.c_str());
 				ImGui::PushFont(Themes::TitleFont());
 				const auto  percent = PercentText(group.found, group.total);
+				const float percentWidth = ImGui::CalcTextSize(percent.c_str()).x;
 				const float percentHeight = ImGui::GetFontSize();
-				drawList->AddText(ImVec2(min.x + padding, y), Colour(group.total > 0 && group.found >= group.total ? palette.found : palette.text), percent.c_str());
+				const float percentX = banner ? centred(percentWidth + fontSize + countSize.x) : min.x + padding;
+				drawList->AddText(ImVec2(percentX, y), Colour(group.total > 0 && group.found >= group.total ? palette.found : palette.text), percent.c_str());
 				ImGui::PopFont();
 
-				const auto count = CountText(group.found, group.total);
-				const auto countSize = ImGui::CalcTextSize(count.c_str());
-				drawList->AddText(ImVec2(max.x - padding - countSize.x, y + percentHeight - countSize.y), Colour(palette.textDim), count.c_str());
+				const float countX = banner ? percentX + percentWidth + fontSize : max.x - padding - countSize.x;
+				drawList->AddText(ImVec2(countX, y + percentHeight - countSize.y), Colour(palette.textDim), counted.c_str());
 				ThinBar(drawList, ImVec2(min.x + padding, max.y - padding * 0.7f - 2.0f), ImVec2(max.x - padding, max.y - padding * 0.7f), Fraction(group.found, group.total));
-
-				ImGui::Dummy(ImVec2(max.x - min.x, cardHeight));
 			}
-			ImGui::EndTable();
 		}
+		ImGui::SetCursorScreenPos(origin);
+		ImGui::Dummy(ImVec2(rowWidth, (cardHeight + style.ItemSpacing.y) * static_cast<float>(rows) - style.ItemSpacing.y));
 
 		ImGui::Dummy(ImVec2(0.0f, fontSize * 0.8f));
 
@@ -3203,6 +3220,9 @@ namespace CompletionistUI
 		std::int32_t found = 0;
 		std::int32_t total = 0;
 		for (const auto& section : page.sections) {
+			if (!section.counted) {
+				continue;
+			}
 			found += section.Found();
 			total += section.Total();
 		}
@@ -3215,7 +3235,11 @@ namespace CompletionistUI
 		const auto tab = _pageTabs.find(page.id);
 		const auto shownTab = tab != _pageTabs.end() && !tab->second.empty() ? std::atoi(tab->second.c_str()) : 0;
 		const bool killsTab = shownTab >= 0 && shownTab < static_cast<int>(page.tabs.size()) && page.tabs[shownTab].layout == PageLayout::kKills;
-		if (!killsTab) {
+		const bool mixingTab = shownTab >= 0 && shownTab < static_cast<int>(page.tabs.size()) && page.tabs[shownTab].layout == PageLayout::kMixing;
+		if (mixingTab) {
+			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
+			ImGui::Spacing();
+		} else if (!killsTab) {
 			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
 			ImGui::SameLine(0.0f, ImGui::GetFontSize());
 			MarkerToggle("##HideCompleted", _hideCompleted, a_provider.Translate("UI_HideCompleted").c_str());
@@ -3335,7 +3359,7 @@ namespace CompletionistUI
 				for (const auto& record : _dragonKills) {
 					kills += record.kills;
 				}
-				const auto count = page.tabs[i].layout == PageLayout::kKills ? std::to_string(kills) : CountText(tabFound, tabTotal);
+				const auto count = page.tabs[i].layout == PageLayout::kKills ? std::to_string(kills) : page.tabs[i].layout == PageLayout::kMixing ? std::string{} : CountText(tabFound, tabTotal);
 				tabs.push_back({ std::to_string(i), a_provider.Translate(title.empty() ? page.title : title), count });
 			}
 			if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == selected; })) {
@@ -3352,6 +3376,10 @@ namespace CompletionistUI
 		}
 		if (view->layout == PageLayout::kKills) {
 			DrawKills(a_provider, _dragonKills, true);
+			return;
+		}
+		if (view->layout == PageLayout::kMixing) {
+			DrawMixing(a_provider, page);
 			return;
 		}
 
@@ -3399,7 +3427,11 @@ namespace CompletionistUI
 				}
 			}
 		}
-		const bool shoutPage = trainerPage || dragonPage || achievementPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
+		const bool ingredientPage = pageHas([](const Entry& a_entry) { return a_entry.IsIngredient(); });
+		if (ingredientPage) {
+			MeasureIngredientPage(*view, ImGui::GetContentRegionAvail().x - ImGui::GetStyle().WindowPadding.x * 2.0f);
+		}
+		const bool shoutPage = trainerPage || dragonPage || achievementPage || ingredientPage || pageHas([](const Entry& a_entry) { return a_entry.placesKnown; });
 		float panelHeight = 0.0f;
 		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
 		if (shoutPage) {
@@ -3414,6 +3446,7 @@ namespace CompletionistUI
 			const float content = trainerPage ? TrainerInfoHeight() + 1.0f
 			                    : dragonPage  ? DragonInfoHeight(_dragonLore, panelWidth) + 1.0f
 			                    : achievementPage ? AchievementInfoHeight(_achievementBody, panelWidth) + 1.0f
+			                    : ingredientPage ? IngredientInfoHeight(panelWidth) + 1.0f
 			                                  : title + ShoutWordsHeight() + style.ItemSpacing.y * 2.0f + ImGui::GetFontSize() * 0.8f;
 			panelHeight = (style.WindowPadding.y * 2.0f + content) * t * t * (3.0f - 2.0f * t);
 			// Leaves the list room for a few rows, as the description panel does, on a short window or a big scale
@@ -5436,6 +5469,9 @@ namespace CompletionistUI
 		ImGui::SameLine();
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextColored(a_entry.IsComplete() ? palette.found : palette.needed, "%s", a_entry.name.c_str());
+		if (a_entry.IsIngredient() && !a_entry.ingredient.effect) {
+			DrawIngredientPips(a_entry);
+		}
 		if (!a_entry.words.empty()) {
 			const float spacing = ImGui::GetStyle().ItemSpacing.x;
 			ImGui::SameLine();
@@ -5841,8 +5877,11 @@ namespace CompletionistUI
 
 			ImGui::PushTextWrapPos(0.0f);
 
-			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon() || entry->IsAchievement();
-			if (entry->IsAchievement()) {
+			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon() || entry->IsAchievement() || entry->IsIngredient();
+			if (entry->IsIngredient()) {
+				DrawIngredientInfo(a_provider, *entry, false);
+				text = {};
+			} else if (entry->IsAchievement()) {
 				DrawAchievementInfo(a_provider, *entry, false);
 				text = {};
 			} else if (entry->IsDragon()) {
@@ -5976,7 +6015,7 @@ namespace CompletionistUI
 		const auto& palette = Themes::GetPalette();
 
 		// Hovered, else pinned, else the first
-		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer() || a_entry.IsDragon() || a_entry.IsAchievement(); };
+		const auto   hasPanel = [](const Entry& a_entry) { return a_entry.placesKnown || a_entry.IsTrainer() || a_entry.IsDragon() || a_entry.IsAchievement() || a_entry.IsIngredient(); };
 		const Entry* entry = _hoveredEntry && hasPanel(*_hoveredEntry) ? std::addressof(*_hoveredEntry) : _pinnedEntry && hasPanel(*_pinnedEntry) ? std::addressof(*_pinnedEntry) : nullptr;
 		for (const auto& section : a_page.sections) {
 			for (const auto& candidate : section.entries) {
@@ -6011,6 +6050,8 @@ namespace CompletionistUI
 			DrawDragonInfo(a_provider, *entry, true);
 		} else if (entry && entry->IsAchievement()) {
 			DrawAchievementInfo(a_provider, *entry, true);
+		} else if (entry && entry->IsIngredient()) {
+			DrawIngredientInfo(a_provider, *entry, true);
 		} else if (entry) {
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
@@ -6648,6 +6689,551 @@ namespace CompletionistUI
 		const auto& story = info.lore.empty() ? a_provider.Translate("UI_DescriptionNone") : info.lore;
 		const float storyY = storyMin.y + (storyHeight - DragonLayout::LoreHeight(story, width)) * 0.5f;
 		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(storyMin.x + padding, std::max(storyMin.y + padding, storyY)), Colour(info.lore.empty() ? palette.textDim : palette.text), story.c_str(), nullptr, loreWidth);
+	}
+
+	namespace IngredientLayout
+	{
+		//---------------------------------------------------
+		//-- Completionist UI ( Sizes ) ---------------------
+		//---------------------------------------------------
+
+		static float CardHeight() { return ShoutLayout::Padding() * 1.2f + ImGui::GetTextLineHeightWithSpacing() * 2.0f; }
+		static float MinCard() { return ImGui::GetFontSize() * 11.0f; }
+		static int   MaxRows() { return 2; }
+
+		static float Header() {
+
+			ImGui::PushFont(Themes::HeaderFont());
+			const float name = ImGui::GetTextLineHeightWithSpacing();
+			ImGui::PopFont();
+			return name;
+		}
+
+		// An ingredient's four in a row, two by two when narrow; an effect's as many as fit
+		static int Columns(const EntryIngredient& a_info, float a_width) {
+
+			const int fit = ShoutLayout::Fit(a_width, MinCard());
+			const int cards = std::max(1, static_cast<int>(a_info.cards.size()));
+			return a_info.effect ? std::clamp(fit, 1, std::min(cards, 6)) : (fit >= cards ? cards : std::clamp(fit, 1, 2));
+		}
+
+		static int Rows(const EntryIngredient& a_info, float a_width) {
+
+			const int columns = Columns(a_info, a_width);
+			return std::clamp((static_cast<int>(a_info.cards.size()) + columns - 1) / columns, 1, MaxRows());
+		}
+
+		static float FactsWidth(float a_width) { return DragonLayout::SideBySide(a_width) ? std::floor(std::clamp(a_width * 0.28f, ImGui::GetFontSize() * 13.0f, ImGui::GetFontSize() * 20.0f)) : a_width; }
+		static float LoreWidth(float a_width) { return std::max(ImGui::GetFontSize() * 4.0f, (DragonLayout::SideBySide(a_width) ? a_width - FactsWidth(a_width) - ShoutLayout::CardGap() : a_width) - ShoutLayout::Padding() * 2.0f); }
+
+		static float LoreHeight(const std::string& a_lore, float a_width) {
+
+			return a_lore.empty() ? 0.0f : ImGui::CalcTextSize(a_lore.c_str(), nullptr, false, LoreWidth(a_width)).y;
+		}
+
+		static float FactsContent(std::size_t a_facts) { return ImGui::GetTextLineHeightWithSpacing() * static_cast<float>(std::max<std::size_t>(a_facts, 1)); }
+
+		//---------------------------------------------------
+		//-- Completionist UI ( Height ) --------------------
+		//---------------------------------------------------
+
+		// Name, the cards, then the lore beside the facts, or above them when narrow
+		static float Height(float a_lore, int a_rows, std::size_t a_facts, float a_width) {
+
+			const float padding = ShoutLayout::Padding();
+			const float gap = ShoutLayout::CardGap();
+			const float cards = (CardHeight() + gap) * static_cast<float>(std::max(a_rows, 1));
+			const float lore = padding * 2.0f + std::max(a_lore, ImGui::GetTextLineHeightWithSpacing());
+			const float facts = padding * 2.0f + FactsContent(a_facts);
+			const float bottom = DragonLayout::SideBySide(a_width) ? std::max(lore, facts) : lore + gap + facts;
+			return Header() + cards + bottom;
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Ingredient Info Height ) ----
+	//---------------------------------------------------
+
+	float Menu::IngredientInfoHeight(float a_width) const {
+
+		return IngredientLayout::Height(_ingredientLore, _ingredientRows, _ingredientFacts, a_width);
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Measure Ingredient Page ) ---
+	//---------------------------------------------------
+
+	// The longest lore, most rows of cards and facts on the tab, so the panel keeps its height
+	void Menu::MeasureIngredientPage(const Page& a_page, float a_width) {
+
+		_ingredientLore = 0.0f;
+		_ingredientRows = 1;
+		_ingredientFacts = 1;
+		for (const auto& section : a_page.sections) {
+			for (const auto& entry : section.entries) {
+				if (!entry.IsIngredient()) {
+					continue;
+				}
+				_ingredientLore = std::max(_ingredientLore, IngredientLayout::LoreHeight(entry.ingredient.lore, a_width));
+				_ingredientRows = std::max(_ingredientRows, IngredientLayout::Rows(entry.ingredient, a_width));
+				_ingredientFacts = std::max(_ingredientFacts, entry.ingredient.facts.size());
+			}
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Ingredient Pips ) ------
+	//---------------------------------------------------
+
+	// A diamond per effect after the name, filled for each one known
+	void Menu::DrawIngredientPips(const Entry& a_entry) {
+
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const float pip = fontSize * 0.22f;
+		const float step = pip * 3.0f;
+		ImGui::SameLine();
+		const auto pos = ImGui::GetCursorScreenPos();
+		const float y = pos.y + ImGui::GetFrameHeight() * 0.5f;
+		auto*       drawList = ImGui::GetWindowDrawList();
+		float       x = pos.x + pip;
+		for (const auto& card : a_entry.ingredient.cards) {
+			Decor::Diamond(drawList, ImVec2(x, y), pip, Colour(card.known ? palette.found : palette.separator), card.known);
+			x += step;
+		}
+		ImGui::Dummy(ImVec2(step * static_cast<float>(a_entry.ingredient.cards.size()), ImGui::GetFrameHeight()));
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Ingredient Info ) ------
+	//---------------------------------------------------
+
+	// Name and how many are known, a card per effect (or per ingredient, for an effect), then
+	// the lore beside the facts. Cards not known yet say how to learn them
+	void Menu::DrawIngredientInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName) {
+
+		const auto& palette = Themes::GetPalette();
+		const auto& info = a_entry.ingredient;
+		const float fontSize = ImGui::GetFontSize();
+		const float width = ImGui::GetContentRegionAvail().x;
+		auto*       drawList = ImGui::GetWindowDrawList();
+
+		const auto panel = [&](ImVec2 a_min, ImVec2 a_max, bool a_lit) {
+			drawList->AddRectFilled(a_min, a_max, Colour(palette.accent, 0.04f));
+			drawList->AddRect(a_min, a_max, Colour(a_lit ? palette.accent : palette.separator, a_lit ? 0.55f : 0.7f));
+			CornerMarks(drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
+		};
+
+		const float padding = ShoutLayout::Padding();
+		const float gap = ShoutLayout::CardGap();
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+		const auto  origin = ImGui::GetCursorScreenPos();
+		const float header = IngredientLayout::Header();
+		const bool  complete = a_entry.IsComplete();
+
+		//---------------------------------------------------
+		// Name and count
+		//---------------------------------------------------
+
+		const auto countSize = ImGui::CalcTextSize(info.summary.c_str());
+		if (a_withName) {
+			ImGui::PushFont(Themes::HeaderFont());
+			const float nameY = origin.y;
+			drawList->AddText(ImVec2(origin.x, nameY), Colour(palette.heading), FitText(a_entry.name, width - countSize.x - fontSize).c_str());
+			const float baseline = nameY + ImGui::GetFontSize();
+			ImGui::PopFont();
+			drawList->AddText(ImVec2(origin.x + width - countSize.x, baseline - countSize.y), Colour(complete ? palette.found : palette.textDim), info.summary.c_str());
+		} else {
+			drawList->AddText(ImVec2(origin.x, origin.y), Colour(complete ? palette.found : palette.textDim), info.summary.c_str());
+		}
+
+		//---------------------------------------------------
+		// Cards
+		//---------------------------------------------------
+
+		const int   columns = IngredientLayout::Columns(info, width);
+		const int   rows = IngredientLayout::Rows(info, width);
+		const int   shown = std::min(static_cast<int>(info.cards.size()), columns * rows);
+		const int   hidden = static_cast<int>(info.cards.size()) - shown;
+		const float cardWidth = (width - gap * static_cast<float>(columns - 1)) / static_cast<float>(columns);
+		const float cardHeight = IngredientLayout::CardHeight();
+		const float cardsTop = origin.y + header;
+		const float pip = fontSize * 0.26f;
+
+		for (int i = 0; i < shown; ++i) {
+			const int   column = i % columns;
+			const int   row = i / columns;
+			const auto  min = ImVec2(origin.x + (cardWidth + gap) * static_cast<float>(column), cardsTop + (cardHeight + gap) * static_cast<float>(row));
+			const auto  max = ImVec2(min.x + cardWidth, min.y + cardHeight);
+			const bool  more = hidden > 0 && i == shown - 1;
+			const auto& card = info.cards[static_cast<std::size_t>(i)];
+			panel(min, max, false);
+
+			drawList->PushClipRect(min, ImVec2(max.x - padding * 0.5f, max.y), true);
+			const float textX = min.x + padding + pip * 3.0f;
+			const float y = min.y + padding * 0.6f;
+			if (more) {
+				// The last card makes way for a count of the rest
+				const auto rest = a_provider.Translate("UI_Ingredients_More{" + std::to_string(hidden + 1) + "}");
+				const auto size = ImGui::CalcTextSize(rest.c_str());
+				drawList->AddText(ImVec2(min.x + (cardWidth - size.x) * 0.5f, min.y + (cardHeight - size.y) * 0.5f), Colour(palette.textDim), rest.c_str());
+			} else {
+				Decor::Diamond(drawList, ImVec2(min.x + padding + pip, y + fontSize * 0.55f), pip, Colour(card.known ? palette.found : palette.separator), card.known);
+				drawList->AddText(ImVec2(textX, y), Colour(card.known ? palette.text : palette.textDim), FitText(card.name, max.x - textX - padding * 0.5f).c_str());
+				drawList->AddText(ImVec2(textX, y + line), Colour(card.known ? palette.textDim : palette.accent), FitText(card.hint, max.x - textX - padding * 0.5f).c_str());
+			}
+			drawList->PopClipRect();
+		}
+
+		//---------------------------------------------------
+		// Lore and facts
+		//---------------------------------------------------
+
+		const bool  sideBySide = DragonLayout::SideBySide(width);
+		const float bottomTop = cardsTop + (cardHeight + gap) * static_cast<float>(rows);
+		const float loreWidth = IngredientLayout::LoreWidth(width);
+		const float factsWidth = IngredientLayout::FactsWidth(width);
+		const float lore = std::max(a_withName ? _ingredientLore : 0.0f, IngredientLayout::LoreHeight(info.lore, width));
+		const float loreHeight = padding * 2.0f + std::max(lore, line);
+		const float factsHeight = padding * 2.0f + IngredientLayout::FactsContent(std::max(info.facts.size(), a_withName ? _ingredientFacts : std::size_t{ 1 }));
+		const float boxHeight = sideBySide ? std::max(loreHeight, factsHeight) : loreHeight;
+
+		const auto loreMin = ImVec2(origin.x, bottomTop);
+		const auto loreMax = ImVec2(origin.x + (sideBySide ? width - factsWidth - gap : width), bottomTop + boxHeight);
+		panel(loreMin, loreMax, false);
+		const auto& story = info.lore.empty() ? a_provider.Translate("UI_DescriptionNone") : info.lore;
+		const float storyY = loreMin.y + (boxHeight - IngredientLayout::LoreHeight(story, width)) * 0.5f;
+		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(loreMin.x + padding, std::max(loreMin.y + padding, storyY)), Colour(info.lore.empty() ? palette.textDim : palette.text), story.c_str(), nullptr, loreWidth);
+
+		const float factsBoxHeight = sideBySide ? boxHeight : factsHeight;
+		const auto  factsMin = sideBySide ? ImVec2(loreMax.x + gap, bottomTop) : ImVec2(origin.x, loreMax.y + gap);
+		const auto  factsMax = ImVec2(origin.x + width, factsMin.y + factsBoxHeight);
+		panel(factsMin, factsMax, false);
+		drawList->PushClipRect(factsMin, ImVec2(factsMax.x - padding * 0.5f, factsMax.y), true);
+		float factY = factsMin.y + (factsBoxHeight - IngredientLayout::FactsContent(info.facts.size())) * 0.5f;
+		for (const auto& fact : info.facts) {
+			drawList->AddText(ImVec2(factsMin.x + padding, factY), Colour(palette.textDim), FitText(fact, factsWidth - padding * 2.0f).c_str());
+			factY += line;
+		}
+		drawList->PopClipRect();
+
+		ImGui::Dummy(ImVec2(width, factsMax.y - origin.y));
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Mix Toggle ) ----------------
+	//---------------------------------------------------
+
+	// In a slot it comes out, else it goes in the first free one, or takes the last
+	void Menu::MixToggle(std::uint32_t a_formID) {
+
+		if (const auto it = std::ranges::find(_mixSlots, a_formID); it != _mixSlots.end()) {
+			*it = 0;
+			return;
+		}
+		const auto free = std::ranges::find(_mixSlots, 0u);
+		*(free != _mixSlots.end() ? free : _mixSlots.end() - 1) = a_formID;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Brew Name ) -----------------
+	//---------------------------------------------------
+
+	// "Potion of Restore Health": the station always names what a brew makes, learnt or not
+	std::string Menu::BrewName(IDataProvider& a_provider, const Brew& a_brew) {
+
+		return a_provider.Translate((a_brew.poison ? "UI_Mix_PoisonOf{" : "UI_Mix_PotionOf{") + a_brew.effects.front().effect->name + "}");
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Mixing ) ---------------
+	//---------------------------------------------------
+
+	// The ingredients on the left, the three slots and what they brew on the right, with the
+	// best brews from what's carried under them; stacked when the window is narrow
+	void Menu::DrawMixing(IDataProvider& a_provider, const Page& a_page) {
+
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const float line = ImGui::GetTextLineHeightWithSpacing();
+		const auto  data = a_page.mixing;
+		if (!data || data->ingredients.empty()) {
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_NothingMatches").c_str());
+			return;
+		}
+
+		// What can be brewed, worked out again only when the page is rebuilt
+		if (_mixData != data) {
+			_mixData = data;
+			_mixGroups = Mixing::Groups(*data, 10);
+			for (auto& slot : _mixSlots) {
+				if (std::ranges::none_of(data->ingredients, [&](const MixIngredient& a_ingredient) { return a_ingredient.formID == slot; })) {
+					slot = 0;
+				}
+			}
+		}
+		const auto byForm = [&](std::uint32_t a_formID) -> const MixIngredient* {
+			const auto it = std::ranges::find(data->ingredients, a_formID, &MixIngredient::formID);
+			return a_formID && it != data->ingredients.end() ? std::addressof(*it) : nullptr;
+		};
+
+		const auto  avail = ImGui::GetContentRegionAvail();
+		const float gap = fontSize * 0.75f;
+		const bool  sideBySide = avail.x >= fontSize * 44.0f;
+		const float listWidth = sideBySide ? std::floor(std::clamp(avail.x * 0.36f, fontSize * 16.0f, fontSize * 26.0f)) : avail.x;
+		const float listHeight = sideBySide ? avail.y : std::floor(avail.y * 0.4f);
+		auto*       drawList = ImGui::GetWindowDrawList();
+
+		const auto card = [&](ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_lit) {
+			a_drawList->AddRectFilled(a_min, a_max, Colour(palette.accent, 0.04f));
+			a_drawList->AddRect(a_min, a_max, Colour(a_lit ? palette.accent : palette.separator, a_lit ? 0.55f : 0.7f));
+			CornerMarks(a_drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
+		};
+		const auto pips = [&](ImDrawList* a_drawList, const MixIngredient& a_ingredient, ImVec2 a_at) {
+			const float pip = fontSize * 0.2f;
+			float       x = a_at.x + pip;
+			for (const auto& effect : a_ingredient.effects) {
+				Decor::Diamond(a_drawList, ImVec2(x, a_at.y), pip, Colour(effect.known ? palette.found : palette.separator), effect.known);
+				x += pip * 3.0f;
+			}
+		};
+
+		//---------------------------------------------------
+		// Ingredients to pick from
+		//---------------------------------------------------
+
+		BeginFramedPanel("##MixList", ImVec2(listWidth, listHeight));
+		MarkerToggle("##MixAll", _mixAll, a_provider.Translate("UI_Mix_ShowAll").c_str());
+		ImGui::Spacing();
+		ImGui::BeginChild("##MixListRows", ImVec2(0.0f, 0.0f), ImGuiChildFlags_NavFlattened);
+		ScrollWithRightStick();
+		const auto needle = Lower(_filter.data());
+		bool       any = false;
+		for (const auto& ingredient : data->ingredients) {
+			if ((!_mixAll && ingredient.carried <= 0) || (!needle.empty() && Lower(ingredient.name).find(needle) == std::string::npos)) {
+				continue;
+			}
+			any = true;
+			ImGui::PushID(static_cast<int>(ingredient.formID));
+			const bool picked = std::ranges::find(_mixSlots, ingredient.formID) != _mixSlots.end();
+			const auto start = ImGui::GetCursorScreenPos();
+			const auto width = ImGui::GetContentRegionAvail().x;
+			if (RowSelectable("##Pick", picked, ImVec2(width, ImGui::GetFrameHeight()))) {
+				MixToggle(ingredient.formID);
+			}
+			auto*      rowList = ImGui::GetWindowDrawList();
+			const auto textY = start.y + (ImGui::GetFrameHeight() - fontSize) * 0.5f;
+			const auto count = ingredient.carried > 0 ? a_provider.Translate("UI_Mix_Carried{" + std::to_string(ingredient.carried) + "}") : std::string{};
+			const auto countSize = ImGui::CalcTextSize(count.c_str());
+			const float pipsWidth = fontSize * 0.6f * static_cast<float>(ingredient.effects.size());
+			rowList->AddText(ImVec2(start.x + fontSize * 0.4f, textY), Colour(picked ? palette.heading : ingredient.carried > 0 ? palette.text : palette.textDim), FitText(ingredient.name, width - countSize.x - pipsWidth - fontSize * 1.6f).c_str());
+			pips(rowList, ingredient, ImVec2(start.x + width - countSize.x - pipsWidth - fontSize * 0.8f, textY + fontSize * 0.55f));
+			rowList->AddText(ImVec2(start.x + width - countSize.x - fontSize * 0.4f, textY), Colour(palette.textDim), count.c_str());
+			ImGui::PopID();
+		}
+		if (!any) {
+			ImGui::PushTextWrapPos(0.0f);
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(_mixAll ? "UI_NothingMatches" : "UI_Mix_NoneCarried").c_str());
+			ImGui::PopTextWrapPos();
+		}
+		ImGui::EndChild();
+		EndFramedPanel();
+
+		if (sideBySide) {
+			ImGui::SameLine(0.0f, gap);
+		}
+
+		//---------------------------------------------------
+		// The slots and what they brew
+		//---------------------------------------------------
+
+		BeginFramedPanel("##MixBench", ImVec2(0.0f, sideBySide ? avail.y : avail.y - listHeight - ImGui::GetStyle().ItemSpacing.y));
+		drawList = ImGui::GetWindowDrawList();
+		const float width = ImGui::GetContentRegionAvail().x;
+		const float padding = ShoutLayout::Padding();
+		const float cardGap = ShoutLayout::CardGap();
+
+		ImGui::TextColored(palette.textDim, "%s", data->power.c_str());
+		if (data->purity) {
+			ImGui::SameLine(0.0f, fontSize);
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Mix_Purity").c_str());
+		}
+		ImGui::Spacing();
+
+		const float slotWidth = (width - cardGap * 2.0f) / 3.0f;
+		const float slotHeight = padding * 1.2f + line * 2.0f;
+		const auto  slotsTop = ImGui::GetCursorScreenPos();
+		std::vector<const MixIngredient*> chosen;
+		for (int i = 0; i < 3; ++i) {
+			const auto* ingredient = byForm(_mixSlots[static_cast<std::size_t>(i)]);
+			const auto  min = ImVec2(slotsTop.x + (slotWidth + cardGap) * static_cast<float>(i), slotsTop.y);
+			const auto  max = ImVec2(min.x + slotWidth, min.y + slotHeight);
+			ImGui::SetCursorScreenPos(min);
+			ImGui::PushID(i);
+			if (ImGui::InvisibleButton("##Slot", ImVec2(slotWidth, slotHeight)) && ingredient) {
+				_mixSlots[static_cast<std::size_t>(i)] = 0;
+			}
+			NoteControl();
+			const bool hovered = ImGui::IsItemHovered() || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible);
+			ImGui::PopID();
+			card(drawList, min, max, hovered && ingredient);
+			const float textX = min.x + padding;
+			const float textY = min.y + padding * 0.6f;
+			if (ingredient) {
+				chosen.push_back(ingredient);
+				drawList->AddText(ImVec2(textX, textY), Colour(palette.text), FitText(ingredient->name, slotWidth - padding * 2.0f).c_str());
+				pips(drawList, *ingredient, ImVec2(textX, textY + line + fontSize * 0.55f));
+				const auto note = ingredient->carried > 0 ? a_provider.Translate("UI_Mix_Carried{" + std::to_string(ingredient->carried) + "}") : a_provider.Translate("UI_Mix_NotCarried");
+				const auto noteSize = ImGui::CalcTextSize(note.c_str());
+				drawList->AddText(ImVec2(max.x - padding - noteSize.x, textY + line), Colour(ingredient->carried > 0 ? palette.textDim : palette.needed), note.c_str());
+			} else {
+				drawList->AddText(ImVec2(textX, textY), Colour(palette.textDim), FitText(a_provider.Translate("UI_Mix_Empty"), slotWidth - padding * 2.0f).c_str());
+			}
+		}
+		ImGui::SetCursorScreenPos(ImVec2(slotsTop.x, slotsTop.y + slotHeight + cardGap));
+
+		// The brew
+		const auto resultTop = ImGui::GetCursorScreenPos();
+		const float resultHeight = padding * 2.0f + line * 6.0f;
+		card(drawList, resultTop, ImVec2(resultTop.x + width, resultTop.y + resultHeight), false);
+		drawList->PushClipRect(resultTop, ImVec2(resultTop.x + width - padding * 0.5f, resultTop.y + resultHeight), true);
+		ImGui::SetCursorScreenPos(ImVec2(resultTop.x + padding, resultTop.y + padding * 0.8f));
+		ImGui::BeginGroup();
+		ImGui::PushTextWrapPos(resultTop.x + width - padding);
+		const auto brew = chosen.size() >= 2 ? Mixing::BrewOf(*data, chosen) : Brew{};
+		if (chosen.size() < 2) {
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Mix_PickTwo").c_str());
+		} else if (brew.Empty()) {
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Mix_Nothing").c_str());
+		} else {
+			const auto title = BrewName(a_provider, brew);
+			const auto worth = a_provider.Translate("UI_Mix_Worth{" + std::to_string(brew.value) + "}");
+			ImGui::PushFont(Themes::HeaderFont());
+			ImGui::TextColored(palette.heading, "%s", FitText(title, width - padding * 2.0f - ImGui::CalcTextSize(worth.c_str()).x - fontSize).c_str());
+			ImGui::PopFont();
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, resultTop.x + width - padding - ImGui::GetCursorScreenPos().x - ImGui::CalcTextSize(worth.c_str()).x));
+			ImGui::AlignTextToFramePadding();
+			ImGui::TextColored(palette.found, "%s", worth.c_str());
+			// Every effect named, the ones not learnt yet with an open marker
+			for (const auto& effect : brew.effects) {
+				const auto at = ImGui::GetCursorScreenPos();
+				Decor::Diamond(drawList, ImVec2(at.x + fontSize * 0.25f, at.y + fontSize * 0.55f), fontSize * 0.22f, Colour(effect.known ? palette.found : palette.separator), effect.known);
+				ImGui::SetCursorScreenPos(ImVec2(at.x + fontSize * 0.8f, at.y));
+				ImGui::TextColored(palette.text, "%s", effect.effect->name.c_str());
+				ImGui::SameLine(0.0f, fontSize * 0.6f);
+				ImGui::TextColored(palette.textDim, "%s", Mixing::Describe(effect).c_str());
+			}
+			if (brew.teaches > 0) {
+				ImGui::TextColored(palette.accent, "%s", a_provider.Translate(brew.teaches == 1 ? "UI_Mix_TeachesOne" : "UI_Mix_Teaches{" + std::to_string(brew.teaches) + "}").c_str());
+			}
+			if (brew.wasted) {
+				ImGui::TextColored(palette.needed, "%s", a_provider.Translate("UI_Mix_Wasted").c_str());
+			}
+		}
+		ImGui::PopTextWrapPos();
+		ImGui::EndGroup();
+		drawList->PopClipRect();
+		ImGui::SetCursorScreenPos(ImVec2(resultTop.x, resultTop.y + resultHeight + cardGap));
+
+		// What can be made from what's carried: a row per potion and poison, opened to its best
+		// ways of making it. The filter finds a potion by its name or an ingredient's
+		HeadingWithCount(a_provider.Translate("UI_Mix_CanMake"), std::string{}, palette.heading);
+		ImGui::BeginChild("##MixRecipes", ImVec2(0.0f, 0.0f), ImGuiChildFlags_NavFlattened);
+		ScrollWithRightStick();
+		if (_mixGroups.empty()) {
+			ImGui::PushTextWrapPos(0.0f);
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Mix_CanMakeNone").c_str());
+			ImGui::PopTextWrapPos();
+		}
+		const float rowHeight = ImGui::GetFrameHeight();
+		bool        lastPoison = false;
+		bool        first = true;
+		for (std::size_t g = 0; g < _mixGroups.size(); ++g) {
+			const auto& group = _mixGroups[g];
+			if (group.variations.empty()) {
+				continue;
+			}
+			const auto name = BrewName(a_provider, group.variations.front().brew);
+			const bool matches = needle.empty() || Lower(name).find(needle) != std::string::npos || std::ranges::any_of(group.variations, [&](const Recipe& a_recipe) {
+				return std::ranges::any_of(a_recipe.ingredients, [&](const MixIngredient* a_ingredient) { return Lower(a_ingredient->name).find(needle) != std::string::npos; });
+			});
+			if (!matches) {
+				continue;
+			}
+			if (first || group.poison != lastPoison) {
+				ImGui::Spacing();
+				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(group.poison ? "UI_Ingredients_Poisons" : "UI_Ingredients_Potions").c_str());
+				first = false;
+				lastPoison = group.poison;
+			}
+
+			const auto key = (static_cast<std::uint64_t>(group.main->id) << 1) | (group.poison ? 1u : 0u);
+			if (!_mixOpenName.empty() && group.main->name == _mixOpenName) {
+				_mixOpen.insert(key);
+				_mixOpenName.clear();
+			}
+			const bool open = _mixOpen.contains(key);
+			ImGui::PushID(static_cast<int>(g));
+			auto       start = ImGui::GetCursorScreenPos();
+			const auto rowWidth = ImGui::GetContentRegionAvail().x;
+			if (RowSelectable("##Potion", false, ImVec2(rowWidth, rowHeight))) {
+				if (open) {
+					_mixOpen.erase(key);
+				} else {
+					_mixOpen.insert(key);
+				}
+			}
+			auto*       rowList = ImGui::GetWindowDrawList();
+			const float textY = start.y + (rowHeight - fontSize) * 0.5f;
+			const auto  worth = a_provider.Translate("UI_Mix_UpTo{" + std::to_string(group.best) + "}");
+			const auto  worthSize = ImGui::CalcTextSize(worth.c_str());
+			Decor::Diamond(rowList, ImVec2(start.x + fontSize * 0.6f, textY + fontSize * 0.55f), fontSize * 0.25f, Colour(palette.accent), open);
+			const float nameX = start.x + fontSize * 1.3f;
+			rowList->AddText(ImVec2(nameX, textY), Colour(open ? palette.heading : palette.text), FitText(name, rowWidth - worthSize.x - fontSize * 2.5f).c_str());
+			rowList->AddText(ImVec2(start.x + rowWidth - worthSize.x - fontSize * 0.4f, textY), Colour(palette.found), worth.c_str());
+
+			// Its ways of making it, the strongest first; one fills the slots
+			if (open) {
+				for (std::size_t v = 0; v < group.variations.size(); ++v) {
+					const auto& recipe = group.variations[v];
+					ImGui::PushID(static_cast<int>(v));
+					start = ImGui::GetCursorScreenPos();
+					const float indent = fontSize * 1.3f;
+					const bool  current = recipe.ingredients.size() == chosen.size() && std::ranges::all_of(recipe.ingredients, [&](const MixIngredient* a_ingredient) { return std::ranges::find(chosen, a_ingredient) != chosen.end(); });
+					ImGui::SetCursorScreenPos(ImVec2(start.x + indent, start.y));
+					if (RowSelectable("##Way", current, ImVec2(rowWidth - indent, rowHeight))) {
+						_mixSlots = {};
+						for (std::size_t s = 0; s < recipe.ingredients.size() && s < _mixSlots.size(); ++s) {
+							_mixSlots[s] = recipe.ingredients[s]->formID;
+						}
+					}
+					std::string from;
+					for (const auto* ingredient : recipe.ingredients) {
+						from += (from.empty() ? "" : "  +  ") + ingredient->name;
+					}
+					std::string also;
+					for (std::size_t e = 1; e < recipe.brew.effects.size(); ++e) {
+						also += (also.empty() ? "" : ", ") + recipe.brew.effects[e].effect->name;
+					}
+					const auto  value = a_provider.Translate("UI_Mix_Worth{" + std::to_string(recipe.brew.value) + "}");
+					const auto  valueSize = ImGui::CalcTextSize(value.c_str());
+					const float lineY = start.y + (rowHeight - fontSize) * 0.5f;
+					const float textX = start.x + indent + fontSize * 0.5f;
+					const float room = rowWidth - indent - valueSize.x - fontSize * 2.0f;
+					const float fromWidth = std::min(ImGui::CalcTextSize(from.c_str()).x, also.empty() ? room : room * 0.6f);
+					rowList->AddText(ImVec2(textX, lineY), Colour(palette.text), FitText(from, fromWidth).c_str());
+					if (!also.empty()) {
+						rowList->AddText(ImVec2(textX + fromWidth + fontSize * 0.8f, lineY), Colour(palette.textDim), FitText(a_provider.Translate("UI_Mix_Also{" + also + "}"), room - fromWidth - fontSize * 0.8f).c_str());
+					}
+					rowList->AddText(ImVec2(start.x + rowWidth - valueSize.x - fontSize * 0.4f, lineY), Colour(palette.textDim), value.c_str());
+					ImGui::PopID();
+				}
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
+		EndFramedPanel();
 	}
 
 	namespace AchievementLayout

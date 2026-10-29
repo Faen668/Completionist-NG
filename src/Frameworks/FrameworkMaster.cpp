@@ -7,6 +7,7 @@
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Frameworks/Misc/CFramework_Enchantments.hpp"
 #include "Frameworks/Misc/CFramework_Dragons.hpp"
+#include "Frameworks/Misc/CFramework_Ingredients.hpp"
 #include "Frameworks/Misc/CFramework_Achievements.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/Events.hpp"
@@ -60,6 +61,7 @@ namespace CFramework_Master
 		CFramework_Shouts::CHandler::InstallFramework();
 		CFramework_Trainers::CHandler::InstallFramework();
 		CFramework_Dragons::CHandler::InstallFramework();
+		CFramework_Ingredients::CHandler::InstallFramework();
 		CFramework_Achievements::CHandler::InstallFramework();
 	};
 

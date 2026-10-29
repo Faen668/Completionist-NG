@@ -2,9 +2,41 @@
 #include "PatchListener.hpp"
 #include "Import/SimpleIni.h"
 #include "Internal Utility/MCMHandler.hpp"
+#include "Frameworks/Items/CFramework_Others.hpp"
+#include "Frameworks/Misc/CFramework_Blessings.hpp"
+#include "Frameworks/Misc/CFramework_Enchantments.hpp"
+#include "Frameworks/Misc/CFramework_Ingredients.hpp"
+#include "Frameworks/Misc/CFramework_Locations.hpp"
+#include "Frameworks/Misc/CFramework_Pets.hpp"
+#include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
+#include "Frameworks/Misc/CFramework_Shouts.hpp"
 
 namespace CExternalPatchHandler
 {
+	namespace
+	{
+		// What Completionist tracks itself, taken before any patch adds to it: a patch that
+		// lists the same item or quest again leaves it to the base mod. The frameworks fill
+		// their data before the patches load; the merged list of them comes only afterwards
+		std::vector<const Serialization::CompletionistData*> baseItems;
+		std::unordered_set<RE::FormID>                       baseIngredients;
+		std::unordered_set<std::string>                      baseQuests;
+
+		std::string Lower(std::string a_text) {
+
+			return DKUtil::string::tolower(a_text);
+		}
+
+		// Fish are caught for the Fishing page as well as brewed, so a fish patch keeps them
+		bool TrackedByBase(RE::FormID a_form, CMiscPatchType a_type) {
+
+			if (a_type != CMiscPatchType::kFish && baseIngredients.contains(a_form)) {
+				return true;
+			}
+			return std::ranges::any_of(baseItems, [&](const Serialization::CompletionistData* a_data) { return a_data->HasForm(a_form); });
+		}
+	}
+
 	//---------------------------------------------------
 	//-- Patch API Functions-----------------------------
 	//---------------------------------------------------
@@ -57,6 +89,25 @@ namespace CExternalPatchHandler
 		{
 			return;
 		};
+
+		baseItems = {
+			&CFramework_Others::ItemDataSB,
+			&CFramework_MapMa_AG::Data, &CFramework_MapMa_HR::Data, &CFramework_MapMa_SZ::Data, &CFramework_MapMa_DG::Data, &CFramework_MapMa_DB::Data,
+			&CFramework_Blessings_DS::Data, &CFramework_Blessings_VS::Data, &CFramework_Blessings_WS::Data,
+			&CFramework_Enchantments_VA::Data, &CFramework_Enchantments_SA::Data, &CFramework_Enchantments_VW::Data, &CFramework_Enchantments_SW::Data,
+			&CFramework_Pets_VP::Data, &CFramework_PlayerHomes_VH::Data,
+			&CFramework_Shouts_VS::Data, &CFramework_Shouts_TS::Data, &CFramework_Shouts_MS::Data,
+		};
+		baseIngredients.clear();
+		for (const auto& ingredient : CFramework_Ingredients::Ingredients) {
+			baseIngredients.insert(ingredient.form->GetFormID());
+		}
+		baseQuests.clear();
+		for (const auto& [quest, name, ID, key] : CQuestMaster::CQuestDataVec) {
+			if (quest) {
+				baseQuests.insert(Lower(quest->GetEditorID()));
+			}
+		}
 
 		for (auto& file : files)
 		{
@@ -258,6 +309,13 @@ namespace CExternalPatchHandler
 					continue;
 				};
 
+				if (baseQuests.contains(Lower(GetEditorID(sec)))) {
+					if (data->log_install) {
+						INFO("Skipping quest section {}: Completionist already tracks it", sec);
+					}
+					continue;
+				}
+
 				//mPagelink is used to tie this quest to an existing page. (Does not create an mcm page and is grabbed by tied page) 
 				int32_t mPagelink = pageIdentifiers[GetMultiPageValue(sec) - 1];
 				if (mPagelink == -1) {
@@ -386,6 +444,14 @@ namespace CExternalPatchHandler
 					const bool itemPatch = PatchData.type == CMiscPatchType::kItems || PatchData.type == CMiscPatchType::kBooks || PatchData.type == CMiscPatchType::kFish;
 					if (const char* name = form->GetName(); itemPatch && (!name || !*name)) {
 						INFO("Skipping nameless item {:08X} ({}) in section {}: it can't be picked up", form->GetFormID(), raw, sec);
+						Idx++;
+						continue;
+					}
+
+					if (itemPatch && TrackedByBase(form->GetFormID(), PatchData.type)) {
+						if (data->log_install) {
+							INFO("Skipping item {:08X} ({}) in section {}: Completionist already tracks it", form->GetFormID(), raw, sec);
+						}
 						Idx++;
 						continue;
 					}

@@ -2,6 +2,7 @@
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
 #include "Frameworks/Misc/CFramework_Dragons.hpp"
+#include "Frameworks/Misc/CFramework_Ingredients.hpp"
 #include "Frameworks/Misc/CFramework_Achievements.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
 #include "Frameworks/Misc/CFramework_Trainers.hpp"
@@ -17,6 +18,7 @@
 #include "UI/Tracker.hpp"
 
 #include <d3d11.h>
+#include <functional>
 
 #undef GetObject
 
@@ -981,6 +983,393 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Alchemy Perk Conditions ) ----------
+		//---------------------------------------------------
+
+		// As the game reads an alchemy perk's conditions: an OR joins an item to the next, the
+		// ORs first, then the ANDs. Whether it's a poison and the effect's keywords are answered
+		// here, since there's no brew; a kind of 0 means not known yet, which fails them
+		bool AlchemyConditionsPass(const RE::BGSEntryPointPerkEntry& a_entry, RE::PlayerCharacter* a_player, const RE::EffectSetting* a_effect, int a_kind) {
+
+			using Function = RE::FUNCTION_DATA::FunctionID;
+			const auto test = [&](const RE::TESConditionItem& a_item) {
+				const auto& data = a_item.data;
+				const auto  wanted = data.flags.global ? (data.comparisonValue.g ? data.comparisonValue.g->value : 0.0f) : data.comparisonValue.f;
+				const auto  compare = [&](float a_value) {
+					switch (data.flags.opCode) {
+					case RE::CONDITION_ITEM_DATA::OpCode::kEqualTo: return a_value == wanted;
+					case RE::CONDITION_ITEM_DATA::OpCode::kNotEqualTo: return a_value != wanted;
+					case RE::CONDITION_ITEM_DATA::OpCode::kGreaterThan: return a_value > wanted;
+					case RE::CONDITION_ITEM_DATA::OpCode::kGreaterThanOrEqualTo: return a_value >= wanted;
+					case RE::CONDITION_ITEM_DATA::OpCode::kLessThan: return a_value < wanted;
+					default: return a_value <= wanted;
+					}
+				};
+				switch (data.functionData.function.get()) {
+				case Function::kEPAlchemyGetMakingPoison:
+					return a_kind != 0 && compare(a_kind == 2 ? 1.0f : 0.0f);
+				case Function::kEPAlchemyEffectHasKeyword: {
+					const auto* keyword = static_cast<const RE::BGSKeyword*>(data.functionData.params[0]);
+					return a_effect && compare(keyword && a_effect->HasKeyword(keyword) ? 1.0f : 0.0f);
+				}
+				case Function::kEPTemperingItemIsEnchanted:
+				case Function::kEPTemperingItemHasKeyword:
+				case Function::kEPModSkillUsage_IsAdvanceSkill:
+				case Function::kEPModSkillUsage_AdvanceObjectHasKeyword:
+				case Function::kEPModSkillUsage_IsAdvanceAction:
+				case Function::kEPMagic_SpellHasKeyword:
+				case Function::kEPMagic_SpellHasSkill:
+					// About something other than a brew
+					return false;
+				default: {
+					RE::ConditionCheckParams params(a_player, a_player);
+					return a_item.IsTrue(params);
+				}
+				}
+			};
+
+			for (std::uint32_t tab = 0; tab < a_entry.conditions.size(); ++tab) {
+				bool all = true;
+				bool any = false;
+				bool open = false;
+				for (auto* item = a_entry.conditions[tab].head; item; item = item->next) {
+					any |= test(*item);
+					open = true;
+					if (!item->data.flags.isOR) {
+						all &= any;
+						any = false;
+						open = false;
+					}
+				}
+				if (open) {
+					all &= any;
+				}
+				if (!all) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Build Mixing Data ) ----------------
+		//---------------------------------------------------
+
+		// Every listed ingredient's effects as the alchemy table would brew them now: the game's
+		// own settings, the player's Alchemy skill and Fortify Alchemy, and the perks they have
+		std::shared_ptr<const MixingData> BuildMixingData(IDataProvider& a_provider, const std::function<std::int32_t(const RE::IngredientItem*)>& a_carried) {
+
+			using namespace CFramework_Ingredients;
+			using EntryPoint = RE::BGSEntryPoint::ENTRY_POINTS::ENTRY_POINT;
+
+			auto  data = std::make_shared<MixingData>();
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			auto* dataHandler = RE::TESDataHandler::GetSingleton();
+			if (!player || !dataHandler) {
+				return data;
+			}
+
+			const auto gameSetting = [](const char* a_name, float a_default) {
+				auto* settings = RE::GameSettingCollection::GetSingleton();
+				auto* setting = settings ? settings->GetSetting(a_name) : nullptr;
+				return setting ? setting->GetFloat() : a_default;
+			};
+			const float ingredientMult = gameSetting("fAlchemyIngredientInitMult", 4.0f);
+			const float skillFactor = gameSetting("fAlchemySkillFactor", 1.5f);
+			const float skill = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAlchemy);
+			const float fortify = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAlchemyModifier);
+
+			// The perks that change a brew's strength, and Purity's
+			std::vector<const RE::BGSEntryPointPerkEntry*> effectiveness;
+			for (auto* perk : dataHandler->GetFormArray<RE::BGSPerk>()) {
+				if (!perk || !player->HasPerk(perk)) {
+					continue;
+				}
+				for (auto* entry : perk->perkEntries) {
+					if (!entry || entry->GetType() != RE::PERK_ENTRY_TYPE::kEntryPoint) {
+						continue;
+					}
+					const auto* point = static_cast<const RE::BGSEntryPointPerkEntry*>(entry);
+					if (point->entryData.entryPoint.get() == EntryPoint::kModAlchemyEffectiveness) {
+						effectiveness.push_back(point);
+					} else if (point->entryData.entryPoint.get() == EntryPoint::kPurifyAlchemyIngredients && AlchemyConditionsPass(*point, player, nullptr, 1)) {
+						data->purity = true;
+					}
+				}
+			}
+			const auto perkMult = [&](const RE::EffectSetting* a_effect, int a_kind) {
+				float value = 1.0f;
+				for (const auto* entry : effectiveness) {
+					const auto* one = entry->functionData && entry->functionData->GetType() == RE::BGSEntryPointFunctionData::ENTRY_POINT_FUNCTION_DATA::kOneValue ? static_cast<const RE::BGSEntryPointFunctionDataOneValue*>(entry->functionData) : nullptr;
+					if (!one || !AlchemyConditionsPass(*entry, player, a_effect, a_kind)) {
+						continue;
+					}
+					switch (entry->entryData.function.get()) {
+					case RE::BGSEntryPointPerkEntry::Function::kSetValue: value = one->data; break;
+					case RE::BGSEntryPointPerkEntry::Function::kAddValue: value += one->data; break;
+					case RE::BGSEntryPointPerkEntry::Function::kMultiplyValue: value *= one->data; break;
+					default: break;
+					}
+				}
+				return value;
+			};
+			const float power = ingredientMult * (1.0f + (skillFactor - 1.0f) * skill / 100.0f) * (1.0f + fortify / 100.0f);
+			data->power = a_provider.Translate("UI_Mix_Power{" + std::to_string(static_cast<int>(skill)) + "}{" + std::to_string(static_cast<int>(std::round(fortify))) + "}");
+
+			using Flag = RE::EffectSetting::EffectSettingData::Flag;
+			for (const auto& ingredient : Ingredients) {
+				auto& mix = data->ingredients.emplace_back();
+				mix.formID = ingredient.form->GetFormID();
+				mix.name = ingredient.form->GetFullName();
+				mix.carried = a_carried(ingredient.form);
+				for (std::uint32_t i = 0; i < ingredient.form->effects.size(); ++i) {
+					const auto* item = ingredient.form->effects[i];
+					const auto* effect = item ? item->baseEffect : nullptr;
+					if (!effect) {
+						continue;
+					}
+					auto& out = mix.effects.emplace_back();
+					out.id = effect->GetFormID();
+					out.name = effect->GetFullName() ? effect->GetFullName() : "";
+					out.text = effect->magicItemDescription.c_str();
+					out.known = CHandler::Knows(ingredient.form, i);
+					out.hostile = effect->IsHostile();
+					out.priority = item->cost;
+					const auto& flags = effect->data.flags;
+					for (int kind = 0; kind < 3; ++kind) {
+						const float factor = power * perkMult(effect, kind);
+						const float magnitude = flags.any(Flag::kNoMagnitude) ? 0.0f : std::round(item->effectItem.magnitude * (flags.any(Flag::kPowerAffectsMagnitude) ? factor : 1.0f));
+						const float duration = flags.any(Flag::kNoDuration) ? 0.0f : std::round(static_cast<float>(item->effectItem.duration) * (flags.any(Flag::kPowerAffectsDuration) ? factor : 1.0f));
+						// The gold the game puts on it
+						const float value = effect->data.baseCost * std::max(std::pow(magnitude, 1.1f), 1.0f) * (duration > 0.0f ? std::pow(duration / 10.0f, 1.1f) : 1.0f);
+						out.magnitude[kind] = static_cast<std::int32_t>(magnitude);
+						out.duration[kind] = static_cast<std::int32_t>(std::max(duration, 0.0f));
+						out.value[kind] = static_cast<std::int32_t>(std::floor(value));
+					}
+				}
+			}
+			return data;
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Build Ingredient Page ) ------------
+		//---------------------------------------------------
+
+		// Each ingredient's four effects, and each effect's ingredients on a tab of their own.
+		// Effects not learnt yet stay unnamed unless the player asks for them
+		Page BuildIngredientPage(IDataProvider& a_provider) {
+
+			using namespace CFramework_Ingredients;
+
+			const auto setting = [](const char* a_name, bool a_default) {
+				const auto* variable = CSettings::SettingsAPI::Get(a_name);
+				return variable && variable->IsBool() ? variable->GetBool() : a_default;
+			};
+
+			Page page{ "ingredients", "UI_Ingredients", {} };
+			if (!setting("IngredientsShow", true) || Ingredients.empty()) {
+				return page;
+			}
+			const bool named = setting("IngredientsNameUnknown", false);
+			page.tabs = { { "UI_Ingredients_TabIngredients" }, { "UI_Ingredients_TabEffects" }, { "UI_Ingredients_TabMixing", PageLayout::kMixing } };
+
+			std::unordered_map<const RE::TESBoundObject*, std::int32_t> carried;
+			if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+				for (const auto& [item, count] : player->GetInventoryCounts()) {
+					if (count > 0 && item && item->GetFormType() == RE::FormType::Ingredient) {
+						carried.emplace(item, count);
+					}
+				}
+			}
+			const auto carriedOf = [&](const Ingredient& a_ingredient) {
+				const auto it = carried.find(a_ingredient.form);
+				return it != carried.end() ? it->second : 0;
+			};
+
+			// Every effect, and the ingredients that carry it with where it is on each
+			struct Holder
+			{
+				const Ingredient* ingredient;
+				std::uint32_t     index;
+			};
+			std::vector<const RE::EffectSetting*>                              effects;
+			std::unordered_map<const RE::EffectSetting*, std::vector<Holder>> holders;
+			for (const auto& ingredient : Ingredients) {
+				for (std::uint32_t i = 0; i < ingredient.form->effects.size(); ++i) {
+					const auto* effect = ingredient.form->effects[i] ? ingredient.form->effects[i]->baseEffect : nullptr;
+					if (!effect) {
+						continue;
+					}
+					auto& list = holders[effect];
+					if (list.empty()) {
+						effects.push_back(effect);
+					}
+					list.push_back({ std::addressof(ingredient), i });
+				}
+			}
+			const auto effectName = [](const RE::EffectSetting* a_effect) {
+				const auto* name = a_effect->GetFullName();
+				return std::string(name ? name : "");
+			};
+			// Ours where we wrote some, else where it comes from
+			const auto loreOf = [&](const std::string& a_key, const std::string& a_source) {
+				if (!a_key.empty()) {
+					if (auto lore = a_provider.Translate(a_key); lore != a_key) {
+						return lore;
+					}
+				}
+				return a_provider.Translate("UI_Ingredients_LoreMod{" + a_provider.Translate(a_source) + "}");
+			};
+			const auto weight = [](float a_weight) { return fmt::format("{:g}", std::round(a_weight * 100.0f) / 100.0f); };
+
+			//---------------------------------------------------
+			// Ingredients, by the game, DLC or Creation that adds them
+			//---------------------------------------------------
+
+			const auto sectionFor = [&](const std::string& a_source) -> Section& {
+				const auto it = std::ranges::find(page.sections, a_source, &Section::title);
+				return it != page.sections.end() ? *it : page.sections.emplace_back(Section{ a_source, {}, 0 });
+			};
+
+			for (const auto& ingredient : Ingredients) {
+				auto*      form = ingredient.form;
+				const auto count = static_cast<std::uint32_t>(form->effects.size());
+				const auto inPack = carriedOf(ingredient);
+
+				std::uint32_t knownCount = 0;
+				for (std::uint32_t i = 0; i < count; ++i) {
+					knownCount += CHandler::Knows(form, i) ? 1 : 0;
+				}
+
+				auto& entry = sectionFor(ingredient.source).entries.emplace_back();
+				entry.name = form->GetFullName();
+				entry.state = knownCount == count ? EntryState::kFound : EntryState::kNeeded;
+				entry.formID = form->GetFormID();
+
+				auto& info = entry.ingredient;
+				info.summary = a_provider.Translate("UI_Ingredients_Known{" + std::to_string(knownCount) + "}{" + std::to_string(count) + "}");
+				info.facts.push_back(a_provider.Translate("UI_Ingredients_Value{" + std::to_string(form->value) + "}{" + weight(form->weight) + "}"));
+				info.facts.push_back(inPack > 0 ? a_provider.Translate("UI_Ingredients_Carried{" + std::to_string(inPack) + "}") : a_provider.Translate("UI_Ingredients_NoneCarried"));
+				info.lore = loreOf(ingredient.key.empty() ? std::string{} : "UI_Ingredients_Lore_" + ingredient.key, ingredient.source);
+				entry.description = info.lore;
+
+				for (std::uint32_t i = 0; i < count; ++i) {
+					const auto* effect = form->effects[i] ? form->effects[i]->baseEffect : nullptr;
+					auto&       card = info.cards.emplace_back();
+					card.known = CHandler::Knows(form, i);
+					card.name = effect && (card.known || named) ? effectName(effect) : a_provider.Translate("UI_Ingredients_NotKnown");
+					if (!effect) {
+						continue;
+					}
+					if (card.known) {
+						card.hint = a_provider.Translate(effect->IsHostile() ? "UI_Ingredients_Poison" : "UI_Ingredients_Potion");
+						continue;
+					}
+					if (i == 0) {
+						// Eating one teaches the first
+						card.hint = a_provider.Translate("UI_Ingredients_HintEat");
+						continue;
+					}
+
+					// Brewing it with another that has it teaches it on both: the one carried most
+					const Holder* best = nullptr;
+					std::string   others;
+					std::int32_t  othersCount = 0;
+					for (const auto& holder : holders[effect]) {
+						if (holder.ingredient == std::addressof(ingredient)) {
+							continue;
+						}
+						if (!best || carriedOf(*holder.ingredient) > carriedOf(*best->ingredient)) {
+							best = std::addressof(holder);
+						}
+						if (othersCount++ < 2) {
+							others += (others.empty() ? "" : ", ") + std::string(holder.ingredient->form->GetFullName());
+						}
+					}
+					if (!best) {
+						card.hint = a_provider.Translate("UI_Ingredients_HintOnly");
+					} else if (const auto with = carriedOf(*best->ingredient); with > 0) {
+						card.hint = a_provider.Translate("UI_Ingredients_HintBrew{" + std::string(best->ingredient->form->GetFullName()) + "}{" + std::to_string(with) + "}");
+					} else if (named) {
+						card.hint = a_provider.Translate("UI_Ingredients_HintShared{" + others + "}");
+					} else {
+						card.hint = a_provider.Translate("UI_Ingredients_HintNone");
+					}
+				}
+			}
+
+			// The game and its DLC in release order, then the Creations by title
+			const auto rank = [](const Section& a_section) {
+				constexpr std::string_view order[] = { "UI_Ingredients_Skyrim", "UI_Ingredients_Dawnguard", "UI_Ingredients_Hearthfire", "UI_Ingredients_Dragonborn" };
+				const auto it = std::ranges::find(order, a_section.title);
+				return std::pair(static_cast<int>(it - std::begin(order)), it == std::end(order) ? a_section.title : std::string{});
+			};
+			std::ranges::stable_sort(page.sections, {}, rank);
+
+			//---------------------------------------------------
+			// Effects, potions then poisons; the first tab counts
+			//---------------------------------------------------
+
+			std::ranges::sort(effects, [&](const RE::EffectSetting* a_left, const RE::EffectSetting* a_right) { return effectName(a_left) < effectName(a_right); });
+			Section potions{ "UI_Ingredients_Potions", {}, 1 };
+			Section poisons{ "UI_Ingredients_Poisons", {}, 1 };
+			potions.counted = poisons.counted = false;
+			for (const auto* effect : effects) {
+				const auto&  list = holders[effect];
+				std::int32_t knownOn = 0;
+				for (const auto& holder : list) {
+					knownOn += CHandler::Knows(holder.ingredient->form, holder.index) ? 1 : 0;
+				}
+				if (knownOn == 0 && !named) {
+					continue;
+				}
+
+				const bool hostile = effect->IsHostile();
+				auto&      entry = (hostile ? poisons : potions).entries.emplace_back();
+				entry.name = effectName(effect);
+				entry.detail = fmt::format("{} / {}", knownOn, list.size());
+				entry.state = knownOn == static_cast<std::int32_t>(list.size()) ? EntryState::kFound : EntryState::kNeeded;
+				entry.formID = effect->GetFormID();
+
+				auto& info = entry.ingredient;
+				info.effect = true;
+				info.summary = a_provider.Translate("UI_Ingredients_KnownOn{" + std::to_string(knownOn) + "}{" + std::to_string(list.size()) + "}");
+				info.facts.push_back(a_provider.Translate(hostile ? "UI_Ingredients_Poison" : "UI_Ingredients_Potion"));
+				const auto  key = CHandler::EffectKey(effect);
+				const auto* file = effect->GetFile(0);
+				info.lore = loreOf(key.empty() ? std::string{} : "UI_Ingredients_Effect_" + key, file ? std::string(file->GetFilename()) : std::string{});
+				entry.description = info.lore;
+
+				// Learnt first, then the ones carried
+				std::vector<const Holder*> sorted;
+				for (const auto& holder : list) {
+					sorted.push_back(std::addressof(holder));
+				}
+				const auto order = [&](const Holder* a_holder) { return std::tuple(!CHandler::Knows(a_holder->ingredient->form, a_holder->index), -carriedOf(*a_holder->ingredient)); };
+				std::ranges::stable_sort(sorted, {}, order);
+				for (const auto* holder : sorted) {
+					auto&      card = info.cards.emplace_back();
+					const auto inPack = carriedOf(*holder->ingredient);
+					card.known = CHandler::Knows(holder->ingredient->form, holder->index);
+					card.name = card.known || named ? std::string(holder->ingredient->form->GetFullName()) : a_provider.Translate("UI_Ingredients_NotLearnt");
+					card.hint = !card.known && !named ? std::string{}
+					          : inPack > 0           ? a_provider.Translate("UI_Ingredients_Carried{" + std::to_string(inPack) + "}")
+					                                 : a_provider.Translate("UI_Ingredients_NoneCarried");
+				}
+			}
+			for (auto* section : { &potions, &poisons }) {
+				if (!section->entries.empty()) {
+					page.sections.push_back(std::move(*section));
+				}
+			}
+			page.mixing = BuildMixingData(a_provider, [&](const RE::IngredientItem* a_form) {
+				const auto it = carried.find(a_form);
+				return it != carried.end() ? it->second : 0;
+			});
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Build Achievement Page ) -----------
 		//---------------------------------------------------
 
@@ -1146,6 +1535,9 @@ namespace CompletionistUI
 
 			PageSummary summary{ a_page.id, a_page.title };
 			for (const auto& section : a_page.sections) {
+				if (!section.counted) {
+					continue;
+				}
 				summary.found += section.Found();
 				summary.total += section.Total();
 			}
@@ -1197,6 +1589,10 @@ namespace CompletionistUI
 			pages.emplace(page.id, std::move(page));
 		}
 		if (auto page = BuildDragonPage(*this); !page.sections.empty()) {
+			categories[0].pages.push_back(Summarise(page));
+			pages.emplace(page.id, std::move(page));
+		}
+		if (auto page = BuildIngredientPage(*this); !page.sections.empty()) {
 			categories[0].pages.push_back(Summarise(page));
 			pages.emplace(page.id, std::move(page));
 		}
@@ -2068,8 +2464,8 @@ namespace CompletionistUI
 		if (a_pageID != "general") {
 			SKSE::GetTaskInterface()->AddTask([this, page = std::string(a_pageID), item = a_item]() {
 				_settingsBuilder.Apply(page, item);
-				// The achievements page is built from its settings
-				if (page == "achievements") {
+				// The achievements and ingredients pages are built from their settings
+				if (page == "achievements" || page == "ingredients") {
 					Rebuild();
 				} else {
 					RebuildSettings();
