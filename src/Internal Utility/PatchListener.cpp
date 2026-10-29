@@ -8,7 +8,6 @@
 #include "Frameworks/Misc/CFramework_Ingredients.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
 #include "Frameworks/Misc/CFramework_Pets.hpp"
-#include "Frameworks/Misc/CFramework_PlayerHomes.hpp"
 #include "Frameworks/Misc/CFramework_Shouts.hpp"
 
 namespace CExternalPatchHandler
@@ -18,9 +17,9 @@ namespace CExternalPatchHandler
 		// What Completionist tracks itself, taken before any patch adds to it: a patch that
 		// lists the same item or quest again leaves it to the base mod. The frameworks fill
 		// their data before the patches load; the merged list of them comes only afterwards
-		std::vector<const Serialization::CompletionistData*> baseItems;
-		std::unordered_set<RE::FormID>                       baseIngredients;
-		std::unordered_set<std::string>                      baseQuests;
+		std::vector<Serialization::CompletionistData*> baseItems;
+		std::unordered_set<RE::FormID>                 baseIngredients;
+		std::unordered_set<std::string>                baseQuests;
 
 		std::string Lower(std::string a_text) {
 
@@ -34,6 +33,32 @@ namespace CExternalPatchHandler
 				return true;
 			}
 			return std::ranges::any_of(baseItems, [&](const Serialization::CompletionistData* a_data) { return a_data->HasForm(a_form); });
+		}
+
+		// A skipped item's variations from other mods go to the base mod's entry, so finding
+		// any of them counts there as the patch meant it to; to its base when the patch's form
+		// is itself one of the base mod's variations
+		void FoldVariations(RE::FormID a_form, const std::vector<std::tuple<RE::FormID, std::string, std::string>>& a_variations, bool a_log) {
+
+			const auto owner = std::ranges::find_if(baseItems, [&](const Serialization::CompletionistData* a_data) { return a_data->HasForm(a_form); });
+			if (owner == baseItems.end()) {
+				return;
+			}
+			auto*      data = *owner;
+			const auto base = data->IsVariation(a_form) ? data->GetBase(a_form) : a_form;
+			for (const auto& [formID, raw, plugin] : a_variations) {
+				if (!Serialization::CompletionistData::IsModInstalled(plugin)) {
+					continue;
+				}
+				const auto* variation = RE::TESDataHandler::GetSingleton()->LookupForm(formID, plugin);
+				if (!variation || data->HasForm(variation->GetFormID())) {
+					continue;
+				}
+				data->data.try_emplace(variation->GetFormID(), base);
+				if (a_log) {
+					INFO("Adding variation {:08X} ({}) to Completionist's own {:08X}", variation->GetFormID(), raw, base);
+				}
+			}
 		}
 	}
 
@@ -90,18 +115,17 @@ namespace CExternalPatchHandler
 			return;
 		};
 
+		// Player Homes is left out: it tracks the houses, and only reads their keys to tell
+		// which are owned, so a Keys patch still lists them as keys
 		baseItems = {
 			&CFramework_Others::ItemDataSB,
 			&CFramework_MapMa_AG::Data, &CFramework_MapMa_HR::Data, &CFramework_MapMa_SZ::Data, &CFramework_MapMa_DG::Data, &CFramework_MapMa_DB::Data,
 			&CFramework_Blessings_DS::Data, &CFramework_Blessings_VS::Data, &CFramework_Blessings_WS::Data,
 			&CFramework_Enchantments_VA::Data, &CFramework_Enchantments_SA::Data, &CFramework_Enchantments_VW::Data, &CFramework_Enchantments_SW::Data,
-			&CFramework_Pets_VP::Data, &CFramework_PlayerHomes_VH::Data,
+			&CFramework_Pets_VP::Data,
 			&CFramework_Shouts_VS::Data, &CFramework_Shouts_TS::Data, &CFramework_Shouts_MS::Data,
 		};
-		baseIngredients.clear();
-		for (const auto& ingredient : CFramework_Ingredients::Ingredients) {
-			baseIngredients.insert(ingredient.form->GetFormID());
-		}
+		baseIngredients = CFramework_Ingredients::Covered;
 		baseQuests.clear();
 		for (const auto& [quest, name, ID, key] : CQuestMaster::CQuestDataVec) {
 			if (quest) {
@@ -452,6 +476,7 @@ namespace CExternalPatchHandler
 						if (data->log_install) {
 							INFO("Skipping item {:08X} ({}) in section {}: Completionist already tracks it", form->GetFormID(), raw, sec);
 						}
+						FoldVariations(form->GetFormID(), GetVariationsArray(sec, fullVariableString, raw, data->log_install), data->log_install);
 						Idx++;
 						continue;
 					}

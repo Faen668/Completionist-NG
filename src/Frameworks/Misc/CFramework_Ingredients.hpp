@@ -13,6 +13,7 @@ namespace CFramework_Ingredients
 	};
 
 	inline std::vector<Ingredient> Ingredients;
+	inline std::unordered_set<RE::FormID> Covered;	// the listed ones and the same-named records folded into them
 
 	class CHandler
 	{

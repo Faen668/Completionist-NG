@@ -326,6 +326,7 @@ namespace CFramework_Ingredients
 	void CHandler::InstallFramework() {
 
 		Ingredients.clear();
+		Covered.clear();
 		effectKeys.clear();
 		auto* dataHandler = RE::TESDataHandler::GetSingleton();
 		if (!dataHandler) { return; }
@@ -357,7 +358,9 @@ namespace CFramework_Ingredients
 
 			std::string plugin(file->GetFilename());
 			auto        source = SourceOf(plugin);
-			if (source.empty() || !seen.insert(plugin + '\x1f' + name).second) { continue; }
+			if (source.empty()) { continue; }
+			Covered.insert(ingredient->GetFormID());
+			if (!seen.insert(plugin + '\x1f' + name).second) { continue; }
 			Ingredients.push_back({ key, std::move(plugin), std::move(source), ingredient });
 		}
 		std::ranges::stable_sort(Ingredients, {}, [](const Ingredient& a_ingredient) { return std::string_view(a_ingredient.form->GetFullName()); });
