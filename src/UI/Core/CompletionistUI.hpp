@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/Core/IDataProvider.hpp"
+#include "UI/Core/Mixing.hpp"
 #include "UI/Core/Toasts.hpp"
 #include "UI/Core/UISettings.hpp"
 
@@ -105,6 +106,8 @@ namespace CompletionistUI
 		};
 		[[nodiscard]] std::vector<SpotView> Spots() const;
 		void OpenPageTab(std::string_view a_page, int a_tab) { _pageTabs[std::string(a_page)] = std::to_string(a_tab); }
+		void SetMixSlots(const std::array<std::uint32_t, 3>& a_slots) { _mixSlots = a_slots; }
+		void OpenMixPotion(std::string a_effect) { _mixOpenName = std::move(a_effect); }	// by its main effect's name
 
 		void RecordControl();
 
@@ -195,6 +198,22 @@ namespace CompletionistUI
 		[[nodiscard]] static float DragonInfoHeight(float a_lore, float a_width);
 		[[nodiscard]] static float DragonLoreHeight(const std::string& a_lore, float a_width);
 		float                      _dragonLore{ 0.0f };	// the page's longest story, so the panel keeps its height
+		void                       DrawIngredientInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
+		void                       DrawMixing(IDataProvider& a_provider, const Page& a_page);
+		void                       MixToggle(std::uint32_t a_formID);
+		[[nodiscard]] static std::string BrewName(IDataProvider& a_provider, const Brew& a_brew);
+		std::array<std::uint32_t, 3>      _mixSlots{};	// the Mixing Station's ingredients
+		bool                              _mixAll{ false };	// every ingredient, not only the ones carried
+		std::shared_ptr<const MixingData> _mixData;
+		std::vector<PotionGroup>          _mixGroups;	// what can be brewed from what's carried, for _mixData
+		std::unordered_set<std::uint64_t> _mixOpen;	// potions opened to their variations
+		std::string                       _mixOpenName;	// opened once the groups are worked out
+		static void                DrawIngredientPips(const Entry& a_entry);
+		void                       MeasureIngredientPage(const Page& a_page, float a_width);
+		[[nodiscard]] float        IngredientInfoHeight(float a_width) const;
+		float                      _ingredientLore{ 0.0f };	// the tab's longest lore, most card rows and facts, so the panel keeps its height
+		std::int32_t               _ingredientRows{ 1 };
+		std::size_t                _ingredientFacts{ 1 };
 		void                       DrawAchievementInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
 		[[nodiscard]] static float AchievementInfoHeight(float a_body, float a_width);
 		[[nodiscard]] static float AchievementBodyHeight(IDataProvider& a_provider, const Entry& a_entry, float a_width);

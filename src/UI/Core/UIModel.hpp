@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -88,6 +89,56 @@ namespace CompletionistUI
 		std::vector<AchievementGoal> progress;
 	};
 
+	// An effect on an ingredient's panel, or an ingredient on an effect's
+	struct IngredientCard
+	{
+		std::string name;	// "not known yet" when hidden
+		std::string hint;	// how to learn it, or what it is
+		bool        known{ false };
+	};
+
+	// An ingredient and its four effects, or an effect and the ingredients that carry it
+	struct EntryIngredient
+	{
+		std::string                 summary;	// empty when not an ingredient or effect
+		std::vector<std::string>    facts;
+		std::string                 lore;
+		std::vector<IngredientCard> cards;
+		bool                        effect{ false };
+	};
+
+	// How an effect on an ingredient brews for the player now, as the game works it out from
+	// their skill, perks and Fortify Alchemy. Index 0 is before the perks that only count in
+	// a potion or a poison, 1 is in a potion, 2 in a poison
+	struct MixEffect
+	{
+		std::uint32_t id{ 0 };	// the effect's form, the same on every ingredient that has it
+		std::string   name;
+		std::string   text;	// the game's description, <mag> and <dur> where the numbers go
+		bool          known{ false };
+		bool          hostile{ false };
+		float         priority{ 0.0f };	// where two ingredients share it, the dearer one's is brewed
+		std::int32_t  magnitude[3]{};
+		std::int32_t  duration[3]{};
+		std::int32_t  value[3]{};
+	};
+
+	struct MixIngredient
+	{
+		std::uint32_t          formID{ 0 };
+		std::string            name;
+		std::int32_t           carried{ 0 };
+		std::vector<MixEffect> effects;
+	};
+
+	// Everything the Mixing Station tab brews from
+	struct MixingData
+	{
+		std::vector<MixIngredient> ingredients;
+		bool                       purity{ false };	// potions lose their harmful effects, poisons their good ones
+		std::string                power;	// what the strength comes from, for the header
+	};
+
 	struct Entry
 	{
 		std::string   name;
@@ -112,10 +163,12 @@ namespace CompletionistUI
 		EntryTrainer            trainer;
 		EntryDragon             dragon;
 		EntryAchievement        achievement;
+		EntryIngredient         ingredient;
 
 		[[nodiscard]] bool          IsTrainer() const noexcept { return trainer.skill >= 0; }
 		[[nodiscard]] bool          IsDragon() const noexcept { return !dragon.fate.empty(); }
 		[[nodiscard]] bool          IsAchievement() const noexcept { return !achievement.game.empty(); }
+		[[nodiscard]] bool          IsIngredient() const noexcept { return !ingredient.summary.empty(); }
 		[[nodiscard]] std::uint32_t MarkerID() const noexcept { return refID ? refID : formID; }
 
 		[[nodiscard]] bool IsComplete() const noexcept { return state == EntryState::kFound || state == EntryState::kDisplayed; }
@@ -126,6 +179,7 @@ namespace CompletionistUI
 		std::string        title;
 		std::vector<Entry> entries;
 		std::int32_t       tab{ -1 };	// index into Page::tabs, -1 when the page has none
+		bool               counted{ true };	// false when another tab already counts the same things
 
 		[[nodiscard]] std::int32_t Found() const noexcept
 		{
@@ -144,6 +198,7 @@ namespace CompletionistUI
 		kList,
 		kJournal,	// quests
 		kKills,	// a kill list, as Kill Counts
+		kMixing,	// the ingredients page's Mixing Station
 	};
 
 	// A patch's own sub-page, e.g. Quests or Gear
@@ -172,6 +227,7 @@ namespace CompletionistUI
 		PageChoice           choice{};	// no options when the patch has none
 		std::vector<PageTab> tabs{};	// sections say which tab they're on
 		std::string          hint{};	// a line above the entries
+		std::shared_ptr<const MixingData> mixing{};	// the ingredients page's
 
 		[[nodiscard]] PageLayout LayoutOf(const Section& a_section) const noexcept
 		{

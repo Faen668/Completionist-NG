@@ -338,6 +338,8 @@ namespace CompletionistUI
 
 			static const std::unordered_map<std::string_view, std::string_view> help{
 			{ "Achievements_Show", "UI_Achievements_SettingShowInfo" },
+			{ "Ingredients_Show", "UI_Ingredients_SettingShowInfo" },
+			{ "Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknownInfo" },
 			{ "Achievements_Progress", "UI_Achievements_SettingProgressInfo" },
 			{ "Achievements_Tips", "UI_Achievements_SettingTipsInfo" },
 			{ "Achievements_Rarity", "UI_Achievements_SettingRarityInfo" },
@@ -425,6 +427,25 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Settings Layout ( Ingredients Page ) -----------
+		//---------------------------------------------------
+
+		// The page, and whether effects not learnt yet are named
+		SettingsPageLayout IngredientsPage() {
+
+			SettingsPageLayout page{ "ingredients", "UI_SettingsSection_Ingredients", {}, {} };
+			page.columns[0] = {
+				Header("UI_Ingredients_SettingsTracking"),
+				Toggle("Ingredients_Show", "UI_Ingredients_SettingShow", "IngredientsShow"),
+			};
+			page.columns[1] = {
+				Header("UI_Ingredients_SettingsDetails"),
+				Toggle("Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknown", "IngredientsNameUnknown", "IngredientsShow"),
+			};
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Settings Layout ( Completion Log Page ) --------
 		//---------------------------------------------------
 
@@ -445,7 +466,7 @@ namespace CompletionistUI
 	const std::vector<SettingsPageLayout>& MCMSettingsLayouts() {
 
 		static const std::vector<SettingsPageLayout> layouts = [] {
-			std::vector<SettingsPageLayout> pages{ NotificationsPage(), HudPage(), MuseumPage(), InterfacePage(), CellScannerPage(), CompletionLogPage(), CellWindowPage(), AchievementsPage() };
+			std::vector<SettingsPageLayout> pages{ NotificationsPage(), HudPage(), MuseumPage(), InterfacePage(), CellScannerPage(), CompletionLogPage(), CellWindowPage(), AchievementsPage(), IngredientsPage() };
 			AddHelpTexts(pages);
 			return pages;
 		}();

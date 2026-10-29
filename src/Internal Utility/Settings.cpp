@@ -49,6 +49,10 @@ namespace CSettings
 			{ "AchievementsRarity", Type::kBool, "true" },
 			{ "AchievementsMissable", Type::kBool, "true" },
 
+			// Ingredients
+			{ "IngredientsShow", Type::kBool, "true" },
+			{ "IngredientsNameUnknown", Type::kBool, "false" },
+
 			// UI Settings
 			{ "NotifyItems", Type::kBool, "true" },
 			{ "NotifyBooks", Type::kBool, "true" },
