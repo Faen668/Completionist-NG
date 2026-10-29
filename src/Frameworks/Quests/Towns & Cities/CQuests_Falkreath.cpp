@@ -21,6 +21,7 @@ namespace CQFramework_Falkreath
 		{"Falkreath_Quest00", CFlagEnum::kSide, CCompEnum::kStand, "DA03"},
 		{"Falkreath_Quest01", CFlagEnum::kSide, CCompEnum::kStand, "FreeformFalkreathQuest03"},
 		{"Falkreath_Quest02", CFlagEnum::kSide, CCompEnum::kStand, "DA05"},
+		{"Falkreath_Quest11", CFlagEnum::kSide, CCompEnum::kStage, "FreeformFalkreathQuest02"}, //CRF
 		{"Falkreath_Quest03", CFlagEnum::kSide, CCompEnum::kFavor, "Favor154"},
 		{"Falkreath_Quest04", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsChopWood"},
 		{"Falkreath_Quest05", CFlagEnum::kSide, CCompEnum::kFavor, "Favor001"},
@@ -35,15 +36,29 @@ namespace CQFramework_Falkreath
 		{"Falkreath_Quest10", "FalkreathImpGetOutofJail", "FalkreathSonsGetOutofJail"},
 	};
 
+	// Runil's Dark Past never completes; stage 5 is his confession
+	CStageData StageData[]{
+		{"Falkreath_Quest11", CStageEnum::kDone, 5},
+	};
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Install Framework ) ------
 	//---------------------------------------------------
 
 	void CHandler::InstallFramework()
 	{
+		auto CuttingRoomFloorInstalled = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
+			// Handle Exclusions for 'Cutting Room Floor'
+			if (!CuttingRoomFloorInstalled && i == 3) {
+				INFO("Excluded quest {} Due To 'Cutting Room Floor'", QuestData[i].unique_identifier);
+				continue;
+			}
+
 			QuestData[i].init()
+				->initStageData(StageData)
 				->initThaneData(ThaneData)
 				->initRadiantData(RadiantData)
 				->initFavorData(FavorData)

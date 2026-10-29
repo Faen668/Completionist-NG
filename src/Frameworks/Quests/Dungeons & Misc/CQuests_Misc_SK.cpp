@@ -5,6 +5,7 @@ namespace CQFramework_Misc_SK
 {
 	CQuestData QuestData_S[]{
 		{"Radi_SK_Quest00", CFlagEnum::kSide, CCompEnum::kFavor, "Favor013"},
+		{"Side_SK_Quest26", CFlagEnum::kSide, CCompEnum::kStand, "NarzulburFreeFormWifeQuest"}, //CRF
 		{"Side_SK_Quest00", CFlagEnum::kSide, CCompEnum::kStage, "FreeformCaravansA"},
 		{"Radi_SK_Quest10", CFlagEnum::kSide, CCompEnum::kFavor, "Favor001" },
 		{"Radi_SK_Quest11", CFlagEnum::kSide, CCompEnum::kFavor, "Favor001" },
@@ -146,8 +147,16 @@ namespace CQFramework_Misc_SK
 
 	void CHandler::InstallFramework()
 	{
+		auto CuttingRoomFloorInstalled = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData_S)>; i++)
 		{
+			// Handle Exclusions for 'Cutting Room Floor'
+			if (!CuttingRoomFloorInstalled && i == 1) {
+				INFO("Excluded quest {} Due To 'Cutting Room Floor'", QuestData_S[i].unique_identifier);
+				continue;
+			}
+
 			QuestData_S[i].init()->initStageData(StageData_S)->initFavorData(FavorData_S)->finalize();
 			CQuestMaster::CQuestDataVec.push_back(std::make_tuple(&QuestData_S[i], QuestData_S[i].GetName(), 28, QuestData_S[i].unique_identifier));
 		}
