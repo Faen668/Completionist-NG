@@ -120,6 +120,11 @@ namespace CVariables
 		settings.toastsNewestFirst = flag("NotificationsNewestFirst", "true");
 		settings.toastX = number("NotificationsX", "0", 0.0f, 1.0f);
 		settings.toastY = number("NotificationsY", "0.317", 0.0f, 1.0f);
+		const auto join = GetIniValue("UI", "NotificationsJoin", "None");
+		settings.toastJoin = DKUtil::string::iequals(join, "Below") ? CompletionistUI::ToastJoin::kBelow
+		                   : DKUtil::string::iequals(join, "Above") ? CompletionistUI::ToastJoin::kAbove
+		                   : DKUtil::string::iequals(join, "Left")  ? CompletionistUI::ToastJoin::kLeft
+		                                                            : CompletionistUI::ToastJoin::kNone;
 
 		const auto theme = GetIniValue("UI", "Theme", "Completionist");
 		settings.theme = CompletionistUI::Themes::FromName(theme);
@@ -169,6 +174,8 @@ namespace CVariables
 		ini.SetValue(section, "NotificationsNewestFirst", a_settings.toastsNewestFirst ? "true" : "false");
 		ini.SetValue(section, "NotificationsX", fmt::format("{:.3f}", a_settings.toastX).c_str());
 		ini.SetValue(section, "NotificationsY", fmt::format("{:.3f}", a_settings.toastY).c_str());
+		constexpr const char* joins[] = { "None", "Below", "Above", "Left" };
+		ini.SetValue(section, "NotificationsJoin", joins[static_cast<int>(a_settings.toastJoin)]);
 
 		if (CSettingsFile::SaveUser(ini) < 0) {
 			INFO("Failed to save UI settings to completionist.ini");

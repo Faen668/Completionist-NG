@@ -33,18 +33,21 @@ namespace CompletionistUI
 		Theme            theme;
 		std::string_view name;	// Completionist.ini
 		const char*      key;	// translation
+		bool             race{ false };	// listed after the separator
 	};
 
-	// Settings list order: ours, then the races A to Z
+	// Settings list order: ours and the UI mods' looks, then the races A to Z
 	inline constexpr ThemeInfo themeList[] = {
 		{ Theme::kCompletionist, "Completionist", "UI_Theme_Completionist" },
 		{ Theme::kSkyUI, "SkyUI", "UI_Theme_SkyUI" },
-		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer" },
-		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian" },
-		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer" },
-		{ Theme::kDunmer, "Dunmer", "UI_Theme_Dunmer" },
-		{ Theme::kKhajiit, "Khajiit", "UI_Theme_Khajiit" },
-		{ Theme::kNord, "Nord", "UI_Theme_Nord" },
+		{ Theme::kDearDiary, "DearDiary", "UI_Theme_DearDiary" },
+		{ Theme::kNordic, "Nordic", "UI_Theme_Nordic" },
+		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer", true },
+		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian", true },
+		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer", true },
+		{ Theme::kDunmer, "Dunmer", "UI_Theme_Dunmer", true },
+		{ Theme::kKhajiit, "Khajiit", "UI_Theme_Khajiit", true },
+		{ Theme::kNord, "Nord", "UI_Theme_Nord", true },
 	};
 
 	struct FontPaths

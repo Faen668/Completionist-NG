@@ -1271,7 +1271,7 @@ namespace CompletionistUI
 			const auto  pos = ImGui::GetCursorScreenPos();
 			const float width = ImGui::GetContentRegionAvail().x;
 			const auto& palette = Themes::GetPalette();
-			if (SkyUI()) {
+			if (Decor::TailedHeadings()) {
 				const auto  headingMin = ImGui::GetItemRectMin();
 				const auto  headingMax = ImGui::GetItemRectMax();
 				const float midY = std::round((headingMin.y + headingMax.y) * 0.5f);
@@ -2605,7 +2605,7 @@ namespace CompletionistUI
 		const auto  origin = ImGui::GetCursorScreenPos();
 
 		ImGui::PushFont(Themes::TitleFont());
-		const auto  shownTitle = SkyUI() ? Upper(title) : title;
+		const auto  shownTitle = Decor::UpperTitle() ? Upper(title) : title;
 		const auto  titleSize = ImGui::CalcTextSize(shownTitle.c_str());
 		const float titleX = origin.x + (width - titleSize.x) * 0.5f;
 		const float lineY = origin.y + titleSize.y * 0.55f;
@@ -2792,7 +2792,11 @@ namespace CompletionistUI
 					drawList->AddText(ImVec2(textX, pos.y + (lineHeight - textSize.y) * 0.5f), Colour(palette.heading), title.c_str());
 					ImGui::PopFont();
 					Decor::DrawIcon(drawList, Decor::IconFor(category.Group()), ImVec2(pos.x + iconSize * 0.5f, lineY), iconSize, Colour(palette.heading));
-					Decor::Rule(drawList, ImVec2(textX + textSize.x + padding, lineY), ImVec2(pos.x + width, lineY), Colour(palette.separator));
+					if (Decor::TailedHeadings()) {
+						Decor::HeadingTail(drawList, ImVec2(textX + textSize.x + padding, lineY), ImVec2(pos.x + width, lineY), Colour(palette.text, 0.85f), Colour(palette.separator));
+					} else {
+						Decor::Rule(drawList, ImVec2(textX + textSize.x + padding, lineY), ImVec2(pos.x + width, lineY), Colour(palette.separator));
+					}
 				}
 				ImGui::Dummy(ImVec2(width, lineHeight));
 			}
@@ -4473,7 +4477,8 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Toast Placement ) ------
 	//---------------------------------------------------
 
-	// Notification placement, hides the main window
+	// Notification placement, hides the main window. The Cell Scanner panel shows where it sits in play,
+	// greyed, so the notifications can be kept clear of it, or let go against one of its edges to join it
 	void Menu::DrawToastPlacement(IDataProvider& a_provider, UISettings& a_settings) {
 
 		const auto& io = ImGui::GetIO();
@@ -4481,6 +4486,8 @@ namespace CompletionistUI
 		if (!_toastSample) {
 			_toastSample = std::make_unique<Toasts>();
 			_placeFrom = ImVec2(a_settings.toastX, a_settings.toastY);
+			_placeJoinFrom = a_settings.toastJoin;
+			_placeMoving = false;
 			const auto entry = a_provider.Translate("UI_Toasts_SampleEntry");
 			_toastSample->Push(entry, a_provider.Translate("UI_Toasts_SampleItem1"), ToastKind::kEntry);
 			_toastSample->Push(entry, a_provider.Translate("UI_Toasts_SampleItem2"), ToastKind::kEntry);
@@ -4492,20 +4499,29 @@ namespace CompletionistUI
 			} else {
 				a_settings.toastX = _placeFrom.x;
 				a_settings.toastY = _placeFrom.y;
+				a_settings.toastJoin = _placeJoinFrom;
 			}
 			_placingToasts = false;
 			_toastSample.reset();
 		};
 
 		ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0.0f, 0.0f), io.DisplaySize, IM_COL32(0, 0, 0, 90));
+		const auto panel = DrawCellPanel(a_provider, a_settings, a_settings.toastJoin, _toastSample->StackSize(false), 0.3f);
 		ToastOptions options;
 		options.x = a_settings.toastX;
 		options.y = a_settings.toastY;
 		options.newestFirst = a_settings.toastsNewestFirst;
 		options.preview = true;
+		if (a_settings.toastJoin != ToastJoin::kNone) {
+			options.docked = true;
+			options.dockAt = panel.dockAt;
+			options.dockWidth = panel.dockWidth;
+			options.dockUp = panel.dockUp;
+		}
 		const auto   bounds = _toastSample->Draw(ImGui::GetTime(), options, {});
 		const ImVec2 size(std::max(1.0f, bounds.max.x - bounds.min.x), std::max(1.0f, bounds.max.y - bounds.min.y));
-		const auto   travel = Toasts::Travel(size);
+		const ImVec2 freeSize(Toasts::Width(), size.y);
+		const auto   travel = Toasts::Travel(freeSize);
 		const auto   move = [&](float a_dx, float a_dy) {
 			if (travel.x > 0.0f) {
 				a_settings.toastX = std::clamp(a_settings.toastX + a_dx / travel.x, 0.0f, 1.0f);
@@ -4514,9 +4530,20 @@ namespace CompletionistUI
 				a_settings.toastY = std::clamp(a_settings.toastY + a_dy / travel.y, 0.0f, 1.0f);
 			}
 		};
+		// Moving a joined stack takes it out of the panel, from where it was
+		const auto detach = [&] {
+			if (a_settings.toastJoin != ToastJoin::kNone) {
+				const auto at = Toasts::Position(bounds.min, freeSize);
+				a_settings.toastX = at.x;
+				a_settings.toastY = at.y;
+				a_settings.toastJoin = ToastJoin::kNone;
+			}
+		};
 
 		ImGui::PushFont(Themes::BodyFont());
 		const float fontSize = ImGui::GetFontSize();
+		bool        moving = false;
+		bool        hovered = false;
 
 		// Mouse drag
 		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
@@ -4527,16 +4554,15 @@ namespace CompletionistUI
 			ImGui::SetCursorScreenPos(bounds.min);
 			ImGui::InvisibleButton("##Stack", size);
 			const bool dragging = ImGui::IsItemActive();
-			const bool hovered = ImGui::IsItemHovered();
-			if (hovered || dragging) {
+			hovered = ImGui::IsItemHovered() || dragging;
+			if (hovered) {
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 			}
 			if (dragging) {
+				detach();
 				move(io.MouseDelta.x, io.MouseDelta.y);
+				moving = true;
 			}
-			const float outline = fontSize * 0.4f;
-			ImGui::GetForegroundDrawList()->AddRect(ImVec2(bounds.min.x - outline, bounds.min.y - outline), ImVec2(bounds.max.x + outline, bounds.max.y + outline),
-				Colour(palette.accent, hovered || dragging ? 1.0f : 0.6f), fontSize * 0.25f, 0, 1.5f);
 		}
 		ImGui::End();
 
@@ -4545,8 +4571,78 @@ namespace CompletionistUI
 		const auto  held = [](ImGuiKey a_a, ImGuiKey a_b, ImGuiKey a_c) { return ImGui::IsKeyDown(a_a) || ImGui::IsKeyDown(a_b) || ImGui::IsKeyDown(a_c); };
 		const float across = (held(ImGuiKey_RightArrow, ImGuiKey_GamepadDpadRight, ImGuiKey_GamepadLStickRight) ? 1.0f : 0.0f) - (held(ImGuiKey_LeftArrow, ImGuiKey_GamepadDpadLeft, ImGuiKey_GamepadLStickLeft) ? 1.0f : 0.0f);
 		const float down = (held(ImGuiKey_DownArrow, ImGuiKey_GamepadDpadDown, ImGuiKey_GamepadLStickDown) ? 1.0f : 0.0f) - (held(ImGuiKey_UpArrow, ImGuiKey_GamepadDpadUp, ImGuiKey_GamepadLStickUp) ? 1.0f : 0.0f);
-		a_settings.toastX = std::clamp(a_settings.toastX + across * speed, 0.0f, 1.0f);
-		a_settings.toastY = std::clamp(a_settings.toastY + down * speed, 0.0f, 1.0f);
+		if (across != 0.0f || down != 0.0f) {
+			detach();
+			a_settings.toastX = std::clamp(a_settings.toastX + across * speed, 0.0f, 1.0f);
+			a_settings.toastY = std::clamp(a_settings.toastY + down * speed, 0.0f, 1.0f);
+			moving = true;
+		}
+
+		// Against the panel on its own: which edge it would join, or whether it covers it
+		const ImVec2 freeMin = Toasts::Origin(ImVec2(a_settings.toastX, a_settings.toastY), freeSize);
+		const ImVec2 freeMax(freeMin.x + freeSize.x, freeMin.y + freeSize.y);
+		const float  snap = fontSize * 2.5f;
+		const bool   overX = freeMin.x < panel.max.x && freeMax.x > panel.min.x;
+		const bool   overY = freeMin.y < panel.max.y && freeMax.y > panel.min.y;
+		ToastJoin    edge = ToastJoin::kNone;
+		if (a_settings.toastJoin == ToastJoin::kNone) {
+			if (overX && std::abs(freeMin.y - panel.max.y) < snap) {
+				edge = ToastJoin::kBelow;
+			} else if (overX && std::abs(freeMax.y - panel.min.y) < snap) {
+				edge = ToastJoin::kAbove;
+			} else if (overY && std::abs(freeMax.x - panel.min.x) < snap) {
+				edge = ToastJoin::kLeft;
+			}
+		}
+		// Let go next to it: joined
+		if (_placeMoving && !moving && edge != ToastJoin::kNone) {
+			a_settings.toastJoin = edge;
+		}
+		_placeMoving = moving;
+		const bool joined = a_settings.toastJoin != ToastJoin::kNone;
+		const bool overlap = !joined && edge == ToastJoin::kNone && overX && overY;
+
+		auto*       front = ImGui::GetForegroundDrawList();
+		const ImU32 warn = Colour(palette.stealing);
+		const float outline = fontSize * 0.4f;
+		front->AddRect(ImVec2(bounds.min.x - outline, bounds.min.y - outline), ImVec2(bounds.max.x + outline, bounds.max.y + outline),
+			overlap ? warn : Colour(palette.accent, hovered || moving ? 1.0f : 0.6f), fontSize * 0.25f, 0, 1.5f);
+		if (overlap) {
+			front->AddRect(ImVec2(std::max(freeMin.x, panel.min.x), std::max(freeMin.y, panel.min.y)), ImVec2(std::min(freeMax.x, panel.max.x), std::min(freeMax.y, panel.max.y)), warn, 0.0f, 0, 2.0f);
+		}
+		// Where a moving stack would join
+		if (moving && edge != ToastJoin::kNone) {
+			const float dash = fontSize * 0.5f;
+			const ImU32 guide = Colour(palette.accent);
+			const bool  side = edge == ToastJoin::kLeft;
+			const float at = edge == ToastJoin::kBelow ? panel.max.y + outline : edge == ToastJoin::kAbove ? panel.min.y - outline : panel.min.x - outline;
+			const float from = side ? panel.min.y : panel.min.x;
+			const float to = side ? panel.max.y : panel.max.x;
+			for (float t = from; t < to; t += dash * 2.0f) {
+				const float end = std::min(to, t + dash);
+				front->AddLine(side ? ImVec2(at, t) : ImVec2(t, at), side ? ImVec2(at, end) : ImVec2(end, at), guide, 2.0f);
+			}
+		}
+		// Captions: on the panel, and under the stack
+		const auto caption = [&](ImVec2 a_at, const std::string& a_text, ImU32 a_colour, bool a_right) {
+			const auto  textSize = ImGui::CalcTextSize(a_text.c_str());
+			const float pad = fontSize * 0.4f;
+			const float x = a_right ? a_at.x - textSize.x - pad * 2.0f : a_at.x;
+			auto        plate = palette.background;
+			plate.w = 0.92f;
+			front->AddRectFilled(ImVec2(x, a_at.y), ImVec2(x + textSize.x + pad * 2.0f, a_at.y + textSize.y + pad), Colour(plate), fontSize * 0.15f);
+			front->AddRect(ImVec2(x, a_at.y), ImVec2(x + textSize.x + pad * 2.0f, a_at.y + textSize.y + pad), a_colour, fontSize * 0.15f);
+			front->AddText(ImVec2(x + pad, a_at.y + pad * 0.5f), a_colour, a_text.c_str());
+		};
+		// Joined, the panel's caption says so, clear of the frame they share
+		caption(ImVec2(panel.max.x, std::max(0.0f, panel.min.y - fontSize * 2.0f)), a_provider.Translate(joined ? "UI_Toasts_Joined" : a_settings.cellPanel ? "UI_Toasts_PanelShown" : "UI_Toasts_PanelOff"),
+			Colour(joined ? palette.accent : palette.textDim), true);
+		const char* note = overlap ? "UI_Toasts_Overlap" : moving && edge != ToastJoin::kNone ? "UI_Toasts_JoinRelease" : nullptr;
+		if (note) {
+			const bool  low = bounds.max.y + fontSize * 2.5f > io.DisplaySize.y;
+			const float y = low ? bounds.min.y - outline - fontSize * 1.8f : bounds.max.y + outline + fontSize * 0.4f;
+			caption(ImVec2(bounds.min.x, y), a_provider.Translate(note), overlap ? warn : Colour(palette.accent), false);
+		}
 
 		const float panelY = (bounds.min.y + bounds.max.y) * 0.5f < io.DisplaySize.y * 0.5f ? io.DisplaySize.y * 0.68f : io.DisplaySize.y * 0.32f;
 		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, panelY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -4577,6 +4673,10 @@ namespace CompletionistUI
 			ImGui::Dummy(ImVec2(width, fontSize * 0.3f));
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + width);
 			ImGui::TextUnformatted(a_provider.Translate("UI_Toasts_PlaceHint").c_str());
+			ImGui::TextUnformatted(a_provider.Translate("UI_Toasts_PlaceJoinHint").c_str());
+			if (overlap) {
+				ImGui::TextColored(palette.stealing, "%s", a_provider.Translate("UI_Toasts_PlaceOverlap").c_str());
+			}
 			const auto padStyle = a_settings.padStyle;
 			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Toasts_PlaceKeys{" + GamepadButtonName(0x1000, padStyle) + "}{" + GamepadButtonName(0x2000, padStyle) + "}").c_str());
 			ImGui::PopTextWrapPos();
@@ -4603,7 +4703,7 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Cell Panel ) -----------
 	//---------------------------------------------------
 
-	void Menu::DrawCellPanel(IDataProvider& a_provider, const UISettings& a_settings) {
+	Menu::CellPanelLayout Menu::DrawCellPanel(IDataProvider& a_provider, const UISettings& a_settings, ToastJoin a_join, ImVec2 a_toasts, float a_dim) {
 
 		// Says why when there's nothing to show
 		auto        scan = a_provider.GetCellScan();
@@ -4612,26 +4712,100 @@ namespace CompletionistUI
 
 		const auto& io = ImGui::GetIO();
 		ImGui::PushFont(Themes::BodyFont());
-		const auto& palette = Themes::GetPalette();
-		const float fontSize = ImGui::GetFontSize();
-		const float frameDepth = Decor::FrameDepth();
-		const float width = fontSize * 17.0f + frameDepth * 2.0f;
-		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - width - fontSize * 1.5f, io.DisplaySize.y * 0.14f), ImGuiCond_Always);
+		const auto&  palette = Themes::GetPalette();
+		const float  fontSize = ImGui::GetFontSize();
+		const float  frameDepth = Decor::FrameDepth();
+		const ImVec2 padding(fontSize * 0.9f + frameDepth, fontSize * 0.7f + frameDepth);
+		const float  baseWidth = fontSize * 17.0f + frameDepth * 2.0f;
+		const float  edge = fontSize * 1.5f;
+		const float  homeY = io.DisplaySize.y * 0.14f;
+
+		// Joined notifications: above or below, the panel widens to their width; to the left, the frame
+		// reaches across for them. Their room opens and closes with them, eased
+		const bool  across = a_join == ToastJoin::kBelow || a_join == ToastJoin::kAbove;
+		const float toastWidth = Toasts::Width();
+		const float target = a_join == ToastJoin::kNone ? 0.0f : a_toasts.y;
+		_joinedSize += (target - _joinedSize) * (1.0f - std::exp(-io.DeltaTime * 12.0f));
+		if (std::abs(target - _joinedSize) < 0.5f) {
+			_joinedSize = target;
+		}
+		const float room = a_join == ToastJoin::kNone ? 0.0f : _joinedSize;
+		const float open = std::clamp(room / (fontSize * 2.0f), 0.0f, 1.0f);
+		const float width = across ? baseWidth + std::max(0.0f, toastWidth + padding.x * 2.0f - baseWidth) * open : baseWidth;	// back to its own width when empty
+		const float seam = fontSize * 0.7f;
+		const float reach = a_join == ToastJoin::kLeft ? (toastWidth + seam + padding.x) * open : (seam + room + padding.y) * open;
+
+		ImVec2 position(io.DisplaySize.x - width - edge, homeY);
+		if (a_join == ToastJoin::kAbove) {
+			position.y += reach;	// under the notifications, the frame's top stays put
+		}
+		ImGui::SetNextWindowPos(position, ImGuiCond_Always);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, io.DisplaySize.y * 0.6f));
 
 		auto background = palette.background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f) * 0.85f;
 		windowOpacity = background.w;
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(fontSize * 0.9f + frameDepth, fontSize * 0.7f + frameDepth));
+		const bool joined = a_join != ToastJoin::kNone;
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, joined ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : background);	// joined, the plate behind both is drawn below
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
 		constexpr auto flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoSavedSettings |
 		                       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBringToFrontOnFocus;
+		CellPanelLayout layout;
 		if (ImGui::Begin("##CellPanel", nullptr, flags)) {
-			auto*      drawList = ImGui::GetWindowDrawList();
-			const auto winMin = ImGui::GetWindowPos();
-			const auto winMax = ImVec2(winMin.x + ImGui::GetWindowWidth(), winMin.y + ImGui::GetWindowHeight());
+			auto*       drawList = ImGui::GetWindowDrawList();
+			const auto  winMin = ImGui::GetWindowPos();
+			const auto  winMax = ImVec2(winMin.x + ImGui::GetWindowWidth(), winMin.y + ImGui::GetWindowHeight());
 			const float inset = fontSize * 0.25f;
-			Decor::Frame(drawList, ImVec2(winMin.x + inset, winMin.y + inset), ImVec2(winMax.x - inset, winMax.y - inset), Colour(palette.separator));
+			layout.min = ImVec2(io.DisplaySize.x - baseWidth - edge, homeY);
+			layout.max = ImVec2(layout.min.x + baseWidth, homeY + (winMax.y - winMin.y));
+
+			ImVec2 frameMin = winMin;
+			ImVec2 frameMax = winMax;
+			switch (a_join) {
+			case ToastJoin::kBelow:
+				frameMax.y += reach;
+				layout.dockAt = ImVec2(winMin.x + padding.x, winMax.y + seam);
+				layout.dockWidth = width - padding.x * 2.0f;
+				break;
+			case ToastJoin::kAbove:
+				frameMin.y -= reach;
+				layout.dockAt = ImVec2(winMin.x + padding.x, winMin.y - seam);
+				layout.dockWidth = width - padding.x * 2.0f;
+				layout.dockUp = true;
+				break;
+			case ToastJoin::kLeft:
+				frameMin.x -= reach;
+				frameMax.y = std::max(winMax.y, winMin.y + padding.y * 2.0f + room);
+				layout.dockAt = ImVec2(winMin.x - seam - toastWidth, winMin.y + padding.y);
+				layout.dockWidth = toastWidth;
+				break;
+			default:
+				break;
+			}
+
+			drawList->PushClipRectFullScreen();
+			if (joined) {
+				drawList->AddRectFilled(frameMin, frameMax, Colour(background));
+			}
+			Decor::Frame(drawList, ImVec2(frameMin.x + inset, frameMin.y + inset), ImVec2(frameMax.x - inset, frameMax.y - inset), Colour(palette.separator));
+			// The seam between the two
+			if (open > 0.05f) {
+				const ImU32 seamColour = Colour(palette.separator, open);
+				if (a_join == ToastJoin::kLeft) {
+					const float x = winMin.x + padding.x * 0.3f;
+					const float top = frameMin.y + padding.y;
+					const float bottom = frameMax.y - padding.y;
+					const float midY = (top + bottom) * 0.5f;
+					const ImU32 clear = Colour(palette.separator, 0.0f);
+					drawList->AddRectFilledMultiColor(ImVec2(x - 0.5f, top), ImVec2(x + 0.5f, midY), clear, clear, seamColour, seamColour);
+					drawList->AddRectFilledMultiColor(ImVec2(x - 0.5f, midY), ImVec2(x + 0.5f, bottom), seamColour, seamColour, clear, clear);
+					Decor::Diamond(drawList, ImVec2(x, midY), fontSize * 0.25f, Colour(palette.accent, open), true);
+				} else {
+					const float y = a_join == ToastJoin::kBelow ? winMax.y - padding.y * 0.2f : winMin.y + padding.y * 0.2f;
+					Decor::Divider(drawList, ImVec2(frameMin.x + padding.x, y), ImVec2(frameMax.x - padding.x, y), seamColour);
+				}
+			}
+			drawList->PopClipRect();
 
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", a_provider.Translate("UI_Cell_Title").c_str());
@@ -4692,11 +4866,18 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Cell_More{" + std::to_string(scan.items.size() - shown) + "}").c_str());
 			}
 			ImGui::Dummy(ImVec2(inner, fontSize * 0.2f));
+
+			if (a_dim > 0.0f) {
+				drawList->PushClipRectFullScreen();
+				drawList->AddRectFilled(frameMin, frameMax, IM_COL32(0, 0, 0, static_cast<int>(std::clamp(a_dim, 0.0f, 1.0f) * 255.0f)));
+				drawList->PopClipRect();
+			}
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
 		ImGui::PopFont();
+		return layout;
 	}
 
 	//---------------------------------------------------
@@ -6890,6 +7071,9 @@ namespace CompletionistUI
 			label(a_provider.Translate("UI_Setting_Theme"));
 			if (ThemedBeginCombo("##Theme", a_provider.Translate(current != std::end(themeList) ? current->key : themeList[0].key).c_str(), controlWidth)) {
 				for (const auto& info : themeList) {
+					if (info.race && &info != themeList && !(&info - 1)->race) {
+						ImGui::Separator();
+					}
 					if (ComboOption(a_provider.Translate(info.key).c_str(), info.theme == settings.theme)) {
 						settings.theme = info.theme;
 						changed = true;
@@ -7088,13 +7272,17 @@ namespace CompletionistUI
 						corner = i;
 					}
 				}
-				const auto position = corner >= 0 ? a_provider.Translate(cornerKeys[corner]) : a_provider.Translate("UI_Setting_ToastsCustom");
+				if (settings.toastJoin != ToastJoin::kNone) {
+					corner = -1;
+				}
+				const auto position = settings.toastJoin != ToastJoin::kNone ? a_provider.Translate("UI_Setting_ToastsJoined") : corner >= 0 ? a_provider.Translate(cornerKeys[corner]) : a_provider.Translate("UI_Setting_ToastsCustom");
 				label(a_provider.Translate("UI_Setting_ToastsPosition"));
 				if (ThemedBeginCombo("##ToastsPosition", position.c_str(), controlWidth)) {
 					for (int i = 0; i < 4; ++i) {
 						if (ComboOption(a_provider.Translate(cornerKeys[i]).c_str(), i == corner)) {
 							settings.toastX = corners[i].x;
 							settings.toastY = corners[i].y;
+							settings.toastJoin = ToastJoin::kNone;
 							changed = true;
 						}
 					}

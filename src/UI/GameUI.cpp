@@ -117,6 +117,10 @@ namespace CompletionistUI
 			if (a_theme == Theme::kAltmer) {
 				return { folder + "EBGaramond.ttf", {}, {}, folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf" };
 			}
+			// Nordic UI's carved capitals for the headings, a book serif for the text
+			if (a_theme == Theme::kNordic) {
+				return { folder + "EBGaramond.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf" };
+			}
 			return { folder + "AlegreyaSans-Regular.ttf", {}, {}, {}, folder + "EBGaramond.ttf" };
 		}
 
@@ -814,9 +818,6 @@ namespace CompletionistUI
 			ImGui_ImplDX11_NewFrame();
 			ImGui::NewFrame();
 			if (a_overlay) {
-				if (a_state.cellPanel) {
-					a_state.menu.DrawCellPanel(a_state.provider, a_state.settings);
-				}
 				// Paused while they can't show
 				a_state.toastClock += io.DeltaTime;
 				ToastOptions options;
@@ -824,6 +825,17 @@ namespace CompletionistUI
 				options.y = a_state.settings.toastY;
 				options.newestFirst = a_state.settings.toastsNewestFirst;
 				const auto waiting = a_state.toasts.Waiting();
+				// Joined to the panel they sit in its frame; with the panel off, back where they were placed
+				if (a_state.cellPanel) {
+					const auto join = a_state.toastsOn ? a_state.settings.toastJoin : ToastJoin::kNone;
+					const auto panel = a_state.menu.DrawCellPanel(a_state.provider, a_state.settings, join, a_state.toasts.StackSize(waiting > 0));
+					if (join != ToastJoin::kNone) {
+						options.docked = true;
+						options.dockAt = panel.dockAt;
+						options.dockWidth = panel.dockWidth;
+						options.dockUp = panel.dockUp;
+					}
+				}
 				a_state.toasts.Draw(a_state.toastClock, options, waiting > 0 ? a_state.provider.Translate("UI_MoreCount{" + std::to_string(waiting) + "}") : std::string{});
 			} else if (!a_state.menu.Draw(a_state.provider, a_state.settings)) {
 				RequestClose();

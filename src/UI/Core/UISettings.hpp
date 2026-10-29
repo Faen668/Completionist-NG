@@ -15,6 +15,8 @@ namespace CompletionistUI
 		kDunmer,
 		kNord,
 		kAltmer,
+		kDearDiary,
+		kNordic,
 	};
 
 	// Button names for each pad, same buttons through XInput
@@ -24,6 +26,15 @@ namespace CompletionistUI
 		kPlayStation,
 		kSwitch,
 		kSteamDeck,
+	};
+
+	// Notifications joined to the Cell Scanner panel, sharing its frame
+	enum class ToastJoin : std::uint8_t
+	{
+		kNone,
+		kBelow,
+		kAbove,
+		kLeft,
 	};
 
 	struct UISettings
@@ -65,6 +76,7 @@ namespace CompletionistUI
 		bool  toastsNewestFirst{ true };
 		float toastX{ 0.0f };
 		float toastY{ 0.317f };
+		ToastJoin toastJoin{ ToastJoin::kNone };	// back at toastX / toastY when the panel is off
 
 		std::string openKeyName{};
 		bool capturingOpenKey{ false };

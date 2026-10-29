@@ -270,6 +270,60 @@ namespace CompletionistUI
 				.stealing = RGBA(232, 112, 122),
 			};
 		}
+
+		//---------------------------------------------------
+		//-- Themes ( Dear Diary Palette ) ------------------
+		//---------------------------------------------------
+
+		// Dear Diary Dark Mode's look: white on near-black, bronze edges, red for the chosen, green for the done
+		Palette DearDiaryPalette() {
+
+			return {
+				.background = RGBA(12, 11, 10, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(236, 232, 226),
+				.textDim = RGBA(150, 144, 136),
+				.accent = RGBA(196, 44, 36),
+				.heading = RGBA(242, 238, 230),
+				.count = RGBA(170, 164, 156),
+				.bar = RGBA(176, 40, 32),
+				.found = RGBA(92, 186, 74),
+				.needed = RGBA(236, 232, 226),
+				.displayable = RGBA(112, 160, 214),
+				.occupied = RGBA(176, 128, 196),
+				.barBackground = RGBA(36, 32, 30),
+				.separator = RGBA(96, 82, 68),
+				.pinned = RGBA(118, 162, 214),
+				.stealing = RGBA(232, 104, 132),
+			};
+		}
+
+		//---------------------------------------------------
+		//-- Themes ( Nordic Palette ) ----------------------
+		//---------------------------------------------------
+
+		// Nordic UI's look: silver on black, pale gold as on the level shield
+		Palette NordicPalette() {
+
+			return {
+				.background = RGBA(2, 2, 3, 0.93f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(230, 228, 222),
+				.textDim = RGBA(146, 144, 140),
+				.accent = RGBA(206, 186, 140),
+				.heading = RGBA(242, 240, 234),
+				.count = RGBA(170, 168, 162),
+				.bar = RGBA(206, 186, 140),
+				.found = RGBA(206, 186, 140),
+				.needed = RGBA(230, 228, 222),
+				.displayable = RGBA(122, 176, 192),
+				.occupied = RGBA(176, 150, 210),
+				.barBackground = RGBA(34, 34, 36),
+				.separator = RGBA(104, 102, 98),
+				.pinned = RGBA(126, 170, 214),
+				.stealing = RGBA(222, 102, 122),
+			};
+		}
 	}
 
 	//---------------------------------------------------
@@ -367,6 +421,12 @@ namespace CompletionistUI
 			break;
 		case Theme::kAltmer:
 			_palette = AltmerPalette();
+			break;
+		case Theme::kDearDiary:
+			_palette = DearDiaryPalette();
+			break;
+		case Theme::kNordic:
+			_palette = NordicPalette();
 			break;
 		default:
 			_palette = CompletionistPalette();
