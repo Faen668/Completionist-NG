@@ -54,8 +54,7 @@ namespace CSettings
 			{ "IngredientsNameUnknown", Type::kBool, "false" },
 
 			// UI Settings
-			{ "ItemPictures", Type::kBool, "true" },
-			{ "ItemPicturesOffered", Type::kBool, "false" },
+			{ "ItemPictures", Type::kBool, "false" },
 			{ "NotifyItems", Type::kBool, "true" },
 			{ "NotifyBooks", Type::kBool, "true" },
 			{ "NotifySpecial", Type::kBool, "true" },

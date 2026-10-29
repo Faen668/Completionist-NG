@@ -1683,13 +1683,6 @@ namespace CompletionistUI
 		pictured.erase(std::ranges::unique(pictured).begin(), pictured.end());
 		ModelPictures::SetItems(std::move(pictured));
 
-		// Asked once, while pictures are on and some aren't kept yet
-		const auto setting = [](const char* a_name, bool a_default) {
-			const auto* variable = CSettings::SettingsAPI::Get(a_name);
-			return variable && variable->IsBool() ? variable->GetBool() : a_default;
-		};
-		_offerPictures = setting("ItemPictures", true) && !setting("ItemPicturesOffered", false) && ModelPictures::Missing() > 0;
-
 		{
 			std::scoped_lock lock(_lock);
 			_categories = std::move(categories);
@@ -1948,11 +1941,11 @@ namespace CompletionistUI
 	//-- Game Data ( Item Picture ) ---------------------
 	//---------------------------------------------------
 
-	// Only while the setting's on, so a setup where drawing them goes wrong can do without
+	// Only while the setting's on: off by default, as it's a little work the first time
 	void* GameDataProvider::ItemPicture(std::uint32_t a_formID) {
 
 		const auto* setting = CSettings::SettingsAPI::Get("ItemPictures");
-		return !setting || !setting->IsBool() || setting->GetBool() ? ModelPictures::Get(a_formID) : nullptr;
+		return setting && setting->IsBool() && setting->GetBool() ? ModelPictures::Get(a_formID) : nullptr;
 	}
 
 	//---------------------------------------------------
@@ -1965,29 +1958,21 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
-	//-- Game Data ( Offer Pictures ) -------------------
+	//-- Game Data ( Prepare Pictures ) -----------------
 	//---------------------------------------------------
 
-	bool GameDataProvider::OfferPictures() {
+	void GameDataProvider::PreparePictures() {
 
-		return _offerPictures;
+		ModelPictures::PrepareAll(false);
 	}
 
 	//---------------------------------------------------
-	//-- Game Data ( Answer Pictures ) ------------------
+	//-- Game Data ( Cancel Pictures ) ------------------
 	//---------------------------------------------------
 
-	// Either way it's not asked again; Settings has the button for later
-	void GameDataProvider::AnswerPictures(bool a_prepare) {
+	void GameDataProvider::CancelPictures() {
 
-		_offerPictures = false;
-		SKSE::GetTaskInterface()->AddTask([a_prepare]() {
-			CSettings::SettingsAPI::SetBool("ItemPicturesOffered", true);
-			CSettings::SettingsAPI::Save();
-			if (a_prepare) {
-				ModelPictures::PrepareAll(false);
-			}
-		});
+		ModelPictures::Cancel();
 	}
 
 	//---------------------------------------------------
