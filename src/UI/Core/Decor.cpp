@@ -3,10 +3,12 @@
 #include "UI/Themes/AltmerDecor.hpp"
 #include "UI/Themes/ArgonianDecor.hpp"
 #include "UI/Themes/BosmerDecor.hpp"
+#include "UI/Themes/DearDiaryDecor.hpp"
 #include "UI/Themes/DecorDraw.hpp"
 #include "UI/Themes/DunmerDecor.hpp"
 #include "UI/Themes/KhajiitDecor.hpp"
 #include "UI/Themes/NordDecor.hpp"
+#include "UI/Themes/NordicDecor.hpp"
 #include "UI/Themes/SkyUIDecor.hpp"
 
 #include <algorithm>
@@ -67,6 +69,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Boss(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Diamond(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Diamond(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
 		default:
 			break;
 		}
@@ -113,6 +121,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kNord:
 			NordDecor::RuneStone(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		default:
 			break;
@@ -175,6 +189,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kNordic:
+			NordicDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		default:
 			break;
 		}
@@ -223,6 +243,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kNord:
 			NordDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kNordic:
+			NordicDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		default:
 			break;
@@ -283,6 +309,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Divider(a_drawList, a_from, a_to, a_colour);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Divider(a_drawList, a_from, a_to, a_colour);
+			return;
 		default:
 			break;
 		}
@@ -340,6 +372,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Knot(a_drawList, a_centre, a_radius * 1.15f, a_colour);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Knot(a_drawList, a_centre, a_radius * 1.5f, a_colour);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Shield(a_drawList, a_centre, a_radius * 1.5f, a_colour);
+			return;
 		default:
 			Diamond(a_drawList, a_centre, a_radius, a_colour, true);
 			return;
@@ -375,6 +413,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Knotwork(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Rule(a_drawList, a_from, a_to, a_colour);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Rule(a_drawList, a_from, a_to, a_colour);
+			return;
 		default:
 			FadedLine(a_drawList, a_from, a_to, a_colour);
 			return;
@@ -409,6 +453,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kNord:
 			NordDecor::Knotwork(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::HeadingTail(a_drawList, a_from, a_to, a_ornament);
+			return;
+		case Theme::kNordic:
+			NordicDecor::HeadingTail(a_drawList, a_from, a_to, a_ornament);
 			return;
 		default:
 			FadedLine(a_drawList, a_from, a_to, a_rule);
@@ -453,6 +503,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Frame(a_drawList, a_min, a_max);
+			return;
+		case Theme::kNordic:
+			NordicDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		default:
 			break;
 		}
@@ -478,7 +534,10 @@ namespace CompletionistUI
 		const float size = ImGui::GetFontSize();
 		switch (_theme) {
 		case Theme::kBosmer:
+		case Theme::kDearDiary:
 			return size * 0.45f;
+		case Theme::kNordic:
+			return size * 0.5f;
 		case Theme::kArgonian:
 		case Theme::kDunmer:
 		case Theme::kKhajiit:
@@ -515,6 +574,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
+		case Theme::kDearDiary:
+			DearDiaryDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kNordic:
+			NordicDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
 		default:
 			return false;
 		}
@@ -545,6 +610,12 @@ namespace CompletionistUI
 		case Theme::kNord:
 			NordDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
+		case Theme::kDearDiary:
+			DearDiaryDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kNordic:
+			NordicDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
 		default:
 			return;
 		}
@@ -562,6 +633,14 @@ namespace CompletionistUI
 
 		if (SkyUI()) {
 			SkyUIDecor::GlowBar(a_drawList, a_min, a_max, a_colour, a_alpha);
+			return;
+		}
+		if (_theme == Theme::kDearDiary) {
+			DearDiaryDecor::GlowBar(a_drawList, a_min, a_max, a_colour, a_alpha);
+			return;
+		}
+		if (_theme == Theme::kNordic) {
+			NordicDecor::GlowBar(a_drawList, a_min, a_max, a_colour, a_alpha);
 			return;
 		}
 

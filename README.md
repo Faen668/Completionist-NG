@@ -68,7 +68,7 @@ Look at something you still need and a tag ("Need It!", "Got It!", or the museum
 
 ### Notifications
 
-Completionist can show its notifications in its own stack instead of the top-left corner: grouped bursts, a position you pick by dragging, and room for more than one at a time.
+Completionist can show its notifications in its own stack instead of the top-left corner: grouped bursts, a position you pick by dragging, and room for more than one at a time. While you place them the Cell Scanner panel is shown too, so you can keep them clear of it, or let go of them against its top, bottom or left edge to join the two into one panel.
 
 ### Settings
 
@@ -82,21 +82,25 @@ Everything is set from the window itself and saved to `Completionist.ini`, so it
 
 ## Themes
 
-Eight looks to choose from in **Settings > Window > Theme**.
+Ten looks to choose from in **Settings > Window > Theme**: our own, three that match popular UI mods, and six drawn from the races of Tamriel.
 
 <table>
 <tr>
 <td align="center" width="33%"><img src="docs/images/theme-completionist.jpg" alt="Completionist theme"><br><b>Completionist</b></td>
 <td align="center" width="33%"><img src="docs/images/theme-skyui.jpg" alt="SkyUI theme"><br><b>SkyUI</b></td>
-<td align="center" width="33%"><img src="docs/images/theme-altmer.jpg" alt="Altmer theme"><br><b>Altmer</b></td>
+<td align="center" width="33%"><img src="docs/images/theme-deardiary.jpg" alt="Dear Diary theme"><br><b>Dear Diary</b><br><sub>in the style of Dear Diary Dark Mode</sub></td>
 </tr>
 <tr>
+<td align="center"><img src="docs/images/theme-nordic.jpg" alt="Nordic theme"><br><b>Nordic</b><br><sub>in the style of Nordic UI</sub></td>
+<td align="center"><img src="docs/images/theme-altmer.jpg" alt="Altmer theme"><br><b>Altmer</b></td>
 <td align="center"><img src="docs/images/theme-argonian.jpg" alt="Argonian theme"><br><b>Argonian</b></td>
+</tr>
+<tr>
 <td align="center"><img src="docs/images/theme-bosmer.jpg" alt="Bosmer theme"><br><b>Bosmer</b></td>
 <td align="center"><img src="docs/images/theme-dunmer.jpg" alt="Dunmer theme"><br><b>Dunmer</b></td>
+<td align="center"><img src="docs/images/theme-khajiit.jpg" alt="Khajiit theme"><br><b>Khajiit</b></td>
 </tr>
 <tr>
-<td align="center"><img src="docs/images/theme-khajiit.jpg" alt="Khajiit theme"><br><b>Khajiit</b></td>
 <td align="center"><img src="docs/images/theme-nord.jpg" alt="Nord theme"><br><b>Nord</b></td>
 </tr>
 </table>
@@ -221,6 +225,13 @@ Address Library provides runtime-independent addresses used by native Skyrim plu
 ### SkyUI
 
 Completionist's item icons and sort work inside SkyUI's item lists.
+
+### Dear Diary Dark Mode and Nordic UI
+
+The Dear Diary and Nordic themes are drawn in the style of **Dear Diary Dark Mode** by uranreactor and **Nordic UI** by outobugi. They are our own drawing code; no files from either mod are used. If you like the look, use their mods for the rest of the game's menus:
+
+- Dear Diary Dark Mode: https://www.nexusmods.com/skyrimspecialedition/mods/60837
+- Nordic UI: https://www.nexusmods.com/skyrimspecialedition/mods/49881
 
 ### Dear ImGui
 

@@ -256,6 +256,59 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Toasts ( Width ) -------------------------------
+	//---------------------------------------------------
+
+	float Toasts::Width() {
+
+		return GetMetrics().fontSize * 18.0f;
+	}
+
+	//---------------------------------------------------
+	//-- Toasts ( Origin ) ------------------------------
+	//---------------------------------------------------
+
+	ImVec2 Toasts::Origin(ImVec2 a_position, ImVec2 a_size) {
+
+		const auto metrics = GetMetrics();
+		const auto travel = Travel(a_size);
+		return ImVec2(metrics.margin.x + std::clamp(a_position.x, 0.0f, 1.0f) * travel.x, metrics.margin.y + std::clamp(a_position.y, 0.0f, 1.0f) * travel.y);
+	}
+
+	//---------------------------------------------------
+	//-- Toasts ( Position ) ----------------------------
+	//---------------------------------------------------
+
+	ImVec2 Toasts::Position(ImVec2 a_origin, ImVec2 a_size) {
+
+		const auto metrics = GetMetrics();
+		const auto travel = Travel(a_size);
+		return ImVec2(travel.x > 0.0f ? std::clamp((a_origin.x - metrics.margin.x) / travel.x, 0.0f, 1.0f) : 0.0f,
+			travel.y > 0.0f ? std::clamp((a_origin.y - metrics.margin.y) / travel.y, 0.0f, 1.0f) : 0.0f);
+	}
+
+	//---------------------------------------------------
+	//-- Toasts ( Stack Size ) --------------------------
+	//---------------------------------------------------
+
+	ImVec2 Toasts::StackSize(bool a_more) const {
+
+		std::scoped_lock lock(_lock);
+		const auto  metrics = GetMetrics();
+		const float fontSize = metrics.fontSize;
+		const float pad = fontSize * 0.55f;
+		const float gap = fontSize * 0.35f;
+		if (_shown.empty()) {
+			return ImVec2(fontSize * 18.0f, 0.0f);
+		}
+		float height = a_more && !_waiting.empty() ? metrics.smallSize + pad * 0.5f : -gap;
+		for (const auto& toast : _shown) {
+			height += pad * 2.0f + (toast.label.empty() ? fontSize : metrics.smallSize + fontSize * 1.05f) + gap;
+		}
+		return ImVec2(fontSize * 18.0f, height);
+	}
+
+	//---------------------------------------------------
 	//-- Toasts ( Draw ) --------------------------------
 	//---------------------------------------------------
 
@@ -279,7 +332,7 @@ namespace CompletionistUI
 		ImFont*     smallFont = metrics.smallFont;
 		const float smallSize = metrics.smallSize;
 
-		const float width = fontSize * 18.0f;
+		const float width = a_options.docked ? a_options.dockWidth : fontSize * 18.0f;
 		const float pad = fontSize * 0.55f;
 		const float iconSide = fontSize * 1.7f;
 		const float gap = fontSize * 0.35f;
@@ -292,10 +345,11 @@ namespace CompletionistUI
 		for (const auto& toast : _shown) {
 			stackHeight += cardHeight(toast) + gap;
 		}
-		const auto  travel = Travel(ImVec2(width, stackHeight));
-		const float left = metrics.margin.x + std::clamp(a_options.x, 0.0f, 1.0f) * travel.x;
-		const float top = metrics.margin.y + std::clamp(a_options.y, 0.0f, 1.0f) * travel.y;
-		const float side = a_options.x > 0.5f ? -1.0f : 1.0f;
+		// Joined ones sit in the Cell Scanner's frame, growing up from its top edge when above it
+		const auto  origin = Origin(ImVec2(a_options.x, a_options.y), ImVec2(width, stackHeight));
+		const float left = a_options.docked ? a_options.dockAt.x : origin.x;
+		const float top = !a_options.docked ? origin.y : a_options.dockUp ? a_options.dockAt.y - stackHeight : a_options.dockAt.y;
+		const float side = (a_options.docked ? left > ImGui::GetIO().DisplaySize.x * 0.5f : a_options.x > 0.5f) ? -1.0f : 1.0f;
 
 		// Newest at the top by default
 		float y = top;

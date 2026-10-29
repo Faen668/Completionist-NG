@@ -28,6 +28,11 @@ namespace CompletionistUI
 		float x{ 0.0f };
 		float y{ 0.0f };
 		bool  preview{ false };	// placing it on screen
+		// Joined to the Cell Scanner panel: drawn at dockAt (its bottom left when dockUp), dockWidth wide
+		bool   docked{ false };
+		ImVec2 dockAt{};
+		float  dockWidth{ 0.0f };
+		bool   dockUp{ false };
 	};
 
 	struct ToastBounds
@@ -45,6 +50,12 @@ namespace CompletionistUI
 		ToastBounds Draw(double a_now, const ToastOptions& a_options, const std::string& a_moreText);
 
 		[[nodiscard]] static ImVec2 Travel(ImVec2 a_size);
+		[[nodiscard]] static float  Width();
+		// Top left of a free stack this size at a 0 to 1 position, and back
+		[[nodiscard]] static ImVec2 Origin(ImVec2 a_position, ImVec2 a_size);
+		[[nodiscard]] static ImVec2 Position(ImVec2 a_origin, ImVec2 a_size);
+		// The stack as it was last drawn, for the panel to make room
+		[[nodiscard]] ImVec2 StackSize(bool a_more) const;
 
 		[[nodiscard]] bool   Active() const;
 		[[nodiscard]] size_t Waiting() const;
