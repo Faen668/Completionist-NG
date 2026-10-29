@@ -3,6 +3,20 @@
 
 namespace CFramework_Ingredients
 {
+	// The page's sections, three tabs of them, as the SkyrimIngredients add-on laid them out
+	enum class Group : std::uint8_t
+	{
+		kAnimalParts,
+		kEggs,
+		kFish,
+		kFlowers,
+		kInsects,
+		kMushrooms,
+		kPlants,
+		kOther,
+		kTotal
+	};
+
 	// An ingredient and the key its lore is under, empty for ones the lore doesn't cover
 	struct Ingredient
 	{
@@ -10,6 +24,7 @@ namespace CFramework_Ingredients
 		std::string         plugin;
 		std::string         source;	// translation key for the game and DLC, a Creation's title
 		RE::IngredientItem* form{ nullptr };
+		Group               group{ Group::kOther };
 	};
 
 	inline std::vector<Ingredient> Ingredients;

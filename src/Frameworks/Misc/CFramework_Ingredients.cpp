@@ -207,6 +207,67 @@ namespace CFramework_Ingredients
 			{ "WildGrassPod", "cctwbsse001-puzzledungeon.esm", 0x019D3A },
 		};
 
+		// Which of the page's sections each goes in, from the SkyrimIngredients add-on; Healing
+		// Salts and Simon Rodayne's Heart, which it doesn't list, go with Salt Pile and Human Heart
+		struct KnownGroup
+		{
+			const char* key;
+			Group       group;
+		};
+
+		constexpr KnownGroup groups[] = {
+			{ "AshHopperJelly", Group::kAnimalParts }, { "BearClaws", Group::kAnimalParts }, { "BoarTusk", Group::kAnimalParts }, { "BoneMeal", Group::kAnimalParts },
+			{ "BurntSprigganWood", Group::kAnimalParts }, { "CharredSkeeverHide", Group::kAnimalParts }, { "ChaurusHunterAntennae", Group::kAnimalParts }, { "DaedraSilk", Group::kAnimalParts },
+			{ "DaedraVenin", Group::kAnimalParts }, { "DaedrothTeeth", Group::kAnimalParts }, { "DreughWax", Group::kAnimalParts }, { "Ectoplasm", Group::kAnimalParts },
+			{ "ElytraIchor", Group::kAnimalParts }, { "EyeOfSabreCat", Group::kAnimalParts }, { "FelsaadTernFeathers", Group::kAnimalParts }, { "FireSalts", Group::kAnimalParts },
+			{ "FrostSalts", Group::kAnimalParts }, { "GiantsToe", Group::kAnimalParts }, { "GlowDust", Group::kAnimalParts }, { "GnarlBark", Group::kAnimalParts },
+			{ "HagravenClaw", Group::kAnimalParts }, { "HagravenFeathers", Group::kAnimalParts }, { "HawkBeak", Group::kAnimalParts }, { "HawkFeathers", Group::kAnimalParts },
+			{ "HeartOfOrder", Group::kAnimalParts }, { "HungerTongue", Group::kAnimalParts }, { "IceWraithTeeth", Group::kAnimalParts }, { "ImpGall", Group::kAnimalParts },
+			{ "KagoutiHide", Group::kAnimalParts }, { "LargeAntlers", Group::kAnimalParts }, { "MinotaurHorn", Group::kAnimalParts }, { "MortFlesh", Group::kAnimalParts },
+			{ "MudcrabChitin", Group::kAnimalParts }, { "NetchJelly", Group::kAnimalParts }, { "OgresTeeth", Group::kAnimalParts }, { "PowderedMammothTusk", Group::kAnimalParts },
+			{ "SabreCatTooth", Group::kAnimalParts }, { "ScribJelly", Group::kAnimalParts }, { "ScribJerky", Group::kAnimalParts }, { "SkeeverTail", Group::kAnimalParts },
+			{ "SloadSoap", Group::kAnimalParts }, { "SmallAntlers", Group::kAnimalParts }, { "SpawnAsh", Group::kAnimalParts }, { "SprigganSap", Group::kAnimalParts },
+			{ "Taproot", Group::kAnimalParts }, { "TrollFat", Group::kAnimalParts }, { "VampireDust", Group::kAnimalParts }, { "VoidEssence", Group::kAnimalParts },
+			{ "VoidSalts", Group::kAnimalParts }, { "WispWrappings", Group::kAnimalParts },
+			{ "ChaurusEggs", Group::kEggs }, { "ChickensEgg", Group::kEggs }, { "HawksEgg", Group::kEggs }, { "PineThrushEgg", Group::kEggs },
+			{ "RockWarblerEgg", Group::kEggs }, { "SpiderEgg", Group::kEggs },
+			{ "AbeceanLongfin", Group::kFish }, { "Angelfish", Group::kFish }, { "AnglerLarvae", Group::kFish }, { "CyrodilicSpadetail", Group::kFish },
+			{ "Glassfish", Group::kFish }, { "Goldfish", Group::kFish }, { "Histcarp", Group::kFish }, { "JuvenileMudcrab", Group::kFish },
+			{ "LyretailAnthias", Group::kFish }, { "NordicBarnacle", Group::kFish }, { "Pearl", Group::kFish }, { "Pearlfish", Group::kFish },
+			{ "PygmySunfish", Group::kFish }, { "RiverBetty", Group::kFish }, { "SalmonRoe", Group::kFish }, { "ScalonFin", Group::kFish },
+			{ "SilversidePerch", Group::kFish }, { "SlaughterfishEgg", Group::kFish }, { "SlaughterfishScales", Group::kFish }, { "SmallPearl", Group::kFish },
+			{ "Spadefish", Group::kFish },
+			{ "Ambrosia", Group::kFlowers }, { "BlueMountainFlower", Group::kFlowers }, { "Deathbell", Group::kFlowers }, { "DragonsTongue", Group::kFlowers },
+			{ "FirePetal", Group::kFlowers }, { "Gleamblossom", Group::kFlowers }, { "GoldKanet", Group::kFlowers }, { "Lavender", Group::kFlowers },
+			{ "Lichor", Group::kFlowers }, { "Nightshade", Group::kFlowers }, { "PoisonBloom", Group::kFlowers }, { "PurpleMountainFlower", Group::kFlowers },
+			{ "RedMountainFlower", Group::kFlowers }, { "RedwortFlower", Group::kFlowers }, { "StoneflowerPetals", Group::kFlowers }, { "YellowMountainFlower", Group::kFlowers },
+			{ "AncestorMothWing", Group::kInsects }, { "Bee", Group::kInsects }, { "BeehiveHusk", Group::kInsects }, { "BlissBugThorax", Group::kInsects },
+			{ "BlueButterflyWing", Group::kInsects }, { "BlueDartwing", Group::kInsects }, { "ButterflyWing", Group::kInsects }, { "GreenButterflyWing", Group::kInsects },
+			{ "Honeycomb", Group::kInsects }, { "LunaMothWing", Group::kInsects }, { "OrangeDartwing", Group::kInsects }, { "PurpleButterflyWing", Group::kInsects },
+			{ "TorchbugThorax", Group::kInsects },
+			{ "BleedingCrown", Group::kMushrooms }, { "BlisterPodCap", Group::kMushrooms }, { "Blisterwort", Group::kMushrooms }, { "BogBeacon", Group::kMushrooms },
+			{ "BunglersBane", Group::kMushrooms }, { "FlameStalk", Group::kMushrooms }, { "FlyAmanita", Group::kMushrooms }, { "FungusStalk", Group::kMushrooms },
+			{ "GiantLichen", Group::kMushrooms }, { "GlowingMushroom", Group::kMushrooms }, { "HydnumAzureGiantSpore", Group::kMushrooms }, { "HyphaFacia", Group::kMushrooms },
+			{ "ImpStool", Group::kMushrooms }, { "LuminousRussula", Group::kMushrooms }, { "MoraTapinella", Group::kMushrooms }, { "NamirasRot", Group::kMushrooms },
+			{ "RotScale", Group::kMushrooms }, { "ScalyPholiota", Group::kMushrooms }, { "SteelBlueEntoloma", Group::kMushrooms }, { "SwampFungalPod", Group::kMushrooms },
+			{ "WhiteCap", Group::kMushrooms }, { "WispStalkCaps", Group::kMushrooms }, { "WitheringMoon", Group::kMushrooms }, { "WormsHeadCap", Group::kMushrooms },
+			{ "AlocasiaFruit", Group::kPlants }, { "AshCreepCluster", Group::kPlants }, { "AshenGrassPod", Group::kPlants }, { "AsterBloomCore", Group::kPlants },
+			{ "BittergreenPetals", Group::kPlants }, { "BlindWatchersEye", Group::kPlants }, { "Bloodgrass", Group::kPlants }, { "BriarHeart", Group::kPlants },
+			{ "CanisRoot", Group::kPlants }, { "Chokeberry", Group::kPlants }, { "Chokeweed", Group::kPlants }, { "CodaFlower", Group::kPlants },
+			{ "Comberry", Group::kPlants }, { "CongealedPutrescence", Group::kPlants }, { "CorkbulbRoot", Group::kPlants }, { "CreepCluster", Group::kPlants },
+			{ "CrimsonNirnroot", Group::kPlants }, { "ElvesEar", Group::kPlants }, { "EmperorParasolMoss", Group::kPlants }, { "FrostMirriam", Group::kPlants },
+			{ "Garlic", Group::kPlants }, { "GrassPod", Group::kPlants }, { "HackleLoLeaf", Group::kPlants }, { "HangingMoss", Group::kPlants },
+			{ "Harrada", Group::kPlants }, { "IronwoodFruit", Group::kPlants }, { "JarrinRoot", Group::kPlants }, { "JazbayGrapes", Group::kPlants },
+			{ "JuniperBerries", Group::kPlants }, { "KreshFiber", Group::kPlants }, { "Marshmerrow", Group::kPlants }, { "Nirnroot", Group::kPlants },
+			{ "RedKelpGasBladder", Group::kPlants }, { "Roobrush", Group::kPlants }, { "Saltrice", Group::kPlants }, { "Scathecraw", Group::kPlants },
+			{ "ScreamingMaw", Group::kPlants }, { "Snowberries", Group::kPlants }, { "SpiddalStick", Group::kPlants }, { "ThistleBranch", Group::kPlants },
+			{ "ThornHook", Group::kPlants }, { "TramaRoot", Group::kPlants }, { "TundraCotton", Group::kPlants }, { "WatchersEye", Group::kPlants },
+			{ "Wheat", Group::kPlants }, { "WildGrassPod", Group::kPlants },
+			{ "BeritsAshes", Group::kOther }, { "CorruptedHumanHeart", Group::kOther }, { "DaedraHeart", Group::kOther }, { "DwarvenOil", Group::kOther },
+			{ "FalmerEar", Group::kOther }, { "HealingSalts", Group::kOther }, { "HumanFlesh", Group::kOther }, { "HumanHeart", Group::kOther },
+			{ "MoonSugar", Group::kOther }, { "SaltPile", Group::kOther }, { "SimonRodaynesHeart", Group::kOther },
+		};
+
 		// The Creations that add ingredients, by their official titles
 		struct Creation
 		{
@@ -361,7 +422,8 @@ namespace CFramework_Ingredients
 			if (source.empty()) { continue; }
 			Covered.insert(ingredient->GetFormID());
 			if (!seen.insert(plugin + '\x1f' + name).second) { continue; }
-			Ingredients.push_back({ key, std::move(plugin), std::move(source), ingredient });
+			const auto group = std::ranges::find(groups, key, [](const KnownGroup& a_known) { return std::string_view(a_known.key); });
+			Ingredients.push_back({ key, std::move(plugin), std::move(source), ingredient, group != std::end(groups) ? group->group : Group::kOther });
 		}
 		std::ranges::stable_sort(Ingredients, {}, [](const Ingredient& a_ingredient) { return std::string_view(a_ingredient.form->GetFullName()); });
 		INFO("Ingredients: {}", Ingredients.size());

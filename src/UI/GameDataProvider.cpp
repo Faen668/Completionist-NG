@@ -15,6 +15,7 @@
 #include "Internal Utility/WordsOfPower.hpp"
 #include "Internal Utility/CellScanner.hpp"
 #include "UI/Core/TranslationFile.hpp"
+#include "UI/ModelPictures.hpp"
 #include "UI/Tracker.hpp"
 
 #include <d3d11.h>
@@ -1171,7 +1172,7 @@ namespace CompletionistUI
 				return page;
 			}
 			const bool named = setting("IngredientsNameUnknown", false);
-			page.tabs = { { "UI_Ingredients_TabIngredients" }, { "UI_Ingredients_TabEffects" }, { "UI_Ingredients_TabMixing", PageLayout::kMixing } };
+			page.tabs = { { "UI_Ingredients_TabAnimals" }, { "UI_Ingredients_TabFlowers" }, { "UI_Ingredients_TabPlants" }, { "UI_Ingredients_TabEffects" }, { "UI_Ingredients_TabMixing", PageLayout::kMixing } };
 
 			std::unordered_map<const RE::TESBoundObject*, std::int32_t> carried;
 			if (auto* player = RE::PlayerCharacter::GetSingleton()) {
@@ -1223,13 +1224,23 @@ namespace CompletionistUI
 			const auto weight = [](float a_weight) { return fmt::format("{:g}", std::round(a_weight * 100.0f) / 100.0f); };
 
 			//---------------------------------------------------
-			// Ingredients, by the game, DLC or Creation that adds them
+			// Ingredients, a section per kind over three tabs; where each comes from is in its facts
 			//---------------------------------------------------
 
-			const auto sectionFor = [&](const std::string& a_source) -> Section& {
-				const auto it = std::ranges::find(page.sections, a_source, &Section::title);
-				return it != page.sections.end() ? *it : page.sections.emplace_back(Section{ a_source, {}, 0 });
+			struct GroupSection
+			{
+				const char*  title;
+				std::int32_t tab;
 			};
+			constexpr GroupSection groupSections[] = {
+				{ "UI_Ingredients_AnimalParts", 0 }, { "UI_Ingredients_Eggs", 0 }, { "UI_Ingredients_Fish", 0 },
+				{ "UI_Ingredients_Flowers", 1 }, { "UI_Ingredients_Insects", 1 }, { "UI_Ingredients_Mushrooms", 1 },
+				{ "UI_Ingredients_Plants", 2 }, { "UI_Ingredients_Other", 2 },
+			};
+			for (const auto& [title, tab] : groupSections) {
+				page.sections.push_back(Section{ title, {}, tab });
+			}
+			const auto sectionFor = [&](Group a_group) -> Section& { return page.sections[static_cast<std::size_t>(a_group)]; };
 
 			for (const auto& ingredient : Ingredients) {
 				auto*      form = ingredient.form;
@@ -1241,7 +1252,7 @@ namespace CompletionistUI
 					knownCount += CHandler::Knows(form, i) ? 1 : 0;
 				}
 
-				auto& entry = sectionFor(ingredient.source).entries.emplace_back();
+				auto& entry = sectionFor(ingredient.group).entries.emplace_back();
 				entry.name = form->GetFullName();
 				entry.state = knownCount == count ? EntryState::kFound : EntryState::kNeeded;
 				entry.formID = form->GetFormID();
@@ -1250,6 +1261,7 @@ namespace CompletionistUI
 				info.summary = a_provider.Translate("UI_Ingredients_Known{" + std::to_string(knownCount) + "}{" + std::to_string(count) + "}");
 				info.facts.push_back(a_provider.Translate("UI_Ingredients_Value{" + std::to_string(form->value) + "}{" + weight(form->weight) + "}"));
 				info.facts.push_back(inPack > 0 ? a_provider.Translate("UI_Ingredients_Carried{" + std::to_string(inPack) + "}") : a_provider.Translate("UI_Ingredients_NoneCarried"));
+				info.facts.push_back(a_provider.Translate("UI_Ingredients_From{" + a_provider.Translate(ingredient.source) + "}"));
 				info.lore = loreOf(ingredient.key.empty() ? std::string{} : "UI_Ingredients_Lore_" + ingredient.key, ingredient.source);
 				entry.description = info.lore;
 
@@ -1298,21 +1310,15 @@ namespace CompletionistUI
 				}
 			}
 
-			// The game and its DLC in release order, then the Creations by title
-			const auto rank = [](const Section& a_section) {
-				constexpr std::string_view order[] = { "UI_Ingredients_Skyrim", "UI_Ingredients_Dawnguard", "UI_Ingredients_Hearthfire", "UI_Ingredients_Dragonborn" };
-				const auto it = std::ranges::find(order, a_section.title);
-				return std::pair(static_cast<int>(it - std::begin(order)), it == std::end(order) ? a_section.title : std::string{});
-			};
-			std::ranges::stable_sort(page.sections, {}, rank);
+			std::erase_if(page.sections, [](const Section& a_section) { return a_section.entries.empty(); });
 
 			//---------------------------------------------------
 			// Effects, potions then poisons; the first tab counts
 			//---------------------------------------------------
 
 			std::ranges::sort(effects, [&](const RE::EffectSetting* a_left, const RE::EffectSetting* a_right) { return effectName(a_left) < effectName(a_right); });
-			Section potions{ "UI_Ingredients_Potions", {}, 1 };
-			Section poisons{ "UI_Ingredients_Poisons", {}, 1 };
+			Section potions{ "UI_Ingredients_Potions", {}, 3 };
+			Section poisons{ "UI_Ingredients_Poisons", {}, 3 };
 			potions.counted = poisons.counted = false;
 			for (const auto* effect : effects) {
 				const auto&  list = holders[effect];
@@ -1660,6 +1666,30 @@ namespace CompletionistUI
 		auto settingsPages = _settingsBuilder.Build();
 		RebuildKills();
 
+		// Items carried in the inventory have a model to picture
+		std::vector<std::uint32_t> pictured;
+		for (auto& [id, page] : pages) {
+			for (auto& section : page.sections) {
+				for (auto& entry : section.entries) {
+					const auto* form = entry.formID ? RE::TESForm::LookupByID(entry.formID) : nullptr;
+					entry.hasModel = form && form->IsInventoryObject();
+					if (entry.hasModel) {
+						pictured.push_back(entry.formID);
+					}
+				}
+			}
+		}
+		std::ranges::sort(pictured);
+		pictured.erase(std::ranges::unique(pictured).begin(), pictured.end());
+		ModelPictures::SetItems(std::move(pictured));
+
+		// Asked once, while pictures are on and some aren't kept yet
+		const auto setting = [](const char* a_name, bool a_default) {
+			const auto* variable = CSettings::SettingsAPI::Get(a_name);
+			return variable && variable->IsBool() ? variable->GetBool() : a_default;
+		};
+		_offerPictures = setting("ItemPictures", true) && !setting("ItemPicturesOffered", false) && ModelPictures::Missing() > 0;
+
 		{
 			std::scoped_lock lock(_lock);
 			_categories = std::move(categories);
@@ -1912,6 +1942,61 @@ namespace CompletionistUI
 		}
 		_icons.emplace(a_icon, view);
 		return view;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Item Picture ) ---------------------
+	//---------------------------------------------------
+
+	// Only while the setting's on, so a setup where drawing them goes wrong can do without
+	void* GameDataProvider::ItemPicture(std::uint32_t a_formID) {
+
+		const auto* setting = CSettings::SettingsAPI::Get("ItemPictures");
+		return !setting || !setting->IsBool() || setting->GetBool() ? ModelPictures::Get(a_formID) : nullptr;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Update Pictures ) ------------------
+	//---------------------------------------------------
+
+	void GameDataProvider::UpdatePictures() {
+
+		ModelPictures::Tick();
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Offer Pictures ) -------------------
+	//---------------------------------------------------
+
+	bool GameDataProvider::OfferPictures() {
+
+		return _offerPictures;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Answer Pictures ) ------------------
+	//---------------------------------------------------
+
+	// Either way it's not asked again; Settings has the button for later
+	void GameDataProvider::AnswerPictures(bool a_prepare) {
+
+		_offerPictures = false;
+		SKSE::GetTaskInterface()->AddTask([a_prepare]() {
+			CSettings::SettingsAPI::SetBool("ItemPicturesOffered", true);
+			CSettings::SettingsAPI::Save();
+			if (a_prepare) {
+				ModelPictures::PrepareAll(false);
+			}
+		});
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Pictures Progress ) ----------------
+	//---------------------------------------------------
+
+	std::pair<int, int> GameDataProvider::PicturesProgress() {
+
+		return ModelPictures::Progress();
 	}
 
 	//---------------------------------------------------
