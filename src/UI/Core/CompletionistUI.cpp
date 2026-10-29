@@ -6076,7 +6076,7 @@ namespace CompletionistUI
 		const float wordHeight = ImGui::GetFontSize();
 		const float wordsWidth = measure(gap);
 
-		const auto  countText = a_provider.Translate("UI_ShoutWord_Learnt{" + std::to_string(learnt) + "}{" + std::to_string(wordCount) + "}");
+		const auto  countText = wordCount == 1 ? a_provider.Translate("UI_ShoutWord_LearntOne{" + std::to_string(learnt) + "}") : a_provider.Translate("UI_ShoutWord_Learnt{" + std::to_string(learnt) + "}{" + std::to_string(wordCount) + "}");
 		const float contentHeight = wordHeight + fontSize * 0.4f + ImGui::GetTextLineHeight();
 		const float stripHeight = std::max(padding * 2.0f + contentHeight, sideBySide ? cardHeight : 0.0f);
 		const auto  stripMin = origin;
@@ -6175,7 +6175,7 @@ namespace CompletionistUI
 				pipX += pip * 3.2f;
 			}
 			std::string which;
-			if ((place.words & allWords) == allWords) {
+			if (wordCount > 1 && (place.words & allWords) == allWords) {
 				which = all;
 			} else {
 				for (std::size_t w = 0; w < wordCount; ++w) {
