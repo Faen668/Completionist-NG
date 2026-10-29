@@ -581,7 +581,11 @@ struct CMiscPatch
 			auto* Word2 = static_cast<RE::SpellItem*>(Shout->variations[1].spell);
 			auto* Word3 = static_cast<RE::SpellItem*>(Shout->variations[2].spell);
 
-			if (!Word1 || !Word2 || !Word3) { continue; }
+			if (!Word1) { continue; }
+
+			// One- and two-word shouts: the last word fills the missing ones, so learning it completes the shout
+			if (!Word2) { Word2 = Word3 = Word1; }
+			else if (!Word3) { Word3 = Word2; }
 
 			section->forms.push_back(Shout);
 			section->words_1.push_back(Word1);

@@ -465,7 +465,11 @@ namespace CFramework_Shouts {
 		auto* Word2 = static_cast<RE::SpellItem*>(Shout->variations[1].spell);
 		auto* Word3 = static_cast<RE::SpellItem*>(Shout->variations[2].spell);
 
-		if (!Word1 || !Word2 || !Word3) { return; }
+		if (!Word1) { return; }
+
+		// One- and two-word shouts: the last word fills the missing ones, so learning it completes the shout
+		if (!Word2) { Word2 = Word3 = Word1; }
+		else if (!Word3) { Word3 = Word2; }
 
 		switch (a_section)
 		{
