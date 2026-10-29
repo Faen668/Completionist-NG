@@ -1961,9 +1961,9 @@ namespace CompletionistUI
 	//-- Game Data ( Prepare Pictures ) -----------------
 	//---------------------------------------------------
 
-	void GameDataProvider::PreparePictures() {
+	void GameDataProvider::PreparePictures(bool a_redraw) {
 
-		ModelPictures::PrepareAll(false);
+		ModelPictures::PrepareAll(a_redraw);
 	}
 
 	//---------------------------------------------------

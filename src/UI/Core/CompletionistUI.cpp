@@ -6962,8 +6962,8 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Pictures Dialog ) ------
 	//---------------------------------------------------
 
-	// Over the window, the rest dimmed: offered when pictures are switched on, then their
-	// progress with Cancel, or that they're ready with Close
+	// Over the window, the rest dimmed: offered when pictures are switched on, asked when Redraw
+	// is pressed, then their progress with Cancel, or that they're ready with Close
 	void Menu::DrawPicturesDialog(IDataProvider& a_provider) {
 
 		if (_picturesDialog == PicturesDialog::kNone) {
@@ -6997,6 +6997,12 @@ namespace CompletionistUI
 			return;
 		}
 		DressPopup();
+		// A controller's A presses only a shown focus, and the page under it leaves the focus hidden
+		if (_padActive) {
+			ImGui::SetNavCursorVisible(true);
+		}
+		// B / Escape answer Later or Cancel, as a modal doesn't close on its own
+		const bool back = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
 
 		const auto heading = [&](const std::string& a_text) {
 			ImGui::PushFont(Themes::HeaderFont());
@@ -7015,31 +7021,41 @@ namespace CompletionistUI
 			ImGui::Spacing();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - row));
 			int pressed = ThemedButton(a_first.c_str()) ? 1 : 0;
+			const auto firstID = ImGui::GetItemID();
 			if (ImGui::IsWindowAppearing()) {
 				ImGui::SetKeyboardFocusHere(-1);
 			}
 			if (!a_second.empty()) {
 				ImGui::SameLine(0.0f, fontSize);
 				pressed = ThemedButton(a_second.c_str()) ? 2 : pressed;
+				// Left and right between the two, steered here as ImGui's own move doesn't reach them
+				const auto secondID = ImGui::GetItemID();
+				const auto pad = [](ImGuiKey a_key, ImGuiKey a_dpad, ImGuiKey a_stick) {
+					return ImGui::IsKeyPressed(a_key) || ImGui::IsKeyPressed(a_dpad) || ImGui::IsKeyPressed(a_stick);
+				};
+				const bool left = pad(ImGuiKey_LeftArrow, ImGuiKey_GamepadDpadLeft, ImGuiKey_GamepadLStickLeft);
+				const bool right = pad(ImGuiKey_RightArrow, ImGuiKey_GamepadDpadRight, ImGuiKey_GamepadLStickRight);
+				if (left || right) {
+					ImGui::NavMoveRequestCancel();
+					ImGui::SetFocusID(right ? secondID : firstID, ImGui::GetCurrentWindow());
+					ImGui::SetNavCursorVisible(true);
+				}
 			}
 			return pressed;
 		};
 
 		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + width - fontSize * 2.4f);
-		if (_picturesDialog == PicturesDialog::kOffer) {
-			heading(a_provider.Translate("UI_ItemPictures_OfferTitle"));
-			ImGui::TextColored(palette.text, "%s", a_provider.Translate("UI_ItemPictures_OfferText").c_str());
-			switch (buttons(a_provider.Translate("UI_ItemPictures_Prepare"), a_provider.Translate("UI_ItemPictures_Later"))) {
-			case 1:
-				a_provider.PreparePictures();
+		if (_picturesDialog == PicturesDialog::kOffer || _picturesDialog == PicturesDialog::kRedraw) {
+			const bool redraw = _picturesDialog == PicturesDialog::kRedraw;
+			heading(a_provider.Translate(redraw ? "UI_ItemPictures_RedrawTitle" : "UI_ItemPictures_OfferTitle"));
+			ImGui::TextColored(palette.text, "%s", a_provider.Translate(redraw ? "UI_ItemPictures_RedrawText" : "UI_ItemPictures_OfferText").c_str());
+			const auto pressed = buttons(a_provider.Translate(redraw ? "UI_ItemPictures_Redraw" : "UI_ItemPictures_Prepare"), a_provider.Translate(redraw ? "UI_ItemPictures_Cancel" : "UI_ItemPictures_Later"));
+			if (pressed == 1) {
+				a_provider.PreparePictures(redraw);
 				_picturesDialog = PicturesDialog::kProgress;
 				_picturesStarted = false;
-				break;
-			case 2:
+			} else if (pressed == 2 || back) {
 				close();
-				break;
-			default:
-				break;
 			}
 		} else {
 			const auto [prepared, total] = a_provider.PicturesProgress();
@@ -7056,7 +7072,7 @@ namespace CompletionistUI
 				ThinBar(ImGui::GetWindowDrawList(), ImVec2(at.x, at.y + fontSize * 0.3f), ImVec2(at.x + barWidth, at.y + fontSize * 0.3f + 3.0f), Fraction(prepared, std::max(total, 1)));
 				ImGui::Dummy(ImVec2(barWidth, fontSize * 0.8f));
 			}
-			if (buttons(a_provider.Translate(ready ? "UI_ItemPictures_Close" : "UI_ItemPictures_Cancel"), {}) == 1) {
+			if (buttons(a_provider.Translate(ready ? "UI_ItemPictures_Close" : "UI_ItemPictures_Cancel"), {}) == 1 || back) {
 				if (!ready) {
 					a_provider.CancelPictures();
 				}
@@ -8334,12 +8350,15 @@ namespace CompletionistUI
 								ImGui::Dummy(ImVec2(0.0f, 0.0f));
 							}
 						}
-						if (edited) {
+						if (edited && item.id == "Item_PicturesRedraw") {
+							// Asked first, as it throws every kept picture away
+							_picturesDialog = PicturesDialog::kRedraw;
+						} else if (edited) {
 							a_provider.ApplySetting(page.id, item);
 							_dirty = page.id == "general";
 							if (item.id == "Item_Pictures" && item.kind == SettingKind::kToggle && item.on) {
 								_picturesDialog = PicturesDialog::kOffer;
-							} else if (item.id == "Item_PicturesPrepare" || item.id == "Item_PicturesRedraw") {
+							} else if (item.id == "Item_PicturesPrepare") {
 								_picturesDialog = PicturesDialog::kProgress;
 								_picturesStarted = false;
 							}
