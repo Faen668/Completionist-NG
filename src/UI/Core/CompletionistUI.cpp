@@ -6603,7 +6603,7 @@ namespace CompletionistUI
 		y += nameLine;
 		ImGui::PushFont(Themes::TitleFont());
 		const float titleLine = ImGui::GetTextLineHeightWithSpacing();
-		const auto  when = info.unlocked.empty() ? a_provider.Translate("UI_Achievements_Locked") : info.unlocked;
+		const auto  when = !info.unlocked.empty() ? info.unlocked : info.locked.empty() ? a_provider.Translate("UI_Achievements_Locked") : info.locked;
 		drawList->AddText(ImVec2(textX, y), Colour(a_entry.IsComplete() ? palette.found : palette.text), FitText(when, textWidth).c_str());
 		ImGui::PopFont();
 		y += titleLine;

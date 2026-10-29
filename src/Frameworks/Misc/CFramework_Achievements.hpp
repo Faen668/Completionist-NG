@@ -43,6 +43,9 @@ namespace CFramework_Achievements
 		[[nodiscard]] static Store StoreInUse() noexcept;
 		[[nodiscard]] static bool  Refresh(std::vector<Achievement>& a_out);
 
+		// Translation key saying why the account's can't be read, for when Refresh says no
+		[[nodiscard]] static const char* WhyNot() noexcept;
+
 		[[nodiscard]] static bool IconPixels(std::int32_t a_icon, std::vector<std::uint8_t>& a_rgba, std::uint32_t& a_width, std::uint32_t& a_height);
 
 		// Achievements Mods Enabler or SSE Engine Fixes, without which mods keep them from unlocking

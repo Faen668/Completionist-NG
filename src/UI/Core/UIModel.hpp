@@ -77,6 +77,7 @@ namespace CompletionistUI
 	{
 		std::string                  game;	// empty when not an achievement
 		std::string                  unlocked;	// when, empty while locked
+		std::string                  locked;	// shown while locked, empty for the usual
 		std::string                  rarity;
 		std::string                  goal;	// what the store says it takes
 		std::string                  tip;

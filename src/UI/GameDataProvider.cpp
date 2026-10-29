@@ -1000,11 +1000,15 @@ namespace CompletionistUI
 				return page;
 			}
 
+			// With no answer from a store the page is this save's only, and says why
 			std::vector<Achievement> achievements;
-			if (!CHandler::Refresh(achievements)) {
-				return page;
-			}
-			if (!CHandler::CanUnlock()) {
+			const bool               fromStore = CHandler::Refresh(achievements);
+			if (!fromStore) {
+				page.hint = CHandler::WhyNot();
+				for (std::int32_t i = 1; i <= Count; ++i) {
+					achievements.push_back({ i });
+				}
+			} else if (!CHandler::CanUnlock()) {
 				page.hint = "UI_Achievements_Disabled";
 			}
 
@@ -1066,7 +1070,7 @@ namespace CompletionistUI
 				return total;
 			};
 
-			const auto store = a_provider.Translate(CHandler::StoreInUse() == Store::kSteam ? "UI_Achievements_Steam" : "UI_Achievements_GOG");
+			const auto store = a_provider.Translate(!fromStore ? "UI_Achievements_SaveOnly" : CHandler::StoreInUse() == Store::kSteam ? "UI_Achievements_Steam" : "UI_Achievements_GOG");
 			for (const auto& achievement : achievements) {
 				const auto  number = std::to_string(achievement.number);
 				const auto* title = gameOf(achievement.number);
@@ -1103,17 +1107,30 @@ namespace CompletionistUI
 					}
 				}
 
-				if (setting("AchievementsProgress")) {
+				// Without a store this is all there is to go on, so it shows whatever the setting says
+				std::size_t expected = 0;
+				bool        allMet = true;
+				if (setting("AchievementsProgress") || !fromStore) {
 					for (const auto& goal : CHandler::Goals()) {
+						expected += goal.number == achievement.number ? 1 : 0;
 						const auto value = goal.number == achievement.number ? statValue(goal.stat) : -1;
 						if (value >= 0) {
 							info.progress.push_back({ a_provider.Translate(std::string("UI_Achievements_Stat_") + goal.label), value, goal.target, goal.flag });
+							allMet = allMet && value >= goal.target;
 						}
 					}
 				}
 
+				// Done on this save: every one of its goals is met, and every one could be told
+				if (!fromStore) {
+					const bool done = expected > 0 && info.progress.size() == expected && allMet;
+					entry.state = done ? EntryState::kFound : EntryState::kNeeded;
+					info.unlocked = done ? a_provider.Translate("UI_Achievements_DoneOnSave") : std::string{};
+					info.locked = a_provider.Translate("UI_Achievements_NotDoneOnSave");
+				}
+
 				entry.detail = achievement.unlocked && achievement.time ? date(achievement.time) : std::string{};
-				if (!achievement.unlocked && info.progress.size() == 1 && !info.progress.front().flag) {
+				if (entry.state != EntryState::kFound && info.progress.size() == 1 && !info.progress.front().flag) {
 					entry.detail = fmt::format("{} / {}", std::min(info.progress.front().value, info.progress.front().target), info.progress.front().target);
 				}
 				entry.description = info.tip;
