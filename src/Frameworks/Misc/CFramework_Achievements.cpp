@@ -66,7 +66,18 @@ namespace CFramework_Achievements
 			bool requested{ false };
 		};
 
+		// What was wrong with a store DLL that was there
+		enum class Reason : std::uint8_t
+		{
+			kNone,
+			kSteamOff,
+			kSteamCalls,
+			kGalaxyCalls,
+		};
+
 		Store  store{ Store::kNone };
+		Reason steamReason{ Reason::kNone };
+		Reason galaxyReason{ Reason::kNone };
 		Steam  steam;
 		Galaxy galaxy;
 		bool   canUnlock{ false };
@@ -227,8 +238,13 @@ namespace CFramework_Achievements
 			if (!module) { return false; }
 
 			bool (*running)() = nullptr;
-			if (!Find(module, "SteamAPI_IsSteamRunning", running) || !running()) {
+			if (!Find(module, "SteamAPI_IsSteamRunning", running)) {
+				steamReason = Reason::kSteamCalls;
+				return false;
+			}
+			if (!running()) {
 				INFO("Achievements: steam_api64.dll is loaded but Steam isn't running");
+				steamReason = Reason::kSteamOff;
 				return false;
 			}
 
@@ -246,6 +262,7 @@ namespace CFramework_Achievements
 			Find(module, "SteamAPI_ISteamUserStats_GetAchievementName", steam.getName);
 			if (!found) {
 				INFO("Achievements: this steam_api64.dll is missing calls we need");
+				steamReason = Reason::kSteamCalls;
 				return false;
 			}
 			return true;
@@ -262,6 +279,7 @@ namespace CFramework_Achievements
 
 			if (!Find(module, "?Stats@api@galaxy@@YAPEAVIStats@12@XZ", galaxy.stats) || !Find(module, "?GetError@api@galaxy@@YAPEBVIError@12@XZ", galaxy.error)) {
 				INFO("Achievements: Galaxy64.dll is loaded but has no Stats or GetError");
+				galaxyReason = Reason::kGalaxyCalls;
 				return false;
 			}
 			return true;
@@ -519,6 +537,22 @@ namespace CFramework_Achievements
 			failLogged = false;
 		}
 		return true;
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Why Not ) ----------------
+	//---------------------------------------------------
+
+	const char* CHandler::WhyNot() noexcept {
+
+		if (store == Store::kSteam) { return "UI_Achievements_WhyNoAnswerSteam"; }
+		if (store == Store::kGOG) { return "UI_Achievements_WhyNoAnswerGalaxy"; }
+		switch (steamReason != Reason::kNone ? steamReason : galaxyReason) {
+		case Reason::kSteamOff: return "UI_Achievements_WhySteamOff";
+		case Reason::kSteamCalls: return "UI_Achievements_WhySteamCalls";
+		case Reason::kGalaxyCalls: return "UI_Achievements_WhyGalaxyCalls";
+		default: return "UI_Achievements_WhyNoStore";
+		}
 	}
 
 	//---------------------------------------------------
