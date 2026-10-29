@@ -52,7 +52,8 @@ namespace CompletionistUI
 			{ "cmpOccupied", IconGroup::kMuseum, MuseumDiamondShapes, MuseumDiamondCommands },
 		};
 
-		constexpr std::string_view listMenus[] = { RE::InventoryMenu::MENU_NAME, RE::ContainerMenu::MENU_NAME, RE::BarterMenu::MENU_NAME, RE::GiftMenu::MENU_NAME };
+		// Crafting Menu covers SkyUI's crafting lists and Crafting Categories' constructibleobjectmenu.swf
+		constexpr std::string_view listMenus[] = { RE::InventoryMenu::MENU_NAME, RE::ContainerMenu::MENU_NAME, RE::BarterMenu::MENU_NAME, RE::GiftMenu::MENU_NAME, RE::CraftingMenu::MENU_NAME };
 		constexpr const char*      skyuiIcons[] = { "bestIcon", "favoriteIcon", "poisonIcon", "stolenIcon", "enchIcon", "readIcon" };
 
 		constexpr const char* markName = "_comp_mark";
@@ -62,6 +63,7 @@ namespace CompletionistUI
 		constexpr const char* originalSetEntry = "_comp_setEntry";
 		constexpr const char* originalProcessEntry = "_comp_processEntry";
 		constexpr const char* originalApplyFilter = "_comp_applyFilter";
+		constexpr const char* craftedMember = "_comp_formId";
 
 		//---------------------------------------------------
 		//-- Item Marks ( Helpers ) -------------------------
@@ -81,8 +83,16 @@ namespace CompletionistUI
 
 		const char* GetIconName(const RE::GFxValue& a_entry) {
 
-			const auto formID = static_cast<RE::FormID>(Number(a_entry, "formId"));
-			auto* object = formID ? RE::TESForm::LookupByID<RE::TESBoundObject>(formID) : nullptr;
+			// Recipes are marked by the item they make
+			auto formID = static_cast<RE::FormID>(Number(a_entry, craftedMember));
+			if (!formID) {
+				formID = static_cast<RE::FormID>(Number(a_entry, "formId"));
+			}
+			auto* form = formID ? RE::TESForm::LookupByID(formID) : nullptr;
+			if (auto* recipe = form ? form->As<RE::BGSConstructibleObject>() : nullptr) {
+				form = recipe->createdItem;
+			}
+			auto* object = form ? form->As<RE::TESBoundObject>() : nullptr;
 			if (!object) { return ""; }
 
 			CompletionistAPI::IconInfo info{};
@@ -384,6 +394,37 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Item Marks ( Tag Recipes ) ---------------------
+		//---------------------------------------------------
+
+		// Recipe entries carry no formId, the game's recipe list is in the same order as its entryList
+		void TagRecipes(RE::GFxMovie* a_movie) {
+
+			auto* ui = RE::UI::GetSingleton();
+			auto  menu = ui ? ui->GetMenu<RE::CraftingMenu>() : nullptr;
+			if (!menu || menu->uiMovie.get() != a_movie) { return; }
+
+			auto* subMenu = menu->GetCraftingSubMenu();
+			auto* construct = subMenu ? skyrim_cast<RE::CraftingSubMenus::ConstructibleObjectMenu*>(subMenu) : nullptr;
+			if (!construct || !construct->entryList.IsArray()) { return; }
+
+			auto&      list = construct->entryList;
+			const auto count = std::min<std::uint32_t>(list.GetArraySize(), construct->recipes.size());
+			for (std::uint32_t i = 0; i < count; ++i) {
+				auto*        recipe = construct->recipes[i].constructibleObject;
+				RE::GFxValue entry;
+				if (!recipe || !recipe->createdItem || !list.GetElement(i, &entry) || !entry.IsObject()) {
+					continue;
+				}
+				const auto formID = static_cast<double>(recipe->createdItem->GetFormID());
+				if (Number(entry, craftedMember) != formID) {
+					entry.SetMember(craftedMember, formID);
+					SetSortStatus(entry);
+				}
+			}
+		}
+
+		//---------------------------------------------------
 		//-- Item Marks ( Set Bands ) -----------------------
 		//---------------------------------------------------
 
@@ -458,6 +499,7 @@ namespace CompletionistUI
 
 				if (!a_params.thisPtr) { return; }
 
+				TagRecipes(a_params.movie);
 				if (a_params.argCount > 0 && a_params.args[0].IsArray()) {
 					auto& list = a_params.args[0];
 					for (std::uint32_t i = 0; i < list.GetArraySize(); ++i) {
@@ -510,8 +552,11 @@ namespace CompletionistUI
 			if (!menu || !menu->uiMovie) { return; }
 
 			auto* movie = menu->uiMovie.get();
+			const bool   crafting = a_menu == RE::CraftingMenu::MENU_NAME;
+			const auto*  path = crafting ? "_global.skyui.util.ConfigManager._config.ListLayout.columns.craftNameColumn" :
+			                               "_global.skyui.util.ConfigManager._config.ListLayout.columns.itemNameColumn";
 			RE::GFxValue column;
-			if (!movie->GetVariable(&column, "_global.skyui.util.ConfigManager._config.ListLayout.columns.itemNameColumn") || !column.IsObject()) {
+			if (!movie->GetVariable(&column, path) || !column.IsObject()) {
 				if (a_tries > 0) {
 					SKSE::GetTaskInterface()->AddUITask([a_menu, a_tries]() { AddSortState(a_menu, a_tries - 1); });
 				} else {
@@ -568,8 +613,9 @@ namespace CompletionistUI
 			if (!menu || !menu->uiMovie) { return; }
 
 			auto* movie = menu->uiMovie.get();
+			const bool   crafting = a_menu == RE::CraftingMenu::MENU_NAME;
 			RE::GFxValue listEntry;
-			if (!movie->GetVariable(&listEntry, "_global.InventoryListEntry.prototype") || !listEntry.IsObject()) {
+			if (!movie->GetVariable(&listEntry, crafting ? "_global.CraftingListEntry.prototype" : "_global.InventoryListEntry.prototype") || !listEntry.IsObject()) {
 				if (a_tries > 0) {
 					SKSE::GetTaskInterface()->AddUITask([a_menu, a_tries]() { WrapMenu(a_menu, a_tries - 1); });
 				} else {
@@ -584,7 +630,7 @@ namespace CompletionistUI
 			}
 
 			RE::GFxValue dataSetter;
-			if (movie->GetVariable(&dataSetter, "_global.InventoryDataSetter.prototype") && dataSetter.IsObject() &&
+			if (movie->GetVariable(&dataSetter, crafting ? "_global.CraftingDataSetter.prototype" : "_global.InventoryDataSetter.prototype") && dataSetter.IsObject() &&
 				WrapFunction(movie, dataSetter, "processEntry", originalProcessEntry, &processEntry)) {
 
 				RE::GFxValue sortFilter;
