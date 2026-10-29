@@ -107,7 +107,8 @@ namespace CompletionistUI
 		[[nodiscard]] std::vector<SpotView> Spots() const;
 		void OpenPageTab(std::string_view a_page, int a_tab) { _pageTabs[std::string(a_page)] = std::to_string(a_tab); }
 		void SetMixSlots(const std::array<std::uint32_t, 3>& a_slots) { _mixSlots = a_slots; }
-		void ShowPicturesDialog(bool a_progress) { _picturesDialog = a_progress ? PicturesDialog::kProgress : PicturesDialog::kOffer; }
+		void ShowPicturesDialog(int a_kind) { _picturesDialog = a_kind == 2 ? PicturesDialog::kProgress : a_kind == 3 ? PicturesDialog::kRedraw : PicturesDialog::kOffer; }	// 1 offer, 2 progress, 3 redraw
+		[[nodiscard]] const char* PicturesDialogShown() const { return _picturesDialog == PicturesDialog::kOffer ? "offer" : _picturesDialog == PicturesDialog::kRedraw ? "redraw" : _picturesDialog == PicturesDialog::kProgress ? "progress" : "none"; }
 		void OpenMixPotion(std::string a_effect) { _mixOpenName = std::move(a_effect); }	// by its main effect's name
 
 		void RecordControl();
@@ -205,6 +206,7 @@ namespace CompletionistUI
 		{
 			kNone,
 			kOffer,	// pictures just switched on: prepare them all now?
+			kRedraw,	// Redraw pressed: throw them all away and draw them again?
 			kProgress,	// preparing, with Cancel; ready, with Close
 		};
 		void                       DrawPicturesDialog(IDataProvider& a_provider);

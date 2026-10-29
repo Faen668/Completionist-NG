@@ -350,8 +350,8 @@ namespace CompletionistUI
 			Tracker::ShowPinGlow(a_item.on);
 		} else if (action == "clearPin") {
 			Tracker::UnpinAll();
-		} else if (action == "picturesPrepare" || action == "picturesRedraw") {
-			ModelPictures::PrepareAll(action == "picturesRedraw");
+		} else if (action == "picturesPrepare") {
+			ModelPictures::PrepareAll(false);
 		}
 
 		SettingsAPI::Save();
