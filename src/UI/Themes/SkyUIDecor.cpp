@@ -151,9 +151,23 @@ namespace CompletionistUI::SkyUIDecor
 	// Grey bar ending in an arrow tip
 	void GlowBar(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, ImU32 a_colour, float a_alpha) {
 
-		const float tip = (a_max.y - a_min.y) * 0.5f;
+		// Snap to whole pixels, with an odd height so the tip sits on one pixel row. Row heights are fractional
+		// at small windows, and unsnapped edges left a gap before the arrow and put the tip a pixel off
+		const float left = std::round(a_min.x);
+		const float top = std::round(a_min.y);
+		float       height = std::round(a_max.y - a_min.y);
+		if (std::fmod(height, 2.0f) == 0.0f) {
+			height -= 1.0f;
+		}
+		if (height < 3.0f) {
+			return;
+		}
+		a_min = ImVec2(left, top);
+		a_max = ImVec2(std::round(a_max.x), top + height);
+
+		const float tip = (height - 1.0f) * 0.5f;
 		const float bodyRight = a_max.x - tip;
-		const float midY = (a_min.y + a_max.y) * 0.5f;
+		const float midY = top + height * 0.5f;	// centre of the middle pixel row
 		const ImU32 faint = WithAlpha(a_colour, 0.04f * a_alpha);
 		const ImU32 strong = WithAlpha(a_colour, 0.24f * a_alpha);
 		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(bodyRight, a_max.y), faint, strong, strong, faint);
@@ -162,8 +176,9 @@ namespace CompletionistUI::SkyUIDecor
 		const ImU32 edgeClear = WithAlpha(a_colour, 0.0f);
 		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(bodyRight, a_min.y + 1.0f), edgeClear, edge, edge, edgeClear);
 		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - 1.0f), ImVec2(bodyRight, a_max.y), edgeClear, edge, edge, edgeClear);
-		a_drawList->AddLine(ImVec2(bodyRight, a_min.y), ImVec2(a_max.x, midY), edge);
-		a_drawList->AddLine(ImVec2(a_max.x, midY), ImVec2(bodyRight, a_max.y), edge);
+		// Lines run through pixel centres so they stay one crisp pixel wide
+		a_drawList->AddLine(ImVec2(bodyRight, a_min.y + 0.5f), ImVec2(a_max.x - 0.5f, midY), edge);
+		a_drawList->AddLine(ImVec2(a_max.x - 0.5f, midY), ImVec2(bodyRight, a_max.y - 0.5f), edge);
 	}
 }
 
