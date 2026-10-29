@@ -131,6 +131,11 @@ namespace CompletionistUI
 				Toggle("CompletionLog_ColoursEnabledState", "$CompletionLog_ColoursEnabledText", logColours),
 				Colour("CompletionLog_QuestsTextColourState", "$CompletionLog_QuestsTextColourText", "CompletionLog_QuestsTextColourVal", "CompletionLog_QuestsTextColourString", "$CompletionLog_QuestsTextColourInfo", logColours),
 				Colour("CompletionLog_ItemsTextColourState", "$CompletionLog_ItemsTextColourText", "CompletionLog_ItemsTextColourVal", "CompletionLog_ItemsTextColourString", "$CompletionLog_ItemsTextColourInfo", logColours),
+				Spacer(),
+				Header("UI_ItemPictures_Header"),
+				Toggle("Item_Pictures", "UI_ItemPictures_Setting", "ItemPictures"),
+				Button("Item_PicturesPrepare", "UI_ItemPictures_PrepareSetting", "UI_ItemPictures_Prepare", "picturesPrepare", "ItemPictures"),
+				Button("Item_PicturesRedraw", "UI_ItemPictures_RedrawSetting", "UI_ItemPictures_Redraw", "picturesRedraw", "ItemPictures"),
 			};
 
 			page.columns[1] = {
@@ -340,6 +345,9 @@ namespace CompletionistUI
 			{ "Achievements_Show", "UI_Achievements_SettingShowInfo" },
 			{ "Ingredients_Show", "UI_Ingredients_SettingShowInfo" },
 			{ "Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknownInfo" },
+			{ "Item_Pictures", "UI_ItemPictures_SettingInfo" },
+			{ "Item_PicturesPrepare", "UI_ItemPictures_PrepareInfo" },
+			{ "Item_PicturesRedraw", "UI_ItemPictures_RedrawInfo" },
 			{ "Achievements_Progress", "UI_Achievements_SettingProgressInfo" },
 			{ "Achievements_Tips", "UI_Achievements_SettingTipsInfo" },
 			{ "Achievements_Rarity", "UI_Achievements_SettingRarityInfo" },

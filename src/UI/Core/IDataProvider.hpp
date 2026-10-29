@@ -3,6 +3,7 @@
 #include "UI/Core/UIModel.hpp"
 
 #include <string_view>
+#include <utility>
 
 namespace CompletionistUI
 {
@@ -47,6 +48,11 @@ namespace CompletionistUI
 		virtual void ExcludeCellItem(const CellItem&) {}
 
 		[[nodiscard]] virtual void* AchievementIcon(std::int32_t /*a_icon*/) { return nullptr; }	// render thread
+		[[nodiscard]] virtual void* ItemPicture(std::uint32_t /*a_formID*/) { return nullptr; }	// render thread, a picture of its model
+		virtual void                                UpdatePictures() {}	// render thread, every frame the window's open
+		[[nodiscard]] virtual bool                  OfferPictures() { return false; }	// ask once to prepare them all
+		virtual void                                AnswerPictures(bool /*a_prepare*/) {}
+		[[nodiscard]] virtual std::pair<int, int>   PicturesProgress() { return {}; }	// prepared of all, 0 of 0 when idle
 
 		[[nodiscard]] virtual std::string Translate(std::string_view a_key) = 0;
 	};

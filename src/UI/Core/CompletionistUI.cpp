@@ -1307,6 +1307,7 @@ namespace CompletionistUI
 	bool Menu::Draw(IDataProvider& a_provider, UISettings& a_settings) {
 
 		_settings = &a_settings;
+		a_provider.UpdatePictures();
 		if (!_settingsApplied) {
 			_hideCompleted = a_settings.hideCompleted;
 			_settingsApplied = true;
@@ -2889,6 +2890,9 @@ namespace CompletionistUI
 		const auto& style = ImGui::GetStyle();
 		const float fontSize = ImGui::GetFontSize();
 
+		DrawPicturesOffer(a_provider);
+		DrawPicturesProgress(a_provider);
+
 		//---------------------------------------------------
 		// Overview cards
 		//---------------------------------------------------
@@ -3216,6 +3220,7 @@ namespace CompletionistUI
 
 		const auto& palette = Themes::GetPalette();
 		const auto& page = *_page;
+		DrawPicturesProgress(a_provider);
 
 		std::int32_t found = 0;
 		std::int32_t total = 0;
@@ -5466,6 +5471,18 @@ namespace CompletionistUI
 		ImGui::SetCursorScreenPos(start);
 		StateMarker(a_entry.state);
 
+		if (a_entry.hasModel) {
+			ImGui::SameLine();
+			const auto at = ImGui::GetCursorScreenPos();
+			const auto  end = ImVec2(at.x + side, at.y + side);
+			if (ImGui::IsRectVisible(at, end)) {
+				if (auto* texture = a_provider.ItemPicture(a_entry.formID)) {
+					ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<ImTextureID>(texture), ImVec2(at.x, at.y + 1.0f), ImVec2(end.x, end.y - 1.0f));
+				}
+			}
+			ImGui::Dummy(ImVec2(side, side));
+		}
+
 		ImGui::SameLine();
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextColored(a_entry.IsComplete() ? palette.found : palette.needed, "%s", a_entry.name.c_str());
@@ -5852,6 +5869,19 @@ namespace CompletionistUI
 			DrawQuestDetail(a_provider, *a_journal, *entry);
 			ImGui::PopTextWrapPos();
 		} else {
+			// An item's picture up the right-hand side, as tall as the panel allows
+			float wrapAt = 0.0f;
+			if (entry->hasModel && !entry->IsIngredient()) {
+				const float side = std::floor(std::min(ImGui::GetContentRegionAvail().y, lineHeight * 6.0f));
+				if (side > lineHeight * 1.5f) {
+					const auto at = ImVec2(ImGui::GetCursorScreenPos().x + ImGui::GetContentRegionAvail().x - side, ImGui::GetCursorScreenPos().y);
+					if (auto* texture = a_provider.ItemPicture(entry->formID)) {
+						ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<ImTextureID>(texture), at, ImVec2(at.x + side, at.y + side));
+					}
+					wrapAt = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - side - ImGui::GetFontSize();
+				}
+			}
+
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
 			ImGui::PopFont();
@@ -5875,7 +5905,7 @@ namespace CompletionistUI
 				}
 			}
 
-			ImGui::PushTextWrapPos(0.0f);
+			ImGui::PushTextWrapPos(wrapAt);
 
 			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon() || entry->IsAchievement() || entry->IsIngredient();
 			if (entry->IsIngredient()) {
@@ -6909,15 +6939,96 @@ namespace CompletionistUI
 		const auto  factsMin = sideBySide ? ImVec2(loreMax.x + gap, bottomTop) : ImVec2(origin.x, loreMax.y + gap);
 		const auto  factsMax = ImVec2(origin.x + width, factsMin.y + factsBoxHeight);
 		panel(factsMin, factsMax, false);
-		drawList->PushClipRect(factsMin, ImVec2(factsMax.x - padding * 0.5f, factsMax.y), true);
+
+		// The ingredient's own model at the right of its facts, as tall as the box allows
+		float picture = 0.0f;
+		if (a_entry.hasModel) {
+			picture = std::floor(factsBoxHeight - padding);
+			const auto at = ImVec2(factsMax.x - padding * 0.5f - picture, factsMin.y + padding * 0.5f);
+			if (auto* texture = a_provider.ItemPicture(a_entry.formID)) {
+				drawList->AddImage(reinterpret_cast<ImTextureID>(texture), at, ImVec2(at.x + picture, at.y + picture));
+			}
+		}
+		drawList->PushClipRect(factsMin, ImVec2(factsMax.x - padding * 0.5f - picture, factsMax.y), true);
 		float factY = factsMin.y + (factsBoxHeight - IngredientLayout::FactsContent(info.facts.size())) * 0.5f;
 		for (const auto& fact : info.facts) {
-			drawList->AddText(ImVec2(factsMin.x + padding, factY), Colour(palette.textDim), FitText(fact, factsWidth - padding * 2.0f).c_str());
+			drawList->AddText(ImVec2(factsMin.x + padding, factY), Colour(palette.textDim), FitText(fact, factsMax.x - factsMin.x - padding * 2.0f - picture).c_str());
 			factY += line;
 		}
 		drawList->PopClipRect();
 
 		ImGui::Dummy(ImVec2(width, factsMax.y - origin.y));
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Pictures Offer ) -------
+	//---------------------------------------------------
+
+	// Asked once, on the overview: draw every item's picture now, so no page waits for them
+	// the first time it's opened. Either answer puts it away; Settings has the button for later
+	void Menu::DrawPicturesOffer(IDataProvider& a_provider) {
+
+		if (!a_provider.OfferPictures() || a_provider.PicturesProgress().second > 0) {
+			return;
+		}
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const float padding = fontSize * 0.8f;
+		const float width = ImGui::GetContentRegionAvail().x;
+		const auto  title = a_provider.Translate("UI_ItemPictures_OfferTitle");
+		const auto  text = a_provider.Translate("UI_ItemPictures_OfferText");
+		const auto  prepare = a_provider.Translate("UI_ItemPictures_Prepare");
+		const auto  later = a_provider.Translate("UI_ItemPictures_NotNow");
+		const float buttons = ButtonWidth(prepare.c_str()) + fontSize + ButtonWidth(later.c_str());
+		const float textWidth = std::max(fontSize * 10.0f, width - padding * 3.0f - buttons);
+		ImGui::PushFont(Themes::HeaderFont());
+		const float titleHeight = ImGui::GetTextLineHeightWithSpacing();
+		ImGui::PopFont();
+		const float height = padding * 2.0f + titleHeight + ImGui::CalcTextSize(text.c_str(), nullptr, false, textWidth).y;
+
+		const auto min = ImGui::GetCursorScreenPos();
+		const auto max = ImVec2(min.x + width, min.y + height);
+		auto*      drawList = ImGui::GetWindowDrawList();
+		drawList->AddRectFilled(min, max, Colour(palette.accent, 0.06f));
+		drawList->AddRect(min, max, Colour(palette.accent, 0.5f));
+		CornerMarks(drawList, min, max, fontSize * 0.18f, Colour(palette.accent, 0.7f));
+		ImGui::PushFont(Themes::HeaderFont());
+		drawList->AddText(ImVec2(min.x + padding, min.y + padding), Colour(palette.heading), title.c_str());
+		ImGui::PopFont();
+		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(min.x + padding, min.y + padding + titleHeight), Colour(palette.textDim), text.c_str(), nullptr, textWidth);
+
+		ImGui::SetCursorScreenPos(ImVec2(max.x - padding - buttons, min.y + (height - ImGui::GetFrameHeight()) * 0.5f));
+		if (ThemedButton(prepare.c_str())) {
+			a_provider.AnswerPictures(true);
+		}
+		ImGui::SameLine(0.0f, fontSize);
+		if (ThemedButton(later.c_str())) {
+			a_provider.AnswerPictures(false);
+		}
+		ImGui::SetCursorScreenPos(ImVec2(min.x, max.y + fontSize * 0.6f));
+		ImGui::Dummy(ImVec2(width, 0.0f));
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Pictures Progress ) ----
+	//---------------------------------------------------
+
+	// A line while pictures are being prepared, on whatever page is open
+	void Menu::DrawPicturesProgress(IDataProvider& a_provider) {
+
+		const auto [prepared, total] = a_provider.PicturesProgress();
+		if (total <= 0) {
+			return;
+		}
+		const auto& palette = Themes::GetPalette();
+		const auto  text = a_provider.Translate("UI_ItemPictures_Preparing{" + std::to_string(prepared) + "}{" + std::to_string(total) + "}");
+		ImGui::TextColored(palette.textDim, "%s", text.c_str());
+		ImGui::SameLine(0.0f, ImGui::GetFontSize());
+		const auto  at = ImGui::GetCursorScreenPos();
+		const float width = ImGui::GetContentRegionAvail().x;
+		const float y = at.y + ImGui::GetTextLineHeight() * 0.5f;
+		ThinBar(ImGui::GetWindowDrawList(), ImVec2(at.x, y - 1.0f), ImVec2(at.x + width, y + 1.0f), Fraction(prepared, total));
+		ImGui::NewLine();
 	}
 
 	//---------------------------------------------------
@@ -6989,6 +7100,13 @@ namespace CompletionistUI
 			a_drawList->AddRect(a_min, a_max, Colour(a_lit ? palette.accent : palette.separator, a_lit ? 0.55f : 0.7f));
 			CornerMarks(a_drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
 		};
+		// The ingredient's own model, once the game has it drawn; the space is kept either way so
+		// rows line up while the pictures arrive
+		const auto model = [&](ImDrawList* a_drawList, std::uint32_t a_formID, ImVec2 a_min, float a_size) {
+			if (auto* texture = a_provider.ItemPicture(a_formID)) {
+				a_drawList->AddImage(reinterpret_cast<ImTextureID>(texture), a_min, ImVec2(a_min.x + a_size, a_min.y + a_size));
+			}
+		};
 		const auto pips = [&](ImDrawList* a_drawList, const MixIngredient& a_ingredient, ImVec2 a_at) {
 			const float pip = fontSize * 0.2f;
 			float       x = a_at.x + pip;
@@ -7026,7 +7144,10 @@ namespace CompletionistUI
 			const auto count = ingredient.carried > 0 ? a_provider.Translate("UI_Mix_Carried{" + std::to_string(ingredient.carried) + "}") : std::string{};
 			const auto countSize = ImGui::CalcTextSize(count.c_str());
 			const float pipsWidth = fontSize * 0.6f * static_cast<float>(ingredient.effects.size());
-			rowList->AddText(ImVec2(start.x + fontSize * 0.4f, textY), Colour(picked ? palette.heading : ingredient.carried > 0 ? palette.text : palette.textDim), FitText(ingredient.name, width - countSize.x - pipsWidth - fontSize * 1.6f).c_str());
+			const float rowHeight = ImGui::GetFrameHeight();
+			model(rowList, ingredient.formID, ImVec2(start.x + fontSize * 0.3f, start.y + 1.0f), rowHeight - 2.0f);
+			const float nameX = start.x + fontSize * 0.6f + rowHeight;
+			rowList->AddText(ImVec2(nameX, textY), Colour(picked ? palette.heading : ingredient.carried > 0 ? palette.text : palette.textDim), FitText(ingredient.name, start.x + width - nameX - countSize.x - pipsWidth - fontSize * 1.2f).c_str());
 			pips(rowList, ingredient, ImVec2(start.x + width - countSize.x - pipsWidth - fontSize * 0.8f, textY + fontSize * 0.55f));
 			rowList->AddText(ImVec2(start.x + width - countSize.x - fontSize * 0.4f, textY), Colour(palette.textDim), count.c_str());
 			ImGui::PopID();
@@ -7077,11 +7198,13 @@ namespace CompletionistUI
 			const bool hovered = ImGui::IsItemHovered() || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible);
 			ImGui::PopID();
 			card(drawList, min, max, hovered && ingredient);
-			const float textX = min.x + padding;
+			const float picture = slotHeight - padding * 0.8f;
+			const float textX = min.x + padding + (ingredient ? picture : 0.0f);
 			const float textY = min.y + padding * 0.6f;
 			if (ingredient) {
 				chosen.push_back(ingredient);
-				drawList->AddText(ImVec2(textX, textY), Colour(palette.text), FitText(ingredient->name, slotWidth - padding * 2.0f).c_str());
+				model(drawList, ingredient->formID, ImVec2(min.x + padding * 0.5f, min.y + padding * 0.4f), picture);
+				drawList->AddText(ImVec2(textX, textY), Colour(palette.text), FitText(ingredient->name, max.x - textX - padding).c_str());
 				pips(drawList, *ingredient, ImVec2(textX, textY + line + fontSize * 0.55f));
 				const auto note = ingredient->carried > 0 ? a_provider.Translate("UI_Mix_Carried{" + std::to_string(ingredient->carried) + "}") : a_provider.Translate("UI_Mix_NotCarried");
 				const auto noteSize = ImGui::CalcTextSize(note.c_str());
@@ -7190,7 +7313,14 @@ namespace CompletionistUI
 			const auto  worthSize = ImGui::CalcTextSize(worth.c_str());
 			Decor::Diamond(rowList, ImVec2(start.x + fontSize * 0.6f, textY + fontSize * 0.55f), fontSize * 0.25f, Colour(palette.accent), open);
 			const float nameX = start.x + fontSize * 1.3f;
-			rowList->AddText(ImVec2(nameX, textY), Colour(open ? palette.heading : palette.text), FitText(name, rowWidth - worthSize.x - fontSize * 2.5f).c_str());
+			const float picture = rowHeight - 2.0f;
+			const auto& bestWay = group.variations.front().ingredients;
+			const float picturesWidth = (picture + 2.0f) * static_cast<float>(bestWay.size());
+			const float picturesX = start.x + rowWidth - worthSize.x - fontSize * 1.2f - picturesWidth;
+			rowList->AddText(ImVec2(nameX, textY), Colour(open ? palette.heading : palette.text), FitText(name, picturesX - nameX - fontSize * 0.5f).c_str());
+			for (std::size_t p = 0; p < bestWay.size(); ++p) {
+				model(rowList, bestWay[p]->formID, ImVec2(picturesX + (picture + 2.0f) * static_cast<float>(p), start.y + 1.0f), picture);
+			}
 			rowList->AddText(ImVec2(start.x + rowWidth - worthSize.x - fontSize * 0.4f, textY), Colour(palette.found), worth.c_str());
 
 			// Its ways of making it, the strongest first; one fills the slots
@@ -7219,8 +7349,11 @@ namespace CompletionistUI
 					const auto  value = a_provider.Translate("UI_Mix_Worth{" + std::to_string(recipe.brew.value) + "}");
 					const auto  valueSize = ImGui::CalcTextSize(value.c_str());
 					const float lineY = start.y + (rowHeight - fontSize) * 0.5f;
-					const float textX = start.x + indent + fontSize * 0.5f;
-					const float room = rowWidth - indent - valueSize.x - fontSize * 2.0f;
+					for (std::size_t p = 0; p < recipe.ingredients.size(); ++p) {
+						model(rowList, recipe.ingredients[p]->formID, ImVec2(start.x + indent + fontSize * 0.3f + (picture + 2.0f) * static_cast<float>(p), start.y + 1.0f), picture);
+					}
+					const float textX = start.x + indent + fontSize * 0.6f + (picture + 2.0f) * static_cast<float>(recipe.ingredients.size());
+					const float room = start.x + rowWidth - textX - valueSize.x - fontSize * 1.2f;
 					const float fromWidth = std::min(ImGui::CalcTextSize(from.c_str()).x, also.empty() ? room : room * 0.6f);
 					rowList->AddText(ImVec2(textX, lineY), Colour(palette.text), FitText(from, fromWidth).c_str());
 					if (!also.empty()) {
@@ -7483,6 +7616,7 @@ namespace CompletionistUI
 		const auto& style = ImGui::GetStyle();
 		bool        changed = false;
 		_hoveredEntry.reset();
+		DrawPicturesProgress(a_provider);
 
 		// Applied on release
 		if (_pendingScale < 0.0f) {

@@ -7,6 +7,7 @@
 #include "Internal Utility/Variables.hpp"
 #include "UI/Core/SettingsLayout.hpp"
 #include "UI/KeyNames.hpp"
+#include "UI/ModelPictures.hpp"
 #include "UI/Tracker.hpp"
 
 #undef GetObject
@@ -349,6 +350,10 @@ namespace CompletionistUI
 			Tracker::ShowPinGlow(a_item.on);
 		} else if (action == "clearPin") {
 			Tracker::UnpinAll();
+		} else if (action == "picturesPrepare" || action == "picturesRedraw") {
+			// Asked and answered from here as well
+			SettingsAPI::SetBool("ItemPicturesOffered", true);
+			ModelPictures::PrepareAll(action == "picturesRedraw");
 		}
 
 		SettingsAPI::Save();

@@ -200,6 +200,8 @@ namespace CompletionistUI
 		float                      _dragonLore{ 0.0f };	// the page's longest story, so the panel keeps its height
 		void                       DrawIngredientInfo(IDataProvider& a_provider, const Entry& a_entry, bool a_withName);
 		void                       DrawMixing(IDataProvider& a_provider, const Page& a_page);
+		void                       DrawPicturesOffer(IDataProvider& a_provider);
+		static void                DrawPicturesProgress(IDataProvider& a_provider);
 		void                       MixToggle(std::uint32_t a_formID);
 		[[nodiscard]] static std::string BrewName(IDataProvider& a_provider, const Brew& a_brew);
 		std::array<std::uint32_t, 3>      _mixSlots{};	// the Mixing Station's ingredients

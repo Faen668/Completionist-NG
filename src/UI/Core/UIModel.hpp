@@ -159,6 +159,7 @@ namespace CompletionistUI
 		bool                    canPin{ false };
 		bool                    canMark{ false };
 		bool                    placesKnown{ false };
+		bool                    hasModel{ false };	// an item, which can show a picture of its model
 		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
 		EntryTrainer            trainer;
 		EntryDragon             dragon;
