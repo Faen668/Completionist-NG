@@ -24,6 +24,7 @@ namespace CQFramework_SmallTowns
 		{"SmallTowns_Quest16", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsGatherWheat"},
 		{"SmallTowns_Quest17", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsDrunks"},
 		{"SmallTowns_Quest18", CFlagEnum::kRadi, CCompEnum::kGlobl, "FavorJobsBeggars"},
+		{"SmallTowns_Quest19", CFlagEnum::kRadi, CCompEnum::kGlobl, "FreeformFrostRiver"}, //CRF
 	};
 
 	CRadiantData RadiantData[]{
@@ -36,6 +37,7 @@ namespace CQFramework_SmallTowns
 		{"SmallTowns_Quest16",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 		{"SmallTowns_Quest17",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
 		{"SmallTowns_Quest18",  CRadiantEnum::kRadiant_Def, 0, 0, 0, CQuestProcessor::kExcluded},
+		{"SmallTowns_Quest19",  CRadiantEnum::kRadiant_Def, 0x0681D4, 0, 200},
 	};
 
 	CStageData StageData[]{
@@ -56,8 +58,16 @@ namespace CQFramework_SmallTowns
 
 	void CHandler::InstallFramework()
 	{
+		auto CuttingRoomFloorInstalled = Serialization::CompletionistData::IsModInstalled("Cutting Room Floor.esp");
+
 		for (auto i = 0; i < std::extent_v<decltype(QuestData)>; i++)
 		{
+			// Handle Exclusions for 'Cutting Room Floor'
+			if (!CuttingRoomFloorInstalled && i == 19) {
+				INFO("Excluded quest {} Due To 'Cutting Room Floor'", QuestData[i].unique_identifier);
+				continue;
+			}
+
 			QuestData[i].init()
 				->initStageData(StageData)
 				->initRadiantData(RadiantData)

@@ -18,8 +18,8 @@ namespace CQFramework_CW
 		{"CWQuest21", 0x018A5A, CQuestProcessor::kExcluded},
 		{"CWQuest25", 0x01676D, CQuestProcessor::kExcluded},
 		{"CWQuest26", 0x01676C, CQuestProcessor::kExcluded},
-		{"CWQuest27", 0x01676B, CQuestProcessor::kExcluded},
-		{"CWQuest28", 0x016770, CQuestProcessor::kExcluded},
+		{"CWQuest27", 0x016770, CQuestProcessor::kExcluded},
+		{"CWQuest28", 0x01676B, CQuestProcessor::kExcluded},
 		{"CWQuest29", 0x01676E, CQuestProcessor::kExcluded},
 		{"CWQuest30", 0x016769, CQuestProcessor::kExcluded},
 	};

@@ -9,7 +9,7 @@ namespace CQFramework_CollegeOfWinterhold
 		/*24*/ {"CollegeOfWinterhold_Quest24",  CRadiantEnum::kRadiant_COL, 0x028A24, 0x0BC096, 200},
 		/*25*/ {"CollegeOfWinterhold_Quest25",  CRadiantEnum::kRadiant_COL, 0x028A1E, 0x000000, 200},
 		/*26*/ {"CollegeOfWinterhold_Quest26",  CRadiantEnum::kRadiant_COL, 0x0266F2, 0x000000, 200},
-		/*27*/ {"CollegeOfWinterhold_Quest27",  CRadiantEnum::kRadiant_COL, 0x05D2EA, 0x000000, 200},
+		/*27*/ {"CollegeOfWinterhold_Quest27",  CRadiantEnum::kRadiant_DF1, 0x05D2E9, 0x000000, 200}, // CRF only offers Research Thief once
 		/*28*/ {"CollegeOfWinterhold_Quest28",  CRadiantEnum::kRadiant_COL, 0x028A19, 0x000000, 200},
 		/*29*/ {"CollegeOfWinterhold_Quest29",  CRadiantEnum::kRadiant_COL, 0x05A609, 0x000000, 200},
 		/*30*/ {"CollegeOfWinterhold_Quest30",  CRadiantEnum::kRadiant_COL, 0x0E0E04, 0x000000, 200},
