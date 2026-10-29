@@ -362,6 +362,10 @@ namespace CFramework_Shouts {
 		std::string THName = "Thunderchild - Epic Shout Package.esp";
 		std::string FTName = "ForcefulTongue.esp";
 		std::string SCName = "Stormcrown.esp";
+		std::string BCName = "kinggathcreations_bard.esm";
+		std::string KXName = "kinggathcreations_kallax.esm";
+		std::string MIName = "Midwood Isle.esp";
+		std::string SIName = "Siege at Icemoth.esp";
 
 		CHandler::AddToArray(Section::kVanilla, 0x05FC77, "V_ShoutName00", "V_ShoutText00", SKName); //Animal Allegiance
 		CHandler::AddToArray(Section::kVanilla, 0x07097B, "V_ShoutName01", "V_ShoutText01", SKName); //Aura Whisper
@@ -433,6 +437,17 @@ namespace CFramework_Shouts {
 
 		CHandler::AddToArray(Section::kMiscellaneous, 0x00082C, "MiscDataShout_SC1_Name", "MiscDataShout_SC1_Data", SCName);	//Lightning Breath (Stormcrown)
 		CHandler::AddToArray(Section::kMiscellaneous, 0x000833, "MiscDataShout_SC2_Name", "MiscDataShout_SC2_Data", SCName);	//Poison Breath (Stormcrown)
+
+		CHandler::AddToArray(Section::kMiscellaneous, 0x01EF4B, "MiscDataShout_BC1_Name", "MiscDataShout_BC1_Data", BCName);	//Phantom Form (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x01FC5A, "MiscDataShout_BC2_Name", "MiscDataShout_BC2_Data", BCName);	//Earthsong (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x021AF7, "MiscDataShout_BC3_Name", "MiscDataShout_BC3_Data", BCName);	//Sanctum's Resonance (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x021AFE, "MiscDataShout_BC4_Name", "MiscDataShout_BC4_Data", BCName);	//Spectral Rift (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x021ED4, "MiscDataShout_BC5_Name", "MiscDataShout_BC5_Data", BCName);	//Call Volgaafsonaan (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x0235FE, "MiscDataShout_BC6_Name", "MiscDataShout_BC6_Data", BCName);	//Summon Sledrig (Bards College Expansion)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x007D10, "MiscDataShout_KLX_Name", "MiscDataShout_KLX_Data", KXName);	//Summon KALLAX (Kallax Storageborn)
+		CHandler::AddToArray(Section::kMiscellaneous, 0x0A54D6, "MiscDataShout_MI1_Name", "MiscDataShout_MI1_Data", MIName);	//Midwood Isle shout 1
+		CHandler::AddToArray(Section::kMiscellaneous, 0x0435F4, "MiscDataShout_MI2_Name", "MiscDataShout_MI2_Data", MIName);	//Midwood Isle shout 2
+		CHandler::AddToArray(Section::kMiscellaneous, 0x012771, "MiscDataShout_SI1_Name", "MiscDataShout_SI1_Data", SIName);	//Plague Breath (Siege at Icemoth)
 	}
 
 	//---------------------------------------------------
