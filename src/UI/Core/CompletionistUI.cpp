@@ -434,13 +434,16 @@ namespace CompletionistUI
 		//-- Completionist UI ( Themed Button ) -------------
 		//---------------------------------------------------
 
+		// Lit as if focused, for a button steered by hand rather than by ImGui
+		bool buttonLit = false;
+
 		bool ThemedButton(const char* a_label, float a_width = 0.0f) {
 
 			const auto& palette = Themes::GetPalette();
 			const float width = a_width > 0.0f ? a_width : ButtonWidth(a_label);
 			const bool  clicked = ImGui::InvisibleButton(a_label, ImVec2(width, ImGui::GetFrameHeight()));
 			NoteControl();
-			const bool  hovered = ImGui::IsItemHovered() || ImGui::IsItemFocused();
+			const bool  hovered = ImGui::IsItemHovered() || ImGui::IsItemFocused() || buttonLit;
 			const float glow = Decor::Animate(ImGui::GetItemID(), hovered || ImGui::IsItemActive(), 12.0f);
 			const auto  min = ImGui::GetItemRectMin();
 			const auto  max = ImGui::GetItemRectMax();
@@ -1308,6 +1311,13 @@ namespace CompletionistUI
 
 		_settings = &a_settings;
 		a_provider.UpdatePictures();
+		if (_tourDim) {
+			ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg] = *std::exchange(_tourDim, std::nullopt);
+		}
+		for (auto& rect : _tourRects) {
+			rect.seen = false;
+		}
+		SetTourNavigation();
 		if (!_settingsApplied) {
 			_hideCompleted = a_settings.hideCompleted;
 			_settingsApplied = true;
@@ -1365,6 +1375,15 @@ namespace CompletionistUI
 			DrawToastPlacement(a_provider, a_settings);
 			return true;
 		}
+		// Offered the first time the window itself opens, until it's answered
+		if (!a_settings.tourOffered && !TourRunning() && !_cellView) {
+			_tourOffer = true;
+			_tourFocus = 2;
+		}
+		if (_tourStep >= 0 && TourStepAt(_tourStep).view == TourView::kOnScreen) {
+			DrawTourOnScreen(a_provider, a_settings);
+			return true;
+		}
 		if (_cellView) {
 			return DrawCellWindow(a_provider, a_settings);
 		}
@@ -1397,8 +1416,11 @@ namespace CompletionistUI
 			const auto inset = ImGui::GetFontSize() * 0.4f;
 			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(Themes::GetPalette().separator));
 
-			HandleGamepadShortcuts(open);
-			RouteNavigation();
+			// The tour's card takes the keys while it shows
+			if (!TourRunning()) {
+				HandleGamepadShortcuts(open);
+				RouteNavigation();
+			}
 			// Header buttons are controller targets too
 			controlRecorder = this;
 			_recordingHeader = true;
@@ -1422,6 +1444,7 @@ namespace CompletionistUI
 				DrawNavigation(a_provider);
 				ImGui::EndChild();
 				ImGui::EndChild();
+				MarkTourItem(TourSpot::kSidebar);
 				ImGui::SameLine(0.0f, 0.0f);
 			} else {
 				ImGui::SetCursorScreenPos(bodyTop);
@@ -1448,6 +1471,7 @@ namespace CompletionistUI
 			}
 			controlRecorder = nullptr;
 			ImGui::EndChild();
+			MarkTourItem(TourSpot::kBody);
 			ImGui::PopStyleColor();
 			// The page's first entry (or control), hidden until the first press shows it
 			if (std::exchange(_focusPage, false)) {
@@ -1468,6 +1492,7 @@ namespace CompletionistUI
 			_restoreFocusKey.clear();
 		}
 		DrawPicturesDialog(a_provider);
+		DrawTour(a_provider);
 		// B / Escape close a dropdown first
 		_backHandledByImGui = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) || ImGui::IsAnyItemActive();
 		ImGui::End();
@@ -2464,6 +2489,9 @@ namespace CompletionistUI
 		}
 		drawList->PopClipRect();
 		ImGui::Dummy(ImVec2(width, height));
+		if (!a_cellWindow) {
+			MarkTourItem(TourSpot::kPadHints);
+		}
 	}
 
 	//---------------------------------------------------
@@ -2637,11 +2665,13 @@ namespace CompletionistUI
 		if (ThemedButton((a_provider.Translate("UI_Find") + "##Find").c_str())) {
 			OpenPage(findPage);
 		}
+		const auto toolsMin = ImGui::GetItemRectMin();
 		ImGui::SameLine();
 		if (ThemedButton((a_provider.Translate("UI_Cell_Button") + "##CellView").c_str())) {
 			_cellView = true;
 			_focusCellList = true;
 		}
+		MarkTour(TourSpot::kHeaderTools, toolsMin, ImGui::GetItemRectMax());
 
 		ImGui::SetCursorScreenPos(ImVec2(origin.x, origin.y + titleSize.y + overallSize.y + ImGui::GetFontSize() * 0.5f));
 		ImGui::Spacing();
@@ -3089,7 +3119,7 @@ namespace CompletionistUI
 		const auto  before = a_selected;
 
 		_tabsShown = a_leftOnly ? TabKeys::kLeft : TabKeys::kBoth;
-		if (!ImGui::IsAnyItemActive() && !a_tabs.empty()) {
+		if (!ImGui::IsAnyItemActive() && !a_tabs.empty() && !TourRunning()) {
 			const bool previous = !a_leftOnly && ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
 			const bool next = ImGui::IsKeyPressed(a_leftOnly ? ImGuiKey_GamepadL2 : ImGuiKey_GamepadR2, false);
 			if (previous || next) {
@@ -3243,6 +3273,8 @@ namespace CompletionistUI
 			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
 			ImGui::Spacing();
 		} else if (!killsTab) {
+			const auto  toolsMin = ImGui::GetCursorScreenPos();
+			const float toolsWidth = ImGui::GetContentRegionAvail().x;
 			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
 			ImGui::SameLine(0.0f, ImGui::GetFontSize());
 			MarkerToggle("##HideCompleted", _hideCompleted, a_provider.Translate("UI_HideCompleted").c_str());
@@ -3311,6 +3343,7 @@ namespace CompletionistUI
 				ImGui::SetCursorPos(ImVec2(barX, rowStart.y + (ImGui::GetFrameHeight() - barHeight) * 0.5f));
 				ProgressBar(Fraction(found, total), barHeight);
 			}
+			MarkTour(TourSpot::kPageTools, toolsMin, ImVec2(toolsMin.x + toolsWidth, toolsMin.y + ImGui::GetFrameHeight()));
 
 			DividerRow();
 		}
@@ -3468,6 +3501,13 @@ namespace CompletionistUI
 			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_NothingMatches").c_str());
 		}
 		EndFramedPanel();
+		MarkTourItem(TourSpot::kEntries);
+		{
+			// Folded, the panel is only its grip
+			const auto entriesMin = ImGui::GetItemRectMin();
+			const auto entriesMax = ImGui::GetItemRectMax();
+			MarkTour(TourSpot::kDescription, ImVec2(entriesMin.x, entriesMax.y + gap * 0.4f), ImVec2(entriesMax.x, entriesMax.y + gap + std::max(panelHeight, ImGui::GetFontSize() * 0.6f)));
+		}
 
 		// Folded, the description panel's grabber is all that's left either way
 		if (shoutPage && panelHeight >= 1.0f) {
@@ -3986,11 +4026,13 @@ namespace CompletionistUI
 			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(palette.separator));
 
 			const bool backPressed = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
-			if (backPressed && !_backHandledByImGui) {
+			if (backPressed && !_backHandledByImGui && !TourRunning()) {
 				open = false;
 			}
 
-			RouteNavigation();
+			if (!TourRunning()) {
+				RouteNavigation();
+			}
 			controlRecorder = this;
 
 			const auto scan = a_provider.GetCellScan();
@@ -4024,7 +4066,9 @@ namespace CompletionistUI
 			Decor::FadedLine(ImGui::GetWindowDrawList(), pos, ImVec2(pos.x + width, pos.y), Colour(palette.separator));
 			ImGui::Dummy(ImVec2(width, 4.0f));
 
+			const auto optionsMin = ImGui::GetCursorScreenPos();
 			DrawCellOptions(a_provider, a_settings);
+			MarkTour(TourSpot::kCellOptions, optionsMin, ImVec2(optionsMin.x + width, ImGui::GetCursorScreenPos().y - style.ItemSpacing.y));
 
 			// Quest marker bar
 			const auto markedCount = std::ranges::count_if(scan.items, &CellItem::marked);
@@ -4088,6 +4132,7 @@ namespace CompletionistUI
 			ScrollWithRightStick();
 			DrawCellList(a_provider, scan);
 			EndFramedPanel();
+			MarkTourItem(TourSpot::kCellList);
 
 			ImGui::Dummy(ImVec2(0.0f, style.ItemSpacing.y * 0.5f));
 			const auto barStart = ImGui::GetCursorScreenPos();
@@ -4126,12 +4171,14 @@ namespace CompletionistUI
 			if (ThemedButton((rescan + "##CellRescan").c_str(), rescanWidth)) {
 				a_provider.RescanCell();
 			}
+			MarkTour(TourSpot::kCellBar, barStart, ImVec2(barStart.x + width, ImGui::GetItemRectMax().y));
 			controlRecorder = nullptr;
 			if (PadHintsShown()) {
 				DrawPadHints(a_provider, true);
 			}
 			ScrollFocusWithRightStick();
 		}
+		DrawTour(a_provider);
 		_backHandledByImGui = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) || ImGui::IsAnyItemActive();
 		ImGui::End();
 		ImGui::PopFont();
@@ -7084,6 +7131,579 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Menu ( Guided Tour ) ---------------------------
+	//---------------------------------------------------
+
+	// Each step points at one part of the window, opening the page or window it's on first
+	const Menu::TourStepDef& Menu::TourStepAt(int a_step) {
+
+		static constexpr TourStepDef steps[] = {
+			{ "UI_Tour_Welcome", TourSpot::kNone, TourView::kMain },
+			{ "UI_Tour_Sidebar", TourSpot::kSidebar, TourView::kOverview },
+			{ "UI_Tour_Overview", TourSpot::kBody, TourView::kOverview },
+			{ "UI_Tour_Header", TourSpot::kHeaderTools, TourView::kOverview },
+			{ "UI_Tour_Entries", TourSpot::kEntries, TourView::kPage },
+			{ "UI_Tour_PageTools", TourSpot::kPageTools, TourView::kPage },
+			{ "UI_Tour_Description", TourSpot::kDescription, TourView::kPage },
+			{ "UI_Tour_CellList", TourSpot::kCellList, TourView::kCell },
+			{ "UI_Tour_CellOptions", TourSpot::kCellOptions, TourView::kCell },
+			{ "UI_Tour_CellBar", TourSpot::kCellBar, TourView::kCell },
+			{ "UI_Tour_OnScreen", TourSpot::kOnScreen, TourView::kOnScreen },
+			{ "UI_Tour_Settings", TourSpot::kBody, TourView::kSettings },
+			{ "UI_Tour_Pad", TourSpot::kPadHints, TourView::kOverview },
+			{ "UI_Tour_Done", TourSpot::kTourButton, TourView::kSettingsWindow },
+		};
+		return steps[std::clamp(a_step, 0, static_cast<int>(std::size(steps)) - 1)];
+	}
+
+	int Menu::TourSteps() {
+
+		return 14;
+	}
+
+	bool Menu::TourWants(TourSpot a_spot) const noexcept {
+
+		return _tourStep >= 0 && TourStepAt(_tourStep).spot == a_spot;
+	}
+
+	void Menu::MarkTour(TourSpot a_spot, const ImVec2& a_min, const ImVec2& a_max) {
+
+		auto& rect = _tourRects[static_cast<std::size_t>(a_spot)];
+		rect = { a_min.x, a_min.y, a_max.x, a_max.y, true };
+		// The spot scrolled into view once, as Settings is taller than a short window
+		if (_tourScroll && TourWants(a_spot) && a_spot == TourSpot::kTourButton) {
+			ImGui::SetScrollHereY(0.5f);
+			_tourScroll = false;
+		}
+	}
+
+	void Menu::MarkTourItem(TourSpot a_spot) {
+
+		MarkTour(a_spot, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Start Tour ) ----------------
+	//---------------------------------------------------
+
+	void Menu::StartTour() {
+
+		_tourReturnPage = _selectedPage;
+		_tourReturnTab = _settingsTab;
+		_tourReturnCell = _cellView;
+		_tourReturnFolded = _settings && _settings->navigationCollapsed;
+		// The page steps show a plain list: the one open if it is one, else the first collection
+		_tourPage.clear();
+		if (_page && _page->layout == PageLayout::kList && _page->tabs.empty() && _page->notice.empty()) {
+			_tourPage = _selectedPage;
+		}
+		for (const auto& category : _categories) {
+			if (_tourPage.empty() && category.Group() == "UI_Category_Collections" && !category.pages.empty()) {
+				_tourPage = category.pages.front().id;
+			}
+		}
+		for (const auto& category : _categories) {
+			if (_tourPage.empty() && !category.pages.empty()) {
+				_tourPage = category.pages.front().id;
+			}
+		}
+		_tourOffer = false;
+		_tourStarted = ImGui::GetFrameCount();
+		_tourHighlight = 0.0f;
+		_tourCardW = 0.0f;
+		GoToTourStep(0);
+	}
+
+	void Menu::ShowTourStep(int a_step) {
+
+		if (a_step < 0) {
+			_tourOffer = true;
+			_tourFocus = 2;
+			return;
+		}
+		if (_tourStep < 0) {
+			StartTour();
+		}
+		GoToTourStep(a_step);
+		_tourHighlight = 0.0f;
+		_tourCardW = 0.0f;
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Go To Tour Step ) -----------
+	//---------------------------------------------------
+
+	void Menu::GoToTourStep(int a_step) {
+
+		_tourStep = std::clamp(a_step, 0, TourSteps() - 1);
+		const auto& step = TourStepAt(_tourStep);
+		_tourScroll = true;
+		_tourFocus = 2;
+		_tourPadHints = step.spot == TourSpot::kPadHints;
+		if (step.view != TourView::kOnScreen) {
+			_tourToasts.reset();
+		}
+		_cellView = step.view == TourView::kCell;
+		const auto open = [&](std::string_view a_page) {
+			if (_selectedPage != a_page) {
+				OpenPage(a_page);
+			}
+		};
+		switch (step.view) {
+		case TourView::kOverview:
+			open({});
+			break;
+		case TourView::kPage:
+			open(_tourPage);
+			break;
+		case TourView::kSettings:
+			open(settingsPage);
+			break;
+		case TourView::kSettingsWindow:
+			open(settingsPage);
+			_settingsTab = "window";
+			break;
+		default:
+			break;
+		}
+		// The sidebar comes out for its own step, and folds again after
+		if (_settings) {
+			_settings->navigationCollapsed = _tourReturnFolded && step.spot != TourSpot::kSidebar;
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( End Tour ) ------------------
+	//---------------------------------------------------
+
+	// Back where it started
+	void Menu::EndTour() {
+
+		const bool wasRunning = _tourStep >= 0;
+		_tourStep = -1;
+		_tourOffer = false;
+		_tourPadHints = false;
+		_tourToasts.reset();
+		SetTourNavigation();
+		if (!wasRunning) {
+			return;
+		}
+		_cellView = _tourReturnCell;
+		if (_selectedPage != _tourReturnPage) {
+			OpenPage(_tourReturnPage);
+		}
+		_settingsTab = _tourReturnTab;
+		if (_settings) {
+			_settings->navigationCollapsed = _tourReturnFolded;
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Set Tour Navigation ) -------
+	//---------------------------------------------------
+
+	// ImGui's own steering is off while the card shows, so nothing behind it moves; the card steers itself
+	void Menu::SetTourNavigation() {
+
+		auto&                      io = ImGui::GetIO();
+		constexpr ImGuiConfigFlags nav = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+		if (TourRunning()) {
+			_tourNavFlags |= io.ConfigFlags & nav;
+			io.ConfigFlags &= ~nav;
+		} else if (_tourNavFlags) {
+			io.ConfigFlags |= _tourNavFlags;
+			_tourNavFlags = 0;
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Tour On Screen ) -------
+	//---------------------------------------------------
+
+	// The Cell Scanner panel and notifications as they show in play, with the window out of the way
+	void Menu::DrawTourOnScreen(IDataProvider& a_provider, const UISettings& a_settings) {
+
+		if (!_tourToasts) {
+			_tourToasts = std::make_unique<Toasts>();
+			_tourToasts->Push(a_provider.Translate("UI_Toasts_SampleEntry"), a_provider.Translate("UI_Toasts_SampleItem1"), ToastKind::kEntry);
+			_tourToasts->Push(a_provider.Translate("UI_Toasts_SampleDiscovery"), a_provider.Translate("UI_Toasts_SampleLocation"), ToastKind::kDiscovery);
+		}
+		const auto   panel = DrawCellPanel(a_provider, a_settings, a_settings.toastJoin, _tourToasts->StackSize(false));
+		ToastOptions options;
+		options.x = a_settings.toastX;
+		options.y = a_settings.toastY;
+		options.newestFirst = a_settings.toastsNewestFirst;
+		options.preview = true;
+		if (a_settings.toastJoin != ToastJoin::kNone) {
+			options.docked = true;
+			options.dockAt = panel.dockAt;
+			options.dockWidth = panel.dockWidth;
+			options.dockUp = panel.dockUp;
+		}
+		const auto bounds = _tourToasts->Draw(ImGui::GetTime(), options, {});
+		// Joined, the two are one panel; apart, each has its own highlight
+		if (a_settings.toastJoin != ToastJoin::kNone) {
+			MarkTour(TourSpot::kOnScreen, ImVec2(std::min(panel.min.x, bounds.min.x), std::min(panel.min.y, bounds.min.y)), ImVec2(std::max(panel.max.x, bounds.max.x), std::max(panel.max.y, bounds.max.y)));
+		} else {
+			MarkTour(TourSpot::kOnScreen, panel.min, panel.max);
+			MarkTour(TourSpot::kOnScreenToasts, bounds.min, bounds.max);
+		}
+
+		ImGui::PushFont(Themes::BodyFont());
+		DrawTour(a_provider);
+		ImGui::PopFont();
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Draw Tour ) -----------------
+	//---------------------------------------------------
+
+	// The offer, then each step: the window shaded but for the part it's about, and a card beside it
+	void Menu::DrawTour(IDataProvider& a_provider) {
+
+		if (!TourRunning()) {
+			return;
+		}
+		constexpr const char* popupID = "##Tour";
+		if (!ImGui::IsPopupOpen(popupID)) {
+			ImGui::OpenPopup(popupID);
+		}
+
+		const auto& palette = Themes::GetPalette();
+		const auto& io = ImGui::GetIO();
+		const float fontSize = ImGui::GetFontSize();
+		const auto* viewport = ImGui::GetMainViewport();
+		const auto  screenMin = viewport->Pos;
+		const auto  screenMax = ImVec2(viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y);
+
+		// Where the highlight goes, eased there from the last step
+		const auto  spot = _tourOffer ? TourSpot::kNone : TourStepAt(_tourStep).spot;
+		const auto& target = _tourRects[static_cast<std::size_t>(spot)];
+		const bool  pointing = spot != TourSpot::kNone && target.seen;
+		const float ease = 1.0f - std::exp(-io.DeltaTime * 14.0f);
+		if (pointing) {
+			const float margin = fontSize * 0.3f;
+			const float goal[4] = { target.minX - margin, target.minY - margin, target.maxX + margin, target.maxY + margin };
+			const bool  snap = _tourHighlight <= 0.01f;
+			for (int i = 0; i < 4; ++i) {
+				_tourShown[i] = snap ? goal[i] : _tourShown[i] + (goal[i] - _tourShown[i]) * ease;
+			}
+		}
+		if (pointing || spot == TourSpot::kNone) {
+			_tourHighlight += ((pointing ? 1.0f : 0.0f) - _tourHighlight) * ease;
+		}
+		const ImVec2 holeMin(_tourShown[0], _tourShown[1]);
+		const ImVec2 holeMax(_tourShown[2], _tourShown[3]);
+		const bool   hole = _tourHighlight > 0.02f;
+		std::vector<ImRect> holes;
+		if (hole) {
+			holes.emplace_back(holeMin, holeMax);
+			// The notifications, on the step that shows them apart from the panel
+			const auto& extra = _tourRects[static_cast<std::size_t>(TourSpot::kOnScreenToasts)];
+			if (spot == TourSpot::kOnScreen && extra.seen && _tourHighlight > 0.5f) {
+				const float margin = fontSize * 0.3f;
+				holes.emplace_back(ImVec2(extra.minX - margin, extra.minY - margin), ImVec2(extra.maxX + margin, extra.maxY + margin));
+			}
+		}
+
+		// The card beside the highlight, or over its corner when nothing fits round it
+		const float cardWidth = fontSize * 25.0f;
+		const float cardHeight = std::max(_tourCardH, fontSize * 8.0f);
+		const float gap = fontSize * 1.0f;
+		ImVec2      cardPos((screenMin.x + screenMax.x - cardWidth) * 0.5f, (screenMin.y + screenMax.y - cardHeight) * 0.5f);
+		if (hole && _tourHighlight > 0.5f) {
+			const auto clampY = [&](float a_y) { return std::clamp(a_y, screenMin.y + gap, std::max(screenMin.y + gap, screenMax.y - gap - cardHeight)); };
+			const auto clampX = [&](float a_x) { return std::clamp(a_x, screenMin.x + gap, std::max(screenMin.x + gap, screenMax.x - gap - cardWidth)); };
+			const float midX = (holeMin.x + holeMax.x) * 0.5f;
+			const float midY = (holeMin.y + holeMax.y) * 0.5f;
+			if (holeMax.x + gap + cardWidth <= screenMax.x - gap) {
+				cardPos = ImVec2(holeMax.x + gap, clampY(midY - cardHeight * 0.5f));
+			} else if (holeMin.x - gap - cardWidth >= screenMin.x + gap) {
+				cardPos = ImVec2(holeMin.x - gap - cardWidth, clampY(midY - cardHeight * 0.5f));
+			} else if (holeMax.y + gap + cardHeight <= screenMax.y - gap) {
+				cardPos = ImVec2(clampX(midX - cardWidth * 0.5f), holeMax.y + gap);
+			} else if (holeMin.y - gap - cardHeight >= screenMin.y + gap) {
+				cardPos = ImVec2(clampX(midX - cardWidth * 0.5f), holeMin.y - gap - cardHeight);
+			} else {
+				cardPos = ImVec2(clampX(holeMax.x - gap * 1.5f - cardWidth), clampY(holeMax.y - gap * 1.5f - cardHeight));
+			}
+		}
+		ImGui::SetNextWindowPos(cardPos, ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(cardWidth, 0.0f), ImVec2(cardWidth, FLT_MAX));
+
+		// ImGui's own wash would cover the highlight; it's read when the frame is drawn, so it's put back next frame
+		auto& dim = ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg];
+		if (!_tourDim) {
+			_tourDim = dim;
+		}
+		dim = ImVec4(0, 0, 0, 0);
+		ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(fontSize * 1.2f, fontSize * 1.0f));
+		const bool open = ImGui::BeginPopupModal(popupID, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNavInputs);
+		ImGui::PopStyleVar(2);
+		if (!open) {
+			return;
+		}
+
+		// The shade first, then the card's own background over it. While the card is still being
+		// measured it isn't shown, so the shade goes on top for that frame instead
+		const auto  windowMin = ImGui::GetWindowPos();
+		const auto  windowMax = ImVec2(windowMin.x + ImGui::GetWindowWidth(), windowMin.y + ImGui::GetWindowHeight());
+		const bool  measuring = ImGui::IsWindowAppearing();
+		auto*       drawList = measuring ? ImGui::GetForegroundDrawList() : ImGui::GetWindowDrawList();
+		const ImU32 shade = IM_COL32(0, 0, 0, 175);
+		drawList->PushClipRect(screenMin, screenMax, false);
+		// Band by band down the screen, shaded either side of the holes that cross it
+		std::vector<float> edges{ screenMin.y, screenMax.y };
+		for (const auto& rect : holes) {
+			edges.push_back(std::clamp(rect.Min.y, screenMin.y, screenMax.y));
+			edges.push_back(std::clamp(rect.Max.y, screenMin.y, screenMax.y));
+		}
+		std::ranges::sort(edges);
+		for (std::size_t i = 0; i + 1 < edges.size(); ++i) {
+			const float top = edges[i];
+			const float bottom = edges[i + 1];
+			if (bottom - top < 0.5f) {
+				continue;
+			}
+			std::vector<ImRect> crossing;
+			for (const auto& rect : holes) {
+				if (rect.Min.y < bottom && rect.Max.y > top) {
+					crossing.push_back(rect);
+				}
+			}
+			std::ranges::sort(crossing, {}, [](const ImRect& a_rect) { return a_rect.Min.x; });
+			float x = screenMin.x;
+			for (const auto& rect : crossing) {
+				if (rect.Min.x > x) {
+					drawList->AddRectFilled(ImVec2(x, top), ImVec2(rect.Min.x, bottom), shade);
+				}
+				x = std::max(x, rect.Max.x);
+			}
+			if (x < screenMax.x) {
+				drawList->AddRectFilled(ImVec2(x, top), ImVec2(screenMax.x, bottom), shade);
+			}
+		}
+		// The edge breathes, so the eye finds it
+		const float pulse = 0.65f + 0.35f * std::sin(static_cast<float>(ImGui::GetTime()) * 3.0f);
+		const float thickness = std::max(1.5f, fontSize * 0.1f);
+		for (const auto& rect : holes) {
+			drawList->AddRect(rect.Min, rect.Max, Colour(palette.accent, _tourHighlight * pulse), 0.0f, 0, thickness);
+			if (!SkyUI()) {
+				for (const auto& point : { rect.Min, ImVec2(rect.Max.x, rect.Min.y), ImVec2(rect.Min.x, rect.Max.y), rect.Max }) {
+					Decor::Diamond(drawList, point, fontSize * 0.28f, Colour(palette.accent, _tourHighlight), true);
+				}
+			}
+		}
+		drawList->PopClipRect();
+		if (!measuring) {
+			drawList->AddRectFilled(windowMin, windowMax, Colour(ImVec4(palette.background.x, palette.background.y, palette.background.z, 0.98f)));
+			drawList->AddRect(windowMin, windowMax, Colour(palette.accent, 0.6f));
+		}
+		DressPopup();
+		if (_tourCardW <= 0.0f) {
+			_tourHighlight = pointing ? 1.0f : 0.0f;
+		}
+		_tourCardW = ImGui::GetWindowWidth();
+		_tourCardH = ImGui::GetWindowHeight();
+
+		// Keys: left and right pick a button, A or Enter press it, the bumpers go back and on, B or Escape leave
+		const auto pressed = [](std::initializer_list<ImGuiKey> a_keys) {
+			return std::ranges::any_of(a_keys, [](ImGuiKey a_key) { return ImGui::IsKeyPressed(a_key, false); });
+		};
+		const bool keysLive = ImGui::GetFrameCount() != _tourStarted;
+		const bool pickLeft = keysLive && pressed({ ImGuiKey_LeftArrow, ImGuiKey_GamepadDpadLeft, ImGuiKey_GamepadLStickLeft });
+		const bool pickRight = keysLive && pressed({ ImGuiKey_RightArrow, ImGuiKey_GamepadDpadRight, ImGuiKey_GamepadLStickRight });
+		const bool press = keysLive && pressed({ ImGuiKey_GamepadFaceDown, ImGuiKey_Enter, ImGuiKey_KeypadEnter, ImGuiKey_Space });
+		bool       next = keysLive && pressed({ ImGuiKey_GamepadR1 });
+		bool       back = keysLive && pressed({ ImGuiKey_GamepadL1, ImGuiKey_Backspace });
+		bool       leave = keysLive && pressed({ ImGuiKey_Escape, ImGuiKey_GamepadFaceRight });
+		if (pickLeft || pickRight || press || _padActive) {
+			_tourKeyed = true;
+		}
+		if (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f) {
+			_tourKeyed = _padActive;
+		}
+
+		const auto style = _settings ? _settings->padStyle : PadStyle::kXbox;
+		const auto keyText = [&](std::uint32_t a_key, const std::string& a_keyName, std::uint32_t a_modifier, std::uint32_t a_button) {
+			std::string text = a_key ? a_keyName : std::string{};
+			if (a_button) {
+				text += (text.empty() ? "" : " / ") + GamepadComboName(a_modifier, a_button, style);
+			}
+			return text;
+		};
+
+		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + cardWidth - fontSize * 2.4f);
+		if (_tourOffer) {
+			ImGui::PushFont(Themes::HeaderFont());
+			ImGui::TextColored(palette.heading, "%s", a_provider.Translate("UI_Tour_OfferTitle").c_str());
+			ImGui::PopFont();
+			ImGui::Spacing();
+			ImGui::TextColored(palette.text, "%s", a_provider.Translate("UI_Tour_OfferText").c_str());
+		} else {
+			const auto& step = TourStepAt(_tourStep);
+			const auto  key = std::string(step.key);
+
+			// How far through, as a row of diamonds
+			const auto counter = a_provider.Translate("UI_Tour_Step{" + std::to_string(_tourStep + 1) + "}{" + std::to_string(TourSteps()) + "}");
+			ImGui::TextColored(palette.textDim, "%s", counter.c_str());
+			{
+				const float size = fontSize * 0.2f;
+				const float spacing = fontSize * 0.75f;
+				const auto  at = ImGui::GetItemRectMax();
+				float       x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - spacing * static_cast<float>(TourSteps() - 1) - size;
+				for (int i = 0; i < TourSteps(); ++i, x += spacing) {
+					Decor::Diamond(ImGui::GetWindowDrawList(), ImVec2(x, at.y - fontSize * 0.5f), i == _tourStep ? size * 1.5f : size, Colour(i <= _tourStep ? palette.accent : palette.separator), i <= _tourStep);
+				}
+			}
+			ImGui::PushFont(Themes::HeaderFont());
+			ImGui::TextColored(palette.heading, "%s", a_provider.Translate(key + "Title").c_str());
+			ImGui::PopFont();
+			ImGui::Spacing();
+			ImGui::TextColored(palette.text, "%s", a_provider.Translate(key + "Text").c_str());
+
+			// The keys this player has set, where a step is about them
+			std::string keys;
+			if (_settings && step.spot == TourSpot::kCellList) {
+				const auto bound = keyText(_settings->cellKey, _settings->cellKeyName, _settings->cellPadModifier, _settings->cellPadButton);
+				keys = bound.empty() ? a_provider.Translate("UI_Tour_CellNoKey") : a_provider.Translate("UI_Tour_CellKey{" + bound + "}");
+			} else if (_settings && step.spot == TourSpot::kPadHints) {
+				const auto bound = keyText(_settings->openKey, _settings->openKeyName, _settings->openPadModifier, _settings->openPadButton);
+				if (!bound.empty()) {
+					keys = a_provider.Translate("UI_Tour_OpenKey{" + bound + "}");
+				}
+			}
+			if (!keys.empty()) {
+				ImGui::Spacing();
+				ImGui::TextColored(palette.textDim, "%s", keys.c_str());
+			}
+		}
+		ImGui::PopTextWrapPos();
+
+		// Leave at the left, back and on at the right
+		ImGui::Spacing();
+		ImGui::Spacing();
+		const auto rowStart = ImGui::GetCursorPosX();
+		const auto right = rowStart + ImGui::GetContentRegionAvail().x;
+		const auto last = !_tourOffer && _tourStep == TourSteps() - 1;
+		const auto leaveLabel = a_provider.Translate(_tourOffer ? "UI_Tour_NotNow" : "UI_Tour_Skip") + "##TourLeave";
+		const auto backLabel = a_provider.Translate("UI_Tour_Back") + "##TourBack";
+		const auto nextLabel = a_provider.Translate(_tourOffer ? "UI_Tour_Take" : last ? "UI_Tour_Finish" : "UI_Tour_Next") + "##TourNext";
+		const bool showBack = !_tourOffer && _tourStep > 0;
+
+		// The d-pad's pick, along the buttons there are
+		const bool shown[3] = { !last, showBack, true };
+		const auto pick = [&](int a_from, int a_by) {
+			for (int i = a_from + a_by; i >= 0 && i < 3; i += a_by) {
+				if (shown[i]) {
+					return i;
+				}
+			}
+			return a_from;
+		};
+		if (!shown[_tourFocus]) {
+			_tourFocus = 2;
+		}
+		if (pickLeft) {
+			_tourFocus = pick(_tourFocus, -1);
+		} else if (pickRight) {
+			_tourFocus = pick(_tourFocus, 1);
+		}
+		// The picked one lit, with a ring round it
+		const auto cardButton = [&](const std::string& a_label, int a_button) {
+			const bool picked = _tourKeyed && _tourFocus == a_button;
+			buttonLit = picked;
+			const bool clicked = ThemedButton(a_label.c_str());
+			buttonLit = false;
+			if (picked) {
+				const float grow = std::max(2.0f, fontSize * 0.15f);
+				const auto  min = ImGui::GetItemRectMin();
+				const auto  max = ImGui::GetItemRectMax();
+				ImGui::GetWindowDrawList()->AddRect(ImVec2(min.x - grow, min.y - grow), ImVec2(max.x + grow, max.y + grow), Colour(palette.text), 3.0f, 0, 2.0f);
+			}
+			return clicked;
+		};
+
+		if (!last) {
+			leave |= cardButton(leaveLabel, 0);
+		}
+		float buttonsWidth = ButtonWidth(nextLabel.c_str());
+		if (showBack) {
+			buttonsWidth += ButtonWidth(backLabel.c_str()) + fontSize * 0.6f;
+		}
+		if (!last) {
+			ImGui::SameLine();
+		}
+		ImGui::SetCursorPosX(std::max(ImGui::GetCursorPosX(), right - buttonsWidth));
+		if (showBack) {
+			back |= cardButton(backLabel, 1);
+			ImGui::SameLine(0.0f, fontSize * 0.6f);
+		}
+		next |= cardButton(nextLabel, 2);
+		if (press) {
+			(_tourFocus == 0 ? leave : _tourFocus == 1 ? back : next) = true;
+		}
+
+		// Controller help under the buttons
+		if (PadHintsShown()) {
+			// A says what the picked button does
+			const char* leaveKey = _tourOffer ? "UI_Tour_NotNow" : "UI_Tour_Skip";
+			const char* nextKey = _tourOffer ? "UI_Tour_Take" : last ? "UI_Tour_Finish" : "UI_Tour_Next";
+			const char* pickedKey = _tourFocus == 0 ? leaveKey : _tourFocus == 1 ? "UI_Tour_Back" : nextKey;
+			std::vector<std::pair<PadButton, std::string>> hints{ { PadButton::kFaceDown, a_provider.Translate(pickedKey) } };
+			if (showBack && _tourFocus != 1) {
+				hints.push_back({ PadButton::kLeftBumper, a_provider.Translate("UI_Tour_Back") });
+			}
+			if (!_tourOffer && _tourFocus != 2) {
+				hints.push_back({ PadButton::kRightBumper, a_provider.Translate(nextKey) });
+			}
+			if (!last && _tourFocus != 0) {
+				hints.push_back({ PadButton::kFaceRight, a_provider.Translate(leaveKey) });
+			}
+			ImGui::Spacing();
+			const float button = std::floor(fontSize * 1.15f);
+			const auto  start = ImGui::GetCursorScreenPos();
+			float       x = start.x;
+			const float centreY = start.y + button * 0.5f;
+			auto*       cardList = ImGui::GetWindowDrawList();
+			for (const auto& [name, label] : hints) {
+				x += DrawPadButton(cardList, ImVec2(std::floor(x), std::floor(centreY - button * 0.5f)), button, name, style) + fontSize * 0.35f;
+				cardList->AddText(ImVec2(x, centreY - fontSize * 0.5f), Colour(palette.textDim), label.c_str());
+				x += ImGui::CalcTextSize(label.c_str()).x + fontSize * 1.2f;
+			}
+			ImGui::Dummy(ImVec2(x - start.x, button));
+		}
+
+		// One move a frame
+		if (_tourOffer) {
+			if (next || leave) {
+				if (_settings) {
+					_settings->tourOffered = true;
+					_settingsChanged = true;
+				}
+				// Taken, the same card goes on to the first step
+				if (next) {
+					StartTour();
+				} else {
+					ImGui::CloseCurrentPopup();
+					_tourOffer = false;
+				}
+			}
+		} else if (leave || (next && last)) {
+			ImGui::CloseCurrentPopup();
+			EndTour();
+		} else if (next) {
+			GoToTourStep(_tourStep + 1);
+		} else if (back && _tourStep > 0) {
+			GoToTourStep(_tourStep - 1);
+		}
+		ImGui::EndPopup();
+		// Started or ended here, ImGui's steering changes before the next frame's keys
+		SetTourNavigation();
+	}
+
+	//---------------------------------------------------
 	//-- Completionist UI ( Mix Toggle ) ----------------
 	//---------------------------------------------------
 
@@ -7983,6 +8603,15 @@ namespace CompletionistUI
 			toggle("UI_Setting_JournalEntry", "UI_SettingHint_JournalEntry", settings.journalEntry);
 
 			ImGui::Spacing();
+			columnHeading(a_provider.Translate("UI_SettingsSection_Help"));
+			label(a_provider.Translate("UI_Setting_Tour"));
+			if (ThemedButton((a_provider.Translate("UI_Setting_TourStart") + "##Tour").c_str(), controlWidth)) {
+				StartTour();
+			}
+			MarkTourItem(TourSpot::kTourButton);
+			describe(a_provider.Translate("UI_Setting_Tour"), a_provider.Translate("UI_SettingHint_Tour"));
+
+			ImGui::Spacing();
 			ImGui::SetCursorPosX(columnX + labelWidth);
 			if (ThemedButton(a_provider.Translate("UI_Setting_Reset").c_str(), controlWidth)) {
 				const auto keyName = settings.openKeyName;
@@ -7990,6 +8619,7 @@ namespace CompletionistUI
 				settings = UISettings{};
 				settings.openKeyName = keyName;
 				settings.cellKeyName = cellKeyName;
+				settings.tourOffered = true;
 				_pendingScale = settings.scale;
 				_pendingWidth = settings.widthPercent;
 				_pendingHeight = settings.heightPercent;

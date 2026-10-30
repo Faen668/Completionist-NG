@@ -63,6 +63,7 @@ namespace CompletionistUI
 		bool          journalEntry{ true };	// Completionist on the Journal's System tab
 		PadStyle      padStyle{ PadStyle::kXbox };
 		std::string   lastPage{};
+		bool          tourOffered{ false };	// the guided tour has been offered once
 
 		// Cell Scanner
 		std::uint32_t cellKey{ 207 };	// End
