@@ -60,6 +60,7 @@ namespace CompletionistUI
 		bool          screenshotButton{ false };
 		bool          printScreen{ true };
 		bool          pauseGame{ true };	// Off leaves the world running while the window is open
+		bool          journalEntry{ true };	// Completionist on the Journal's System tab
 		PadStyle      padStyle{ PadStyle::kXbox };
 		std::string   lastPage{};
 

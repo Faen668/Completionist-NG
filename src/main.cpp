@@ -10,6 +10,7 @@
 #include "Internal Utility/WordsOfPower.hpp"
 #include "UI/GameUI.hpp"
 #include "UI/ItemMarks.hpp"
+#include "UI/JournalEntry.hpp"
 #include "UI/SettingsPages.hpp"
 #include "UI/Tracker.hpp"
 
@@ -89,6 +90,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 
 		Completionist_MainHUD::TextnTagsAPI::Register();
 		CompletionistUI::ItemMarks::Install();
+		CompletionistUI::JournalEntry::Install();
 
 		CQuestMaster::QuestAPI::Register();
 		CFramework_Master::FrameworkAPI::Register();
