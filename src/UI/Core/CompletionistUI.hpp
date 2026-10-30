@@ -37,7 +37,12 @@ namespace CompletionistUI
 		bool Draw(IDataProvider& a_provider, UISettings& a_settings);
 
 		void Refresh() noexcept { _dirty = true; }
-		void Opened() noexcept { _justOpened = true; }
+		void Opened()
+		{
+			_justOpened = true;
+			// Closed partway through, the tour doesn't pick up again
+			EndTour();
+		}
 		// Harness
 		void ForcePadHints(bool a_force) noexcept { _forcePadHints = a_force; }
 		void OpenPage(std::string_view a_id);
@@ -113,6 +118,12 @@ namespace CompletionistUI
 
 		void RecordControl();
 
+		// Guided tour, offered the first time the window opens and started again from Settings
+		void StartTour();
+		void ShowTourStep(int a_step);	// Harness, -1 for the offer
+		[[nodiscard]] int  TourStep() const noexcept { return _tourStep; }
+		[[nodiscard]] static int TourSteps();
+
 		[[nodiscard]] static float ComputeScale(const UISettings& a_settings, float a_displayHeight) noexcept;
 
 	private:
@@ -154,7 +165,7 @@ namespace CompletionistUI
 
 		void HandleGamepadShortcuts(bool& a_open);
 		void TrackInputDevice();
-		[[nodiscard]] bool  PadHintsShown() const noexcept { return _padActive || _forcePadHints; }
+		[[nodiscard]] bool  PadHintsShown() const noexcept { return _padActive || _forcePadHints || _tourPadHints; }
 		[[nodiscard]] float PadHintsHeight() const;
 		void                DrawPadHints(IDataProvider& a_provider, bool a_cellWindow = false);
 		float UpdateNavigationOpen();
@@ -235,6 +246,78 @@ namespace CompletionistUI
 		void                UpdateDescriptionPanel(float a_available, float a_gap);
 
 		[[nodiscard]] bool PassesFilter(const Entry& a_entry) const;
+
+		// What a tour step points at, noted as it's drawn
+		enum class TourSpot : std::uint8_t
+		{
+			kNone,
+			kSidebar,
+			kBody,
+			kHeaderTools,
+			kEntries,
+			kPageTools,
+			kDescription,
+			kCellList,
+			kCellOptions,
+			kCellBar,
+			kOnScreen,
+			kOnScreenToasts,	// shown with kOnScreen, where the notifications aren't joined to the panel
+			kPadHints,
+			kTourButton,
+			kCount,
+		};
+		// The page or window a step needs open
+		enum class TourView : std::uint8_t
+		{
+			kMain,
+			kOverview,
+			kPage,
+			kCell,
+			kSettings,
+			kSettingsWindow,	// Settings on its Window tab
+			kOnScreen,	// the window hidden, the panel and notifications shown as in play
+		};
+		struct TourStepDef
+		{
+			const char* key;	// key + "Title", key + "Text"
+			TourSpot    spot;
+			TourView    view;
+		};
+		static const TourStepDef& TourStepAt(int a_step);
+		struct TourRect
+		{
+			float minX{ 0.0f }, minY{ 0.0f }, maxX{ 0.0f }, maxY{ 0.0f };
+			bool  seen{ false };
+		};
+		void MarkTour(TourSpot a_spot, const ImVec2& a_min, const ImVec2& a_max);
+		void MarkTourItem(TourSpot a_spot);	// the last item
+		[[nodiscard]] bool TourRunning() const noexcept { return _tourStep >= 0 || _tourOffer; }
+		[[nodiscard]] bool TourWants(TourSpot a_spot) const noexcept;
+		void GoToTourStep(int a_step);
+		void EndTour();
+		void DrawTour(IDataProvider& a_provider);
+		void DrawTourOnScreen(IDataProvider& a_provider, const UISettings& a_settings);
+		void SetTourNavigation();
+		std::array<TourRect, static_cast<std::size_t>(TourSpot::kCount)> _tourRects{};
+		int                    _tourStep{ -1 };	// -1 off
+		bool                   _tourOffer{ false };	// "take the tour?" first
+		bool                   _tourPadHints{ false };	// the controller step shows the hints bar
+		bool                   _tourScroll{ false };	// scroll the step's spot into view once
+		float                  _tourShown[4]{};	// the highlight, eased to the step's spot
+		float                  _tourHighlight{ 0.0f };	// 0 none, 1 shown
+		float                  _tourCardW{ 0.0f };	// the card's size last frame, to place it
+		float                  _tourCardH{ 0.0f };
+		std::optional<ImVec4>  _tourDim;	// ImGui's modal wash, cleared while the tour shows
+		int                    _tourStarted{ -1 };	// the frame it started, whose key press started it
+		std::string            _tourPage;	// the page the list steps show
+		std::string            _tourReturnPage;	// put back when it ends
+		std::string            _tourReturnTab;
+		bool                   _tourReturnCell{ false };
+		bool                   _tourReturnFolded{ false };
+		int                    _tourFocus{ 2 };	// the card's button the d-pad is on: 0 leave, 1 back, 2 on
+		bool                   _tourKeyed{ false };	// moved with keys or the pad, so the focus shows
+		ImGuiConfigFlags       _tourNavFlags{ 0 };	// ImGui's own steering, off while the card shows
+		std::unique_ptr<Toasts> _tourToasts;	// the on-screen step's sample notifications
 
 		struct TabItem
 		{
