@@ -68,6 +68,7 @@ namespace CompletionistUI
 			std::atomic<bool>                              cellPanel{ false };
 			Toasts                                         toasts;
 			std::atomic<bool>                              toastsOn{ false };
+			std::atomic<bool>                              journalEntry{ true };
 			double                                         toastClock{ 0.0 };
 			std::atomic<std::int32_t>                      requestedView{ -1 };	// -1 none, 0 main, 1 cell
 			std::atomic<bool>                              inCellView{ false };
@@ -741,6 +742,7 @@ namespace CompletionistUI
 			a_state.cellPadModifier = a_state.settings.cellPadModifier;
 			a_state.cellPanel = a_state.settings.cellPanel;
 			a_state.toastsOn = a_state.settings.toasts;
+			a_state.journalEntry = a_state.settings.journalEntry;
 			if (!a_state.settings.toasts) {
 				a_state.toasts.Clear();
 			}
@@ -910,6 +912,7 @@ namespace CompletionistUI
 		state.cellPadModifier = state.settings.cellPadModifier;
 		state.cellPanel = state.settings.cellPanel;
 		state.toastsOn = state.settings.toasts;
+		state.journalEntry = state.settings.journalEntry;
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -954,6 +957,31 @@ namespace CompletionistUI
 		if (auto* queue = RE::UIMessageQueue::GetSingleton()) {
 			queue->AddMessage(menuName, RE::UI_MESSAGE_TYPE::kHide, nullptr);
 		}
+	}
+
+	//---------------------------------------------------
+	//-- Game UI ( Open Main ) --------------------------
+	//---------------------------------------------------
+
+	// The open key's path, for the Journal's System tab entry
+	void GameUI::OpenMain() {
+
+		auto& state = GetState();
+		if (state.open || !CanOpen()) {
+			return;
+		}
+		state.requestedView = 0;
+		state.padIgnored = state.padHeld;
+		Open();
+	}
+
+	//---------------------------------------------------
+	//-- Game UI ( Journal Entry Shown ) ----------------
+	//---------------------------------------------------
+
+	bool GameUI::JournalEntryShown() noexcept {
+
+		return GetState().journalEntry;
 	}
 
 	//---------------------------------------------------

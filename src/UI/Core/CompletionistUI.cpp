@@ -7980,6 +7980,7 @@ namespace CompletionistUI
 			toggle("UI_Setting_Screenshot", "UI_SettingHint_Screenshot", settings.screenshotButton);
 			toggle("UI_Setting_CellPanel", "UI_SettingHint_CellPanel", settings.cellPanel);
 			toggle("UI_Setting_PauseGame", "UI_SettingHint_PauseGame", settings.pauseGame);
+			toggle("UI_Setting_JournalEntry", "UI_SettingHint_JournalEntry", settings.journalEntry);
 
 			ImGui::Spacing();
 			ImGui::SetCursorPosX(columnX + labelWidth);
