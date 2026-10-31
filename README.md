@@ -111,6 +111,8 @@ Ten looks to choose from in **Settings > Window > Theme**: our own, three that m
 
 Tracking for mods comes from patch files (INI and translation files under `SKSE/Plugins/CompletionistData`). Each patch gets its own page, laid out in the sections its author chose. Patches for Legacy of the Dragonborn, spell packs, quest mods, followers and many more are available, and new ones don't need any changes to the plugin.
 
+Want to write one? The [Dev Kit](devkit) has the guide and a template ([download the zip](https://github.com/Faen668/Completionist-NG/raw/master/devkit/Completionist-Dev-Kit.zip)), and the [wiki](https://github.com/Faen668/Completionist-NG/wiki/Dev-Kit) walks you through your first one.
+
 Other mods can read Completionist's data through its API. **QuickLootIE** uses it to show the same icons in its loot window.
 
 ---

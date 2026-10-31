@@ -1,0 +1,76 @@
+- ============================================================================
+- COMPLETIONIST ADDON TRANSLATION FILE
+- ============================================================================
+- This file holds the text the player sees for CompletionistAddon_Template.ini.
+- Give it the same name as your .ini, with .txt instead of .ini, and put it in
+- Data\SKSE\Plugins\CompletionistData\Translations\
+-
+- EACH LINE IS:  the key, a TAB, a |, then the text.
+-   - The gap after the key must be a TAB, not spaces. Several TABs are fine.
+-   - The text runs from the | to the end of the line.
+-   - Spaces at the end of the text are kept.
+-   - Keys care about upper and lower case. Each key may appear only once.
+-   - A missing key shows in game as the key itself, so it's easy to spot.
+-   - Lines that start with - are notes, like this one. Blank lines are fine.
+-   - Trailing : and spaces on headings and tab names are trimmed in the window.
+-   - Save as UTF-8. Keep a - line at the very top of the file.
+-
+- TO TRANSLATE: copy this file and change only the text after each |.
+- ============================================================================
+
+- Page, tabs and heading
+cTranslate_MCMName	|Bloodchill Armoury 
+cTranslate_PageName1	|Gear 
+cTranslate_PageName2	|Quests 
+cTranslate_Header	|Bloodchill Mods 
+
+- Filter drop-down
+cTranslate_Filter_Name	|Questline 
+cTranslate_Filter_Hint	|Show the entries for the questline you are following. 
+cTranslate_Filter_Option1	|Vampires 
+cTranslate_Filter_Option2	|Vigilants 
+
+- List headings
+cTranslate_Header_Weapons	|Weapons: 
+cTranslate_Header_Found	|Found 
+cTranslate_Header_Books	|Books: 
+cTranslate_Header_Read	|Read 
+cTranslate_Header_Locations	|Locations: 
+cTranslate_Header_Discovered	|Discovered 
+cTranslate_Header_Enchantments	|Enchantments: 
+cTranslate_Header_Learned	|Learned 
+cTranslate_Header_Shouts	|Shouts: 
+cTranslate_Header_Quests	|Quests: 
+cTranslate_Header_Completed	|Completed 
+cTranslate_Header_Fish	|Fish: 
+cTranslate_Header_Caught	|Caught 
+cTranslate_Header_Homes	|Homes: 
+cTranslate_Header_Owned	|Owned 
+cTranslate_Header_Pets	|Pets: 
+cTranslate_Header_Tamed	|Tamed 
+cTranslate_Header_Shrines	|Shrines: 
+cTranslate_Header_Used	|Used 
+
+- Entry names and hints
+cTranslate_Hint_BloodchillBow	|Found on the altar in Frostmoon Crag. 
+cTranslate_Name_RimefangDagger	|Rimefang Dagger 
+cTranslate_Hint_FrozenVault	|On the desk in Bloodchill Manor's library. 
+cTranslate_Hint_FrostmoonCrag	|High in the mountains north of Winterhold. 
+cTranslate_Hint_FrostPike	|Caught in arctic waters during snow. 
+cTranslate_Home_Manor	|Bloodchill Manor 
+cTranslate_Hint_Manor	|Buy it from the steward in Winterhold. 
+cTranslate_Home_Cabin	|Frostmoon Cabin 
+cTranslate_Hint_SnowFox	|Wanders the hills around Frostmoon Crag. 
+cTranslate_Pet_Wolf	|Ash, the wolf pup 
+cTranslate_Shrine_Crag	|Shrine of Talos, Frostmoon Crag 
+cTranslate_Hint_ShrineCrag	|Behind the waterfall below the crag. 
+
+- Quests
+cTranslate_QuestName01	|The Frozen Vault 
+cTranslate_QuestText01	|Quest giver: Hrolf, in Winterhold. Needs level 10. 
+cTranslate_QuestName02	|Ending Either Way 
+cTranslate_QuestText02	|Starts after The Frozen Vault. Either ending counts. 
+cTranslate_QuestName03	|Wolf Hunt 
+cTranslate_QuestText03	|Repeatable. Ask Hrolf for work three times. 
+cTranslate_QuestName04	|A Drink for Old Hrolf 
+cTranslate_QuestText04	|Give Hrolf any ale or mead. 
