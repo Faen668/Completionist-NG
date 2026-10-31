@@ -3,28 +3,27 @@
 This guide shows you how to add another mod's items, books, places, quests and more to Completionist.
 You don't need to write any code. An addon is two text files.
 
-- **New here?** Read sections 1 to 4, then copy `CompletionistAddon_Template.ini` and `CompletionistAddon_Template.txt` and change them.
-- **Looking something up?** Sections 5 to 13 list every setting.
+- **New here?** Read sections 1 to 3, then copy `CompletionistAddon_Template.ini` and `CompletionistAddon_Template.txt` and change them.
+- **Looking something up?** Sections 4 to 12 list every setting.
 
 ## Contents
 
 1. What an addon is
 2. Where the files go
-3. The quickest start: the xEdit script
-4. How the .ini file works
-5. The `[Completionist Patch Data]` section
-6. Pages, sections and the Completionist window
-7. Section settings
-8. FormIDs: what to write in the list
-9. Settings for one entry
-10. The Types, one by one
-11. Quests
-12. Install conditions
-13. The filter drop-down
-14. The translation file
-15. Testing your addon
-16. Common mistakes
-17. Old settings you can delete
+3. How the .ini file works
+4. The `[Completionist Patch Data]` section
+5. Pages, sections and the Completionist window
+6. Section settings
+7. FormIDs: what to write in the list
+8. Settings for one entry
+9. The Types, one by one
+10. Quests
+11. Install conditions
+12. The filter drop-down
+13. The translation file
+14. Testing your addon
+15. Common mistakes
+16. Old settings you can delete
 
 ---
 
@@ -52,27 +51,10 @@ Give your files a name that no other addon is likely to use, such as `AuthorName
 
 - Completionist reads every `.ini` in the Addons folder, and in any folder inside it.
 - The .txt must have the same name as the .ini (`MyMod.ini` → `MyMod.txt`).
-  To use a different name, or to share one .txt between several .ini files, see `OverrideLocalisationFileName` in section 5.
+  To use a different name, or to share one .txt between several .ini files, see `OverrideLocalisationFileName` in section 4.
 - Addons are read when the game starts. After you change a file, restart the game.
 
-## 3. The quickest start: the xEdit script
-
-Completionist Addons comes with an xEdit script, `Completionist_Output_Patch.pas`, that writes a first draft for you.
-
-1. Put the script in xEdit's `Edit Scripts` folder.
-2. In xEdit, select the records you want to track (or a whole plugin).
-3. Right-click → **Apply Script** → `Completionist_Output_Patch`.
-4. It writes `<PluginName>.ini` and `<PluginName>.txt` to `Completionist Patches\` in xEdit's folder.
-
-The script sorts records into weapons, armour, books, keys, map markers, quests and so on.
-Then go through the draft:
-
-- Remove anything that shouldn't be tracked.
-- Fill in the quest hint text. The script writes `Empty` for every quest.
-- Check each quest's `QuestType` and `CompletionType`. The script sets every quest to a side quest that completes the normal way.
-- Add display names, hints and variations where they help (section 9).
-
-## 4. How the .ini file works
+## 3. How the .ini file works
 
 An .ini file is made of **sections** and **settings**.
 
@@ -85,14 +67,14 @@ A few rules to know:
 
 - **Comments go on their own line** and start with `;`.
   Don't put a comment after a value: `Type = 0 ; items` makes the value `0 ; items`.
-  The only place a comment may follow a value is inside a FormIDs list (section 8).
+  The only place a comment may follow a value is inside a FormIDs list (section 7).
 - **Setting names don't care about upper or lower case.** `EditorID` and `EditorId` are the same.
 - **Every section needs its own name.** Two sections with the same name are merged into one.
 - **Every section needs `Enabled = true`**, or it is skipped. This includes the top section and each quest.
 - **True or false** can be written `true`/`false`, `yes`/`no`, `on`/`off` or `1`/`0`.
 - Spaces around `=` don't matter.
 
-## 5. The `[Completionist Patch Data]` section
+## 4. The `[Completionist Patch Data]` section
 
 This section comes first. It describes the whole addon.
 
@@ -101,18 +83,18 @@ This section comes first. It describes the whole addon.
 | `Enabled` | **Yes** | `true` to load the addon. Leaving it out counts as `false`. |
 | `PluginFileName` | **Yes** | The plugin most of your FormIDs come from, with its extension, e.g. `MyMod.esp`. If this plugin isn't in the load order, the whole addon is skipped. |
 | `MCMPageName` | **Yes** | Translation key for the page's name in the Completionist window's list of pages. |
-| `PageName1`, `PageName2`, … | **Yes** (at least `PageName1`) | Translation keys for the tabs on your page. Number them 1, 2, 3 with no gaps: Completionist stops counting at the first missing number. See section 6. |
-| `PageName1_InstallCondition`, … | No | Only show that tab when a condition is met. See section 12. |
-| `InstallCondition` | No | Only load the addon when a condition is met. See section 12. |
+| `PageName1`, `PageName2`, … | **Yes** (at least `PageName1`) | Translation keys for the tabs on your page. Number them 1, 2, 3 with no gaps: Completionist stops counting at the first missing number. See section 5. |
+| `PageName1_InstallCondition`, … | No | Only show that tab when a condition is met. See section 11. |
+| `InstallCondition` | No | Only load the addon when a condition is met. See section 11. |
 | `Priority` | No | Where your page sits in the list. Lower numbers come first. Pages with the same priority are sorted by name. Default `0`. |
 | `Header` | No | Translation key for a heading in the list of pages. Addons with the same heading text are listed together under it. Without a header, your page goes under "Mod Added Patches" (or "Vanilla Tracking", see the next row). |
 | `IsVanillaTracking` | No | `true` only for addons that track the base game or Creation Club content. Those pages are listed first, in the Collections group. Leave it `false` for mods. |
 | `SortMode` | No | How entries are ordered in each section. `0` = A to Z (default). `1` = A to Z, ignoring a leading "The", "A" or "An". `2` = the order you wrote them in the FormIDs list. |
 | `OverrideLocalisationFileName` | No | The name of the translation file to use instead of `<ini name>.txt`, e.g. `MyMods_Shared.txt`. Several .ini files can share one .txt this way, as long as all their keys are different. |
-| `Log` | No | `true` writes what happened to each entry to Completionist's log. Use it while you make the addon, and set it back to `false` before you release it. See section 15. |
-| `DropDownMenu`, `DropDownMenu_Name`, `DropDownMenu_Highlight`, `DropDownMenu_Option_1`, … | No | A drop-down that filters the page. See section 13. |
+| `Log` | No | `true` writes what happened to each entry to Completionist's log. Use it while you make the addon, and set it back to `false` before you release it. See section 14. |
+| `DropDownMenu`, `DropDownMenu_Name`, `DropDownMenu_Highlight`, `DropDownMenu_Option_1`, … | No | A drop-down that filters the page. See section 12. |
 
-## 6. Pages, sections and the Completionist window
+## 5. Pages, sections and the Completionist window
 
 Each addon .ini gets **one page** in the Completionist window.
 
@@ -134,24 +116,24 @@ PageName2    →  "Quests"                    (tab 2)
 - There is no limit on how many entries a list or a tab can hold.
 - Quests are shown the same way as Completionist's own quest pages: Main, Side, Radiant and Completed.
 
-## 7. Section settings
+## 6. Section settings
 
-Use these in every section except quest sections (quests are in section 11).
+Use these in every section except quest sections (quests are in section 10).
 
 | Setting | Needed? | What it does |
 |---|---|---|
 | `Enabled` | **Yes** | `true` to load this section. |
-| `Type` | **Yes** | What kind of thing the list holds, from `0` to `9`. See section 10. One section holds one Type. |
+| `Type` | **Yes** | What kind of thing the list holds, from `0` to `9`. See section 9. One section holds one Type. |
 | `DisplayOnPage` | **Yes** | Which tab the list goes on: `1` for `PageName1`, `2` for `PageName2`, and so on. It must be a tab you named. |
 | `SectionHeader_L` | **Yes** | Translation key for the list's heading. |
 | `SectionHeader_R` | No | Translation key for the right-hand heading in older versions of Completionist ("Found", "Read"). The current window doesn't show it. |
-| `FormIDs` | **Yes** (not for Type 5) | The things to track. See section 8. |
+| `FormIDs` | **Yes** (not for Type 5) | The things to track. See section 7. |
 | `InstallFrom` | No | The plugin this section's FormIDs come from, if it isn't `PluginFileName`. |
-| `InstallCondition` | No | Only load this section when a condition is met. See section 12. |
+| `InstallCondition` | No | Only load this section when a condition is met. See section 11. |
 
-## 8. FormIDs: what to write in the list
+## 7. FormIDs: what to write in the list
 
-### 8.1 Write the FormID without the load order
+### 7.1 Write the FormID without the load order
 
 In xEdit a FormID looks like `FE000807` or `0A01ABCD`.
 The first part is the plugin's place in **your** load order. It's different for every player, so leave it out.
@@ -163,12 +145,12 @@ Write `0x` and then the rest:
 | Light plugin (.esl, or ESL-flagged) | `FE000807` (first 5 digits are the load order) | `0x000807` |
 
 Leading zeros don't matter to Completionist: `0x807` and `0x000807` find the same record.
-But write each FormID the **same way everywhere** in the file, because the entry settings in section 9 use it as a name.
+But write each FormID the **same way everywhere** in the file, because the entry settings in section 8 use it as a name.
 
 Not sure which part is the load order? Select the record in xEdit and read the bar at the top, e.g. `[FE 000]`.
 Mod Organizer 2 also shows it in the Plugins tab, to the right of each plugin.
 
-### 8.2 Writing the list
+### 7.2 Writing the list
 
 You can write the list on one line:
 
@@ -194,7 +176,7 @@ How the list works:
 - After the comma you can add `; a note`. Completionist ignores it.
   Keep `0x` out of these notes, because Completionist treats any `0x` it finds as a FormID.
 
-### 8.3 FormIDs from another plugin: `0xID*Plugin.esp`
+### 7.3 FormIDs from another plugin: `0xID*Plugin.esp`
 
 If a FormID comes from a different plugin than `PluginFileName` (or `InstallFrom`), add `*` and that plugin's name:
 
@@ -209,7 +191,7 @@ LIST
 Each FormID without a `*` comes from the section's `InstallFrom`, or from `PluginFileName` if the section has none.
 If that plugin isn't in the load order, the entry is skipped and the rest of the list still loads.
 
-### 8.4 Only load an entry when another mod is or isn't installed
+### 7.4 Only load an entry when another mod is or isn't installed
 
 Add one condition to the end of the FormID:
 
@@ -219,12 +201,12 @@ Add one condition to the end of the FormID:
 | `0x000800<&OtherMod.esp,` | Load this entry only if `OtherMod.esp` **is** installed. |
 | `0x000800*Patch.esp<&OtherMod.esp,` | Load it from `Patch.esp`, only if `OtherMod.esp` is installed. |
 
-One condition fits here. For more than one, use `0x000800_InstallCondition` (section 9 and 12).
+One condition fits here. For more than one, use `0x000800_InstallCondition` (section 8 and 11).
 
 Example: the mod Undeath has a spell tome `0x05839E`, but "Undeath Classical Lichdom" removes it.
 `0x05839E<!Undeath_ClassicalLichdom.esp,` tracks the tome only when that add-on isn't installed.
 
-## 9. Settings for one entry
+## 8. Settings for one entry
 
 These settings belong to one FormID in a section. Put them in the same section as the FormID, after the list.
 Each one starts with the FormID **written exactly as in the list**, then `_` and the setting.
@@ -234,10 +216,10 @@ Each one starts with the FormID **written exactly as in the list**, then `_` and
 | `0x000800 = …` | 0, 1, 6, 9 | **Variations**: other FormIDs that count as this entry. See below. |
 | `0x000800_DisplayName` | all | Translation key for the name to show instead of the record's own name. Only changes what Completionist shows. |
 | `0x000800_Highlight` | all | Translation key for a hint shown under the entry, e.g. where to find it. |
-| `0x000800_Visibility` | all | Which drop-down option shows this entry: `1` for `DropDownMenu_Option_1`, `2` for option 2, and so on. See section 13. |
-| `0x000800_InstallCondition` | all | Only load this entry when a condition is met. See section 12. |
+| `0x000800_Visibility` | all | Which drop-down option shows this entry: `1` for `DropDownMenu_Option_1`, `2` for option 2, and so on. See section 12. |
+| `0x000800_InstallCondition` | all | Only load this entry when a condition is met. See section 11. |
 | `0x000800_PickupEnabled` | 6 (Fish) | `true`: picking the fish up also completes it, not only catching it. Default `false`. |
-| `0x000800_Type` | 7, 8 | How the home or pet is completed. See section 10. |
+| `0x000800_Type` | 7, 8 | How the home or pet is completed. See section 9. |
 | `0x000800_Stage` | 7, 8 | The quest stage that completes the home or pet. |
 | `0x000800_OptionalStage` | 7 | Read, but not used yet. Set it to `0`. |
 
@@ -262,10 +244,10 @@ LIST
 
 - Only the main FormID goes in `FormIDs`.
 - Write the variations on one line, separated by commas.
-- Each variation can have its own `*Plugin.esp` and one `<!` or `<&` condition, like in section 8.
+- Each variation can have its own `*Plugin.esp` and one `<!` or `<&` condition, like in section 7.
 - Finding any version completes the entry.
 
-## 10. The Types, one by one
+## 9. The Types, one by one
 
 Each section has one `Type`. It decides what the FormIDs are and how an entry is completed.
 
@@ -368,7 +350,7 @@ FormIDs = 0x000840,
 ### Type 5: Quests
 
 A Type 5 section has **no FormIDs**. It marks the tab where your quests appear.
-The quests themselves are their own sections, explained in section 11.
+The quests themselves are their own sections, explained in section 10.
 
 ```ini
 [Quest list]
@@ -477,11 +459,11 @@ LIST
 0x000880_Highlight = cTranslate_Hint_ShrineCrag
 ```
 
-## 11. Quests
+## 10. Quests
 
 Quests work differently from the other Types. Two things are needed:
 
-1. **One Type 5 section** on the tab where the quests should appear (section 10).
+1. **One Type 5 section** on the tab where the quests should appear (section 9).
 2. **One section per quest.** A section with an `EditorID` setting is a quest. It needs no `Type`.
 
 Quests Completionist already tracks itself are skipped.
@@ -498,8 +480,8 @@ Quests Completionist already tracks itself are skipped.
 | `HighlightText` | **Yes** | Translation key for the hint, e.g. `Quest giver: Jarl Balgruuf. Needs level 10.` |
 | `QuestType` | **Yes** | Which group it goes in: `0` = Main, `1` = Side, `2` = Radiant / repeatable. |
 | `CompletionType` | **Yes** | How it's completed: `0`, `1` or `2`. See below. |
-| `InstallCondition` | No | Only load this quest when a condition is met (section 12). |
-| `Visibility` | No | Which drop-down option shows this quest: `1` for option 1, and so on (section 13). |
+| `InstallCondition` | No | Only load this quest when a condition is met (section 11). |
+| `Visibility` | No | Which drop-down option shows this quest: `1` for option 1, and so on (section 12). |
 
 ### CompletionType 0: the normal way
 
@@ -574,7 +556,7 @@ For these, add the settings below to a CompletionType 2 quest. Completionist the
 |---|---|
 | `isGenericFavorQuest` | `true`. |
 | `GenericFavorQuestType` | `0` = selling to the NPC (crops, ore, firewood). `1` = giving the NPC gold (beggars). `2` = giving the NPC an item from a list (drinks, gifts). |
-| `BaseFormID` | The NPC's actor base FormID, written as in section 8.1. |
+| `BaseFormID` | The NPC's actor base FormID, written as in section 7.1. |
 | `PluginFileName` | The plugin that NPC comes from. |
 | `validItemsFormID` | Type `2` only: the FormID of the form list (`FLST`) of items that count. |
 | `validItemsFileName` | Type `2` only: the plugin that form list comes from. |
@@ -601,7 +583,7 @@ validItemsFileName = MyMod.esp
 
 Leave `BaseFormID` out of quests that aren't favour quests. Completionist finds the quest by its `EditorID`.
 
-## 12. Install conditions
+## 11. Install conditions
 
 An install condition loads something only when certain plugins are, or aren't, in the load order.
 You can put one on the whole addon, a tab, a section, a quest or a single entry:
@@ -625,7 +607,7 @@ How to write one:
 InstallCondition = <!SomeMod1.esp<&SomeMod2.esm,<&SomeMod3.esp<&SomeMod4.esm
 ```
 
-## 13. The filter drop-down
+## 12. The filter drop-down
 
 A drop-down at the top of your page lets the player pick which entries to show.
 Use it for things like a mod with three questlines where the player can only follow one.
@@ -647,7 +629,7 @@ DropDownMenu_Option_3 = cTranslate_Filter_Option3
 - An entry or quest **without** a Visibility setting always shows.
 - One with a Visibility setting shows only while its option is picked.
 
-## 14. The translation file
+## 13. The translation file
 
 The .txt file turns each key from the .ini into the text the player sees.
 Each line is: **the key, a TAB, a `|`, then the text.**
@@ -672,7 +654,7 @@ cTranslate_Hint_BloodchillBow	|Found on the altar in Frostmoon Crag.
 
 To translate an addon, copy the .txt and change only the text after the `|`. Never change the keys.
 
-## 15. Testing your addon
+## 14. Testing your addon
 
 1. Set `Log = true` in `[Completionist Patch Data]`.
    Or set `Log_All_Patch_Installs = true` in Completionist's settings file to log every addon.
@@ -684,7 +666,7 @@ To translate an addon, copy the .txt and change only the text after the `|`. Nev
 4. Open the Completionist window and check your page. Missing text shows as the raw key.
 5. Set `Log` back to `false` before you release the addon.
 
-## 16. Common mistakes
+## 15. Common mistakes
 
 | Problem | Likely cause |
 |---|---|
@@ -699,9 +681,9 @@ To translate an addon, copy the .txt and change only the text after the `|`. Nev
 | A filtered entry never shows | Its `_Visibility` number has no matching `DropDownMenu_Option_` number. Options start at 1. |
 | The game crashes or misbehaves at start-up | A quest or Type 5 section has no `DisplayOnPage`, or it points to a tab that has no `PageName`. |
 
-## 17. Old settings you can delete
+## 16. Old settings you can delete
 
-Older addons, and the xEdit script, still write some settings that Completionist no longer reads. They do no harm, and you can remove them:
+Older addons still write some settings that Completionist no longer reads. They do no harm, and you can remove them:
 
 - `axPlt`
 - `PageCount` (Completionist counts the `PageName` settings instead)
