@@ -2,6 +2,7 @@
 #include "PatchListener.hpp"
 #include "Import/SimpleIni.h"
 #include "Internal Utility/MCMHandler.hpp"
+#include "Internal Utility/PlacedReferences.hpp"
 #include "Frameworks/Items/CFramework_Others.hpp"
 #include "Frameworks/Misc/CFramework_Blessings.hpp"
 #include "Frameworks/Misc/CFramework_Enchantments.hpp"
@@ -432,8 +433,21 @@ namespace CExternalPatchHandler
 			}
 			else
 			{
+				auto entries = GetFormIDArray(sec, data->log_install);
+
+				// Temporary references aren't loaded yet, so they are read from their plugins
+				if (PatchData.type == CMiscPatchType::kInteractableObject) {
+					std::vector<RE::FormID> references;
+					for (auto& [formID, raw, pluginFileName, fullVariableString] : entries) {
+						if (const auto id = Handler->LookupFormID(formID, pluginFileName); id && !RE::TESForm::LookupByID(id)) {
+							references.push_back(id);
+						}
+					}
+					PlacedReferences::Resolve(references);
+				}
+
 				auto Idx = 0;
-				for (auto& [formID, raw, pluginFileName, fullVariableString] : GetFormIDArray(sec, data->log_install))
+				for (auto& [formID, raw, pluginFileName, fullVariableString] : entries)
 				{
 					if (!Serialization::CompletionistData::IsModInstalled(pluginFileName)) {
 						if (data->log_install) {
@@ -454,6 +468,9 @@ namespace CExternalPatchHandler
 					};
 
 					auto* form = RE::TESDataHandler::GetSingleton()->LookupForm(formID, pluginFileName);
+					if (!form && PatchData.type == CMiscPatchType::kInteractableObject) {
+						form = PlacedReferences::Find(Handler->LookupFormID(formID, pluginFileName));
+					}
 					if (!form)
 					{
 						if (data->log_install) {

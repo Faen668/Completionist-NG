@@ -2,6 +2,7 @@
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Internal Utility/CellScanner.hpp"
 #include "Internal Utility/Forms.hpp"
+#include "Internal Utility/PlacedReferences.hpp"
 #include "Internal Utility/Settings.hpp"
 #include "UI/SettingsPages.hpp"
 
@@ -378,7 +379,11 @@ namespace CompletionistUI
 			case Kind::kTravel:
 				return Translate("UI_Track_Travel{" + a_item.name + "}");
 			case Kind::kFind:
-				if (const auto place = PlaceOf(a_ref); !place.empty() && place != a_item.name) {
+				if (!a_item.type.empty()) {
+					return Translate(a_item.type + "{" + a_item.name + "}");
+				}
+				// A temporary reference's own place, not that of the marker near it; none when its name says it
+				if (const auto place = PlacedReferences::Find(a_item.ref) ? PlacedReferences::PlaceName(a_item.ref) : PlaceOf(a_ref); !place.empty() && a_item.name.find(place) == std::string::npos) {
 					return Translate("UI_Track_FindIn{" + a_item.name + "}{" + place + "}");
 				}
 				return Translate("UI_Track_Find{" + a_item.name + "}");
@@ -538,7 +543,7 @@ namespace CompletionistUI
 				if (!item.Located() || item.slot < 0) {
 					continue;
 				}
-				auto*       ref = RE::TESForm::LookupByID<RE::TESObjectREFR>(item.ref);
+				auto*       ref = PlacedReferences::Target(item.ref);
 				const auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
 				const auto  at = tracked.begin() + static_cast<std::ptrdiff_t>(i);
 				// Some map markers stay disabled until a quest shows them, items are done once picked up
@@ -548,6 +553,9 @@ namespace CompletionistUI
 					Unplace(at, "found", true);
 				} else if ((actor || item.kind == Kind::kTravel) && Reached(player, ref)) {
 					Unplace(at, "reached", true);
+				} else if (PlacedReferences::Find(item.ref) && SlotReference(item.slot) != ref) {
+					INFO("Tracker: {} now points at {:08X}", item.name, ref->GetFormID());
+					FillSlot(item, ref, false);	// its cell loaded, from the marker near it to the reference
 				}
 			}
 			UpdateLocating();
@@ -795,7 +803,7 @@ namespace CompletionistUI
 	//---------------------------------------------------
 
 	// The alias holds the NPC or map marker itself, so the marker follows them about
-	bool Tracker::Locate(RE::TESObjectREFR* a_ref, const std::string& a_name, bool a_announce) {
+	bool Tracker::Locate(RE::TESObjectREFR* a_ref, const std::string& a_name, bool a_announce, const std::string& a_text) {
 
 		auto& tracked = Targets().tracked;
 		if (!a_ref || !a_ref->GetBaseObject()) {
@@ -809,13 +817,20 @@ namespace CompletionistUI
 			NotifySlotsFull();
 			return false;
 		}
-		const bool travel = a_ref->extraList.HasType<RE::ExtraMapMarker>();
+		// A temporary reference far away is found by way of a marker near it, until its cell loads
+		const bool standIn = PlacedReferences::Find(a_ref->GetFormID()) == a_ref;
+		auto*      target = standIn ? PlacedReferences::Target(a_ref->GetFormID()) : a_ref;
+		if (!target) {
+			return false;
+		}
+		const bool travel = !standIn && a_ref->extraList.HasType<RE::ExtraMapMarker>();
 		tracked.push_back({ .form = travel ? a_ref->GetFormID() : a_ref->GetBaseObject()->GetFormID(),
 			.ref = a_ref->GetFormID(),
 			.name = a_name,
+			.type = a_text,
 			.kind = travel ? Kind::kTravel : Kind::kFind,
 			.slot = slot });
-		FillSlot(tracked.back(), a_ref, a_announce);
+		FillSlot(tracked.back(), target, a_announce);
 		INFO("Tracker: {} {} ({:08X}) in slot {}", travel ? "travel to" : "find", a_name, a_ref->GetFormID(), slot);
 		locating = true;
 		return true;
@@ -859,7 +874,7 @@ namespace CompletionistUI
 			if (tracked[i].slot < 0) {
 				continue;
 			}
-			auto*       ref = RE::TESForm::LookupByID<RE::TESObjectREFR>(tracked[i].ref);
+			auto*       ref = tracked[i].Located() ? PlacedReferences::Target(tracked[i].ref) : RE::TESForm::LookupByID<RE::TESObjectREFR>(tracked[i].ref);
 			const auto* cell = ref ? ref->GetParentCell() : nullptr;
 			const bool  back = tracked[i].kind == Kind::kTravel ? ref != nullptr : tracked[i].Located() ? !Gone(ref) : cell && cell->IsAttached();
 			if (back) {

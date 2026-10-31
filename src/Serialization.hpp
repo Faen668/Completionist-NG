@@ -1,6 +1,7 @@
 #include "Structs.hpp"
 #include "DKUtil/Utility.hpp"
 #include "Internal Utility/Localisation.hpp"
+#include "Internal Utility/PlacedReferences.hpp"
 #include "Internal Utility/Variables.hpp"
 #pragma once
 
@@ -358,7 +359,8 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		[[nodiscard]] RE::TESForm* GetForm(RE::FormID a_form) const noexcept
 		{
-			return HasForm(a_form) ? RE::TESForm::LookupByID(a_form) : nullptr;
+			// Temporary references the game hasn't loaded have a stand-in
+			return HasForm(a_form) ? PlacedReferences::Lookup(a_form) : nullptr;
 		}
 
 		template <typename T>

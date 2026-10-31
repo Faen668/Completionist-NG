@@ -1,14 +1,16 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
-// Reads plugin files directly for word of power script properties
+// Reads plugin files directly for word of power script properties and placed references
 namespace PluginScan
 {
 	struct Cell
@@ -45,6 +47,17 @@ namespace PluginScan
 		std::string plugin;
 	};
 
+	// A placed reference as the last file to touch it has it
+	struct Reference
+	{
+		std::string          base;
+		std::string          cell;
+		std::string          worldspace;	// exterior only
+		std::array<float, 3> position{};
+		std::string          plugin;
+		bool                 deleted{ false };
+	};
+
 	struct Result
 	{
 		std::map<std::string, std::string>              words;
@@ -53,6 +66,7 @@ namespace PluginScan
 		std::map<std::string, Location>                 locations;
 		std::map<std::string, std::string>              worldspaces;
 		std::map<std::string, std::string>              editorIDs;
+		std::map<std::string, Reference>                references;
 		std::size_t                                     records{ 0 };
 		std::size_t                                     compressedSkipped{ 0 };
 		std::vector<std::string>                        errors;
@@ -62,6 +76,9 @@ namespace PluginScan
 	{
 	public:
 		void AddFile(std::string_view a_name, std::span<const std::byte> a_data);
+
+		// Only these placed references are read, and the cells they could be in
+		void WantReferences(std::set<std::string> a_keys) { _wanted = std::move(a_keys); }
 
 		[[nodiscard]] Result Finish();
 
@@ -93,6 +110,7 @@ namespace PluginScan
 
 		std::map<std::string, ScriptedRecord>           _scripted;
 		std::map<std::string, std::vector<std::string>> _formLists;
+		std::set<std::string>                           _wanted;
 		Result                                _result;
 	};
 }
