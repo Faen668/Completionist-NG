@@ -8338,15 +8338,20 @@ namespace CompletionistUI
 			labelWidth = width * 0.46f;
 			controlWidth = width - labelWidth - style.ItemSpacing.x;
 		};
+		float labelEnd = 0.0f;
 		const auto label = [&](const std::string& a_text) {
 			ImGui::AlignTextToFramePadding();
 			ImGui::TextUnformatted(a_text.c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(columnX + labelWidth);
+			labelEnd = columnX + ImGui::CalcTextSize(a_text.c_str()).x;
 		};
 		const auto toggleSpot = [&]() {
 			if (SkyUI()) {
 				ImGui::SetCursorPosX(columnX + labelWidth + controlWidth - ImGui::GetTextLineHeight() - style.FramePadding.x);
+			} else if (labelEnd + style.ItemSpacing.x > columnX + labelWidth) {
+				// A label longer than its column pushes the toggle along rather than running under it
+				ImGui::SetCursorPosX(std::min(labelEnd + style.ItemSpacing.x, columnX + labelWidth + controlWidth - ImGui::GetTextLineHeight() - style.FramePadding.x));
 			}
 		};
 		const auto describe = [&](const std::string& a_label, const std::string& a_info) {
