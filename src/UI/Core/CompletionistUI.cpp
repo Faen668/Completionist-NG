@@ -1475,14 +1475,15 @@ namespace CompletionistUI
 			ImGui::PopStyleColor();
 			// The page's first entry (or control), hidden until the first press shows it
 			if (std::exchange(_focusPage, false)) {
+				const bool shown = std::exchange(_focusPageShown, false);
 				const auto start = std::ranges::find_if(_entrySpots, &NavSpot::visible);
 				const auto control = std::ranges::find_if(_controlSpots, [](const NavSpot& a_spot) { return a_spot.visible && a_spot.section != -1; });
 				const NavSpot* spot = start != _entrySpots.end() ? std::addressof(*start) : control != _controlSpots.end() ? std::addressof(*control) : nullptr;
 				if (spot) {
 					// Placed as the item is drawn next frame, inside its own window
 					_pendingFocus = spot->id;
-					_pendingHidden = spot->id;
-					_revealFocus = spot->id;
+					_pendingHidden = shown ? 0 : spot->id;
+					_revealFocus = shown ? 0 : spot->id;
 				}
 			}
 			if (PadHintsShown()) {
@@ -3127,6 +3128,9 @@ namespace CompletionistUI
 				const auto count = static_cast<std::ptrdiff_t>(a_tabs.size());
 				const auto index = (static_cast<std::ptrdiff_t>(current - a_tabs.begin()) + (next ? 1 : count - 1)) % count;
 				a_selected = a_tabs[static_cast<std::size_t>(index)].id;
+				// The entry focused goes with the old tab: the new tab's first takes it, not the sidebar
+				_focusPage = true;
+				_focusPageShown = ImGui::GetIO().NavVisible;
 			}
 		}
 

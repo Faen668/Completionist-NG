@@ -23,6 +23,6 @@ namespace PlacedReferences
 	bool Trackable(RE::FormID a_formID);
 
 	// What the tracker points to: the reference once its cell is loaded, before that the
-	// nearest map marker outside, or the marker of the place an interior belongs to
+	// nearest persistent reference outside, or for an interior a door in its cell
 	RE::TESObjectREFR* Target(RE::FormID a_formID);
 }

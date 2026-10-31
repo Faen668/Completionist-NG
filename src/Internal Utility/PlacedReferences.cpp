@@ -23,6 +23,8 @@ namespace PlacedReferences
 			RE::FormID   location{ 0 };	// the cell's, as the plugins have it
 			RE::FormID   worldspace{ 0 };
 			RE::NiPoint3 position;
+
+			mutable RE::ObjectRefHandle anchor;	// what it's found by outside, until its cell loads
 		};
 
 		std::unordered_map<RE::FormID, std::unique_ptr<StandIn>> standIns;
@@ -119,38 +121,75 @@ namespace PlacedReferences
 		}
 
 		//---------------------------------------------------
-		//-- Placed References ( Nearest Map Marker ) -------
+		//-- Placed References ( Nearest Door ) -------------
 		//---------------------------------------------------
 
-		RE::TESObjectREFR* NearestMapMarker(const StandIn& a_standIn) {
+		// The load door in its own cell nearest it. Load doors are persistent, so the game has them
+		// while the cell isn't loaded, and quest markers find their way to them through other doors
+		RE::TESObjectREFR* NearestDoor(const StandIn& a_standIn) {
 
-			// The worldspace's map markers, kept once found
-			static std::unordered_map<RE::FormID, std::vector<RE::ObjectRefHandle>> markers;
-			auto* world = RE::TESForm::LookupByID<RE::TESWorldSpace>(a_standIn.worldspace);
-			if (!world) {
+			const auto* cell = RE::TESForm::LookupByID<RE::TESObjectCELL>(a_standIn.cell);
+			if (!cell) {
 				return nullptr;
 			}
-			auto [it, added] = markers.try_emplace(world->GetFormID());
-			if (added && world->persistentCell) {
-				for (const auto& ref : world->persistentCell->GetRuntimeData().references) {
-					if (ref && ref->extraList.HasType<RE::ExtraMapMarker>()) {
-						it->second.push_back(ref->GetHandle());
-					}
-				}
-			}
-
 			RE::TESObjectREFR* nearest = nullptr;
 			float              best = FLT_MAX;
-			for (const auto& handle : it->second) {
-				auto marker = handle.get();
-				if (!marker || marker->IsDeleted()) {
+			for (const auto& ref : cell->GetRuntimeData().references) {
+				if (!ref || !ref->extraList.HasType<RE::ExtraTeleport>()) {
 					continue;
 				}
-				if (const float distance = marker->GetPosition().GetDistance(a_standIn.position); distance < best) {
+				if (const float distance = ref->GetPosition().GetDistance(a_standIn.position); distance < best) {
 					best = distance;
-					nearest = marker.get();
+					nearest = ref.get();
 				}
 			}
+			return nearest;
+		}
+
+		//---------------------------------------------------
+		//-- Placed References ( Inside Target ) ------------
+		//---------------------------------------------------
+
+		// An interior's: a door in its cell, else the marker of the place it belongs to
+		RE::TESObjectREFR* InsideTarget(const StandIn& a_standIn) {
+
+			if (auto* door = NearestDoor(a_standIn)) {
+				return door;
+			}
+			const auto* location = MarkedLocation(a_standIn);
+			return location ? location->worldLocMarker.get().get() : nullptr;
+		}
+
+		//---------------------------------------------------
+		//-- Placed References ( Nearest Persistent ) -------
+		//---------------------------------------------------
+
+		// Outside, the persistent reference nearest it in its worldspace: a map marker, a door, a
+		// shrine. The game always has these, NPCs aside, as they move. Found once, again if it goes
+		RE::TESObjectREFR* NearestPersistent(const StandIn& a_standIn) {
+
+			const auto usable = [](const RE::TESObjectREFR* a_ref) {
+				return a_ref && a_ref->GetBaseObject() && !a_ref->IsDisabled() && !a_ref->IsDeleted() && !a_ref->Is(RE::FormType::ActorCharacter);
+			};
+			if (auto anchor = a_standIn.anchor.get(); usable(anchor.get())) {
+				return anchor.get();
+			}
+			const auto* world = RE::TESForm::LookupByID<RE::TESWorldSpace>(a_standIn.worldspace);
+			if (!world || !world->persistentCell) {
+				return nullptr;
+			}
+			RE::TESObjectREFR* nearest = nullptr;
+			float              best = FLT_MAX;
+			for (const auto& ref : world->persistentCell->GetRuntimeData().references) {
+				if (!usable(ref.get())) {
+					continue;
+				}
+				if (const float distance = ref->GetPosition().GetDistance(a_standIn.position); distance < best) {
+					best = distance;
+					nearest = ref.get();
+				}
+			}
+			a_standIn.anchor = nearest ? nearest->GetHandle() : RE::ObjectRefHandle{};
 			return nearest;
 		}
 
@@ -315,7 +354,7 @@ namespace PlacedReferences
 			return false;
 		}
 		const auto& standIn = *it->second;
-		return standIn.worldspace ? RE::TESForm::LookupByID<RE::TESWorldSpace>(standIn.worldspace) != nullptr : MarkedLocation(standIn) != nullptr;
+		return standIn.worldspace ? RE::TESForm::LookupByID<RE::TESWorldSpace>(standIn.worldspace) != nullptr : InsideTarget(standIn) != nullptr;
 	}
 
 	//---------------------------------------------------
@@ -333,9 +372,8 @@ namespace PlacedReferences
 		}
 		const auto& standIn = *it->second;
 		if (standIn.worldspace) {
-			return NearestMapMarker(standIn);
+			return NearestPersistent(standIn);
 		}
-		const auto* location = MarkedLocation(standIn);
-		return location ? location->worldLocMarker.get().get() : nullptr;
+		return InsideTarget(standIn);
 	}
 }

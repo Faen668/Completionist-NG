@@ -218,28 +218,6 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Tracker ( Show Slot Objective ) ----------------
-		//---------------------------------------------------
-
-		void ShowSlotObjective(std::int32_t a_slot, bool a_displayed, bool a_force) {
-
-			if (SlotQuest(a_slot)) {
-				CForms::Call(SlotScript(a_slot), "SetObjectiveDisplayed"sv, std::int32_t{ 0 }, a_displayed, a_force);
-			}
-		}
-
-		//---------------------------------------------------
-		//-- Tracker ( Complete Slot Objective ) ------------
-		//---------------------------------------------------
-
-		void CompleteSlotObjective(std::int32_t a_slot) {
-
-			if (SlotQuest(a_slot)) {
-				CForms::Call(SlotScript(a_slot), "SetObjectiveCompleted"sv, std::int32_t{ 0 }, true);
-			}
-		}
-
-		//---------------------------------------------------
 		//-- Tracker ( Slot Objective ) ---------------------
 		//---------------------------------------------------
 
@@ -256,21 +234,44 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Tracker ( Restore Slot Objective ) -------------
+		//-- Tracker ( Announce ) ---------------------------
 		//---------------------------------------------------
 
-		// Restore without the objective added message
-		void RestoreSlotObjective(std::int32_t a_slot, RE::TESObjectREFR* a_ref, bool a_active) {
+		// The game's "objective added", with its sound: only when something is first tracked
+		void Announce(std::int32_t a_slot) {
+
+			if (SlotQuest(a_slot)) {
+				CForms::Call(SlotScript(a_slot), "SetObjectiveDisplayed"sv, std::int32_t{ 0 }, true, true);
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Tracker ( Complete ) ---------------------------
+		//---------------------------------------------------
+
+		// The game's "objective completed", then off the journal. Both by script, so they run in order
+		void Complete(std::int32_t a_slot) {
+
+			if (SlotQuest(a_slot)) {
+				CForms::Call(SlotScript(a_slot), "SetObjectiveCompleted"sv, std::int32_t{ 0 }, true);
+				CForms::Call(SlotScript(a_slot), "SetObjectiveDisplayed"sv, std::int32_t{ 0 }, false, false);
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Tracker ( Show Quietly ) -----------------------
+		//---------------------------------------------------
+
+		// In the journal and on the compass straight away, with nothing said: after loads, saves
+		// and doors, and when a marker moves
+		void ShowQuietly(std::int32_t a_slot, bool a_active) {
 
 			auto* quest = SlotQuest(a_slot);
 			auto* objective = SlotObjective(a_slot);
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!quest || !objective || !player) {
-				INFO("Tracker: can't restore slot {} (quest {}, objective {})", a_slot, quest != nullptr, objective != nullptr);
+				INFO("Tracker: can't show slot {} (quest {}, objective {})", a_slot, quest != nullptr, objective != nullptr);
 				return;
-			}
-			if (a_ref) {
-				quest->ForceRefIntoAlias(0, a_ref);
 			}
 			if (a_active) {
 				quest->data.flags.set(RE::QuestFlag::kActive);
@@ -293,20 +294,49 @@ namespace CompletionistUI
 				}
 				targets.insert({ quest, list });
 			}
-			const auto aliased = quest->GetAliasedRef(0).get();
-			INFO("Tracker: restored slot {} quietly (quest {:08X} flags {:04X}, running {}, alias on {:08X}, {} compass targets)", a_slot, quest->GetFormID(),
-				quest->data.flags.underlying(), quest->IsRunning(), aliased ? aliased->GetFormID() : 0, targets.size());
 		}
 
 		//---------------------------------------------------
-		//-- Tracker ( Clear Slot Alias ) -------------------
+		//-- Tracker ( Hide Quietly ) -----------------------
 		//---------------------------------------------------
 
-		void ClearSlotAlias(std::int32_t a_slot) {
+		// Off the journal and the compass straight away, with nothing said
+		void HideQuietly(RE::TESQuest* a_quest) {
 
-			if (auto* alias = SlotAlias(a_slot)) {
-				CForms::Call(CForms::NativeObject(CForms::HandleFor(alias), "ReferenceAlias"), "Clear"sv);
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!a_quest || !player) {
+				return;
 			}
+			auto& objectives = player->GetPlayerRuntimeData().objectives;
+			for (auto it = objectives.begin(); it != objectives.end();) {
+				it = it->Objective && it->Objective->ownerQuest == a_quest ? objectives.erase(it) : std::next(it);
+			}
+			for (auto* objective : a_quest->objectives) {
+				if (objective) {
+					objective->state = RE::QUEST_OBJECTIVE_STATE::kDormant;
+				}
+			}
+			RE::BSSpinLockGuard lock(player->GetQuestTargetsLock());
+			auto& targets = player->GetQuestTargets();
+			if (const auto it = targets.find(a_quest); it != targets.end()) {
+				auto* list = it->second;
+				targets.erase(it);
+				if (list) {
+					std::destroy_at(list);
+					RE::free(list);
+				}
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Tracker ( Is Active ) --------------------------
+		//---------------------------------------------------
+
+		// Whether the player has made it the active quest in the journal
+		bool IsActive(std::int32_t a_slot, bool a_otherwise) {
+
+			const auto* quest = a_slot >= 0 ? slotQuests[static_cast<std::size_t>(a_slot)] : nullptr;
+			return quest ? quest->data.flags.any(RE::QuestFlag::kActive) : a_otherwise;
 		}
 
 		//---------------------------------------------------
@@ -396,17 +426,22 @@ namespace CompletionistUI
 		//-- Tracker ( Fill Slot ) --------------------------
 		//---------------------------------------------------
 
+		// Announced only when it's first tracked: moving it, and putting it back after a load, is quiet
 		void FillSlot(const Slotted& a_item, RE::TESObjectREFR* a_ref, bool a_announce) {
 
+			auto* quest = SlotQuest(a_item.slot);
+			if (!quest) {
+				return;
+			}
 			if (auto* objective = SlotObjective(a_item.slot); objective && SettingsPages::translate) {
 				objective->displayText = ObjectiveText(a_item, a_ref);
 			}
-			CForms::Call(CForms::NativeObject(CForms::HandleFor(SlotAlias(a_item.slot)), "ReferenceAlias"), "ForceRefTo"sv, a_ref);
+			quest->ForceRefIntoAlias(0, a_ref);
 			if (ShowsObjective(a_item)) {
 				if (a_announce) {
-					ShowSlotObjective(a_item.slot, true, true);
+					Announce(a_item.slot);
 				} else {
-					RestoreSlotObjective(a_item.slot, a_ref, a_item.active);
+					ShowQuietly(a_item.slot, a_item.active);
 				}
 			}
 			if (a_item.Pinned() && SettingOn("bCellScanner_Pinning_Effect")) {
@@ -418,7 +453,9 @@ namespace CompletionistUI
 		//-- Tracker ( Release Slot ) -----------------------
 		//---------------------------------------------------
 
-		void ReleaseSlot(Slotted& a_item) {
+		// Done: the game's "completed". Otherwise just taken off, with nothing said. The alias keeps
+		// its reference until the slot is next filled
+		void ReleaseSlot(Slotted& a_item, bool a_done = false) {
 
 			if (a_item.slot < 0) {
 				return;
@@ -426,8 +463,12 @@ namespace CompletionistUI
 			if (a_item.Pinned()) {
 				StopGlow(SlotReference(a_item.slot));
 			}
-			ShowSlotObjective(a_item.slot, false, false);
-			ClearSlotAlias(a_item.slot);
+			a_item.active = IsActive(a_item.slot, a_item.active);
+			if (a_done) {
+				Complete(a_item.slot);
+			} else {
+				HideQuietly(slotQuests[static_cast<std::size_t>(a_item.slot)]);
+			}
 			a_item.slot = -1;
 		}
 
@@ -435,7 +476,8 @@ namespace CompletionistUI
 		//-- Tracker ( Place Pin ) --------------------------
 		//---------------------------------------------------
 
-		bool PlacePin(Slotted& a_item, bool a_sound) {
+		// a_announce: just pinned. A pin moving on to the one in the next cell carries on quietly
+		bool PlacePin(Slotted& a_item, bool a_announce) {
 
 			auto* form = RE::TESForm::LookupByID(a_item.form);
 			auto* ref = form ? Completionist::CellScanner::GetPinnedReferenceRefr(nullptr, form) : nullptr;
@@ -451,8 +493,8 @@ namespace CompletionistUI
 			a_item.ref = ref->GetFormID();
 			a_item.name = Completionist::CellScanner::GetPinnedReferenceName(nullptr, form);
 			a_item.type = Completionist::CellScanner::GetPinnedReferenceType(nullptr, form);
-			FillSlot(a_item, ref, true);
-			if (a_sound) {
+			FillSlot(a_item, ref, a_announce);
+			if (a_announce) {
 				PlayPinSound(SettingNumber("CellScanner_Pinning_Sound_Choice"));
 			}
 			return true;
@@ -466,10 +508,7 @@ namespace CompletionistUI
 		void Unplace(std::vector<Slotted>::iterator a_item, std::string_view a_why, bool a_done = false) {
 
 			INFO("Tracker: {} {} ({}), slot {}", a_item->Pinned() ? "pin parked" : "marker ended", a_item->name, a_why, a_item->slot);
-			if (a_done && a_item->slot >= 0) {
-				CompleteSlotObjective(a_item->slot);
-			}
-			ReleaseSlot(*a_item);
+			ReleaseSlot(*a_item, a_done);
 			if (!a_item->Pinned()) {
 				Targets().tracked.erase(a_item);
 			}
@@ -513,6 +552,16 @@ namespace CompletionistUI
 		bool Gone(const RE::TESObjectREFR* a_ref) {
 
 			return !a_ref || a_ref->IsDisabled() || a_ref->IsDeleted();
+		}
+
+		//---------------------------------------------------
+		//-- Tracker ( Slot Target ) ------------------------
+		//---------------------------------------------------
+
+		// What its slot points at: a place or NPC by way of the marker near it until its cell loads
+		RE::TESObjectREFR* SlotTarget(const Slotted& a_item) {
+
+			return a_item.Located() ? PlacedReferences::Target(a_item.ref) : RE::TESForm::LookupByID<RE::TESObjectREFR>(a_item.ref);
 		}
 
 		//---------------------------------------------------
@@ -585,10 +634,7 @@ namespace CompletionistUI
 				auto& tracked = Targets().tracked;
 				for (std::size_t i = tracked.size(); i-- > 0;) {
 					if (tracked[i].form == a_event->baseObj) {
-						if (tracked[i].Located() && tracked[i].slot >= 0) {
-							CompleteSlotObjective(tracked[i].slot);
-						}
-						ReleaseSlot(tracked[i]);
+						ReleaseSlot(tracked[i], tracked[i].Located());
 						tracked.erase(tracked.begin() + static_cast<std::ptrdiff_t>(i));
 					}
 				}
@@ -698,7 +744,7 @@ namespace CompletionistUI
 			return;
 		}
 		for (auto& item : Targets().tracked) {
-			if (item.Pinned() && item.slot < 0 && std::ranges::find(a_items, item.form) != a_items.end() && PlacePin(item, true)) {
+			if (item.Pinned() && item.slot < 0 && std::ranges::find(a_items, item.form) != a_items.end() && PlacePin(item, false)) {
 				CFramework_Master::FrameworkAPI::SendNotification(Translate("UI_Cell_PinHere{" + item.name + "}"), "bCellScanner_Pinning_Notify");
 			}
 		}
@@ -712,7 +758,7 @@ namespace CompletionistUI
 
 		for (const auto& item : Targets().tracked) {
 			if (item.Pinned() && item.slot >= 0) {
-				ShowSlotObjective(item.slot, a_shown, a_shown);
+				a_shown ? ShowQuietly(item.slot, item.active) : HideQuietly(slotQuests[static_cast<std::size_t>(item.slot)]);
 			}
 		}
 	}
@@ -874,7 +920,7 @@ namespace CompletionistUI
 			if (tracked[i].slot < 0) {
 				continue;
 			}
-			auto*       ref = tracked[i].Located() ? PlacedReferences::Target(tracked[i].ref) : RE::TESForm::LookupByID<RE::TESObjectREFR>(tracked[i].ref);
+			auto*       ref = SlotTarget(tracked[i]);
 			const auto* cell = ref ? ref->GetParentCell() : nullptr;
 			const bool  back = tracked[i].kind == Kind::kTravel ? ref != nullptr : tracked[i].Located() ? !Gone(ref) : cell && cell->IsAttached();
 			if (back) {
@@ -903,58 +949,29 @@ namespace CompletionistUI
 	//-- Tracker ( Before Save ) ------------------------
 	//---------------------------------------------------
 
+	// The slot quests are made each session, so the save mustn't have the player's objectives on them:
+	// they're taken off for it and put back after as they were, with nothing said
 	void Tracker::BeforeSave() {
 
-		auto* player = RE::PlayerCharacter::GetSingleton();
-		if (!player || std::ranges::none_of(slotQuests, [](const RE::TESQuest* a_quest) { return a_quest != nullptr; })) {
+		std::size_t hidden = 0;
+		for (auto& item : Targets().tracked) {
+			if (auto* quest = item.slot >= 0 ? slotQuests[static_cast<std::size_t>(item.slot)] : nullptr) {
+				item.active = IsActive(item.slot, item.active);
+				HideQuietly(quest);
+				++hidden;
+			}
+		}
+		if (hidden == 0) {
 			return;
 		}
-		const auto ours = [](const RE::TESQuest* a_quest) { return a_quest && std::ranges::find(slotQuests, a_quest) != slotQuests.end(); };
-
-		auto&       objectives = player->GetPlayerRuntimeData().objectives;
-		std::size_t removed = 0;
-		for (auto it = objectives.begin(); it != objectives.end();) {
-			if (it->Objective && ours(it->Objective->ownerQuest)) {
-				it = objectives.erase(it);
-				++removed;
-			} else {
-				++it;
-			}
-		}
-		{
-			RE::BSSpinLockGuard lock(player->GetQuestTargetsLock());
-			auto&               targets = player->GetQuestTargets();
-			for (auto* quest : slotQuests) {
-				if (quest) {
-					targets.erase(quest);
-				}
-			}
-		}
-		// Hidden for the save, shown again after
-		for (auto& item : Targets().tracked) {
-			if (const auto* quest = item.slot >= 0 ? slotQuests[static_cast<std::size_t>(item.slot)] : nullptr) {
-				item.active = quest->data.flags.any(RE::QuestFlag::kActive);
-			}
-		}
-		for (auto* quest : slotQuests) {
-			for (auto* objective : quest ? quest->objectives : RE::BSSimpleList<RE::BGSQuestObjective*>{}) {
-				if (objective) {
-					objective->state = RE::QUEST_OBJECTIVE_STATE::kDormant;
-				}
-			}
-		}
-		INFO("Tracker: before saving, took {} objectives off", removed);
+		INFO("Tracker: {} objectives off for the save", hidden);
 
 		SKSE::GetTaskInterface()->AddTask([]() {
-			for (auto& item : Targets().tracked) {
-				if (item.slot < 0) {
-					continue;
-				}
-				if (auto* ref = RE::TESForm::LookupByID<RE::TESObjectREFR>(item.ref)) {
-					FillSlot(item, ref, false);
+			for (const auto& item : Targets().tracked) {
+				if (item.slot >= 0 && ShowsObjective(item)) {
+					ShowQuietly(item.slot, item.active);
 				}
 			}
-			INFO("Tracker: after saving, slots filled again");
 		});
 	}
 

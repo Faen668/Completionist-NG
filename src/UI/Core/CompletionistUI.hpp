@@ -379,6 +379,7 @@ namespace CompletionistUI
 		bool                  _justOpened{ true };
 		bool                  _focusSidebar{ false };
 		bool                  _focusPage{ false };	// sidebar folded at opening: the page takes the focus
+		bool                  _focusPageShown{ false };	// with the focus box showing, as after switching tabs with the pad
 		std::uint32_t         _revealFocus{ 0 };	// that focus, shown by the first press
 		std::uint32_t         _pendingHidden{ 0 };	// this _pendingFocus goes on without showing the focus box
 		bool                  _focusCellList{ false };
