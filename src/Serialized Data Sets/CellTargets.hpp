@@ -26,7 +26,7 @@ namespace Serialization
 			RE::FormID   form{ 0 };
 			RE::FormID   ref{ 0 };	// item, or the container / NPC holding it
 			std::string  name;
-			std::string  type;
+			std::string  type;	// located from a page: the objective's translation key, when not the usual one
 			Kind         kind{ Kind::kMark };
 			std::int32_t slot{ -1 };	// -1 for a pin not in this cell
 			bool         active{ true };

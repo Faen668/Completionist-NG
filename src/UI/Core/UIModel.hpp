@@ -161,6 +161,8 @@ namespace CompletionistUI
 		bool                    placesKnown{ false };
 		bool                    hasModel{ false };	// an item, which can show a picture of its model
 		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
+		std::string             markerText;	// the location marker's objective, when not "Find {name}"
+		std::string             markerName;	// the name it fills in, when not this entry's
 		EntryTrainer            trainer;
 		EntryDragon             dragon;
 		EntryAchievement        achievement;

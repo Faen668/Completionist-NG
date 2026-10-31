@@ -35,7 +35,8 @@ namespace CompletionistUI
 
 		// NPCs, placed items and map markers from the pages, as many as there are slots
 		[[nodiscard]] static std::vector<RE::FormID> Located();
-		static bool                                  Locate(RE::TESObjectREFR* a_ref, const std::string& a_name, bool a_announce = true);
+		// a_text: the objective's translation key with {} for the name, when not the usual one
+		static bool                                  Locate(RE::TESObjectREFR* a_ref, const std::string& a_name, bool a_announce = true, const std::string& a_text = {});
 		static void                                  Unlocate(RE::FormID a_ref);
 		static void                                  UnlocateAll();
 

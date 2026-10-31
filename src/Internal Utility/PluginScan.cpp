@@ -367,6 +367,9 @@ namespace PluginScan
 		const auto handleRecord = [&](const std::string& a_type, std::uint32_t a_flags, std::uint32_t a_formID, std::span<const std::byte> a_data) {
 			++_result.records;
 			const auto key = keyFor(a_formID);
+			if (!_wanted.empty() && a_type != "CELL" && (!IsPlaced(a_type) || !_wanted.contains(key))) {
+				return;
+			}
 
 			// Compressed: u32 size then zlib, navmesh and land skipped
 			std::vector<std::byte> inflated;
@@ -389,6 +392,7 @@ namespace PluginScan
 			std::string                editorID;
 			std::uint32_t              name = 0, location = 0, parent = 0, refLocation = 0;
 			std::uint8_t               cellFlags = 0;
+			std::array<float, 3>       position{};
 			std::span<const std::byte> vmad;
 			std::vector<std::string>   listEntries;
 
@@ -428,7 +432,18 @@ namespace PluginScan
 					parent = U32(body.data());
 				} else if (type == "DATA" && size >= 1 && a_type == "CELL") {
 					cellFlags = static_cast<std::uint8_t>(body[0]);
+				} else if (type == "DATA" && size >= sizeof(position) && IsPlaced(a_type)) {
+					std::memcpy(position.data(), body.data(), sizeof(position));
 				}
+			}
+
+			if (!_wanted.empty() && a_type == "CELL") {
+				_result.cells[key] = { editorID, keyFor(location), keyFor(enclosing({ worldChildren })), (cellFlags & 1) != 0 };
+				return;
+			}
+			if (!_wanted.empty()) {
+				_result.references[key] = { keyFor(name), keyFor(enclosing({ cellChildren, cellPersistent, cellTemporary, cellDistant })), keyFor(enclosing({ worldChildren })), position, std::string(a_name), (a_flags & recordDeleted) != 0 };
+				return;
 			}
 
 			if (a_type == "WOOP") {
@@ -482,6 +497,11 @@ namespace PluginScan
 					}
 					std::int32_t groupType;
 					std::memcpy(&groupType, header + 12, sizeof(groupType));
+					// References only live under cells and worldspaces
+					if (!_wanted.empty() && groupType == 0 && FourCC(header + 8) != "CELL" && FourCC(header + 8) != "WRLD") {
+						pos += size;
+						continue;
+					}
 					groups.push_back({ groupType, U32(header + 8) });
 					a_self(a_self, pos + 24, pos + size);
 					groups.pop_back();

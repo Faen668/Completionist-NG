@@ -10,6 +10,7 @@
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/MCMHandler.hpp"
 #include "Internal Utility/PatchListener.hpp"
+#include "Internal Utility/PlacedReferences.hpp"
 #include "Internal Utility/Settings.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Internal Utility/WordsOfPower.hpp"
@@ -118,6 +119,52 @@ namespace CompletionistUI
 				return;
 			}
 			a_entry.canMark = !a_entry.IsComplete() && ref->GetParentCell() && !ref->IsDisabled() && !ref->IsDeleted();
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Is Fishing Spot ) ------------------
+		//---------------------------------------------------
+
+		// Placed from one of the Fishing Creation's four fishing spots, by it or any other mod
+		bool IsFishingSpot(const RE::TESForm* a_form) {
+
+			static const std::array<RE::FormID, 4> spots = [] {
+				auto* handler = RE::TESDataHandler::GetSingleton();
+				std::array<RE::FormID, 4> ids{};
+				const std::array<RE::FormID, 4> local{ 0x00089F, 0x0008A6, 0x0008D0, 0x0008D1 };	// stream, lake, arctic, cave
+				for (std::size_t i = 0; handler && i < local.size(); ++i) {
+					ids[i] = handler->LookupFormID(local[i], "ccBGSSSE001-Fish.esm");
+				}
+				return ids;
+			}();
+			const auto* ref = a_form ? a_form->As<RE::TESObjectREFR>() : nullptr;
+			const auto* base = ref ? ref->data.objectReference : nullptr;
+			return base && std::ranges::find(spots, base->GetFormID()) != spots.end();
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Trim ) -----------------------------
+		//---------------------------------------------------
+
+		std::string Trim(const std::string& a_text) {
+
+			const auto first = a_text.find_first_not_of(" \t\r\n");
+			const auto last = a_text.find_last_not_of(" \t\r\n");
+			return first == std::string::npos ? std::string{} : a_text.substr(first, last - first + 1);
+		}
+
+		//---------------------------------------------------
+		//-- Game Data ( Place Of ) -------------------------
+		//---------------------------------------------------
+
+		// Where a placed reference is, as its plugin has it
+		std::string PlaceOf(RE::TESObjectREFR* a_ref) {
+
+			if (PlacedReferences::Find(a_ref->GetFormID())) {
+				return PlacedReferences::PlaceName(a_ref->GetFormID());
+			}
+			const auto* location = a_ref->GetEditorLocation();
+			return location && location->GetName() ? Trim(location->GetName()) : std::string{};
 		}
 
 		//---------------------------------------------------
@@ -349,6 +396,24 @@ namespace CompletionistUI
 					entry.canToggle = entry.formID != 0 && data.type != CMiscPatchType::kLocations;
 					if (data.type == CMiscPatchType::kLocations) {
 						AddMapMarker(entry, i < data.forms.size() ? data.forms[i] : nullptr, a_provider);
+					} else if (data.type == CMiscPatchType::kInteractableObject && i < data.forms.size() && IsFishingSpot(data.forms[i]) && entry.formID) {
+						// "Find the fishing spot in Riverwood"; a spot named only "Fishing Spot" goes by its place
+						auto*      ref = data.forms[i]->As<RE::TESObjectREFR>();
+						const auto name = Trim(entry.name);
+						const auto place = name == Trim(ref->data.objectReference->GetName()) ? PlaceOf(ref) : name;
+						if (!place.empty()) {
+							entry.markerText = "UI_Track_FishingSpot";
+							entry.markerName = place;
+						}
+						// Temporary references are tracked by way of a marker near them, loaded ones directly
+						const bool  standIn = PlacedReferences::Find(entry.formID) != nullptr;
+						const char* why = entry.IsComplete() ? "found" :
+						                  standIn            ? (PlacedReferences::Trackable(entry.formID) ? nullptr : "nothing near it to point at") :
+						                  ref->IsDisabled() || ref->IsDeleted() ? "disabled" : nullptr;
+						entry.canMark = why == nullptr;
+						if (static std::set<RE::FormID> logged; why && logged.insert(entry.formID).second) {
+							INFO("Fishing spot {:08X} ({}): no location marker, {}", entry.formID, name, why);
+						}
 					}
 					if (i < data.texts.size() && !data.texts[i].empty() && data.texts[i] != "NO_HIGHLIGHT") {
 						entry.description = a_provider.Translate(data.texts[i]);
@@ -1796,7 +1861,7 @@ namespace CompletionistUI
 				}
 			}
 			SKSE::GetTaskInterface()->AddTask([this, id = a_entry.frameworkID, formID = a_entry.formID, a_completed]() {
-				CFramework_Master::FrameworkAPI::SetOptionCompleted(id, RE::TESForm::LookupByID(formID), a_completed);
+				CFramework_Master::FrameworkAPI::SetOptionCompleted(id, PlacedReferences::Lookup(formID), a_completed);
 				Rebuild();
 			});
 			return;
@@ -2440,8 +2505,9 @@ namespace CompletionistUI
 				_pins.located.push_back(a_entry.MarkerID());
 			}
 		}
-		SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.MarkerID(), name = a_entry.name]() {
-			Tracker::Locate(RE::TESForm::LookupByID<RE::TESObjectREFR>(formID), name);
+		SKSE::GetTaskInterface()->AddTask([this, formID = a_entry.MarkerID(), name = a_entry.markerName.empty() ? Trim(a_entry.name) : a_entry.markerName, text = a_entry.markerText]() {
+			auto* form = PlacedReferences::Lookup(formID);
+			Tracker::Locate(form ? form->As<RE::TESObjectREFR>() : nullptr, name, true, text);
 			RebuildPins();
 		});
 	}

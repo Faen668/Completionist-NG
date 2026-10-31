@@ -86,6 +86,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 
 		CEvents::EventHandler::Register();
 		CVariables::VariablesAPI::Register();
+		CVariables::VariablesAPI::Update();	// coc from the main menu sends no new game or load message
 		CLocalisation::LocalisationAPI::Register();
 
 		Completionist_MainHUD::TextnTagsAPI::Register();
