@@ -272,6 +272,60 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Themes ( Imperial Palette ) --------------------
+		//---------------------------------------------------
+
+		// The Imperial City: dark marble, ivory headings, polished bronze, Legion crimson for found
+		Palette ImperialPalette() {
+
+			return {
+				.background = RGBA(18, 16, 15, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(232, 226, 214),
+				.textDim = RGBA(142, 134, 124),
+				.accent = RGBA(198, 142, 84),
+				.heading = RGBA(240, 234, 220),
+				.count = RGBA(180, 170, 156),
+				.bar = RGBA(156, 38, 44),
+				.found = RGBA(222, 76, 70),
+				.needed = RGBA(232, 226, 214),
+				.displayable = RGBA(130, 176, 200),
+				.occupied = RGBA(176, 140, 190),
+				.barBackground = RGBA(42, 36, 34),
+				.separator = RGBA(98, 84, 70),
+				.pinned = RGBA(124, 170, 210),
+				.stealing = RGBA(236, 150, 90),
+			};
+		}
+
+		//---------------------------------------------------
+		//-- Themes ( Redguard Palette ) --------------------
+		//---------------------------------------------------
+
+		// Hammerfell: warm plaster, sand headings, terracotta and brass, turquoise tile for found
+		Palette RedguardPalette() {
+
+			return {
+				.background = RGBA(26, 16, 12, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(234, 222, 200),
+				.textDim = RGBA(150, 132, 110),
+				.accent = RGBA(214, 154, 92),
+				.heading = RGBA(238, 208, 152),
+				.count = RGBA(190, 168, 134),
+				.bar = RGBA(184, 100, 56),
+				.found = RGBA(90, 194, 184),
+				.needed = RGBA(234, 222, 200),
+				.displayable = RGBA(150, 180, 220),
+				.occupied = RGBA(190, 140, 180),
+				.barBackground = RGBA(50, 34, 26),
+				.separator = RGBA(110, 84, 60),
+				.pinned = RGBA(130, 166, 220),
+				.stealing = RGBA(232, 108, 120),
+			};
+		}
+
+		//---------------------------------------------------
 		//-- Themes ( Khajiit Palette ) ---------------------
 		//---------------------------------------------------
 
@@ -505,6 +559,12 @@ namespace CompletionistUI
 			break;
 		case Theme::kBreton:
 			_palette = BretonPalette();
+			break;
+		case Theme::kImperial:
+			_palette = ImperialPalette();
+			break;
+		case Theme::kRedguard:
+			_palette = RedguardPalette();
 			break;
 		case Theme::kNord:
 			_palette = NordPalette();

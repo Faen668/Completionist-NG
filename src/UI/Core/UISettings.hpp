@@ -20,6 +20,8 @@ namespace CompletionistUI
 		kDwemer,
 		kOrsimer,
 		kBreton,
+		kImperial,
+		kRedguard,
 	};
 
 	// Button names for each pad, same buttons through XInput

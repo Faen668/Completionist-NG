@@ -8,10 +8,12 @@
 #include "UI/Themes/DunmerDecor.hpp"
 #include "UI/Themes/BretonDecor.hpp"
 #include "UI/Themes/DwemerDecor.hpp"
+#include "UI/Themes/ImperialDecor.hpp"
 #include "UI/Themes/KhajiitDecor.hpp"
 #include "UI/Themes/NordDecor.hpp"
 #include "UI/Themes/NordicDecor.hpp"
 #include "UI/Themes/OrsimerDecor.hpp"
+#include "UI/Themes/RedguardDecor.hpp"
 #include "UI/Themes/SkyUIDecor.hpp"
 
 #include <algorithm>
@@ -71,6 +73,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kBreton:
 			BretonDecor::Lozenge(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kImperial:
+			ImperialDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Tile(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Crescent(a_drawList, a_centre, a_radius, a_colour, a_filled);
@@ -133,6 +141,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kBreton:
 			BretonDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kImperial:
+			ImperialDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Phase(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -210,6 +224,12 @@ namespace CompletionistUI
 		case Theme::kBreton:
 			BretonDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kImperial:
+			ImperialDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
@@ -273,6 +293,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kBreton:
 			BretonDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kImperial:
+			ImperialDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
@@ -348,6 +374,12 @@ namespace CompletionistUI
 		case Theme::kBreton:
 			BretonDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
 			return;
+		case Theme::kImperial:
+			ImperialDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
 			return;
@@ -420,6 +452,12 @@ namespace CompletionistUI
 		case Theme::kBreton:
 			BretonDecor::Rose(a_drawList, a_centre, a_radius * 1.2f, a_colour, true);
 			return;
+		case Theme::kImperial:
+			ImperialDecor::Stud(a_drawList, a_centre, a_radius * 1.1f, a_colour, true);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Star(a_drawList, a_centre, a_radius * 1.2f, a_colour, true);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::TwinMoons(a_drawList, a_centre, a_radius * 1.7f);
 			return;
@@ -470,6 +508,12 @@ namespace CompletionistUI
 		case Theme::kBreton:
 			BretonDecor::Came(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
+		case Theme::kImperial:
+			ImperialDecor::Garland(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Carving(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
@@ -519,6 +563,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kBreton:
 			BretonDecor::Came(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kImperial:
+			ImperialDecor::Garland(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Carving(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
@@ -578,6 +628,12 @@ namespace CompletionistUI
 		case Theme::kBreton:
 			BretonDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kImperial:
+			ImperialDecor::Frame(a_drawList, a_min, a_max);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Frame(a_drawList, a_min, a_max);
 			return;
@@ -627,6 +683,8 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 		case Theme::kOrsimer:
 		case Theme::kBreton:
+		case Theme::kImperial:
+		case Theme::kRedguard:
 		case Theme::kKhajiit:
 		case Theme::kAltmer:
 		case Theme::kNord:
@@ -660,6 +718,12 @@ namespace CompletionistUI
 			return true;
 		case Theme::kBreton:
 			BretonDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kImperial:
+			ImperialDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kRedguard:
+			RedguardDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
 		case Theme::kKhajiit:
 			KhajiitDecor::Panel(a_drawList, a_min, a_max, a_emblem);
@@ -705,6 +769,12 @@ namespace CompletionistUI
 			return;
 		case Theme::kBreton:
 			BretonDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kImperial:
+			ImperialDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kRedguard:
+			RedguardDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PanelCorners(a_drawList, a_min, a_max);
