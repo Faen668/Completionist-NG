@@ -36,6 +36,7 @@ namespace CompletionistUI
 		[[nodiscard]] static bool Argonian() noexcept { return _theme == Theme::kArgonian; }
 		[[nodiscard]] static bool Khajiit() noexcept { return _theme == Theme::kKhajiit; }
 		[[nodiscard]] static bool Dunmer() noexcept { return _theme == Theme::kDunmer; }
+		[[nodiscard]] static bool Dwemer() noexcept { return _theme == Theme::kDwemer; }
 		[[nodiscard]] static bool Nord() noexcept { return _theme == Theme::kNord; }
 		[[nodiscard]] static bool Altmer() noexcept { return _theme == Theme::kAltmer; }
 		[[nodiscard]] static bool DearDiary() noexcept { return _theme == Theme::kDearDiary; }

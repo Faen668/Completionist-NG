@@ -46,6 +46,7 @@ namespace CompletionistUI
 		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian", true },
 		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer", true },
 		{ Theme::kDunmer, "Dunmer", "UI_Theme_Dunmer", true },
+		{ Theme::kDwemer, "Dwemer", "UI_Theme_Dwemer", true },
 		{ Theme::kKhajiit, "Khajiit", "UI_Theme_Khajiit", true },
 		{ Theme::kNord, "Nord", "UI_Theme_Nord", true },
 	};

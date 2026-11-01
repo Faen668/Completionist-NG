@@ -6,6 +6,7 @@
 #include "UI/Themes/DearDiaryDecor.hpp"
 #include "UI/Themes/DecorDraw.hpp"
 #include "UI/Themes/DunmerDecor.hpp"
+#include "UI/Themes/DwemerDecor.hpp"
 #include "UI/Themes/KhajiitDecor.hpp"
 #include "UI/Themes/NordDecor.hpp"
 #include "UI/Themes/NordicDecor.hpp"
@@ -60,6 +61,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::Flame(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Crescent(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
@@ -112,6 +116,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDunmer:
 			DunmerDecor::Ember(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kDwemer:
+			DwemerDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Phase(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -180,6 +187,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
@@ -234,6 +244,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDunmer:
 			DunmerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kDwemer:
+			DwemerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
@@ -300,6 +313,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::Divider(a_drawList, a_from, a_to, Accent());
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Divider(a_drawList, a_from, a_to, Accent(0.8f));
 			return;
@@ -363,6 +379,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::Triangle(a_drawList, a_centre, a_radius * 1.6f, a_colour);
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::Cog(a_drawList, a_centre, a_radius * 1.25f, a_colour, true);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::TwinMoons(a_drawList, a_centre, a_radius * 1.7f);
 			return;
@@ -404,6 +423,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::Lava(a_drawList, a_from, a_to, Accent(), size * 0.6f);
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::Inlay(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
@@ -444,6 +466,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDunmer:
 			DunmerDecor::Lava(a_drawList, a_from, a_to, a_ornament, size * 0.5f);
+			return;
+		case Theme::kDwemer:
+			DwemerDecor::Inlay(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
@@ -494,6 +519,9 @@ namespace CompletionistUI
 		case Theme::kDunmer:
 			DunmerDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kDwemer:
+			DwemerDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Frame(a_drawList, a_min, a_max);
 			return;
@@ -540,6 +568,7 @@ namespace CompletionistUI
 			return size * 0.5f;
 		case Theme::kArgonian:
 		case Theme::kDunmer:
+		case Theme::kDwemer:
 		case Theme::kKhajiit:
 		case Theme::kAltmer:
 		case Theme::kNord:
@@ -564,6 +593,9 @@ namespace CompletionistUI
 			return true;
 		case Theme::kDunmer:
 			DunmerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kDwemer:
+			DwemerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
 		case Theme::kKhajiit:
 			KhajiitDecor::Panel(a_drawList, a_min, a_max, a_emblem);
@@ -600,6 +632,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDunmer:
 			DunmerDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kDwemer:
+			DwemerDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::PanelCorners(a_drawList, a_min, a_max);

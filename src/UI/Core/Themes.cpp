@@ -191,6 +191,33 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Themes ( Dwemer Palette ) ----------------------
+		//---------------------------------------------------
+
+		// A Dwemer hall: cold grey stone, bone text, worked gold for headings and found
+		Palette DwemerPalette() {
+
+			return {
+				.background = RGBA(19, 20, 21, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(228, 222, 208),
+				.textDim = RGBA(138, 136, 130),
+				.accent = RGBA(212, 166, 68),
+				.heading = RGBA(234, 194, 106),
+				.count = RGBA(174, 170, 160),
+				.bar = RGBA(196, 150, 58),
+				.found = RGBA(244, 204, 112),
+				.needed = RGBA(228, 222, 208),
+				.displayable = RGBA(128, 174, 200),
+				.occupied = RGBA(176, 136, 184),
+				.barBackground = RGBA(40, 40, 42),
+				.separator = RGBA(88, 86, 80),
+				.pinned = RGBA(124, 170, 210),
+				.stealing = RGBA(232, 112, 122),
+			};
+		}
+
+		//---------------------------------------------------
 		//-- Themes ( Khajiit Palette ) ---------------------
 		//---------------------------------------------------
 
@@ -415,6 +442,9 @@ namespace CompletionistUI
 			break;
 		case Theme::kDunmer:
 			_palette = DunmerPalette();
+			break;
+		case Theme::kDwemer:
+			_palette = DwemerPalette();
 			break;
 		case Theme::kNord:
 			_palette = NordPalette();

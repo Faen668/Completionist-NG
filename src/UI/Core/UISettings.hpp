@@ -17,6 +17,7 @@ namespace CompletionistUI
 		kAltmer,
 		kDearDiary,
 		kNordic,
+		kDwemer,
 	};
 
 	// Button names for each pad, same buttons through XInput
