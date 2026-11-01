@@ -310,22 +310,17 @@ namespace CompletionistUI::DearDiaryDecor
 	//-- Dear Diary Decor ( Glow Bar ) ------------------
 	//---------------------------------------------------
 
-	// The chosen row: a fine light outline with a pointed right end, a red arrow at the left
+	// The chosen row: a red glow rising out of the shadow, brightest at the left, with a fine red edge
 	void GlowBar(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, ImU32 a_colour, float a_alpha) {
 
-		const float height = a_max.y - a_min.y;
-		const float point = std::min(height * 0.45f, (a_max.x - a_min.x) * 0.1f);
 		const float midY = (a_min.y + a_max.y) * 0.5f;
-		const ImVec2 outline[5] = { a_min, ImVec2(a_max.x - point, a_min.y), ImVec2(a_max.x, midY), ImVec2(a_max.x - point, a_max.y), ImVec2(a_min.x, a_max.y) };
-		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_max.x - point, a_max.y), WithAlpha(silver, 0.12f * a_alpha), WithAlpha(silver, 0.04f * a_alpha), WithAlpha(silver, 0.04f * a_alpha), WithAlpha(silver, 0.12f * a_alpha));
-		a_drawList->AddPolyline(outline, 5, WithAlpha(IM_COL32(222, 218, 210, 255), 0.75f * a_alpha), ImDrawFlags_Closed, 1.0f);
-		// Red chevron in the left margin, as on the menus' chosen line
-		const float  arrow = std::min(height * 0.28f, ImGui::GetFontSize() * 0.3f);
-		const ImVec2 tip(a_min.x + arrow * 1.1f, midY);
-		for (const float back : { 0.0f, arrow * 0.6f }) {
-			const ImVec2 chevron[3] = { ImVec2(tip.x - arrow - back, midY - arrow), ImVec2(tip.x - back, midY), ImVec2(tip.x - arrow - back, midY + arrow) };
-			a_drawList->AddPolyline(chevron, 3, WithAlpha(back == 0.0f ? bloodLight : blood, a_alpha), ImDrawFlags_None, std::max(1.5f, arrow * 0.35f));
-		}
+		const ImU32 glow = WithAlpha(blood, 0.55f * a_alpha);
+		const ImU32 none = WithAlpha(blood, 0.0f);
+		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_max.x, midY), none, none, none, glow);
+		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, midY), a_max, glow, none, none, none);
+		const ImU32 edge = WithAlpha(bloodLight, 0.8f * a_alpha);
+		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_min.x + 2.0f, midY), none, none, edge, edge);
+		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, midY), ImVec2(a_min.x + 2.0f, a_max.y), edge, edge, none, none);
 		(void)a_colour;
 	}
 
