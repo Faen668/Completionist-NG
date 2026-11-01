@@ -45,10 +45,12 @@ namespace CompletionistUI
 		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer", true },
 		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian", true },
 		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer", true },
+		{ Theme::kBreton, "Breton", "UI_Theme_Breton", true },
 		{ Theme::kDunmer, "Dunmer", "UI_Theme_Dunmer", true },
 		{ Theme::kDwemer, "Dwemer", "UI_Theme_Dwemer", true },
 		{ Theme::kKhajiit, "Khajiit", "UI_Theme_Khajiit", true },
 		{ Theme::kNord, "Nord", "UI_Theme_Nord", true },
+		{ Theme::kOrsimer, "Orsimer", "UI_Theme_Orsimer", true },
 	};
 
 	struct FontPaths

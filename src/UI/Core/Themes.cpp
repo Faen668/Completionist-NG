@@ -218,6 +218,60 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Themes ( Orsimer Palette ) ---------------------
+		//---------------------------------------------------
+
+		// An Orc stronghold: blackened iron, bone headings, rust, forge-orange for found
+		Palette OrsimerPalette() {
+
+			return {
+				.background = RGBA(18, 15, 13, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(222, 214, 198),
+				.textDim = RGBA(136, 128, 118),
+				.accent = RGBA(184, 104, 58),
+				.heading = RGBA(230, 214, 180),
+				.count = RGBA(176, 166, 150),
+				.bar = RGBA(164, 88, 46),
+				.found = RGBA(240, 152, 72),
+				.needed = RGBA(222, 214, 198),
+				.displayable = RGBA(130, 172, 196),
+				.occupied = RGBA(172, 132, 176),
+				.barBackground = RGBA(42, 36, 32),
+				.separator = RGBA(92, 80, 70),
+				.pinned = RGBA(124, 170, 210),
+				.stealing = RGBA(232, 112, 122),
+			};
+		}
+
+		//---------------------------------------------------
+		//-- Themes ( Breton Palette ) ----------------------
+		//---------------------------------------------------
+
+		// A High Rock manor: wine tapestry, silver headings and edges, heraldic rose for found
+		Palette BretonPalette() {
+
+			return {
+				.background = RGBA(20, 15, 18, 0.95f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(230, 224, 224),
+				.textDim = RGBA(146, 136, 140),
+				.accent = RGBA(192, 196, 206),
+				.heading = RGBA(226, 230, 238),
+				.count = RGBA(180, 172, 176),
+				.bar = RGBA(168, 66, 94),
+				.found = RGBA(230, 128, 154),
+				.needed = RGBA(230, 224, 224),
+				.displayable = RGBA(130, 180, 170),
+				.occupied = RGBA(186, 150, 210),
+				.barBackground = RGBA(44, 34, 40),
+				.separator = RGBA(96, 82, 90),
+				.pinned = RGBA(124, 170, 210),
+				.stealing = RGBA(236, 144, 84),
+			};
+		}
+
+		//---------------------------------------------------
 		//-- Themes ( Khajiit Palette ) ---------------------
 		//---------------------------------------------------
 
@@ -445,6 +499,12 @@ namespace CompletionistUI
 			break;
 		case Theme::kDwemer:
 			_palette = DwemerPalette();
+			break;
+		case Theme::kOrsimer:
+			_palette = OrsimerPalette();
+			break;
+		case Theme::kBreton:
+			_palette = BretonPalette();
 			break;
 		case Theme::kNord:
 			_palette = NordPalette();

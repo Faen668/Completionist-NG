@@ -121,6 +121,10 @@ namespace CompletionistUI
 			if (a_theme == Theme::kDwemer) {
 				return { folder + "AlegreyaSans-Regular.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "EBGaramond.ttf" };
 			}
+			// A manor's book hand for the headings
+			if (a_theme == Theme::kBreton) {
+				return { folder + "AlegreyaSans-Regular.ttf", {}, folder + "EBGaramond.ttf", folder + "EBGaramond.ttf", folder + "Cinzel.ttf" };
+			}
 			// Nordic UI's carved capitals for the headings, a book serif for the text
 			if (a_theme == Theme::kNordic) {
 				return { folder + "EBGaramond.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf" };
