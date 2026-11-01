@@ -50,7 +50,6 @@ namespace CSettings
 			{ "AchievementsMissable", Type::kBool, "true" },
 
 			// Ingredients
-			{ "IngredientsShow", Type::kBool, "true" },
 			{ "IngredientsNameUnknown", Type::kBool, "false" },
 
 			// UI Settings
@@ -157,7 +156,6 @@ namespace CSettings
 			{ "bCellScanner_Pinning_Enabled", Type::kBool, "true" },
 			{ "bCellScanner_Pinning_Marker", Type::kBool, "true" },
 			{ "bCellScanner_Pinning_Effect", Type::kBool, "true" },
-			{ "bCellScanner_Pinning_Notify", Type::kBool, "true" },
 			{ "CellScanner_Pinning_Sound_Choice", Type::kInt, "0" },
 		};
 

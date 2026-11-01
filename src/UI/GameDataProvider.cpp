@@ -1233,7 +1233,7 @@ namespace CompletionistUI
 			};
 
 			Page page{ "ingredients", "UI_Ingredients", {} };
-			if (!setting("IngredientsShow", true) || Ingredients.empty()) {
+			if (Ingredients.empty()) {
 				return page;
 			}
 			const bool named = setting("IngredientsNameUnknown", false);

@@ -67,7 +67,6 @@ namespace CompletionistUI
 			std::atomic<std::uint32_t>                     cellPadModifier{ 0 };
 			std::atomic<bool>                              cellPanel{ false };
 			Toasts                                         toasts;
-			std::atomic<bool>                              toastsOn{ false };
 			std::atomic<bool>                              journalEntry{ true };
 			double                                         toastClock{ 0.0 };
 			std::atomic<std::int32_t>                      requestedView{ -1 };	// -1 none, 0 main, 1 cell
@@ -741,11 +740,7 @@ namespace CompletionistUI
 			a_state.cellPadButton = a_state.settings.cellPadButton;
 			a_state.cellPadModifier = a_state.settings.cellPadModifier;
 			a_state.cellPanel = a_state.settings.cellPanel;
-			a_state.toastsOn = a_state.settings.toasts;
 			a_state.journalEntry = a_state.settings.journalEntry;
-			if (!a_state.settings.toasts) {
-				a_state.toasts.Clear();
-			}
 			if (a_state.settings.cellKey != a_state.namedCellKey) {
 				a_state.settings.cellKeyName = KeyName(a_state.settings.cellKey);
 				a_state.namedCellKey = a_state.settings.cellKey;
@@ -829,7 +824,7 @@ namespace CompletionistUI
 				const auto waiting = a_state.toasts.Waiting();
 				// Joined to the panel they sit in its frame; with the panel off, back where they were placed
 				if (a_state.cellPanel) {
-					const auto join = a_state.toastsOn ? a_state.settings.toastJoin : ToastJoin::kNone;
+					const auto join = a_state.settings.toastJoin;
 					const auto panel = a_state.menu.DrawCellPanel(a_state.provider, a_state.settings, join, a_state.toasts.StackSize(waiting > 0));
 					if (join != ToastJoin::kNone) {
 						options.docked = true;
@@ -870,7 +865,7 @@ namespace CompletionistUI
 					message += " " + a_state.provider.Translate("UI_ScreenshotCopied");
 				}
 				if (a_overlay) {
-					SKSE::GetTaskInterface()->AddTask([message]() { RE::SendHUDMessage::ShowHUDMessage(message.c_str()); });
+					a_state.toasts.Push({}, message, ToastKind::kInfo);
 				} else {
 					a_state.menu.ShowStatus(message);
 				}
@@ -911,7 +906,6 @@ namespace CompletionistUI
 		state.cellPadButton = state.settings.cellPadButton;
 		state.cellPadModifier = state.settings.cellPadModifier;
 		state.cellPanel = state.settings.cellPanel;
-		state.toastsOn = state.settings.toasts;
 		state.journalEntry = state.settings.journalEntry;
 
 		IMGUI_CHECKVERSION();
@@ -1079,7 +1073,7 @@ namespace CompletionistUI
 		_OnPresent(a_arg);
 
 		auto& state = GetState();
-		const bool overlay = !state.open && (state.cellPanel || (state.toastsOn && state.toasts.Active())) && OverlayAllowed();
+		const bool overlay = !state.open && (state.cellPanel || state.toasts.Active()) && OverlayAllowed();
 		if (!state.open && !overlay) {
 			state.printScreen = false;
 			return;
@@ -1090,15 +1084,6 @@ namespace CompletionistUI
 		}
 
 		RenderFrame(state, overlay);
-	}
-
-	//---------------------------------------------------
-	//-- Game UI ( Notifications Enabled ) --------------
-	//---------------------------------------------------
-
-	bool GameUI::NotificationsEnabled() noexcept {
-
-		return GetState().toastsOn;
 	}
 
 	//---------------------------------------------------

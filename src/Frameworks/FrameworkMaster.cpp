@@ -349,9 +349,8 @@ namespace CFramework_Master
 	namespace
 	{
 		// Own notification stack, "Title - Item" on two lines
-		bool ShowOwnNotification(std::string_view a_message, std::string_view a_setting, std::string_view a_colour) {
+		void ShowOwnNotification(std::string_view a_message, std::string_view a_setting, std::string_view a_colour) {
 
-			if (!CompletionistUI::GameUI::NotificationsEnabled()) { return false; }
 			std::string           text(a_message);
 			constexpr std::string_view prefix = "Completionist: ";
 			if (text.starts_with(prefix)) {
@@ -374,7 +373,6 @@ namespace CFramework_Master
 				colour = ImVec4(static_cast<float>((value >> 16) & 0xFF) / 255.0f, static_cast<float>((value >> 8) & 0xFF) / 255.0f, static_cast<float>(value & 0xFF) / 255.0f, 1.0f);
 			}
 			CompletionistUI::GameUI::Notify(std::move(label), std::move(text), kind, colour);
-			return true;
 		}
 	}
 
@@ -385,11 +383,7 @@ namespace CFramework_Master
 		auto* colour = VariablesAPI::GetProperty("ColourString");
 		auto* colourEnabled = VariablesAPI::GetProperty("NotificationColourEnabled");
 		const bool coloured = colour && colourEnabled && colourEnabled->GetBool();
-		if (ShowOwnNotification(a_msg, a_setting, coloured ? std::string_view(colour->GetString()) : std::string_view{})) { return; }
-		if (!colour || !colourEnabled || !colourEnabled->GetBool()) { RE::SendHUDMessage::ShowHUDMessage(a_msg.c_str()); return; }
-
-		auto message = fmt::format("<font color='{:s}'>{:s}</font>"sv, colour->GetString(), a_msg);
-		RE::SendHUDMessage::ShowHUDMessage(message.c_str());
+		ShowOwnNotification(a_msg, a_setting, coloured ? std::string_view(colour->GetString()) : std::string_view{});
 	}
 
 	//---------------------------------------------------

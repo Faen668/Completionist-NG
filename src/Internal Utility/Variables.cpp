@@ -118,7 +118,8 @@ namespace CVariables
 		settings.cellPanel = flag("CellPanel", "true");
 		settings.cellOptionsOpen = flag("CellOptionsOpen", "true");
 		settings.cellHeight = flag("CellShowHeight", "true");
-		settings.toasts = flag("Notifications", "true");
+		settings.cellX = number("CellPanelX", "1", 0.0f, 1.0f);
+		settings.cellY = number("CellPanelY", "0.14", 0.0f, 1.0f);
 		settings.toastsNewestFirst = flag("NotificationsNewestFirst", "true");
 		settings.toastX = number("NotificationsX", "0", 0.0f, 1.0f);
 		settings.toastY = number("NotificationsY", "0.317", 0.0f, 1.0f);
@@ -174,7 +175,9 @@ namespace CVariables
 		ini.SetValue(section, "CellPanel", a_settings.cellPanel ? "true" : "false");
 		ini.SetValue(section, "CellOptionsOpen", a_settings.cellOptionsOpen ? "true" : "false");
 		ini.SetValue(section, "CellShowHeight", a_settings.cellHeight ? "true" : "false");
-		ini.SetValue(section, "Notifications", a_settings.toasts ? "true" : "false");
+		ini.SetValue(section, "CellPanelX", fmt::format("{:.3f}", a_settings.cellX).c_str());
+		ini.SetValue(section, "CellPanelY", fmt::format("{:.3f}", a_settings.cellY).c_str());
+		ini.Delete(section, "Notifications");
 		ini.SetValue(section, "NotificationsNewestFirst", a_settings.toastsNewestFirst ? "true" : "false");
 		ini.SetValue(section, "NotificationsX", fmt::format("{:.3f}", a_settings.toastX).c_str());
 		ini.SetValue(section, "NotificationsY", fmt::format("{:.3f}", a_settings.toastY).c_str());

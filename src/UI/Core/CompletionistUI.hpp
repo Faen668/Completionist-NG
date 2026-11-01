@@ -76,9 +76,9 @@ namespace CompletionistUI
 
 		// Cell Scanner window
 		void ShowCellView(bool a_cell) noexcept { _cellView = a_cell; }
-		// Notification placement
-		void StartToastPlacement() noexcept { _placingToasts = true; }
-		[[nodiscard]] bool PlacingToasts() const noexcept { return _placingToasts; }
+		// Placing the Cell Scanner panel and the notifications
+		void StartPlacement() noexcept { _placing = true; }
+		[[nodiscard]] bool Placing() const noexcept { return _placing; }
 		void ShowCellOptionsSection(int a_section) noexcept { _cellOptionsSection = a_section; }	// Harness
 		[[nodiscard]] bool CellView() const noexcept { return _cellView; }
 		// On screen panel, no input. With notifications joined it frames them too, a_toasts the stack's size;
@@ -87,6 +87,10 @@ namespace CompletionistUI
 		{
 			ImVec2 min{};	// the panel on its own, unjoined
 			ImVec2 max{};
+			ImVec2 windowMin{};	// where it is now, without joined notifications
+			ImVec2 windowMax{};
+			float  travel{ 0.0f };	// the room it has across, for its placed x
+			float  lowest{ 1.0f };	// the lowest placed y that keeps it on screen
 			ImVec2 dockAt{};	// where the joined notifications go
 			float  dockWidth{ 0.0f };
 			bool   dockUp{ false };
@@ -180,7 +184,7 @@ namespace CompletionistUI
 		void DrawKills(IDataProvider& a_provider, const std::vector<KillRecord>& a_records, bool a_dragons = false);	// dragons: the Dragons page's tab
 		void DrawPinnedBar(IDataProvider& a_provider);
 		bool DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings);	// false when it should close
-		void DrawToastPlacement(IDataProvider& a_provider, UISettings& a_settings);
+		void DrawPlacement(IDataProvider& a_provider, UISettings& a_settings);
 		void DrawCellOptions(IDataProvider& a_provider, UISettings& a_settings);
 		void DrawCellList(IDataProvider& a_provider, const CellScan& a_scan);
 		void TogglePin(IDataProvider& a_provider, const Entry& a_entry);
@@ -367,11 +371,14 @@ namespace CompletionistUI
 		std::string           _selectedPage;
 		std::array<char, 128> _filter{};
 		bool                  _hideCompleted{ false };
-		bool                    _placingToasts{ false };
+		bool                    _placing{ false };
+		bool                    _placePanel{ false };	// the arrow keys move the panel, not the notifications
 		ImVec2                  _placeFrom{};	// for Cancel
+		ImVec2                  _placeCellFrom{};
 		ToastJoin               _placeJoinFrom{ ToastJoin::kNone };
 		bool                    _placeMoving{ false };	// dragged or moved with keys, joins when let go
 		float                   _joinedSize{ 0.0f };	// joined notifications' room in the panel frame, eased
+		float                   _cellFrameHeight{ 0.0f };	// last frame's, to keep it on screen
 		std::unique_ptr<Toasts> _toastSample;
 		SortMode              _sort{ SortMode::kDefault };
 		bool                  _dirty{ true };

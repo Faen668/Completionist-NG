@@ -5,6 +5,7 @@
 #include "Internal Utility/PlacedReferences.hpp"
 #include "Internal Utility/Settings.hpp"
 #include "UI/SettingsPages.hpp"
+#include "UI/GameUI.hpp"
 
 namespace CompletionistUI
 {
@@ -370,7 +371,7 @@ namespace CompletionistUI
 		void NotifySlotsFull() {
 
 			if (const auto text = Translate("UI_Track_Full{" + std::to_string(CForms::TrackerSlots) + "}"); !text.empty()) {
-				RE::SendHUDMessage::ShowHUDMessage(text.c_str());
+				CompletionistUI::GameUI::Notify({}, text, CompletionistUI::ToastKind::kInfo);
 			}
 		}
 
@@ -744,8 +745,8 @@ namespace CompletionistUI
 			return;
 		}
 		for (auto& item : Targets().tracked) {
-			if (item.Pinned() && item.slot < 0 && std::ranges::find(a_items, item.form) != a_items.end() && PlacePin(item, false)) {
-				CFramework_Master::FrameworkAPI::SendNotification(Translate("UI_Cell_PinHere{" + item.name + "}"), "bCellScanner_Pinning_Notify");
+			if (item.Pinned() && item.slot < 0 && std::ranges::find(a_items, item.form) != a_items.end()) {
+				PlacePin(item, false);
 			}
 		}
 	}

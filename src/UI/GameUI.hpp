@@ -21,7 +21,6 @@ namespace CompletionistUI
 		[[nodiscard]] static bool CanOpen();
 		[[nodiscard]] static bool OverlayAllowed();
 
-		[[nodiscard]] static bool NotificationsEnabled() noexcept;
 		[[nodiscard]] static bool JournalEntryShown() noexcept;
 		static void               Notify(std::string a_label, std::string a_text, ToastKind a_kind, std::optional<ImVec4> a_colour = std::nullopt);
 

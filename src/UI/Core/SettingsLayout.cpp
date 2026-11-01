@@ -326,7 +326,6 @@ namespace CompletionistUI
 				Toggle("CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Text", pinning, {}, "pinningEnabled"),
 				Toggle("CellScanner_Setting_Pinning_Marker", "$CellScanner_Setting_Pinning_Marker_Text", "bCellScanner_Pinning_Marker", pinning, "pinningMarker"),
 				Toggle("CellScanner_Setting_Pinning_Effect", "$CellScanner_Setting_Pinning_Effect_Text", "bCellScanner_Pinning_Effect", pinning, "pinningEffect"),
-				Toggle("CellScanner_Setting_Pinning_Notify", "UI_Cell_PinNotify", "bCellScanner_Pinning_Notify", pinning),
 				Choice("State_CellScanner_Pinning_Sound", "UI_Cell_Sound", "CellScanner_Pinning_Sound_Choice", Keys("$CellScannerSoundList", 3), "$CellScanner_Pinning_Sound_Info", pinning),
 				Dynamic("pinnedItem", pinning),
 				Button("CellScanner_Setting_Pinning_ClearPin", "", "UI_Cell_ClearPin", "clearPin", pinning),
@@ -343,7 +342,6 @@ namespace CompletionistUI
 
 			static const std::unordered_map<std::string_view, std::string_view> help{
 			{ "Achievements_Show", "UI_Achievements_SettingShowInfo" },
-			{ "Ingredients_Show", "UI_Ingredients_SettingShowInfo" },
 			{ "Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknownInfo" },
 			{ "Item_Pictures", "UI_ItemPictures_SettingInfo" },
 			{ "Item_PicturesPrepare", "UI_ItemPictures_PrepareInfo" },
@@ -364,7 +362,6 @@ namespace CompletionistUI
 			{ "CellScanner_Setting_Pinning_Effect", "$CellScanner_Setting_Pinning_Effect_Info" },
 			{ "CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Info" },
 			{ "CellScanner_Setting_Pinning_Marker", "$CellScanner_Setting_Pinning_Marker_Info" },
-			{ "CellScanner_Setting_Pinning_Notify", "UI_Cell_PinNotifyInfo" },
 			{ "CellScanner_Setting_Range", "$CellScanner_Setting_Range_Info" },
 			{ "ColourState_Displayable", "$ColourState_Displayable_Info" },
 			{ "ColourState_Displayed", "$ColourState_Displayed_Info" },
@@ -438,17 +435,13 @@ namespace CompletionistUI
 		//-- Settings Layout ( Ingredients Page ) -----------
 		//---------------------------------------------------
 
-		// The page, and whether effects not learnt yet are named
+		// Whether effects not learnt yet are named, shown on the Mixing Station, not a tab
 		SettingsPageLayout IngredientsPage() {
 
-			SettingsPageLayout page{ "ingredients", "UI_SettingsSection_Ingredients", {}, {} };
+			SettingsPageLayout page{ "ingredients", "UI_Ingredients", {}, {} };
+			page.tab = false;
 			page.columns[0] = {
-				Header("UI_Ingredients_SettingsTracking"),
-				Toggle("Ingredients_Show", "UI_Ingredients_SettingShow", "IngredientsShow"),
-			};
-			page.columns[1] = {
-				Header("UI_Ingredients_SettingsDetails"),
-				Toggle("Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknown", "IngredientsNameUnknown", "IngredientsShow"),
+				Toggle("Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknown", "IngredientsNameUnknown"),
 			};
 			return page;
 		}

@@ -72,9 +72,10 @@ namespace CompletionistUI
 		bool          cellPanel{ true };
 		bool          cellOptionsOpen{ true };
 		bool          cellHeight{ true };
+		float         cellX{ 1.0f };	// across the room the panel has, 1 against the right edge
+		float         cellY{ 0.14f };	// its top, down the screen
 
 		// Notifications
-		bool  toasts{ true };
 		bool  toastsNewestFirst{ true };
 		float toastX{ 0.0f };
 		float toastY{ 0.317f };
