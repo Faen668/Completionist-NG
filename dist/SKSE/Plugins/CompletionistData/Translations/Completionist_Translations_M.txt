@@ -1,0 +1,1330 @@
+----------------------------------------------------------------------------
+-- COMPLETIONIST - IN-GAME TEXT
+-- File: Completionist_Translations_M.txt   (shout hints, Stones of Barenziah, log text, window text)
+--
+-- Each line is:   KEY <TAB> | text
+--
+-- HOW TO TRANSLATE
+--   * Change only the text AFTER the '|'. Never change the KEY in front of it.
+--   * Keep the TAB between the KEY and the '|': a key ends at its first TAB.
+--   * '\n' is a line break. Keep each one where it is.
+--   * Keep '~~~ Name ~~~' headings and placeholders such as {} exactly as they are.
+--   * Some texts end in a space on purpose (for example Completed: ). Keep that space,
+--     because Completionist puts a name straight after it.
+--   * Lines starting with '-' are comments and are ignored.
+--   * The order of the lines does not matter: lines are matched by KEY.
+--   * Set your editor's tab width to 4 and the columns line up.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+-- Shout word locations: Skyrim and DLC (V_ShoutText)
+----------------------------------------------------------------------------
+V_ShoutText00	|~~~ Animal Allegiance ~~~
+V_ShoutText01	|~~~ Aura Whisper ~~~
+V_ShoutText02	|~~~ Battle Fury ~~~
+V_ShoutText03	|~~~ Become Ethereal ~~~
+V_ShoutText04	|~~~ Bend Will ~~~
+V_ShoutText05	|~~~ Call Dragon ~~~
+V_ShoutText06	|~~~ Call of Valor ~~~
+V_ShoutText07	|~~~ Clear Skies ~~~
+V_ShoutText08	|~~~ Cyclone ~~~
+V_ShoutText09	|~~~ Disarm ~~~
+V_ShoutText10	|~~~ Dismay ~~~
+V_ShoutText11	|~~~ Dragon Aspect ~~~
+V_ShoutText12	|~~~ Dragonrend ~~~
+V_ShoutText13	|~~~ Drain Vitality ~~~
+V_ShoutText14	|~~~ Elemental Fury ~~~
+V_ShoutText15	|~~~ Fire Breath ~~~
+V_ShoutText16	|~~~ Frost Breath ~~~
+V_ShoutText17	|~~~ Ice Form ~~~
+V_ShoutText18	|~~~ Kyne's Peace ~~~
+V_ShoutText19	|~~~ Marked for Death ~~~
+V_ShoutText20	|~~~ Slow Time ~~~
+V_ShoutText21	|~~~ Soul Tear ~~~\n Durnehviir teaches you a word each time you summon him from the Soul Cairn
+V_ShoutText22	|~~~ Storm Call ~~~
+V_ShoutText23	|~~~ Summon Durnehviir ~~~
+V_ShoutText24	|~~~ Throw Voice ~~~
+V_ShoutText25	|~~~ Unrelenting Force ~~~
+V_ShoutText26	|~~~ Whirlwind Sprint ~~~
+
+----------------------------------------------------------------------------
+-- Shouts added by other mods (MiscDataShout)
+----------------------------------------------------------------------------
+MiscDataShout_FSK_Data		|~~~ Champion's Spirit ~~~\nShout added by Falskaar
+MiscDataShout_WYR_Data		|~~~ Phantom Form ~~~\nShout added by Wyrmstooth
+MiscDataShout_FFT_Data		|~~~ Phantom Form ~~~\nShout added by Forceful Tongue - Shouts Overhaul
+MiscDataShout_FFTWYR_Data	|~~~ Phantom Form ~~~\nShout added by Forceful Tongue - Shouts Overhaul (Wyrmstooth Patch Detected)
+MiscDataShout_SC1_Data		|~~~ Lightning Breath ~~~\nShout added by Stormcrown
+MiscDataShout_SC2_Data		|~~~ Poison Breath ~~~\nShout added by Stormcrown
+MiscDataShout_BC1_Data		|~~~ Phantom Form ~~~\nShout added by Bards College Expansion
+MiscDataShout_BC2_Data		|~~~ Earthsong ~~~\nShout added by Bards College Expansion
+MiscDataShout_BC3_Data		|~~~ Sanctum's Resonance ~~~\nShout added by Bards College Expansion
+MiscDataShout_BC4_Data		|~~~ Spectral Rift ~~~\nShout added by Bards College Expansion
+MiscDataShout_BC5_Data		|~~~ Call Volgaafsonaan ~~~\nShout added by Bards College Expansion
+MiscDataShout_BC6_Data		|~~~ Summon Sledrig ~~~\nShout added by Bards College Expansion
+MiscDataShout_KLX_Data		|~~~ Summon KALLAX ~~~\nShout added by Kallax Storageborn
+MiscDataShout_MI1_Data		|Shout added by Midwood Isle
+MiscDataShout_MI2_Data		|Shout added by Midwood Isle
+MiscDataShout_SI1_Data		|~~~ Plague Breath ~~~\nShout added by Siege at Icemoth
+
+----------------------------------------------------------------------------
+-- Shouts added by Thunderchild (T_ShoutText)
+----------------------------------------------------------------------------
+T_ShoutText00	|~~~ Alessia's Love ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText01	|~~~ Annihilate ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText02	|~~~ Arcane Helix ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText03	|~~~ Armageddon ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText04	|~~~ Curse ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText05	|~~~ Dance of the Dead ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText06	|~~~ Earthquake ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText07	|~~~ Essence Rip ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText08	|~~~ Evocation ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText09	|~~~ Geomagnetism ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText10	|~~~ Iceborn ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText11	|~~~ Jone's Shadow ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText12	|~~~ Kingsbane ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText13	|~~~ Lifestream ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText14	|~~~ Lightning Shield ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText15	|~~~ Oblivion ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText16	|~~~ Phantom Decoy ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText17	|~~~ Riftwalk ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText18	|~~~ Shattersphere ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText19	|~~~ Shor's Wrath ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText20	|~~~ Shroud of Snowfall ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText21	|~~~ Speak Unto The Stars ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText22	|~~~ Splinter Twins ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText23	|~~~ Stormblast ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText24	|~~~ The Conqueror ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText25	|~~~ Trueshot ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText26	|~~~ Wail of the Banshee ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText27	|~~~ Wanderlust ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText28	|~~~ Warcry ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild  
+
+----------------------------------------------------------------------------
+-- Stones of Barenziah: names
+----------------------------------------------------------------------------
+Barenziah_Name00	|Ansilvund
+Barenziah_Name01	|Black-Briar Lodge
+Barenziah_Name02	|College of Winterhold
+Barenziah_Name03	|Dainty Sload
+Barenziah_Name04	|Dark Brotherhood Sanctuary
+Barenziah_Name05	|Dead Crone Rock
+Barenziah_Name06	|Fellglow Keep
+Barenziah_Name07	|Hob's Fall Cave
+Barenziah_Name08	|Treasury House
+Barenziah_Name09	|Dwemer Museum
+Barenziah_Name10	|Pinewatch
+Barenziah_Name11	|Rannveig's Fast
+Barenziah_Name12	|Mistveil Keep
+Barenziah_Name13	|Blue Palace
+Barenziah_Name14	|Proudspire Manor
+Barenziah_Name15	|Stony Creek Cave
+Barenziah_Name16	|Sunderstone Gorge
+Barenziah_Name17	|Thalmor Embassy
+Barenziah_Name18	|Whiterun Hall of the Dead
+Barenziah_Name19	|Dragonsreach
+Barenziah_Name20	|Jorrvaskr
+Barenziah_Name21	|House of Clan Shatter-Shield
+Barenziah_Name22	|Palace of the Kings
+Barenziah_Name23	|Yngvild
+
+----------------------------------------------------------------------------
+-- Stones of Barenziah: where to find them
+----------------------------------------------------------------------------
+Barenziah_Text00	|~~~ Ansilvund ~~~\n This Stone of Barenziah can be located on the table at the end of the Ansilvund Burial Chambers.
+Barenziah_Text01	|~~~ Black-Briar Lodge ~~~\n This Stone of Barenziah can be located in the top floor bedroom, next to the bed.
+Barenziah_Text02	|~~~ College of Winterhold ~~~\n This Stone of Barenziah can be located in the Arch-Mage Quarters.
+Barenziah_Text03	|~~~ Dainty Sload ~~~\n This Stone of Barenziah can be located in the last room on the table.
+Barenziah_Text04	|~~~ Dark Brotherhood Sanctuary ~~~\n This Stone of Barenziah can be located on the dresser in Astrid's room.
+Barenziah_Text05	|~~~ Dead Crone Rock ~~~\n This Stone of Barenziah can be located on the stone altar opposite the Word Wall.
+Barenziah_Text06	|~~~ Fellglow Keep ~~~\n This Stone of Barenziah can be located straight up the stairs on the right hand side.
+Barenziah_Text07	|~~~ Hob's Fall Cave ~~~\n This Stone of Barenziah can be located near the alchemy set under the bridge in the northwestern part of the cave system.
+Barenziah_Text08	|~~~ Treasury House ~~~\n This Stone of Barenziah can be located in the Treasury House on a bedside table in Thonar's bedroom.
+Barenziah_Text09	|~~~ Dwemer Museum ~~~\n This Stone of Barenziah can be located in Understone Keep's Dwemer Museum, on a table in the first room to the left
+Barenziah_Text10	|~~~ Pinewatch ~~~\n This Stone of Barenziah can be located in the basement, press the hidden button to the right of the bookcase which provides access to the bandit's hideout, the stone is found in a locked room in the Bandit's Sanctuary.
+Barenziah_Text11	|~~~ Rannveig's Fast ~~~\n This Stone of Barenziah can be located next to the alchemy lab and chest on the right after falling down the trapdoor in front of the chest and the Word Wall.
+Barenziah_Text12	|~~~ Mistveil Keep ~~~\n This Stone of Barenziah can be located in Mistveil Keep in the Jarl's bedroom, go up the stairs and through the locked center door. It will be on the end table left of the bed.
+Barenziah_Text13	|~~~ Blue Palace ~~~\n This Stone of Barenziah can be located in the Blue Palace in the Jarl's bedroom, right side of the bed on top of the wardrobe.
+Barenziah_Text14	|~~~ Proudspire Manor ~~~\n This Stone of Barenziah can be located in Proudspire Manor. You must first purchase the house and the stone can be found on the top floor in the master bedroom, on top of the wardrobe behind the door.
+Barenziah_Text15	|~~~ Stony Creek Cave ~~~\n This Stone of Barenziah can be located on the table next to the alchemy lab in the room off to the side.
+Barenziah_Text16	|~~~ Sunderstone Gorge ~~~\n This Stone of Barenziah can be located on the table with two bodies in front of the Word Wall.
+Barenziah_Text17	|~~~ Thalmor Embassy / Reeking Cave ~~~\n This Stone of Barenziah can be located in the Thalmor Embassy in Elenwen's Solar on the second floor. or inside Reeking Cave next to a corpse in the back depending on your Skyrim Version.
+Barenziah_Text18	|~~~ Whiterun Hall of the Dead ~~~\n This Stone of Barenziah can be located inside the Hall of the Dead Catacombs, go down the left stairs and it will be to your left, next to a skeleton.
+Barenziah_Text19	|~~~ Dragonsreach ~~~\n This Stone of Barenziah can be located in Dragonsreach in the Jarl's bedroom, on the right-hand end table.
+Barenziah_Text20	|~~~ Jorrvaskr ~~~\n This Stone of Barenziah can be located in Jorrvaskr's living quarters, on the bookshelf in Kodlak's room.
+Barenziah_Text21	|~~~ House of Clan Shatter-Shield ~~~\n This Stone of Barenziah can be located in the House of Clan Shatter-Shield, on a bookshelf in the room to the left of the top of the stairs.
+Barenziah_Text22	|~~~ Palace of the Kings ~~~\n This Stone of Barenziah can be located in the Palace of the Kings Upstairs. Take the first door to the left upon entering the main palace area, then find Wuunferth's room with an Alchemy Lab & Arcane Enchanter at the end of the hall. The stone is on a table on the right side of the room.
+Barenziah_Text23	|~~~ Yngvild ~~~\n This Stone of Barenziah can be located in the bedroom behind the throne in Yngvild Throne room.
+
+----------------------------------------------------------------------------
+-- Completion log prefixes (each ends in a space on purpose - keep it)
+----------------------------------------------------------------------------
+LogPrefix_Col	|Collected: 
+LogPrefix_Dis	|Discovered: 
+LogPrefix_Lea	|Learnt: 
+LogPrefix_Obt	|Obtained: 
+LogPrefix_Bar	|Stone of Barenziah: 
+LogPrefix_Tam	|Tamed: 
+LogPrefix_Sho	|Learnt Shout: 
+LogPrefix_Wor	|Learnt Word of Power: 
+LogPrefix_Fis	|Caught Fish: 
+LogPrefix_Boo	|Read: 
+LogPrefix_Tom	|Consumed: 
+LogPrefix_Qst	|Completed: 
+
+----------------------------------------------------------------------------
+-- Map markers
+----------------------------------------------------------------------------
+MapMarkerCleared	|(Cleared)
+
+----------------------------------------------------------------------------
+-- Item types
+----------------------------------------------------------------------------
+ItemType_Scroll		|Scroll:
+ItemType_Item		|Item:
+ItemType_Weapon		|Weapon:
+ItemType_Armor		|Armor Piece:
+ItemType_SpellTome	|Spell Tome:
+ItemType_SkillBook	|Skill Book:
+ItemType_Book		|Book:
+ItemType_Ingredient	|Ingredient:
+ItemType_Key		|Key:
+ItemType_Potion		|Potion:
+ItemType_Poison		|Poison
+ItemType_SoulGem	|Soul Gem:
+
+----------------------------------------------------------------------------
+-- Death messages
+----------------------------------------------------------------------------
+MCMText_DeathSentanceBy	|Death by:
+MCMText_Collectables	|Collectables:
+
+----------------------------------------------------------------------------
+-- Death messages: articles and locations
+----------------------------------------------------------------------------
+DeathArticle_Vowel		|An
+DeathArticle_Consonant	|A
+DeathLocation_Unknown	|the wilds of Tamriel
+
+----------------------------------------------------------------------------
+-- In-game window: titles and categories
+----------------------------------------------------------------------------
+UI_Title				|Completionist
+UI_Overall				|Overall
+UI_Overview				|Overview
+UI_Close				|Close
+UI_Filter				|Filter...
+UI_HideCompleted		|Hide completed
+UI_SortDefault			|Default order
+UI_SortName				|Sort by name
+UI_SortNeeded			|Needed first
+UI_NothingMatches		|Nothing matches the current filter.
+UI_State_Needed			|Not found yet
+UI_State_Found			|Found
+UI_State_Displayable	|Can be displayed in the museum
+UI_State_Displayed		|Displayed in the museum
+UI_State_Occupied		|Museum slot taken by a variation
+UI_Category_Collections	|Collections
+UI_Category_Locations	|Locations
+UI_Category_Patches		|Patches
+UI_Category_Quests		|Quests
+
+----------------------------------------------------------------------------
+-- Screenshots
+----------------------------------------------------------------------------
+UI_Screenshot		|Screenshot
+UI_ScreenshotSaved	|Screenshot saved:
+UI_ScreenshotFailed	|Screenshot failed, see Completionist.log
+
+----------------------------------------------------------------------------
+-- In-game window: settings
+----------------------------------------------------------------------------
+UI_Settings						|Settings
+UI_Setting_SavedHint			|Changes apply straight away and are saved to Completionist.ini when the window closes.
+UI_SettingsSection_Appearance	|Appearance
+UI_Setting_Theme				|Theme
+UI_Theme_Completionist			|Completionist
+UI_Theme_SkyUI					|SkyUI
+UI_Theme_DearDiary				|Dear Diary - Dark Mode
+UI_Theme_Nordic					|Nordic UI
+UI_Theme_Altmer					|Altmer
+UI_Theme_Argonian				|Argonian
+UI_Theme_Bosmer					|Bosmer
+UI_Theme_Breton					|Breton
+UI_Theme_Dunmer					|Dunmer
+UI_Theme_Dwemer					|Dwemer
+UI_Theme_Imperial				|Imperial
+UI_Theme_Khajiit				|Khajiit
+UI_Theme_Nord					|Nord
+UI_Theme_Orsimer				|Orsimer
+UI_Theme_Redguard				|Redguard
+UI_Setting_Scale				|Text and interface scale
+UI_SettingHint_Scale			|Multiplies the automatic scaling for your resolution. Applied when you release the slider, like width and height.
+UI_Setting_Width				|Window width
+UI_Setting_Height				|Window height
+UI_Setting_Opacity				|Background opacity
+UI_Setting_Columns				|Entries per row
+UI_Setting_ColumnsAuto			|Automatic
+UI_SettingHint_Columns			|Automatic fits as many columns as the window width allows, up to four.
+UI_Setting_OpenKey				|Open key
+UI_Setting_PressKey				|Press a key... (Esc cancels)
+UI_SettingHint_OpenKey			|Click, then press the key that should open and close this window. Press Delete while it waits to leave it unbound.
+UI_Setting_OpenOnLastPage		|Reopen on the last page viewed
+UI_Setting_HideCompleted		|Hide completed entries by default
+UI_Setting_Screenshot			|Show the screenshot button
+UI_SettingHint_Screenshot		|Adds a button next to Close that saves the screen, including this window, as a PNG.
+UI_Setting_PauseGame			|Pause the game while open
+UI_SettingHint_PauseGame		|Freezes the world while this window is open, like the inventory does. Turn it off to keep the game running behind it.
+UI_Setting_JournalEntry			|Completionist on the Journal's System tab
+UI_SettingHint_JournalEntry		|Adds a Completionist entry to the System tab of the Journal (Quicksave, Save, Load...) that opens this window, so it can be opened without a key or button combo.
+UI_Setting_Reset				|Reset to defaults
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 1)
+----------------------------------------------------------------------------
+UI_DescriptionEmpty				|Hover over an entry to see its description here. Click an entry to keep it here while you scroll.
+UI_DescriptionNone				|No description for this entry.
+UI_Setting_DescriptionLines		|Description panel height
+UI_SettingHint_DescriptionLines	|Height of the description panel under each page, in lines of text. You can also drag the grabber on the panel's top edge, and double-click it to collapse or reopen the panel.
+UI_SettingsSection_Window		|Window
+UI_QuestSection_Main			|Main
+UI_QuestSection_Side			|Side
+UI_QuestSection_Radiant			|Radiant
+UI_QuestSection_Completed		|Completed
+UI_QuestMarked					|Marked complete by you
+UI_Dashboard_Closest			|Closest to complete
+UI_Dashboard_Recent				|Recently found
+UI_Dashboard_NoRecent			|Nothing found yet. Your finds will appear here.
+UI_Dashboard_AllDone			|Everything here is complete.
+UI_Today						|Today
+UI_Yesterday					|Yesterday
+UI_QuestState_Pending			|Not completed yet
+UI_QuestState_Done				|Completed
+UI_QuestMarkComplete			|Mark as complete
+UI_QuestMarkIncomplete			|Mark as not complete
+UI_QuestCompletedInGame			|Completed in game, so it can't be changed here.
+UI_QuestType_Main				|Main quest
+UI_QuestType_Side				|Side quest
+UI_QuestType_Radiant			|Radiant quest
+UI_QuestSelect					|Select a quest to read about it here.
+UI_Setting_OpenPad				|Controller open buttons
+UI_Setting_PressButtons			|Hold a button, then press another...
+UI_SettingHint_OpenPad			|Controller buttons that open and close the window: hold the first, then press the second. Press Delete while it waits to leave it unbound.
+UI_ColourCustom					|Custom colour
+UI_ConfirmClick					|Click again to confirm
+UI_Remove						|Remove
+UI_Exclude						|Exclude
+UI_CellScanner_NoPin			|No active pin
+UI_Setting_RemoveMarker			|Remove marker
+UI_Setting_Unbound				|Not bound
+UI_Setting_PressKeyUnbind		|Press a key... (Esc cancels, Delete unbinds)
+UI_Setting_KeepOneOpen			|Keep either a key or a controller combo bound, or nothing will open Completionist.
+UI_ColourSwatches				|Swatches
+UI_ColourCurrent				|Current
+UI_ColourNew					|New
+UI_ColourHue					|Hue
+UI_ColourSaturation				|Saturation
+UI_ColourBrightness				|Brightness
+UI_Done							|Done
+
+----------------------------------------------------------------------------
+-- UI: Kills (UI_Kills_*)
+----------------------------------------------------------------------------
+UI_Kills_Title			|Kill Counts
+UI_Kills_Total			|Total kills
+UI_Kills_Assists		|Assists
+UI_Kills_Types			|Creature types
+UI_Kills_MostSlain		|Most slain
+UI_Kills_Creature		|Creature
+UI_Kills_Share			|Share
+UI_Kills_Kills			|Kills
+UI_Kills_SortKills		|Most kills first
+UI_Kills_SortAssists	|Most assists first
+UI_Kills_LastKill		|Last kill:
+UI_Kills_NoLastKill		|Only assists so far
+UI_Kills_Reset			|Reset count
+UI_Kills_Empty			|Nothing to see yet... go murder something!
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 2)
+----------------------------------------------------------------------------
+UI_Find						|Find
+UI_Find_Hint				|Search every page...
+UI_Find_All					|Everything
+UI_Find_IgnoreCompleted		|Ignore completed
+UI_Find_Prompt				|Type a name to search every quest, collection, location and patch page. Select a result to jump to it.
+UI_Find_Limit				|Showing the first 500 results. Type more of the name to narrow the search.
+UI_ShoutWord_Background		|A background quest
+UI_ShoutWord_Nowhere		|No word wall or quest teaches these words
+UI_ShoutWord_Learnt{}{}		|{} of {} words learnt
+UI_ShoutWord_LearntOne{}	|{} of 1 word learnt
+UI_ShoutWord_Quest			|Quest
+UI_ShoutWord_AllWords		|All words
+UI_Pin						|Pin
+UI_Unpin					|Unpin
+UI_Pinned					|Pinned:
+UI_Pin_GoTo					|Go to page
+UI_Pin_Hint					|marked when you're in the same cell as it
+
+----------------------------------------------------------------------------
+-- UI: Cell (UI_Cell_*)
+----------------------------------------------------------------------------
+UI_Cell_Title			|Cell Scanner
+UI_Cell_Back			|Completionist
+UI_Cell_Count{}			|{} to find
+UI_Cell_Options			|Scanner options
+UI_Cell_OptionsHint		|searching, exclusions and item pinning
+UI_Cell_Scanning		|Scanning...
+UI_Cell_Excluded		|This cell is on the cell scanner's excluded list.
+UI_Cell_Nothing			|Nothing left to find here.
+UI_Cell_NothingInRange	|Nothing left to find in range.
+UI_Cell_Loose			|Lying around
+UI_Cell_Containers		|In containers
+UI_Cell_Carried			|Carried by others
+UI_Cell_Metres{}		|{} m
+UI_Cell_More{}			|and {} more
+UI_Cell_KeepOnScreen	|Keep on screen
+UI_Cell_Rescan			|Rescan
+UI_Cell_ClearMarker		|Clear marker
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 3)
+----------------------------------------------------------------------------
+UI_Setting_CellKey					|Cell Scanner key
+UI_SettingHint_CellKey				|Opens the Cell Scanner: what's still to collect in the cell you're in. Press Delete while it waits to leave it unbound.
+UI_Setting_CellPad					|Cell Scanner (controller)
+UI_SettingHint_CellPad				|Button combo that opens the Cell Scanner. Press Delete while it waits to leave it unbound.
+UI_Setting_CellPanel				|Keep the Cell Scanner on screen
+UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. Place UI elements moves it.
+UI_Setting_PlaceUI					|Place UI elements
+UI_Setting_PlaceUIButton			|Place...
+UI_SettingHint_PlaceUI				|Hides the window and shows the Cell Scanner panel and some notifications to drag where you want them. Let go of the notifications against the panel's edge to join the two into one panel. Confirm keeps the new places; Cancel puts them back.
+UI_Cell_Button						|Cell Scanner
+UI_Cell_Marker						|Quest marker:
+UI_Cell_ExcludeMarked				|Exclude from scans
+UI_Cell_ExcludeMarkedHint			|Leaves what the marker is on (the item, or the container or person holding it) out of future scans. Settings > Cell Scanner lists it, to put it back.
+UI_Cell_ExcludeCell					|Exclude this cell
+UI_Cell_Range						|Exterior range (m)
+UI_Cell_Sound						|Sound
+UI_Cell_ClearPin					|Clear
+UI_Marker_Place						|Track location
+UI_Marker_Remove					|Stop tracking
+UI_Pad_Select						|Select
+UI_Pad_Back							|Back
+UI_Pad_Close						|Close
+UI_Pad_Pages						|Pages
+UI_Pad_Description					|Autofit Description
+UI_Pad_DescriptionHoldCollapse		|Hold to collapse
+UI_Pad_DescriptionHoldExpand		|Hold to expand
+UI_Pad_Sidebar						|Sidebar
+UI_Pad_Scroll						|Scroll
+UI_Pad_Find							|Find
+UI_Setting_PadStyle					|Controller buttons
+UI_SettingHint_PadStyle				|Which controller's button names and symbols the button help at the foot of the window and the controller settings show. The buttons do the same on every controller; only their names differ.
+UI_Setting_PadXbox					|Xbox
+UI_Setting_PadPlayStation			|PlayStation
+UI_Setting_PadSwitch				|Nintendo Switch
+UI_Setting_PadSteamDeck				|Steam Deck
+UI_Pad_Tabs							|Tabs
+UI_Setting_PrintScreen				|Print Screen includes Completionist
+UI_SettingHint_PrintScreen			|The game takes its own screenshot before Completionist draws, so it never shows the window or the on-screen panel. With this on, Print Screen also saves one with them on (in My Games\Skyrim Special Edition\SKSE\Completionist\Screenshots) and copies it to the clipboard, ready to paste.
+UI_ScreenshotCopied					|(copied to the clipboard)
+UI_SettingsSection_Layout			|Layout
+UI_SettingsSection_Controls			|Controls
+UI_SettingsSection_OnScreen			|On Screen
+UI_Setting_ResetKey{}				|Reset to the default: {}
+UI_Setting_PadSingleUsed{}			|{} on its own moves around the window: hold it and press another button to make a combo.
+UI_Cell_ShowHeight					|Show height
+UI_Cell_ShowHeightHint				|Shows how far above or below you each item is (2 m or more), beside the arrow, here and on the on-screen panel.
+UI_Cell_Tracking					|Tracking
+UI_Track_Marked{}{}					|Find the {} {}
+UI_Track_Pinned{}{}					|Find the pinned {} {}
+UI_Track_Find{}						|Find {}
+UI_Track_FindIn{}{}					|Find {} in {}
+UI_Track_FishingSpot{}				|Find the fishing spot in {}
+UI_Track_Travel{}					|Travel to {}
+UI_Track_Full{}						|All {} tracking slots are in use. Clear a marker or unpin an item first.
+UI_UnpinAll							|Unpin all
+UI_MoreCount{}						|+{} more
+UI_Cell_ClearAllMarkers				|Clear all
+UI_Cell_Markers{}					|Quest markers ({}):
+UI_Cell_ExcludeOwned				|Exclude Owned Items
+UI_Cell_ExcludeOwnedInfo			|Leaves out anything that taking would be stealing. This is checked item by item, so a body or a chest can hold both free and owned things, and items owned by a faction you belong to count as yours.
+UI_Cell_ExcludeLiving				|Exclude Living People
+UI_Cell_ExcludeLivingInfo			|Leaves out what living people carry. Bodies are still searched.
+UI_Cell_Stealing					|Taking this would be stealing
+UI_SettingsSection_Notifications	|Notifications
+UI_SettingsSection_Toasts			|On Screen
+UI_Setting_ToastsOrder				|New notifications
+UI_SettingHint_ToastsOrder			|Where a new notification joins the stack. At the top, new ones push the others down; at the bottom, they join under them.
+UI_Setting_ToastsNewestTop			|At the top
+UI_Setting_ToastsNewestBottom		|At the bottom
+UI_Setting_ToastsPosition			|Position
+UI_SettingHint_ToastsPosition		|Which corner of the screen the notifications show in. Settings > Window > Place UI elements puts them anywhere else, or joins them to the Cell Scanner panel.
+UI_Setting_ToastsTopLeft			|Top left
+UI_Setting_ToastsTopRight			|Top right
+UI_Setting_ToastsBottomLeft			|Bottom left
+UI_Setting_ToastsBottomRight		|Bottom right
+UI_Setting_ToastsCustom				|Placed by hand
+UI_Setting_ToastsJoined				|Joined to the Cell Scanner
+UI_Toasts_PlaceTitle				|Place UI Elements
+UI_Toasts_PlaceHint					|Drag the Cell Scanner panel or the notifications where you want them, or move the chosen one with the arrow keys, the d-pad or the left stick.
+UI_Toasts_PlaceMovingPanel{}		|The keys move the Cell Scanner panel. {} or Tab moves the notifications instead.
+UI_Toasts_PlaceMovingToasts{}		|The keys move the notifications. {} or Tab moves the Cell Scanner panel instead.
+UI_Toasts_PlaceJoinHint				|Let go of the notifications against any edge of the panel to join the two.
+UI_Toasts_PlaceOverlap				|They cover part of the Cell Scanner panel.
+UI_Toasts_PanelShown				|Cell Scanner panel
+UI_Toasts_PanelOff					|Cell Scanner panel (turned off, shown so you can place it)
+UI_Toasts_Overlap					|Covers part of the Cell Scanner
+UI_Toasts_JoinRelease				|Let go to join the Cell Scanner
+UI_Toasts_Joined					|Joined to the Cell Scanner. Move them to separate
+UI_Toasts_PlaceKeys{}{}				|{} or Enter to confirm, {} or Escape to cancel.
+UI_Toasts_PlaceConfirm				|Confirm
+UI_Toasts_PlaceCancel				|Cancel
+UI_Toasts_SampleEntry				|Entry complete
+UI_Toasts_SampleItem1				|Amulet of Mara
+UI_Toasts_SampleItem2				|Spell Tome: Conjure Flame Atronach
+UI_Toasts_SampleDiscovery			|Location discovered
+UI_Toasts_SampleLocation			|Bleak Falls Barrow
+
+----------------------------------------------------------------------------
+-- UI: ItemIcons (UI_ItemIcons_*)
+----------------------------------------------------------------------------
+UI_ItemIcons_Header			|Item Icons
+UI_ItemIcons_Show			|Show item icons
+UI_ItemIcons_ShowInfo		|Shows Completionist's icons after item names in the inventory, containers, shops and gift menus (with SkyUI): a trophy for collectables, a museum for Legacy of the Dragonborn displays.
+UI_ItemIcons_Size			|Icon size (%)
+UI_ItemIcons_SizeInfo		|How big the icons are, compared with the item name's text. 100 is a little taller than the text.
+UI_ItemIcons_Opacity		|Icon opacity (%)
+UI_ItemIcons_OpacityInfo	|How solid the icons are. Lower makes them fainter, so they stand out less in long lists.
+UI_ItemIcons_Needed			|Still needed
+UI_ItemIcons_NeededInfo		|The trophy with a blue plus, on collectables you haven't got yet.
+UI_ItemIcons_Found			|Already found
+UI_ItemIcons_FoundInfo		|The trophy with a green tick, on collectables you've already found. Turn off to only mark what's still needed.
+UI_ItemIcons_Museum			|Museum
+UI_ItemIcons_MuseumInfo		|With Legacy of the Dragonborn's museum mode: the museum with a plus (can be displayed), a tick (displayed) or a diamond (another version is displayed).
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 4)
+----------------------------------------------------------------------------
+UI_Sort_Completionist	|COMPLETIONIST
+UI_Journal_Entry		|COMPLETIONIST
+UI_Sort_Header			|Completionist Sort
+UI_Sort_Needed			|Still needed
+UI_Sort_Found			|Already found
+UI_Sort_Displayable		|Museum: can be displayed
+UI_Sort_Occupied		|Museum: another version displayed
+UI_Sort_Displayed		|Museum: displayed
+UI_Sort_PriorityInfo	|Where these items come in the COMPLETIONIST sort on the item list's name column (click NAME until it says COMPLETIONIST): 1 comes first. Items with the same priority are sorted together by name; items Completionist doesn't track always come last.
+UI_Sort_Bands			|Group bands
+UI_Sort_BandsInfo		|While the item list is sorted by COMPLETIONIST, each status group gets its own tinted band with a gold edge, so you can see where one group ends and the next starts.
+LogPrefix_Tra			|Trained with: 
+
+----------------------------------------------------------------------------
+-- UI: Trainers (UI_Trainers_*)
+----------------------------------------------------------------------------
+UI_Trainers_Combat			|Combat
+UI_Trainers_Magic			|Magic
+UI_Trainers_Stealth			|Stealth
+UI_Trainers_Tier0			|Journeyman
+UI_Trainers_Tier1			|Expert
+UI_Trainers_Tier2			|Master
+UI_Trainers_CanTeach{}		|Can still teach you {} levels
+UI_Trainers_Outgrown		|You've outgrown this trainer
+UI_Trainers_Now{}			|Away, now in {}
+UI_Trainers_Home{}			|Home: {}
+UI_Trainers_Perks{}{}		|{} of {} perks
+UI_Trainers_NoPerks			|This skill has no perk tree
+UI_Trainers_PerkRank{}{}	|Rank {} of {}
+UI_Trainers_PerkNeeds{}		|Needs skill {}
+UI_Trainers_PerkTaken		|Taken
+UI_Trainers_PerkNotTaken	|Not taken yet
+
+----------------------------------------------------------------------------
+-- UI: Dragons (UI_Dragons_*)
+----------------------------------------------------------------------------
+UI_Dragons_Unique				|Unique Dragons
+UI_Dragons_Kills				|Dragon Kills
+UI_Dragons_Skyrim				|Skyrim
+UI_Dragons_Dawnguard			|Dawnguard
+UI_Dragons_Dragonborn			|Dragonborn
+UI_Dragons_NotMet				|Not met yet
+UI_Dragons_Met					|Met
+UI_Dragons_Tamed				|Tamed
+UI_Dragons_Ally					|Your ally
+UI_Dragons_Slain				|Slain
+UI_Dragons_Means{}				|Name means: {}
+UI_Dragons_Place{}				|Met at: {}
+UI_Dragons_Kinds				|Kinds of dragon
+UI_Dragons_Kind					|Dragon
+UI_Dragons_KillsEmpty			|No dragons slain yet. Dragon kills are counted by kind from this version of Completionist on.
+UI_Dragons_Lore_Mod{}			|A named dragon added by {}.
+UI_Dragons_Meaning_Alduin		|Destroyer Devour Master
+UI_Dragons_Where_Alduin			|Helgen, and in the end Sovngarde
+UI_Dragons_Lore_Alduin			|The first-born of Akatosh, the World-Eater of Nord legend. Long ago he ruled Skyrim through his dragon priests, until the ancient Tongues used an Elder Scroll to cast him out of time. He returns at Helgen as the game begins, raises the dead dragons from their burial mounds, and hides in Sovngarde to feed on the souls of the dead. With the heroes Gormlaith, Hakon and Felldir you defeat him there in Dragonslayer.
+UI_Dragons_Meaning_Paarthurnax	|Ambition Overlord Cruelty
+UI_Dragons_Where_Paarthurnax	|The top of the Throat of the World
+UI_Dragons_Lore_Paarthurnax		|Once Alduin's lieutenant, he turned on his master and taught men the Thu'um so they could fight back. For thousands of years since, he has lived on the mountain as master of the Greybeards, following the Way of the Voice to keep his cruel nature in check. He teaches you Fire Breath and how Alduin was beaten before. The Blades want him dead for his old crimes: you can kill him for them, or spare him and he stays on his mountain.
+UI_Dragons_Meaning_Odahviing	|Snow Hunter Wing
+UI_Dragons_Where_Odahviing		|Dragonsreach, Whiterun
+UI_Dragons_Lore_Odahviing		|One of Alduin's strongest followers. In The Fallen you call him by name to Dragonsreach, where he is trapped on the great porch. Seeing that Alduin is losing, he tells you Alduin has gone to Skuldafn and agrees to fly you there in return for his freedom. Once free he answers your Call Dragon shout and fights at your side.
+UI_Dragons_Meaning_Mirmulnir	|Allegiance Strength Hunt
+UI_Dragons_Where_Mirmulnir		|The Western Watchtower, near Whiterun
+UI_Dragons_Lore_Mirmulnir		|A loyal follower of Alduin who attacks the Western Watchtower in Dragon Rising. You kill him with the Whiterun guards, and taking in his soul shows that you are Dragonborn; the Greybeards call you to High Hrothgar soon after.
+UI_Dragons_Meaning_Sahloknir	|Phantom Sky Hunt
+UI_Dragons_Where_Sahloknir		|The burial mound above Kynesgrove
+UI_Dragons_Lore_Sahloknir		|Buried for ages on the hill above Kynesgrove. In A Blade in the Dark you and Delphine watch Alduin raise him from the dead, the proof that Alduin is bringing the dragons back. Killed as soon as he rises, he wins you Delphine's trust and the help of the Blades.
+UI_Dragons_Meaning_Vuljotnaak	|Dark Maw Eat
+UI_Dragons_Where_Vuljotnaak		|A burial mound near Sunderstone Gorge
+UI_Dragons_Lore_Vuljotnaak		|One of the dragons Alduin raises from the dead as the story goes on. He wakes from his burial mound near Sunderstone Gorge around the start of Diplomatic Immunity, and roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Nahagliiv	|Fury Burn Wither
+UI_Dragons_Where_Nahagliiv		|A burial mound west of Rorikstead
+UI_Dragons_Lore_Nahagliiv		|Raised from his burial mound by Alduin while you take Esbern to Sky Haven Temple in Alduin's Wall. Like the other risen dragons he has no part in the story after that, and roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Viinturuth	|Shine Hammer Rage
+UI_Dragons_Where_Viinturuth		|A burial mound near Lake Yorgrim
+UI_Dragons_Lore_Viinturuth		|The last of the dragons Alduin raises from the burial mounds, woken after you meet Paarthurnax on the Throat of the World. Like the other risen dragons he roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Vulthuryol	|Dark Overlord Fire
+UI_Dragons_Where_Vulthuryol		|Blackreach, beneath Skyrim
+UI_Dragons_Lore_Vulthuryol		|An old dragon sleeping out of sight in the great cavern of Blackreach, far below Skyrim. He stays away until a shout of Unrelenting Force hits the glowing orb that hangs over the cavern, which calls him down. He is no part of any quest; he is there for those who go looking for him.
+UI_Dragons_Where_SkeletalDragon	|Labyrinthian, Hjaalmarch
+UI_Dragons_Lore_SkeletalDragon	|The bones of a dragon in a great hall of Labyrinthian, behind a gate past the entrance. You reach it on the way to the Staff of Magnus: when you fight the skeletons in the hall, the dragon rises from its mound in the middle and joins in, breathing frost. It has no name of its own, but it is the only one of its kind in the game, and it is too big to follow you back through the gate.
+UI_Dragons_Meaning_Durnehviir	|Curse Never Dying
+UI_Dragons_Where_Durnehviir		|The Soul Cairn
+UI_Dragons_Lore_Durnehviir		|Once a dragon of Tamriel, he made a pact with the masters of the Soul Cairn and was bound there, rotting but unable to die. He attacks you in Beyond Death. Beaten, he asks you to remember his name and teaches you Summon Durnehviir, so he can fly free in Tamriel by fighting for you.
+UI_Dragons_Meaning_Voslaarum	|Claw Water Twin
+UI_Dragons_Where_Voslaarum		|The frozen lake in the Forgotten Vale
+UI_Dragons_Lore_Voslaarum		|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Naaslaarum, as you cross the vale with Dawnguard.
+UI_Dragons_Meaning_Naaslaarum	|Tooth Water Twin
+UI_Dragons_Where_Naaslaarum		|The frozen lake in the Forgotten Vale
+UI_Dragons_Lore_Naaslaarum		|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Voslaarum, as you cross the vale with Dawnguard.
+UI_Dragons_Meaning_Krosulhah	|Sorcerer Day Mind
+UI_Dragons_Where_Krosulhah		|Outside Nchardak, Solstheim
+UI_Dragons_Lore_Krosulhah		|A dragon of Solstheim who swoops on you and Neloth outside the Dwemer ruin of Nchardak in The Gardener of Men, taunting you as you fight.
+UI_Dragons_Meaning_Sahrotaar	|Mighty Servant
+UI_Dragons_Where_Sahrotaar		|Apocrypha, in At the Summit of Apocrypha
+UI_Dragons_Lore_Sahrotaar		|Miraak's own dragon. With the full Bend Will shout you turn him against his master and ride him to the summit of Apocrypha to face Miraak. During that last fight Miraak takes Sahrotaar's soul to heal himself.
+UI_Dragons_Meaning_Kruziikrel	|Ancient Domination
+UI_Dragons_Where_Kruziikrel		|The summit of Apocrypha
+UI_Dragons_Lore_Kruziikrel		|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
+UI_Dragons_Meaning_Relonikiv	|Domination Enlightenment
+UI_Dragons_Where_Relonikiv		|The summit of Apocrypha
+UI_Dragons_Lore_Relonikiv		|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 5)
+----------------------------------------------------------------------------
+UI_Category_Achievements	|Achievements
+UI_Achievements				|Achievements
+
+----------------------------------------------------------------------------
+-- UI: Achievements (UI_Achievements_*)
+----------------------------------------------------------------------------
+UI_Achievements_Skyrim								|Skyrim
+UI_Achievements_Dawnguard							|Dawnguard
+UI_Achievements_Hearthfire							|Hearthfire
+UI_Achievements_Dragonborn							|Dragonborn
+UI_Achievements_Steam								|your Steam account
+UI_Achievements_GOG									|your GOG account
+UI_Achievements_Unlocked{}							|Unlocked {}
+UI_Achievements_UnlockedUndated						|Unlocked
+UI_Achievements_Locked								|Not unlocked yet
+UI_Achievements_Rarity{}							|{}% of players have it
+UI_Achievements_Missable							|Missable: a choice or a death can lock it out
+UI_Achievements_ThisSave							|This save
+UI_Achievements_Track{}								|Track it on the {} page
+UI_Achievements_Stat_SideQuestsCompleted			|Side quests
+UI_Achievements_Stat_MiscObjectivesCompleted		|Misc objectives
+UI_Achievements_Stat_LocksPicked					|Locks picked
+UI_Achievements_Stat_PocketsPicked					|Pockets picked
+UI_Achievements_Stat_Persuasions					|Persuaded
+UI_Achievements_Stat_Bribes							|Bribed
+UI_Achievements_Stat_Intimidations					|Intimidated
+UI_Achievements_Stat_HousesOwned					|Houses owned
+UI_Achievements_Stat_JailEscapes					|Jail escapes
+UI_Achievements_Stat_WeaponsMadeArmorMade			|Smithed
+UI_Achievements_Stat_MagicItemsMade					|Enchanted
+UI_Achievements_Stat_PotionsMixed					|Potions mixed
+UI_Achievements_Stat_MostGoldCarried				|Most gold carried
+UI_Achievements_Stat_DungeonsCleared				|Dungeons cleared
+UI_Achievements_Stat_LocationsDiscovered			|Locations found
+UI_Achievements_Stat_SkillBooksRead					|Skill books read
+UI_Achievements_Stat_DragonSoulsCollected			|Dragon souls
+UI_Achievements_Stat_ShoutsMastered					|Shouts mastered
+UI_Achievements_Stat_ShoutsLearned					|Shouts learned
+UI_Achievements_Stat_NumWerewolfPerks				|Werewolf perks
+UI_Achievements_Stat_NumVampirePerks				|Vampire Lord perks
+UI_Achievements_Stat_StalhrimItemsCrafted			|Stalhrim items made
+UI_Achievements_Stat_SolstheimLocationsDiscovered	|Solstheim locations
+UI_Achievements_Name_1								|Unbound
+UI_Achievements_Goal_1								|Complete "Unbound"
+UI_Achievements_Tip_1								|Comes with the escape from Helgen at the very start, whether you follow Ralof or Hadvar out of the keep.
+UI_Achievements_Name_2								|Bleak Falls Barrow
+UI_Achievements_Goal_2								|Complete "Bleak Falls Barrow"
+UI_Achievements_Tip_2								|Farengar in Dragonsreach sends you for the Dragonstone. The door at the end of the barrow opens with the Golden Claw: the right order of animals is drawn on the claw's palm.
+UI_Achievements_Name_3								|The Way of the Voice
+UI_Achievements_Goal_3								|Complete "The Way of the Voice"
+UI_Achievements_Tip_3								|After Dragon Rising, climb the 7,000 steps from Ivarstead to High Hrothgar and do the Greybeards' trials. They also teach you the rest of Unrelenting Force on the way.
+UI_Achievements_Name_4								|Diplomatic Immunity
+UI_Achievements_Goal_4								|Complete "Diplomatic Immunity"
+UI_Achievements_Tip_4								|Delphine sends you into the Thalmor Embassy's party. You go in without your gear, so choose well what Malborn smuggles in for you: a weapon, armour and a few potions.
+UI_Achievements_Name_5								|Alduin's Wall
+UI_Achievements_Goal_5								|Complete "Alduin's Wall"
+UI_Achievements_Tip_5								|Find Esbern in the Ratway Warrens under Riften, then go with him and Delphine to Sky Haven Temple in Karthspire. The temple door opens to the Dragonborn's blood.
+UI_Achievements_Name_6								|Elder Knowledge
+UI_Achievements_Goal_6								|Complete "Elder Knowledge"
+UI_Achievements_Tip_6								|Septimus Signus, on the ice north of Winterhold, sends you through Alftand to Blackreach. Look around while you're down there: Blackreach has the Crimson Nirnroot that Sinderion wants.
+UI_Achievements_Name_7								|The Fallen
+UI_Achievements_Goal_7								|Complete "The Fallen"
+UI_Achievements_Tip_7								|If the civil war has started, the Jarl of Whiterun won't let you trap a dragon in Dragonsreach until the peace council in Season Unending has met. Finish the civil war first or go to the council.
+UI_Achievements_Name_8								|Dragonslayer
+UI_Achievements_Goal_8								|Complete "Dragonslayer"
+UI_Achievements_Tip_8								|Odahviing flies you to Skuldafn and you go on to Sovngarde. You come back to Skyrim afterwards, so nothing is lost by going.
+UI_Achievements_Name_9								|Take Up Arms
+UI_Achievements_Goal_9								|Join the Companions
+UI_Achievements_Tip_9								|Go to Jorrvaskr in Whiterun, speak to Kodlak, then spar with Vilkas in the yard.
+UI_Achievements_Name_10								|Blood Oath
+UI_Achievements_Goal_10								|Become a member of the Circle
+UI_Achievements_Tip_10								|Comes early in the Companions' story, when Skjor offers you the beast blood in the Underforge. You become a werewolf, which also starts you towards Werewolf Mastered.
+UI_Achievements_Name_11								|Glory of the Dead
+UI_Achievements_Goal_11								|Complete "Glory of the Dead"
+UI_Achievements_Tip_11								|The end of the Companions' story, at Ysgramor's Tomb.
+UI_Achievements_Name_12								|Gatekeeper
+UI_Achievements_Goal_12								|Join the College of Winterhold
+UI_Achievements_Tip_12								|Ride or walk to Winterhold and speak to Faralda at the bridge. She asks you to cast a spell (she'll sell you one if you have none), or you can talk your way in.
+UI_Achievements_Name_13								|Revealing the Unseen
+UI_Achievements_Goal_13								|Complete "Revealing the Unseen"
+UI_Achievements_Tip_13								|Part of the College's story: after Saarthal, it takes you to Mzulft with the Synod.
+UI_Achievements_Name_14								|The Eye of Magnus
+UI_Achievements_Goal_14								|Complete "The Eye of Magnus"
+UI_Achievements_Tip_14								|The end of the College of Winterhold's story.
+UI_Achievements_Name_15								|Taking Care of Business
+UI_Achievements_Goal_15								|Join the Thieves Guild
+UI_Achievements_Tip_15								|Brynjolf in Riften's marketplace gives you the job with Madesi's ring, then sends you to collect three debts for the guild.
+UI_Achievements_Name_16								|Darkness Returns
+UI_Achievements_Goal_16								|Complete "Darkness Returns"
+UI_Achievements_Tip_16								|Part of the Thieves Guild's story, near the end: the Skeleton Key goes back to the Twilight Sepulcher.
+UI_Achievements_Name_17								|One with the Shadows
+UI_Achievements_Goal_17								|Returned the Thieves Guild to its former glory
+UI_Achievements_Tip_17								|Do Delvin's and Vex's small jobs in Whiterun, Windhelm, Markarth and Solitude. Five in one city opens that city's big job; do all four. Keep Erikur in Solitude alive until The Dainty Sload is done.
+UI_Achievements_Name_18								|With Friends Like These...
+UI_Achievements_Goal_18								|Join the Dark Brotherhood
+UI_Achievements_Tip_18								|Speak to Aventus Aretino in Windhelm about the Black Sacrament, or wait for the Dark Brotherhood to find you after a murder. Destroying the Brotherhood locks this one out, so don't kill Astrid at the shack.
+UI_Achievements_Name_19								|Bound Until Death
+UI_Achievements_Goal_19								|Complete "Bound Until Death"
+UI_Achievements_Tip_19								|A Dark Brotherhood contract: Vittoria Vici, killed at her own wedding in Solitude. Gone if you destroy the Brotherhood.
+UI_Achievements_Name_20								|Hail Sithis!
+UI_Achievements_Goal_20								|Complete "Hail Sithis!"
+UI_Achievements_Tip_20								|The end of the Dark Brotherhood's story. Gone if you destroy the Brotherhood.
+UI_Achievements_Name_21								|Taking Sides
+UI_Achievements_Goal_21								|Join the Stormcloaks or the Imperial Army
+UI_Achievements_Tip_21								|Join Ulfric's Stormcloaks in Windhelm or General Tullius's Legion in Solitude. Either side counts.
+UI_Achievements_Name_22								|War Hero
+UI_Achievements_Goal_22								|Capture Fort Sungard or Fort Greenwall
+UI_Achievements_Tip_22								|Comes with taking Fort Sungard in the Reach as a Stormcloak, or Fort Greenwall in the Rift for the Legion. Giving that hold away at the peace council in Season Unending can take the battle away.
+UI_Achievements_Name_23								|Hero of Skyrim
+UI_Achievements_Goal_23								|Capture Solitude or Windhelm
+UI_Achievements_Tip_23								|The end of the civil war, at Solitude or Windhelm.
+UI_Achievements_Name_24								|Sideways
+UI_Achievements_Goal_24								|Complete 10 side quests
+UI_Achievements_Tip_24								|Side quests are the ones on their own in the journal, not part of a story. Town quests from innkeepers and Jarls are the quickest.
+UI_Achievements_Name_25								|Hero of the People
+UI_Achievements_Goal_25								|Complete 50 Misc Objectives
+UI_Achievements_Tip_25								|Miscellaneous objectives are the small tasks in the journal: favours, deliveries and fetching things. Every innkeeper and steward has a few.
+UI_Achievements_Name_26								|Hard Worker
+UI_Achievements_Goal_26								|Chop wood, mine ore, and cook food
+UI_Achievements_Tip_26								|All three can be done in Riverwood: chop wood at the block by the mill, mine the ore vein near the smithy with a pickaxe, and cook at any cooking pot.
+UI_Achievements_Name_27								|Thief
+UI_Achievements_Goal_27								|Pick 50 locks and 50 pockets
+UI_Achievements_Tip_27								|Any lock and any successful pickpocket counts. Novice locks and lifting a coin purse are quick; save before the pockets.
+UI_Achievements_Name_28								|Snake Tongue
+UI_Achievements_Goal_28								|Successfully persuade, bribe, and intimidate
+UI_Achievements_Tip_28								|Look for (Persuade), (Bribe) and (Intimidate) in dialogue; one success of each. A higher Speech skill and a few Speech perks make them easier.
+UI_Achievements_Name_29								|Blessed
+UI_Achievements_Goal_29								|Select a Standing Stone blessing
+UI_Achievements_Tip_29								|Use any standing stone. The Guardian Stones on the road from Helgen to Riverwood are the first you come to.
+UI_Achievements_Name_30								|Standing Stones
+UI_Achievements_Goal_30								|Find 13 Standing Stones
+UI_Achievements_Tip_30								|Each stone counts once, and the three Guardian Stones by Riverwood count as three on their own. The game adds them up as you find them; the Doomstones page shows which you've been to.
+UI_Achievements_Name_31								|Citizen
+UI_Achievements_Goal_31								|Buy a house
+UI_Achievements_Tip_31								|Breezehome in Whiterun costs 5,000 gold once you've done Dragon Rising: buy it from Proventus Avenicci in Dragonsreach. Hearthfire land counts too.
+UI_Achievements_Name_32								|Wanted
+UI_Achievements_Goal_32								|Escape from jail
+UI_Achievements_Tip_32								|Keep a lockpick on you: the guards leave you one. Get arrested, choose jail, pick the cell door and get out. Markarth's Cidhna Mine has its own escape quest.
+UI_Achievements_Name_33								|Married
+UI_Achievements_Goal_33								|Get married
+UI_Achievements_Tip_33								|Buy an Amulet of Mara from Maramal at the Temple of Mara in Riften, wear it, and talk to someone who can marry you. The wedding is at the temple.
+UI_Achievements_Name_34								|Artificer
+UI_Achievements_Goal_34								|Make a smithed item, an enchanted item, and a potion
+UI_Achievements_Tip_34								|Make anything at a forge, enchant anything at an arcane enchanter (disenchant something first to learn an enchantment), and mix any potion or poison at an alchemy lab. Whiterun has all three.
+UI_Achievements_Name_35								|Master Criminal
+UI_Achievements_Goal_35								|Bounty of 1000 gold in all nine holds
+UI_Achievements_Tip_35								|A bounty of 1,000 gold in each of the nine holds at some point. You can pay it off afterwards: it only has to reach 1,000 once.
+UI_Achievements_Name_36								|Golden Touch
+UI_Achievements_Goal_36								|Have 100,000 gold
+UI_Achievements_Tip_36								|Only gold you carry counts, not gold in a chest. Selling what you smith or enchant, and the Speech perk that lets you invest in shops, get you there fastest.
+UI_Achievements_Name_37								|Delver
+UI_Achievements_Goal_37								|Clear 50 dungeons
+UI_Achievements_Tip_37								|A dungeon is cleared when its boss is dead. Bounty and radiant quests send you to ones you haven't done.
+UI_Achievements_Name_38								|Skill Master
+UI_Achievements_Goal_38								|Get a skill to 100
+UI_Achievements_Tip_38								|Despite its description, the game gives this one after 100 skill increases in total, across all your skills, not for one skill at 100. Trainers' lessons count too; the Trainers page shows who teaches what.
+UI_Achievements_Name_39								|Explorer
+UI_Achievements_Goal_39								|Discover 100 Locations
+UI_Achievements_Tip_39								|Every map marker you find counts. The Locations pages show what's left.
+UI_Achievements_Name_40								|Reader
+UI_Achievements_Goal_40								|Read 50 Skill Books
+UI_Achievements_Tip_40								|Each skill book counts once, the first time you read it. Many are on shop shelves: buying and reading them counts.
+UI_Achievements_Name_41								|Daedric Influence
+UI_Achievements_Goal_41								|Acquire a Daedric Artifact
+UI_Achievements_Tip_41								|Comes with the first Daedric artifact, from a Daedric quest or found in the world, such as Meridia's Beacon.
+UI_Achievements_Name_42								|Oblivion Walker
+UI_Achievements_Goal_42								|Collect 15 Daedric Artifacts
+UI_Achievements_Tip_42								|An artifact counts when you get it, so you can store or sell it after. Where a Daedric quest ends with a choice, take the side that gives the artifact.
+UI_Achievements_Name_43								|Dragon Soul
+UI_Achievements_Goal_43								|Absorb a dragon soul
+UI_Achievements_Tip_43								|The first dragon, at the Western Watchtower during Dragon Rising.
+UI_Achievements_Name_44								|Dragon Hunter
+UI_Achievements_Goal_44								|Absorb 20 dragon souls
+UI_Achievements_Tip_44								|Dragons come more often once the main story has reached Alduin's Wall. The Dragons page keeps count of the dragons you've killed.
+UI_Achievements_Name_45								|Words of Power
+UI_Achievements_Goal_45								|Learn all three words of a shout
+UI_Achievements_Tip_45								|You learn all three words of Unrelenting Force during The Way of the Voice, so this usually comes on its own.
+UI_Achievements_Name_46								|Thu'um Master
+UI_Achievements_Goal_46								|Learn 20 shouts
+UI_Achievements_Tip_46								|Twenty different shouts. The Shouts page shows every word wall, and which words you still need.
+UI_Achievements_Name_47								|Apprentice
+UI_Achievements_Goal_47								|Reach Level 5
+UI_Achievements_Tip_47								|Level 5.
+UI_Achievements_Name_48								|Adept
+UI_Achievements_Goal_48								|Reach Level 10
+UI_Achievements_Tip_48								|Level 10.
+UI_Achievements_Name_49								|Expert
+UI_Achievements_Goal_49								|Reach Level 25
+UI_Achievements_Tip_49								|Level 25.
+UI_Achievements_Name_50								|Master
+UI_Achievements_Goal_50								|Reach Level 50
+UI_Achievements_Tip_50								|Level 50. Skills made legendary still raise your level, so you can keep going.
+UI_Achievements_Name_51								|Awakening
+UI_Achievements_Goal_51								|Complete "Awakening"
+UI_Achievements_Tip_51								|The start of Dawnguard: join the Dawnguard at Fort Dawnguard, then wake Serana in Dimhollow Crypt.
+UI_Achievements_Name_52								|Beyond Death
+UI_Achievements_Goal_52								|Complete "Beyond Death"
+UI_Achievements_Tip_52								|Serana's mother is in the Soul Cairn. Going in costs part of your soul, unless you're a vampire.
+UI_Achievements_Name_53								|Kindred Judgement
+UI_Achievements_Goal_53								|Complete "Kindred Judgment"
+UI_Achievements_Tip_53								|The end of Dawnguard, on either side.
+UI_Achievements_Name_54								|Lost to the Ages
+UI_Achievements_Goal_54								|Complete "Lost to the Ages"
+UI_Achievements_Tip_54								|Comes with the Aetherium Forge. Lost to the Ages takes you to Arkngthamz in the Reach, where Katria helps you find the shards.
+UI_Achievements_Name_55								|Soul Tear
+UI_Achievements_Goal_55								|Learn all three words of Soul Tear
+UI_Achievements_Tip_55								|Summon Durnehviir in Skyrim three times: he teaches you one word of Soul Tear each time. You learn to summon him in the Soul Cairn.
+UI_Achievements_Name_56								|Auriel's Bow
+UI_Achievements_Goal_56								|Use the special power of Auriel's Bow
+UI_Achievements_Tip_56								|Fire a Sunhallowed or Bloodcursed elven arrow at the sun with Auriel's Bow. The bow isn't a quest item once Dawnguard is done, so don't sell it or leave it lying around.
+UI_Achievements_Name_57								|Werewolf Mastered
+UI_Achievements_Goal_57								|Acquire 11 werewolf perks
+UI_Achievements_Tip_57								|Werewolf perks come from feeding on corpses in beast form. Curing lycanthropy twice locks you out of this, and becoming a Vampire Lord counts as a cure.
+UI_Achievements_Name_58								|Vampire Mastered
+UI_Achievements_Goal_58								|Acquire 11 vampire perks
+UI_Achievements_Tip_58								|Vampire Lord perks come from draining and biting in Vampire Lord form.
+UI_Achievements_Name_59								|A New You
+UI_Achievements_Goal_59								|Change your face
+UI_Achievements_Tip_59								|Galathil, the face sculptor, sits in the Ragged Flagon under Riften. Innkeepers and guards mention her once Dawnguard is installed.
+UI_Achievements_Name_60								|Legend
+UI_Achievements_Goal_60								|Defeat a Legendary Dragon
+UI_Achievements_Tip_60								|Legendary dragons only appear once you reach level 78. Kills count here from when Completionist started counting dragon kills.
+UI_Achievements_Name_61								|Proud Parent
+UI_Achievements_Goal_61								|Adopt a child
+UI_Achievements_Tip_61								|Adopt a child from Honorhall Orphanage in Riften or from Whiterun's streets. Your home needs a child's bedroom first.
+UI_Achievements_Name_62								|Landowner
+UI_Achievements_Goal_62								|Buy a plot of land
+UI_Achievements_Tip_62								|Buy land from the steward in Falkreath, Morthal or Dawnstar. The Jarl has to like you first, usually after a task for them.
+UI_Achievements_Name_63								|Architect
+UI_Achievements_Goal_63								|Build three wings on a house
+UI_Achievements_Tip_63								|Build any three wings on one Hearthfire house.
+UI_Achievements_Name_64								|Land Baron
+UI_Achievements_Goal_64								|Buy three plots of land
+UI_Achievements_Tip_64								|Buy all three plots: Lakeview Manor, Windstad Manor and Heljarchen Hall.
+UI_Achievements_Name_65								|Master Architect
+UI_Achievements_Goal_65								|Build three houses
+UI_Achievements_Tip_65								|Build a house on all three Hearthfire plots.
+UI_Achievements_Name_66								|Outlander
+UI_Achievements_Goal_66								|Arrive on Solstheim
+UI_Achievements_Tip_66								|Take the Northern Maiden from Windhelm's docks to Raven Rock.
+UI_Achievements_Name_67								|The Temple of Miraak
+UI_Achievements_Goal_67								|Complete "The Temple of Miraak"
+UI_Achievements_Tip_67								|The first part of the Dragonborn story, after the cultists in Raven Rock.
+UI_Achievements_Name_68								|The Path of Knowledge
+UI_Achievements_Goal_68								|Complete "The Path of Knowledge"
+UI_Achievements_Tip_68								|The second part of the Dragonborn story, ending in Apocrypha.
+UI_Achievements_Name_69								|At the Summit of Apocrypha
+UI_Achievements_Goal_69								|Complete "At the Summit of Apocrypha"
+UI_Achievements_Tip_69								|The end of the Dragonborn story.
+UI_Achievements_Name_70								|Dragon Aspect
+UI_Achievements_Goal_70								|Learn all 3 words of Dragon Aspect
+UI_Achievements_Tip_70								|Its words are found during the Dragonborn story and on Solstheim. The Shouts page shows where.
+UI_Achievements_Name_71								|Hidden Knowledge
+UI_Achievements_Goal_71								|Learn the secrets of 5 Black Books
+UI_Achievements_Tip_71								|Read Black Books on Solstheim to the end of each and pick a reward. Five of the seven are enough.
+UI_Achievements_Name_72								|Stalhrim Crafter
+UI_Achievements_Goal_72								|Craft an item out of Stalhrim
+UI_Achievements_Tip_72								|Ask Deor Woodcutter or Fanari Strong-Voice in Raven Rock about stalhrim; A New Source of Stalhrim ends with Baldor Iron-Shaper teaching you. Smithing stalhrim needs the Ebony Smithing perk. The quest is lost if both of them die.
+UI_Achievements_Name_73								|Dragonrider
+UI_Achievements_Goal_73								|Tame and ride 5 dragons
+UI_Achievements_Tip_73								|Use Bend Will on a dragon and ride it, with five dragons. Bend Will is learned during the Dragonborn story.
+UI_Achievements_Name_74								|Raven Rock Owner
+UI_Achievements_Goal_74								|Own a house in Raven Rock
+UI_Achievements_Tip_74								|Help Adril Arano in Served Cold and Severin Manor is yours, free.
+UI_Achievements_Name_75								|Solstheim Explorer
+UI_Achievements_Goal_75								|Discover 30 locations on the island of Solstheim
+UI_Achievements_Tip_75								|Any 30 map markers on Solstheim.
+UI_Achievements_Stat_Holds							|Holds at 1,000 bounty now
+UI_Achievements_Stat_Artifacts						|Daedric artifacts
+UI_Achievements_Stat_DragonAspectWords				|Dragon Aspect words
+UI_Achievements_Stat_BlackBooks						|Black Books finished
+UI_Achievements_Stat_Done							|Earned
+UI_Achievements_FlagDone							|Done
+UI_Achievements_FlagNotYet							|Not yet
+UI_Achievements_Stat_WoodChopped					|Wood chopped
+UI_Achievements_Stat_OreMined						|Ore mined
+UI_Achievements_Stat_FoodCooked						|Food cooked
+UI_Achievements_Stat_StandingStonesFound			|Standing stones found
+UI_Achievements_Stat_SkillIncreases					|Skill increases
+UI_Achievements_Stat_LevelIncreases					|Level increases
+UI_Achievements_Stat_LegendaryDragons				|Legendary dragons killed
+UI_Achievements_Stat_ChildrenAdopted				|Children adopted
+UI_Achievements_Stat_Plots							|Plots bought
+UI_Achievements_Stat_Wings							|Most wings on one house
+UI_Achievements_Stat_Houses							|Houses with three wings
+UI_Achievements_Stat_DragonsRidden					|Dragons ridden
+UI_Achievements_Disabled							|Mods switch Skyrim's achievements off, so new ones won't unlock on your account. Achievements Mods Enabler (nexusmods.com/skyrimspecialedition/mods/245) or SSE Engine Fixes switch them back on.
+UI_Achievements_SaveOnly							|this save only
+UI_Achievements_DoneOnSave							|Done on this save
+UI_Achievements_NotDoneOnSave						|Not done on this save yet
+UI_Achievements_WhyNoStore							|No Steam or GOG Galaxy found, so your account's achievements can't be read. Showing this save only.
+UI_Achievements_WhySteamOff							|Steam's library is loaded but Steam isn't running, so your account's achievements can't be read. Showing this save only.
+UI_Achievements_WhySteamCalls						|This copy of Steam's library can't give achievements (some DRM-free copies are like this). Showing this save only.
+UI_Achievements_WhyGalaxyCalls						|GOG Galaxy's library is loaded but can't give achievements. Showing this save only.
+UI_Achievements_WhyNoAnswerSteam					|Steam isn't giving this game's achievements (it may be offline, or this may be a DRM-free copy). Showing this save only; it tries again when the window opens.
+UI_Achievements_WhyNoAnswerGalaxy					|GOG Galaxy isn't giving this game's achievements (it may not be signed in or running). Showing this save only; it tries again when the window opens.
+
+----------------------------------------------------------------------------
+-- In-game window: text and settings (part 6)
+----------------------------------------------------------------------------
+UI_SettingsSection_Achievements	|Achievements
+
+----------------------------------------------------------------------------
+-- UI: Achievements (UI_Achievements_*)
+----------------------------------------------------------------------------
+UI_Achievements_SettingsTracking	|Tracking
+UI_Achievements_SettingsDetails		|In the details
+UI_Achievements_SettingShow			|Show the Achievements page
+UI_Achievements_SettingShowInfo		|Shows your achievements in the sidebar. Off hides the page.
+UI_Achievements_SettingProgress		|This save's progress
+UI_Achievements_SettingProgressInfo	|Shows how far this save is towards each one, from the counts the game keeps.
+UI_Achievements_SettingTips			|How to get it
+UI_Achievements_SettingTipsInfo		|Shows a tip for each one. Some name places and people from the quests.
+UI_Achievements_SettingRarity		|How rare it is
+UI_Achievements_SettingRarityInfo	|Shows how many players have each one, from Steam.
+UI_Achievements_SettingMissable		|Missable warnings
+UI_Achievements_SettingMissableInfo	|Marks the ones a choice or a death in the game can lock out.
+
+----------------------------------------------------------------------------
+-- UI: Ingredients (UI_Ingredients_*)
+----------------------------------------------------------------------------
+UI_Ingredients							|Ingredients
+UI_Ingredients_SettingNameUnknown		|Name effects not learnt yet
+UI_Ingredients_SettingNameUnknownInfo	|Shows the names of effects you haven't discovered yet, and which ingredients carry them. Off keeps them hidden until you learn them in game.
+UI_Ingredients_TabAnimals				|Animal Parts, Eggs and Fish
+UI_Ingredients_TabFlowers				|Flowers, Insects and Mushrooms
+UI_Ingredients_TabPlants				|Plants and Other
+UI_Ingredients_TabEffects				|Effects
+UI_Ingredients_Skyrim					|Skyrim
+UI_Ingredients_Dawnguard				|Dawnguard
+UI_Ingredients_Hearthfire				|Hearthfire
+UI_Ingredients_Dragonborn				|Dragonborn
+UI_Ingredients_AnimalParts				|Animal Parts
+UI_Ingredients_Eggs						|Eggs
+UI_Ingredients_Fish						|Fish
+UI_Ingredients_Flowers					|Flowers
+UI_Ingredients_Insects					|Insects
+UI_Ingredients_Mushrooms				|Mushrooms
+UI_Ingredients_Plants					|Plants
+UI_Ingredients_Other					|Other
+UI_Ingredients_From{}					|From {}
+UI_Ingredients_Potions					|Potions
+UI_Ingredients_Poisons					|Poisons
+UI_Ingredients_Known{}{}				|{} of {} effects known
+UI_Ingredients_KnownOn{}{}				|Known on {} of {} ingredients
+UI_Ingredients_Value{}{}				|Value {}  ·  Weight {}
+UI_Ingredients_Carried{}				|You carry {}
+UI_Ingredients_NoneCarried				|None in your pack
+UI_Ingredients_NotKnown					|Not known yet
+UI_Ingredients_NotLearnt				|Not learnt yet
+UI_Ingredients_Potion					|Potion
+UI_Ingredients_Poison					|Poison
+UI_Ingredients_HintEat					|Eat one to learn it
+UI_Ingredients_HintBrew{}{}				|Brew with {} (you carry {})
+UI_Ingredients_HintShared{}				|Shared with {}
+UI_Ingredients_HintNone					|Nothing you carry shares it
+UI_Ingredients_HintOnly					|No other ingredient has it
+UI_Ingredients_More{}					|+{} more
+UI_Ingredients_LoreMod{}				|Added by {}.
+
+----------------------------------------------------------------------------
+-- UI: Ingredient lore (UI_Ingredients_Lore_*)
+----------------------------------------------------------------------------
+UI_Ingredients_Lore_AbeceanLongfin			|A slim, silvery fish named after the Abecean Sea off Cyrodiil's western coast. In Skyrim it swims the rivers and lakes, and a quick hand can catch one straight out of the water.
+UI_Ingredients_Lore_BearClaws				|Taken from the bears that roam Skyrim's forests and caves. Hunters keep them as trophies, and alchemists grind them into draughts said to lend the drinker a little of a bear's strength.
+UI_Ingredients_Lore_Bee						|A honeybee, caught as it drifts between the flowers or taken from a hive. Its sting is small, but an alchemist can make a good deal more of it.
+UI_Ingredients_Lore_BeehiveHusk				|The papery shell of a beehive. Skyrim has few apiaries, and the biggest hives in the land are kept at Goldenglow Estate, on its island near Riften.
+UI_Ingredients_Lore_BeritsAshes				|The ashes of Berit, a Falkreath man and an old friend of Thadgeir's, kept in Dengeir's House in Falkreath. To an alchemist they're no different from bone meal, which is perhaps not how Berit hoped to be remembered.
+UI_Ingredients_Lore_BleedingCrown			|A cave fungus that grows in clusters in damp caves and old ruins, its broad caps easy to spot by torchlight. It leaves a target weaker to fire and poison, though it can also turn magic aside.
+UI_Ingredients_Lore_Blisterwort				|A tall cave mushroom with a rough, blistered cap. Odd as it seems, it's one of the few ingredients a smith has any use for: one of its effects steadies the hand at the forge.
+UI_Ingredients_Lore_BlueButterflyWing		|The wing of a blue butterfly, caught over Skyrim's meadows. Enchanters seek them out, since a potion of them makes an enchantment take more strongly.
+UI_Ingredients_Lore_BlueDartwing			|A blue dragonfly that skims over streams and ponds. Thieves have a quiet fondness for it: one of its effects makes light fingers lighter still.
+UI_Ingredients_Lore_BlueMountainFlower		|One of the commonest flowers in Skyrim, growing along the roads and hillsides of almost every hold. Paired with wheat it brews into a fine healing potion, and it's often the first an apprentice learns.
+UI_Ingredients_Lore_BoneMeal				|Ground from the bones of the dead, most often taken from the skeletons that walk in old tombs. Necromancers find it useful, for reasons best left unasked.
+UI_Ingredients_Lore_BriarHeart				|The heart a hagraven's magic plants in the chest of a Forsworn Briarheart, keeping the warrior alive and fighting. Take it from one and the Briarheart falls.
+UI_Ingredients_Lore_ButterflyWing			|The orange and black wing of a monarch butterfly, found fluttering over the flowers of Skyrim's milder holds. A merchant's favourite, since one of its effects makes for better prices.
+UI_Ingredients_Lore_CanisRoot				|A root dug from Skyrim's wilds. Archers prize it, and so does anyone who wants a target to stay still.
+UI_Ingredients_Lore_CharredSkeeverHide		|What's left of a skeever roasted on a spit, as found over the campfires of bandits and others who can't afford better. Burnt as it is, it's surprisingly good at curing what ails you.
+UI_Ingredients_Lore_ChaurusEggs				|Laid by the chaurus, the great insects the Falmer keep in the caves beneath Skyrim. The eggs are taken from their nests, at some risk to the one taking them.
+UI_Ingredients_Lore_ChickensEgg				|An ordinary hen's egg from the nests around Skyrim's farms. A humble thing, but with the right partner it lets you breathe underwater.
+UI_Ingredients_Lore_CreepCluster			|A rock-hugging plant of the volcanic tundra around Eastmarch's hot springs. Its tangled growth breaks away easily in the hand.
+UI_Ingredients_Lore_CrimsonNirnroot			|A red nirnroot that grows only in Blackreach, the vast cavern beneath Skyrim. Like its common cousin it chimes faintly, and the alchemist Sinderion died down there studying it.
+UI_Ingredients_Lore_CyrodilicSpadetail		|A fish named for Cyrodiil and for the flat, spade-like tail it swims with. In Skyrim it's found in the rivers and lakes.
+UI_Ingredients_Lore_DaedraHeart				|The heart of a dremora, still faintly warm with the power of Oblivion. Rare and costly: the few merchants who have one ask a high price for it.
+UI_Ingredients_Lore_Deathbell				|A drooping flower of the marshes of Hjaalmarch, its name honestly earned. Ingun Black-Briar in Riften wants some for her studies.
+UI_Ingredients_Lore_DragonsTongue			|A bright orange flower from the volcanic tundra of Eastmarch. A potion made from it helps you stand against fire, a dragon's breath included.
+UI_Ingredients_Lore_DwarvenOil				|Oil drained from the broken automatons that still guard the Dwemer ruins. After all these centuries it still runs.
+UI_Ingredients_Lore_Ectoplasm				|The glowing residue a ghost leaves behind when it's laid to rest. Destruction mages are fond of it.
+UI_Ingredients_Lore_ElvesEar				|A plant with long, pointed leaves that give it its name. Archers make good use of it.
+UI_Ingredients_Lore_EyeOfSabreCat			|Taken from a sabre cat, one of the most dangerous hunters in Skyrim. Despite where it comes from, it restores both stamina and health.
+UI_Ingredients_Lore_FalmerEar				|Taken from the Falmer, the blind elves of Skyrim's deepest caves. A grim trophy, but a useful one for anyone who picks locks.
+UI_Ingredients_Lore_FireSalts				|The fiery remains of a flame atronach, still warm with the fire that made it. Mages pay well for them.
+UI_Ingredients_Lore_FlyAmanita				|A red mushroom spotted with white, a familiar sight in Skyrim's caves. Its effects range from warding off fire to driving people into a frenzy.
+UI_Ingredients_Lore_FrostMirriam			|A hardy herb of the snowy north, growing where little else will. It helps the drinker go unnoticed.
+UI_Ingredients_Lore_FrostSalts				|The icy remains of a frost atronach, and among the most valuable ingredients there are. Conjurers like them for the way they lengthen a summons.
+UI_Ingredients_Lore_Garlic					|A kitchen staple, hung in strings in many Skyrim homes. Old wisdom says it keeps vampires away; alchemists know it better for helping wounds heal.
+UI_Ingredients_Lore_GiantLichen				|A grey-green lichen that clings to the rocks in the marshes of Hjaalmarch. Much of what it does is harmful, but it restores magicka too.
+UI_Ingredients_Lore_GiantsToe				|The toe of a giant, taken at great risk from one of the herders who drive their mammoths across the plains. Fittingly, it lets you carry more.
+UI_Ingredients_Lore_GlowDust				|The shimmering dust left when a wisp or wispmother is destroyed. It still gives off a faint light of its own.
+UI_Ingredients_Lore_GlowingMushroom			|A luminous fungus that lights the caves and Dwemer ruins beneath Skyrim, nowhere more than Blackreach.
+UI_Ingredients_Lore_GrassPod				|The seed pod of the spiky grass that grows in northern Skyrim. Light and common, it's useful to mages who work with Alteration.
+UI_Ingredients_Lore_HagravenClaw			|A claw from a hagraven, one of the crones who trade their humanity for power and keep company with the Forsworn. Enchanters value it.
+UI_Ingredients_Lore_HagravenFeathers		|Feathers from a hagraven. They carry something of the creature's foul magic, which conjurers find useful.
+UI_Ingredients_Lore_HangingMoss				|A grey moss that hangs in curtains from the trees of Skyrim's damp forests and marshes.
+UI_Ingredients_Lore_HawkBeak				|Taken from the hawks that circle over Skyrim's plains and mountains. It takes a good bow to bring one down.
+UI_Ingredients_Lore_HawkFeathers			|Feathers from a hawk, light and strong. Alchemists use them for potions of light armour and a light step.
+UI_Ingredients_Lore_Histcarp				|A fish whose name recalls the Hist of Black Marsh, though it's quite at home in Skyrim's waters. Useful for breathing underwater.
+UI_Ingredients_Lore_Honeycomb				|A piece of comb from a beehive, dripping with honey. Good to eat, and better still for anyone who wants a sturdier guard.
+UI_Ingredients_Lore_HumanFlesh				|Flesh taken from the dead by those who feed on it, Namira's cannibals among them. Best not to ask where any particular piece came from.
+UI_Ingredients_Lore_HumanHeart				|A human heart, cut out for dark rites. Only a handful are to be found in Skyrim, in the lairs of those who use them.
+UI_Ingredients_Lore_IceWraithTeeth			|The teeth of an ice wraith, the serpent-like spirits of Skyrim's snowfields and frozen peaks. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_ImpStool				|A cave mushroom with tall, narrow caps. Most of what it does is harmful, though it can heal as well.
+UI_Ingredients_Lore_JarrinRoot				|The only one in Skyrim, handed over by Astrid for the Dark Brotherhood's plot against the Emperor. Every one of its effects is harmful.
+UI_Ingredients_Lore_JazbayGrapes			|A small purple grape that grows wild in Eastmarch, around Windhelm. Mages favour it for their magicka.
+UI_Ingredients_Lore_JuniperBerries			|Blue-black berries from the juniper bushes on the hillsides of the Reach. Archers and the wounded both have uses for them.
+UI_Ingredients_Lore_LargeAntlers			|A large set of antlers taken from an elk. Hunters and alchemists both keep them.
+UI_Ingredients_Lore_Lavender				|A purple flower that grows wild on the plains around Whiterun. Its scent calms, and its effects help guard against magic.
+UI_Ingredients_Lore_LunaMothWing			|The pale green wing of a luna moth, a night-flying moth of Skyrim's woods. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_MoonSugar				|The sweet crystals the Khajiit bring from Elsweyr, and the stuff skooma is made from. It can't be found in the wild; Khajiit traders are the only source.
+UI_Ingredients_Lore_MoraTapinella			|A shelf fungus that grows on fallen logs and stumps in Skyrim's forests. Illusionists use it to strengthen their spells.
+UI_Ingredients_Lore_MudcrabChitin			|A piece of a mudcrab's shell. Mudcrabs are everywhere along Skyrim's shores, and anyone who's walked by a river has met one.
+UI_Ingredients_Lore_NamirasRot				|A cave mushroom named for Namira, the Daedric Prince of decay and of all that disgusts. Despite that, one of its effects is good for picking locks.
+UI_Ingredients_Lore_Nightshade				|A dark-leaved plant with drooping purple flowers, at home in shaded woods. Every herbalist's first lesson is to leave it alone, and every poisoner's is the opposite. Ingun Black-Briar in Riften wants some for her studies.
+UI_Ingredients_Lore_Nirnroot				|A plant that grows by water and gives off a faint chime, so it's often heard before it's seen. It's named after Nirn itself, and Ingun Black-Briar in Riften wants some for her studies.
+UI_Ingredients_Lore_NordicBarnacle			|A barnacle scraped from the clusters that grow on rocks and wrecks in or near Skyrim's waters. Useful for breathing underwater.
+UI_Ingredients_Lore_OrangeDartwing			|An orange dragonfly that darts over streams and ponds. Like its blue cousin, it's prized by pickpockets.
+UI_Ingredients_Lore_Pearl					|A pearl from a clam on the sea or river bed. Lovely to look at, though an alchemist sees past the shine.
+UI_Ingredients_Lore_PineThrushEgg			|The small egg of a pine thrush, taken from nests in Skyrim's forests. A burglar's breakfast: it makes locks easier to pick.
+UI_Ingredients_Lore_PowderedMammothTusk		|Ground from the tusks of the mammoths that giants herd across Skyrim's plains. It helps the drinker move unseen.
+UI_Ingredients_Lore_PurpleMountainFlower	|The purple variety of the mountain flowers that grow all over Skyrim. It helps the drinker move unseen.
+UI_Ingredients_Lore_RedMountainFlower		|The red variety of mountain flower, common along Skyrim's roads and hills. Mages use it for their magicka.
+UI_Ingredients_Lore_RiverBetty				|A small fish of Skyrim's streams. Its effects are an odd mix of help and harm.
+UI_Ingredients_Lore_RockWarblerEgg			|The egg of a rock warbler, found in nests among the cliffs and crags. Good for anyone who fights with one hand.
+UI_Ingredients_Lore_SabreCatTooth			|A long fang taken from a sabre cat. Smiths keep them, since brewed right they help at the forge.
+UI_Ingredients_Lore_SaltPile				|Plain salt, found in the barrels and sacks of kitchens and storerooms. Cooks use it every day; alchemists less often, but it has its uses.
+UI_Ingredients_Lore_ScalyPholiota			|A fungus with scaly caps that grows on old logs and tree stumps. Illusionists favour it.
+UI_Ingredients_Lore_SilversidePerch			|A common perch with silvery sides, found in Skyrim's rivers and lakes. It restores stamina and keeps out the cold.
+UI_Ingredients_Lore_SkeeverTail				|The tail of a skeever, the oversized rats of every cellar and sewer in Skyrim. Most of what it does is harmful.
+UI_Ingredients_Lore_SlaughterfishEgg		|An egg of the slaughterfish, the sharp-toothed fish that hunt Skyrim's waters, gathered from their nests in the shallows.
+UI_Ingredients_Lore_SlaughterfishScales		|Scales from a slaughterfish, the toothy fish that bite any swimmer they find. Tough and overlapping, they make for potions of tougher armour.
+UI_Ingredients_Lore_SmallAntlers			|A small set of antlers from a deer. Common enough, and useful to healers.
+UI_Ingredients_Lore_SmallPearl				|A small pearl from a clam. Worth less than a full pearl, but just as handy at the alchemy table.
+UI_Ingredients_Lore_Snowberries				|Bright red berries from the bushes of Skyrim's coldest holds. They guard against fire, frost and shock alike.
+UI_Ingredients_Lore_SpiderEgg				|Taken from the egg sacs of the frostbite spiders that infest Skyrim's caves. Archers have a use for it.
+UI_Ingredients_Lore_SprigganSap				|Sap from a spriggan, one of the tree spirits that guard Skyrim's forests. Smiths and enchanters both prize it.
+UI_Ingredients_Lore_SwampFungalPod			|A pod from the fungus that grows in the marshes of Hjaalmarch. It can paralyse, and it can heal.
+UI_Ingredients_Lore_Taproot					|The root of a spriggan, taken once it falls. Mages use it to strengthen illusions and restore magicka.
+UI_Ingredients_Lore_ThistleBranch			|A spiny branch from the thistles of Skyrim's colder holds. Warriors in heavy armour have a use for it.
+UI_Ingredients_Lore_TorchbugThorax			|The glowing body of a torchbug, one of the small insects that light up Skyrim's evenings.
+UI_Ingredients_Lore_TrollFat				|Fat from a troll, greasy and rank. Warriors with two-handed weapons have a use for it.
+UI_Ingredients_Lore_TundraCotton			|White tufts from the cotton that grows on the tundra around Whiterun. Merchants like it, since it makes for better prices.
+UI_Ingredients_Lore_VampireDust				|The ash a vampire leaves when it's destroyed. One of the few ingredients that can make you invisible, and it cures disease too.
+UI_Ingredients_Lore_VoidSalts				|The dark remains of a storm atronach, among the most valuable ingredients there are. Mages want it for their magicka.
+UI_Ingredients_Lore_Wheat					|Grown on farms all over Skyrim, and on Whiterun's above all. A healer's staple.
+UI_Ingredients_Lore_WhiteCap				|A cave mushroom with a pale cap. Warriors in heavy armour have a use for it.
+UI_Ingredients_Lore_WispWrappings			|The ragged wrappings left when a wispmother is destroyed. Destruction mages put them to good use.
+UI_Ingredients_Lore_RotScale				|One of the strange roots sold by the Khajiit traders who carry Rare Curios. Nasty stuff, good only for poisons.
+UI_Ingredients_Lore_ScreamingMaw			|A rare root from far-off lands, sold by the Khajiit traders who carry Rare Curios. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_ThornHook				|A rare hooked root from the Khajiit traders' stock of Rare Curios. It's as good for harming as for healing.
+UI_Ingredients_Lore_AncestorMothWing		|The wing of an ancestor moth, the moths of the Ancestor Glade that the Moth Priests call on to read the Elder Scrolls. It shares all four effects with blue butterfly wings.
+UI_Ingredients_Lore_ChaurusHunterAntennae	|Antennae from a chaurus hunter, the winged kind of chaurus that serves the Falmer. It shares all four effects with blue butterfly wings and ancestor moth wings.
+UI_Ingredients_Lore_Gleamblossom			|A softly glowing flower. It can frighten or paralyse a foe, and it helps wounds heal.
+UI_Ingredients_Lore_PoisonBloom				|A plant whose name is a fair warning: most of what it does is harmful.
+UI_Ingredients_Lore_YellowMountainFlower	|The yellow mountain flower, rarer than its red, blue and purple cousins. Healers use it.
+UI_Ingredients_Lore_HawksEgg				|An egg taken from a hawk's nest. It shares all four effects with the humble chicken's egg.
+UI_Ingredients_Lore_SalmonRoe				|The eggs of the salmon that leap up Skyrim's waterfalls, caught as they jump. Useful for breathing underwater.
+UI_Ingredients_Lore_AshCreepCluster			|A creep cluster that thrives in the ash covering Solstheim. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_AshHopperJelly			|Jelly from an ash hopper, one of the big insects that leap about Solstheim's ashlands.
+UI_Ingredients_Lore_AshenGrassPod			|The pod of the spiky grass that grows in Solstheim's ash. A thief's friend: it helps with locks and with sneaking.
+UI_Ingredients_Lore_BoarTusk				|A tusk from a bristleback, one of the wild boars of Solstheim that the rieklings ride into battle.
+UI_Ingredients_Lore_BurntSprigganWood		|Charred wood from a burnt spriggan, a spriggan scorched and twisted by the ash of Solstheim.
+UI_Ingredients_Lore_EmperorParasolMoss		|Moss gathered from the giant emperor parasol mushrooms around Tel Mithryn, where the Telvanni grow their towers.
+UI_Ingredients_Lore_FelsaadTernFeathers		|Feathers from a felsaad tern, a seabird of Solstheim's coasts.
+UI_Ingredients_Lore_NetchJelly				|Jelly from a netch, the floating creatures of Solstheim that the Dunmer herd for their leather.
+UI_Ingredients_Lore_Scathecraw				|A spiky plant of Solstheim's ashlands. Every one of its effects is harmful.
+UI_Ingredients_Lore_SpawnAsh				|The ash left by an ash spawn, one of the ash creatures that plague Solstheim.
+UI_Ingredients_Lore_TramaRoot				|The root of the trama, a thorny shrub of Solstheim.
+
+----------------------------------------------------------------------------
+-- UI: Effect lore (UI_Ingredients_Effect_*)
+----------------------------------------------------------------------------
+UI_Ingredients_Effect_CureDisease				|Clears every disease you've caught, from the rattles to ataxia. Cheaper than a shrine, and it doesn't mind which god you pray to.
+UI_Ingredients_Effect_DamageHealth				|A plain poison: it hurts whoever it touches, once.
+UI_Ingredients_Effect_DamageMagicka				|Drains the target's magicka at once, leaving a mage short for their next spell.
+UI_Ingredients_Effect_DamageMagickaRegen		|Slows the target's magicka coming back for a while. Cruel on a mage in a long fight.
+UI_Ingredients_Effect_DamageStamina				|Drains the target's stamina at once, so they can't run or swing as hard.
+UI_Ingredients_Effect_DamageStaminaRegen		|Slows the target's stamina coming back for a while.
+UI_Ingredients_Effect_Fear						|Sends anyone up to a certain level fleeing from the fight for a while.
+UI_Ingredients_Effect_FortifyAlteration			|Alteration spells last longer while it lasts.
+UI_Ingredients_Effect_FortifyBarter				|Better prices from merchants for a while. Drink it before you haggle, not after.
+UI_Ingredients_Effect_FortifyBlock				|Your shield or weapon takes more of each blow while it lasts.
+UI_Ingredients_Effect_FortifyCarryWeight		|Lets you carry more for a while. Many an adventurer has drunk one just to get the loot home.
+UI_Ingredients_Effect_FortifyConjuration		|Your conjured creatures and weapons stay longer while it lasts.
+UI_Ingredients_Effect_FortifyDestruction		|Destruction spells hit harder while it lasts.
+UI_Ingredients_Effect_FortifyEnchanting			|Anything you enchant while it lasts comes out stronger. Brew it, drink it, then go to the enchanter.
+UI_Ingredients_Effect_FortifyHealth				|Raises your health for a while.
+UI_Ingredients_Effect_FortifyHeavyArmor			|Raises your Heavy Armor skill for a while.
+UI_Ingredients_Effect_FortifyIllusion			|Illusion spells are stronger while it lasts.
+UI_Ingredients_Effect_FortifyLightArmor			|Raises your Light Armor skill for a while.
+UI_Ingredients_Effect_FortifyLockpicking		|Locks are easier to pick while it lasts.
+UI_Ingredients_Effect_FortifyMagicka			|Raises your magicka for a while.
+UI_Ingredients_Effect_FortifyMarksman			|Bows do more damage while it lasts.
+UI_Ingredients_Effect_FortifyOneHanded			|One-handed weapons do more damage while it lasts.
+UI_Ingredients_Effect_FortifyPickpocket			|Pickpocketing is easier while it lasts.
+UI_Ingredients_Effect_FortifyRestoration		|Restoration spells are stronger while it lasts.
+UI_Ingredients_Effect_FortifySmithing			|Weapons and armour you improve while it lasts come out better. Drink it at the grindstone or the workbench.
+UI_Ingredients_Effect_FortifySneak				|You're harder to notice while it lasts.
+UI_Ingredients_Effect_FortifyStamina			|Raises your stamina for a while.
+UI_Ingredients_Effect_FortifyTwoHanded			|Two-handed weapons do more damage while it lasts.
+UI_Ingredients_Effect_Frenzy					|Drives anyone up to a certain level to attack whatever's near them, friend or foe, for a while.
+UI_Ingredients_Effect_Invisibility				|You can't be seen for a short while. Attacking, casting or using anything breaks it at once, so it buys you a way past, not a way through.
+UI_Ingredients_Effect_LingeringDamageHealth		|A poison that keeps hurting every second for a while after it strikes.
+UI_Ingredients_Effect_LingeringDamageMagicka	|Drains the target's magicka every second for a while.
+UI_Ingredients_Effect_LingeringDamageStamina	|Drains the target's stamina every second for a while.
+UI_Ingredients_Effect_Paralysis					|Leaves the target unable to move for a few seconds.
+UI_Ingredients_Effect_RavageHealth				|A concentrated poison that does its damage all at once.
+UI_Ingredients_Effect_RavageMagicka				|A concentrated poison that tears into the target's magicka.
+UI_Ingredients_Effect_RavageStamina				|A concentrated poison that tears into the target's stamina.
+UI_Ingredients_Effect_RegenerateHealth			|Health comes back faster for a while.
+UI_Ingredients_Effect_RegenerateMagicka			|Magicka comes back faster for a while.
+UI_Ingredients_Effect_RegenerateStamina			|Stamina comes back faster for a while.
+UI_Ingredients_Effect_ResistFire				|Takes the edge off fire for a while, a dragon's breath included.
+UI_Ingredients_Effect_ResistFrost				|Takes the edge off frost for a while. Welcome on the mountain roads and against frost dragons.
+UI_Ingredients_Effect_ResistMagic				|Turns aside part of every spell cast at you for a while.
+UI_Ingredients_Effect_ResistPoison				|Turns aside part of any poison for a while.
+UI_Ingredients_Effect_ResistShock				|Takes the edge off shock for a while, storm mages and their atronachs included.
+UI_Ingredients_Effect_RestoreHealth				|Heals you at once. The potion every adventurer carries.
+UI_Ingredients_Effect_RestoreMagicka			|Restores your magicka at once.
+UI_Ingredients_Effect_RestoreStamina			|Restores your stamina at once.
+UI_Ingredients_Effect_Slow						|The target moves at half speed for a while.
+UI_Ingredients_Effect_Waterbreathing			|Lets you breathe underwater for a while.
+UI_Ingredients_Effect_WeaknessToFire			|The target takes more fire damage for a while. Poison a blade with it, then follow up with flames.
+UI_Ingredients_Effect_WeaknessToFrost			|The target takes more frost damage for a while.
+UI_Ingredients_Effect_WeaknessToMagic			|The target takes more from every spell for a while.
+UI_Ingredients_Effect_WeaknessToPoison			|The target takes more from poisons for a while, so it goes well with a second one.
+UI_Ingredients_Effect_WeaknessToShock			|The target takes more shock damage for a while.
+
+----------------------------------------------------------------------------
+-- UI: Creation ingredient lore (UI_Ingredients_Lore_*, UI_Ingredients_Effect_*)
+----------------------------------------------------------------------------
+UI_Ingredients_Lore_Angelfish				|A bright, flat-bodied fish caught by those who fish Skyrim's waters. Archers and the wounded both have a use for it.
+UI_Ingredients_Lore_AnglerLarvae			|The young of an angler fish, small enough to slip off the hook. Useful for breathing underwater.
+UI_Ingredients_Lore_Glassfish				|A fish so pale you can almost see through it, caught with a rod and some patience. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_Goldfish				|A small golden fish, an unlikely catch in Skyrim's cold waters. It helps warriors in heavy armour and keeps out the cold.
+UI_Ingredients_Lore_JuvenileMudcrab			|A young mudcrab, small enough to come up on a fishing line. Even this small, it lets you carry more.
+UI_Ingredients_Lore_LyretailAnthias			|A colourful fish with a long, lyre-shaped tail, caught by those who fish Skyrim's waters. Mages use it for Alteration and Conjuration alike.
+UI_Ingredients_Lore_Pearlfish				|A fish with a pearly sheen, caught by those who fish Skyrim's waters. Smiths and one-handed fighters have a use for it.
+UI_Ingredients_Lore_PygmySunfish			|A tiny sunfish, barely worth the bait. Healers can still make something of it.
+UI_Ingredients_Lore_Spadefish				|A broad, flat fish caught by those who fish Skyrim's waters. It heals and cures disease, and thieves like it for their hands.
+UI_Ingredients_Lore_BlissBugThorax			|The glowing thorax of a bliss bug, one of the insects of the Shivering Isles. Illusionists have a use for it.
+UI_Ingredients_Lore_FlameStalk				|A fiery plant of the Shivering Isles. It heals, guards against the cold, and can make you invisible.
+UI_Ingredients_Lore_GreenButterflyWing		|The wing of a green butterfly from the Shivering Isles. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_PurpleButterflyWing		|The wing of a purple butterfly from the Shivering Isles. It helps health, magicka and stamina all come back faster.
+UI_Ingredients_Lore_AlocasiaFruit			|An exotic fruit sold by Khajiit caravans among their Rare Curios. It can make a small light, and it helps you recover.
+UI_Ingredients_Lore_Ambrosia				|A rare and wholesome food, said to be fit for the gods, sold by Khajiit caravans among their Rare Curios. Everything it does is good for you.
+UI_Ingredients_Lore_AsterBloomCore			|The core of an aster bloom, sold by Khajiit caravans among their Rare Curios. Warriors like it for their armour and guard.
+UI_Ingredients_Lore_BittergreenPetals		|Petals of the bittergreen plant, sold by Khajiit caravans among their Rare Curios. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_BlindWatchersEye		|A clouded eye, sold by Khajiit caravans among their Rare Curios. Mages use it for their magicka and against hostile spells.
+UI_Ingredients_Lore_BlisterPodCap			|The cap of a blister pod, sold by Khajiit caravans among their Rare Curios. It sharpens sight in the dark and can make you invisible.
+UI_Ingredients_Lore_BogBeacon				|A glowing swamp fungus, sold by Khajiit caravans among their Rare Curios. It can frighten as well as protect.
+UI_Ingredients_Lore_BunglersBane			|A fungus with a well-earned name, sold by Khajiit caravans among their Rare Curios. Most of what it does is harmful.
+UI_Ingredients_Lore_Chokeberry				|A deadly berry sold by Khajiit caravans, and by Babette, who knows exactly what it's for. Every one of its effects is harmful.
+UI_Ingredients_Lore_Chokeweed				|A tough weed sold by Khajiit caravans among their Rare Curios. It restores stamina and cures disease.
+UI_Ingredients_Lore_CodaFlower				|A flower sold by Khajiit caravans among their Rare Curios. Most of what it does is harmful, though it lets you carry more.
+UI_Ingredients_Lore_Comberry				|A sweet berry sold by Khajiit caravans among their Rare Curios. Mages like it for magicka and for Destruction.
+UI_Ingredients_Lore_CongealedPutrescence	|A foul, congealed mass sold by Khajiit caravans among their Rare Curios. Conjurers find it useful, as conjurers often do with foul things.
+UI_Ingredients_Lore_CorkbulbRoot			|A root sold by Khajiit caravans among their Rare Curios. It can paralyse, and eating one is said to save you from a long fall.
+UI_Ingredients_Lore_DaedraSilk				|Silk spun by a Daedra, sold by Khajiit caravans among their Rare Curios. It can paralyse, and it can make you invisible.
+UI_Ingredients_Lore_DaedraVenin				|Venom taken from a Daedra, sold by Khajiit caravans among their Rare Curios. Mostly harmful, but Destruction mages value it.
+UI_Ingredients_Lore_DaedrothTeeth			|Teeth from a daedroth, the crocodile-headed Daedra, sold by Khajiit caravans among their Rare Curios.
+UI_Ingredients_Lore_DreughWax				|Wax from a dreugh, the shelled creatures of the sea, sold by Khajiit caravans among their Rare Curios. Smiths and enchanters both prize it.
+UI_Ingredients_Lore_ElytraIchor				|Ichor from an elytra, the giant insects of the Shivering Isles, sold by Khajiit caravans among their Rare Curios. One of the few ingredients that can make you invisible.
+UI_Ingredients_Lore_FirePetal				|A fiery red petal sold by Khajiit caravans among their Rare Curios. It guards against fire and against hostile spells.
+UI_Ingredients_Lore_FungusStalk				|A stalk of fungus sold by Khajiit caravans among their Rare Curios. Good for health and stamina, and for breathing underwater.
+UI_Ingredients_Lore_GnarlBark				|Bark from a gnarl, the walking trees of the Shivering Isles, sold by Khajiit caravans among their Rare Curios.
+UI_Ingredients_Lore_GoldKanet				|A golden flower sold by Khajiit caravans among their Rare Curios. It can paralyse, and eating one is said to save you from a long fall.
+UI_Ingredients_Lore_HackleLoLeaf			|A leaf sold by Khajiit caravans among their Rare Curios. It restores stamina and helps healers.
+UI_Ingredients_Lore_HeartOfOrder			|A heart taken from the servants of Order in the Shivering Isles, sold by Khajiit caravans among their Rare Curios. Everything it does is good for a fighter.
+UI_Ingredients_Lore_HungerTongue			|The tongue of a hunger, one of the Daedra of the Shivering Isles, sold by Khajiit caravans among their Rare Curios. It cures both disease and poison.
+UI_Ingredients_Lore_HydnumAzureGiantSpore	|A spore from a giant blue mushroom, sold by Khajiit caravans among their Rare Curios. It can make a small light, and it's good for your health.
+UI_Ingredients_Lore_HyphaFacia				|A shelf fungus sold by Khajiit caravans among their Rare Curios. Most of what it does is harmful, but it guards against magic too.
+UI_Ingredients_Lore_ImpGall					|The gall of an imp, sold by Khajiit caravans among their Rare Curios. Merchants like it for better prices.
+UI_Ingredients_Lore_KagoutiHide				|Hide from a kagouti, sold by Khajiit caravans among their Rare Curios. It sharpens sight in the dark and lets you carry more.
+UI_Ingredients_Lore_KreshFiber				|Fibres of the kresh weed, sold by Khajiit caravans among their Rare Curios. A thief's friend, for sneaking and pickpocketing.
+UI_Ingredients_Lore_Lichor					|Sold by Khajiit caravans among their Rare Curios. Everything it does is for a mage's magicka.
+UI_Ingredients_Lore_LuminousRussula			|A glowing mushroom sold by Khajiit caravans among their Rare Curios. Mostly harmful, but useful for breathing underwater.
+UI_Ingredients_Lore_Marshmerrow				|A marsh reed with a sweet pith, sold by Khajiit caravans among their Rare Curios. It heals and lets you carry more.
+UI_Ingredients_Lore_MinotaurHorn			|The horn of a minotaur, sold by Khajiit caravans among their Rare Curios. It guards against poison and helps you recover.
+UI_Ingredients_Lore_OgresTeeth				|The teeth of an ogre, sold by Khajiit caravans among their Rare Curios. It guards against poison and helps wounds heal.
+UI_Ingredients_Lore_RedKelpGasBladder		|The gas bladder from a red kelp, sold by Khajiit caravans among their Rare Curios. Useful for breathing underwater, and it cures disease.
+UI_Ingredients_Lore_RedwortFlower			|A red flower sold by Khajiit caravans among their Rare Curios. It cures poison and can make you invisible.
+UI_Ingredients_Lore_Roobrush				|A scrubby plant sold by Khajiit caravans among their Rare Curios. It helps you sneak, and cures poison.
+UI_Ingredients_Lore_Saltrice				|A hardy grain sold by Khajiit caravans among their Rare Curios. Plain food, but good for health, stamina and magicka.
+UI_Ingredients_Lore_ScalonFin				|The fin of a scalon, sold by Khajiit caravans among their Rare Curios. Useful for breathing underwater, though most of what it does is harmful.
+UI_Ingredients_Lore_ScribJelly				|Jelly from a scrib, the young of the kwama, sold by Khajiit caravans among their Rare Curios. It cures both disease and poison.
+UI_Ingredients_Lore_ScribJerky				|Dried scrib meat, sold by Khajiit caravans among their Rare Curios. Good for stamina, and for breathing underwater.
+UI_Ingredients_Lore_SloadSoap				|Soap made by the sload, sold by Khajiit caravans among their Rare Curios. Most people would rather not ask what's in it; conjurers are not most people.
+UI_Ingredients_Lore_StoneflowerPetals		|Petals of the stoneflower, sold by Khajiit caravans among their Rare Curios. Enchanters and mages both have a use for them.
+UI_Ingredients_Lore_VoidEssence				|Sold by Khajiit caravans among their Rare Curios. Everything it does is good for your health and stamina.
+UI_Ingredients_Lore_WatchersEye				|A staring eye, sold by Khajiit caravans among their Rare Curios. It sharpens sight in the dark and guards against hostile spells.
+UI_Ingredients_Lore_WispStalkCaps			|The caps of the wisp stalk mushroom, sold by Khajiit caravans among their Rare Curios. Most of what it does is harmful.
+UI_Ingredients_Lore_WitheringMoon			|A pale flower sold by Khajiit caravans among their Rare Curios. Mages use it against hostile spells.
+UI_Ingredients_Lore_WormsHeadCap			|The cap of a worm's head mushroom, sold by Khajiit caravans among their Rare Curios. Good for locks and for seeing in the dark.
+UI_Ingredients_Lore_MortFlesh				|Rotten flesh from the risen dead of the plague. Every one of its effects is harmful.
+UI_Ingredients_Lore_SteelBlueEntoloma		|A steel-blue mushroom that came to Skyrim with the goblins. Destruction mages have a use for it.
+UI_Ingredients_Lore_Bloodgrass				|A red grass from the planes of Oblivion. It can make you invisible.
+UI_Ingredients_Lore_Harrada					|A thorny vine from the planes of Oblivion. Every one of its effects is harmful.
+UI_Ingredients_Lore_SpiddalStick			|A spiny stick from the planes of Oblivion. Most of what it does is harmful.
+UI_Ingredients_Lore_CorruptedHumanHeart		|A human heart twisted by dark magic. Every one of its effects is harmful.
+UI_Ingredients_Lore_SimonRodaynesHeart		|The heart of Simon Rodayne, at the centre of the Spell Knight's tale. Every one of its effects is harmful.
+UI_Ingredients_Lore_HealingSalts			|Salts with a healer's reputation. To an alchemist they're no different from a plain salt pile.
+UI_Ingredients_Lore_IronwoodFruit			|The fruit of the ironwood tree. It heals, restores magicka and guards against fire.
+UI_Ingredients_Lore_WildGrassPod			|A grass pod gathered in the Dwemer ruin of Runoff Caverns. It's no different from the grass pods of northern Skyrim.
+UI_Ingredients_Effect_CurePoison			|Stops a poison doing any more harm.
+UI_Ingredients_Effect_FortifyPersuasion		|Raises your Speech skill for a while.
+UI_Ingredients_Effect_Light					|Makes a small light around you for a while.
+UI_Ingredients_Effect_NightEye				|Lets you see better in the dark for a while.
+UI_Ingredients_Effect_SpellAbsorption		|Gives you a chance to absorb the magicka of hostile spells for a while.
+
+----------------------------------------------------------------------------
+-- UI: Mixing Station (UI_Mix_*)
+----------------------------------------------------------------------------
+UI_Ingredients_TabMixing	|Mixing Station
+UI_Mix_ShowAll				|Every ingredient, not just the ones you carry
+UI_Mix_NoneCarried			|You aren't carrying any ingredients.
+UI_Mix_Carried{}			|x{}
+UI_Mix_NotCarried			|Not carried
+UI_Mix_Empty				|Pick an ingredient
+UI_Mix_Power{}{}			|Alchemy {}  ·  Fortify Alchemy {}%
+UI_Mix_Purity				|Purity: no harmful effects in potions, no helpful ones in poisons
+UI_Mix_PickTwo				|Pick two or three ingredients to see what they brew.
+UI_Mix_Nothing				|These don't share any effects, so they won't brew anything.
+UI_Mix_PotionOf{}			|Potion of {}
+UI_Mix_PoisonOf{}			|Poison of {}
+UI_Mix_Worth{}				|{} gold
+UI_Mix_TeachesOne			|Brewing it teaches you a new effect
+UI_Mix_Teaches{}			|Brewing it teaches you {} new effects
+UI_Mix_Wasted				|One of these shares nothing with the others and would be used up for nothing
+UI_Mix_CanMake				|What you can make
+UI_Mix_CanMakeNone			|Nothing you carry brews together yet.
+UI_Mix_UpTo{}				|up to {} gold
+UI_Mix_Also{}				|also {}
+
+----------------------------------------------------------------------------
+-- UI: ItemPictures (UI_ItemPictures_*)
+----------------------------------------------------------------------------
+UI_ItemPictures_Header			|Pictures
+UI_ItemPictures_Setting			|Pictures of items
+UI_ItemPictures_SettingInfo		|Shows each item's own model next to it on the item pages, the ingredient pages and the Mixing Station, drawn from the game with your mesh and texture mods. Switching it on offers to prepare them all.
+UI_ItemPictures_OfferTitle		|Prepare pictures of every item?
+UI_ItemPictures_OfferText		|Each picture is drawn from the item's model the first time it's needed, which can slow the first visit to a long page. Preparing them all now takes a minute or two, and they're kept for next time. You can also do it later from here.
+UI_ItemPictures_Later			|Later
+UI_ItemPictures_Preparing		|Preparing pictures
+UI_ItemPictures_Progress{}{}	|{} of {}
+UI_ItemPictures_Starting		|Getting started...
+UI_ItemPictures_Ready			|Pictures ready
+UI_ItemPictures_ReadyText		|Every item's picture is drawn and kept for next time.
+UI_ItemPictures_Cancel			|Cancel
+UI_ItemPictures_Close			|Close
+UI_ItemPictures_PrepareSetting	|Prepare every picture
+UI_ItemPictures_PrepareInfo		|Draws the picture of every item that doesn't have one kept yet, so no page waits for them the first time it's opened. A window shows how far it's got, and you can cancel it.
+UI_ItemPictures_RedrawSetting	|Redraw every picture
+UI_ItemPictures_RedrawInfo		|Throws away the kept pictures and draws them all again. Use it after changing mesh or texture mods. It asks first.
+UI_ItemPictures_Prepare			|Prepare now
+UI_ItemPictures_Redraw			|Redraw
+UI_ItemPictures_RedrawTitle		|Redraw every picture?
+UI_ItemPictures_RedrawText		|Every kept picture is thrown away and drawn again from its model, with the mesh and texture mods you have now. It takes a minute or two.
+
+----------------------------------------------------------------------------
+-- UI: Guided tour (UI_Tour_*)
+----------------------------------------------------------------------------
+UI_Tour_OfferTitle			|New here?
+UI_Tour_OfferText			|Completionist's window has a new look. A short tour shows you where everything is: the pages, the panels, the Cell Scanner and the settings. You can take it again any time from Settings.
+UI_Tour_Take				|Take the tour
+UI_Tour_NotNow				|Not now
+UI_Tour_Next				|Next
+UI_Tour_Back				|Back
+UI_Tour_Skip				|End tour
+UI_Tour_Finish				|Finish
+UI_Tour_Step{}{}			|{} of {}
+UI_Tour_WelcomeTitle		|Welcome
+UI_Tour_WelcomeText			|This tour takes you round the window one part at a time. It takes about a minute, and you can end it whenever you like.
+UI_Tour_SidebarTitle		|Pages
+UI_Tour_SidebarText			|Everything Completionist tracks is listed here: quests, collections, locations and the patches you have installed. Pick a page to open it, or step through them with the shoulder buttons on a controller. Double-click the grip beside the list to fold it away and give the page more room.
+UI_Tour_OverviewTitle		|Overview
+UI_Tour_OverviewText		|With no page open you see the overview: how far you've got in each group, and the things you found most recently.
+UI_Tour_HeaderTitle			|Find and Cell Scanner
+UI_Tour_HeaderText			|Find searches every page at once, so you can look anything up by name. Cell Scanner shows what's still to find around you. We'll look at it in a moment.
+UI_Tour_EntriesTitle		|The list
+UI_Tour_EntriesText			|Each page lists what there is to find, and marks what you've found. Point at a row to see its details below. Depending on the page, the button at the end of a row ticks it off by hand, pins it, or tracks its location on your map.
+UI_Tour_PageToolsTitle		|Filter and sort
+UI_Tour_PageToolsText		|Type here to filter the list by name, hide what you've already found, or change the order. The bar shows how far you've got on this page. Pages with tabs switch between them with the triggers on a controller.
+UI_Tour_DescriptionTitle	|Details
+UI_Tour_DescriptionText		|Details of the row you point at: where to find it and anything else worth knowing. Drag the grip on its top edge to make it taller or shorter, or double-click the grip to fold it.
+UI_Tour_CellListTitle		|Cell Scanner
+UI_Tour_CellListText		|The Cell Scanner lists everything still to find in the area you're in, with how far away it is. Pick an item to put a quest marker on it, so you can walk straight to it.
+UI_Tour_CellKey{}			|Open it straight from the game with {}.
+UI_Tour_CellNoKey			|You can give it its own key in Settings, to open it straight from the game.
+UI_Tour_CellOptionsTitle	|Scanner options
+UI_Tour_CellOptionsText		|Set how the scanner searches, what it leaves out, and how pinned items are shown. Click the heading to fold the options away.
+UI_Tour_CellBarTitle		|Scanner bar
+UI_Tour_CellBarText			|Show height tells you whether an item is above or below you. Rescan looks again, and in an interior you can exclude the cell once you're done with it. Keep on screen puts the scanner on screen while you play: that's next.
+UI_Tour_OnScreenTitle		|Always on screen
+UI_Tour_OnScreenText		|While you play, Keep on screen shows the Cell Scanner on screen: the closest things still to find, how far away they are and which way to go. Completionist's own notifications show here too, when you find something. Settings > Window turns the panel on or off, and Place UI elements there moves it and the notifications anywhere you like, or joins the two.
+UI_Tour_SettingsTitle		|Settings
+UI_Tour_SettingsText		|The cog at the top opens Settings: the theme, size, keys, controller buttons, notifications and what Completionist tracks. Point at a setting and the panel at the bottom explains what it does.
+UI_Tour_PadTitle			|With a controller
+UI_Tour_PadText				|Everything works with a controller too. This bar shows what each button does, and changes as you move around the window.
+UI_Tour_OpenKey{}			|Open this window with {}.
+UI_Tour_DoneTitle			|That's the tour
+UI_Tour_DoneText			|You can take it again any time with this button.
+UI_SettingsSection_Help		|Help
+UI_Setting_Tour				|Guided tour
+UI_Setting_TourStart		|Take the tour
+UI_SettingHint_Tour			|Shows you round the window one part at a time: the pages, the panels, the Cell Scanner and the settings.

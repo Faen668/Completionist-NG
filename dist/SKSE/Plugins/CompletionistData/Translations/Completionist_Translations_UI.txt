@@ -1,0 +1,326 @@
+----------------------------------------------------------------------------
+-- COMPLETIONIST - IN-GAME WINDOW
+-- File: Completionist_Translations_UI.txt   (lines ported from the MCM keep their MCM key; plain text, no HTML)
+--
+-- Each line is:   KEY <TAB> | text
+--
+-- HOW TO TRANSLATE
+--   * Change only the text AFTER the '|'. Never change the KEY in front of it.
+--   * Keep the TAB between the KEY and the '|': a key ends at its first TAB.
+--   * '\n' is a line break. Keep each one where it is.
+--   * {} is filled in by Completionist (a number or a name). Keep every {} in your text.
+--   * Keep '~~~ Name ~~~' headings exactly as they are.
+--   * Lines starting with '-' are comments and are ignored.
+--   * The order of the lines does not matter: lines are matched by KEY.
+--   * Set your editor's tab width to 4 and the columns line up.
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+-- About
+----------------------------------------------------------------------------
+$AuthorThanks		|Thanks for downloading Completionist, an automatic quest and item tracker for Skyrim and its DLC.
+$DLLVersion{}		|DLL plugin version: {}
+$PatchesInstalled{}	|Installed patches: {}
+
+----------------------------------------------------------------------------
+-- General Settings
+----------------------------------------------------------------------------
+$MCMPageSettings				|General Settings
+$MCMPageSettingsHeader			|Completionist Settings
+$MCMPageSettingsHeader2			|Faction & Start Settings
+$State_RadiantQuestsText		|Radiant quests
+$State_RadiantQuestsInfo		|Choose a type of radiant (repeatable) quest, then set how many times its quests need to be completed before they show as completed.
+$RadiantChoice01				|Favor Quests
+$RadiantChoice02				|Bounty Quests
+$RadiantChoice03				|Thieves Guild Quests
+$RadiantChoice04				|Dawnguard Quests
+$RadiantChoice05				|Legacy of the Dragonborn Quests
+$RadiantChoice06				|Vigilant Quests
+$RadiantChoice07				|The Companions Quests
+$RadiantChoice08				|College of Winterhold Quests
+$RadiantChoice09				|Dark Brotherhood Quests
+$RadiantChoice10				|Fishing in Skyrim Quests
+$RadiantChoice11				|The Blades Quests
+$State_RadiantCounterText		|Favor Quests
+$State_RadiantCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nSell Chopped Wood, Sell Mined Ore, Gold to a Beggar, Drinks to a Drunk, Sell Harvested Crops.\n\nDefault: 5 times.
+$State_BountyCounterText		|Bounty Quests
+$State_BountyCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nKill the Bandit Leader, Kill the Giant, Kill the Dragon, Kill the Forsworn Leader.\n\nDefault: 5 times.
+$State_TGRCounterText			|Thieves Guild Quests
+$State_TGRCounterInfo			|The following repeatable quests only show as completed once you have finished them this many times:\n\nThe Bedlam Job, The Burglary Job, The Fishing Job, The Heist Job, The Numbers Job, The Shill Job, The Sweep Job.\n\nDefault: 5 times.
+$State_DLC1CounterText			|Dawnguard Quests
+$State_DLC1CounterInfo			|The following repeatable quests only show as completed once you have finished them this many times:\n\nA Jarl's Justice, Cleansing Light, Hide and Seek, Hunting the Monster, Preemptive Strike, Rescue, Ancient Power, Culling the Beast, Deceiving the Herd, New Allegiances, Protecting the Bloodline, The Hunt.\n\nDefault: 5 times.
+$State_LOTDCounterText			|Legacy of the Dragonborn Quests
+$State_LOTDCounterInfo			|The following repeatable quests only show as completed once you have finished them this many times:\n\nFinders Keepers, Research Project, One Man's Junk, Relic Hunt.\n\nDefault: 5 times.
+$State_VigilantCounterText		|Vigilant Quests
+$State_VigilantCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nAll 13 quests on the Vigilant Radiant Quests page.\n\nDefault: 5 times.
+$State_CompanionsCounterText	|Companions Quests
+$State_CompanionsCounterInfo	|The following repeatable quests only show as completed once you have finished them this many times:\n\nAll Companions quests listed under the Radiant section.\n\nDefault: 5 times.
+$State_CollegeCounterText		|College of Winterhold Quests
+$State_CollegeCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nAll College of Winterhold quests listed under the Radiant section.\n\nDefault: 5 times.
+$State_DBCounterText			|Dark Brotherhood Quests
+$State_DBCounterInfo			|The following repeatable quests only show as completed once you have finished them this many times:\n\nAll Dark Brotherhood quests listed under the Radiant section.\n\nDefault: 5 times.
+$State_FishingCounterText		|Fishing in Skyrim Quests
+$State_FishingCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nAll Fishing quests listed under the Radiant section.\n\nDefault: 4 times.
+$State_TheBladesCounterText		|The Blades Quests
+$State_TheBladesCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nDragon Hunting and Dragon Research.\n\nDefault: 5 times.
+$TreatBooksAsItemsState_Text	|I hate reading books
+$TreatBooksAsItemsState_Info	|Treats books as items: they're marked as completed as soon as you pick them up.\n\nDefault: off.
+$DGFaction						|Dawnguard faction
+$DGFactionInfo					|Shows the quests for the faction you joined during the Dawnguard quest Bloodline.
+$LDFaction						|Legacy of the Dragonborn start
+$LDFactionInfo					|Adds the start quests for the new life you chose.
+$NOFaction						|Not installed
+$MenuChoiceDefault				|Make your choice
+$MenuChoice03					|Dawnguard
+$MenuChoice04					|Vampires
+$MenuChoice05					|Vanilla Start
+$MenuChoice06					|Solitude Docks Start
+$MenuChoice07					|Guildmaster Start
+
+----------------------------------------------------------------------------
+-- Quest pages
+----------------------------------------------------------------------------
+$Header0				|Story Quests
+$Header2				|Towns & Cities
+$Header3				|Guilds & Factions
+$Header4				|Dungeons & Misc
+$Header5				|Legacy of the Dragonborn
+$HeaderU				|Mod Added Patches
+$MCMPageMain			|Main Quests
+$MCMPageMainCW			|Main Quests (CW)
+$MCMPageMainDG			|Main Quests (DG)
+$MCMPageMainDB			|Main Quests (DB)
+$MCMPageMainDawnstar	|Dawnstar
+$MCMPageMainFalkreath	|Falkreath
+$MCMPageMainMarkarth	|Markarth
+$MCMPageMainMorthal		|Morthal
+$MCMPageMainRavenRock	|Raven Rock
+$MCMPageMainRiften		|Riften
+$MCMPageMainSkaal		|Skaal Village
+$MCMPageMainSolitude	|Solitude
+$MCMPageMainTelMithryn	|Tel Mithryn
+$MCMPageMainThirsk		|Thirsk
+$MCMPageMainWhiterun	|Whiterun
+$MCMPageMainWindhelm	|Windhelm
+$MCMPageMainWinterhold	|Winterhold
+$MCMPageMainCompanions	|Companions
+$MCMPageMainCollege		|College of Winterhold
+$MCMPageMainThieves		|Thieves Guild
+$MCMPageMainBrotherhood	|Dark Brotherhood
+$MCMPageMainDawnguard	|Dawnguard
+$MCMPageMainVampires	|Vampires
+$MCMPageMainDungeons	|Dungeons
+$MCMPageMainMiscSide	|Misc (Side)
+$MCMPageMainMiscRadi	|Misc (Radiant)
+$MCMPageMainMiscDG		|Misc (Dawnguard)
+$MCMPageMainMiscDB		|Misc (Dragonborn)
+$MCMPageMainSmall		|Small Towns
+$MCMPageMuseum			|Museum Quests
+$MCMPageExplorer		|Explorers Guild
+$MCMPageMisc			|Misc Quests
+$MCMPageNotes			|Auryen's Notes
+$MCMPageJournals		|Sanamia's Journals
+$HeaderO				|Vanilla Tracking
+
+----------------------------------------------------------------------------
+-- Settings pages (HUD, Museum Mode, UI, Cell Scanner, Completion Log)
+----------------------------------------------------------------------------
+$NotificationSettingsText						|Notification Settings
+$ModNotificationsItems							|Item Notifications
+$ModNotificationsBooks							|Book Notifications
+$ModNotificationsColourEnabled					|Notification Colour
+$State_MapMarkerSettingsHead					|Map Marker Settings
+$State_MarkerDetectionText						|Quest Markers (Radius)
+$State_MarkerDetectionInfo						|When you track a location, NPC or item from the pages, this is how close you have to get before its quest marker is done.
+$State_MarkerDetectionCancelText				|Quest Markers (Clear All)
+$MCMPageSettingsHeader4							|Completion Log Settings
+$CompletionLog_ColoursEnabledText				|Coloured Log Entries
+$CompletionLog_QuestsTextColourText				|Quest Entries
+$CompletionLog_QuestsTextColourInfo				|Sets the text colour for completion log entries from completed quests.
+$CompletionLog_ItemsTextColourText				|Items Entries
+$CompletionLog_ItemsTextColourInfo				|Sets the text colour for completion log entries from collected items.
+$ModNotificationsSpecial						|Special Notifications
+$ModNotificationsStartup						|Startup Notifications
+$ModNotificationsColour							|Notification Colour
+$ModNotificationsColourInfo						|Use this option to customize the colour of Completionist's Notifications\nDefault: Orange
+$CompletionLog_PrefixEnabledText				|Log Entry Time Prefix
+$CompletionLog_BooksTextColourText				|Books Entries
+$CompletionLog_BooksTextColourInfo				|Sets the text colour for completion log entries from read books / tomes.
+$CompletionLog_SpecialTextColourText			|Special Entries
+$CompletionLog_SpecialTextColourInfo			|Sets the text colour for completion log entries from special entires such as pets, homes & shrines.
+$MainHUDMode_Header_N							|Main HUD (New Items)
+$State_OverRide_N_Name_Text						|Tag Text
+$ColourState_N_Generic_Text_Crosshair			|Tag Colour
+$ColourState_N_Generic_Info_Crosshair			|Sets the display colour of the Dynamic Crosshair Tags for valid collectable items.
+$MenuHUDMode_Header_N							|Menu Mode (New Items)
+$InventoryModeOptions_PrAp_Text_N				|Format
+$InventoryModeOptions_PrAp_Info_N				|Use this menu to customize how the names of collectable / new items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrFx_Text_N				|Prefix
+$InventoryModeOptions_PrFx_Info_N				|Use this menu to customize how the prefix of collectable / new item names are displayed in menus.\nDefault 'One Star (*)'
+$ColourState_N_Generic_Text_Menus				|Colour
+$ColourState_N_Generic_Info_Menus				|Sets the text colour of collectable / new items in Menu's.
+$MainHUDMode_Header_G							|Main HUD (Found Items)
+$State_OverRide_G_Name_Text						|Tag Text
+$ColourState_G_Generic_Text_Crosshair			|Tag Colour
+$ColourState_G_Generic_Info_Crosshair			|Sets the display colour of the Dynamic Crosshair Tags for valid collected items.
+$MenuHUDMode_Header_G							|Menu Mode (Found Items)
+$InventoryModeOptions_PrAp_Text_G				|Format
+$InventoryModeOptions_PrAp_Info_G				|Use this menu to customize how the names of collected / found items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrFx_Text_G				|Prefix
+$InventoryModeOptions_PrFx_Info_G				|Use this menu to customize how the prefix of collected / found item names are displayed in menus.\nDefault 'One Star (*)'
+$ColourState_G_Generic_Text_Menus				|Colour
+$ColourState_G_Generic_Info_Menus				|Sets the text colour of collected / found items in Menu's.
+$MenuHUDMode_Header_DB							|Museum Mode Settings
+$State_MuseumModeEnabled_Text					|Museum Mode
+$State_TreatOccupiedAsDisplayed_Text			|Treat Occuiped As Displayed
+$MenuHUDMode_Header_N_DB						|Museum Mode (Displayable Items)
+$State_OverRide_Displayable_Name_Text			|Tag Text
+$ColourState_Displayable_Text					|Tag Colour
+$ColourState_Displayable_Info					|Sets the colour of 'Museum Displayable' items that are not yet displayed, for the crosshair tag and, with a colour format, the item lists.
+$InventoryModeOptions_PrAp_Text_Displayable		|Format
+$InventoryModeOptions_PrAp_Info_Displayable		|Use this menu to customize how the names of 'Museum Displayable' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrFx_Text_Displayable		|Prefix
+$InventoryModeOptions_PrFx_Info_Displayable		|Use this menu to customize how the prefix of 'Museum Displayable' item names are displayed in menus.\nDefault 'One Star (*)'
+$MenuHUDMode_Header_G_DB						|Museum Mode (Displayed Items)
+$State_OverRide_Displayed_Name_Text				|Tag Text
+$ColourState_Displayed_Text						|Tag Colour
+$ColourState_Displayed_Info						|Sets the colour of 'Museum Displayable' items that are already displayed, for the crosshair tag and, with a colour format, the item lists.
+$InventoryModeOptions_PrAp_Text_Displayed		|Format
+$InventoryModeOptions_PrAp_Info_Displayed		|Use this menu to customize how the names of 'Museum Displayed' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrFx_Text_Displayed		|Prefix
+$InventoryModeOptions_PrFx_Info_Displayed		|Use this menu to customize how the prefix of 'Museum Displayed' item names are displayed in menus.\nDefault 'One Star (*)'
+$State_OverRide_Occupied_Name_Text				|Tag Text
+$ColourState_Occupied_Text						|Tag Colour
+$ColourState_Occupied_Info						|Sets the colour of 'Museum Displayable' items where a variation is already displayed, for the crosshair tag and, with a colour format, the item lists.
+$InventoryModeOptions_PrAp_Text_Occupied		|Format
+$InventoryModeOptions_PrAp_Info_Occupied		|Use this menu to customize how the names of 'Museum Display Occupied' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrFx_Text_Occupied		|Prefix
+$InventoryModeOptions_PrFx_Info_Occupied		|Use this menu to customize how the prefix of 'Museum Display Occupied' item names are displayed in menus.\nDefault 'One Star (*)'
+$CellScanner_SettingsHeader5					|Item Pinning
+$CellScanner_Setting_Pinning_Enabled_Text		|Item Pinning
+$CellScanner_Setting_Pinning_Marker_Text		|Use Quest Markers
+$CellScanner_SettingsHeader2					|Searching
+$CellScanner_Setting_Range_Info					|Sets the range that should be used when scanning for collectables in an exterior location.
+$CellScanner_SettingsHeader4					|Exclusions
+$CellScanner_Setting_ExcludeAlchemy_Text		|Exclude Alchemy Items
+$CellScanner_Setting_ExcludeIngredients_Text	|Exclude Ingredients
+$CellScanner_Setting_ExcludeArmor_Text			|Exclude Armor Pieces
+$CellScanner_Setting_ExcludeBooks_Text			|Exclude Books / Spell Tomes
+$CellScanner_ExcludedHeader						|Excluded Cells
+$CellScanner_ExcludedReferencesHeader			|Excluded References In Current Cell
+$CellScanner_Pinning_Sound_Info					|Plays a sound when a pinned item is found in the cell you are scanning letting you know its there.\nDefault Enabled
+$CellScanner_Setting_Pinning_Effect_Text		|Visual Effect
+$CellScanner_Setting_ExcludeMiscItems_Text		|Exclude Miscellaneous Items
+$CellScanner_Setting_ExcludeWeapons_Text		|Exclude Weapons
+$MCMPageSettings2								|UI Settings
+$MCMPageSettings3								|HUD Settings
+$MCMPageSettings4								|Cell Scanner
+$MCMPageSettings5								|Completion Log
+$MCMPageSettings6								|Museum Mode
+$Log_DateSelection_Text							|Select Date
+$Log_DateSelection_Info							|Allows you to select which date to view completion logs for:
+$EmptyLogView									|Nothing to see here...
+$CellScanner_CurrentPin							|Current Pin
+$CellScanner_Setting_EXCL_None					|Excluded Cells WIll Appear Here.
+$CellScanner_Setting_EXRF_None					|Excluded References WIll Appear Here.
+$CellScanner_Setting_EXCL_Text{}				|Exclude Current Cell: - [{}]
+$CellScanner_Setting_EXCL_TextERROR				|Exclude Current Cell: - Must Be In An Interior Cell
+$SearchTypeChoice01								|Name Contains
+$SearchTypeChoice02								|Name Starts With
+$SearchTypeChoice03								|Exact Match
+$InventoryMode_PrAp_Menu0						|Append ('Name' *)
+$InventoryMode_PrAp_Menu1						|Prepend (* 'Name')
+$InventoryMode_PrAp_Menu2						|Wrap (* 'Name' *)
+$InventoryMode_PrAp_Menu3						|(Colour) Append ('Name' *)
+$InventoryMode_PrAp_Menu4						|(Colour) Prepend (* 'Name')
+$InventoryMode_PrAp_Menu5						|(Colour) Wrap (* 'Name' *)
+$InventoryMode_PrAp_Menu6						|Colour Only
+$InventoryMode_PrAp_Menu7						|Vanilla (No Edits)
+$InventoryMode_PrFx_Menu0						|One Star (*)
+$CellScannerSoundList0							|No Sound Effect
+$InventoryMode_PrFx_Menu1						|Two Stars (**)
+$CellScannerSoundList1							|Sci-Fi
+$InventoryMode_PrFx_Menu2						|Three Stars (***)
+$CellScannerSoundList2							|Surprise
+
+----------------------------------------------------------------------------
+-- Settings help texts
+----------------------------------------------------------------------------
+$CellScanner_Setting_ExcludeAlchemy_Info		|Click to enable / disable searching for Alchemy Items when scanning a cell.
+$CellScanner_Setting_ExcludeIngredients_Info	|Click to enable / disable searching for Ingredients when scanning a cell, including plants.
+$CellScanner_Setting_ExcludeArmor_Info			|Click to enable / disable searching for Armor Pieces when scanning a cell.
+$CellScanner_Setting_ExcludeBooks_Info			|Click to enable / disable searching for Books, Notes and Spell Tomes when scanning a cell.
+$CellScanner_Setting_ExcludeMiscItems_Info		|Click to enable / disable searching for Misc Items when scanning a cell.
+$CellScanner_Setting_ExcludeWeapons_Info		|Click to enable / disable searching for Weapons when scanning a cell.
+$CellScanner_Setting_Pinning_ClearPin_Info		|Clears the assigned pin
+$CellScanner_Setting_Pinning_Effect_Info		|Adds a visual effect to pinned items or the holding container making them easier to spot.\nDefault: Enabled
+$CellScanner_Setting_Pinning_Enabled_Info		|Allows you to 'Pin' a collectable item by clicking on it in the MCM. Pinned items will be checked for when you use the cell scanner.\nDefault: Enabled
+$CellScanner_Setting_Pinning_Marker_Info		|Adds a misc journal entry with a quest marker on the pinned item or container holding it.\nDefault: Enabled
+$CompletionLog_ColoursEnabledInfo				|Allows you to enable / disable custom colour options for completed log entries.
+$CompletionLog_PrefixEnabledInfo				|Allows you to show / hide the log entries completion time.
+$ModNotificationsBooksInfo						|Receive notifications when the player reads a book tracked by Completionist for the first time\nDefault: Enabled
+$ModNotificationsColourEnabledInfo				|Enables/Disables Notification Colour\nDefault: Enabled
+$ModNotificationsItemsInfo						|Receive notifications when the player picks up a unique item tracked by Completionist\nDefault: Enabled
+$ModNotificationsSpecialInfo					|Receive notifications when the player performs a special action such as activating an undiscovered shrine or standing stone, acquiring a new pet, catching a new fish, learning a new dragon shout or word of power etc.\nDefault: Enabled
+$ModNotificationsStartupInfo					|Enables / Disables the startup notification when loading a saved game\nDefault: Enabled
+$State_OverRide_Displayable_Name_Info			|Sets the text of the Dynamic Crosshair Tag for museum displayable items.\nTyping '...' into the box will disable this tag.\nDefault: Displayable!
+$State_OverRide_Displayed_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayed items.\nTyping '...' into the box will disable this tag.\nDefault: Displayed!
+$State_OverRide_G_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collected items.\nTyping '...' into the box will disable this tag.\nDefault: Got It!
+$State_OverRide_N_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collectable items.\nTyping '...' into the box will disable this tag.\nDefault: Need It!
+$State_OverRide_Occupied_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayable items where a variation is already displayed.\nTyping '...' into the box will disable this tag.\nDefault: Need It!
+$State_MarkerDetectionCancelInfo				|Clears every location, NPC and item you're tracking from the pages.
+$State_MuseumModeEnabled_Info					|Controller for Museum Mode support within Completionist\nDefault: Enabled
+$State_TreatOccupiedAsDisplayed_Info			|Ignores the 'Occupied' settings and treats all occuiped item displays as 'Displayed'\nDefault: Disabled
+$CellScanner_Setting_EXCL_Highlight				|Click to remove this cell from the excluded locations list.
+$CellScanner_Setting_EXRF_Highlight				|Click to remove this reference from the excluded list.
+
+----------------------------------------------------------------------------
+-- Ported from Interface/Translations
+----------------------------------------------------------------------------
+$PickFactionErrorMSG				|This page requires configuration\n Please use the Menu in the 'General Settings' page to configure this page correctly. 
+$PickFactionErrorMSGCW				|This page will automatically populate once you have joined a side in the civil war.
+$ColourState_G_Generic_Enabled_Text	|Crosshair Tag & Menu Text :
+$ColourState_G_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collected items.\n Default Enabled
+$ColourState_N_Generic_Enabled_Text	|Crosshair Tag & Menu Text (New):
+$ColourState_N_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collectable items.\n Default Enabled
+$AddSkillBookHighlight{}{}			|~~~ {} ~~~\nReading this book increases your {} skill.
+$AddSpellTomeHighlight{}{}{}		|~~~ {} ~~~\nReading this tome teaches you the {} spell: '{}'.
+$AddLocationHighlight{}				|~~~ {} ~~~\nClick to add a quest marker at this location.
+$MCMPagePets						|Animals & Pets
+$MCMPageShouts						|Dragon Shouts
+$MCMPageTrainers					|Skill Trainers
+$MCMPageDragons						|Dragons
+$MCMPageHouses						|Player Homes
+$MCMPageShrines						|Shrines
+$MCMPageDoomstone					|Standing Stones
+$MCMPageBarenziah					|Stones of Barenziah
+$MCMPageAEnchantments				|Enchantments: (Armor)
+$MCMPageWEnchantments				|Enchantments: (Weapon)
+$MCMPageLocations1					|Locations: (A-G)
+$MCMPageLocations2					|Locations: (H-R)
+$MCMPageLocations3					|Locations: (S-Z)
+$MCMPageLocations4					|Locations: (Dawnguard)
+$MCMPageLocations5					|Locations: (Dragonborn)
+$PageHeaderAEnchantments			|Enchantments (Armor):
+$PageHeaderWEnchantments			|Enchantments (Weapon):
+$PageHeaderSEnchantments			|Enchantments (Summermyst):
+$PageHeaderDoomstone1				|Standing Stones:
+$PageHeaderShrines1					|Shrines:
+$PageHeaderShrines2					|Shrines (Wintersun):
+$PageHeaderShouts1					|Shouts (Vanilla):
+$PageHeaderShouts2					|Shouts (Thunderchild):
+$PageHeaderShouts3					|Shouts (Patches):
+$PageHeaderPlaces1					|Locations:
+$PageHeaderHouses1					|Player Homes:
+$PageHeaderPets1					|Adoptable Critters:
+$PageHeaderBarenziah1				|Stones of Barenziah:
+$HouseHighlight00					|~~~ Breezehome ~~~\nBreezehome can be purchased in Whiterun.
+$HouseHighlight01					|~~~ Heljarchen Hall ~~~\nHeljarchen Hall can be purchased in The Pale.
+$HouseHighlight02					|~~~ Hjerim ~~~\nHjerim can be purchased in Windhelm.
+$HouseHighlight03					|~~~ Honeyside ~~~\nHoneyside can be purchased in Riften.
+$HouseHighlight04					|~~~ Lakeview Manor ~~~\nLakeview Manor can be purchased in Falkreath.
+$HouseHighlight05					|~~~ Proudspire Manor ~~~\nProudspire Manor can be purchased in Solitude.
+$HouseHighlight06					|~~~ Severin Manor ~~~\nSeverin Manor can be acquired in Raven Rock.
+$HouseHighlight07					|~~~ Vlindrel Hall ~~~\nVlindrel Hall can be purchased in Markarth.
+$HouseHighlight08					|~~~ Windstad Manor ~~~\nWindstad Manor can be purchased in Hjaalmarch.
+$PetHighlight00{}{}					|~~~ {} ~~~\n{} can be brought home by adopted children.

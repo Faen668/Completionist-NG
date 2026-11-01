@@ -586,9 +586,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
-			std::size_t total;
+			std::size_t total{};
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
 				ERROR("Failed to read serialized form data: size");
+				return;
 			}
 
 			auto read = 0;
@@ -596,7 +597,8 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				RE::FormID form, base;
 				if (!a_intfc->ReadRecordData(&form, sizeof(form)) ||
 					!a_intfc->ReadRecordData(&base, sizeof(base))) {
-					continue;
+					ERROR("Failed to read serialized form data: pair");
+					return;
 				}
 
 				if (!form || !a_intfc->ResolveFormID(form, form)) {
@@ -693,9 +695,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
-			std::size_t total;
+			std::size_t total{};
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
 				ERROR("Failed to read serialized form data: size");
+				return;
 			}
 
 			auto read = 0;
@@ -705,12 +708,14 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
 					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
 					ERROR("Failed to read serialized form data: pair_size");
+					return;
 				}
 
 				key.resize(keySize);
 				val.resize(valSize);
 				if (!a_intfc->ReadRecordData(key.data(), keySize) || (valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
 					ERROR("Failed to read serialized form data: pair_data");
+					return;
 				}
 
 				data.try_emplace(key, val);
@@ -938,9 +943,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
-			std::size_t total;
+			std::size_t total{};
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
 				ERROR("Failed to read serialized form data: size");
+				return;
 			}
 
 			auto read = 0;
@@ -950,6 +956,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize)) ||
 					!a_intfc->ReadRecordData(&valSize, sizeof(valSize))) {
 					ERROR("Failed to read serialized form data: pair_size");
+					return;
 				}
 
 				key.resize(keySize);
@@ -957,6 +964,7 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				if (!a_intfc->ReadRecordData(key.data(), keySize) ||
 					(valSize && !a_intfc->ReadRecordData(val.data(), valSize))) {
 					ERROR("Failed to read serialized form data: pair_data");
+					return;
 				}
 
 				data.try_emplace(key, val);
@@ -1067,9 +1075,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 		virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 		{
-			std::size_t total;
+			std::size_t total{};
 			if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
 				ERROR("Failed to read serialized form data: size");
+				return;
 			}
 
 			auto read = 0;
@@ -1080,11 +1089,13 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 				std::size_t keySize;
 				if (!a_intfc->ReadRecordData(&keySize, sizeof(keySize))) {
 					ERROR("Failed to read serialized form data: keysize");
+					return;
 				}
 
 				key.resize(keySize);
 				if (!a_intfc->ReadRecordData(key.data(), keySize) || (!a_intfc->ReadRecordData(val))) {
 					ERROR("Failed to read serialized form data: pair_data");
+					return;
 				}
 
 				data.try_emplace(key, val);
@@ -1268,9 +1279,10 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 
 	virtual void Load(SKSE::SerializationInterface* a_intfc, std::string_view a_name) noexcept override
 	{
-		std::size_t total;
+		std::size_t total{};
 		if (!a_intfc->ReadRecordData(&total, sizeof(total))) {
 			ERROR("Failed to read serialized form data: size");
+			return;
 		}
 
 		auto read = 0;
@@ -1280,17 +1292,20 @@ constexpr auto DEFAULT_VARIATION_MAX = 13;
 			static RE::FormID cellID;
 			static std::string refName;
 			std::size_t refNameSize, locationSize;
-			if (!a_intfc->ReadRecordData(&refNameSize, sizeof(refNameSize)) || !a_intfc->ReadRecordData(&locationSize, sizeof(locationSize))) {
+			if (!a_intfc->ReadRecordData(&refNameSize, sizeof(refNameSize)) || !a_intfc->ReadRecordData(&locationSize, sizeof(locationSize)) || locationSize != sizeof(cellID)) {
 				ERROR("Failed to read serialized form data: pair_size");
+				return;
 			}
 
 			refName.resize(refNameSize);
 			if (!a_intfc->ReadRecordData(refName.data(), refNameSize) || (!a_intfc->ReadRecordData(&cellID, locationSize))) {
 				ERROR("Failed to read serialized form data: pair_data");
+				return;
 			}
 
 			if (!a_intfc->ReadRecordData(&formID, sizeof(formID))) {
 				ERROR("Failed to read serialized form data: formID");
+				return;
 			}
 
 			if (!formID || !a_intfc->ResolveFormID(formID, formID)) {
@@ -1373,8 +1388,10 @@ namespace Serialization
 				return;
 			}
 
+			// Laid out by a newer Completionist: reading it would mix up the data, so it isn't loaded
 			if (version > kVersion) {
-				ERROR("New version of save file detected, possbily using an outdated plugin?");
+				ERROR("This save was made with a newer version of Completionist. Its tracking data isn't loaded: update Completionist to get it back.");
+				return;
 			}
 
 			for (auto& [data, name] : ISerializable::ManagedData) {
