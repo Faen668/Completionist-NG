@@ -1164,8 +1164,9 @@ namespace CompletionistUI
 		//-- Completionist UI ( Begin Framed Panel ) --------
 		//---------------------------------------------------
 
-		// a_emblem: a detail panel, where a race theme puts its emblem in the empty corner
-		void BeginFramedPanel(const char* a_id, ImVec2 a_size, bool a_emblem = false) {
+		// a_emblem: a detail panel, where a race theme puts its emblem in the empty corner.
+		// a_underGrip: the panel sits below a resize grip (detail panels always do)
+		void BeginFramedPanel(const char* a_id, ImVec2 a_size, bool a_emblem = false, bool a_underGrip = false) {
 
 			const auto& palette = Themes::GetPalette();
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, InsetColour());
@@ -1189,6 +1190,39 @@ namespace CompletionistUI
 				Decor::PanelCorners(drawList, min, max);
 			}
 			drawList->PopClipRect();
+
+			// A wash of the accent from the top, an inner moulding and the theme's ornament on the
+			// top and bottom edges, so a long list isn't a bare box beside the overview's cards
+			if (!SkyUI()) {
+				const float fontSize = ImGui::GetFontSize();
+				const float height = max.y - min.y;
+				const float wash = std::min(height * 0.4f, fontSize * 12.0f);
+				const ImU32 tint = Colour(palette.accent, 0.07f);
+				const ImU32 clear = Colour(palette.accent, 0.0f);
+				drawList->AddRectFilledMultiColor(ImVec2(min.x + 1.0f, min.y + 1.0f), ImVec2(max.x - 1.0f, min.y + wash), tint, tint, clear, clear);
+				drawList->AddRectFilledMultiColor(ImVec2(min.x + 1.0f, max.y - wash * 0.5f), ImVec2(max.x - 1.0f, max.y - 1.0f), clear, clear, Colour(palette.accent, 0.035f), Colour(palette.accent, 0.035f));
+				const float inset = fontSize * 0.3f;
+				const float gap = fontSize * 1.2f;
+				const float midX = (min.x + max.x) * 0.5f;
+				const ImU32 moulding = Colour(palette.separator, 0.45f);
+				if (max.x - min.x > fontSize * 8.0f && height > fontSize * 4.0f) {
+					for (const float y : { min.y + inset, max.y - inset }) {
+						drawList->AddLine(ImVec2(min.x + inset + fontSize, y), ImVec2(midX - gap, y), moulding, 1.0f);
+						drawList->AddLine(ImVec2(midX + gap, y), ImVec2(max.x - inset - fontSize, y), moulding, 1.0f);
+					}
+					drawList->AddLine(ImVec2(min.x + inset, min.y + inset + fontSize), ImVec2(min.x + inset, max.y - inset - fontSize), moulding, 1.0f);
+					drawList->AddLine(ImVec2(max.x - inset, min.y + inset + fontSize), ImVec2(max.x - inset, max.y - inset - fontSize), moulding, 1.0f);
+					// Not on an edge that meets a resize grip, which has its own ornament
+					drawList->PushClipRect(ImVec2(min.x, min.y - fontSize), ImVec2(max.x, max.y + fontSize), false);
+					if (!a_emblem && !a_underGrip) {
+						Decor::Ornament(drawList, ImVec2(midX, min.y + inset), fontSize * 0.32f, Colour(palette.accent, 0.85f));
+					}
+					if (a_size.y >= 0.0f) {
+						Decor::Ornament(drawList, ImVec2(midX, max.y - inset), fontSize * 0.32f, Colour(palette.accent, 0.85f));
+					}
+					drawList->PopClipRect();
+				}
+			}
 
 			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 			ImGui::BeginChild("##Scroll", ImVec2(0.0f, 0.0f), ImGuiChildFlags_NavFlattened);
@@ -6117,7 +6151,7 @@ namespace CompletionistUI
 			_settingsChanged = true;
 		}
 		ImGui::SetCursorScreenPos(ImVec2(start.x, gapTop + a_gap));
-		BeginFramedPanel("##Shout", ImVec2(0.0f, a_height));
+		BeginFramedPanel("##Shout", ImVec2(0.0f, a_height), false, true);
 		auto* gripList = ImGui::GetWindowDrawList();
 		gripList->PushClipRect(ImVec2(start.x, gapTop), ImVec2(centreX * 2.0f - start.x, gapTop + a_gap + a_height), false);
 		DrawPanelGrip(gripList, centreX, gapTop + a_gap, gripWidth, gripHovered);
