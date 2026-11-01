@@ -16,89 +16,51 @@ namespace CompletionistUI::OrsimerDecor
 	{
 		constexpr float pi = std::numbers::pi_v<float>;
 
-		// Blackened iron, rust, bone, hide and the forge
-		constexpr ImU32 iron = IM_COL32(56, 54, 52, 255);
-		constexpr ImU32 ironLight = IM_COL32(124, 120, 114, 255);
-		constexpr ImU32 ironDark = IM_COL32(20, 19, 18, 255);
-		constexpr ImU32 rust = IM_COL32(150, 80, 42, 255);
-		constexpr ImU32 bone = IM_COL32(226, 212, 178, 255);
-		constexpr ImU32 boneShade = IM_COL32(150, 134, 102, 255);
-		constexpr ImU32 hide = IM_COL32(94, 66, 44, 255);
-		constexpr ImU32 hideDark = IM_COL32(46, 32, 22, 255);
-		constexpr ImU32 forge = IM_COL32(240, 140, 60, 255);
-
-		float Alpha(ImU32 a_colour) {
-
-			return ((a_colour >> IM_COL32_A_SHIFT) & 0xFF) / 255.0f;
-		}
+		// Blackened iron, bone, and the red the Orcs paint for war
+		constexpr ImU32 iron = IM_COL32(42, 42, 44, 255);
+		constexpr ImU32 ironLight = IM_COL32(118, 118, 120, 255);
+		constexpr ImU32 ironDark = IM_COL32(10, 10, 11, 255);
+		constexpr ImU32 bone = IM_COL32(226, 214, 186, 255);
+		constexpr ImU32 paint = IM_COL32(168, 34, 28, 255);
+		constexpr ImU32 smoke = IM_COL32(120, 116, 112, 255);
 
 		//---------------------------------------------------
 		//-- Orsimer Decor ( Fade At ) ----------------------
 		//---------------------------------------------------
 
 		// 0 at a run's ends, 1 through its middle
-		float FadeAt(float a_t) {
+		float FadeAt(float a_x, float a_from, float a_length) {
 
-			return std::pow(std::sin(std::clamp(a_t, 0.0f, 1.0f) * pi), 0.6f);
+			return std::pow(std::sin(std::clamp((a_x - a_from) / a_length, 0.0f, 1.0f) * pi), 0.6f);
 		}
 
 		//---------------------------------------------------
-		//-- Orsimer Decor ( Tusk ) -------------------------
+		//-- Orsimer Decor ( Fin ) --------------------------
 		//---------------------------------------------------
 
-		// A tusk rising from a_base and curving out to its point; a_facing is -1 or 1
-		std::vector<ImVec2> TuskOutline(ImVec2 a_base, float a_length, float a_facing) {
+		// A blade-shaped fin, as on Orcish armour: from a_base along a_angle, a bevel down its spine and a bone edge
+		void Fin(ImDrawList* a_drawList, ImVec2 a_base, float a_length, float a_angle, float a_width) {
 
-			const ImVec2 p0 = a_base;
-			const ImVec2 p1(a_base.x, a_base.y - a_length * 0.6f);
-			const ImVec2 p2(a_base.x + a_facing * a_length * 0.55f, a_base.y - a_length * 0.95f);
-			const float  width = a_length * 0.17f;
-			constexpr int steps = 12;
-			std::vector<ImVec2> spine;
-			for (int i = 0; i <= steps; ++i) {
-				const float t = static_cast<float>(i) / steps;
-				const float u = 1.0f - t;
-				spine.emplace_back(u * u * p0.x + 2.0f * u * t * p1.x + t * t * p2.x, u * u * p0.y + 2.0f * u * t * p1.y + t * t * p2.y);
-			}
-			std::vector<ImVec2> outline;
-			for (int i = 0; i <= steps; ++i) {
-				const auto  normal = NormalAt(spine, static_cast<std::size_t>(i));
-				const float half = width * (1.0f - static_cast<float>(i) / steps) * 0.5f;
-				outline.emplace_back(spine[i].x + normal.x * half, spine[i].y + normal.y * half);
-			}
-			for (int i = steps - 1; i >= 0; --i) {
-				const auto  normal = NormalAt(spine, static_cast<std::size_t>(i));
-				const float half = width * (1.0f - static_cast<float>(i) / steps) * 0.5f;
-				outline.emplace_back(spine[i].x - normal.x * half, spine[i].y - normal.y * half);
-			}
-			return outline;
-		}
-
-		// A bone tusk bound at its root with hide
-		void Tusk(ImDrawList* a_drawList, ImVec2 a_base, float a_length, float a_facing, float a_alpha) {
-
-			const auto outline = TuskOutline(a_base, a_length, a_facing);
-			for (const auto& point : outline) {
-				a_drawList->PathLineTo(point);
-			}
-			a_drawList->PathFillConcave(WithAlpha(bone, a_alpha));
-			// Shade down the inner curve, rings of age near the root
-			const std::size_t half = outline.size() / 2;
-			std::vector<ImVec2> inner(outline.begin() + static_cast<std::ptrdiff_t>(half), outline.end());
-			a_drawList->AddPolyline(inner.data(), static_cast<int>(inner.size()), WithAlpha(boneShade, a_alpha), ImDrawFlags_None, std::max(1.0f, a_length * 0.035f));
-			const float width = a_length * 0.17f;
-			for (int band = 0; band < 3; ++band) {
-				const float y = a_base.y - width * (0.25f + band * 0.32f);
-				a_drawList->AddLine(ImVec2(a_base.x - width * 0.55f, y), ImVec2(a_base.x + width * 0.55f, y + width * 0.12f), WithAlpha(hide, a_alpha), std::max(1.5f, width * 0.22f));
-			}
+			const ImVec2 along(std::cos(a_angle), std::sin(a_angle));
+			const ImVec2 side(-along.y, along.x);
+			const ImVec2 tip(a_base.x + along.x * a_length, a_base.y + along.y * a_length);
+			const ImVec2 left(a_base.x + side.x * a_width, a_base.y + side.y * a_width);
+			const ImVec2 right(a_base.x - side.x * a_width * 0.6f, a_base.y - side.y * a_width * 0.6f);
+			// The back edge kinks once, so it reads as forged rather than drawn
+			const ImVec2 kink(a_base.x + along.x * a_length * 0.55f + side.x * a_width * 0.75f, a_base.y + along.y * a_length * 0.55f + side.y * a_width * 0.75f);
+			const ImVec2 blade[4] = { left, kink, tip, right };
+			a_drawList->AddConvexPolyFilled(blade, 4, iron);
+			a_drawList->AddTriangleFilled(left, kink, ImVec2((a_base.x + tip.x) * 0.5f, (a_base.y + tip.y) * 0.5f), WithAlpha(ironLight, 0.35f));
+			a_drawList->AddLine(right, tip, bone, std::max(1.0f, a_width * 0.18f));
+			a_drawList->AddLine(a_base, tip, WithAlpha(ironDark, 0.8f), 1.0f);
 		}
 
 		//---------------------------------------------------
-		//-- Orsimer Decor ( Hide ) -------------------------
+		//-- Orsimer Decor ( Soot ) -------------------------
 		//---------------------------------------------------
 
-		// Backdrop: hides stretched across the wall, mottled and stitched, the forge glowing below
-		void Hides(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
+		// Backdrop: the soot-black wall of a forge, smoke rising in streaks, cracks running straight through the stone
+		void Soot(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 			const float width = a_max.x - a_min.x;
 			const float height = a_max.y - a_min.y;
@@ -106,46 +68,43 @@ namespace CompletionistUI::OrsimerDecor
 			a_drawList->PushClipRect(a_min, a_max, true);
 
 			const ImVec2 wall[4] = { a_min, ImVec2(a_max.x, a_min.y), a_max, ImVec2(a_min.x, a_max.y) };
-			GradientQuad(a_drawList, wall, { IM_COL32(40, 30, 22, 60), IM_COL32(40, 30, 22, 60), IM_COL32(14, 11, 9, 60), IM_COL32(14, 11, 9, 60) });
+			GradientQuad(a_drawList, wall, { IM_COL32(30, 30, 31, 70), IM_COL32(30, 30, 31, 70), IM_COL32(6, 6, 6, 70), IM_COL32(6, 6, 6, 70) });
 
-			// Mottling in the leather
-			Random    random{ 0x0A5Cu };
-			const int blotches = std::clamp(static_cast<int>(width * height / (size * size * 6.0f)), 20, 260);
-			for (int i = 0; i < blotches; ++i) {
-				const ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
-				const bool   light = random.Next() < 0.4f;
-				a_drawList->AddCircleFilled(at, size * random.Range(0.8f, 3.0f), WithAlpha(light ? hide : IM_COL32(0, 0, 0, 255), light ? 0.03f : 0.06f), 16);
+			Random random{ 0x0A5Cu };
+			// Smoke, wide and soft, thinning as it rises
+			const int plumes = std::clamp(static_cast<int>(width / (size * 7.0f)), 3, 30);
+			for (int i = 0; i < plumes; ++i) {
+				const float  x = a_min.x + width * random.Next();
+				const float  wide = size * random.Range(1.5f, 3.5f);
+				const float  lean = size * random.Range(-2.0f, 2.0f);
+				const ImVec2 quad[4] = { ImVec2(x - wide * 0.3f, a_max.y), ImVec2(x + wide * 0.3f, a_max.y), ImVec2(x + lean + wide, a_min.y), ImVec2(x + lean - wide, a_min.y) };
+				GradientQuad(a_drawList, quad, { WithAlpha(smoke, 0.06f), WithAlpha(smoke, 0.06f), WithAlpha(smoke, 0.0f), WithAlpha(smoke, 0.0f) });
 			}
-
-			// Seams where the hides meet, wandering, laced across
-			if (width > size * 20.0f) {
-				for (const float across : { 0.34f, 0.71f }) {
-					std::vector<ImVec2> seam;
-					float               x = a_min.x + width * across;
-					for (float y = a_min.y; y <= a_max.y + size; y += size * 1.5f) {
-						seam.emplace_back(x, y);
-						x += random.Range(-0.5f, 0.5f) * size;
-					}
-					a_drawList->AddPolyline(seam.data(), static_cast<int>(seam.size()), WithAlpha(IM_COL32(0, 0, 0, 255), 0.35f), ImDrawFlags_None, 2.0f);
-					for (const auto& point : seam) {
-						a_drawList->AddLine(ImVec2(point.x - size * 0.35f, point.y - size * 0.2f), ImVec2(point.x + size * 0.35f, point.y + size * 0.2f), WithAlpha(hide, 0.18f), 1.5f);
-					}
+			// Cracks: straight lengths, turning sharply
+			const int cracks = std::clamp(static_cast<int>(width * height / (size * size * 50.0f)), 4, 40);
+			for (int i = 0; i < cracks; ++i) {
+				ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
+				float  angle = random.Range(0.0f, pi * 2.0f);
+				for (int step = 0; step < 4; ++step) {
+					const float  reach = size * random.Range(0.8f, 2.0f);
+					const ImVec2 next(at.x + std::cos(angle) * reach, at.y + std::sin(angle) * reach);
+					a_drawList->AddLine(at, next, WithAlpha(IM_COL32(0, 0, 0, 255), 0.5f), 1.0f);
+					a_drawList->AddLine(ImVec2(at.x + 1.0f, at.y + 1.0f), ImVec2(next.x + 1.0f, next.y + 1.0f), WithAlpha(smoke, 0.06f), 1.0f);
+					angle += random.Range(0.5f, 1.1f) * (random.Next() < 0.5f ? -1.0f : 1.0f);
+					at = next;
 				}
 			}
 
-			// The forge, out of sight below
-			SoftSpot(a_drawList, ImVec2(a_min.x + width * 0.5f, a_max.y + size * 3.0f), std::max(width * 0.4f, size * 10.0f), WithAlpha(forge, 0.012f));
-
-			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.15f, IM_COL32(4, 3, 2, 210));
+			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.15f, IM_COL32(2, 2, 2, 220));
 			a_drawList->PopClipRect();
 		}
 
 		//---------------------------------------------------
-		//-- Orsimer Decor ( Iron Band ) --------------------
+		//-- Orsimer Decor ( Plate Band ) -------------------
 		//---------------------------------------------------
 
-		// One side of the frame: hammered iron plates, dented, riveted where they meet, lashed with hide
-		void IronBand(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_horizontal, std::uint32_t a_seed) {
+		// One side of the frame: angular iron plates, each end cut on a slant, teeth along the inner edge
+		void PlateBand(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_horizontal, bool a_teethDown, std::uint32_t a_seed) {
 
 			const float length = a_horizontal ? a_max.x - a_min.x : a_max.y - a_min.y;
 			const float depth = a_horizontal ? a_max.y - a_min.y : a_max.x - a_min.x;
@@ -156,150 +115,166 @@ namespace CompletionistUI::OrsimerDecor
 
 			Random random{ a_seed };
 			float  along = 0.0f;
+			bool   lean = false;
 			while (along < length) {
-				const float plate = depth * random.Range(3.0f, 4.5f);
-				const float end = std::min(length, along + plate);
-				a_drawList->AddRectFilled(at(along + 1.0f, 1.0f), at(end - 1.0f, depth - 1.0f), Shade(iron, random.Range(0.8f, 1.1f)));
-				a_drawList->AddLine(at(along + 1.0f, 1.5f), at(end - 1.0f, 1.5f), WithAlpha(ironLight, 0.5f), 1.0f);
-				// Hammer marks: a dark dent, lit on its lower lip
-				for (int dent = 0; dent < 3; ++dent) {
-					const ImVec2 spot = at(along + (end - along) * random.Range(0.2f, 0.8f), depth * random.Range(0.3f, 0.7f));
-					const float  radius = depth * random.Range(0.12f, 0.2f);
-					a_drawList->AddCircleFilled(spot, radius, WithAlpha(ironDark, 0.55f), 10);
-					a_drawList->PathArcTo(spot, radius, pi * 0.15f, pi * 0.85f, 6);
-					a_drawList->PathStroke(WithAlpha(ironLight, 0.35f), ImDrawFlags_None, 1.0f);
-				}
-				// Rust bleeding from the seam now and then
-				if (random.Next() < 0.4f) {
-					a_drawList->AddRectFilledMultiColor(at(end - depth * 0.9f, 1.0f), at(end - 1.0f, depth - 1.0f), WithAlpha(rust, 0.0f), WithAlpha(rust, 0.35f), WithAlpha(rust, 0.35f), WithAlpha(rust, 0.0f));
-				}
-				// Rivets either side of the seam
-				if (end < length) {
-					for (const float across : { depth * 0.3f, depth * 0.7f }) {
-						const ImVec2 rivet = at(end - depth * 0.22f, across);
-						a_drawList->AddCircleFilled(rivet, depth * 0.12f, ironDark, 8);
-						a_drawList->AddCircleFilled(ImVec2(rivet.x - depth * 0.025f, rivet.y - depth * 0.025f), depth * 0.08f, ironLight, 8);
-					}
-				}
-				along = end;
+				const float  plate = depth * random.Range(2.6f, 4.0f);
+				const float  slant = depth * 0.45f * (lean ? 1.0f : -1.0f);
+				const ImVec2 points[4] = { at(along + 1.5f, 1.0f), at(along + plate - 1.5f, 1.0f), at(along + plate - 1.5f + slant, depth - 1.0f), at(along + 1.5f + slant, depth - 1.0f) };
+				a_drawList->AddConvexPolyFilled(points, 4, Shade(iron, random.Range(0.85f, 1.15f)));
+				a_drawList->AddLine(points[0], points[1], WithAlpha(ironLight, 0.6f), 1.0f);
+				a_drawList->AddLine(points[1], points[2], WithAlpha(ironLight, 0.25f), 1.0f);
+				along += plate;
+				lean = !lean;
 			}
 
-			// Hide lashed round it
-			for (float x = depth * 7.0f; x + depth < length - depth * 5.0f; x += depth * 17.0f) {
-				const float wide = depth * 1.1f;
-				a_drawList->AddRectFilled(at(x, -1.0f), at(x + wide, depth + 1.0f), hide);
-				for (float wrap = 0.0f; wrap < wide; wrap += depth * 0.3f) {
-					a_drawList->AddLine(at(x + wrap, -1.0f), at(std::min(x + wide, x + wrap + depth * 0.25f), depth + 1.0f), hideDark, 1.0f);
-				}
+			// Teeth along the inner edge, pointing in
+			const float edge = a_teethDown ? depth : 0.0f;
+			const float point = a_teethDown ? depth * 1.35f : -depth * 0.35f;
+			const float tooth = depth * 0.6f;
+			for (float x = tooth; x < length - tooth; x += tooth * 2.2f) {
+				const ImVec2 left = at(x - tooth * 0.35f, edge);
+				const ImVec2 right = at(x + tooth * 0.35f, edge);
+				const ImVec2 tip = at(x, point);
+				a_drawList->AddTriangleFilled(left, tip, right, iron);
+				a_drawList->AddLine(left, tip, WithAlpha(ironLight, 0.5f), 1.0f);
 			}
 		}
 
 		//---------------------------------------------------
-		//-- Orsimer Decor ( Corner Plate ) -----------------
+		//-- Orsimer Decor ( War Paint ) --------------------
 		//---------------------------------------------------
 
-		// A thick iron plate at each corner, a spiked boss in the middle
-		void CornerPlate(ImDrawList* a_drawList, ImVec2 a_centre, float a_size) {
+		// Three slashes of red smeared across the iron, as a clan marks its gear
+		void WarPaint(ImDrawList* a_drawList, ImVec2 a_centre, float a_size) {
 
-			const ImVec2 min(a_centre.x - a_size, a_centre.y - a_size);
-			const ImVec2 max(a_centre.x + a_size, a_centre.y + a_size);
-			a_drawList->AddRectFilled(min, max, iron);
-			a_drawList->AddLine(ImVec2(min.x, min.y + 1.0f), ImVec2(max.x, min.y + 1.0f), WithAlpha(ironLight, 0.7f), 1.5f);
-			a_drawList->AddRect(min, max, ironDark, 0.0f, 0, 1.5f);
-			const float inset = a_size * 0.24f;
-			for (const auto& rivet : { ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), ImVec2(min.x + inset, max.y - inset) }) {
-				a_drawList->AddCircleFilled(rivet, a_size * 0.1f, ironLight, 8);
+			for (int slash = -1; slash <= 1; ++slash) {
+				const float  x = a_centre.x + static_cast<float>(slash) * a_size * 0.45f;
+				const ImVec2 from(x - a_size * 0.2f, a_centre.y - a_size * 0.45f);
+				const ImVec2 to(x + a_size * 0.2f, a_centre.y + a_size * 0.45f);
+				a_drawList->AddLine(from, to, WithAlpha(paint, 0.9f), std::max(1.5f, a_size * 0.2f));
+				a_drawList->AddLine(ImVec2(to.x - a_size * 0.04f, to.y), ImVec2(to.x + a_size * 0.02f, to.y + a_size * 0.15f), WithAlpha(paint, 0.7f), std::max(1.0f, a_size * 0.1f));
 			}
-			Spike(a_drawList, a_centre, a_size * 0.5f, ironLight);
+		}
+
+		//---------------------------------------------------
+		//-- Orsimer Decor ( Axe ) --------------------------
+		//---------------------------------------------------
+
+		// An Orcish war axe: a long haft, a broad blade swept back into spikes
+		void Axe(ImDrawList* a_drawList, ImVec2 a_head, float a_length, ImU32 a_colour) {
+
+			const ImVec2 foot(a_head.x - a_length * 0.35f, a_head.y + a_length);
+			a_drawList->AddLine(ImVec2(a_head.x, a_head.y - a_length * 0.08f), foot, a_colour, std::max(2.0f, a_length * 0.04f));
+			const float  s = a_length * 0.32f;
+			const ImVec2 blade[] = {
+				ImVec2(a_head.x, a_head.y - s * 0.35f), ImVec2(a_head.x + s * 0.9f, a_head.y - s * 0.8f), ImVec2(a_head.x + s * 0.75f, a_head.y - s * 0.2f),
+				ImVec2(a_head.x + s * 1.0f, a_head.y + s * 0.15f), ImVec2(a_head.x + s * 0.7f, a_head.y + s * 0.5f), ImVec2(a_head.x + s * 0.85f, a_head.y + s * 0.95f),
+				ImVec2(a_head.x, a_head.y + s * 0.35f),
+			};
+			for (const auto& point : blade) {
+				a_drawList->PathLineTo(point);
+			}
+			a_drawList->PathFillConcave(a_colour);
+			// The back spike
+			a_drawList->AddTriangleFilled(ImVec2(a_head.x, a_head.y - s * 0.2f), ImVec2(a_head.x - s * 0.6f, a_head.y - s * 0.05f), ImVec2(a_head.x, a_head.y + s * 0.2f), a_colour);
 		}
 	}
 
 	//---------------------------------------------------
-	//-- Orsimer Decor ( Rivet ) ------------------------
+	//-- Orsimer Decor ( Shard ) ------------------------
 	//---------------------------------------------------
 
-	// In place of the diamond: a round rivet head, lit on top
-	void Rivet(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled) {
+	// In place of the diamond: an angular iron shard, longer below than above
+	void Shard(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled) {
 
-		const float radius = a_radius * 0.85f;
+		const ImVec2 points[4] = {
+			ImVec2(a_centre.x + a_radius * 0.15f, a_centre.y - a_radius * 0.9f),
+			ImVec2(a_centre.x + a_radius * 0.75f, a_centre.y - a_radius * 0.1f),
+			ImVec2(a_centre.x - a_radius * 0.1f, a_centre.y + a_radius * 1.1f),
+			ImVec2(a_centre.x - a_radius * 0.75f, a_centre.y - a_radius * 0.05f),
+		};
 		if (!a_filled) {
-			a_drawList->AddCircle(a_centre, radius, a_colour, 12, std::max(1.0f, a_radius * 0.24f));
+			a_drawList->AddPolyline(points, 4, a_colour, ImDrawFlags_Closed, std::max(1.0f, a_radius * 0.22f));
 			return;
 		}
-		a_drawList->AddCircleFilled(a_centre, radius, a_colour, 12);
-		a_drawList->AddCircleFilled(ImVec2(a_centre.x - radius * 0.25f, a_centre.y - radius * 0.25f), radius * 0.38f, WithAlpha(IM_COL32(255, 244, 220, 255), 0.4f * Alpha(a_colour)), 8);
+		a_drawList->AddConvexPolyFilled(points, 4, a_colour);
+		a_drawList->AddTriangleFilled(points[3], points[0], points[1], WithAlpha(IM_COL32(255, 255, 255, 255), 0.25f * (((a_colour >> IM_COL32_A_SHIFT) & 0xFF) / 255.0f)));
 	}
 
 	//---------------------------------------------------
-	//-- Orsimer Decor ( Spike ) ------------------------
+	//-- Orsimer Decor ( Blades ) -----------------------
 	//---------------------------------------------------
 
-	// A boss with four short spikes, as on Orcish shields
-	void Spike(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour) {
+	// Four blades round a square boss, the upright ones longer, as the Orcs cut their marks
+	void Blades(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour) {
 
-		for (int spike = 0; spike < 4; ++spike) {
-			const float  angle = static_cast<float>(spike) * pi * 0.5f - pi * 0.5f;
+		for (int blade = 0; blade < 4; ++blade) {
+			const float  angle = static_cast<float>(blade) * pi * 0.5f - pi * 0.5f;
+			const float  reach = a_radius * (blade % 2 == 0 ? 1.0f : 0.7f);
 			const ImVec2 out(std::cos(angle), std::sin(angle));
 			const ImVec2 side(-out.y, out.x);
-			const ImVec2 tip(a_centre.x + out.x * a_radius, a_centre.y + out.y * a_radius);
-			const ImVec2 left(a_centre.x + (out.x * 0.35f + side.x * 0.24f) * a_radius, a_centre.y + (out.y * 0.35f + side.y * 0.24f) * a_radius);
-			const ImVec2 right(a_centre.x + (out.x * 0.35f - side.x * 0.24f) * a_radius, a_centre.y + (out.y * 0.35f - side.y * 0.24f) * a_radius);
+			const ImVec2 tip(a_centre.x + out.x * reach, a_centre.y + out.y * reach);
+			const ImVec2 left(a_centre.x + side.x * a_radius * 0.22f, a_centre.y + side.y * a_radius * 0.22f);
+			const ImVec2 right(a_centre.x + out.x * a_radius * 0.3f - side.x * a_radius * 0.1f, a_centre.y + out.y * a_radius * 0.3f - side.y * a_radius * 0.1f);
 			a_drawList->AddTriangleFilled(left, tip, right, a_colour);
 		}
-		a_drawList->AddCircleFilled(a_centre, a_radius * 0.45f, a_colour, 14);
-		a_drawList->AddCircleFilled(ImVec2(a_centre.x - a_radius * 0.12f, a_centre.y - a_radius * 0.12f), a_radius * 0.16f, WithAlpha(IM_COL32(255, 244, 220, 255), 0.35f * Alpha(a_colour)), 8);
+		const float  half = a_radius * 0.24f;
+		const ImVec2 square[4] = { ImVec2(a_centre.x, a_centre.y - half), ImVec2(a_centre.x + half, a_centre.y), ImVec2(a_centre.x, a_centre.y + half), ImVec2(a_centre.x - half, a_centre.y) };
+		a_drawList->AddConvexPolyFilled(square, 4, a_colour);
 	}
 
 	//---------------------------------------------------
-	//-- Orsimer Decor ( Marker ) -----------------------
+	//-- Orsimer Decor ( Anvil ) ------------------------
 	//---------------------------------------------------
 
-	// Needed / found: a tusk, outlined until it's found, then whole bone
-	void Marker(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill) {
+	// Needed / found: the anvil at the heart of every stronghold, sparks flying when it's found
+	void Anvil(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill) {
 
-		const float  length = a_size * 0.8f;
-		const ImVec2 base(a_centre.x - length * 0.18f, a_centre.y + length * 0.46f);
-		const auto   outline = TuskOutline(base, length, 1.0f);
+		const float  s = a_size;
+		const auto   at = [&](float a_x, float a_y) { return ImVec2(a_centre.x + a_x * s, a_centre.y + a_y * s); };
+		const ImVec2 outline[] = {
+			at(-0.46f, -0.13f), at(-0.2f, -0.2f), at(0.38f, -0.2f), at(0.38f, -0.06f), at(0.14f, -0.01f), at(0.08f, 0.12f),
+			at(0.24f, 0.24f), at(-0.22f, 0.24f), at(-0.06f, 0.12f), at(-0.12f, -0.01f), at(-0.3f, -0.05f),
+		};
+		const int count = static_cast<int>(std::size(outline));
 		if (a_fill > 0.0f) {
 			for (const auto& point : outline) {
 				a_drawList->PathLineTo(point);
 			}
 			a_drawList->PathFillConcave(WithAlpha(a_colour, a_fill));
+			// Sparks off the face
+			for (const auto& [x, y] : { std::pair{ -0.05f, -0.36f }, std::pair{ 0.12f, -0.42f }, std::pair{ 0.26f, -0.33f } }) {
+				a_drawList->AddCircleFilled(at(x, y), std::max(1.0f, s * 0.04f * a_fill), WithAlpha(a_colour, a_fill), 6);
+			}
 		}
-		a_drawList->AddPolyline(outline.data(), static_cast<int>(outline.size()), a_colour, ImDrawFlags_Closed, std::max(1.0f, a_size * 0.07f));
-		// Its root bound in hide
-		a_drawList->AddLine(ImVec2(base.x - length * 0.12f, base.y - length * 0.06f), ImVec2(base.x + length * 0.12f, base.y - length * 0.04f), a_colour, std::max(1.0f, a_size * 0.1f));
+		a_drawList->AddPolyline(outline, count, a_colour, ImDrawFlags_Closed, std::max(1.0f, s * 0.065f));
 	}
 
 	//---------------------------------------------------
-	//-- Orsimer Decor ( Chain ) ------------------------
+	//-- Orsimer Decor ( Serration ) --------------------
 	//---------------------------------------------------
 
-	// In place of a rule: forged links, one face on, the next edge on, fading at the ends
-	void Chain(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, float a_size, bool a_fade) {
+	// In place of a rule: a blade's serrated edge, the teeth uneven, fading at the ends
+	void Serration(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, float a_size) {
 
-		const float dx = a_to.x - a_from.x;
-		const float dy = a_to.y - a_from.y;
-		const float length = std::hypot(dx, dy);
+		const float length = a_to.x - a_from.x;
 		if (length < a_size * 2.0f) {
 			return;
 		}
-		const ImVec2 along(dx / length, dy / length);
-		const float  angle = std::atan2(dy, dx);
-		const float  link = a_size * 0.62f;
-		const float  stroke = std::max(1.0f, a_size * 0.09f);
-		const int    count = static_cast<int>(length / link);
-		const float  start = (length - static_cast<float>(count) * link) * 0.5f;
-		for (int i = 0; i < count; ++i) {
-			const float  middle = start + (static_cast<float>(i) + 0.5f) * link;
-			const ImVec2 centre(a_from.x + along.x * middle, a_from.y + along.y * middle);
-			const ImU32  colour = a_fade ? WithAlpha(a_colour, FadeAt(middle / length)) : a_colour;
-			if (i % 2 == 0) {
-				a_drawList->AddEllipse(centre, ImVec2(link * 0.68f, a_size * 0.2f), colour, angle, 14, stroke);
-			} else {
-				const float reach = link * 0.62f;
-				a_drawList->AddLine(ImVec2(centre.x - along.x * reach, centre.y - along.y * reach), ImVec2(centre.x + along.x * reach, centre.y + along.y * reach), colour, stroke * 1.6f);
-			}
+		const float tooth = a_size * 0.34f;
+		const float base = a_from.y + a_size * 0.12f;
+		for (float x = a_from.x; x < a_to.x; x += tooth * 0.5f) {
+			const float end = std::min(a_to.x, x + tooth * 0.5f);
+			a_drawList->AddLine(ImVec2(x, base), ImVec2(end, base), WithAlpha(a_colour, FadeAt((x + end) * 0.5f, a_from.x, length)), std::max(1.0f, a_size * 0.08f));
+		}
+		int i = 0;
+		for (float x = a_from.x + tooth; x < a_to.x - tooth; x += tooth, ++i) {
+			const float  fade = FadeAt(x, a_from.x, length);
+			const float  tall = a_size * (i % 3 == 0 ? 0.36f : 0.22f);
+			const ImVec2 left(x - tooth * 0.4f, base);
+			const ImVec2 right(x + tooth * 0.15f, base);
+			const ImVec2 tip(x + tooth * 0.25f, base - tall);
+			a_drawList->AddTriangleFilled(left, tip, right, WithAlpha(a_colour, fade * 0.9f));
 		}
 	}
 
@@ -311,16 +286,17 @@ namespace CompletionistUI::OrsimerDecor
 
 		const float midX = (a_from.x + a_to.x) * 0.5f;
 		const float gap = ImGui::GetFontSize() * 0.9f;
-		Chain(a_drawList, a_from, ImVec2(midX - gap, a_to.y), a_colour, gap * 0.8f);
-		Chain(a_drawList, ImVec2(midX + gap, a_from.y), a_to, a_colour, gap * 0.8f);
-		Spike(a_drawList, ImVec2(midX, a_from.y), gap * 0.5f, a_colour);
+		Serration(a_drawList, a_from, ImVec2(midX - gap, a_to.y), a_colour, gap * 0.8f);
+		Serration(a_drawList, ImVec2(midX + gap, a_from.y), a_to, a_colour, gap * 0.8f);
+		Blades(a_drawList, ImVec2(midX, a_from.y), gap * 0.6f, a_colour);
 	}
 
 	//---------------------------------------------------
 	//-- Orsimer Decor ( Frame ) ------------------------
 	//---------------------------------------------------
 
-	// Hammered iron lashed with hide, spiked plates on the corners, tusks rising from the top ones
+	// Jagged iron plates toothed along their inner edge and slashed with war paint, blade fins
+	// thrusting out from the corners, and on the main window a helmet's crest of fins over the top
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 		const float size = ImGui::GetFontSize();
@@ -329,34 +305,38 @@ namespace CompletionistUI::OrsimerDecor
 		const float compact = std::clamp(std::min(width, height) / (size * 24.0f), 0.45f, 1.0f);
 		const float band = size * 0.72f * std::max(0.6f, compact);
 
-		Hides(a_drawList, a_min, a_max);
+		Soot(a_drawList, a_min, a_max);
 
-		IronBand(a_drawList, a_min, ImVec2(a_max.x, a_min.y + band), true, 0x0C01u);
-		IronBand(a_drawList, ImVec2(a_min.x, a_max.y - band), a_max, true, 0x0C02u);
-		IronBand(a_drawList, ImVec2(a_min.x, a_min.y + band), ImVec2(a_min.x + band, a_max.y - band), false, 0x0C03u);
-		IronBand(a_drawList, ImVec2(a_max.x - band, a_min.y + band), ImVec2(a_max.x, a_max.y - band), false, 0x0C04u);
-		a_drawList->AddRect(ImVec2(a_min.x + band + 1.0f, a_min.y + band + 1.0f), ImVec2(a_max.x - band - 1.0f, a_max.y - band - 1.0f), WithAlpha(rust, 0.3f), 0.0f, 0, 1.0f);
-
-		const float corner = band * 1.05f;
-		CornerPlate(a_drawList, ImVec2(a_min.x + band * 0.5f, a_min.y + band * 0.5f), corner);
-		CornerPlate(a_drawList, ImVec2(a_max.x - band * 0.5f, a_min.y + band * 0.5f), corner);
-		CornerPlate(a_drawList, ImVec2(a_max.x - band * 0.5f, a_max.y - band * 0.5f), corner);
-		CornerPlate(a_drawList, ImVec2(a_min.x + band * 0.5f, a_max.y - band * 0.5f), corner);
-
-		// Only on the main window: tusks behind the top corners, rising above it, as over a stronghold's gate
+		// Behind the window, so only what thrusts out past its edges shows
+		auto*       behind = ImGui::GetBackgroundDrawList();
+		const float fin = band * (compact >= 0.8f ? 4.6f : 3.0f);
+		const float corner = pi * 0.25f;
+		Fin(behind, ImVec2(a_min.x + band, a_min.y + band), fin, pi + corner, band * 0.7f);
+		Fin(behind, ImVec2(a_max.x - band, a_min.y + band), fin, -corner, band * 0.7f);
+		Fin(behind, ImVec2(a_max.x - band, a_max.y - band), fin, corner, band * 0.7f);
+		Fin(behind, ImVec2(a_min.x + band, a_max.y - band), fin, pi - corner, band * 0.7f);
 		if (compact >= 0.8f) {
-			auto*       behind = ImGui::GetBackgroundDrawList();
-			const float tusk = band * 5.5f;
-			Tusk(behind, ImVec2(a_min.x + band * 1.1f, a_min.y + band * 1.2f), tusk, -1.0f, 1.0f);
-			Tusk(behind, ImVec2(a_max.x - band * 1.1f, a_min.y + band * 1.2f), tusk, 1.0f, 1.0f);
+			const float midX = (a_min.x + a_max.x) * 0.5f;
+			Fin(behind, ImVec2(midX, a_min.y + band), band * 6.0f, -pi * 0.5f, band * 0.8f);
+			Fin(behind, ImVec2(midX - band * 1.2f, a_min.y + band), band * 4.6f, -pi * 0.5f - 0.38f, band * 0.65f);
+			Fin(behind, ImVec2(midX + band * 1.2f, a_min.y + band), band * 4.6f, -pi * 0.5f + 0.38f, band * 0.65f);
 		}
+
+		PlateBand(a_drawList, a_min, ImVec2(a_max.x, a_min.y + band), true, true, 0x0C01u);
+		PlateBand(a_drawList, ImVec2(a_min.x, a_max.y - band), a_max, true, false, 0x0C02u);
+		PlateBand(a_drawList, ImVec2(a_min.x, a_min.y + band), ImVec2(a_min.x + band, a_max.y - band), false, true, 0x0C03u);
+		PlateBand(a_drawList, ImVec2(a_max.x - band, a_min.y + band), ImVec2(a_max.x, a_max.y - band), false, false, 0x0C04u);
+
+		WarPaint(a_drawList, ImVec2(a_min.x + width * 0.22f, a_min.y + band * 0.5f), band * 0.9f);
+		WarPaint(a_drawList, ImVec2(a_max.x - width * 0.22f, a_min.y + band * 0.5f), band * 0.9f);
+		WarPaint(a_drawList, ImVec2((a_min.x + a_max.x) * 0.5f, a_max.y - band * 0.5f), band * 0.9f);
 	}
 
 	//---------------------------------------------------
 	//-- Orsimer Decor ( Panel ) ------------------------
 	//---------------------------------------------------
 
-	// Inside a panel: pitted iron at the edges clearing towards the text, the forge's light from below, crossed tusks in the empty corner
+	// Inside a panel: hammer facets at the edges clearing towards the text, a war axe in the empty corner
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem) {
 
 		const float width = a_max.x - a_min.x;
@@ -367,29 +347,27 @@ namespace CompletionistUI::OrsimerDecor
 		}
 		const float band = std::min(width, height) * 0.3f + size * 2.0f;
 
-		const float glow = std::min(height * 0.35f, size * 6.0f);
-		a_drawList->AddRectFilledMultiColor(ImVec2(a_min.x, a_max.y - glow), a_max, WithAlpha(forge, 0.0f), WithAlpha(forge, 0.0f), WithAlpha(forge, 0.06f), WithAlpha(forge, 0.06f));
-
-		// Pits and hammer marks
+		// Facets: small flat triangles where the hammer struck, catching the light on one face
 		Random    random{ static_cast<std::uint32_t>(width) * 53u + static_cast<std::uint32_t>(height) };
-		const int marks = std::clamp(static_cast<int>(width * height / (size * size * 0.6f)), 40, 1400);
+		const int marks = std::clamp(static_cast<int>(width * height / (size * size * 1.0f)), 30, 900);
 		for (int i = 0; i < marks; ++i) {
 			const ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
 			const float  weight = EdgeWeight(at, a_min, a_max, band);
-			if (weight < 0.02f) {
+			if (weight < 0.04f) {
 				continue;
 			}
-			const float radius = random.Range(0.8f, 2.4f);
-			a_drawList->AddCircleFilled(at, radius, WithAlpha(IM_COL32(0, 0, 0, 255), weight * 0.35f), 6);
-			a_drawList->AddLine(ImVec2(at.x - radius, at.y + radius), ImVec2(at.x + radius, at.y + radius), WithAlpha(ironLight, weight * 0.18f), 1.0f);
+			const float  r = size * random.Range(0.25f, 0.6f);
+			const float  angle = random.Range(0.0f, pi * 2.0f);
+			const ImVec2 a(at.x + std::cos(angle) * r, at.y + std::sin(angle) * r);
+			const ImVec2 b(at.x + std::cos(angle + 2.2f) * r, at.y + std::sin(angle + 2.2f) * r);
+			const ImVec2 c(at.x + std::cos(angle + 4.1f) * r, at.y + std::sin(angle + 4.1f) * r);
+			a_drawList->AddTriangleFilled(a, b, c, WithAlpha(random.Next() < 0.5f ? ironLight : IM_COL32(0, 0, 0, 255), weight * 0.12f));
 		}
 
-		// Two tusks crossed, large and faint, in the lower right
+		// An Orcish war axe, large and faint, in the lower right
 		if (a_emblem) {
-			const float  length = std::min(height * 0.8f, width * 0.3f);
-			const ImVec2 centre(a_max.x - length * 0.6f, a_max.y - length * 0.08f);
-			Tusk(a_drawList, ImVec2(centre.x - length * 0.22f, centre.y), length, 1.0f, 0.055f);
-			Tusk(a_drawList, ImVec2(centre.x + length * 0.22f, centre.y), length, -1.0f, 0.055f);
+			const float length = std::min(height * 0.85f, width * 0.28f);
+			Axe(a_drawList, ImVec2(a_max.x - length * 0.55f, a_max.y - length * 0.92f), length, WithAlpha(bone, 0.07f));
 		}
 	}
 
@@ -397,27 +375,14 @@ namespace CompletionistUI::OrsimerDecor
 	//-- Orsimer Decor ( Panel Corners ) ----------------
 	//---------------------------------------------------
 
-	// Rough iron brackets on the panel's corners, a spike on the point
+	// A blade thrust in at each corner, its edge in bone
 	void PanelCorners(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 		const float size = ImGui::GetFontSize();
-		const float arm = size * 1.1f;
-		const float thick = std::max(3.0f, size * 0.24f);
 		for (const auto& outer : { a_min, ImVec2(a_max.x, a_min.y), a_max, ImVec2(a_min.x, a_max.y) }) {
 			const float sx = outer.x == a_min.x ? 1.0f : -1.0f;
 			const float sy = outer.y == a_min.y ? 1.0f : -1.0f;
-			// Inside the panel's edge, so its clip doesn't halve them
-			const ImVec2 corner(outer.x + sx * (thick * 0.5f + 1.0f), outer.y + sy * (thick * 0.5f + 1.0f));
-			const ImVec2 points[3] = { ImVec2(corner.x + sx * arm, corner.y), corner, ImVec2(corner.x, corner.y + sy * arm) };
-			a_drawList->AddPolyline(points, 3, ironDark, ImDrawFlags_None, thick + 2.0f);
-			a_drawList->AddPolyline(points, 3, iron, ImDrawFlags_None, thick);
-			a_drawList->AddLine(ImVec2(corner.x + sx * thick * 0.3f, corner.y - sy * thick * 0.3f), ImVec2(corner.x + sx * arm * 0.9f, corner.y - sy * thick * 0.3f), WithAlpha(ironLight, 0.6f), 1.0f);
-			for (const auto& rivet : { ImVec2(corner.x + sx * arm * 0.7f, corner.y), ImVec2(corner.x, corner.y + sy * arm * 0.7f) }) {
-				a_drawList->AddCircleFilled(rivet, thick * 0.3f, ironLight, 8);
-			}
-			// The spike, pointing in
-			const ImVec2 spike[3] = { ImVec2(corner.x + sx * thick * 0.9f, corner.y), ImVec2(corner.x + sx * thick * 2.4f, corner.y + sy * thick * 2.4f), ImVec2(corner.x, corner.y + sy * thick * 0.9f) };
-			a_drawList->AddTriangleFilled(spike[0], spike[1], spike[2], ironLight);
+			Fin(a_drawList, ImVec2(outer.x + sx, outer.y + sy), size * 1.3f, std::atan2(sy, sx), size * 0.28f);
 		}
 	}
 }
@@ -428,21 +393,21 @@ namespace CompletionistUI::OrsimerDecor
 	//-- Orsimer Decor ( Perk Node ) --------------------
 	//---------------------------------------------------
 
-	// Spiked bosses when taken, a bare iron ring when next, a rivet when locked
+	// Anvils: struck and sparking when taken, an empty anvil when next, a shard when locked
 	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state) {
 
 		switch (a_state) {
 		case PerkState::kTaken:
 			SoftSpot(a_drawList, a_centre, a_radius * 1.6f, WithAlpha(a_colour, 0.05f));
-			Spike(a_drawList, a_centre, a_radius * 1.15f, a_colour);
+			Anvil(a_drawList, a_centre, a_radius * 2.6f, a_colour, 1.0f);
 			return;
 		case PerkState::kNext:
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.6f, ironDark, 16);
-			a_drawList->AddCircle(a_centre, a_radius * 0.6f, a_colour, 16, std::max(1.5f, a_radius * 0.16f));
+			a_drawList->AddRectFilled(ImVec2(a_centre.x - a_radius * 0.9f, a_centre.y - a_radius * 0.5f), ImVec2(a_centre.x + a_radius * 0.9f, a_centre.y + a_radius * 0.6f), ironDark);
+			Anvil(a_drawList, a_centre, a_radius * 2.6f, a_colour, 0.0f);
 			return;
 		default:
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.32f, ironDark, 10);
-			a_drawList->AddCircle(a_centre, a_radius * 0.32f, a_colour, 10, 1.0f);
+			Shard(a_drawList, a_centre, a_radius * 0.45f, ironDark, true);
+			Shard(a_drawList, a_centre, a_radius * 0.45f, a_colour, false);
 			return;
 		}
 	}
@@ -451,23 +416,17 @@ namespace CompletionistUI::OrsimerDecor
 	//-- Orsimer Decor ( Perk Link ) --------------------
 	//---------------------------------------------------
 
-	// Chain between the perks where they're taken, a thin iron rod where they're not
+	// Hard angles between the perks, struck in war paint where they're taken
 	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius) {
 
+		const float  run = std::min(std::abs(a_to.y - a_from.y), (a_to.x - a_from.x) * 0.6f);
 		const float  middle = (a_from.x + a_to.x) * 0.5f;
-		const ImVec2 points[4] = { a_from, ImVec2(middle, a_from.y), ImVec2(middle, a_to.y), a_to };
+		const ImVec2 points[4] = { a_from, ImVec2(middle - run * 0.5f, a_from.y), ImVec2(middle + run * 0.5f, a_to.y), a_to };
 		if (!a_lit) {
-			a_drawList->AddPolyline(points, 4, a_colour, ImDrawFlags_None, 1.5f);
+			a_drawList->AddPolyline(points, 4, a_colour, ImDrawFlags_None, 1.0f);
 			return;
 		}
-		const float size = std::max(6.0f, a_radius * 1.1f);
-		for (int i = 0; i < 3; ++i) {
-			const float run = std::hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
-			if (run >= size * 2.0f) {
-				Chain(a_drawList, points[i], points[i + 1], a_colour, size, false);
-			} else if (run > 0.5f) {
-				a_drawList->AddLine(points[i], points[i + 1], a_colour, std::max(1.0f, size * 0.12f));
-			}
-		}
+		a_drawList->AddPolyline(points, 4, a_colour, ImDrawFlags_None, std::max(2.0f, a_radius * 0.22f));
+		a_drawList->AddPolyline(points, 4, WithAlpha(bone, 0.5f), ImDrawFlags_None, 1.0f);
 	}
 }

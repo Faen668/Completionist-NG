@@ -69,7 +69,7 @@ namespace CompletionistUI
 			DwemerDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kOrsimer:
-			OrsimerDecor::Rivet(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			OrsimerDecor::Shard(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kBreton:
 			BretonDecor::Lozenge(a_drawList, a_centre, a_radius, a_colour, a_filled);
@@ -125,7 +125,7 @@ namespace CompletionistUI
 			SkyUIDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kArgonian:
-			ArgonianDecor::Egg(a_drawList, a_centre, a_size, a_colour, a_fill);
+			ArgonianDecor::Drop(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kBosmer:
 			BosmerDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -137,7 +137,7 @@ namespace CompletionistUI
 			DwemerDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kOrsimer:
-			OrsimerDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			OrsimerDecor::Anvil(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kBreton:
 			BretonDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -435,7 +435,7 @@ namespace CompletionistUI
 			SkyUIDecor::Knot(a_drawList, a_centre, a_radius * 2.4f, a_colour);
 			return;
 		case Theme::kArgonian:
-			ArgonianDecor::Leaf(a_drawList, a_centre, a_radius * 1.1f, a_colour);
+			ArgonianDecor::Glyph(a_drawList, a_centre, a_radius * 1.1f, a_colour);
 			return;
 		case Theme::kBosmer:
 			BosmerDecor::Sprig(a_drawList, ImVec2(a_centre.x, a_centre.y + a_radius * 0.4f), a_radius * 1.5f, -std::numbers::pi_v<float> * 0.5f, a_colour);
@@ -447,7 +447,7 @@ namespace CompletionistUI
 			DwemerDecor::Cog(a_drawList, a_centre, a_radius * 1.25f, a_colour, true);
 			return;
 		case Theme::kOrsimer:
-			OrsimerDecor::Spike(a_drawList, a_centre, a_radius * 1.3f, a_colour);
+			OrsimerDecor::Blades(a_drawList, a_centre, a_radius * 1.4f, a_colour);
 			return;
 		case Theme::kBreton:
 			BretonDecor::Rose(a_drawList, a_centre, a_radius * 1.2f, a_colour, true);
@@ -491,7 +491,7 @@ namespace CompletionistUI
 			SkyUIDecor::DoubleRule(a_drawList, a_from, a_to, a_colour);
 			return;
 		case Theme::kArgonian:
-			ArgonianDecor::Ridge(a_drawList, a_from, a_to, Accent(0.75f), size * 0.6f);
+			ArgonianDecor::Scales(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
 		case Theme::kBosmer:
 			BosmerDecor::Vine(a_drawList, a_from, a_to, a_colour, Accent(), size * 0.55f, TailSeed(a_from, a_to));
@@ -503,7 +503,7 @@ namespace CompletionistUI
 			DwemerDecor::Inlay(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
 		case Theme::kOrsimer:
-			OrsimerDecor::Chain(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			OrsimerDecor::Serration(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
 		case Theme::kBreton:
 			BretonDecor::Came(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
@@ -547,7 +547,7 @@ namespace CompletionistUI
 			SkyUIDecor::HeadingTail(a_drawList, a_from, a_to, a_ornament, a_rule);
 			return;
 		case Theme::kArgonian:
-			ArgonianDecor::Ridge(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			ArgonianDecor::Scales(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kBosmer:
 			BosmerDecor::Vine(a_drawList, a_from, a_to, a_rule, a_ornament, size * 0.5f, TailSeed(a_from, a_to));
@@ -559,7 +559,7 @@ namespace CompletionistUI
 			DwemerDecor::Inlay(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kOrsimer:
-			OrsimerDecor::Chain(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			OrsimerDecor::Serration(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kBreton:
 			BretonDecor::Came(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);

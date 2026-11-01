@@ -4,14 +4,14 @@
 
 #include <imgui.h>
 
-// Argonian theme: Black Marsh water and mist, Xanmeer stone, mangrove roots, the Hist
+// Argonian theme: Black Marsh in the rain, reptile scales, slit-pupilled eyes, a Xanmeer and the Hist's amber sap
 namespace CompletionistUI::ArgonianDecor
 {
 	void Scale(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled);
-	void Egg(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill);
-	void Eye(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour);
-	void Leaf(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour);
-	void Ridge(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, float a_size);
+	void Drop(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill);
+	void Eye(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius);
+	void Glyph(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour);
+	void Scales(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, float a_size);
 	void Divider(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour);
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem);

@@ -140,26 +140,26 @@ namespace CompletionistUI
 		//-- Themes ( Argonian Palette ) --------------------
 		//---------------------------------------------------
 
-		// Black Marsh: murky olive water, moss-green headings, Hist sap amber for found
+		// Black Marsh in the rain: teal-black water, pale jade, the Hist's amber sap for found
 		Palette ArgonianPalette() {
 
 			return {
-				.background = RGBA(11, 16, 10, 0.95f),
+				.background = RGBA(6, 16, 19, 0.95f),
 				.panel = RGBA(0, 0, 0, 0.0f),
-				.text = RGBA(214, 216, 196),
-				.textDim = RGBA(125, 134, 112),
-				.accent = RGBA(138, 163, 90),
-				.heading = RGBA(164, 179, 106),
-				.count = RGBA(170, 166, 128),
-				.bar = RGBA(124, 148, 80),
-				.found = RGBA(227, 164, 60),
-				.needed = RGBA(214, 216, 196),
-				.displayable = RGBA(130, 172, 204),
-				.occupied = RGBA(170, 130, 170),
-				.barBackground = RGBA(31, 40, 30),
-				.separator = RGBA(74, 82, 64),
-				.pinned = RGBA(120, 182, 214),
-				.stealing = RGBA(230, 110, 120),
+				.text = RGBA(214, 226, 222),
+				.textDim = RGBA(122, 146, 142),
+				.accent = RGBA(82, 168, 156),
+				.heading = RGBA(160, 214, 200),
+				.count = RGBA(150, 180, 172),
+				.bar = RGBA(58, 138, 128),
+				.found = RGBA(238, 172, 62),
+				.needed = RGBA(214, 226, 222),
+				.displayable = RGBA(150, 170, 220),
+				.occupied = RGBA(190, 140, 190),
+				.barBackground = RGBA(22, 40, 42),
+				.separator = RGBA(52, 84, 82),
+				.pinned = RGBA(130, 170, 230),
+				.stealing = RGBA(232, 110, 120),
 			};
 		}
 
@@ -221,26 +221,26 @@ namespace CompletionistUI
 		//-- Themes ( Orsimer Palette ) ---------------------
 		//---------------------------------------------------
 
-		// An Orc stronghold: blackened iron, bone headings, rust, forge-orange for found
+		// A stronghold forge: soot black and iron, bone, war-paint red for found
 		Palette OrsimerPalette() {
 
 			return {
-				.background = RGBA(18, 15, 13, 0.95f),
+				.background = RGBA(13, 13, 13, 0.95f),
 				.panel = RGBA(0, 0, 0, 0.0f),
-				.text = RGBA(222, 214, 198),
-				.textDim = RGBA(136, 128, 118),
-				.accent = RGBA(184, 104, 58),
-				.heading = RGBA(230, 214, 180),
-				.count = RGBA(176, 166, 150),
-				.bar = RGBA(164, 88, 46),
-				.found = RGBA(240, 152, 72),
-				.needed = RGBA(222, 214, 198),
-				.displayable = RGBA(130, 172, 196),
-				.occupied = RGBA(172, 132, 176),
-				.barBackground = RGBA(42, 36, 32),
-				.separator = RGBA(92, 80, 70),
+				.text = RGBA(226, 220, 206),
+				.textDim = RGBA(138, 134, 126),
+				.accent = RGBA(214, 198, 160),
+				.heading = RGBA(236, 228, 206),
+				.count = RGBA(176, 170, 158),
+				.bar = RGBA(160, 36, 30),
+				.found = RGBA(214, 62, 48),
+				.needed = RGBA(226, 220, 206),
+				.displayable = RGBA(130, 170, 200),
+				.occupied = RGBA(172, 136, 180),
+				.barBackground = RGBA(36, 34, 33),
+				.separator = RGBA(84, 80, 74),
 				.pinned = RGBA(124, 170, 210),
-				.stealing = RGBA(232, 112, 122),
+				.stealing = RGBA(236, 150, 90),
 			};
 		}
 
