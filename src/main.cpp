@@ -136,6 +136,13 @@ DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 #endif
 
 	DKUtil::Logger::Init(Plugin::NAME, REL::Module::get().version().string());
+
+	// Built for SE and AE only: in VR the window would be drawn where the headset can't show it
+	if (REL::Module::GetRuntime() == REL::Module::Runtime::VR) {
+		INFO("Skyrim VR isn't supported, Completionist won't load");
+		return false;
+	}
+
 	SKSE::Init(a_skse);
 	SKSE::AllocTrampoline(256);
 

@@ -1188,6 +1188,9 @@ namespace CompletionistUI
 				mix.formID = ingredient.form->GetFormID();
 				mix.name = ingredient.form->GetFullName();
 				mix.carried = a_carried(ingredient.form);
+				for (const auto* variant : ingredient.variants) {
+					mix.carried += a_carried(variant);
+				}
 				for (std::uint32_t i = 0; i < ingredient.form->effects.size(); ++i) {
 					const auto* item = ingredient.form->effects[i];
 					const auto* effect = item ? item->baseEffect : nullptr;
@@ -1198,7 +1201,7 @@ namespace CompletionistUI
 					out.id = effect->GetFormID();
 					out.name = effect->GetFullName() ? effect->GetFullName() : "";
 					out.text = effect->magicItemDescription.c_str();
-					out.known = CHandler::Knows(ingredient.form, i);
+					out.known = CHandler::Knows(ingredient, i);
 					out.hostile = effect->IsHostile();
 					out.priority = item->cost;
 					const auto& flags = effect->data.flags;
@@ -1247,9 +1250,17 @@ namespace CompletionistUI
 					}
 				}
 			}
+			// Its variants' count as well
 			const auto carriedOf = [&](const Ingredient& a_ingredient) {
-				const auto it = carried.find(a_ingredient.form);
-				return it != carried.end() ? it->second : 0;
+				const auto countOf = [&](const RE::IngredientItem* a_form) {
+					const auto it = carried.find(a_form);
+					return it != carried.end() ? it->second : 0;
+				};
+				auto count = countOf(a_ingredient.form);
+				for (const auto* variant : a_ingredient.variants) {
+					count += countOf(variant);
+				}
+				return count;
 			};
 
 			// Every effect, and the ingredients that carry it with where it is on each
@@ -1314,7 +1325,7 @@ namespace CompletionistUI
 
 				std::uint32_t knownCount = 0;
 				for (std::uint32_t i = 0; i < count; ++i) {
-					knownCount += CHandler::Knows(form, i) ? 1 : 0;
+					knownCount += CHandler::Knows(ingredient, i) ? 1 : 0;
 				}
 
 				auto& entry = sectionFor(ingredient.group).entries.emplace_back();
@@ -1333,7 +1344,7 @@ namespace CompletionistUI
 				for (std::uint32_t i = 0; i < count; ++i) {
 					const auto* effect = form->effects[i] ? form->effects[i]->baseEffect : nullptr;
 					auto&       card = info.cards.emplace_back();
-					card.known = CHandler::Knows(form, i);
+					card.known = CHandler::Knows(ingredient, i);
 					card.name = effect && (card.known || named) ? effectName(effect) : a_provider.Translate("UI_Ingredients_NotKnown");
 					if (!effect) {
 						continue;
@@ -1389,7 +1400,7 @@ namespace CompletionistUI
 				const auto&  list = holders[effect];
 				std::int32_t knownOn = 0;
 				for (const auto& holder : list) {
-					knownOn += CHandler::Knows(holder.ingredient->form, holder.index) ? 1 : 0;
+					knownOn += CHandler::Knows(*holder.ingredient, holder.index) ? 1 : 0;
 				}
 				if (knownOn == 0 && !named) {
 					continue;
@@ -1416,12 +1427,12 @@ namespace CompletionistUI
 				for (const auto& holder : list) {
 					sorted.push_back(std::addressof(holder));
 				}
-				const auto order = [&](const Holder* a_holder) { return std::tuple(!CHandler::Knows(a_holder->ingredient->form, a_holder->index), -carriedOf(*a_holder->ingredient)); };
+				const auto order = [&](const Holder* a_holder) { return std::tuple(!CHandler::Knows(*a_holder->ingredient, a_holder->index), -carriedOf(*a_holder->ingredient)); };
 				std::ranges::stable_sort(sorted, {}, order);
 				for (const auto* holder : sorted) {
 					auto&      card = info.cards.emplace_back();
 					const auto inPack = carriedOf(*holder->ingredient);
-					card.known = CHandler::Knows(holder->ingredient->form, holder->index);
+					card.known = CHandler::Knows(*holder->ingredient, holder->index);
 					card.name = card.known || named ? std::string(holder->ingredient->form->GetFullName()) : a_provider.Translate("UI_Ingredients_NotLearnt");
 					card.hint = !card.known && !named ? std::string{}
 					          : inPack > 0           ? a_provider.Translate("UI_Ingredients_Carried{" + std::to_string(inPack) + "}")

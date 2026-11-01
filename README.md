@@ -46,11 +46,11 @@ You need Visual Studio 2022 with the C++ workload, CMake 3.21 or newer, and vcpk
 ```bash
 git clone --recursive https://github.com/Faen668/Completionist-NG.git
 cd Completionist-NG
-cmake --preset ALL
-cmake --build --preset ALL
+cmake --preset FLATRIM
+cmake --build --preset FLATRIM
 ```
 
-vcpkg fetches Dear ImGui, spdlog and the other libraries on the first configure. The DLL lands in `build/ALL/Release`.
+vcpkg fetches Dear ImGui, spdlog and the other libraries on the first configure. The DLL lands in `build/FLATRIM/Release`. The release is built without VR support, so SKSE VR doesn't load it.
 
 ## Contributing
 

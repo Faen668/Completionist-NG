@@ -87,7 +87,6 @@ namespace CFramework_Ingredients
 			{ "RockWarblerEgg", "Skyrim.esm", 0x07E8C8 },
 			{ "SabreCatTooth", "Skyrim.esm", 0x06BC04 },
 			{ "SaltPile", "Skyrim.esm", 0x034CDF },
-			{ "SaltPile", "Skyrim.esm", 0x074A19 },	// Black-Briar Meadery's, a second record of it
 			{ "ScalyPholiota", "Skyrim.esm", 0x06F950 },
 			{ "SilversidePerch", "Skyrim.esm", 0x106E1C },
 			{ "SkeeverTail", "Skyrim.esm", 0x03AD6F },
@@ -163,7 +162,7 @@ namespace CFramework_Ingredients
 			{ "DreughWax", "ccBGSSSE037-Curios.esl", 0x000827 },
 			{ "ElytraIchor", "ccBGSSSE037-Curios.esl", 0x000828 },
 			{ "FirePetal", "ccBGSSSE037-Curios.esl", 0x000829 },
-			{ "FlameStalk", "ccBGSSSE037-Curios.esl", 0x00082A },
+			{ "FlameStalk", "ccBGSSSE037-Curios.esl", 0x00082A },	// listed itself without Saints & Seducers'
 			{ "FungusStalk", "ccBGSSSE037-Curios.esl", 0x00082B },
 			{ "GnarlBark", "ccBGSSSE037-Curios.esl", 0x00082C },
 			{ "GoldKanet", "ccBGSSSE037-Curios.esl", 0x00082D },
@@ -200,15 +199,33 @@ namespace CFramework_Ingredients
 			{ "Harrada", "ccbgssse067-daedinv.esm", 0x024C11 },
 			{ "SpiddalStick", "ccbgssse067-daedinv.esm", 0x024C15 },
 			{ "CorruptedHumanHeart", "ccedhsse002-splkntset.esl", 0x00085B },
-			{ "SimonRodaynesHeart", "ccedhsse002-splkntset.esl", 0x00085D },
-			{ "Nightshade", "cceejsse005-cave.esm", 0x042A61 },
 			{ "HealingSalts", "cckrtsse001_altar.esl", 0x000F86 },
 			{ "IronwoodFruit", "cckrtsse001_altar.esl", 0x000F0F },
 			{ "WildGrassPod", "cctwbsse001-puzzledungeon.esm", 0x019D3A },
 		};
 
+		// Second records of an ingredient, folded into the first: what's learnt or carried of them
+		// counts there, and they aren't listed again. Same as the SkyrimIngredients add-on's variants.
+		// One whose first isn't in the game is listed itself
+		struct KnownVariant
+		{
+			const char* plugin;
+			RE::FormID  id;
+			const char* basePlugin;
+			RE::FormID  baseID;
+		};
+
+		constexpr KnownVariant variants[] = {
+			{ "Skyrim.esm", 0x04BCE0, "Skyrim.esm", 0x01BCBC },						// Jarrin Root
+			{ "Skyrim.esm", 0x074A19, "Skyrim.esm", 0x034CDF },						// Salt Pile, Black-Briar Meadery's
+			{ "ccBGSSSE037-Curios.esl", 0x00082A, "ccBGSSSE025-AdvDSGS.esm", 0x095E23 },	// Flame Stalk
+			{ "ccedhsse002-splkntset.esl", 0x00085D, "ccedhsse002-splkntset.esl", 0x00085B },	// Simon Rodayne's Heart, a Corrupted Human Heart
+			{ "cceejsse005-cave.esm", 0x042A61, "Skyrim.esm", 0x02F44C },				// Nightshade
+			{ "cckrtsse001_altar.esl", 0x000F7E, "cckrtsse001_altar.esl", 0x000F0F },	// Ironwood Fruit
+		};
+
 		// Which of the page's sections each goes in, from the SkyrimIngredients add-on; Healing
-		// Salts and Simon Rodayne's Heart, which it doesn't list, go with Salt Pile and Human Heart
+		// Salts, which it doesn't list, goes with Salt Pile
 		struct KnownGroup
 		{
 			const char* key;
@@ -265,7 +282,7 @@ namespace CFramework_Ingredients
 			{ "Wheat", Group::kPlants }, { "WildGrassPod", Group::kPlants },
 			{ "BeritsAshes", Group::kOther }, { "CorruptedHumanHeart", Group::kOther }, { "DaedraHeart", Group::kOther }, { "DwarvenOil", Group::kOther },
 			{ "FalmerEar", Group::kOther }, { "HealingSalts", Group::kOther }, { "HumanFlesh", Group::kOther }, { "HumanHeart", Group::kOther },
-			{ "MoonSugar", Group::kOther }, { "SaltPile", Group::kOther }, { "SimonRodaynesHeart", Group::kOther },
+			{ "MoonSugar", Group::kOther }, { "SaltPile", Group::kOther },
 		};
 
 		// The Creations that add ingredients, by their official titles
@@ -383,7 +400,8 @@ namespace CFramework_Ingredients
 	//---------------------------------------------------
 
 	// Every ingredient with a name and effects from the game, its DLC or a Creation; a second
-	// record of one under the same name in the same plugin (Black-Briar's salt) is left out
+	// record of one, under the same name in the same plugin or in the variants above, is folded
+	// into the first
 	void CHandler::InstallFramework() {
 
 		Ingredients.clear();
@@ -406,7 +424,22 @@ namespace CFramework_Ingredients
 		}
 		const bool curios = dataHandler->LookupModByName("ccBGSSSE037-Curios.esl") != nullptr;
 
-		std::unordered_set<std::string> seen;
+		std::unordered_map<RE::FormID, RE::FormID> baseOf;
+		for (const auto& [plugin, id, basePlugin, baseID] : variants) {
+			const auto* variant = dataHandler->LookupForm<RE::IngredientItem>(id, plugin);
+			const auto* base = dataHandler->LookupForm<RE::IngredientItem>(baseID, basePlugin);
+			if (variant && base) {
+				baseOf.emplace(variant->GetFormID(), base->GetFormID());
+			}
+		}
+
+		const auto add = [&](RE::IngredientItem* a_form, std::string a_key, std::string a_plugin, std::string a_source) {
+			const auto group = std::ranges::find(groups, a_key, [](const KnownGroup& a_known) { return std::string_view(a_known.key); });
+			Ingredients.push_back({ std::move(a_key), std::move(a_plugin), std::move(a_source), a_form, group != std::end(groups) ? group->group : Group::kOther });
+		};
+
+		std::unordered_map<std::string, std::size_t> seen;	// plugin and name, to the entry listed for them
+		std::vector<RE::IngredientItem*>             folded;
 		for (auto* ingredient : dataHandler->GetFormArray<RE::IngredientItem>()) {
 			if (!ingredient || ingredient->IsDeleted() || ingredient->effects.empty()) { continue; }
 			const auto* name = ingredient->GetFullName();
@@ -421,9 +454,30 @@ namespace CFramework_Ingredients
 			auto        source = SourceOf(plugin);
 			if (source.empty()) { continue; }
 			Covered.insert(ingredient->GetFormID());
-			if (!seen.insert(plugin + '\x1f' + name).second) { continue; }
-			const auto group = std::ranges::find(groups, key, [](const KnownGroup& a_known) { return std::string_view(a_known.key); });
-			Ingredients.push_back({ key, std::move(plugin), std::move(source), ingredient, group != std::end(groups) ? group->group : Group::kOther });
+			if (baseOf.contains(ingredient->GetFormID())) {
+				folded.push_back(ingredient);
+				continue;
+			}
+			const auto [first, isNew] = seen.try_emplace(plugin + '\x1f' + name, Ingredients.size());
+			if (!isNew) {
+				Ingredients[first->second].variants.push_back(ingredient);
+				continue;
+			}
+			add(ingredient, key, std::move(plugin), std::move(source));
+		}
+
+		// The variants go to their first, or are listed themselves when it isn't
+		for (auto* variant : folded) {
+			const auto base = baseOf.at(variant->GetFormID());
+			const auto owner = std::ranges::find(Ingredients, base, [](const Ingredient& a_ingredient) { return a_ingredient.form->GetFormID(); });
+			if (owner != Ingredients.end()) {
+				owner->variants.push_back(variant);
+				continue;
+			}
+			const auto  it = keys.find(variant->GetFormID());
+			std::string plugin(variant->GetFile(0)->GetFilename());
+			auto        source = SourceOf(plugin);
+			add(variant, it != keys.end() ? std::string(it->second) : std::string{}, std::move(plugin), std::move(source));
 		}
 		std::ranges::stable_sort(Ingredients, {}, [](const Ingredient& a_ingredient) { return std::string_view(a_ingredient.form->GetFullName()); });
 		INFO("Ingredients: {}", Ingredients.size());
@@ -433,10 +487,21 @@ namespace CFramework_Ingredients
 	//-- Framework Functions ( Knows ) ------------------
 	//---------------------------------------------------
 
-	// Bit per effect, kept in the save as the game learns them
-	bool CHandler::Knows(const RE::IngredientItem* a_ingredient, std::uint32_t a_index) {
+	// Bit per effect, kept in the save as the game learns them; learnt on a variant counts too,
+	// where the variant has the same effect in that place
+	bool CHandler::Knows(const Ingredient& a_ingredient, std::uint32_t a_index) {
 
-		return a_ingredient && a_index < 16 && ((a_ingredient->gamedata.knownEffectFlags >> a_index) & 1u);
+		const auto knows = [&](const RE::IngredientItem* a_form) {
+			return a_form && a_index < 16 && ((a_form->gamedata.knownEffectFlags >> a_index) & 1u);
+		};
+		if (knows(a_ingredient.form)) {
+			return true;
+		}
+		const auto& effects = a_ingredient.form->effects;
+		const auto* effect = a_index < effects.size() && effects[a_index] ? effects[a_index]->baseEffect : nullptr;
+		return effect && std::ranges::any_of(a_ingredient.variants, [&](const RE::IngredientItem* a_variant) {
+			return a_index < a_variant->effects.size() && a_variant->effects[a_index] && a_variant->effects[a_index]->baseEffect == effect && knows(a_variant);
+		});
 	}
 
 	//---------------------------------------------------
