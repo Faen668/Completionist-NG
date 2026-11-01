@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-// Imperial theme: veined marble, polished bronze, Legion crimson, shields and laurel
+// Imperial theme: a marble temple front, columns, pediment and steps, bronze, Legion shields and laurel
 namespace CompletionistUI::ImperialDecor
 {
 	void Stud(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled);

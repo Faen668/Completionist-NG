@@ -512,7 +512,7 @@ namespace CompletionistUI
 			ImperialDecor::Garland(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
 		case Theme::kRedguard:
-			RedguardDecor::Carving(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
+			RedguardDecor::Beads(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
@@ -568,7 +568,7 @@ namespace CompletionistUI
 			ImperialDecor::Garland(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kRedguard:
-			RedguardDecor::Carving(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			RedguardDecor::Beads(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
 			return;
 		case Theme::kKhajiit:
 			KhajiitDecor::Thread(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);

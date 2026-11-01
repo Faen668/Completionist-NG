@@ -22,7 +22,6 @@ namespace CompletionistUI::ImperialDecor
 		constexpr ImU32 vein = IM_COL32(116, 114, 112, 255);
 		constexpr ImU32 bronze = IM_COL32(178, 124, 70, 255);
 		constexpr ImU32 bronzeLight = IM_COL32(234, 188, 128, 255);
-		constexpr ImU32 bronzeDeep = IM_COL32(104, 68, 36, 255);
 		constexpr ImU32 crimson = IM_COL32(150, 32, 38, 255);
 		constexpr ImU32 darkMarble = IM_COL32(28, 26, 26, 255);
 		constexpr ImU32 daylight = IM_COL32(255, 236, 200, 255);
@@ -54,27 +53,31 @@ namespace CompletionistUI::ImperialDecor
 		}
 
 		//---------------------------------------------------
-		//-- Imperial Decor ( Veins ) -----------------------
+		//-- Imperial Decor ( Tesserae ) --------------------
 		//---------------------------------------------------
 
-		// A vein wandering through marble
-		void Vein(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_step, int a_count, Random& a_random, ImU32 a_colour, float a_wander) {
+		// A strip of mosaic tiles, a_rows deep, laid along one edge; a_ring picks out one row in crimson
+		void Tesserae(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_along, ImVec2 a_inward, float a_length, int a_rows, float a_tile, int a_ring, Random& a_random) {
 
-			std::vector<ImVec2> points{ a_from };
-			ImVec2              at = a_from;
-			for (int i = 0; i < a_count; ++i) {
-				at = ImVec2(at.x + a_step.x + a_random.Range(-a_wander, a_wander), at.y + a_step.y + a_random.Range(-a_wander, a_wander));
-				points.push_back(at);
+			const int count = static_cast<int>(a_length / a_tile);
+			for (int row = 0; row < a_rows; ++row) {
+				for (int i = 0; i < count; ++i) {
+					const float  along = (static_cast<float>(i) + 0.5f) * a_tile + a_random.Range(-0.08f, 0.08f) * a_tile;
+					const float  across = (static_cast<float>(row) + 0.5f) * a_tile + a_random.Range(-0.08f, 0.08f) * a_tile;
+					const ImVec2 centre(a_from.x + a_along.x * along + a_inward.x * across, a_from.y + a_along.y * along + a_inward.y * across);
+					const float  half = a_tile * 0.4f;
+					const ImU32  colour = row == a_ring ? WithAlpha(crimson, a_random.Range(0.35f, 0.5f)) : WithAlpha(marble, a_random.Range(0.05f, 0.1f));
+					a_drawList->AddRectFilled(ImVec2(centre.x - half, centre.y - half), ImVec2(centre.x + half, centre.y + half), colour);
+				}
 			}
-			a_drawList->AddPolyline(points.data(), static_cast<int>(points.size()), a_colour, ImDrawFlags_None, 1.0f);
 		}
 
 		//---------------------------------------------------
-		//-- Imperial Decor ( Marble Wall ) -----------------
+		//-- Imperial Decor ( Mosaic ) ----------------------
 		//---------------------------------------------------
 
-		// Backdrop: dark polished marble, pale veins running through it, daylight from above
-		void MarbleWall(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
+		// Backdrop: a dark floor laid with a mosaic border of small tiles, a crimson row running through it
+		void Mosaic(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_inset) {
 
 			const float width = a_max.x - a_min.x;
 			const float height = a_max.y - a_min.y;
@@ -84,20 +87,17 @@ namespace CompletionistUI::ImperialDecor
 			const ImVec2 wall[4] = { a_min, ImVec2(a_max.x, a_min.y), a_max, ImVec2(a_min.x, a_max.y) };
 			GradientQuad(a_drawList, wall, { IM_COL32(46, 42, 40, 70), IM_COL32(46, 42, 40, 70), IM_COL32(12, 11, 11, 70), IM_COL32(12, 11, 11, 70) });
 
-			// Slabs, and the veins across them
 			Random      random{ 0x1A9Eu };
-			const float slab = size * 9.0f;
-			for (float x = a_min.x + slab; x < a_max.x; x += slab) {
-				a_drawList->AddLine(ImVec2(x, a_min.y), ImVec2(x, a_max.y), WithAlpha(IM_COL32(0, 0, 0, 255), 0.35f), 1.5f);
-				a_drawList->AddLine(ImVec2(x + 1.5f, a_min.y), ImVec2(x + 1.5f, a_max.y), WithAlpha(marble, 0.035f), 1.0f);
-			}
-			const int veins = std::clamp(static_cast<int>(width * height / (size * size * 40.0f)), 6, 60);
-			for (int i = 0; i < veins; ++i) {
-				const ImVec2 from(a_min.x + width * random.Next(), a_min.y + height * random.Next() - size * 4.0f);
-				Vein(a_drawList, from, ImVec2(size * random.Range(0.4f, 1.0f), size * random.Range(0.6f, 1.2f)), 10, random, WithAlpha(marble, random.Range(0.03f, 0.07f)), size * 0.5f);
-			}
+			const float tile = std::max(3.0f, size * 0.32f);
+			const ImVec2 min(a_min.x + a_inset, a_min.y + a_inset);
+			const ImVec2 max(a_max.x - a_inset, a_max.y - a_inset);
+			const float  innerWidth = max.x - min.x;
+			const float  innerHeight = max.y - min.y;
+			Tesserae(a_drawList, min, ImVec2(1.0f, 0.0f), ImVec2(0.0f, 1.0f), innerWidth, 3, tile, 1, random);
+			Tesserae(a_drawList, ImVec2(min.x, max.y), ImVec2(1.0f, 0.0f), ImVec2(0.0f, -1.0f), innerWidth, 3, tile, 1, random);
+			Tesserae(a_drawList, ImVec2(min.x, min.y + tile * 3.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), innerHeight - tile * 6.0f, 3, tile, 1, random);
+			Tesserae(a_drawList, ImVec2(max.x, min.y + tile * 3.0f), ImVec2(0.0f, 1.0f), ImVec2(-1.0f, 0.0f), innerHeight - tile * 6.0f, 3, tile, 1, random);
 
-			// Daylight falling from high windows
 			SoftSpot(a_drawList, ImVec2(a_min.x + width * 0.5f, a_min.y - size * 2.0f), std::max(width * 0.4f, size * 10.0f), WithAlpha(daylight, 0.01f));
 
 			EdgeShadow(a_drawList, a_min, a_max, std::min(width, height) * 0.15f, IM_COL32(4, 4, 4, 210));
@@ -105,51 +105,23 @@ namespace CompletionistUI::ImperialDecor
 		}
 
 		//---------------------------------------------------
-		//-- Imperial Decor ( Marble Band ) -----------------
+		//-- Imperial Decor ( Column ) ----------------------
 		//---------------------------------------------------
 
-		// One side of the frame: veined marble blocks between strips of bronze, a bronze stud on each joint
-		void MarbleBand(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_horizontal, std::uint32_t a_seed) {
+		// A fluted marble column shaft, lit down its left side
+		void Column(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
-			const float length = a_horizontal ? a_max.x - a_min.x : a_max.y - a_min.y;
-			const float depth = a_horizontal ? a_max.y - a_min.y : a_max.x - a_min.x;
-			const auto  at = [&](float a_along, float a_across) {
-				return a_horizontal ? ImVec2(a_min.x + a_along, a_min.y + a_across) : ImVec2(a_min.x + a_across, a_min.y + a_along);
-			};
-
-			const float trim = std::max(1.5f, depth * 0.13f);
-			const float inner = depth - trim;
-			Random      random{ a_seed };
-			a_drawList->AddRectFilled(a_min, a_max, marbleShade);
-			a_drawList->PushClipRect(ImVec2(std::min(at(0.0f, trim).x, at(length, inner).x), std::min(at(0.0f, trim).y, at(length, inner).y)),
-				ImVec2(std::max(at(0.0f, trim).x, at(length, inner).x), std::max(at(0.0f, trim).y, at(length, inner).y)), true);
-			float along = 0.0f;
-			while (along < length) {
-				const float block = depth * random.Range(5.0f, 7.0f);
-				const float end = std::min(length, along + block);
-				a_drawList->AddRectFilled(at(along + 1.0f, trim), at(end - 1.0f, inner), Shade(marble, random.Range(0.92f, 1.02f)));
-				// Two or three veins running at a slant
-				for (int v = 0; v < 3; ++v) {
-					const float start = along + (end - along) * random.Range(0.0f, 0.8f);
-					std::vector<ImVec2> points;
-					float               x = start;
-					for (float across = trim; across <= inner + 1.0f; across += (inner - trim) / 4.0f) {
-						points.push_back(at(x, across));
-						x += depth * random.Range(0.1f, 0.6f);
-					}
-					a_drawList->AddPolyline(points.data(), static_cast<int>(points.size()), WithAlpha(vein, random.Range(0.35f, 0.7f)), ImDrawFlags_None, 1.0f);
-				}
-				a_drawList->AddLine(at(along + 1.0f, trim + 0.5f), at(end - 1.0f, trim + 0.5f), WithAlpha(IM_COL32(255, 255, 255, 255), 0.5f), 1.0f);
-				along = end;
-				if (along < length) {
-					a_drawList->AddLine(at(along, trim), at(along, inner), WithAlpha(vein, 0.9f), 1.0f);
-				}
-			}
-			a_drawList->PopClipRect();
-
-			for (const auto& [from, to] : { std::pair{ 0.0f, trim }, std::pair{ inner, depth } }) {
-				a_drawList->AddRectFilled(at(0.0f, from), at(length, to), bronze);
-				a_drawList->AddLine(at(0.0f, from + 0.5f), at(length, from + 0.5f), WithAlpha(bronzeLight, 0.8f), 1.0f);
+			const float width = a_max.x - a_min.x;
+			const ImU32 light = marble;
+			const ImU32 shade = marbleShade;
+			const float middle = a_min.x + width * 0.4f;
+			a_drawList->AddRectFilledMultiColor(a_min, ImVec2(middle, a_max.y), shade, light, light, shade);
+			a_drawList->AddRectFilledMultiColor(ImVec2(middle, a_min.y), a_max, light, Shade(shade, 0.8f), Shade(shade, 0.8f), light);
+			// The flutes
+			for (int flute = 1; flute <= 3; ++flute) {
+				const float x = a_min.x + width * static_cast<float>(flute) / 4.0f;
+				a_drawList->AddLine(ImVec2(x, a_min.y), ImVec2(x, a_max.y), WithAlpha(vein, 0.75f), 1.0f);
+				a_drawList->AddLine(ImVec2(x + 1.0f, a_min.y), ImVec2(x + 1.0f, a_max.y), WithAlpha(IM_COL32(255, 255, 255, 255), 0.35f), 1.0f);
 			}
 		}
 
@@ -157,42 +129,90 @@ namespace CompletionistUI::ImperialDecor
 		//-- Imperial Decor ( Capital ) ---------------------
 		//---------------------------------------------------
 
-		// A bronze capital at each corner, its two volutes curling out
-		void Capital(ImDrawList* a_drawList, ImVec2 a_centre, float a_size) {
+		// An Ionic capital: a slab wider than the shaft, a volute curling down at each end
+		void Capital(ImDrawList* a_drawList, ImVec2 a_centre, float a_half, float a_height) {
 
-			const ImVec2 min(a_centre.x - a_size, a_centre.y - a_size);
-			const ImVec2 max(a_centre.x + a_size, a_centre.y + a_size);
-			a_drawList->AddRectFilled(min, max, bronze);
-			a_drawList->AddLine(ImVec2(min.x, min.y + 1.0f), ImVec2(max.x, min.y + 1.0f), bronzeLight, 1.5f);
-			a_drawList->AddLine(ImVec2(min.x + 1.0f, min.y), ImVec2(min.x + 1.0f, max.y), WithAlpha(bronzeLight, 0.7f), 1.0f);
-			const float inset = a_size * 0.2f;
-			a_drawList->AddRectFilled(ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), crimson);
-			// Volutes in the upper corners of the crimson
+			const ImVec2 min(a_centre.x - a_half, a_centre.y - a_height * 0.5f);
+			const ImVec2 max(a_centre.x + a_half, a_centre.y + a_height * 0.5f);
+			a_drawList->AddRectFilled(ImVec2(min.x + a_height * 0.3f, min.y), ImVec2(max.x - a_height * 0.3f, max.y), marble);
+			a_drawList->AddLine(ImVec2(min.x, min.y + 0.5f), ImVec2(max.x, min.y + 0.5f), bronzeLight, std::max(1.5f, a_height * 0.14f));
 			for (const float side : { -1.0f, 1.0f }) {
-				const ImVec2 eye(a_centre.x + side * a_size * 0.38f, a_centre.y - a_size * 0.15f);
-				for (int turn = 0; turn < 10; ++turn) {
-					const float t = static_cast<float>(turn) / 9.0f;
-					const float radius = a_size * 0.34f * (1.0f - t * 0.75f);
-					const float angle = side * t * pi * 2.2f - pi * 0.5f;
+				const ImVec2 eye(a_centre.x + side * (a_half - a_height * 0.42f), a_centre.y + a_height * 0.08f);
+				a_drawList->AddCircleFilled(eye, a_height * 0.44f, marble, 16);
+				for (int turn = 0; turn < 14; ++turn) {
+					const float t = static_cast<float>(turn) / 13.0f;
+					const float radius = a_height * 0.4f * (1.0f - t * 0.8f);
+					const float angle = -pi * 0.5f + side * t * pi * 2.4f;
 					a_drawList->PathLineTo(ImVec2(eye.x + std::cos(angle) * radius, eye.y + std::sin(angle) * radius));
 				}
-				a_drawList->PathStroke(bronzeLight, ImDrawFlags_None, std::max(1.0f, a_size * 0.1f));
+				a_drawList->PathStroke(bronze, ImDrawFlags_None, std::max(1.0f, a_height * 0.1f));
 			}
-			a_drawList->AddLine(ImVec2(min.x + inset, a_centre.y + a_size * 0.35f), ImVec2(max.x - inset, a_centre.y + a_size * 0.35f), bronzeLight, std::max(1.0f, a_size * 0.08f));
+			a_drawList->AddLine(ImVec2(min.x + a_height * 0.4f, max.y), ImVec2(max.x - a_height * 0.4f, max.y), marbleShade, 1.0f);
 		}
 
 		//---------------------------------------------------
-		//-- Imperial Decor ( Crest ) -----------------------
+		//-- Imperial Decor ( Entablature ) -----------------
 		//---------------------------------------------------
 
-		// A crimson seal ringed in bronze, a laurel wreath round it
-		void Crest(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius) {
+		// The beam the columns carry: a plain architrave, a row of dentils, the bronze-capped cornice
+		void Entablature(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
-			Wreath(a_drawList, a_centre, a_radius, bronzeLight);
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.62f, bronze, 24);
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.5f, crimson, 24);
-			a_drawList->AddCircle(a_centre, a_radius * 0.62f, bronzeLight, 24, 1.0f);
-			Stud(a_drawList, a_centre, a_radius * 0.24f, bronzeLight, true);
+			const float height = a_max.y - a_min.y;
+			a_drawList->AddRectFilled(a_min, a_max, marble);
+			const float cornice = height * 0.3f;
+			a_drawList->AddRectFilled(a_min, ImVec2(a_max.x, a_min.y + cornice), bronze);
+			a_drawList->AddLine(ImVec2(a_min.x, a_min.y + 0.5f), ImVec2(a_max.x, a_min.y + 0.5f), bronzeLight, 1.0f);
+			// Dentils: small blocks under the cornice, the gaps between them in shadow
+			const float top = a_min.y + cornice;
+			const float bottom = top + height * 0.32f;
+			const float tooth = std::max(3.0f, height * 0.36f);
+			a_drawList->AddRectFilled(ImVec2(a_min.x, top), ImVec2(a_max.x, bottom), marbleShade);
+			for (float x = a_min.x + tooth * 0.3f; x + tooth * 0.6f < a_max.x; x += tooth) {
+				a_drawList->AddRectFilled(ImVec2(x, top), ImVec2(x + tooth * 0.62f, bottom), marble);
+			}
+			a_drawList->AddLine(ImVec2(a_min.x, bottom + 0.5f), ImVec2(a_max.x, bottom + 0.5f), vein, 1.0f);
+			a_drawList->AddLine(ImVec2(a_min.x, a_max.y - 0.5f), ImVec2(a_max.x, a_max.y - 0.5f), marbleShade, 1.0f);
+		}
+
+		//---------------------------------------------------
+		//-- Imperial Decor ( Steps ) -----------------------
+		//---------------------------------------------------
+
+		// Marble steps the temple stands on, each lit along its edge
+		void Steps(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, int a_count, float a_spread) {
+
+			const float rise = (a_max.y - a_min.y) / static_cast<float>(a_count);
+			for (int step = 0; step < a_count; ++step) {
+				const float out = a_spread * static_cast<float>(step);
+				const ImVec2 min(a_min.x - out, a_min.y + rise * static_cast<float>(step));
+				const ImVec2 max(a_max.x + out, min.y + rise);
+				a_drawList->AddRectFilled(min, max, Shade(marble, 1.0f - 0.06f * static_cast<float>(step)));
+				a_drawList->AddLine(ImVec2(min.x, min.y + 0.5f), ImVec2(max.x, min.y + 0.5f), WithAlpha(IM_COL32(255, 255, 255, 255), 0.6f), 1.0f);
+				a_drawList->AddLine(ImVec2(min.x, max.y - 0.5f), ImVec2(max.x, max.y - 0.5f), marbleShade, 1.0f);
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Imperial Decor ( Pediment ) --------------------
+		//---------------------------------------------------
+
+		// The temple's gable: a marble triangle under a bronze cornice, the wreathed seal of the Empire in its face
+		void Pediment(ImDrawList* a_drawList, ImVec2 a_base, float a_half, float a_height) {
+
+			const ImVec2 left(a_base.x - a_half, a_base.y);
+			const ImVec2 right(a_base.x + a_half, a_base.y);
+			const ImVec2 apex(a_base.x, a_base.y - a_height);
+			a_drawList->AddTriangleFilled(ImVec2(left.x - a_height * 0.12f, left.y + 1.0f), ImVec2(apex.x, apex.y - a_height * 0.12f), ImVec2(right.x + a_height * 0.12f, right.y + 1.0f), bronze);
+			a_drawList->AddTriangleFilled(left, apex, right, marble);
+			// The recessed face
+			const float inset = a_height * 0.18f;
+			a_drawList->AddTriangleFilled(ImVec2(left.x + inset * 2.2f, left.y - inset * 0.5f), ImVec2(apex.x, apex.y + inset * 1.3f), ImVec2(right.x - inset * 2.2f, right.y - inset * 0.5f), marbleShade);
+			a_drawList->AddLine(ImVec2(left.x - a_height * 0.12f, left.y), ImVec2(apex.x, apex.y - a_height * 0.12f), bronzeLight, 1.0f);
+			const ImVec2 seal(a_base.x, a_base.y - a_height * 0.5f);
+			const float  radius = a_height * 0.24f;
+			Wreath(a_drawList, seal, radius, bronze);
+			a_drawList->AddCircleFilled(seal, radius * 0.55f, crimson, 20);
+			a_drawList->AddCircle(seal, radius * 0.55f, bronzeLight, 20, 1.0f);
 		}
 	}
 
@@ -316,7 +336,8 @@ namespace CompletionistUI::ImperialDecor
 	//-- Imperial Decor ( Frame ) -----------------------
 	//---------------------------------------------------
 
-	// Veined marble bound in bronze, bronze capitals on the corners, a wreathed crimson seal on the top beam
+	// A temple front: fluted columns up the sides under Ionic capitals, the entablature across the top,
+	// marble steps at the foot, and on the main window a pediment rising over it all
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 		const float size = ImGui::GetFontSize();
@@ -324,34 +345,46 @@ namespace CompletionistUI::ImperialDecor
 		const float height = a_max.y - a_min.y;
 		const float compact = std::clamp(std::min(width, height) / (size * 24.0f), 0.45f, 1.0f);
 		const float band = size * 0.72f * std::max(0.6f, compact);
+		const bool  full = compact >= 0.8f;
 
-		MarbleWall(a_drawList, a_min, a_max);
+		Mosaic(a_drawList, a_min, a_max, band + size * 0.4f);
 
-		MarbleBand(a_drawList, a_min, ImVec2(a_max.x, a_min.y + band), true, 0x1E01u);
-		MarbleBand(a_drawList, ImVec2(a_min.x, a_max.y - band), a_max, true, 0x1E02u);
-		MarbleBand(a_drawList, ImVec2(a_min.x, a_min.y + band), ImVec2(a_min.x + band, a_max.y - band), false, 0x1E03u);
-		MarbleBand(a_drawList, ImVec2(a_max.x - band, a_min.y + band), ImVec2(a_max.x, a_max.y - band), false, 0x1E04u);
-		a_drawList->AddRect(ImVec2(a_min.x + band + 1.0f, a_min.y + band + 1.0f), ImVec2(a_max.x - band - 1.0f, a_max.y - band - 1.0f), WithAlpha(bronze, 0.3f), 0.0f, 0, 1.0f);
-
-		const float corner = band * 0.95f;
-		Capital(a_drawList, ImVec2(a_min.x + band * 0.5f, a_min.y + band * 0.5f), corner);
-		Capital(a_drawList, ImVec2(a_max.x - band * 0.5f, a_min.y + band * 0.5f), corner);
-		Capital(a_drawList, ImVec2(a_max.x - band * 0.5f, a_max.y - band * 0.5f), corner);
-		Capital(a_drawList, ImVec2(a_min.x + band * 0.5f, a_max.y - band * 0.5f), corner);
-
-		// Only on the main window, inside its top edge so none of it is clipped
-		if (compact >= 0.8f) {
+		// Behind the window, so only what stands out past its edges shows: the pediment, the capitals' ends, the lower steps
+		auto*       behind = ImGui::GetBackgroundDrawList();
+		const float capitalHalf = band * 1.15f;
+		const float capitalHeight = band * 0.85f;
+		const float beam = band * 1.15f;
+		if (full) {
 			const float midX = (a_min.x + a_max.x) * 0.5f;
-			Crest(a_drawList, ImVec2(midX, a_min.y + band * 1.05f + 2.0f), band * 1.05f);
-			Capital(a_drawList, ImVec2(midX, a_max.y - band * 0.5f), corner);
+			Pediment(behind, ImVec2(midX, a_min.y + band * 0.5f), std::min(width * 0.16f, size * 11.0f), band * 4.4f);
+			Steps(behind, ImVec2(a_min.x - band * 0.2f, a_max.y - band * 0.5f), ImVec2(a_max.x + band * 0.2f, a_max.y + band * 0.9f), 2, band * 0.35f);
 		}
+
+		// The steps along the foot
+		Steps(a_drawList, ImVec2(a_min.x, a_max.y - band), a_max, 2, 0.0f);
+
+		// The columns, standing on the steps and under the beam
+		const float shaftTop = a_min.y + beam + capitalHeight * 0.8f;
+		const float shaftBottom = a_max.y - band * 1.3f;
+		const float shaft = band * 0.95f;
+		for (const float x : { a_min.x + band * 0.5f, a_max.x - band * 0.5f }) {
+			Column(a_drawList, ImVec2(x - shaft * 0.5f, shaftTop), ImVec2(x + shaft * 0.5f, shaftBottom));
+			// A plinth under each
+			a_drawList->AddRectFilled(ImVec2(x - shaft * 0.7f, shaftBottom), ImVec2(x + shaft * 0.7f, a_max.y - band), marble);
+			a_drawList->AddLine(ImVec2(x - shaft * 0.7f, shaftBottom + 0.5f), ImVec2(x + shaft * 0.7f, shaftBottom + 0.5f), marbleShade, 1.0f);
+			for (auto* list : { behind, a_drawList }) {
+				Capital(list, ImVec2(x, a_min.y + beam + capitalHeight * 0.5f), capitalHalf, capitalHeight);
+			}
+		}
+
+		Entablature(a_drawList, a_min, ImVec2(a_max.x, a_min.y + beam));
 	}
 
 	//---------------------------------------------------
 	//-- Imperial Decor ( Panel ) -----------------------
 	//---------------------------------------------------
 
-	// Inside a panel: marble veins at the edges clearing towards the text, daylight from above, a laurel wreath in the empty corner
+	// Inside a panel: a mosaic edge of small tiles fading in towards the text, daylight from above, a laurel wreath in the empty corner
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem) {
 
 		const float width = a_max.x - a_min.x;
@@ -365,22 +398,19 @@ namespace CompletionistUI::ImperialDecor
 		const float glow = std::min(height * 0.3f, size * 5.0f);
 		a_drawList->AddRectFilledMultiColor(a_min, ImVec2(a_max.x, a_min.y + glow), WithAlpha(daylight, 0.04f), WithAlpha(daylight, 0.04f), WithAlpha(daylight, 0.0f), WithAlpha(daylight, 0.0f));
 
-		// Veins, drawn in short lengths so each fades by how near the edge it is
-		Random    random{ static_cast<std::uint32_t>(width) * 29u + static_cast<std::uint32_t>(height) };
-		const int veins = std::clamp(static_cast<int>(width * height / (size * size * 8.0f)), 6, 120);
-		a_drawList->PushClipRect(a_min, a_max, true);
-		for (int i = 0; i < veins; ++i) {
-			ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
-			for (int step = 0; step < 8; ++step) {
-				const ImVec2 next(at.x + size * random.Range(0.1f, 0.9f), at.y + size * random.Range(0.3f, 1.0f));
-				const float  weight = EdgeWeight(ImVec2((at.x + next.x) * 0.5f, (at.y + next.y) * 0.5f), a_min, a_max, band);
-				if (weight > 0.03f) {
-					a_drawList->AddLine(at, next, WithAlpha(marble, weight * 0.12f), 1.0f);
-				}
-				at = next;
+		// Loose tiles, thick at the edges and thinning towards the middle
+		Random      random{ static_cast<std::uint32_t>(width) * 29u + static_cast<std::uint32_t>(height) };
+		const float tile = std::max(3.0f, size * 0.3f);
+		const int   tiles = std::clamp(static_cast<int>(width * height / (size * size * 0.9f)), 40, 1600);
+		for (int i = 0; i < tiles; ++i) {
+			const ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
+			const float  weight = EdgeWeight(at, a_min, a_max, band);
+			if (weight < 0.05f) {
+				continue;
 			}
+			const ImVec2 snapped(a_min.x + std::floor((at.x - a_min.x) / tile) * tile, a_min.y + std::floor((at.y - a_min.y) / tile) * tile);
+			a_drawList->AddRectFilled(ImVec2(snapped.x + 1.0f, snapped.y + 1.0f), ImVec2(snapped.x + tile - 1.0f, snapped.y + tile - 1.0f), WithAlpha(random.Next() < 0.15f ? crimson : marble, weight * 0.12f));
 		}
-		a_drawList->PopClipRect();
 
 		// A laurel wreath, large and faint, in the lower right
 		if (a_emblem) {
@@ -395,26 +425,26 @@ namespace CompletionistUI::ImperialDecor
 	//-- Imperial Decor ( Panel Corners ) ---------------
 	//---------------------------------------------------
 
-	// Bronze brackets on the panel's corners, a crimson stud on the point
+	// A sprig of laurel tucked into each corner, a bronze stud at its stem
 	void PanelCorners(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
 
 		const float size = ImGui::GetFontSize();
-		const float arm = size * 1.1f;
-		const float thick = std::max(3.0f, size * 0.18f);
+		const float leaf = size * 0.55f;
 		for (const auto& outer : { a_min, ImVec2(a_max.x, a_min.y), a_max, ImVec2(a_min.x, a_max.y) }) {
-			const float sx = outer.x == a_min.x ? 1.0f : -1.0f;
-			const float sy = outer.y == a_min.y ? 1.0f : -1.0f;
-			// Inside the panel's edge, so its clip doesn't halve them
-			const ImVec2 corner(outer.x + sx * (thick * 0.5f + 1.0f), outer.y + sy * (thick * 0.5f + 1.0f));
-			const ImVec2 points[3] = { ImVec2(corner.x + sx * arm, corner.y), corner, ImVec2(corner.x, corner.y + sy * arm) };
-			a_drawList->AddPolyline(points, 3, bronze, ImDrawFlags_None, thick);
-			a_drawList->AddLine(ImVec2(corner.x, corner.y - sy * thick * 0.35f), ImVec2(corner.x + sx * arm, corner.y - sy * thick * 0.35f), WithAlpha(bronzeLight, 0.7f), 1.0f);
-			for (const auto& end : { points[0], points[2] }) {
-				a_drawList->AddCircleFilled(end, thick * 0.55f, bronzeLight, 8);
+			const float  sx = outer.x == a_min.x ? 1.0f : -1.0f;
+			const float  sy = outer.y == a_min.y ? 1.0f : -1.0f;
+			const ImVec2 stem(outer.x + sx * size * 0.35f, outer.y + sy * size * 0.35f);
+			// Leaves running out along both edges from the corner
+			for (int i = 0; i < 3; ++i) {
+				const float along = size * (0.35f + 0.42f * static_cast<float>(i));
+				const float angleX = sx > 0.0f ? 0.0f : pi;
+				const float angleY = sy > 0.0f ? pi * 0.5f : -pi * 0.5f;
+				Leaf(a_drawList, ImVec2(stem.x + sx * along, stem.y), leaf * (1.0f - 0.15f * static_cast<float>(i)), angleX + sx * sy * 0.45f, bronze);
+				Leaf(a_drawList, ImVec2(stem.x, stem.y + sy * along), leaf * (1.0f - 0.15f * static_cast<float>(i)), angleY - sx * sy * 0.45f, bronze);
 			}
-			const ImVec2 stud(corner.x + sx * thick * 1.4f, corner.y + sy * thick * 1.4f);
-			Stud(a_drawList, stud, thick * 1.1f, crimson, true);
-			Stud(a_drawList, stud, thick * 1.1f, bronzeLight, false);
+			a_drawList->AddLine(stem, ImVec2(stem.x + sx * size * 1.3f, stem.y), WithAlpha(bronze, 0.8f), 1.0f);
+			a_drawList->AddLine(stem, ImVec2(stem.x, stem.y + sy * size * 1.3f), WithAlpha(bronze, 0.8f), 1.0f);
+			Stud(a_drawList, stem, size * 0.22f, bronzeLight, true);
 		}
 	}
 }
