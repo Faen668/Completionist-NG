@@ -36,6 +36,7 @@ namespace CompletionistUI
 		kBelow,
 		kAbove,
 		kLeft,
+		kRight,
 	};
 
 	struct UISettings

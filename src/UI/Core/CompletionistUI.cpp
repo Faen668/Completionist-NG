@@ -4710,7 +4710,7 @@ namespace CompletionistUI
 		ImGui::End();
 
 		// Tab, or X / Square, picks the other one
-		if (ImGui::IsKeyPressed(ImGuiKey_Tab, false) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft, false)) {
+		if (ImGui::IsKeyPressed(ImGuiKey_Tab, false) || ImGui::IsKeyPressed(rowActionKey, false)) {
 			_placePanel = !_placePanel;
 		}
 		// Arrows, d-pad and left stick
@@ -4743,6 +4743,8 @@ namespace CompletionistUI
 				edge = ToastJoin::kAbove;
 			} else if (overY && std::abs(freeMax.x - panel.min.x) < snap) {
 				edge = ToastJoin::kLeft;
+			} else if (overY && std::abs(freeMin.x - panel.max.x) < snap) {
+				edge = ToastJoin::kRight;
 			}
 		}
 		// Let go next to it: joined, whichever one was moved
@@ -4769,8 +4771,8 @@ namespace CompletionistUI
 		if (moving && edge != ToastJoin::kNone) {
 			const float dash = fontSize * 0.5f;
 			const ImU32 guide = Colour(palette.accent);
-			const bool  side = edge == ToastJoin::kLeft;
-			const float at = edge == ToastJoin::kBelow ? panel.max.y + outline : edge == ToastJoin::kAbove ? panel.min.y - outline : panel.min.x - outline;
+			const bool  side = edge == ToastJoin::kLeft || edge == ToastJoin::kRight;
+			const float at = edge == ToastJoin::kBelow ? panel.max.y + outline : edge == ToastJoin::kAbove ? panel.min.y - outline : edge == ToastJoin::kLeft ? panel.min.x - outline : panel.max.x + outline;
 			const float from = side ? panel.min.y : panel.min.x;
 			const float to = side ? panel.max.y : panel.max.x;
 			for (float t = from; t < to; t += dash * 2.0f) {
@@ -4887,8 +4889,8 @@ namespace CompletionistUI
 		const float  margin = edge * 0.5f;
 		const float  homeY = std::clamp(a_settings.cellY * io.DisplaySize.y, margin, std::max(margin, io.DisplaySize.y - _cellFrameHeight - margin));
 
-		// Joined notifications: above or below, the panel widens to their width; to the left, the frame
-		// reaches across for them. Their room opens and closes with them, eased
+		// Joined notifications: above or below, the panel widens to their width; to the left or right, the
+		// frame reaches across for them. Their room opens and closes with them, eased
 		const bool  across = a_join == ToastJoin::kBelow || a_join == ToastJoin::kAbove;
 		const float toastWidth = Toasts::Width();
 		const float target = a_join == ToastJoin::kNone ? 0.0f : a_toasts.y;
@@ -4900,11 +4902,18 @@ namespace CompletionistUI
 		const float open = std::clamp(room / (fontSize * 2.0f), 0.0f, 1.0f);
 		const float width = across ? baseWidth + std::max(0.0f, toastWidth + padding.x * 2.0f - baseWidth) * open : baseWidth;	// back to its own width when empty
 		const float seam = fontSize * 0.7f;
-		const float reach = a_join == ToastJoin::kLeft ? (toastWidth + seam + padding.x) * open : (seam + room + padding.y) * open;
+		const bool  beside = a_join == ToastJoin::kLeft || a_join == ToastJoin::kRight;
+		const float reach = beside ? (toastWidth + seam + padding.x) * open : (seam + room + padding.y) * open;
 
 		ImVec2 position(homeX - (width - baseWidth) * cellX, homeY);	// widens away from the nearer edge
 		if (a_join == ToastJoin::kAbove) {
 			position.y += reach;	// under the notifications, the frame's top stays put
+		}
+		// Beside it, the notifications stay on screen too
+		if (a_join == ToastJoin::kLeft) {
+			position.x = std::max(position.x, margin + reach);
+		} else if (a_join == ToastJoin::kRight) {
+			position.x = std::min(position.x, io.DisplaySize.x - margin - reach - width);
 		}
 		ImGui::SetNextWindowPos(position, ImGuiCond_Always);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, io.DisplaySize.y * 0.6f));
@@ -4949,6 +4958,12 @@ namespace CompletionistUI
 				layout.dockAt = ImVec2(winMin.x - seam - toastWidth, winMin.y + padding.y);
 				layout.dockWidth = toastWidth;
 				break;
+			case ToastJoin::kRight:
+				frameMax.x += reach;
+				frameMax.y = std::max(winMax.y, winMin.y + padding.y * 2.0f + room);
+				layout.dockAt = ImVec2(winMax.x + seam, winMin.y + padding.y);
+				layout.dockWidth = toastWidth;
+				break;
 			default:
 				break;
 			}
@@ -4963,8 +4978,8 @@ namespace CompletionistUI
 			// The seam between the two
 			if (open > 0.05f) {
 				const ImU32 seamColour = Colour(palette.separator, open);
-				if (a_join == ToastJoin::kLeft) {
-					const float x = winMin.x + padding.x * 0.3f;
+				if (beside) {
+					const float x = a_join == ToastJoin::kLeft ? winMin.x + padding.x * 0.3f : winMax.x - padding.x * 0.3f;
 					const float top = frameMin.y + padding.y;
 					const float bottom = frameMax.y - padding.y;
 					const float midY = (top + bottom) * 0.5f;

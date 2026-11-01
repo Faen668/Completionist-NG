@@ -127,6 +127,7 @@ namespace CVariables
 		settings.toastJoin = DKUtil::string::iequals(join, "Below") ? CompletionistUI::ToastJoin::kBelow
 		                   : DKUtil::string::iequals(join, "Above") ? CompletionistUI::ToastJoin::kAbove
 		                   : DKUtil::string::iequals(join, "Left")  ? CompletionistUI::ToastJoin::kLeft
+		                   : DKUtil::string::iequals(join, "Right") ? CompletionistUI::ToastJoin::kRight
 		                                                            : CompletionistUI::ToastJoin::kNone;
 
 		const auto theme = GetIniValue("UI", "Theme", "Completionist");
@@ -181,7 +182,7 @@ namespace CVariables
 		ini.SetValue(section, "NotificationsNewestFirst", a_settings.toastsNewestFirst ? "true" : "false");
 		ini.SetValue(section, "NotificationsX", fmt::format("{:.3f}", a_settings.toastX).c_str());
 		ini.SetValue(section, "NotificationsY", fmt::format("{:.3f}", a_settings.toastY).c_str());
-		constexpr const char* joins[] = { "None", "Below", "Above", "Left" };
+		constexpr const char* joins[] = { "None", "Below", "Above", "Left", "Right" };
 		ini.SetValue(section, "NotificationsJoin", joins[static_cast<int>(a_settings.toastJoin)]);
 
 		if (CSettingsFile::SaveUser(ini) < 0) {
