@@ -33,12 +33,14 @@ namespace CompletionistUI
 		//-- Themes ( Add Font ) ----------------------------
 		//---------------------------------------------------
 
-		ImFont* AddFont(const std::string& a_path, const std::string& a_fallback, float a_size, const ImWchar* a_ranges) {
+		ImFont* AddFont(const std::string& a_path, const std::string& a_fallback, float a_size, const ImWchar* a_ranges, float a_weight) {
 
 			auto&   io = ImGui::GetIO();
 			ImFont* font = nullptr;
 			if (FontExists(a_path)) {
-				font = io.Fonts->AddFontFromFileTTF(a_path.c_str(), a_size, nullptr, a_ranges);
+				ImFontConfig config;
+				config.RasterizerMultiply = a_weight;
+				font = io.Fonts->AddFontFromFileTTF(a_path.c_str(), a_size, &config, a_ranges);
 			} else {
 				ImFontConfig config;
 				config.SizePixels = a_size;
@@ -48,6 +50,7 @@ namespace CompletionistUI
 			if (FontExists(a_fallback) && a_fallback != a_path) {
 				ImFontConfig merge;
 				merge.MergeMode = true;
+				merge.RasterizerMultiply = a_weight;
 				io.Fonts->AddFontFromFileTTF(a_fallback.c_str(), a_size, &merge, a_ranges);
 			}
 			return font;
@@ -459,6 +462,33 @@ namespace CompletionistUI
 				.stealing = RGBA(222, 102, 122),
 			};
 		}
+
+		//---------------------------------------------------
+		//-- Themes ( Oblivion Palette ) --------------------
+		//---------------------------------------------------
+
+		// A Cyrodiil map: old parchment, black ink, banner crimson for headings, amber gold for found
+		Palette OblivionPalette() {
+
+			return {
+				.background = RGBA(226, 208, 170, 0.97f),
+				.panel = RGBA(232, 216, 182, 0.0f),
+				.text = RGBA(34, 24, 14),
+				.textDim = RGBA(92, 72, 50),
+				.accent = RGBA(150, 100, 36),
+				.heading = RGBA(110, 26, 18),
+				.count = RGBA(58, 42, 26),
+				.bar = RGBA(136, 40, 26),
+				.found = RGBA(126, 68, 6),
+				.needed = RGBA(34, 24, 14),
+				.displayable = RGBA(38, 86, 130),
+				.occupied = RGBA(116, 52, 104),
+				.barBackground = RGBA(198, 176, 136),
+				.separator = RGBA(130, 98, 60),
+				.pinned = RGBA(34, 88, 142),
+				.stealing = RGBA(168, 34, 54),
+			};
+		}
 	}
 
 	//---------------------------------------------------
@@ -518,10 +548,10 @@ namespace CompletionistUI
 		const auto& bold = a_paths.bold.empty() ? a_paths.regular : a_paths.bold;
 		const auto& heading = a_paths.heading.empty() ? bold : a_paths.heading;
 		const auto& title = a_paths.title.empty() ? heading : a_paths.title;
-		_body = AddFont(a_paths.regular, a_paths.fallback, 18.0f * a_scale, ranges.Data);
-		_small = AddFont(a_paths.regular, a_paths.fallback, 15.0f * a_scale, ranges.Data);
-		_header = AddFont(heading, a_paths.fallback, 22.0f * a_scale, ranges.Data);
-		_title = AddFont(title, a_paths.fallback, 30.0f * a_scale, ranges.Data);
+		_body = AddFont(a_paths.regular, a_paths.fallback, 18.0f * a_scale, ranges.Data, a_paths.weight);
+		_small = AddFont(a_paths.regular, a_paths.fallback, 15.0f * a_scale, ranges.Data, a_paths.weight);
+		_header = AddFont(heading, a_paths.fallback, 22.0f * a_scale, ranges.Data, a_paths.weight);
+		_title = AddFont(title, a_paths.fallback, a_paths.titleSize * a_scale, ranges.Data, a_paths.weight);
 
 		io.FontDefault = _body;
 		io.Fonts->Build();
@@ -577,6 +607,9 @@ namespace CompletionistUI
 			break;
 		case Theme::kNordic:
 			_palette = NordicPalette();
+			break;
+		case Theme::kOblivion:
+			_palette = OblivionPalette();
 			break;
 		default:
 			_palette = CompletionistPalette();

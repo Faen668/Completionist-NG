@@ -117,6 +117,10 @@ namespace CompletionistUI
 			if (a_theme == Theme::kAltmer) {
 				return { folder + "EBGaramond.ttf", {}, {}, folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf" };
 			}
+			// A mapmaker's book hand and his lettered capitals
+			if (a_theme == Theme::kOblivion) {
+				return { folder + "EBGaramond.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf", 1.7f, 36.0f };
+			}
 			// Carved capitals over the Dwemer's doors, a plain face for the text
 			if (a_theme == Theme::kDwemer) {
 				return { folder + "AlegreyaSans-Regular.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "EBGaramond.ttf" };

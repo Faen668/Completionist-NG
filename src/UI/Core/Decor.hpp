@@ -45,10 +45,11 @@ namespace CompletionistUI
 		[[nodiscard]] static bool Altmer() noexcept { return _theme == Theme::kAltmer; }
 		[[nodiscard]] static bool DearDiary() noexcept { return _theme == Theme::kDearDiary; }
 		[[nodiscard]] static bool Nordic() noexcept { return _theme == Theme::kNordic; }
+		[[nodiscard]] static bool Oblivion() noexcept { return _theme == Theme::kOblivion; }
 		// The framed themes (races and the UI mods' looks), as against Completionist and SkyUI
 		[[nodiscard]] static bool Race() noexcept { return _theme != Theme::kCompletionist && _theme != Theme::kSkyUI; }
 		// Window title in capitals, as the menus these themes follow write theirs
-		[[nodiscard]] static bool UpperTitle() noexcept { return SkyUI() || DearDiary() || Nordic(); }
+		[[nodiscard]] static bool UpperTitle() noexcept { return SkyUI() || DearDiary() || Nordic() || Oblivion(); }
 		// Headings with their ornament running out beside them, rather than a rule underneath
 		[[nodiscard]] static bool TailedHeadings() noexcept { return SkyUI() || DearDiary() || Nordic(); }
 		// How far a race's frame reaches in past the plain one, for padding small panels

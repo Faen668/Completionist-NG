@@ -22,6 +22,7 @@ namespace CompletionistUI
 		kBreton,
 		kImperial,
 		kRedguard,
+		kOblivion,
 	};
 
 	// Button names for each pad, same buttons through XInput

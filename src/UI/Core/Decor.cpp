@@ -12,6 +12,7 @@
 #include "UI/Themes/KhajiitDecor.hpp"
 #include "UI/Themes/NordDecor.hpp"
 #include "UI/Themes/NordicDecor.hpp"
+#include "UI/Themes/OblivionDecor.hpp"
 #include "UI/Themes/OrsimerDecor.hpp"
 #include "UI/Themes/RedguardDecor.hpp"
 #include "UI/Themes/SkyUIDecor.hpp"
@@ -67,6 +68,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDwemer:
 			DwemerDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kOblivion:
+			OblivionDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Shard(a_drawList, a_centre, a_radius, a_colour, a_filled);
@@ -135,6 +139,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDwemer:
 			DwemerDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kOblivion:
+			OblivionDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Anvil(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -218,6 +225,9 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 			DwemerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kOblivion:
+			OblivionDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
@@ -287,6 +297,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDwemer:
 			DwemerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kOblivion:
+			OblivionDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
@@ -368,6 +381,9 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 			DwemerDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
 			return;
+		case Theme::kOblivion:
+			OblivionDecor::Divider(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
 			return;
@@ -446,6 +462,9 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 			DwemerDecor::Cog(a_drawList, a_centre, a_radius * 1.25f, a_colour, true);
 			return;
+		case Theme::kOblivion:
+			OblivionDecor::Rosette(a_drawList, a_centre, a_radius * 1.5f);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Blades(a_drawList, a_centre, a_radius * 1.4f, a_colour);
 			return;
@@ -502,6 +521,9 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 			DwemerDecor::Inlay(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
+		case Theme::kOblivion:
+			OblivionDecor::Rule(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Serration(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
@@ -557,6 +579,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDwemer:
 			DwemerDecor::Inlay(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
+			return;
+		case Theme::kOblivion:
+			OblivionDecor::Rule(a_drawList, a_from, a_to, a_rule);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Serration(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
@@ -622,6 +647,9 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 			DwemerDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kOblivion:
+			OblivionDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Frame(a_drawList, a_min, a_max);
 			return;
@@ -681,6 +709,7 @@ namespace CompletionistUI
 		case Theme::kArgonian:
 		case Theme::kDunmer:
 		case Theme::kDwemer:
+		case Theme::kOblivion:
 		case Theme::kOrsimer:
 		case Theme::kBreton:
 		case Theme::kImperial:
@@ -712,6 +741,9 @@ namespace CompletionistUI
 			return true;
 		case Theme::kDwemer:
 			DwemerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kOblivion:
+			OblivionDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
 		case Theme::kOrsimer:
 			OrsimerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
@@ -763,6 +795,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kDwemer:
 			DwemerDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		case Theme::kOblivion:
+			OblivionDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PanelCorners(a_drawList, a_min, a_max);
@@ -816,6 +851,11 @@ namespace CompletionistUI
 		}
 		if (_theme == Theme::kNordic) {
 			NordicDecor::GlowBar(a_drawList, a_min, a_max, a_colour, a_alpha);
+			return;
+		}
+
+		if (Oblivion()) {
+			OblivionDecor::Highlight(a_drawList, a_min, a_max, a_alpha);
 			return;
 		}
 

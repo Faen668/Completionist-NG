@@ -2,6 +2,7 @@
 #include "UI/Core/Decor.hpp"
 #include "UI/Core/SettingsLayout.hpp"
 #include "UI/Core/Themes.hpp"
+#include "UI/Themes/OblivionDecor.hpp"
 
 #include <imgui_internal.h>
 
@@ -178,6 +179,10 @@ namespace CompletionistUI
 				*channel = light ? *channel + (1.0f - *channel) * 0.4f : *channel * 0.72f;
 			}
 			colour.w = windowOpacity;
+			// Oblivion's panels are the page itself, its grain showing through them
+			if (Decor::Oblivion()) {
+				colour.w *= 0.25f;
+			}
 			return colour;
 		}
 
@@ -437,6 +442,9 @@ namespace CompletionistUI
 		// Lit as if focused, for a button steered by hand rather than by ImGui
 		bool buttonLit = false;
 
+		// Room kept at a button's left for a small drawing beside its label
+		float buttonIconRoom = 0.0f;
+
 		bool ThemedButton(const char* a_label, float a_width = 0.0f) {
 
 			const auto& palette = Themes::GetPalette();
@@ -472,13 +480,17 @@ namespace CompletionistUI
 				return clicked;
 			}
 
-			drawList->AddRectFilled(min, max, Colour(palette.accent, 0.05f + (ImGui::IsItemActive() ? 0.18f : 0.10f * glow)));
-			drawList->AddRect(min, max, Colour(glow > 0.0f ? palette.accent : palette.separator, 0.55f + 0.45f * glow));
-			Decor::Diamond(drawList, ImVec2(min.x, midY), diamond, Colour(palette.accent, 0.6f + 0.4f * glow), true);
-			Decor::Diamond(drawList, ImVec2(max.x, midY), diamond, Colour(palette.accent, 0.6f + 0.4f * glow), true);
+			if (Decor::Oblivion()) {
+				OblivionDecor::Plaque(drawList, min, max, glow, ImGui::IsItemActive());
+			} else {
+				drawList->AddRectFilled(min, max, Colour(palette.accent, 0.05f + (ImGui::IsItemActive() ? 0.18f : 0.10f * glow)));
+				drawList->AddRect(min, max, Colour(glow > 0.0f ? palette.accent : palette.separator, 0.55f + 0.45f * glow));
+				Decor::Diamond(drawList, ImVec2(min.x, midY), diamond, Colour(palette.accent, 0.6f + 0.4f * glow), true);
+				Decor::Diamond(drawList, ImVec2(max.x, midY), diamond, Colour(palette.accent, 0.6f + 0.4f * glow), true);
+			}
 
 			const auto textSize = ImGui::CalcTextSize(a_label, labelEnd);
-			drawList->AddText(ImVec2((min.x + max.x - textSize.x) * 0.5f, midY - textSize.y * 0.5f), Colour(hovered ? palette.text : palette.needed), a_label, labelEnd);
+			drawList->AddText(ImVec2((min.x + max.x - textSize.x + buttonIconRoom) * 0.5f, midY - textSize.y * 0.5f), Colour(hovered ? palette.text : palette.needed), a_label, labelEnd);
 			return clicked;
 		}
 
@@ -684,6 +696,10 @@ namespace CompletionistUI
 			const float size = ImGui::GetFontSize();
 			const auto  padding = ImGui::GetStyle().FramePadding;
 
+			if (Decor::Oblivion()) {
+				const auto at = ImGui::GetCursorScreenPos();
+				OblivionDecor::Plaque(ImGui::GetWindowDrawList(), at, ImVec2(at.x + a_width, at.y + ImGui::GetFrameHeight()), 0.0f, true);
+			}
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(padding.x + size * 1.1f, padding.y));
@@ -704,7 +720,9 @@ namespace CompletionistUI
 			const float radius = size * 0.26f;
 			drawList->AddCircle(lens, radius, colour, 0, std::max(1.0f, size * 0.07f));
 			drawList->AddLine(ImVec2(lens.x + radius * 0.7f, lens.y + radius * 0.7f), ImVec2(lens.x + radius * 1.6f, lens.y + radius * 1.6f), colour, std::max(1.0f, size * 0.09f));
-			Decor::FadedLine(drawList, ImVec2(min.x, max.y - 1.0f), ImVec2(max.x, max.y - 1.0f), Colour(active ? palette.accent : palette.separator));
+			if (!Decor::Oblivion()) {
+				Decor::FadedLine(drawList, ImVec2(min.x, max.y - 1.0f), ImVec2(max.x, max.y - 1.0f), Colour(active ? palette.accent : palette.separator));
+			}
 		}
 
 		constexpr std::string_view windowTab = "window";
@@ -1180,6 +1198,10 @@ namespace CompletionistUI
 			drawList->PushClipRect(min, max, false);
 			// Race themes dress the panel: texture at the edges, light, emblem, their own corners
 			const bool dressed = Decor::Panel(drawList, min, max, a_emblem);
+			// The word panel keeps its lower half for the cards
+			if (a_underGrip && Decor::Oblivion()) {
+				OblivionDecor::PanelEtching(drawList, min, max, 0.56f);
+			}
 			drawList->AddRect(min, max, Colour(palette.separator, 0.8f));
 			for (const auto& point : { min, ImVec2(max.x, min.y), ImVec2(min.x, max.y), max }) {
 				if (!SkyUI() && !dressed) {
@@ -1278,6 +1300,9 @@ namespace CompletionistUI
 		//-- Completionist UI ( Row Selectable ) ------------
 		//---------------------------------------------------
 
+		// Drawing the sidebar, where Oblivion marks the chosen row with a crimson plaque
+		bool sidebarRows = false;
+
 		bool RowSelectable(const char* a_id, bool a_selected, ImVec2 a_size, ImGuiSelectableFlags a_flags = 0) {
 
 
@@ -1295,7 +1320,11 @@ namespace CompletionistUI
 
 			const bool  focused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
 			const float glow = Decor::Animate(ImGui::GetItemID(), a_selected || (ImGui::IsItemHovered() && !ImGui::GetIO().NavVisible) || focused);
-			Decor::GlowBar(ImGui::GetWindowDrawList(), ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Colour(Themes::GetPalette().accent), a_selected ? 1.0f : glow * 0.6f);
+			if (sidebarRows && a_selected && Decor::Oblivion()) {
+				OblivionDecor::NavPlaque(ImGui::GetWindowDrawList(), ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), 1.0f);
+			} else {
+				Decor::GlowBar(ImGui::GetWindowDrawList(), ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Colour(Themes::GetPalette().accent), a_selected ? 1.0f : glow * 0.6f);
+			}
 			return clicked;
 		}
 
@@ -1470,6 +1499,9 @@ namespace CompletionistUI
 			const float navWidth = std::floor(fullWidth * UpdateNavigationOpen());
 			const auto  bodyTop = ImGui::GetCursorScreenPos();
 			if (navWidth >= 1.0f) {
+				if (Decor::Oblivion()) {
+					OblivionDecor::SidebarEtching(ImGui::GetWindowDrawList(), bodyTop, ImVec2(bodyTop.x + navWidth, bodyTop.y + ImGui::GetContentRegionAvail().y - footer));
+				}
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 				ImGui::BeginChild("##NavigationClip", ImVec2(navWidth, -footer), ImGuiChildFlags_NavFlattened, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground);
 				ImGui::PopStyleVar();
@@ -2379,6 +2411,9 @@ namespace CompletionistUI
 			const float stroke = std::max(1.2f, ImGui::GetFontSize() * 0.075f);
 			const float radius = a_height * 0.5f - stroke * 0.5f;
 			const float width = PadButtonWidth(a_button, a_style, a_height);
+			if (Decor::Oblivion()) {
+				OblivionDecor::PadCap(a_drawList, a_pos, ImVec2(a_pos.x + width, a_pos.y + a_height), IsFace(a_button) ? a_height * 0.5f : a_height * 0.3f);
+			}
 			const auto label = [&](const std::string& a_text, ImVec2 a_centre) {
 				const auto ink = SmallTextInk(a_text);
 				const auto inkCentre = ImVec2((ink.min.x + ink.max.x) * 0.5f, (ink.min.y + ink.max.y) * 0.5f);
@@ -2459,7 +2494,11 @@ namespace CompletionistUI
 		const auto  start = ImGui::GetCursorScreenPos();
 		const float width = ImGui::GetContentRegionAvail().x;
 
-		Decor::Rule(drawList, ImVec2(start.x + width * 0.1f, start.y + 1.0f), ImVec2(start.x + width * 0.9f, start.y + 1.0f), Colour(palette.separator));
+		if (Decor::Oblivion()) {
+			OblivionDecor::FooterBand(drawList, start.y);
+		} else {
+			Decor::Rule(drawList, ImVec2(start.x + width * 0.1f, start.y + 1.0f), ImVec2(start.x + width * 0.9f, start.y + 1.0f), Colour(palette.separator));
+		}
 
 		const auto style = _settings ? _settings->padStyle : PadStyle::kXbox;
 		std::vector<std::pair<std::vector<PadButton>, std::string>> hints;
@@ -2519,7 +2558,7 @@ namespace CompletionistUI
 			for (const auto name : buttons) {
 				x += DrawPadButton(drawList, ImVec2(std::floor(x), std::floor(centreY - button * 0.5f)), button, name, style) + gap;
 			}
-			drawList->AddText(ImVec2(x, centreY - fontSize * 0.5f), Colour(palette.textDim), label.c_str());
+			drawList->AddText(ImVec2(x, centreY - fontSize * 0.5f), Decor::Oblivion() ? IM_COL32(240, 226, 196, 255) : Colour(palette.textDim), label.c_str());
 			x += ImGui::CalcTextSize(label.c_str()).x + spacing;
 		}
 		drawList->PopClipRect();
@@ -2586,7 +2625,16 @@ namespace CompletionistUI
 			ImGui::SetCursorScreenPos(ImVec2(pos.x + a_gap, pos.y));
 			return;
 		}
-		verticalFade(lineX + 0.5f, pos.y, pos.y + height, Colour(palette.separator), 1.0f);
+		if (Decor::Oblivion()) {
+			// A ruled double line down the sheet, stopping short at a small lozenge
+			const float rule = ImGui::GetFontSize() * 0.14f;
+			const float foot = pos.y + height - ImGui::GetFontSize() * 0.5f;
+			drawList->AddRectFilled(ImVec2(lineX, pos.y), ImVec2(lineX + 1.0f, foot), Colour(palette.separator, 0.9f));
+			drawList->AddRectFilled(ImVec2(lineX + rule + 1.0f, pos.y), ImVec2(lineX + rule + 2.0f, foot), Colour(palette.separator, 0.5f));
+			Decor::Diamond(drawList, ImVec2(lineX + rule * 0.5f + 0.5f, foot), ImGui::GetFontSize() * 0.2f, Colour(palette.accent), true);
+		} else {
+			verticalFade(lineX + 0.5f, pos.y, pos.y + height, Colour(palette.separator), 1.0f);
+		}
 		const float half = gripHeight * 0.5f;
 		const float offset = ImGui::GetFontSize() * 0.22f;
 		const float thickness = std::max(1.5f, ImGui::GetFontSize() * 0.08f);
@@ -2667,13 +2715,23 @@ namespace CompletionistUI
 		const auto overall = a_provider.Translate("UI_Overall") + "  " + CountText(found, total) + "  (" + PercentText(found, total) + ")";
 		auto*       drawList = ImGui::GetWindowDrawList();
 		const float width = ImGui::GetContentRegionAvail().x;
-		const auto  origin = ImGui::GetCursorScreenPos();
+		// Oblivion's header is a band of the sheet, taller for its banners
+		const bool  band = Decor::Oblivion();
+		const float bodySize = ImGui::GetFontSize();
+		const auto  origin = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + (band ? bodySize * 0.1f : 0.0f));
+		const auto  overallSize = ImGui::CalcTextSize(overall.c_str());
 
 		ImGui::PushFont(Themes::TitleFont());
 		const auto  shownTitle = Decor::UpperTitle() ? Upper(title) : title;
 		const auto  titleSize = ImGui::CalcTextSize(shownTitle.c_str());
 		const float titleX = origin.x + (width - titleSize.x) * 0.5f;
 		const float lineY = origin.y + titleSize.y * 0.55f;
+		ImGui::PopFont();
+		const float bandBottom = origin.y + titleSize.y + overallSize.y + bodySize * 0.8f;
+		if (band) {
+			OblivionDecor::HeaderBand(drawList, bandBottom, ImVec2(titleX, origin.y), ImVec2(titleX + titleSize.x, origin.y + titleSize.y));
+		}
+		ImGui::PushFont(Themes::TitleFont());
 		float edge = 0.0f;
 		if (SkyUI()) {
 			const float pad = ImGui::GetFontSize() * 0.9f;
@@ -2682,33 +2740,66 @@ namespace CompletionistUI
 			Decor::Banner(drawList, ImVec2(titleX - pad, top), ImVec2(titleX + titleSize.x + pad, bottom), Colour(ImVec4(0.07f, 0.07f, 0.07f, 0.95f)), Colour(palette.separator));
 			edge = pad + (bottom - top) * 0.5f;
 		}
-		drawList->AddText(ImVec2(titleX, origin.y), Colour(palette.text), shownTitle.c_str());
+		drawList->AddText(ImVec2(titleX, origin.y), Colour(band ? palette.heading : palette.text), shownTitle.c_str());
 		ImGui::PopFont();
 		const float gap = ImGui::GetFontSize() * 1.2f;
 
-		Decor::Rule(drawList, ImVec2(origin.x + width * 0.12f, lineY), ImVec2(titleX - edge - gap, lineY), Colour(palette.separator));
-		Decor::Rule(drawList, ImVec2(titleX + titleSize.x + edge + gap, lineY), ImVec2(origin.x + width * 0.88f, lineY), Colour(palette.separator));
-		Decor::Ornament(drawList, ImVec2(titleX - edge - gap * 0.5f, lineY), gap * 0.18f, Colour(palette.accent));
-		Decor::Ornament(drawList, ImVec2(titleX + titleSize.x + edge + gap * 0.5f, lineY), gap * 0.18f, Colour(palette.accent));
+		if (!band) {
+			Decor::Rule(drawList, ImVec2(origin.x + width * 0.12f, lineY), ImVec2(titleX - edge - gap, lineY), Colour(palette.separator));
+			Decor::Rule(drawList, ImVec2(titleX + titleSize.x + edge + gap, lineY), ImVec2(origin.x + width * 0.88f, lineY), Colour(palette.separator));
+			Decor::Ornament(drawList, ImVec2(titleX - edge - gap * 0.5f, lineY), gap * 0.18f, Colour(palette.accent));
+			Decor::Ornament(drawList, ImVec2(titleX + titleSize.x + edge + gap * 0.5f, lineY), gap * 0.18f, Colour(palette.accent));
+		}
 
-		const auto overallSize = ImGui::CalcTextSize(overall.c_str());
 		drawList->AddText(ImVec2(origin.x + (width - overallSize.x) * 0.5f, origin.y + titleSize.y + 2.0f), Colour(palette.textDim), overall.c_str());
 
 		DrawHeaderButtons(a_provider, a_open, origin.x + width, origin.y);
 
+		// Oblivion's have a small drawing beside the label: a lens, the Cell Scanner's grid
+		const float toolRoom = band ? bodySize * 1.25f : 0.0f;
+		const auto  toolIcon = [&](bool a_grid) {
+			if (!band) {
+				return;
+			}
+			const auto  min = ImGui::GetItemRectMin();
+			const float midY = (min.y + ImGui::GetItemRectMax().y) * 0.5f;
+			const ImU32 pen = Colour(palette.text);
+			const float x = min.x + ImGui::GetStyle().FramePadding.x + bodySize * 0.48f;
+			if (a_grid) {
+				const float cell = bodySize * 0.2f;
+				for (int row = -1; row <= 1; ++row) {
+					for (int column = -1; column <= 1; ++column) {
+						const ImVec2 at(x + static_cast<float>(column) * cell * 1.3f, midY + static_cast<float>(row) * cell * 1.3f);
+						drawList->AddRectFilled(ImVec2(at.x - cell * 0.5f, at.y - cell * 0.5f), ImVec2(at.x + cell * 0.5f, at.y + cell * 0.5f), pen);
+					}
+				}
+				return;
+			}
+			const float radius = bodySize * 0.27f;
+			const ImVec2 lens(x - radius * 0.2f, midY - radius * 0.2f);
+			drawList->AddCircle(lens, radius, pen, 0, std::max(1.2f, bodySize * 0.08f));
+			drawList->AddLine(ImVec2(lens.x + radius * 0.7f, lens.y + radius * 0.7f), ImVec2(lens.x + radius * 1.7f, lens.y + radius * 1.7f), pen, std::max(1.5f, bodySize * 0.11f));
+		};
+
 		ImGui::SetCursorScreenPos(origin);
-		if (ThemedButton((a_provider.Translate("UI_Find") + "##Find").c_str())) {
+		const auto findLabel = a_provider.Translate("UI_Find") + "##Find";
+		buttonIconRoom = toolRoom;
+		if (ThemedButton(findLabel.c_str(), ButtonWidth(findLabel.c_str()) + toolRoom)) {
 			OpenPage(findPage);
 		}
+		toolIcon(false);
 		const auto toolsMin = ImGui::GetItemRectMin();
 		ImGui::SameLine();
-		if (ThemedButton((a_provider.Translate("UI_Cell_Button") + "##CellView").c_str())) {
+		const auto cellLabel = a_provider.Translate("UI_Cell_Button") + "##CellView";
+		if (ThemedButton(cellLabel.c_str(), ButtonWidth(cellLabel.c_str()) + toolRoom)) {
 			_cellView = true;
 			_focusCellList = true;
 		}
+		buttonIconRoom = 0.0f;
+		toolIcon(true);
 		MarkTour(TourSpot::kHeaderTools, toolsMin, ImGui::GetItemRectMax());
 
-		ImGui::SetCursorScreenPos(ImVec2(origin.x, origin.y + titleSize.y + overallSize.y + ImGui::GetFontSize() * 0.5f));
+		ImGui::SetCursorScreenPos(ImVec2(origin.x, band ? bandBottom + bodySize * 0.5f : origin.y + titleSize.y + overallSize.y + ImGui::GetFontSize() * 0.5f));
 		ImGui::Spacing();
 	}
 
@@ -2776,6 +2867,9 @@ namespace CompletionistUI
 		const float rowHeight = ImGui::GetFontSize() * 1.7f;
 		const float padding = ImGui::GetStyle().FramePadding.x;
 		const float iconSize = ImGui::GetFontSize() * 0.9f;
+		sidebarRows = true;
+		// On a crimson plaque the text is ivory
+		const auto  rowColour = [&](bool a_selected, const ImVec4& a_colour) { return a_selected && Decor::Oblivion() ? ImVec4(0.96f, 0.91f, 0.78f, 1.0f) : a_colour; };
 
 		bool       sidebarFocused = false;
 		int        sidebarIndex = 0;
@@ -2806,7 +2900,7 @@ namespace CompletionistUI
 			const auto  size = ImGui::CalcTextSize(text.c_str());
 			const float centreX = (min.x + max.x) * 0.5f;
 			const float centreY = (min.y + max.y) * 0.5f;
-			drawList->AddText(ImVec2(centreX - size.x * 0.5f, centreY - size.y * 0.5f), Colour(palette.heading), text.c_str());
+			drawList->AddText(ImVec2(centreX - size.x * 0.5f, centreY - size.y * 0.5f), Colour(rowColour(a_selected, palette.heading)), text.c_str());
 			ImGui::PopFont();
 			const float gap = ImGui::GetFontSize() * 0.8f;
 			const float glyph = ImGui::GetFontSize() * 0.2f;
@@ -2893,8 +2987,9 @@ namespace CompletionistUI
 					drawList->AddText(ImVec2(right - ImGui::CalcTextSize(shown.c_str()).x, textY), Colour(palette.text), shown.c_str());
 					ThinBar(drawList, ImVec2(min.x + padding, max.y - 2.0f), ImVec2(right, max.y - 1.0f), Fraction(page.found, page.total));
 				} else {
-					drawList->AddText(ImVec2(textX, textY), Colour(palette.text), FitText(name, max.x - countSize.x - padding * 2.0f - textX).c_str());
-					drawList->AddText(ImVec2(max.x - countSize.x - padding, textY), Colour(complete ? palette.found : palette.count), count.c_str());
+					const bool chosen = _selectedPage == page.id;
+					drawList->AddText(ImVec2(textX, textY), Colour(rowColour(chosen, palette.text)), FitText(name, max.x - countSize.x - padding * 2.0f - textX).c_str());
+					drawList->AddText(ImVec2(max.x - countSize.x - padding, textY), Colour(rowColour(chosen, complete ? palette.found : palette.count)), count.c_str());
 					ThinBar(drawList, ImVec2(textX, max.y - 3.0f), ImVec2(max.x - padding, max.y - 2.0f), Fraction(page.found, page.total));
 				}
 				ImGui::PopID();
@@ -2924,9 +3019,9 @@ namespace CompletionistUI
 					drawList->AddText(ImVec2(right - ImGui::CalcTextSize(name.c_str()).x, textY), Colour(palette.text), name.c_str());
 				} else {
 					drawList->PushClipRect(min, ImVec2(max.x - countSize.x - padding * 2.0f, max.y), true);
-					drawList->AddText(ImVec2(textX, textY), Colour(palette.text), name.c_str());
+					drawList->AddText(ImVec2(textX, textY), Colour(rowColour(_selectedPage == killsPage, palette.text)), name.c_str());
 					drawList->PopClipRect();
-					drawList->AddText(ImVec2(max.x - countSize.x - padding, textY), Colour(palette.count), count.c_str());
+					drawList->AddText(ImVec2(max.x - countSize.x - padding, textY), Colour(rowColour(_selectedPage == killsPage, palette.count)), count.c_str());
 				}
 			}
 		}
@@ -2940,6 +3035,7 @@ namespace CompletionistUI
 			_focusSidebar = false;
 		}
 		_sidebarFocused = sidebarFocused;
+		sidebarRows = false;
 	}
 
 	//---------------------------------------------------
