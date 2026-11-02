@@ -12,11 +12,13 @@ namespace CompletionistUI::OblivionDecor
 	void Rosette(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius);
 	void Rule(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour);
 	void Divider(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour);
+	// A window's paper, inside its frame. Called just before Frame, it leaves the window a clear margin round the rail
+	void Ground(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, ImU32 a_colour);
 	void Frame(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
 	void Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem);
 	void PanelCorners(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
-	// A panel's drawing of the castle and far hills, standing a_baseline of the way down it
-	void PanelEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_baseline);
+	// The castle and far hills drawn in a box, standing on its bottom edge and kept inside it. a_ruin adds the ruin at its left
+	void BoxEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_ruin);
 	void PerkNode(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, PerkState a_state);
 	void PerkLink(ImDrawList* a_drawList, ImVec2 a_from, ImVec2 a_to, ImU32 a_colour, bool a_lit, float a_radius);
 

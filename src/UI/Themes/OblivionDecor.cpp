@@ -30,14 +30,16 @@ namespace CompletionistUI::OblivionDecor
 		constexpr ImU32 crimson = IM_COL32(138, 34, 24, 255);
 		constexpr ImU32 crimsonLight = IM_COL32(178, 60, 38, 255);
 		constexpr ImU32 crimsonDeep = IM_COL32(84, 16, 12, 255);
-		constexpr ImU32 oak = IM_COL32(92, 48, 30, 255);
-		constexpr ImU32 oakDark = IM_COL32(52, 24, 15, 255);
+		constexpr ImU32 oak = IM_COL32(98, 58, 38, 255);
+		constexpr ImU32 oakDark = IM_COL32(50, 28, 19, 255);
 		constexpr ImU32 ivory = IM_COL32(240, 226, 196, 255);
 
 		// The window's frame, as last drawn, for the bands that fill it
 		ImVec2 frameMin;
 		ImVec2 frameMax;
 		float  frameRail = 0.0f;
+		float  frameBoss = 0.0f;
+		bool   groundDrawn = false;
 
 		//---------------------------------------------------
 		//-- Oblivion Decor ( Mix ) -------------------------
@@ -282,47 +284,79 @@ namespace CompletionistUI::OblivionDecor
 		// Dark oak, its grain drawn out along its length
 		ImU32 OakAt(float a_x, float a_y, float a_size) {
 
-			const float grain = Fbm(a_x / (a_size * 5.5f), a_y / (a_size * 0.34f), 4);
-			const float knots = Fbm(a_x / (a_size * 2.6f) + 40.0f, a_y / (a_size * 1.4f), 3);
-			return Mix(oakDark, oak, std::clamp((grain - 0.32f) * 1.9f + (knots - 0.5f) * 0.6f, 0.0f, 1.2f));
+			const float grain = Fbm(a_x / (a_size * 3.2f), a_y / (a_size * 0.55f), 4);
+			const float knots = Fbm(a_x / (a_size * 2.0f) + 40.0f, a_y / (a_size * 1.1f), 3);
+			// The dark lines of its figure, where the grain turns
+			const float figure = 1.0f - Smooth(std::abs(knots - 0.5f) * 16.0f);
+			return Mix(oakDark, oak, std::clamp((grain - 0.28f) * 1.7f - figure * 0.4f, 0.0f, 1.0f));
+		}
+
+		//---------------------------------------------------
+		//-- Oblivion Decor ( Oak Grain ) -------------------
+		//---------------------------------------------------
+
+		// The rough of the wood, too fine for its shading to carry: short cuts along the grain.
+		// a_strength takes a point's position and says how much of the oak is showing there
+		template <class Strength>
+		void OakGrain(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, std::uint32_t a_seed, Strength&& a_strength) {
+
+			const float size = ImGui::GetFontSize();
+			const float width = a_max.x - a_min.x;
+			const float height = a_max.y - a_min.y;
+			Random      random{ a_seed };
+			const int   cuts = std::clamp(static_cast<int>(width * height / (size * size * 0.06f)), 20, 2600);
+			for (int i = 0; i < cuts; ++i) {
+				const ImVec2 at(a_min.x + width * random.Next(), a_min.y + height * random.Next());
+				const float  strength = a_strength(at);
+				const float  length = size * random.Range(0.25f, 1.1f);
+				const float  drift = size * random.Range(-0.06f, 0.06f);
+				const bool   light = random.Next() < 0.3f;
+				if (strength > 0.02f && at.x + length < a_max.x) {
+					a_drawList->AddLine(at, ImVec2(at.x + length, at.y + drift), WithAlpha(light ? IM_COL32(150, 100, 66, 255) : IM_COL32(26, 12, 6, 255), strength * random.Range(0.12f, light ? 0.25f : 0.4f)), 1.0f);
+				}
+			}
 		}
 
 		//---------------------------------------------------
 		//-- Oblivion Decor ( Rail ) ------------------------
 		//---------------------------------------------------
 
-		// One length of worn bronze moulding: dark edges, a rubbed bright ridge, nicks and verdigris shadow
+		// One length of worn bronze moulding, shaded as a soft mesh so nothing in it has a hard edge: dark at both sides,
+		// lit along its upper ridge, a groove below that, tarnish and copper drifting along it
 		void Rail(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, std::uint32_t a_seed) {
 
-			const bool  horizontal = a_max.x - a_min.x >= a_max.y - a_min.y;
-			const float length = horizontal ? a_max.x - a_min.x : a_max.y - a_min.y;
-			const float depth = horizontal ? a_max.y - a_min.y : a_max.x - a_min.x;
-			const auto  at = [&](float a_along, float a_across) { return horizontal ? ImVec2(a_min.x + a_along, a_min.y + a_across) : ImVec2(a_min.x + a_across, a_min.y + a_along); };
+			constexpr ImU32 tan = IM_COL32(178, 136, 84, 255);
+			constexpr ImU32 pale = IM_COL32(230, 200, 146, 255);
+			constexpr ImU32 copper = IM_COL32(132, 76, 44, 255);
 
-			a_drawList->AddRectFilled(a_min, a_max, bronzeDark);
-			Random random{ a_seed };
-			float  along = 0.0f;
-			while (along < length) {
-				const float step = depth * random.Range(0.25f, 0.8f);
-				const float end = std::min(length, along + step);
-				const float wear = Fbm((along + static_cast<float>(a_seed % 500u)) / (depth * 9.0f), 0.3f, 4);
-				const ImU32 body = Mix(goldDeep, gold, Smooth((wear - 0.25f) * 2.2f) * random.Range(0.85f, 1.0f));
-				a_drawList->AddRectFilled(at(along, depth * 0.12f), at(end, depth * 0.88f), body);
-				const ImU32 ridge = Mix(gold, goldLight, Smooth((wear - 0.3f) * 2.4f) * random.Range(0.75f, 1.0f));
-				a_drawList->AddRectFilled(at(along, depth * 0.26f), at(end, depth * 0.5f), ridge);
-				a_drawList->AddRectFilled(at(along, depth * 0.6f), at(end, depth * 0.74f), WithAlpha(bronzeDark, random.Range(0.3f, 0.55f)));
-				// Pits and rubbed flecks in the casting
-				if (random.Next() < 0.28f) {
-					const float across = random.Range(0.14f, 0.7f);
-					a_drawList->AddRectFilled(at(along, depth * across), at(end, depth * (across + 0.14f)), WithAlpha(random.Next() < 0.6f ? bronzeDark : goldLight, random.Range(0.25f, 0.6f)));
+			const bool  horizontal = a_max.x - a_min.x >= a_max.y - a_min.y;
+			const float depth = horizontal ? a_max.y - a_min.y : a_max.x - a_min.x;
+			const float offset = static_cast<float>(a_seed % 500u);
+			const float along = std::max(2.0f, depth * 0.4f);
+			const float across = std::max(1.0f, depth / 6.0f);
+
+			Mesh(a_drawList, a_min, a_max, horizontal ? along : across, horizontal ? across : along, [&](float a_x, float a_y) {
+				const float length = horizontal ? a_x : a_y;
+				const float t = horizontal ? (a_y - a_min.y) / depth : (a_x - a_min.x) / depth;
+
+				// Across the moulding
+				ImU32 colour;
+				if (t < 0.3f) {
+					colour = Mix(bronzeDark, pale, Smooth(t / 0.3f));
+				} else if (t < 0.62f) {
+					colour = Mix(pale, goldDeep, Smooth((t - 0.3f) / 0.32f));
+				} else if (t < 0.82f) {
+					colour = Mix(goldDeep, tan, Smooth((t - 0.62f) / 0.2f));
+				} else {
+					colour = Mix(tan, bronzeDark, Smooth((t - 0.82f) / 0.18f));
 				}
-				along = end;
-			}
-			if (horizontal) {
-				a_drawList->AddLine(ImVec2(a_min.x, a_min.y + 0.5f), ImVec2(a_max.x, a_min.y + 0.5f), WithAlpha(goldLight, 0.3f), 1.0f);
-			} else {
-				a_drawList->AddLine(ImVec2(a_min.x + 0.5f, a_min.y), ImVec2(a_min.x + 0.5f, a_max.y), WithAlpha(goldLight, 0.3f), 1.0f);
-			}
+
+				// Along it: rubbed bright in some places, tarnished in others
+				const float wear = Fbm(length / (depth * 3.5f) + offset, t * 1.5f, 3);
+				const float pits = Fbm(length / (depth * 0.9f) + offset, t * 2.5f + 7.0f, 2);
+				colour = Mix(colour, copper, Smooth((wear - 0.55f) * 4.0f) * 0.55f);
+				return Mix(colour, bronzeDark, Smooth((pits - 0.58f) * 5.0f) * 0.5f);
+			});
 		}
 
 		//---------------------------------------------------
@@ -379,80 +413,148 @@ namespace CompletionistUI::OblivionDecor
 		}
 
 		//---------------------------------------------------
-		//-- Oblivion Decor ( Leaf ) ------------------------
+		//-- Oblivion Decor ( Petal ) -----------------------
 		//---------------------------------------------------
 
-		// One bronze acanthus leaf: dark under, bright along its rib
-		void Leaf(ImDrawList* a_drawList, ImVec2 a_root, float a_angle, float a_length, float a_width, ImU32 a_body, ImU32 a_rib) {
+		// One fat cast petal: dark round it, dull gold, a lit swell down its middle, a shadow towards its tip
+		void Petal(ImDrawList* a_drawList, ImVec2 a_root, float a_angle, float a_length, float a_width) {
+
+			constexpr ImU32 cast = IM_COL32(158, 118, 68, 255);
+			constexpr ImU32 lit = IM_COL32(226, 196, 136, 255);
 
 			const float cosine = std::cos(a_angle);
 			const float sine = std::sin(a_angle);
 			const auto  at = [&](float a_along, float a_across) {
 				return ImVec2(a_root.x + cosine * a_along * a_length - sine * a_across * a_width, a_root.y + sine * a_along * a_length + cosine * a_across * a_width);
 			};
-			const ImVec2 outline[] = { at(0.0f, 0.0f), at(0.34f, 0.5f), at(0.74f, 0.42f), at(1.0f, 0.0f), at(0.74f, -0.42f), at(0.34f, -0.5f) };
-			const auto   shape = Spline(outline, 6, true, 3);
-			FillShape(a_drawList, shape, a_body);
-			a_drawList->AddLine(at(0.06f, 0.0f), at(0.88f, 0.0f), a_rib, std::max(1.0f, a_width * 0.14f));
+			const auto shape = [&](float a_scale, float a_start, float a_end, float a_shift) {
+				const float span = a_end - a_start;
+				const ImVec2 points[] = {
+					at(a_start, a_shift),
+					at(a_start + span * 0.22f, a_scale * 0.32f + a_shift),
+					at(a_start + span * 0.5f, a_scale * 0.5f + a_shift),
+					at(a_start + span * 0.78f, a_scale * 0.3f + a_shift),
+					at(a_end, a_shift),
+					at(a_start + span * 0.78f, -a_scale * 0.3f + a_shift),
+					at(a_start + span * 0.5f, -a_scale * 0.5f + a_shift),
+					at(a_start + span * 0.22f, -a_scale * 0.32f + a_shift),
+				};
+				return Spline(points, 8, true, 3);
+			};
+			// Sharpen the tip: the spline rounds it, so a small wedge finishes it off
+			const ImVec2 wedge[3] = { at(0.86f, 0.13f), at(1.04f, 0.0f), at(0.86f, -0.13f) };
+
+			FillShape(a_drawList, shape(1.26f, 0.1f, 1.04f, 0.0f), bronzeDark);
+			a_drawList->AddTriangleFilled(wedge[0], wedge[1], wedge[2], cast);
+			FillShape(a_drawList, shape(1.0f, 0.14f, 1.0f, 0.0f), cast);
+			FillShape(a_drawList, shape(0.46f, 0.3f, 0.84f, 0.1f), lit);
+			FillShape(a_drawList, shape(0.3f, 0.14f, 0.42f, 0.0f), WithAlpha(bronzeDark, 0.6f));
+			FillShape(a_drawList, shape(0.24f, 0.58f, 0.96f, -0.22f), WithAlpha(bronzeDark, 0.5f));
+			a_drawList->AddLine(at(0.32f, -0.12f), at(0.74f, -0.16f), WithAlpha(bronzeDark, 0.55f), std::max(1.0f, a_width * 0.05f));
 		}
 
 		//---------------------------------------------------
 		//-- Oblivion Decor ( Corner Boss ) -----------------
 		//---------------------------------------------------
 
-		// A cast bronze flower on the corner, leaves running out along both rails
-		void CornerBoss(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, float a_sx, float a_sy) {
+		// The cast flower on a corner of the frame, spreading past the rail: eight splayed petals round a ringed boss,
+		// the longest two running along the rails. a_corner is the rail's outer corner, a_rail its width
+		void CornerBoss(ImDrawList* a_drawList, ImVec2 a_corner, float a_rail, float a_sx, float a_sy) {
 
-			const auto petal = [&](float a_angle, float a_length, float a_width, float a_shade) {
-				Leaf(a_drawList, a_centre, a_angle, a_length * 1.08f, a_width * 1.2f, bronzeDark, bronzeDark);
-				Leaf(a_drawList, a_centre, a_angle, a_length, a_width, Shade(gold, a_shade), goldLight);
+			const ImVec2 centre(a_corner.x + a_sx * a_rail * 1.6f, a_corner.y + a_sy * a_rail * 1.3f);
+
+			// Angle in degrees as on a bottom left corner, length in rail widths, drawn from the back forward
+			struct Spread
+			{
+				float degrees;
+				float length;
 			};
-			const float across = a_sx > 0.0f ? 0.0f : pi;
-			const float down = a_sy > 0.0f ? pi * 0.5f : -pi * 0.5f;
-			// Leaves along the rails, from the far end in
-			for (const float scale : { 2.3f, 1.6f }) {
-				petal(across + a_sx * a_sy * 0.13f, a_radius * scale, a_radius * 0.46f, scale > 2.0f ? 0.72f : 0.95f);
-				petal(down - a_sx * a_sy * 0.13f, a_radius * scale, a_radius * 0.46f, scale > 2.0f ? 0.72f : 0.95f);
+			static constexpr Spread petals[] = {
+				{ 226.0f, 2.9f }, { 137.0f, 1.8f }, { 63.0f, 2.3f }, { 29.0f, 2.8f }, { -50.0f, 2.0f }, { 190.0f, 2.2f }, { 6.0f, 2.9f }, { -90.0f, 3.1f },
+			};
+			const auto turned = [&](float a_degrees) {
+				const float angle = a_degrees * pi / 180.0f;
+				return std::atan2(-a_sy * std::sin(angle), a_sx * std::cos(angle));
+			};
+
+			// A thin spike carries on past the longest petal, along the rail
+			const float up = turned(-90.0f);
+			const ImVec2 spikeFrom(centre.x + std::cos(up) * a_rail * 2.9f, centre.y + std::sin(up) * a_rail * 2.9f);
+			const ImVec2 spikeTo(centre.x + std::cos(up) * a_rail * 4.4f, centre.y + std::sin(up) * a_rail * 4.4f);
+			a_drawList->AddLine(spikeFrom, spikeTo, bronzeDark, std::max(1.5f, a_rail * 0.26f));
+			a_drawList->AddLine(spikeFrom, spikeTo, gold, std::max(1.0f, a_rail * 0.13f));
+			a_drawList->AddCircleFilled(spikeTo, a_rail * 0.15f, gold, 8);
+
+			for (const auto& petal : petals) {
+				Petal(a_drawList, centre, turned(petal.degrees), a_rail * petal.length * 1.12f, a_rail * petal.length * 0.42f + a_rail * 0.26f);
 			}
-			// The flower, turned to the corner
-			const float outward = std::atan2(-a_sy, -a_sx);
-			for (const float turn : { -1.15f, 1.15f, -0.58f, 0.58f, 0.0f }) {
-				petal(outward + turn, a_radius * (turn == 0.0f ? 0.72f : 0.68f), a_radius * 0.56f, 0.86f + 0.2f * (1.0f - std::abs(turn)));
+
+			a_drawList->AddCircleFilled(centre, a_rail * 0.62f, bronzeDark, 18);
+			a_drawList->AddCircleFilled(centre, a_rail * 0.42f, IM_COL32(226, 196, 140, 255), 18);
+			a_drawList->AddCircleFilled(centre, a_rail * 0.24f, goldDeep, 12);
+			a_drawList->AddCircleFilled(ImVec2(centre.x - a_rail * 0.05f, centre.y - a_rail * 0.05f), a_rail * 0.1f, gold, 8);
+		}
+
+		//---------------------------------------------------
+		//-- Oblivion Decor ( Sheet Corner ) ----------------
+		//---------------------------------------------------
+
+		// A scroll of bronze in the corner of the page, its tendrils running along the rails
+		void SheetCorner(ImDrawList* a_drawList, ImVec2 a_corner, float a_arm, float a_sx, float a_sy) {
+
+			const auto at = [&](float a_x, float a_y) { return ImVec2(a_corner.x + a_sx * a_x * a_arm, a_corner.y + a_sy * a_y * a_arm); };
+			const ImVec2 tendril[] = { at(1.0f, 0.03f), at(0.72f, 0.04f), at(0.46f, 0.08f), at(0.26f, 0.2f), at(0.12f, 0.42f), at(0.06f, 0.7f), at(0.03f, 1.0f) };
+			const ImVec2 scroll[] = { at(0.26f, 0.2f), at(0.42f, 0.2f), at(0.52f, 0.32f), at(0.46f, 0.46f), at(0.32f, 0.48f), at(0.25f, 0.37f), at(0.33f, 0.3f), at(0.39f, 0.36f) };
+			const float  stroke = std::max(1.2f, a_arm * 0.05f);
+			for (const auto& line : { Spline(tendril, 7, false, 4), Spline(scroll, 8, false, 4) }) {
+				a_drawList->AddPolyline(line.data(), static_cast<int>(line.size()), WithAlpha(bronzeDark, 0.85f), ImDrawFlags_None, stroke + 1.2f);
+				a_drawList->AddPolyline(line.data(), static_cast<int>(line.size()), gold, ImDrawFlags_None, stroke);
 			}
-			for (const float turn : { -2.1f, 2.1f }) {
-				petal(outward + turn, a_radius * 0.82f, a_radius * 0.6f, 0.78f);
+			// A small leaf at each tendril's end
+			for (const auto& tip : { at(1.0f, 0.03f), at(0.03f, 1.0f) }) {
+				a_drawList->AddCircleFilled(tip, stroke * 1.1f, gold, 8);
 			}
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.27f, bronzeDark, 16);
-			a_drawList->AddCircleFilled(a_centre, a_radius * 0.21f, gold, 16);
-			a_drawList->AddCircleFilled(ImVec2(a_centre.x - a_radius * 0.04f, a_centre.y - a_radius * 0.05f), a_radius * 0.11f, goldLight, 12);
+			const ImVec2 webbing[] = { at(0.0f, 0.0f), at(0.46f, 0.0f), at(0.46f, 0.08f), at(0.26f, 0.2f), at(0.12f, 0.42f), at(0.0f, 0.46f) };
+			a_drawList->AddConvexPolyFilled(webbing, 6, WithAlpha(goldDeep, 0.25f));
 		}
 
 		//---------------------------------------------------
 		//-- Oblivion Decor ( Sprig ) -----------------------
 		//---------------------------------------------------
 
-		// A laurel sprig, as a mapmaker draws beside a title
-		void Sprig(ImDrawList* a_drawList, ImVec2 a_root, float a_length, float a_direction, ImU32 a_stem, ImU32 a_leaf, ImU32 a_rib) {
+		// A vine in line work, as a mapmaker draws it: a thin wandering stem, open leaves with a rib down each, a bud at its head.
+		// a_root is the bud's end; it runs a_direction along x and tails away downward
+		void Sprig(ImDrawList* a_drawList, ImVec2 a_root, float a_length, float a_direction, ImU32 a_line, ImU32 a_fill) {
 
 			const auto at = [&](float a_x, float a_y) { return ImVec2(a_root.x + a_x * a_length * a_direction, a_root.y + a_y * a_length); };
-			const ImVec2 stem[] = { at(0.0f, 0.06f), at(0.25f, 0.13f), at(0.52f, 0.02f), at(0.78f, -0.02f), at(1.0f, 0.06f) };
-			const auto   curve = Spline(stem, 5, false, 6);
-			a_drawList->AddPolyline(curve.data(), static_cast<int>(curve.size()), a_stem, ImDrawFlags_None, std::max(1.0f, a_length * 0.018f));
+			const ImVec2 stem[] = { at(0.0f, -0.07f), at(0.12f, -0.02f), at(0.23f, 0.05f), at(0.37f, 0.02f), at(0.51f, -0.02f), at(0.74f, 0.01f), at(1.0f, 0.1f) };
+			const auto   curve = Spline(stem, 7, false, 6);
+			const float  pen = std::max(1.0f, a_length * 0.009f);
+			a_drawList->AddPolyline(curve.data(), static_cast<int>(curve.size()), a_line, ImDrawFlags_None, pen);
 
-			const float leafLength = a_length * 0.22f;
-			const float leafWidth = a_length * 0.09f;
-			const auto  leaf = [&](float a_along, float a_angle, float a_scale) {
-				const auto&  point = curve[static_cast<std::size_t>(a_along * static_cast<float>(curve.size() - 1))];
-				const float  angle = a_direction > 0.0f ? a_angle : pi - a_angle;
-				Leaf(a_drawList, point, angle, leafLength * a_scale, leafWidth * a_scale, a_leaf, a_rib);
+			const auto leaf = [&](float a_along, float a_degrees, float a_scale) {
+				const auto&  root = curve[static_cast<std::size_t>(a_along * static_cast<float>(curve.size() - 1))];
+				const float  degrees = a_direction > 0.0f ? a_degrees : 180.0f - a_degrees;
+				const float  angle = degrees * pi / 180.0f;
+				const float  cosine = std::cos(angle);
+				const float  sine = std::sin(angle);
+				const float  length = a_length * 0.105f * a_scale;
+				const float  width = length * 0.42f;
+				const auto   point = [&](float a_x, float a_y) { return ImVec2(root.x + cosine * a_x * length - sine * a_y * width, root.y + sine * a_x * length + cosine * a_y * width); };
+				const ImVec2 outline[] = { point(0.0f, 0.0f), point(0.34f, 0.5f), point(0.72f, 0.38f), point(1.0f, 0.0f), point(0.72f, -0.38f), point(0.34f, -0.5f) };
+				const auto   shape = Spline(outline, 6, true, 3);
+				FillShape(a_drawList, shape, a_fill);
+				a_drawList->AddPolyline(shape.data(), static_cast<int>(shape.size()), a_line, ImDrawFlags_Closed, pen);
+				a_drawList->AddLine(point(0.1f, 0.0f), point(0.74f, 0.0f), a_line, std::max(1.0f, pen * 0.7f));
 			};
-			leaf(0.12f, -0.9f, 0.8f);
-			leaf(0.22f, 0.8f, 0.7f);
-			leaf(0.4f, -1.05f, 1.0f);
-			leaf(0.52f, 0.7f, 0.85f);
-			leaf(0.68f, -0.95f, 0.9f);
-			leaf(0.8f, 0.55f, 0.75f);
-			leaf(0.98f, -0.25f, 0.8f);
+			leaf(0.0f, -160.0f, 1.2f);	// The bud
+			leaf(0.14f, 150.0f, 0.75f);
+			leaf(0.25f, -55.0f, 1.05f);
+			leaf(0.33f, 70.0f, 0.8f);
+			leaf(0.47f, -48.0f, 1.0f);
+			leaf(0.6f, 40.0f, 0.95f);
+			leaf(0.73f, -42.0f, 0.85f);
+			leaf(0.86f, 62.0f, 0.55f);
 		}
 
 		//---------------------------------------------------
@@ -512,6 +614,15 @@ namespace CompletionistUI::OblivionDecor
 				} else {
 					list->PathClear();
 				}
+			}
+
+			// A column of faint shading under a slope. These sit edge to edge, so they're drawn without the soft fringe
+			// an ordinary fill has, which would leave a stripe at every join
+			void WashColumn(float a_x0, float a_top0, float a_x1, float a_top1, float a_base, float a_alpha) {
+
+				const ImVec2 points[4] = { At(a_x0, a_top0), At(a_x1, a_top1), At(a_x1, a_base), At(a_x0, a_base) };
+				const auto   colour = [&](ImVec2 a_at) { return WithAlpha(OblivionDecor::ink, a_alpha * ink * Fade(a_at)); };
+				GradientQuad(list, points, { colour(points[0]), colour(points[1]), colour(points[2]), colour(points[3]) });
 			}
 
 			// Soft shading laid in one direction, as a pen hatches
@@ -626,7 +737,7 @@ namespace CompletionistUI::OblivionDecor
 							const float length = (y - a_base) * random.Range(0.2f, 0.7f);
 							Stroke(x, y - 0.02f, x + length * 0.5f, y - length, a_alpha * 0.32f, 0.7f);
 						}
-						Wash({ ImVec2(x - step, a_base), ImVec2(x, a_base), ImVec2(x, y), ImVec2(x - step, lastY) }, a_alpha * 0.1f);
+						WashColumn(x - step, lastY, x, y, a_base, a_alpha * 0.1f);
 					}
 					lastY = y;
 					started = true;
@@ -835,7 +946,7 @@ namespace CompletionistUI::OblivionDecor
 			const float step = 0.5f;
 			for (float x = -13.0f; x < 5.5f; x += step) {
 				a_pen.Stroke(a_x + x, hillAt(x), a_x + x + step, hillAt(x + step), 0.55f, 0.8f);
-				a_pen.Wash({ ImVec2(a_x + x, 0.0f), ImVec2(a_x + x + step, 0.0f), ImVec2(a_x + x + step, hillAt(x + step)), ImVec2(a_x + x, hillAt(x)) }, 0.07f);
+				a_pen.WashColumn(a_x + x, hillAt(x), a_x + x + step, hillAt(x + step), 0.0f, 0.07f);
 			}
 
 			// Keep and chapel tower behind the wall
@@ -1077,6 +1188,10 @@ namespace CompletionistUI::OblivionDecor
 				const float keep = Smooth((1.0f - along * 1.15f + (edge - 0.5f) * 0.5f) * 2.1f);
 				return WithAlpha(OakAt(a_x, a_y, size), keep);
 			});
+			OakGrain(a_drawList, a_min, a_max, a_left ? 0xB701u : 0xB702u, [&](ImVec2 a_at) {
+				const float along = a_left ? (a_at.x - a_min.x) / width : (a_max.x - a_at.x) / width;
+				return Smooth((1.0f - along * 1.15f) * 2.1f);
+			});
 		}
 	}
 
@@ -1187,6 +1302,16 @@ namespace CompletionistUI::OblivionDecor
 	}
 
 	//---------------------------------------------------
+	//-- Oblivion Decor ( Ground ) ----------------------
+	//---------------------------------------------------
+
+	void Ground(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, ImU32 a_colour) {
+
+		a_drawList->AddRectFilled(a_min, a_max, a_colour);
+		groundDrawn = true;
+	}
+
+	//---------------------------------------------------
 	//-- Oblivion Decor ( Frame ) -----------------------
 	//---------------------------------------------------
 
@@ -1194,8 +1319,10 @@ namespace CompletionistUI::OblivionDecor
 	void Frame(ImDrawList* a_drawList, ImVec2 a_inMin, ImVec2 a_inMax) {
 
 		const float size = ImGui::GetFontSize();
-		// Out to the window's edge, so no strip of bare paper shows outside the rail
-		const float  bleed = size * 0.4f;
+		// A window with its own ground leaves a clear margin for the flowers to spread over; any other runs
+		// out to its edge, so no strip of bare paper shows outside the rail
+		const bool   margin = std::exchange(groundDrawn, false);
+		const float  bleed = margin ? 0.0f : size * 0.4f;
 		const ImVec2 a_min(a_inMin.x - bleed, a_inMin.y - bleed);
 		const ImVec2 a_max(a_inMax.x + bleed, a_inMax.y + bleed);
 		const float  width = a_max.x - a_min.x;
@@ -1206,6 +1333,7 @@ namespace CompletionistUI::OblivionDecor
 		frameMin = a_min;
 		frameMax = a_max;
 		frameRail = rail;
+		frameBoss = rail * (margin ? 1.0f : 0.66f);
 
 		Baked(a_drawList, 0x0B11u, a_min, a_max, [&](ImDrawList* a_list) { ParchmentTone(a_list, a_min, a_max, 0.95f, 0xB1u); });
 		Baked(a_drawList, 0x0B12u, a_min, a_max, [&](ImDrawList* a_list) { ParchmentGrain(a_list, a_min, a_max, 0xB1u); });
@@ -1224,12 +1352,10 @@ namespace CompletionistUI::OblivionDecor
 			Rail(a_list, ImVec2(a_min.x, a_min.y + rail), ImVec2(a_min.x + rail, a_max.y - rail), 0xB203u);
 			Rail(a_list, ImVec2(a_max.x - rail, a_min.y + rail), ImVec2(a_max.x, a_max.y - rail), 0xB204u);
 
-			const float boss = size * 1.2f * std::clamp(std::min(width, height) / (size * 46.0f), 0.5f, 1.0f);
-			const float in = boss * 0.62f;
-			CornerBoss(a_list, ImVec2(a_min.x + in, a_min.y + in), boss, 1.0f, 1.0f);
-			CornerBoss(a_list, ImVec2(a_max.x - in, a_min.y + in), boss, -1.0f, 1.0f);
-			CornerBoss(a_list, ImVec2(a_max.x - in, a_max.y - in), boss, -1.0f, -1.0f);
-			CornerBoss(a_list, ImVec2(a_min.x + in, a_max.y - in), boss, 1.0f, -1.0f);
+			CornerBoss(a_list, a_min, frameBoss, 1.0f, 1.0f);
+			CornerBoss(a_list, ImVec2(a_max.x, a_min.y), frameBoss, -1.0f, 1.0f);
+			CornerBoss(a_list, a_max, frameBoss, -1.0f, -1.0f);
+			CornerBoss(a_list, ImVec2(a_min.x, a_max.y), frameBoss, 1.0f, -1.0f);
 		});
 	}
 
@@ -1255,7 +1381,7 @@ namespace CompletionistUI::OblivionDecor
 		// Long and narrow, as the banners hang in the old Imperial halls
 		const float bannerHeight = height + frameRail * 0.65f + size * 0.75f;
 		const float bannerWidth = bannerHeight / 2.1f;
-		const float reach = titleHalf + size * 5.6f + bannerWidth * 0.85f;
+		const float reach = titleHalf + size * 6.5f + bannerWidth * 0.85f;
 		const float bannerOffset = std::clamp(width * 0.165f, reach, std::max(reach, width * 0.36f));
 		const bool  banners = bannerOffset + bannerWidth < width * 0.5f - size * 7.0f;
 
@@ -1294,11 +1420,25 @@ namespace CompletionistUI::OblivionDecor
 			const ImU32 clear = WithAlpha(parchShade, 0.0f);
 			a_list->AddRectFilledMultiColor(ImVec2(min.x, max.y), ImVec2(max.x, max.y + size * 0.4f), dark, dark, clear, clear);
 
+			// A hairline round the oak, fading as the oak gives out
+			const float inset = frameRail * 0.5f;
+			const ImU32 line = WithAlpha(gold, 0.85f);
+			const ImU32 lineClear = WithAlpha(gold, 0.0f);
+			const float lineTop = min.y + inset;
+			const float lineBottom = max.y - foot - inset;
+			a_list->AddRectFilled(ImVec2(min.x + inset, lineTop), ImVec2(min.x + inset + 1.5f, lineBottom), line);
+			a_list->AddRectFilled(ImVec2(max.x - inset - 1.5f, lineTop), ImVec2(max.x - inset, lineBottom), line);
+			a_list->AddRectFilledMultiColor(ImVec2(min.x + inset, lineTop), ImVec2(min.x + wornWidth, lineTop + 1.5f), line, lineClear, lineClear, line);
+			a_list->AddRectFilledMultiColor(ImVec2(max.x - wornWidth, lineTop), ImVec2(max.x - inset, lineTop + 1.5f), lineClear, line, line, lineClear);
+
+			// Scrolls in the page's top corners
+			const float scroll = size * 2.3f;
+			SheetCorner(a_list, ImVec2(min.x + 1.0f, max.y + 1.0f), scroll, 1.0f, 1.0f);
+			SheetCorner(a_list, ImVec2(max.x - 1.0f, max.y + 1.0f), scroll, -1.0f, 1.0f);
+
 			// The frame's flowers again, over the oak
-			const float boss = size * 1.2f;
-			const float in = boss * 0.62f;
-			CornerBoss(a_list, ImVec2(frameMin.x + in, frameMin.y + in), boss, 1.0f, 1.0f);
-			CornerBoss(a_list, ImVec2(frameMax.x - in, frameMin.y + in), boss, -1.0f, 1.0f);
+			CornerBoss(a_list, frameMin, frameBoss, 1.0f, 1.0f);
+			CornerBoss(a_list, ImVec2(frameMax.x, frameMin.y), frameBoss, -1.0f, 1.0f);
 
 			if (banners) {
 				WarBanner(a_list, midX - bannerOffset, frameMin.y + frameRail * 0.35f, bannerWidth, bannerHeight, 11u);
@@ -1306,12 +1446,10 @@ namespace CompletionistUI::OblivionDecor
 			}
 
 			// Laurel either side of the title
-			const float sprig = size * 4.8f;
+			const float sprig = size * 5.0f;
 			const float sprigY = (a_titleMin.y + a_titleMax.y) * 0.5f;
-			const ImU32 stem = goldDeep;
-			const ImU32 leaf = Mix(goldDeep, gold, 0.55f);
-			Sprig(a_list, ImVec2(a_titleMin.x - size * 0.7f, sprigY), sprig, -1.0f, stem, leaf, WithAlpha(bronzeDark, 0.6f));
-			Sprig(a_list, ImVec2(a_titleMax.x + size * 0.7f, sprigY), sprig, 1.0f, stem, leaf, WithAlpha(bronzeDark, 0.6f));
+			Sprig(a_list, ImVec2(a_titleMin.x - size * 1.15f, sprigY), sprig, -1.0f, goldDeep, WithAlpha(gold, 0.35f));
+			Sprig(a_list, ImVec2(a_titleMax.x + size * 1.15f, sprigY), sprig, 1.0f, goldDeep, WithAlpha(gold, 0.35f));
 		});
 	}
 
@@ -1330,22 +1468,33 @@ namespace CompletionistUI::OblivionDecor
 		}
 		Baked(a_drawList, 0x0B30u, min, max, [&](ImDrawList* a_list) {
 			Mesh(a_list, min, max, size * 0.7f, size * 0.22f, [&](float a_x, float a_y) { return OakAt(a_x, a_y, size); });
+			OakGrain(a_list, min, max, 0xB703u, [](ImVec2) { return 1.0f; });
 			const float foot = std::max(3.0f, size * 0.22f);
 			Rail(a_list, ImVec2(min.x, min.y - foot), ImVec2(max.x, min.y), 0xB401u);
-			const ImU32 dark = WithAlpha(IM_COL32(16, 6, 2, 255), 0.55f);
-			const ImU32 clear = WithAlpha(IM_COL32(16, 6, 2, 255), 0.0f);
-			a_list->AddRectFilledMultiColor(min, ImVec2(max.x, min.y + size * 0.5f), dark, dark, clear, clear);
-			a_list->AddRectFilledMultiColor(ImVec2(min.x, max.y - size * 0.4f), max, clear, clear, dark, dark);
+			const ImU32 dark = WithAlpha(IM_COL32(16, 6, 2, 255), 0.45f);
+			const ImU32 none = WithAlpha(IM_COL32(16, 6, 2, 255), 0.0f);
+			a_list->AddRectFilledMultiColor(min, ImVec2(max.x, min.y + size * 0.45f), dark, dark, none, none);
+			a_list->AddRectFilledMultiColor(ImVec2(min.x, max.y - size * 0.35f), max, none, none, dark, dark);
 
+			// A hairline along its foot, running out of the flowers
+			const float hair = max.y - frameRail * 0.5f;
+			a_list->AddRectFilled(ImVec2(min.x, hair), ImVec2(max.x, hair + 1.5f), WithAlpha(gold, 0.8f));
+
+			// Laurel in line work, its bud towards the corner
+			constexpr ImU32 pale = IM_COL32(196, 156, 98, 255);
 			const float midY = (min.y + max.y) * 0.5f;
-			const float sprig = std::min((max.x - min.x) * 0.1f, size * 5.5f);
-			Sprig(a_list, ImVec2(min.x + size * 2.0f, midY), sprig, 1.0f, gold, Mix(goldDeep, gold, 0.8f), WithAlpha(goldLight, 0.8f));
-			Sprig(a_list, ImVec2(max.x - size * 2.0f, midY), sprig, -1.0f, gold, Mix(goldDeep, gold, 0.8f), WithAlpha(goldLight, 0.8f));
+			const float sprig = std::min((max.x - min.x) * 0.11f, size * 6.6f);
+			const float clear = frameRail * 5.2f;
+			Sprig(a_list, ImVec2(min.x + clear, midY), sprig, 1.0f, pale, WithAlpha(gold, 0.5f));
+			Sprig(a_list, ImVec2(max.x - clear, midY), sprig, -1.0f, pale, WithAlpha(gold, 0.5f));
 
-			const float boss = size * 1.2f;
-			const float in = boss * 0.62f;
-			CornerBoss(a_list, ImVec2(frameMax.x - in, frameMax.y - in), boss, -1.0f, -1.0f);
-			CornerBoss(a_list, ImVec2(frameMin.x + in, frameMax.y - in), boss, 1.0f, -1.0f);
+			// Scrolls in the page's bottom corners
+			const float scroll = size * 2.3f;
+			SheetCorner(a_list, ImVec2(min.x + 1.0f, min.y - foot - 1.0f), scroll, 1.0f, -1.0f);
+			SheetCorner(a_list, ImVec2(max.x - 1.0f, min.y - foot - 1.0f), scroll, -1.0f, -1.0f);
+
+			CornerBoss(a_list, frameMax, frameBoss, -1.0f, -1.0f);
+			CornerBoss(a_list, ImVec2(frameMin.x, frameMax.y), frameBoss, 1.0f, -1.0f);
 		});
 	}
 
@@ -1395,32 +1544,37 @@ namespace CompletionistUI::OblivionDecor
 			}
 		});
 		if (a_emblem) {
-			PanelEtching(a_drawList, a_min, a_max, 1.0f);
+			// Clear of the moulding along the panel's foot
+			BoxEtching(a_drawList, a_min, ImVec2(a_max.x, a_max.y - size * 0.55f), false);
 		}
 	}
 
 	//---------------------------------------------------
-	//-- Oblivion Decor ( Panel Etching ) ---------------
+	//-- Oblivion Decor ( Box Etching ) -----------------
 	//---------------------------------------------------
 
-	void PanelEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_baseline) {
+	void BoxEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_ruin) {
 
 		const float width = a_max.x - a_min.x;
 		const float size = ImGui::GetFontSize();
-		const float ground = a_min.y + (a_max.y - a_min.y) * a_baseline - size * 0.25f;
+		const float ground = a_max.y - 1.0f;
 		const float room = ground - a_min.y;
 		if (room < size * 4.0f || width < size * 22.0f) {
 			return;
 		}
-		Baked(a_drawList, a_baseline < 1.0f ? 0x0B53u : 0x0B52u, a_min, a_max, [&](ImDrawList* a_list) {
-			const float unit = std::min(room / 9.4f, size * 0.62f);
-			Etching castle{ a_list, ImVec2(a_max.x - unit * 7.0f, ground), unit, 0.42f, ImVec2(a_max.x - unit * 28.0f, a_min.y), ImVec2(a_max.x - size * 0.3f, ground), size * 3.0f, Random{ 0xB601u } };
+		// Sized to stay under the box's top, so only its ends need to fade, and clipped so no stroke crosses its lines
+		const ImVec2 top(a_min.x, a_min.y - size * 4.0f);
+		a_drawList->PushClipRect(a_min, a_max, true);
+		Baked(a_drawList, a_ruin ? 0x0B53u : 0x0B52u, a_min, a_max, [&](ImDrawList* a_list) {
+			const float unit = std::min(room / 10.2f, size * 0.62f);
+			Etching castle{ a_list, ImVec2(a_max.x - unit * 7.0f, ground), unit, 0.42f, ImVec2(a_max.x - unit * 28.0f, top.y), ImVec2(a_max.x, a_max.y), size * 2.0f, Random{ 0xB601u } };
 			HillCastle(castle, 0.0f);
-			if (a_baseline < 1.0f && width > size * 48.0f) {
-				Etching hills{ a_list, ImVec2(a_min.x + unit * 11.0f, ground), unit * 0.82f, 0.22f, a_min, ImVec2(a_min.x + unit * 24.0f, ground), size * 3.0f, Random{ 0xB602u } };
+			if (a_ruin && width > size * 48.0f) {
+				Etching hills{ a_list, ImVec2(a_min.x + unit * 11.0f, ground), unit * 0.82f, 0.22f, ImVec2(a_min.x, top.y), ImVec2(a_min.x + unit * 24.0f, a_max.y), size * 2.0f, Random{ 0xB602u } };
 				AyleidRuin(hills, 0.0f);
 			}
 		});
+		a_drawList->PopClipRect();
 	}
 
 	//---------------------------------------------------

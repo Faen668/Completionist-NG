@@ -1198,10 +1198,6 @@ namespace CompletionistUI
 			drawList->PushClipRect(min, max, false);
 			// Race themes dress the panel: texture at the edges, light, emblem, their own corners
 			const bool dressed = Decor::Panel(drawList, min, max, a_emblem);
-			// The word panel keeps its lower half for the cards
-			if (a_underGrip && Decor::Oblivion()) {
-				OblivionDecor::PanelEtching(drawList, min, max, 0.56f);
-			}
 			drawList->AddRect(min, max, Colour(palette.separator, 0.8f));
 			for (const auto& point : { min, ImVec2(max.x, min.y), ImVec2(min.x, max.y), max }) {
 				if (!SkyUI() && !dressed) {
@@ -1463,9 +1459,13 @@ namespace CompletionistUI
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
 		windowOpacity = background.w;
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+		// Oblivion lays its own paper inside the rail, and the content clears the corner flowers
+		const bool  ownGround = Decor::Oblivion();
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ownGround ? ImVec4(0, 0, 0, 0) : background);
 		const float pad = ImGui::GetFontSize() * 1.4f;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
+		const float roomX = ownGround ? ImGui::GetFontSize() * 0.7f : 0.0f;
+		const float roomY = ownGround ? ImGui::GetFontSize() * 0.3f : 0.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad + roomX, pad + roomY));
 		constexpr auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		// The panels scroll, the window never does (controller focus near the bottom nudged it)
 		ImGui::SetNextWindowScroll(ImVec2(0.0f, 0.0f));
@@ -1477,6 +1477,9 @@ namespace CompletionistUI
 			const auto min = ImGui::GetWindowPos();
 			const auto max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
 			const auto inset = ImGui::GetFontSize() * 0.4f;
+			if (ownGround) {
+				OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+			}
 			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(Themes::GetPalette().separator));
 
 			// The tour's card takes the keys while it shows
@@ -4142,9 +4145,12 @@ namespace CompletionistUI
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
 		windowOpacity = background.w;
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, background);
+		const bool  ownGround = Decor::Oblivion();
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ownGround ? ImVec4(0, 0, 0, 0) : background);
 		const float pad = ImGui::GetFontSize() * 1.4f;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
+		const float roomX = ownGround ? ImGui::GetFontSize() * 0.7f : 0.0f;
+		const float roomY = ownGround ? ImGui::GetFontSize() * 0.3f : 0.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad + roomX, pad + roomY));
 		constexpr auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		const bool     visible = ImGui::Begin("##InCurrentCell", nullptr, flags);
 		ImGui::PopStyleVar();
@@ -4157,6 +4163,9 @@ namespace CompletionistUI
 			const auto min = ImGui::GetWindowPos();
 			const auto max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
 			const auto inset = fontSize * 0.4f;
+			if (ownGround) {
+				OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+			}
 			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(palette.separator));
 
 			const bool backPressed = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
@@ -6397,6 +6406,12 @@ namespace CompletionistUI
 		const float stripHeight = std::max(padding * 2.0f + contentHeight, sideBySide ? cardHeight : 0.0f);
 		const auto  stripMin = origin;
 		const auto  stripMax = ImVec2(stripMin.x + stripWidth, stripMin.y + stripHeight);
+		if (Decor::Oblivion()) {
+			// Sized from the body text, not the large words' font
+			ImGui::PushFont(Themes::BodyFont());
+			OblivionDecor::BoxEtching(drawList, stripMin, stripMax, true);
+			ImGui::PopFont();
+		}
 		panel(stripMin, stripMax, false);
 
 		float       x = stripMin.x + (stripWidth - wordsWidth) * 0.5f;
