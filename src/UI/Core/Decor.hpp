@@ -47,10 +47,11 @@ namespace CompletionistUI
 		[[nodiscard]] static bool Nordic() noexcept { return _theme == Theme::kNordic; }
 		[[nodiscard]] static bool Oblivion() noexcept { return _theme == Theme::kOblivion; }
 		[[nodiscard]] static bool Gothic() noexcept { return _theme == Theme::kGothic; }
+		[[nodiscard]] static bool Anime() noexcept { return _theme == Theme::kAnime; }
 		// The framed themes (races and the UI mods' looks), as against Completionist and SkyUI
 		[[nodiscard]] static bool Race() noexcept { return _theme != Theme::kCompletionist && _theme != Theme::kSkyUI; }
 		// Window title in capitals, as the menus these themes follow write theirs
-		[[nodiscard]] static bool UpperTitle() noexcept { return SkyUI() || DearDiary() || Nordic() || Oblivion(); }
+		[[nodiscard]] static bool UpperTitle() noexcept { return SkyUI() || DearDiary() || Nordic() || Oblivion() || Anime(); }
 		// Headings with their ornament running out beside them, rather than a rule underneath
 		[[nodiscard]] static bool TailedHeadings() noexcept { return SkyUI() || DearDiary() || Nordic(); }
 		// How far a race's frame reaches in past the plain one, for padding small panels
@@ -58,6 +59,8 @@ namespace CompletionistUI
 		// Inside a framed panel; false when the theme leaves panels plain
 		static bool Panel(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_emblem);
 		static void PanelCorners(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
+		// Over a finished tooltip, in the room its padding leaves. Every theme's tooltips come through here
+		static void Tooltip(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
 
 		static void Diamond(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius, ImU32 a_colour, bool a_filled);
 		static void Marker(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour, float a_fill);

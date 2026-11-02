@@ -1,6 +1,7 @@
 #include "UI/Core/Decor.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/Themes/AltmerDecor.hpp"
+#include "UI/Themes/AnimeDecor.hpp"
 #include "UI/Themes/ArgonianDecor.hpp"
 #include "UI/Themes/BosmerDecor.hpp"
 #include "UI/Themes/DearDiaryDecor.hpp"
@@ -76,6 +77,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Shard(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
@@ -149,6 +153,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kAnime:
+			AnimeDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Anvil(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -238,6 +245,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
@@ -313,6 +323,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kAnime:
+			AnimeDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
@@ -400,6 +413,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Divider(a_drawList, a_from, a_to, a_colour);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::Divider(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Divider(a_drawList, a_from, a_to, Accent(0.85f));
 			return;
@@ -484,6 +500,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Ornament(a_drawList, a_centre, a_radius, a_colour);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::Ornament(a_drawList, a_centre, a_radius, a_colour);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Blades(a_drawList, a_centre, a_radius * 1.4f, a_colour);
 			return;
@@ -546,6 +565,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Rule(a_drawList, a_from, a_to, a_colour);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::Rule(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Serration(a_drawList, a_from, a_to, Accent(0.8f), size * 0.6f);
 			return;
@@ -607,6 +629,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::Rule(a_drawList, a_from, a_to, a_rule);
+			return;
+		case Theme::kAnime:
+			AnimeDecor::Rule(a_drawList, a_from, a_to, a_rule);
 			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Serration(a_drawList, a_from, a_to, WithAlpha(a_ornament, 0.75f), size * 0.5f);
@@ -678,6 +703,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::Frame(a_drawList, a_min, a_max);
 			return;
@@ -739,6 +767,7 @@ namespace CompletionistUI
 		case Theme::kDwemer:
 		case Theme::kOblivion:
 		case Theme::kGothic:
+		case Theme::kAnime:
 		case Theme::kOrsimer:
 		case Theme::kBreton:
 		case Theme::kImperial:
@@ -776,6 +805,9 @@ namespace CompletionistUI
 			return true;
 		case Theme::kGothic:
 			GothicDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kAnime:
+			AnimeDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
 		case Theme::kOrsimer:
 			OrsimerDecor::Panel(a_drawList, a_min, a_max, a_emblem);
@@ -834,6 +866,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
+		case Theme::kAnime:
+			AnimeDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
 		case Theme::kOrsimer:
 			OrsimerDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
@@ -860,6 +895,21 @@ namespace CompletionistUI
 			return;
 		case Theme::kNordic:
 			NordicDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
+		default:
+			return;
+		}
+	}
+
+	//---------------------------------------------------
+	//-- Decor ( Tooltip ) ------------------------------
+	//---------------------------------------------------
+
+	void Decor::Tooltip(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
+
+		switch (_theme) {
+		case Theme::kAnime:
+			AnimeDecor::TooltipMarks(a_drawList, a_min, a_max);
 			return;
 		default:
 			return;
@@ -895,6 +945,10 @@ namespace CompletionistUI
 		}
 		if (Gothic()) {
 			GothicDecor::Highlight(a_drawList, a_min, a_max, a_alpha);
+			return;
+		}
+		if (Anime()) {
+			AnimeDecor::Highlight(a_drawList, a_min, a_max, a_alpha);
 			return;
 		}
 

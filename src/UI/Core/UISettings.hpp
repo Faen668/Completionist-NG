@@ -24,6 +24,7 @@ namespace CompletionistUI
 		kRedguard,
 		kOblivion,
 		kGothic,
+		kAnime,
 	};
 
 	// Button names for each pad, same buttons through XInput

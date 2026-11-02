@@ -522,6 +522,37 @@ namespace CompletionistUI
 		}
 	}
 
+	namespace
+	{
+
+		//---------------------------------------------------
+		//-- Themes ( Anime Palette ) -----------------------
+		//---------------------------------------------------
+
+		// Pale floating panels, near-black text, signal yellow; the dark parts draw their own white text
+		Palette AnimePalette() {
+
+			return {
+				.background = RGBA(232, 232, 236, 0.97f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(24, 24, 26),
+				.textDim = RGBA(92, 92, 96),
+				.accent = RGBA(128, 88, 0),
+				.heading = RGBA(20, 20, 22),
+				.count = RGBA(40, 40, 44),
+				.bar = RGBA(244, 200, 16),
+				.found = RGBA(112, 78, 0),
+				.needed = RGBA(24, 24, 26),
+				.displayable = RGBA(30, 96, 160),
+				.occupied = RGBA(126, 60, 140),
+				.barBackground = RGBA(176, 176, 180),
+				.separator = RGBA(150, 150, 154),
+				.pinned = RGBA(24, 96, 170),
+				.stealing = RGBA(190, 40, 70),
+			};
+		}
+	}
+
 	//---------------------------------------------------
 	//-- Themes ( From Name ) ---------------------------
 	//---------------------------------------------------
@@ -645,6 +676,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			_palette = GothicPalette();
 			break;
+		case Theme::kAnime:
+			_palette = AnimePalette();
+			break;
 		default:
 			_palette = CompletionistPalette();
 			break;
@@ -667,6 +701,14 @@ namespace CompletionistUI
 		style.ItemSpacing = ImVec2(10.0f, 7.0f);
 		style.ScrollbarSize = 6.0f;
 		style.SelectableTextAlign = ImVec2(0.0f, 0.5f);
+		if (a_theme == Theme::kAnime) {
+			style.WindowRounding = 14.0f;
+			style.ChildRounding = 12.0f;
+			style.PopupRounding = 8.0f;
+			style.FrameRounding = 6.0f;
+			style.GrabRounding = 4.0f;
+			style.ScrollbarRounding = 3.0f;
+		}
 
 		const auto& p = _palette;
 		const bool  neutral = a_theme == Theme::kSkyUI;
@@ -675,7 +717,8 @@ namespace CompletionistUI
 		c[ImGuiCol_TextDisabled] = p.textDim;
 		c[ImGuiCol_WindowBg] = p.background;
 		c[ImGuiCol_ChildBg] = p.panel;
-		c[ImGuiCol_PopupBg] = ImVec4(p.panel.x, p.panel.y, p.panel.z, 0.98f);
+		// The window's own ground, which the theme's text is always readable on
+		c[ImGuiCol_PopupBg] = ImVec4(p.background.x, p.background.y, p.background.z, 0.98f);
 		c[ImGuiCol_Border] = p.separator;
 		c[ImGuiCol_Separator] = p.separator;
 		c[ImGuiCol_FrameBg] = neutral ? ImVec4(0, 0, 0, 0.5f) : p.barBackground;

@@ -36,7 +36,7 @@ namespace CompletionistUI
 		bool             race{ false };	// listed after the separator
 	};
 
-	// Settings list order: ours, the UI mods' looks, Oblivion and Gothic, then the races A to Z
+	// Settings list order: ours, the UI mods' looks, Oblivion, Gothic and Anime, then the races A to Z
 	inline constexpr ThemeInfo themeList[] = {
 		{ Theme::kCompletionist, "Completionist", "UI_Theme_Completionist" },
 		{ Theme::kSkyUI, "SkyUI", "UI_Theme_SkyUI" },
@@ -44,6 +44,7 @@ namespace CompletionistUI
 		{ Theme::kNordic, "Nordic", "UI_Theme_Nordic" },
 		{ Theme::kOblivion, "Oblivion", "UI_Theme_Oblivion" },
 		{ Theme::kGothic, "Gothic", "UI_Theme_Gothic" },
+		{ Theme::kAnime, "Anime", "UI_Theme_Anime" },
 		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer", true },
 		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian", true },
 		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer", true },

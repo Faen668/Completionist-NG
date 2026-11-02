@@ -121,6 +121,10 @@ namespace CompletionistUI
 			if (a_theme == Theme::kOblivion) {
 				return { folder + "EBGaramond.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf", 1.7f, 36.0f };
 			}
+			// A plain sans, drawn heavy, for a modern game menu
+			if (a_theme == Theme::kAnime) {
+				return { folder + "AlegreyaSans-Regular.ttf", {}, {}, {}, folder + "EBGaramond.ttf", 1.5f, 40.0f };
+			}
 			// A library's book hand under its carved capitals
 			if (a_theme == Theme::kGothic) {
 				return { folder + "EBGaramond.ttf", {}, folder + "Cinzel.ttf", folder + "Cinzel.ttf", folder + "AlegreyaSans-Regular.ttf", 1.35f, 36.0f };

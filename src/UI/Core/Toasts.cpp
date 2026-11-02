@@ -2,6 +2,7 @@
 
 #include "UI/Core/Decor.hpp"
 #include "UI/Core/Themes.hpp"
+#include "UI/Themes/AnimeDecor.hpp"
 
 #include <algorithm>
 #include <cfloat>
@@ -384,6 +385,8 @@ namespace CompletionistUI
 				const ImU32 l = side > 0.0f ? edge : away;
 				const ImU32 r = side > 0.0f ? away : edge;
 				drawList->AddRectFilledMultiColor(min, max, l, r, r, l);
+			} else if (Decor::Anime()) {
+				AnimeDecor::ToastPlate(drawList, min, max, alpha, opacity);
 			} else {
 				drawList->AddRectFilled(min, max, Colour(background, alpha), fontSize * 0.15f);
 				drawList->AddRect(min, max, Colour(palette.separator, alpha * 0.9f), fontSize * 0.15f);
