@@ -248,6 +248,7 @@ UI_Theme_SkyUI					|SkyUI
 UI_Theme_DearDiary				|Dear Diary - Dark Mode
 UI_Theme_Nordic					|Nordic UI
 UI_Theme_Oblivion				|Oblivion
+UI_Theme_Gothic					|Gothic
 UI_Theme_Altmer					|Altmer
 UI_Theme_Argonian				|Argonian
 UI_Theme_Bosmer					|Bosmer

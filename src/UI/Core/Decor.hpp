@@ -46,6 +46,7 @@ namespace CompletionistUI
 		[[nodiscard]] static bool DearDiary() noexcept { return _theme == Theme::kDearDiary; }
 		[[nodiscard]] static bool Nordic() noexcept { return _theme == Theme::kNordic; }
 		[[nodiscard]] static bool Oblivion() noexcept { return _theme == Theme::kOblivion; }
+		[[nodiscard]] static bool Gothic() noexcept { return _theme == Theme::kGothic; }
 		// The framed themes (races and the UI mods' looks), as against Completionist and SkyUI
 		[[nodiscard]] static bool Race() noexcept { return _theme != Theme::kCompletionist && _theme != Theme::kSkyUI; }
 		// Window title in capitals, as the menus these themes follow write theirs

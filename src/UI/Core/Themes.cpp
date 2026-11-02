@@ -491,6 +491,37 @@ namespace CompletionistUI
 		}
 	}
 
+	namespace
+	{
+
+		//---------------------------------------------------
+		//-- Themes ( Gothic Palette ) ----------------------
+		//---------------------------------------------------
+
+		// The Arcane University's library by night: charcoal, ivory text, silver lines, guild violet, gilt for found
+		Palette GothicPalette() {
+
+			return {
+				.background = RGBA(21, 21, 26, 0.97f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(234, 228, 214),
+				.textDim = RGBA(150, 146, 148),
+				.accent = RGBA(196, 192, 204),
+				.heading = RGBA(238, 232, 218),
+				.count = RGBA(210, 204, 194),
+				.bar = RGBA(126, 88, 178),
+				.found = RGBA(232, 196, 120),
+				.needed = RGBA(234, 228, 214),
+				.displayable = RGBA(126, 170, 214),
+				.occupied = RGBA(182, 142, 218),
+				.barBackground = RGBA(46, 44, 54),
+				.separator = RGBA(120, 118, 128),
+				.pinned = RGBA(136, 176, 226),
+				.stealing = RGBA(228, 108, 128),
+			};
+		}
+	}
+
 	//---------------------------------------------------
 	//-- Themes ( From Name ) ---------------------------
 	//---------------------------------------------------
@@ -610,6 +641,9 @@ namespace CompletionistUI
 			break;
 		case Theme::kOblivion:
 			_palette = OblivionPalette();
+			break;
+		case Theme::kGothic:
+			_palette = GothicPalette();
 			break;
 		default:
 			_palette = CompletionistPalette();
