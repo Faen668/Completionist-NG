@@ -1241,7 +1241,7 @@ namespace CompletionistUI
 
 			// A wash of the accent from the top, an inner moulding and the theme's ornament on the
 			// top and bottom edges, so a long list isn't a bare box beside the overview's cards
-			if (!SkyUI()) {
+			if (!SkyUI() && !Decor::Gothic()) {
 				const float fontSize = ImGui::GetFontSize();
 				const float height = max.y - min.y;
 				const float wash = std::min(height * 0.4f, fontSize * 12.0f);
@@ -2538,11 +2538,11 @@ namespace CompletionistUI
 		const auto  start = ImGui::GetCursorScreenPos();
 		const float width = ImGui::GetContentRegionAvail().x;
 
-		const float gothicDrop = Decor::Gothic() ? fontSize * 0.5f : 0.0f;
+		const float gothicDrop = Decor::Gothic() ? fontSize * 0.8f : 0.0f;
 		if (Decor::Gothic()) {
 			const auto  windowMin = ImGui::GetWindowPos();
 			const float sideGap = fontSize * 0.6f;
-			GothicDecor::FooterBox(drawList, ImVec2(windowMin.x + sideGap, start.y + fontSize * 0.45f), ImVec2(windowMin.x + ImGui::GetWindowWidth() - sideGap, start.y + height + fontSize * 0.55f));
+			GothicDecor::FooterBox(drawList, ImVec2(windowMin.x + sideGap, start.y + fontSize * 0.75f), ImVec2(windowMin.x + ImGui::GetWindowWidth() - sideGap, start.y + height + fontSize * 0.85f));
 		} else if (Decor::Oblivion()) {
 			OblivionDecor::FooterBand(drawList, start.y);
 		} else {
