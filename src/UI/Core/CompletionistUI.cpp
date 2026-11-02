@@ -1235,6 +1235,11 @@ namespace CompletionistUI
 			drawList->PushClipRect(min, max, false);
 			// Race themes dress the panel: texture at the edges, light, emblem, their own corners
 			const bool dressed = Decor::Panel(drawList, min, max, a_emblem);
+			// Faint behind the Cell Scanner's list, a castle down at its foot
+			if (Decor::Oblivion() && std::string_view(a_id) == "##CellList" && max.y - min.y > ImGui::GetFontSize() * 11.0f) {
+				const float fontSize = ImGui::GetFontSize();
+				OblivionDecor::BoxEtching(drawList, ImVec2(min.x, max.y - fontSize * 7.5f), ImVec2(max.x, max.y - fontSize * 0.55f), false, 0.6f);
+			}
 			// Not on Kill Counts, whose buttons sit in that corner
 			if (Decor::Anime() && a_emblem && std::string_view(a_id) != "##KillDetail") {
 				const float fontSize = ImGui::GetFontSize();
@@ -4548,6 +4553,10 @@ namespace CompletionistUI
 			}
 			ImGui::PushFont(Themes::TitleFont());
 			const auto  windowTitle = anime ? Upper(a_provider.Translate("UI_Cell_Title")) : a_provider.Translate("UI_Cell_Title");
+			if (Decor::Oblivion()) {
+				const float textEnd = start.x + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
+				OblivionDecor::WindowHeader(ImGui::GetWindowDrawList(), start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f, textEnd, start.x + width - backWidth - closeWidth - style.ItemSpacing.x);
+			}
 			if (anime) {
 				const float textEnd = start.x + titleIndent + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
 				const float bandBottom = start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f;
@@ -4577,10 +4586,10 @@ namespace CompletionistUI
 			ImGui::TextColored(anime ? palette.text : palette.textDim, "%s", subtitle.c_str());
 			const auto pos = ImVec2(start.x, ImGui::GetCursorScreenPos().y);
 			ImGui::SetCursorScreenPos(pos);
-			if (!anime) {
+			if (!anime && !Decor::Oblivion()) {
 				Decor::FadedLine(ImGui::GetWindowDrawList(), pos, ImVec2(pos.x + width, pos.y), Colour(palette.separator));
 			}
-			ImGui::Dummy(ImVec2(width, anime ? fontSize * 0.5f : 4.0f));
+			ImGui::Dummy(ImVec2(width, anime || Decor::Oblivion() ? fontSize * 0.5f : 4.0f));
 
 			const auto optionsMin = ImGui::GetCursorScreenPos();
 			DrawCellOptions(a_provider, a_settings);
@@ -4976,8 +4985,8 @@ namespace CompletionistUI
 				char rowID[24];
 				std::snprintf(rowID, sizeof(rowID), "%08X:%08X", item.refID, item.formID);
 				ImGui::PushID(rowID);
-				// On Anime's solid yellow band a marked row's text goes dark
-				const auto& rowDim = Decor::Anime() && item.marked ? palette.text : palette.textDim;
+				// On a strong band a marked row's text goes dark
+				const auto& rowDim = Decor::StrongHighlight() && item.marked ? palette.text : palette.textDim;
 				if (RowSelectable("##CellRow", item.marked, ImVec2(0.0f, rowHeight), ImGuiSelectableFlags_AllowOverlap)) {
 					if (item.marked) {
 						a_provider.ClearCellMarker(item);
@@ -5043,7 +5052,7 @@ namespace CompletionistUI
 					}
 					const auto distance = a_provider.Translate("UI_Cell_Metres{" + std::to_string(static_cast<int>(std::lround(item.distance))) + "}");
 					const auto size = ImGui::CalcTextSize(distance.c_str());
-					DrawDirection(drawList, ImVec2(right - fontSize * 0.4f, centreY), fontSize * 0.75f, item.bearing, Colour(item.marked ? (Decor::Anime() ? palette.text : palette.accent) : item.pinned ? palette.pinned : palette.textDim));
+					DrawDirection(drawList, ImVec2(right - fontSize * 0.4f, centreY), fontSize * 0.75f, item.bearing, Colour(item.marked ? (Decor::StrongHighlight() ? palette.text : palette.accent) : item.pinned ? palette.pinned : palette.textDim));
 					right -= fontSize * 1.1f;
 					drawList->AddText(ImVec2(right - size.x, textY), Colour(rowDim), distance.c_str());
 					right -= size.x + fontSize;
@@ -5064,7 +5073,7 @@ namespace CompletionistUI
 				// Name gives way first
 				const float hand = item.stealing ? fontSize * 1.2f : 0.0f;
 				const auto  name = FitText(item.name, right - nameX - hand);
-				drawList->AddText(ImVec2(nameX, textY), Colour(item.marked ? (Decor::Anime() ? palette.text : palette.accent) : item.pinned ? palette.pinned : palette.text), name.c_str());
+				drawList->AddText(ImVec2(nameX, textY), Colour(item.marked ? (Decor::StrongHighlight() ? palette.text : palette.accent) : item.pinned ? palette.pinned : palette.text), name.c_str());
 				const float nameRight = nameX + ImGui::CalcTextSize(name.c_str()).x;
 				if (item.stealing) {
 					DrawStealIcon(drawList, ImVec2(nameRight + hand * 0.5f, centreY), fontSize * 0.9f, Colour(palette.stealing));
@@ -5495,6 +5504,10 @@ namespace CompletionistUI
 				ImGui::PushFont(Themes::HeaderFont());
 				ImGui::TextColored(palette.heading, "%s", a_provider.Translate("UI_Cell_Title").c_str());
 				ImGui::PopFont();
+				if (Decor::Oblivion()) {
+					const auto titleMax = ImGui::GetItemRectMax();
+					OblivionDecor::TitleSprig(drawList, ImVec2(titleMax.x + fontSize * 0.5f, ImGui::GetItemRectMin().y + (titleMax.y - ImGui::GetItemRectMin().y) * 0.5f), fontSize * 3.6f);
+				}
 				if (!empty) {
 					const auto count = std::to_string(scan.items.size());
 					ImGui::SameLine(ImGui::GetContentRegionMax().x - ImGui::CalcTextSize(count.c_str()).x);
@@ -5554,6 +5567,12 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Cell_More{" + std::to_string(scan.items.size() - shown) + "}").c_str());
 			}
 			ImGui::Dummy(ImVec2(inner, fontSize * 0.2f));
+			if (Decor::Oblivion()) {
+				const auto skyline = ImGui::GetCursorScreenPos();
+				const float skylineHeight = fontSize * 2.8f;
+				OblivionDecor::PanelSkyline(drawList, skyline, ImVec2(skyline.x + inner, skyline.y + skylineHeight));
+				ImGui::Dummy(ImVec2(inner, skylineHeight));
+			}
 
 			if (a_dim > 0.0f) {
 				drawList->PushClipRectFullScreen();

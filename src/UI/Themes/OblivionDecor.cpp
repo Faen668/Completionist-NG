@@ -1222,6 +1222,84 @@ namespace CompletionistUI::OblivionDecor
 	}
 
 	//---------------------------------------------------
+	//-- Oblivion Decor ( Window Header ) ---------------
+	//---------------------------------------------------
+
+	void WindowHeader(ImDrawList* a_drawList, float a_bottom, float a_titleEnd, float a_buttonsStart) {
+
+		const float  size = ImGui::GetFontSize();
+		const ImVec2 min(frameMin.x + frameRail, frameMin.y + frameRail);
+		const ImVec2 max(frameMax.x - frameRail, a_bottom);
+		const float  width = max.x - min.x;
+		const float  height = max.y - min.y;
+		if (width < size * 20.0f || height < size * 2.0f) {
+			return;
+		}
+		Baked(a_drawList, 0x0B70u, min, max, [&](ImDrawList* a_list) {
+			const ImU32 top = WithAlpha(parchShade, 0.38f);
+			const ImU32 bottom = WithAlpha(parchShade, 0.14f);
+			a_list->AddRectFilledMultiColor(min, max, top, top, bottom, bottom);
+
+			// What fits between the title and the buttons: a banner each side and the city between them, or just the city
+			const float left = a_titleEnd + size * 1.2f;
+			const float right = a_buttonsStart - size;
+			const float room = right - left;
+			const float bannerHeight = height + frameRail * 0.65f + size * 0.5f;
+			const float bannerWidth = bannerHeight / 2.1f;
+			const bool  banners = room > bannerWidth * 5.5f;
+			const float inset = banners ? bannerWidth * 1.5f : 0.0f;
+			const float cityLeft = left + inset;
+			const float cityRight = right - inset;
+			if (cityRight - cityLeft > size * 4.0f) {
+				const float unit = std::min(height / 9.2f, (cityRight - cityLeft) / 27.0f);
+				Etching city{ a_list, ImVec2((cityLeft + cityRight) * 0.5f, max.y - size * 0.16f), unit, 0.8f, ImVec2(cityLeft, min.y), ImVec2(cityRight, max.y), size * 0.9f, Random{ 0xB701u } };
+				ImperialCity(city, 0.0f);
+			}
+
+			const float worn = std::min(max.x - a_buttonsStart + size * 3.0f, width * 0.45f);
+			WornOak(a_list, ImVec2(max.x - worn, min.y), max, false);
+
+			const float foot = std::max(3.0f, size * 0.22f);
+			Rail(a_list, ImVec2(min.x, max.y - foot), max, 0xB702u);
+			const ImU32 dark = WithAlpha(parchShade, 0.45f);
+			const ImU32 clear = WithAlpha(parchShade, 0.0f);
+			a_list->AddRectFilledMultiColor(ImVec2(min.x, max.y), ImVec2(max.x, max.y + size * 0.4f), dark, dark, clear, clear);
+
+			CornerBoss(a_list, frameMin, frameBoss, 1.0f, 1.0f);
+			CornerBoss(a_list, ImVec2(frameMax.x, frameMin.y), frameBoss, -1.0f, 1.0f);
+
+			if (banners) {
+				WarBanner(a_list, left + bannerWidth * 0.8f, frameMin.y + frameRail * 0.35f, bannerWidth, bannerHeight, 11u);
+				WarBanner(a_list, right - bannerWidth * 0.8f, frameMin.y + frameRail * 0.35f, bannerWidth, bannerHeight, 29u);
+			}
+		});
+	}
+
+	//---------------------------------------------------
+	//-- Oblivion Decor ( Title Sprig ) -----------------
+	//---------------------------------------------------
+
+	void TitleSprig(ImDrawList* a_drawList, ImVec2 a_root, float a_length) {
+
+		Sprig(a_drawList, a_root, a_length, 1.0f, goldDeep, WithAlpha(gold, 0.35f));
+	}
+
+	//---------------------------------------------------
+	//-- Oblivion Decor ( Panel Skyline ) ---------------
+	//---------------------------------------------------
+
+	void PanelSkyline(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
+
+		const float size = ImGui::GetFontSize();
+		Baked(a_drawList, 0x0B71u, a_min, a_max, [&](ImDrawList* a_list) {
+			const float unit = std::min((a_max.y - a_min.y) / 9.2f, (a_max.x - a_min.x) / 34.0f);
+			Etching city{ a_list, ImVec2((a_min.x + a_max.x) * 0.5f, a_max.y - size * 0.1f), unit, 0.85f, a_min, a_max, size * 2.0f, Random{ 0xB703u } };
+			ImperialCity(city, 0.0f);
+			a_list->AddLine(ImVec2(a_min.x + size, a_max.y - 1.0f), ImVec2(a_max.x - size, a_max.y - 1.0f), WithAlpha(goldDeep, 0.5f), 1.0f);
+		});
+	}
+
+	//---------------------------------------------------
 	//-- Oblivion Decor ( Footer Band ) -----------------
 	//---------------------------------------------------
 
@@ -1321,7 +1399,7 @@ namespace CompletionistUI::OblivionDecor
 	//-- Oblivion Decor ( Box Etching ) -----------------
 	//---------------------------------------------------
 
-	void BoxEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_ruin) {
+	void BoxEtching(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, bool a_ruin, float a_ink) {
 
 		const float width = a_max.x - a_min.x;
 		const float size = ImGui::GetFontSize();
@@ -1335,7 +1413,7 @@ namespace CompletionistUI::OblivionDecor
 		a_drawList->PushClipRect(a_min, a_max, true);
 		Baked(a_drawList, a_ruin ? 0x0B53u : 0x0B52u, a_min, a_max, [&](ImDrawList* a_list) {
 			const float unit = std::min(room / 10.2f, size * 0.62f);
-			Etching castle{ a_list, ImVec2(a_max.x - unit * 7.0f, ground), unit, 0.42f, ImVec2(a_max.x - unit * 28.0f, top.y), ImVec2(a_max.x, a_max.y), size * 2.0f, Random{ 0xB601u } };
+			Etching castle{ a_list, ImVec2(a_max.x - unit * 7.0f, ground), unit, 0.42f * a_ink, ImVec2(a_max.x - unit * 28.0f, top.y), ImVec2(a_max.x, a_max.y), size * 2.0f, Random{ 0xB601u } };
 			HillCastle(castle, 0.0f);
 			if (a_ruin && width > size * 48.0f) {
 				Etching hills{ a_list, ImVec2(a_min.x + unit * 11.0f, ground), unit * 0.82f, 0.22f, ImVec2(a_min.x, top.y), ImVec2(a_min.x + unit * 24.0f, a_max.y), size * 2.0f, Random{ 0xB602u } };
@@ -1391,11 +1469,12 @@ namespace CompletionistUI::OblivionDecor
 		const float round = size * 0.14f;
 		const float drop = a_pressed ? 0.0f : size * 0.09f;
 		a_drawList->AddRectFilled(ImVec2(a_min.x + drop * 0.4f, a_min.y + drop), ImVec2(a_max.x + drop, a_max.y + drop * 1.6f), WithAlpha(IM_COL32(40, 22, 8, 255), 0.4f), round);
-		const ImU32 top = Mix(parchCard, goldLight, a_glow * 0.5f);
-		const ImU32 bottom = Mix(Shade(parchCard, 0.84f), gold, a_glow * 0.25f);
+		// Lit, it has to read from across a room on a controller: the amber of a chosen row, edged in crimson
+		const ImU32 top = Mix(parchCard, IM_COL32(226, 164, 88, 255), a_glow);
+		const ImU32 bottom = Mix(Shade(parchCard, 0.84f), IM_COL32(190, 118, 44, 255), a_glow);
 		a_drawList->AddRectFilledMultiColor(a_min, a_max, a_pressed ? bottom : top, a_pressed ? bottom : top, a_pressed ? top : bottom, a_pressed ? top : bottom);
-		a_drawList->AddRect(a_min, a_max, Mix(goldDeep, crimson, a_glow * 0.5f), round, 0, std::max(1.0f, size * 0.07f));
-		a_drawList->AddRect(ImVec2(a_min.x + 2.0f, a_min.y + 2.0f), ImVec2(a_max.x - 2.0f, a_max.y - 2.0f), WithAlpha(goldDeep, 0.3f), round * 0.5f);
+		a_drawList->AddRect(a_min, a_max, Mix(goldDeep, crimson, a_glow), round, 0, std::max(1.0f, size * (0.07f + 0.07f * a_glow)));
+		a_drawList->AddRect(ImVec2(a_min.x + 2.0f, a_min.y + 2.0f), ImVec2(a_max.x - 2.0f, a_max.y - 2.0f), WithAlpha(Mix(goldDeep, crimsonDeep, a_glow), 0.3f + 0.4f * a_glow), round * 0.5f);
 		a_drawList->AddLine(ImVec2(a_min.x + 3.0f, a_min.y + 1.5f), ImVec2(a_max.x - 3.0f, a_min.y + 1.5f), WithAlpha(parchLight, 0.75f), 1.0f);
 	}
 
@@ -1429,7 +1508,7 @@ namespace CompletionistUI::OblivionDecor
 	// A chosen row: one stroke of an amber brush, dry at its end
 	void Highlight(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_alpha) {
 
-		constexpr ImU32 amber = IM_COL32(226, 168, 92, 255);
+		constexpr ImU32 amber = IM_COL32(196, 126, 54, 255);
 		const float height = a_max.y - a_min.y;
 		const float width = a_max.x - a_min.x;
 		Random      random{ static_cast<std::uint32_t>(a_min.y) * 31u + 77u };
@@ -1439,7 +1518,7 @@ namespace CompletionistUI::OblivionDecor
 			const float bottom = a_min.y + height * static_cast<float>(bristle + 1) / bristles;
 			const float across = std::sin((static_cast<float>(bristle) + 0.5f) / bristles * pi);
 			const float length = width * (0.72f + 0.26f * across) * random.Range(0.92f, 1.0f);
-			const float core = a_alpha * (0.18f + 0.3f * across);
+			const float core = a_alpha * (0.44f + 0.3f * across);
 			const ImU32 strong = WithAlpha(amber, core);
 			const ImU32 clear = WithAlpha(amber, 0.0f);
 			const float start = a_min.x + width * 0.02f * random.Next();
