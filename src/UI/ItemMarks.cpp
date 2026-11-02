@@ -312,6 +312,20 @@ namespace CompletionistUI
 				}
 			}
 
+			// Dynamic Inventory Icon Injector lists its icons on the entry and places them after SkyUI's
+			RE::GFxValue otherIcons;
+			if (a_entry.GetMember("_DIIIIcons", &otherIcons) && otherIcons.IsArray()) {
+				for (std::uint32_t i = 0; i < otherIcons.GetArraySize(); ++i) {
+					RE::GFxValue data;
+					RE::GFxValue label;
+					RE::GFxValue otherIcon;
+					if (otherIcons.GetElement(i, &data) && data.IsObject() && data.GetMember("label", &label) && label.IsString() &&
+						a_row.GetMember(label.GetString(), &otherIcon) && otherIcon.IsDisplayObject() && Visible(otherIcon)) {
+						right = std::max(right, Number(otherIcon, "_x") + Number(otherIcon, "_width"));
+					}
+				}
+			}
+
 			mark.SetMember("_x", std::round(right + size * 0.2));
 			mark.SetMember("_y", std::round(Number(textField, "_y") + (Number(textField, "_height") - size) * 0.5));
 			mark.SetMember("_alpha", static_cast<double>(CVariables::V_ItemIcons_Opacity));
@@ -544,49 +558,30 @@ namespace CompletionistUI
 		//-- Item Marks ( Add Sort State ) ------------------
 		//---------------------------------------------------
 
-		// Adds a state to the name column in SkyUI's loaded config, retries until the config is loaded
-		void AddSortState(std::string a_menu, int a_tries) {
-
-			auto* ui = RE::UI::GetSingleton();
-			auto menu = ui ? ui->GetMenu(a_menu) : nullptr;
-			if (!menu || !menu->uiMovie) { return; }
-
-			auto* movie = menu->uiMovie.get();
-			const bool   crafting = a_menu == RE::CraftingMenu::MENU_NAME;
-			const auto*  path = crafting ? "_global.skyui.util.ConfigManager._config.ListLayout.columns.craftNameColumn" :
-			                               "_global.skyui.util.ConfigManager._config.ListLayout.columns.itemNameColumn";
-			RE::GFxValue column;
-			if (!movie->GetVariable(&column, path) || !column.IsObject()) {
-				if (a_tries > 0) {
-					SKSE::GetTaskInterface()->AddUITask([a_menu, a_tries]() { AddSortState(a_menu, a_tries - 1); });
-				} else {
-					INFO("Item Marks: No SkyUI name column in {}", a_menu);
-				}
-				return;
-			}
+		void AddColumnState(RE::GFxMovie* a_movie, RE::GFxValue& a_column, std::string_view a_menu, std::string_view a_name) {
 
 			RE::GFxValue added;
-			if (column.GetMember("_comp_state", &added) && added.IsNumber()) { return; }
+			if (a_column.GetMember("_comp_state", &added) && added.IsNumber()) { return; }
 
-			const auto states = static_cast<int>(Number(column, "states"));
+			const auto states = static_cast<int>(Number(a_column, "states"));
 			if (states < 1) { return; }
 
 			const int state = states + 1;
 			const std::string title = SettingsPages::translate ? SettingsPages::translate("UI_Sort_Completionist") : std::string("Completionist");
 
 			RE::GFxValue stateData, label, entry, labelText, attributes, options;
-			movie->CreateObject(&stateData);
-			movie->CreateObject(&label);
-			movie->CreateObject(&entry);
-			movie->CreateString(&labelText, title.c_str());
+			a_movie->CreateObject(&stateData);
+			a_movie->CreateObject(&label);
+			a_movie->CreateObject(&entry);
+			a_movie->CreateString(&labelText, title.c_str());
 			label.SetMember("text", labelText);
 			entry.SetMember("text", "@text");
 
-			movie->CreateArray(&attributes);
+			a_movie->CreateArray(&attributes);
 			attributes.PushBack(statusMember);
 			attributes.PushBack("text");
 
-			movie->CreateArray(&options);
+			a_movie->CreateArray(&options);
 			options.PushBack(16.0);	// NUMERIC
 			options.PushBack(1.0);	// CASEINSENSITIVE
 
@@ -596,10 +591,45 @@ namespace CompletionistUI
 			stateData.SetMember("sortOptions", options);
 			stateData.SetMember("playerOnly", false);
 
-			column.SetMember(fmt::format("state{}", state).c_str(), stateData);
-			column.SetMember("states", static_cast<double>(state));
-			column.SetMember("_comp_state", static_cast<double>(state));
-			INFO("Item Marks: Added sort state {} to {}", state, a_menu);
+			a_column.SetMember(fmt::format("state{}", state).c_str(), stateData);
+			a_column.SetMember("states", static_cast<double>(state));
+			a_column.SetMember("_comp_state", static_cast<double>(state));
+			INFO("Item Marks: Added sort state {} to {} in {}", state, a_name, a_menu);
+		}
+
+		// Adds a state to every name column in SkyUI's loaded config, retries until the config is loaded
+		// Configs edited by other mods can give some tabs their own name column
+		void AddSortState(std::string a_menu, int a_tries) {
+
+			auto* ui = RE::UI::GetSingleton();
+			auto menu = ui ? ui->GetMenu(a_menu) : nullptr;
+			if (!menu || !menu->uiMovie) { return; }
+
+			auto*        movie = menu->uiMovie.get();
+			RE::GFxValue columns;
+			if (!movie->GetVariable(&columns, "_global.skyui.util.ConfigManager._config.ListLayout.columns") || !columns.IsObject()) {
+				if (a_tries > 0) {
+					SKSE::GetTaskInterface()->AddUITask([a_menu, a_tries]() { AddSortState(a_menu, a_tries - 1); });
+				} else {
+					INFO("Item Marks: No SkyUI columns in {}", a_menu);
+				}
+				return;
+			}
+
+			// ListLayout.COL_TYPE_NAME
+			std::vector<std::string> names;
+			columns.VisitMembers([&](const char* a_name, const RE::GFxValue& a_column) {
+				if (a_name && a_column.IsObject() && Number(a_column, "type") == 3.0) {
+					names.emplace_back(a_name);
+				}
+			});
+
+			for (const auto& name : names) {
+				RE::GFxValue column;
+				if (columns.GetMember(name.c_str(), &column) && column.IsObject()) {
+					AddColumnState(movie, column, a_menu, name);
+				}
+			}
 		}
 
 		//---------------------------------------------------
