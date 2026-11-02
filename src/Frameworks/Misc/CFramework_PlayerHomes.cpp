@@ -48,7 +48,7 @@ namespace CFramework_PlayerHomes {
 
 	EventResult CHandler::ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) {
 
-		if (a_event && a_event->newContainer == RE::PlayerCharacter::GetSingleton()->GetFormID())
+		if (a_event && a_event->newContainer == RE::PlayerCharacter::GetSingleton()->GetFormID() && FrameworkAPI::RecordsItemsFrom(a_event))
 		{
 			auto* key = RE::TESForm::LookupByID(a_event->baseObj);
 			if (key && CFramework_PlayerHomes_VH::Data.HasForm(key))

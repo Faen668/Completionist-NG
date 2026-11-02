@@ -15,7 +15,11 @@ namespace Serialization
 		kHeader = 'COMP',
 		kVersion = 2000,
 		kFirstVersion = 2000,	// a new game is needed for anything older
+		kItemsWaiting = 'CWIT',	// only in a save made before a new game started recording items
 	};
+
+	// On a new game, until the start-up scripts have swapped the default inventory for the real one
+	inline std::atomic<bool> ItemRecordingPaused{ false };
 
 #define SetSerializableInfo(DATA) (DATA).SetAsSerializable(#DATA)
 constexpr auto DEFAULT_VARIATION_MAX = 13;
@@ -1368,6 +1372,10 @@ namespace Serialization
 				data->Save(a_intfc, name);
 			}
 		}
+
+		if (ItemRecordingPaused && !a_intfc->OpenRecord(kItemsWaiting, kVersion)) {
+			ERROR("Failed to open record");
+		}
 	}
 
 	//---------------------------------------------------
@@ -1378,6 +1386,11 @@ namespace Serialization
 	{
 		std::uint32_t type, version, length;
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
+			if (type == kItemsWaiting) {
+				ItemRecordingPaused = true;
+				continue;
+			}
+
 			if (type != kHeader) {
 				break;
 			}

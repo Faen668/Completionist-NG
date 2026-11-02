@@ -165,6 +165,8 @@ namespace CEvents
 			fn(a_event);
 		};
 
+		if (!CFramework_Master::FrameworkAPI::RecordsItemsFrom(a_event)) { return EventResult::kContinue; }
+
 		for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
 			patchData->OnContainerChangedEvent(a_event);
 		};

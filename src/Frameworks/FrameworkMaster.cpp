@@ -242,10 +242,135 @@ namespace CFramework_Master
 	//-- Framework Functions ( On Game Started ) --------
 	//---------------------------------------------------
 
+	namespace
+	{
+		// Leaving the cell the player was in when the loading screen went. The cell they're placed
+		// in at the start doesn't count, and a door's cell only shows once its loading screen has gone.
+		class ItemStartWatch final :
+			public RE::BSTEventSink<RE::BGSActorCellEvent>,
+			public RE::BSTEventSink<RE::MenuOpenCloseEvent>
+		{
+		public:
+			static ItemStartWatch* Get() {
+
+				static ItemStartWatch singleton;
+				static const bool sunk = [] {
+					if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+						player->AsBGSActorCellEventSource()->AddEventSink(&singleton);
+					}
+					if (auto* ui = RE::UI::GetSingleton()) {
+						ui->AddEventSink<RE::MenuOpenCloseEvent>(&singleton);
+					}
+					return true;
+				}();
+				(void)sunk;
+				return &singleton;
+			}
+
+			void Begin() {
+
+				startCell = 0;
+				CheckSoon();
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::BGSActorCellEvent* a_event, RE::BSTEventSource<RE::BGSActorCellEvent>*) override {
+
+				if (a_event && a_event->flags.get() == RE::BGSActorCellEvent::CellFlag::kEnter) {
+					CheckSoon();
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override {
+
+				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
+					CheckSoon();
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+		private:
+			void CheckSoon() {
+
+				if (Serialization::ItemRecordingPaused) {
+					SKSE::GetTaskInterface()->AddTask([this]() { CheckCell(); });
+				}
+			}
+
+			void CheckCell() {
+
+				auto* ui = RE::UI::GetSingleton();
+				const auto* player = RE::PlayerCharacter::GetSingleton();
+				const auto* cell = player ? player->GetParentCell() : nullptr;
+				if (!Serialization::ItemRecordingPaused || !cell || (ui && ui->IsMenuOpen(RE::LoadingMenu::MENU_NAME))) {
+					return;
+				}
+				if (!startCell) {
+					startCell = cell->GetFormID();
+				} else if (cell->GetFormID() != startCell) {
+					FrameworkAPI::StartRecordingItems("the player changed cell");
+				}
+			}
+
+			RE::FormID startCell{ 0 };
+		};
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Pause Item Recording ) ---
+	//---------------------------------------------------
+
+	void FrameworkAPI::PauseItemRecording() {
+
+		Serialization::ItemRecordingPaused = true;
+		INFO("New game: items aren't recorded until the player picks one up or changes cell");
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Start Recording Items ) --
+	//---------------------------------------------------
+
+	// What's carried by now is the real inventory: it's recorded quietly, like on a load
+	void FrameworkAPI::StartRecordingItems(std::string_view a_reason) {
+
+		if (!Serialization::ItemRecordingPaused.exchange(false)) { return; }
+
+		INFO("Items are recorded from here on: {}", a_reason);
+		SKSE::GetTaskInterface()->AddTask([]() {
+			for (auto& [pageName, patchData] : CExternalPatchHandler::Get()) {
+				patchData->UpdateFoundForms();
+			};
+		});
+	}
+
+	//---------------------------------------------------
+	//-- Framework Functions ( Records Items From ) -----
+	//---------------------------------------------------
+
+	// False for what scripts hand out while recording is paused. A pickup ends the pause and is recorded
+	// as usual: picked up from the world it has a reference, taken from a container or bought a menu is open.
+	bool FrameworkAPI::RecordsItemsFrom(RE::TESContainerChangedEvent const* a_event) {
+
+		if (!Serialization::ItemRecordingPaused) { return true; }
+
+		const auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!a_event || !player || a_event->newContainer != player->GetFormID()) { return false; }
+
+		auto* ui = RE::UI::GetSingleton();
+		const bool fromMenu = a_event->oldContainer && ui && (ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME) || ui->IsMenuOpen(RE::BarterMenu::MENU_NAME));
+		if (!a_event->reference && !fromMenu) { return false; }
+
+		StartRecordingItems("the player picked up an item");
+		return true;
+	}
+
 	// What the API and Load scripts did on a new game and load
 	void FrameworkAPI::OnGameStarted(bool a_newGame) {
 
 		INFO("Start-up: {}", a_newGame ? "new game" : "game loaded");
+		if (Serialization::ItemRecordingPaused) {
+			ItemStartWatch::Get()->Begin();
+		}
 		CFramework_Pets::CHandler::CheckAdoptedPet();
 		CFramework_Trainers::CHandler::FindPlacedTrainers();
 		CFramework_Dragons::CHandler::FindPlacedDragons();
@@ -651,7 +776,7 @@ namespace CFramework_Master
 		if (!itm || !pcr) { return false; }
 
 		
-		if (CVariables::V_TreatBooksAsItems && pcr->GetItemCount(itm) > 0) {
+		if (CVariables::V_TreatBooksAsItems && !Serialization::ItemRecordingPaused && pcr->GetItemCount(itm) > 0) {
 			FoundItemData.AddForm(itm);
 			return FoundItemData.HasForm(a_form);
 		}
@@ -686,6 +811,8 @@ namespace CFramework_Master
 
 		auto base = a_data->GetBase(a_form->GetFormID()) ? a_data->GetBase(a_form->GetFormID()) : a_form->GetFormID();
 		auto* pcr = RE::PlayerCharacter::GetSingleton();
+
+		if (Serialization::ItemRecordingPaused) { return FoundItemData.HasForm(a_form); }
 
 		if (pcr->GetItemCount(a_data->GetForm<RE::TESBoundObject>(base)) > 0) {
 			FoundItemData.AddForm(base);

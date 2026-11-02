@@ -106,6 +106,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 	}
 
 	case SKSE::MessagingInterface::kNewGame:
+		CFramework_Master::FrameworkAPI::PauseItemRecording();
 		CVariables::VariablesAPI::Update();
 		CFramework_Master::FrameworkAPI::Update();
 		Completionist::MuseumAPI::OnPlayerLoadGame();
@@ -116,6 +117,10 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 
 	case SKSE::MessagingInterface::kSaveGame:
 		CompletionistUI::Tracker::BeforeSave();
+		break;
+
+	case SKSE::MessagingInterface::kPreLoadGame:
+		Serialization::ItemRecordingPaused = false;	// the save says if it's still waiting
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:

@@ -100,6 +100,11 @@ namespace CFramework_Master
 		// New game or load, called from main.cpp
 		static void							OnGameStarted(bool a_newGame);
 
+		// A new game records no items until the player picks one up or changes cell
+		static void							PauseItemRecording();
+		static void							StartRecordingItems(std::string_view a_reason);
+		static bool							RecordsItemsFrom(RE::TESContainerChangedEvent const* a_event);
+
 		static void							SendNotification(std::string a_msg, std::string a_setting);
 
 		static std::string					ReplaceStr(std::string const& in, std::string const& from, std::string const& to);
