@@ -34,9 +34,8 @@ namespace CompletionistUI::ApocryphaDecor
 	void TitleEyes(ImDrawList* a_drawList, ImVec2 a_titleMin, ImVec2 a_titleMax, float a_room);
 	// The Cell Scanner's heading: an eye and tentacles between the title and the buttons
 	void WindowHeader(ImDrawList* a_drawList, float a_top, float a_bottom, float a_left, float a_right);
-	// Something large moving behind a long list
+	// Two thin tentacles lying along the foot of a long list, clear of its rows
 	void Creep(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
-	// The in-game panel's strip, and the small watcher beside its title
-	void PanelStrip(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max);
+	// The small watcher beside the in-game panel's title
 	void TitleWatcher(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius);
 }

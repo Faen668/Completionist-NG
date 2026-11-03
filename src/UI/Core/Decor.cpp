@@ -508,7 +508,7 @@ namespace CompletionistUI
 			DunmerDecor::Triangle(a_drawList, a_centre, a_radius * 1.6f, a_colour);
 			return;
 		case Theme::kDwemer:
-			DwemerDecor::Cog(a_drawList, a_centre, a_radius * 1.25f, a_colour, true);
+			DwemerDecor::Ornament(a_drawList, a_centre, a_radius * 1.25f, a_colour);
 			return;
 		case Theme::kOblivion:
 			OblivionDecor::Rosette(a_drawList, a_centre, a_radius * 1.5f);

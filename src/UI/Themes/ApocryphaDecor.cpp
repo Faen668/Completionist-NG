@@ -463,7 +463,10 @@ namespace CompletionistUI::ApocryphaDecor
 		const float  width = a_max.x - a_min.x;
 		const float  height = a_max.y - a_min.y;
 		const float  compact = std::clamp(std::min(width, height) / (size * 26.0f), 0.34f, 1.0f);
-		const float  root = size * 1.4f * compact;
+		// The in-game panel has no ground of its own: it keeps them to its corners, thin. A narrow window gets slimmer ones than the main one
+		const bool   tiny = !margin;
+		const float  slim = std::clamp(width / (size * 60.0f), 0.62f, 1.0f);
+		const float  root = tiny ? size * 0.4f : size * 1.4f * compact * slim;
 
 		Baked(a_drawList, 0x0C10u, a_min, a_max, [&](ImDrawList* a_list) { Marble(a_list, a_min, a_max, 1.0f, 3.7f); });
 		Baked(a_drawList, 0x0C11u, a_min, a_max, [&](ImDrawList* a_list) {
@@ -473,25 +476,27 @@ namespace CompletionistUI::ApocryphaDecor
 			const float off = root * 0.3f;
 			const float weave = 0.1f;
 			const float wave = size * 11.0f;
-			const float across = width * 0.36f;
-			const float down = height * (compact < 0.7f ? 0.27f : 0.48f);	// On a small panel the curls would reach the text
+			const float across = tiny ? size * 2.8f : width * 0.36f;
+			const float down = tiny ? size * 2.0f : height * 0.48f;
+			const float foot = tiny ? size * 2.8f : width * 0.22f;
+			const float hook = slim < 1.0f ? 0.65f : 1.0f;	// Not so far in that the side curls reach a narrow window's list
 			const float inX = root * 0.42f;
 			const float inY = root * 0.42f;
 
 			// Down the sides first, the top and bottom lying over them
-			Tentacle(a_list, Walk(ImVec2(a_min.x + inX, a_min.y - off), pi * 0.5f, down, weave, wave, 0.4f, -3.8f), root, -1.0f, 0xC101u);
-			Tentacle(a_list, Walk(ImVec2(a_max.x - inX, a_min.y - off), pi * 0.5f, down, weave, wave, 2.1f, 3.8f), root, 1.0f, 0xC102u);
-			Tentacle(a_list, Walk(ImVec2(a_min.x + inX, a_max.y + off), -pi * 0.5f, down * 0.92f, weave, wave, 1.2f, 3.8f), root, 1.0f, 0xC103u);
-			Tentacle(a_list, Walk(ImVec2(a_max.x - inX, a_max.y + off), -pi * 0.5f, down * 0.92f, weave, wave, 3.3f, -3.8f), root, -1.0f, 0xC104u);
+			Tentacle(a_list, Walk(ImVec2(a_min.x + inX, a_min.y - off), pi * 0.5f, down, weave, wave, 0.4f, -3.8f * hook), root, -1.0f, 0xC101u);
+			Tentacle(a_list, Walk(ImVec2(a_max.x - inX, a_min.y - off), pi * 0.5f, down, weave, wave, 2.1f, 3.8f * hook), root, 1.0f, 0xC102u);
+			Tentacle(a_list, Walk(ImVec2(a_min.x + inX, a_max.y + off), -pi * 0.5f, down * 0.92f, weave, wave, 1.2f, 3.8f * hook), root, 1.0f, 0xC103u);
+			Tentacle(a_list, Walk(ImVec2(a_max.x - inX, a_max.y + off), -pi * 0.5f, down * 0.92f, weave, wave, 3.3f, -3.8f * hook), root, -1.0f, 0xC104u);
 
 			Tentacle(a_list, Walk(ImVec2(a_min.x - off, a_min.y + inY), 0.0f, across, weave, wave, 1.7f, 3.9f), root, 1.0f, 0xC105u);
 			Tentacle(a_list, Walk(ImVec2(a_max.x + off, a_min.y + inY), pi, across, weave, wave, 4.1f, -3.9f), root, -1.0f, 0xC106u);
-			Tentacle(a_list, Walk(ImVec2(a_min.x - off, a_max.y - inY), 0.0f, width * 0.22f, weave, wave, 2.6f, -3.9f), root, -1.0f, 0xC107u);
-			Tentacle(a_list, Walk(ImVec2(a_max.x + off, a_max.y - inY), pi, width * 0.22f, weave, wave, 5.3f, 3.9f), root, 1.0f, 0xC108u);
+			Tentacle(a_list, Walk(ImVec2(a_min.x - off, a_max.y - inY), 0.0f, foot, weave, wave, 2.6f, -3.9f), root, -1.0f, 0xC107u);
+			Tentacle(a_list, Walk(ImVec2(a_max.x + off, a_max.y - inY), pi, foot, weave, wave, 5.3f, 3.9f), root, 1.0f, 0xC108u);
 		});
 
 		// The loose ends at the corners stir
-		const float tip = size * 5.5f * compact;
+		const float tip = tiny ? size * 1.1f : size * 5.5f * compact * (slim < 1.0f ? slim * 0.7f : 1.0f);
 		const float tipRoot = root * 0.8f;
 		a_drawList->PushClipRect(a_min, a_max, true);
 		CornerTip(a_drawList, a_min, pi * 0.25f, tip, tipRoot, 3.6f, 0xC111u);
@@ -777,29 +782,16 @@ namespace CompletionistUI::ApocryphaDecor
 			return;
 		}
 		Baked(a_drawList, 0x0C40u, a_min, a_max, [&](ImDrawList* a_list) {
-			Tentacle(a_list, Walk(ImVec2(a_max.x + size * 0.3f, a_max.y - size * 0.9f), pi, width * 0.62f, 0.1f, size * 8.0f, 0.6f, 3.9f), size * 2.0f, 1.0f, 0xC401u, 0.6f);
-			Tentacle(a_list, Walk(ImVec2(a_min.x - size * 0.3f, a_max.y - size * 0.4f), 0.0f, width * 0.4f, 0.1f, size * 6.0f, 2.4f, -3.8f), size * 1.4f, -1.0f, 0xC402u, 0.45f);
-			Script(a_list, ImVec2(a_min.x + width * 0.42f, a_max.y - size * 2.6f), width * 0.34f, size * 0.46f, WithAlpha(rule, 0.4f), 0xC403u);
+			// Thin and flat along the very foot, under where the rows end, their tips tucked out of sight below it
+			const float low = a_max.y - size * 0.2f;
+			Tentacle(a_list, Walk(ImVec2(a_max.x + size * 0.3f, low), pi, size * 7.5f, 0.03f, size * 5.0f, 0.6f, -1.1f), size * 0.42f, 1.0f, 0xC401u, 0.8f);
+			Tentacle(a_list, Walk(ImVec2(a_min.x - size * 0.3f, low), 0.0f, size * 6.0f, 0.03f, size * 5.0f, 2.4f, 1.1f), size * 0.42f, -1.0f, 0xC402u, 0.8f);
 		});
 	}
 
 	//---------------------------------------------------
 	//-- Apocrypha Decor ( Panel Strip ) ----------------
 	//---------------------------------------------------
-
-	void PanelStrip(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max) {
-
-		const float size = ImGui::GetFontSize();
-		const float width = a_max.x - a_min.x;
-		const float height = a_max.y - a_min.y;
-		const float mid = (a_min.x + a_max.x) * 0.5f;
-		const float y = a_min.y + height * 0.6f;
-		Baked(a_drawList, 0x0C50u, a_min, a_max, [&](ImDrawList* a_list) {
-			Tentacle(a_list, Walk(ImVec2(mid - size * 0.7f, y), pi, width * 0.44f, 0.16f, size * 4.0f, 0.9f, 3.4f), size * 0.95f, 1.0f, 0xC501u);
-			Tentacle(a_list, Walk(ImVec2(mid + size * 0.7f, y), 0.0f, width * 0.44f, 0.16f, size * 4.0f, 3.4f, -3.4f), size * 0.95f, -1.0f, 0xC502u);
-		});
-		WatchingEye(a_drawList, ImVec2(mid, a_min.y + height * 0.5f), std::min(height * 0.5f, size * 1.2f), 0xC503u);
-	}
 
 	void TitleWatcher(ImDrawList* a_drawList, ImVec2 a_centre, float a_radius) {
 

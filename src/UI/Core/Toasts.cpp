@@ -4,6 +4,7 @@
 #include "UI/Core/Themes.hpp"
 #include "UI/Themes/AnimeDecor.hpp"
 #include "UI/Themes/ApocryphaDecor.hpp"
+#include "UI/Themes/DwemerDecor.hpp"
 
 #include <algorithm>
 #include <cfloat>
@@ -389,6 +390,8 @@ namespace CompletionistUI
 				drawList->AddRectFilledMultiColor(min, max, l, r, r, l);
 			} else if (Decor::Anime()) {
 				AnimeDecor::ToastPlate(drawList, min, max, alpha, opacity);
+			} else if (Decor::Dwemer()) {
+				DwemerDecor::ToastPlate(drawList, min, max, alpha, opacity);
 			} else if (Decor::Apocrypha()) {
 				ApocryphaDecor::ToastPlate(drawList, min, max, alpha, opacity, static_cast<std::uint32_t>(std::hash<std::string>{}(toast.text)));
 			} else {

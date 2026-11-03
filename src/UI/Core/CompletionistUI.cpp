@@ -5615,12 +5615,6 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Cell_More{" + std::to_string(scan.items.size() - shown) + "}").c_str());
 			}
 			ImGui::Dummy(ImVec2(inner, fontSize * 0.2f));
-			if (Decor::Apocrypha()) {
-				const auto strip = ImGui::GetCursorScreenPos();
-				const float stripHeight = fontSize * 2.2f;
-				ApocryphaDecor::PanelStrip(drawList, strip, ImVec2(strip.x + inner, strip.y + stripHeight));
-				ImGui::Dummy(ImVec2(inner, stripHeight));
-			}
 			if (Decor::Oblivion()) {
 				const auto skyline = ImGui::GetCursorScreenPos();
 				const float skylineHeight = fontSize * 2.8f;
