@@ -49,6 +49,7 @@ namespace CompletionistUI
 		std::string               Translate(std::string_view a_key) override;
 		void*                     AchievementIcon(std::int32_t a_icon) override;
 		void*                     ItemPicture(std::uint32_t a_formID) override;
+		bool                      ShowsItemPicture(std::uint32_t a_formID) override;
 		void                      UpdatePictures() override;
 		void                      PreparePictures(bool a_redraw) override;
 		void                      CancelPictures() override;

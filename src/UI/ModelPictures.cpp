@@ -1013,6 +1013,13 @@ float4 PS(VertexOut input) : SV_TARGET
 		return icon.stage == Stage::kDone ? icon.view.Get() : nullptr;
 	}
 
+	bool ModelPictures::Failed(std::uint32_t a_formID) {
+
+		std::unique_lock guard(lock);
+		const auto it = icons.find(a_formID);
+		return it != icons.end() && it->second.stage == Stage::kFailed;
+	}
+
 	//---------------------------------------------------
 	//-- Model Pictures ( Tick ) ------------------------
 	//---------------------------------------------------

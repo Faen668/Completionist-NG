@@ -547,74 +547,149 @@ UI_Trainers_PerkTaken		|Taken
 UI_Trainers_PerkNotTaken	|Not taken yet
 
 ----------------------------------------------------------------------------
+-- UI: Museum displays (UI_Museum_*)
+----------------------------------------------------------------------------
+UI_Museum_Displays						|Museum Displays
+UI_Museum_Hint							|What's on show in the museum right now, room by room. Checked each time this window opens, and not part of your overall completion.
+UI_Museum_Empty							|Not on display yet
+UI_Museum_HallofHeroes					|Hall of Heroes
+UI_Museum_GalleryLibrary				|Library
+UI_Museum_DaedricGallery				|Daedric Gallery
+UI_Museum_HallofLostEmpires				|Hall of Lost Empires
+UI_Museum_HallofOddities				|Hall of Oddities
+UI_Museum_NaturalScience				|Natural Science
+UI_Museum_DragonbornHall				|Dragonborn Hall
+UI_Museum_Armory						|Armory
+UI_Museum_HallofSecrets					|Hall of Secrets
+UI_Museum_MuseumStoreroom				|Storeroom
+UI_Museum_HallofLegends					|Hall of Legends
+UI_Museum_Safehouse						|Safehouse
+UI_Museum_Guildhouse					|Guildhouse
+UI_Museum_MainFloorLeftSide				|Main Floor - Left Side
+UI_Museum_DragonPriestMasksandClaws		|Dragon Priest Masks and Claws
+UI_Museum_MainFloorRightside			|Main Floor - Right Side
+UI_Museum_UpperGallery					|Upper Gallery
+UI_Museum_JeweleryCabinet				|Jewelry Cabinet
+UI_Museum_ReceptionHall					|Reception Hall
+UI_Museum_CultureandArtDisplays			|Culture and Art Displays
+UI_Museum_UpperRing						|Upper Ring
+UI_Museum_MainFloor						|Main Floor
+UI_Museum_RareBooks						|Rare Books
+UI_Museum_MainFloorLeftBookcases		|Main Floor - Left Bookcases
+UI_Museum_MainFloorRightBookcases		|Main Floor - Right Bookcases
+UI_Museum_Mezzanine						|Mezzanine
+UI_Museum_Maps							|Maps
+UI_Museum_DaedricItems					|Daedric Items
+UI_Museum_QuestandAchievementDisplays	|Quest and Achievement Displays
+UI_Museum_CreatureDisplays				|Creature Displays
+UI_Museum_Gemstones						|Gemstones
+UI_Museum_TidePool						|Tide Pool
+UI_Museum_FossilDisplays				|Fossil Displays
+UI_Museum_SecretDisplays				|Secret Displays
+UI_Museum_ThaneDisplays					|Thane Displays
+UI_Museum_DwarvenArmorDisplay			|Dwarven Armor Display
+UI_Museum_SteelArmorDisplay				|Steel Armor Display
+UI_Museum_IronArmorDisplay				|Iron Armor Display
+UI_Museum_FalmerArmorDisplay			|Falmer Armor Display
+UI_Museum_NordicArmorDisplay			|Nordic Armor Display
+UI_Museum_ElvenArmorDisplay				|Elven Armor Display
+UI_Museum_GlassArmorDisplay				|Glass Armor Display
+UI_Museum_OrcishArmorDisplay			|Orcish Armor Display
+UI_Museum_BladesArmorDisplay			|Blades Armor Display
+UI_Museum_SnowElfArmorDisplay			|Snow Elf Armor Display
+UI_Museum_EbonyArmorDisplay				|Ebony Armor Display
+UI_Museum_DragonArmorDisplay			|Dragon Armor Display
+UI_Museum_DaedricArmorDisplay			|Daedric Armor Display
+UI_Museum_StalhrimArmorDisplay			|Stalhrim Armor Display
+UI_Museum_ForswornArmorDisplay			|Forsworn Armor Display
+UI_Museum_AncientNordicArmorDisplay		|Ancient Nordic Armor Display
+UI_Museum_DawnguardArmorDisplay			|Dawnguard Armor Display
+UI_Museum_MiscArmorDisplays				|Misc. Armor Displays
+UI_Museum_HoldGuardArmor				|Hold Guard Armor
+UI_Museum_ReserveVintages				|Reserve Vintages
+UI_Museum_ExplorerRelics				|Explorer Relics
+
+----------------------------------------------------------------------------
 -- UI: Dragons (UI_Dragons_*)
 ----------------------------------------------------------------------------
-UI_Dragons_Unique				|Unique Dragons
-UI_Dragons_Kills				|Dragon Kills
-UI_Dragons_Skyrim				|Skyrim
-UI_Dragons_Dawnguard			|Dawnguard
-UI_Dragons_Dragonborn			|Dragonborn
-UI_Dragons_NotMet				|Not met yet
-UI_Dragons_Met					|Met
-UI_Dragons_Tamed				|Tamed
-UI_Dragons_Ally					|Your ally
-UI_Dragons_Slain				|Slain
-UI_Dragons_Means{}				|Name means: {}
-UI_Dragons_Place{}				|Met at: {}
-UI_Dragons_Kinds				|Kinds of dragon
-UI_Dragons_Kind					|Dragon
-UI_Dragons_KillsEmpty			|No dragons slain yet. Dragon kills are counted by kind from this version of Completionist on.
-UI_Dragons_Lore_Mod{}			|A named dragon added by {}.
-UI_Dragons_Meaning_Alduin		|Destroyer Devour Master
-UI_Dragons_Where_Alduin			|Helgen, and in the end Sovngarde
-UI_Dragons_Lore_Alduin			|The first-born of Akatosh, the World-Eater of Nord legend. Long ago he ruled Skyrim through his dragon priests, until the ancient Tongues used an Elder Scroll to cast him out of time. He returns at Helgen as the game begins, raises the dead dragons from their burial mounds, and hides in Sovngarde to feed on the souls of the dead. With the heroes Gormlaith, Hakon and Felldir you defeat him there in Dragonslayer.
-UI_Dragons_Meaning_Paarthurnax	|Ambition Overlord Cruelty
-UI_Dragons_Where_Paarthurnax	|The top of the Throat of the World
-UI_Dragons_Lore_Paarthurnax		|Once Alduin's lieutenant, he turned on his master and taught men the Thu'um so they could fight back. For thousands of years since, he has lived on the mountain as master of the Greybeards, following the Way of the Voice to keep his cruel nature in check. He teaches you Fire Breath and how Alduin was beaten before. The Blades want him dead for his old crimes: you can kill him for them, or spare him and he stays on his mountain.
-UI_Dragons_Meaning_Odahviing	|Snow Hunter Wing
-UI_Dragons_Where_Odahviing		|Dragonsreach, Whiterun
-UI_Dragons_Lore_Odahviing		|One of Alduin's strongest followers. In The Fallen you call him by name to Dragonsreach, where he is trapped on the great porch. Seeing that Alduin is losing, he tells you Alduin has gone to Skuldafn and agrees to fly you there in return for his freedom. Once free he answers your Call Dragon shout and fights at your side.
-UI_Dragons_Meaning_Mirmulnir	|Allegiance Strength Hunt
-UI_Dragons_Where_Mirmulnir		|The Western Watchtower, near Whiterun
-UI_Dragons_Lore_Mirmulnir		|A loyal follower of Alduin who attacks the Western Watchtower in Dragon Rising. You kill him with the Whiterun guards, and taking in his soul shows that you are Dragonborn; the Greybeards call you to High Hrothgar soon after.
-UI_Dragons_Meaning_Sahloknir	|Phantom Sky Hunt
-UI_Dragons_Where_Sahloknir		|The burial mound above Kynesgrove
-UI_Dragons_Lore_Sahloknir		|Buried for ages on the hill above Kynesgrove. In A Blade in the Dark you and Delphine watch Alduin raise him from the dead, the proof that Alduin is bringing the dragons back. Killed as soon as he rises, he wins you Delphine's trust and the help of the Blades.
-UI_Dragons_Meaning_Vuljotnaak	|Dark Maw Eat
-UI_Dragons_Where_Vuljotnaak		|A burial mound near Sunderstone Gorge
-UI_Dragons_Lore_Vuljotnaak		|One of the dragons Alduin raises from the dead as the story goes on. He wakes from his burial mound near Sunderstone Gorge around the start of Diplomatic Immunity, and roams Skyrim until someone kills him.
-UI_Dragons_Meaning_Nahagliiv	|Fury Burn Wither
-UI_Dragons_Where_Nahagliiv		|A burial mound west of Rorikstead
-UI_Dragons_Lore_Nahagliiv		|Raised from his burial mound by Alduin while you take Esbern to Sky Haven Temple in Alduin's Wall. Like the other risen dragons he has no part in the story after that, and roams Skyrim until someone kills him.
-UI_Dragons_Meaning_Viinturuth	|Shine Hammer Rage
-UI_Dragons_Where_Viinturuth		|A burial mound near Lake Yorgrim
-UI_Dragons_Lore_Viinturuth		|The last of the dragons Alduin raises from the burial mounds, woken after you meet Paarthurnax on the Throat of the World. Like the other risen dragons he roams Skyrim until someone kills him.
-UI_Dragons_Meaning_Vulthuryol	|Dark Overlord Fire
-UI_Dragons_Where_Vulthuryol		|Blackreach, beneath Skyrim
-UI_Dragons_Lore_Vulthuryol		|An old dragon sleeping out of sight in the great cavern of Blackreach, far below Skyrim. He stays away until a shout of Unrelenting Force hits the glowing orb that hangs over the cavern, which calls him down. He is no part of any quest; he is there for those who go looking for him.
-UI_Dragons_Where_SkeletalDragon	|Labyrinthian, Hjaalmarch
-UI_Dragons_Lore_SkeletalDragon	|The bones of a dragon in a great hall of Labyrinthian, behind a gate past the entrance. You reach it on the way to the Staff of Magnus: when you fight the skeletons in the hall, the dragon rises from its mound in the middle and joins in, breathing frost. It has no name of its own, but it is the only one of its kind in the game, and it is too big to follow you back through the gate.
-UI_Dragons_Meaning_Durnehviir	|Curse Never Dying
-UI_Dragons_Where_Durnehviir		|The Soul Cairn
-UI_Dragons_Lore_Durnehviir		|Once a dragon of Tamriel, he made a pact with the masters of the Soul Cairn and was bound there, rotting but unable to die. He attacks you in Beyond Death. Beaten, he asks you to remember his name and teaches you Summon Durnehviir, so he can fly free in Tamriel by fighting for you.
-UI_Dragons_Meaning_Voslaarum	|Claw Water Twin
-UI_Dragons_Where_Voslaarum		|The frozen lake in the Forgotten Vale
-UI_Dragons_Lore_Voslaarum		|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Naaslaarum, as you cross the vale with Dawnguard.
-UI_Dragons_Meaning_Naaslaarum	|Tooth Water Twin
-UI_Dragons_Where_Naaslaarum		|The frozen lake in the Forgotten Vale
-UI_Dragons_Lore_Naaslaarum		|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Voslaarum, as you cross the vale with Dawnguard.
-UI_Dragons_Meaning_Krosulhah	|Sorcerer Day Mind
-UI_Dragons_Where_Krosulhah		|Outside Nchardak, Solstheim
-UI_Dragons_Lore_Krosulhah		|A dragon of Solstheim who swoops on you and Neloth outside the Dwemer ruin of Nchardak in The Gardener of Men, taunting you as you fight.
-UI_Dragons_Meaning_Sahrotaar	|Mighty Servant
-UI_Dragons_Where_Sahrotaar		|Apocrypha, in At the Summit of Apocrypha
-UI_Dragons_Lore_Sahrotaar		|Miraak's own dragon. With the full Bend Will shout you turn him against his master and ride him to the summit of Apocrypha to face Miraak. During that last fight Miraak takes Sahrotaar's soul to heal himself.
-UI_Dragons_Meaning_Kruziikrel	|Ancient Domination
-UI_Dragons_Where_Kruziikrel		|The summit of Apocrypha
-UI_Dragons_Lore_Kruziikrel		|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
-UI_Dragons_Meaning_Relonikiv	|Domination Enlightenment
-UI_Dragons_Where_Relonikiv		|The summit of Apocrypha
-UI_Dragons_Lore_Relonikiv		|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
+UI_Dragons_Unique					|Unique Dragons
+UI_Dragons_Kills					|Dragon Kills
+UI_Dragons_Skyrim					|Skyrim
+UI_Dragons_Dawnguard				|Dawnguard
+UI_Dragons_Dragonborn				|Dragonborn
+UI_Dragons_InstalledContent			|Installed Content
+UI_Dragons_NotMet					|Not met yet
+UI_Dragons_Met						|Met
+UI_Dragons_Tamed					|Tamed
+UI_Dragons_Ally						|Your ally
+UI_Dragons_Slain					|Slain
+UI_Dragons_Means{}					|Name means: {}
+UI_Dragons_Place{}					|Met at: {}
+UI_Dragons_Kinds					|Kinds of dragon
+UI_Dragons_Kind						|Dragon
+UI_Dragons_KillsEmpty				|No dragons slain yet. Dragon kills are counted by kind from this version of Completionist on.
+UI_Dragons_Lore_Mod{}				|A named dragon added by {}.
+UI_Dragons_Meaning_Alduin			|Destroyer Devour Master
+UI_Dragons_Where_Alduin				|Helgen, and in the end Sovngarde
+UI_Dragons_Lore_Alduin				|The first-born of Akatosh, the World-Eater of Nord legend. Long ago he ruled Skyrim through his dragon priests, until the ancient Tongues used an Elder Scroll to cast him out of time. He returns at Helgen as the game begins, raises the dead dragons from their burial mounds, and hides in Sovngarde to feed on the souls of the dead. With the heroes Gormlaith, Hakon and Felldir you defeat him there in Dragonslayer.
+UI_Dragons_Meaning_Paarthurnax		|Ambition Overlord Cruelty
+UI_Dragons_Where_Paarthurnax		|The top of the Throat of the World
+UI_Dragons_Lore_Paarthurnax			|Once Alduin's lieutenant, he turned on his master and taught men the Thu'um so they could fight back. For thousands of years since, he has lived on the mountain as master of the Greybeards, following the Way of the Voice to keep his cruel nature in check. He teaches you Fire Breath and how Alduin was beaten before. The Blades want him dead for his old crimes: you can kill him for them, or spare him and he stays on his mountain.
+UI_Dragons_Meaning_Odahviing		|Snow Hunter Wing
+UI_Dragons_Where_Odahviing			|Dragonsreach, Whiterun
+UI_Dragons_Lore_Odahviing			|One of Alduin's strongest followers. In The Fallen you call him by name to Dragonsreach, where he is trapped on the great porch. Seeing that Alduin is losing, he tells you Alduin has gone to Skuldafn and agrees to fly you there in return for his freedom. Once free he answers your Call Dragon shout and fights at your side.
+UI_Dragons_Meaning_Mirmulnir		|Allegiance Strength Hunt
+UI_Dragons_Where_Mirmulnir			|The Western Watchtower, near Whiterun
+UI_Dragons_Lore_Mirmulnir			|A loyal follower of Alduin who attacks the Western Watchtower in Dragon Rising. You kill him with the Whiterun guards, and taking in his soul shows that you are Dragonborn; the Greybeards call you to High Hrothgar soon after.
+UI_Dragons_Meaning_Sahloknir		|Phantom Sky Hunt
+UI_Dragons_Where_Sahloknir			|The burial mound above Kynesgrove
+UI_Dragons_Lore_Sahloknir			|Buried for ages on the hill above Kynesgrove. In A Blade in the Dark you and Delphine watch Alduin raise him from the dead, the proof that Alduin is bringing the dragons back. Killed as soon as he rises, he wins you Delphine's trust and the help of the Blades.
+UI_Dragons_Meaning_Vuljotnaak		|Dark Maw Eat
+UI_Dragons_Where_Vuljotnaak			|A burial mound near Sunderstone Gorge
+UI_Dragons_Lore_Vuljotnaak			|One of the dragons Alduin raises from the dead as the story goes on. He wakes from his burial mound near Sunderstone Gorge around the start of Diplomatic Immunity, and roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Nahagliiv		|Fury Burn Wither
+UI_Dragons_Where_Nahagliiv			|A burial mound west of Rorikstead
+UI_Dragons_Lore_Nahagliiv			|Raised from his burial mound by Alduin while you take Esbern to Sky Haven Temple in Alduin's Wall. Like the other risen dragons he has no part in the story after that, and roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Viinturuth		|Shine Hammer Rage
+UI_Dragons_Where_Viinturuth			|A burial mound near Lake Yorgrim
+UI_Dragons_Lore_Viinturuth			|The last of the dragons Alduin raises from the burial mounds, woken after you meet Paarthurnax on the Throat of the World. Like the other risen dragons he roams Skyrim until someone kills him.
+UI_Dragons_Meaning_Vulthuryol		|Dark Overlord Fire
+UI_Dragons_Where_Vulthuryol			|Blackreach, beneath Skyrim
+UI_Dragons_Lore_Vulthuryol			|An old dragon sleeping out of sight in the great cavern of Blackreach, far below Skyrim. He stays away until a shout of Unrelenting Force hits the glowing orb that hangs over the cavern, which calls him down. He is no part of any quest; he is there for those who go looking for him.
+UI_Dragons_Where_SkeletalDragon		|Labyrinthian, Hjaalmarch
+UI_Dragons_Lore_SkeletalDragon		|The bones of a dragon in a great hall of Labyrinthian, behind a gate past the entrance. You reach it on the way to the Staff of Magnus: when you fight the skeletons in the hall, the dragon rises from its mound in the middle and joins in, breathing frost. It has no name of its own, but it is the only one of its kind in the game, and it is too big to follow you back through the gate.
+UI_Dragons_Meaning_Durnehviir		|Curse Never Dying
+UI_Dragons_Where_Durnehviir			|The Soul Cairn
+UI_Dragons_Lore_Durnehviir			|Once a dragon of Tamriel, he made a pact with the masters of the Soul Cairn and was bound there, rotting but unable to die. He attacks you in Beyond Death. Beaten, he asks you to remember his name and teaches you Summon Durnehviir, so he can fly free in Tamriel by fighting for you.
+UI_Dragons_Meaning_Voslaarum		|Claw Water Twin
+UI_Dragons_Where_Voslaarum			|The frozen lake in the Forgotten Vale
+UI_Dragons_Lore_Voslaarum			|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Naaslaarum, as you cross the vale with Dawnguard.
+UI_Dragons_Meaning_Naaslaarum		|Tooth Water Twin
+UI_Dragons_Where_Naaslaarum			|The frozen lake in the Forgotten Vale
+UI_Dragons_Lore_Naaslaarum			|One of a pair of twin dragons that guard the frozen lake in the Forgotten Vale. He fights together with his twin, Voslaarum, as you cross the vale with Dawnguard.
+UI_Dragons_Meaning_Krosulhah		|Sorcerer Day Mind
+UI_Dragons_Where_Krosulhah			|Outside Nchardak, Solstheim
+UI_Dragons_Lore_Krosulhah			|A dragon of Solstheim who swoops on you and Neloth outside the Dwemer ruin of Nchardak in The Gardener of Men, taunting you as you fight.
+UI_Dragons_Meaning_Sahrotaar		|Mighty Servant
+UI_Dragons_Where_Sahrotaar			|Apocrypha, in At the Summit of Apocrypha
+UI_Dragons_Lore_Sahrotaar			|Miraak's own dragon. With the full Bend Will shout you turn him against his master and ride him to the summit of Apocrypha to face Miraak. During that last fight Miraak takes Sahrotaar's soul to heal himself.
+UI_Dragons_Meaning_Kruziikrel		|Ancient Domination
+UI_Dragons_Where_Kruziikrel			|The summit of Apocrypha
+UI_Dragons_Lore_Kruziikrel			|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
+UI_Dragons_Meaning_Relonikiv		|Domination Enlightenment
+UI_Dragons_Where_Relonikiv			|The summit of Apocrypha
+UI_Dragons_Lore_Relonikiv			|One of the dragons that serve Miraak in Apocrypha. He joins the fight at the summit in At the Summit of Apocrypha, where Miraak takes his soul to heal himself.
+UI_Dragons_Where_HeraldOfAkatosh	|The Sanctum of Akatosh, beneath Sancre Tor
+UI_Dragons_Lore_HeraldOfAkatosh		|An aspect of Akatosh who speaks for the god rather than fighting for him, and he can only be talked to. In Shattered Legacy you bring him the relics of the Dragonborns who came before you, and he judges whether you're worthy. Once you've brought them all, he reforges the shards of the Amulet of Kings, then leaves you the Dragonsoul Forge, whose blue flame turns the souls of slain dragons into ingots.
+UI_Dragons_Meaning_Kreindeinvith	|Sun Guard Serpent
+UI_Dragons_Where_Kreindeinvith		|Windcaller Pass
+UI_Dragons_Lore_Kreindeinvith		|A blood dragon, a breed of swamp dragon thought to be native to Black Marsh, though they've lately been seen in Skyrim. With Izvenyah, it guards the Jade Claw during The Excavation of Windcaller Pass. Its scales complete its exhibit in the Gallery of Natural Science.
+UI_Dragons_Meaning_Izvenyah			|Ice Wind Seek
+UI_Dragons_Where_Izvenyah			|Windcaller's Retreat
+UI_Dragons_Lore_Izvenyah			|A frost dragon, one of the deadliest breeds in Skyrim. Scholars think frost dragons settled here in the Merethic Era for the cold. With Kreindeinvith, it guards the Jade Claw during The Excavation of Windcaller Pass. Its scales complete its exhibit in the Gallery of Natural Science.
+UI_Dragons_Meaning_Gaafnehdir		|Ghost Never Die
+UI_Dragons_Where_Gaafnehdir			|Upper Embershard Mine
+UI_Dragons_Lore_Gaafnehdir			|A dragon bound to a haunted mine, serving the spirit who holds the dead there since an old cave-in. A ghost girl named Hanna, trapped with the miners, begs you to free them. Spiders, skeletons and this dragon are among the things you face on the way to the "bad man" she fears. The mine's new owner wants it cleared before work can start again.
 
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 5)
@@ -1266,20 +1341,20 @@ UI_Mix_Also{}				|also {}
 -- UI: ItemPictures (UI_ItemPictures_*)
 ----------------------------------------------------------------------------
 UI_ItemPictures_Header			|Pictures
-UI_ItemPictures_Setting			|Pictures of items
-UI_ItemPictures_SettingInfo		|Shows each item's own model next to it on the item pages, the ingredient pages and the Mixing Station, drawn from the game with your mesh and texture mods. Switching it on offers to prepare them all.
-UI_ItemPictures_OfferTitle		|Prepare pictures of every item?
-UI_ItemPictures_OfferText		|Each picture is drawn from the item's model the first time it's needed, which can slow the first visit to a long page. Preparing them all now takes a minute or two, and they're kept for next time. You can also do it later from here.
+UI_ItemPictures_Setting			|Pictures of ingredients
+UI_ItemPictures_SettingInfo		|Shows each ingredient's own model at the Mixing Station, drawn from the game with your mesh and texture mods. Switching it on offers to prepare them all.
+UI_ItemPictures_OfferTitle		|Prepare pictures of every ingredient?
+UI_ItemPictures_OfferText		|Each picture is drawn from the ingredient's model the first time it's needed, which can slow the first visit to the Mixing Station. Preparing them all now takes a minute or two, and they're kept for next time. You can also do it later from here.
 UI_ItemPictures_Later			|Later
 UI_ItemPictures_Preparing		|Preparing pictures
 UI_ItemPictures_Progress{}{}	|{} of {}
 UI_ItemPictures_Starting		|Getting started...
 UI_ItemPictures_Ready			|Pictures ready
-UI_ItemPictures_ReadyText		|Every item's picture is drawn and kept for next time.
+UI_ItemPictures_ReadyText		|Every ingredient's picture is drawn and kept for next time.
 UI_ItemPictures_Cancel			|Cancel
 UI_ItemPictures_Close			|Close
 UI_ItemPictures_PrepareSetting	|Prepare every picture
-UI_ItemPictures_PrepareInfo		|Draws the picture of every item that doesn't have one kept yet, so no page waits for them the first time it's opened. A window shows how far it's got, and you can cancel it.
+UI_ItemPictures_PrepareInfo		|Draws the picture of every ingredient that doesn't have one kept yet, so the Mixing Station doesn't wait for them the first time it's opened. A window shows how far it's got, and you can cancel it.
 UI_ItemPictures_RedrawSetting	|Redraw every picture
 UI_ItemPictures_RedrawInfo		|Throws away the kept pictures and draws them all again. Use it after changing mesh or texture mods. It asks first.
 UI_ItemPictures_Prepare			|Prepare now

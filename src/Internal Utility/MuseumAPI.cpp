@@ -33,6 +33,7 @@ namespace Completionist
 			return;
 
 		_museumContainers.clear();
+		_patchHandlers.clear();
 		_museumInventory.clear();
 		_AllVariations.clear();
 		_DisplayableFormIDs.clear();
@@ -539,6 +540,8 @@ namespace Completionist
 			const auto& itemLists = script.get()->GetProperty("NewSectionItemLists");
 			if (!itemLists) continue;
 
+			_patchHandlers.push_back(quest);
+
 			if (itemLists->IsArray())
 			{
 				const auto& scriptArrayPointer = itemLists->GetArray().get();
@@ -743,6 +746,243 @@ namespace Completionist
 				}
 			}
 		}
+	}
+
+	//---------------------------------------------------
+	//-- Display Rooms ----------------------------------
+	//---------------------------------------------------
+
+	// Null entries stay, as a section's display and item lists pair up by index
+	static std::vector<RE::TESForm*> ListForms(const RE::BGSListForm* a_list)
+	{
+		std::vector<RE::TESForm*> forms;
+		if (!a_list)
+			return forms;
+
+		forms.assign(a_list->forms.begin(), a_list->forms.end());
+		if (a_list->scriptAddedTempForms) {
+			for (const auto& id : *a_list->scriptAddedTempForms)
+				forms.push_back(RE::TESForm::LookupByID(id));
+		}
+		return forms;
+	}
+
+	std::vector<MuseumAPI::DisplayRoom> MuseumAPI::GetDisplayRooms()
+	{
+		std::vector<DisplayRoom> rooms;
+		if (!_ready)
+			return rooms;
+
+		auto* quest = _handler->LookupForm<RE::TESQuest>(0x138793, "LegacyoftheDragonborn.esm");
+		const auto script = ScriptObject::FromForm(quest, "DBM_MuseumAPI", false);
+		if (!script) {
+			INFO("MuseumAPI: Unable to read the museum's room lists");
+			return rooms;
+		}
+
+		const auto readFormsOf = [&](const ScriptObjectPtr& a_script, const std::string& a_property) {
+			std::vector<RE::TESForm*> forms;
+			const auto* variable = a_script->GetProperty(a_property);
+			const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
+			if (!array)
+				return forms;
+
+			forms.reserve(array->size());
+			for (std::uint32_t i = 0; i < array->size(); ++i) {
+				const auto object = (*array)[i].IsObject() ? (*array)[i].GetObject() : nullptr;
+				forms.push_back(object ? _policy->GetObjectForHandle(RE::TESForm::FORMTYPE, object->GetHandle()) : nullptr);
+			}
+			return forms;
+		};
+		const auto readStringsOf = [&](const ScriptObjectPtr& a_script, const std::string& a_property) {
+			std::vector<std::string> strings;
+			const auto* variable = a_script->GetProperty(a_property);
+			const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
+			if (!array)
+				return strings;
+
+			strings.reserve(array->size());
+			for (std::uint32_t i = 0; i < array->size(); ++i)
+				strings.emplace_back((*array)[i].IsString() ? (*array)[i].GetString() : std::string_view{});
+			return strings;
+		};
+		const auto readForms = [&](const std::string& a_property) { return readFormsOf(script, a_property); };
+		const auto readStrings = [&](const std::string& a_property) { return readStringsOf(script, a_property); };
+
+		struct SectionLists
+		{
+			std::string        name;
+			RE::BGSListForm*   displays{ nullptr };
+			RE::BGSListForm*   items{ nullptr };
+		};
+
+		// LOTD's sections, and patches' once LOTD has set them up, about 30 seconds after loading
+		std::unordered_map<RE::FormID, SectionLists> sections;
+		for (const std::string suffix : { "", "2", "3", "4" }) {
+			const auto names = readStrings("SectionNames" + suffix);
+			const auto displays = readForms("SectionDisplayLists" + suffix);
+			const auto items = readForms("SectionDisplayItems" + suffix);
+			for (std::size_t i = 0; i < displays.size() && i < items.size() && i < names.size(); ++i) {
+				auto* displayList = displays[i] ? displays[i]->As<RE::BGSListForm>() : nullptr;
+				auto* itemList = items[i] ? items[i]->As<RE::BGSListForm>() : nullptr;
+				if (displayList && itemList)
+					sections.try_emplace(displayList->GetFormID(), SectionLists{ names[i], displayList, itemList });
+			}
+		}
+
+		std::unordered_set<RE::FormID> inventory;
+		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+			for (const auto& [item, count] : player->GetInventoryCounts()) {
+				if (item && count > 0)
+					inventory.insert(item->GetFormID());
+			}
+		}
+		const auto carried = [&](RE::FormID a_id) {
+			return inventory.contains(a_id) || std::ranges::any_of(GetVariations(a_id), [&](RE::FormID a_variation) { return inventory.contains(a_variation); });
+		};
+
+		std::int32_t total = 0;
+		std::int32_t shown = 0;
+		std::int32_t withParent = 0;
+		std::int32_t disagree = 0;
+
+		// A display is on show when its reference is enabled, as LOTD's own MCM reads it
+		const auto isEnabled = [&](const RE::TESObjectREFR* a_ref) {
+			const bool enabled = !a_ref->IsDisabled();
+			if (const auto* extra = a_ref->extraList.GetByType<RE::ExtraEnableStateParent>()) {
+				++withParent;
+				if (const auto parent = extra->parent.get()) {
+					const bool inverted = (extra->flags & 1) != 0;
+					if ((!parent->IsDisabled() != inverted) != enabled) {
+						++disagree;
+						INFO("MuseumAPI: display {:08X} is {} but its enable parent {:08X} says otherwise", a_ref->GetFormID(), enabled ? "enabled" : "disabled", parent->GetFormID());
+					}
+				}
+			}
+			return enabled;
+		};
+
+		struct RoomLists
+		{
+			std::string               name;
+			std::vector<SectionLists> sections;
+		};
+
+		std::vector<RoomLists>         roomOrder;
+		std::unordered_set<RE::FormID> placed;
+		std::unordered_map<RE::FormID, RE::TESForm*> corrections;
+		for (const auto& [listedID, listedFile, realID, realFile] : displayCorrections) {
+			const auto* listed = _handler->LookupForm(listedID, listedFile);
+			auto*       real = _handler->LookupForm(realID, realFile);
+			if (listed && real)
+				corrections.emplace(listed->GetFormID(), real);
+		}
+
+		const auto roomNames = readStrings("RoomNames");
+		const auto roomForms = readForms("RoomLists");
+		for (std::size_t r = 0; r < roomNames.size() && r < roomForms.size(); ++r) {
+			auto* roomList = roomForms[r] ? roomForms[r]->As<RE::BGSListForm>() : nullptr;
+			if (!roomList)
+				continue;
+
+			auto& room = roomOrder.emplace_back(RoomLists{ roomNames[r], {} });
+			for (auto* sectionForm : ListForms(roomList)) {
+				const auto it = sectionForm ? sections.find(sectionForm->GetFormID()) : sections.end();
+				if (it != sections.end() && placed.insert(it->first).second)
+					room.sections.push_back(it->second);
+			}
+		}
+
+		// A patch names the room each of its sections belongs in. From the quests found on load, as a patch new to
+		// the save waits up to 25 seconds to register with LOTD, and longer to be set up
+		for (auto* handler : _patchHandlers) {
+			const auto patch = ScriptObject::FromForm(handler, "DBMSupportedModScript", false);
+			if (!patch)
+				continue;
+
+			const auto names = readStringsOf(patch, "NewSectionNames");
+			const auto wanted = readStringsOf(patch, "NewSectionRoomNames");
+			const auto displays = readFormsOf(patch, "NewSectionDisplayRefLists");
+			const auto items = readFormsOf(patch, "NewSectionItemLists");
+			for (std::size_t i = 0; i < names.size() && i < wanted.size() && i < displays.size() && i < items.size(); ++i) {
+				auto* displayList = displays[i] ? displays[i]->As<RE::BGSListForm>() : nullptr;
+				auto* itemList = items[i] ? items[i]->As<RE::BGSListForm>() : nullptr;
+				if (!displayList || !itemList || placed.contains(displayList->GetFormID()))
+					continue;
+
+				const auto room = std::ranges::find(roomOrder, wanted[i], &RoomLists::name);
+				if (room == roomOrder.end()) {
+					INFO("MuseumAPI: section {} wants a room the museum doesn't have: {}", names[i], wanted[i]);
+					continue;
+				}
+				placed.insert(displayList->GetFormID());
+				room->sections.push_back({ names[i], displayList, itemList });
+			}
+		}
+
+		for (const auto& roomLists : roomOrder) {
+			DisplayRoom room{ roomLists.name, {} };
+			for (const auto& lists : roomLists.sections) {
+				DisplaySection section{ lists.name, {} };
+				const auto displayForms = ListForms(lists.displays);
+				const auto itemForms = ListForms(lists.items);
+				for (std::size_t i = 0; i < displayForms.size() && i < itemForms.size(); ++i) {
+					if (!displayForms[i] || !itemForms[i])
+						continue;
+
+					// Some displays have a reference for each version of the item they take, in the same order
+					Display display;
+					std::size_t version = 0;
+					if (const auto* versions = displayForms[i]->As<RE::BGSListForm>()) {
+						const auto refs = ListForms(versions);
+						for (std::size_t v = 0; v < refs.size(); ++v) {
+							const auto* ref = refs[v] ? refs[v]->AsReference() : nullptr;
+							if (ref && isEnabled(ref) && !display.displayed) {
+								display.displayed = true;
+								version = v;
+							}
+						}
+					} else {
+						const auto corrected = corrections.find(displayForms[i]->GetFormID());
+						const auto* ref = (corrected != corrections.end() ? corrected->second : displayForms[i])->AsReference();
+						display.displayed = ref && isEnabled(ref);
+					}
+
+					auto*             item = itemForms[i];
+					std::vector<RE::TESForm*> versions;
+					if (const auto* list = item->As<RE::BGSListForm>()) {
+						versions = ListForms(list);
+						item = version < versions.size() ? versions[version] : nullptr;
+					}
+					while (item && item->Is(RE::FormType::FormList)) {
+						const auto nested = ListForms(item->As<RE::BGSListForm>());
+						item = nested.empty() ? nullptr : nested.front();
+					}
+					if (!item || !*item->GetName()) {
+						if (_logging)
+							INFO("MuseumAPI: no item name for display {} in {}", i, lists.name);
+						continue;
+					}
+
+					display.name = item->GetName();
+					display.itemID = item->GetFormID();
+					if (!display.displayed) {
+						display.carried = carried(item->GetFormID()) || std::ranges::any_of(versions, [&](RE::TESForm* a_form) { return a_form && carried(a_form->GetFormID()); });
+					}
+					++total;
+					shown += display.displayed ? 1 : 0;
+					section.displays.push_back(std::move(display));
+				}
+				if (!section.displays.empty())
+					room.sections.push_back(std::move(section));
+			}
+			if (!room.sections.empty())
+				rooms.push_back(std::move(room));
+		}
+
+		const auto* count = RE::TESForm::LookupByEditorID<RE::TESGlobal>("DBM_DisplayCount");
+		INFO("MuseumAPI: {} of {} displays on show (LOTD's own count is {}), {} patches, {} checks against enable parents, {} disagreed", shown, total, count ? static_cast<std::int32_t>(count->value) : -1, _patchHandlers.size(), withParent, disagree);
+		return rooms;
 	}
 
 	void MuseumAPI::VerifyAltLists()

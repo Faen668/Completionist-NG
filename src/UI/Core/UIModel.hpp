@@ -159,7 +159,6 @@ namespace CompletionistUI
 		bool                    canPin{ false };
 		bool                    canMark{ false };
 		bool                    placesKnown{ false };
-		bool                    hasModel{ false };	// an item, which can show a picture of its model
 		std::uint32_t           refID{ 0 };	// the location marker goes on this when set
 		std::string             markerText;	// the location marker's objective, when not "Find {name}"
 		std::string             markerName;	// the name it fills in, when not this entry's
@@ -244,6 +243,7 @@ namespace CompletionistUI
 		std::string  title;
 		std::int32_t found{ 0 };
 		std::int32_t total{ 0 };
+		bool         counted{ true };	// false to stay out of its category's figure, the overall one and the overview cards
 	};
 
 	enum class SettingKind : std::uint8_t
@@ -305,7 +305,7 @@ namespace CompletionistUI
 		{
 			std::int32_t found = 0;
 			for (const auto& page : pages) {
-				found += page.found;
+				found += page.counted ? page.found : 0;
 			}
 			return found;
 		}
@@ -314,7 +314,7 @@ namespace CompletionistUI
 		{
 			std::int32_t total = 0;
 			for (const auto& page : pages) {
-				total += page.total;
+				total += page.counted ? page.total : 0;
 			}
 			return total;
 		}

@@ -39,6 +39,29 @@ namespace Completionist
 		static void FindAndTrackMuseumAltItems();
 		static std::unordered_set<RE::TESForm*> GetReplicaItems(const RE::TESForm* element, const RE::BGSListForm* replicaBaseItems, const RE::BGSListForm* replicaItems);
 
+		struct Display
+		{
+			std::string  name;
+			RE::FormID   itemID{ 0 };
+			bool         displayed{ false };
+			bool         carried{ false };	// not on display, but the player has one to put there
+		};
+
+		struct DisplaySection
+		{
+			std::string          name;
+			std::vector<Display> displays;
+		};
+
+		struct DisplayRoom
+		{
+			std::string                 name;
+			std::vector<DisplaySection> sections;
+		};
+
+		// Rooms, sections and displays as the museum has them now, patches included. Game thread.
+		static std::vector<DisplayRoom> GetDisplayRooms();
+
 		// Papyrus Functions
 
 	private:
@@ -47,6 +70,7 @@ namespace Completionist
 
 		inline static std::unordered_map<RE::FormID, int32_t> _museumInventory;
 		inline static std::unordered_set<RE::FormID> _museumContainers;
+		inline static std::vector<RE::TESQuest*> _patchHandlers;
 		inline static std::unordered_map<RE::FormID, std::unordered_set<RE::FormID>> _AllVariations;
 		inline static std::unordered_map<RE::FormID, std::unordered_set<RE::FormID>> _DisplayableFormIDs;
 
@@ -122,6 +146,12 @@ namespace Completionist
 		};
 
 		// Hardcoded variations for patch replaced items that have not been modified in ReplicaBaseItems.
+		// Displays a patch lists under the wrong reference. Helgen Reborn's Keepers of Haatu entry is the patch's own
+		// enable marker, on from the moment the patch installs; its exhibit is the one that waits for the quest.
+		inline static constexpr std::tuple<RE::FormID, std::string_view, RE::FormID, std::string_view> displayCorrections[] = {
+			{0x172118, "LegacyoftheDragonborn.esm", 0x83C, "DBM_HelgenReborn_Patch.esp"},
+		};
+
 		inline static std::tuple<RE::FormID, std::string_view, std::vector<std::pair<RE::FormID, std::string_view>>> patchedItemMappings[] = {
 			{0x06A9F0, "Hothtrooper44_ArmorCompilation.esp", { {0x73C752, "LegacyoftheDragonborn.esm" } } },
 		};

@@ -9,6 +9,7 @@
 #include "Frameworks/Quests/CQuestMaster.hpp"
 #include "Internal Utility/Localisation.hpp"
 #include "Internal Utility/MCMHandler.hpp"
+#include "Internal Utility/MuseumAPI.hpp"
 #include "Internal Utility/PatchListener.hpp"
 #include "Internal Utility/PlacedReferences.hpp"
 #include "Internal Utility/Settings.hpp"
@@ -998,7 +999,8 @@ namespace CompletionistUI
 			page.tabs = { { "UI_Dragons_Unique" }, { "UI_Dragons_Kills", PageLayout::kKills } };
 
 			const auto sectionFor = [&](const std::string& a_plugin) -> Section& {
-				const auto title = a_plugin == "Skyrim.esm" ? std::string("UI_Dragons_Skyrim") : a_plugin == "Dawnguard.esm" ? std::string("UI_Dragons_Dawnguard") : a_plugin == "Dragonborn.esm" ? std::string("UI_Dragons_Dragonborn") : a_plugin;
+				// Every mod's dragons share one section
+				const std::string title = a_plugin == "Skyrim.esm" ? "UI_Dragons_Skyrim" : a_plugin == "Dawnguard.esm" ? "UI_Dragons_Dawnguard" : a_plugin == "Dragonborn.esm" ? "UI_Dragons_Dragonborn" : "UI_Dragons_InstalledContent";
 				const auto it = std::ranges::find(page.sections, title, &Section::title);
 				return it != page.sections.end() ? *it : page.sections.emplace_back(Section{ title, {}, 0 });
 			};
@@ -1041,7 +1043,8 @@ namespace CompletionistUI
 					auto        ref = dragon.refs.empty() ? RE::NiPointer<RE::TESObjectREFR>{} : dragon.refs.front().get();
 					const auto* home = ref ? ref->GetEditorLocation() : nullptr;
 					info.place = PlaceName(home, ref.get());
-					info.lore = a_provider.Translate("UI_Dragons_Lore_Mod{" + dragon.plugin + "}");
+					// No story for this one yet, so it says where it's from
+					info.lore = a_provider.Translate("UI_Dragons_Lore_Mod{" + dragon.plugin.substr(0, dragon.plugin.rfind('.')) + "}");
 				}
 				entry.description = info.lore;
 			}
@@ -1610,6 +1613,41 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Game Data ( Build Museum Page ) ----------------
+		//---------------------------------------------------
+
+		// LOTD's museum: a tab for each room, read live so patches' rooms and sections turn up by themselves
+		Page BuildMuseumPage(IDataProvider& a_provider) {
+
+			// LOTD's names are plain English in its scripts, a patch's stay as the patch wrote them
+			const auto title = [&](const std::string& a_name) {
+				auto key = std::string("UI_Museum_");
+				std::ranges::copy_if(a_name, std::back_inserter(key), [](unsigned char a_char) { return std::isalnum(a_char) != 0; });
+				return a_provider.Translate(key) != key ? key : a_name;
+			};
+
+			Page page{ "UI_Museum_Displays", "UI_Museum_Displays", {} };
+			page.hint = "UI_Museum_Hint";
+			for (const auto& room : Completionist::MuseumAPI::GetDisplayRooms()) {
+				const auto tab = static_cast<std::int32_t>(page.tabs.size());
+				page.tabs.push_back({ title(room.name) });
+				for (const auto& displays : room.sections) {
+					Section section{ title(displays.name), {}, tab };
+					section.entries.reserve(displays.displays.size());
+					for (const auto& display : displays.displays) {
+						auto& entry = section.entries.emplace_back();
+						entry.name = display.name;
+						entry.formID = display.itemID;
+						entry.state = display.displayed ? EntryState::kDisplayed : display.carried ? EntryState::kDisplayable : EntryState::kNeeded;
+						entry.status = display.displayed || display.carried ? std::string{} : "UI_Museum_Empty";
+					}
+					page.sections.push_back(std::move(section));
+				}
+			}
+			return page;
+		}
+
+		//---------------------------------------------------
 		//-- Game Data ( Summarise ) ------------------------
 		//---------------------------------------------------
 
@@ -1728,6 +1766,16 @@ namespace CompletionistUI
 			}
 		}
 
+		// With LOTD's quests. Mostly the items the collections already count, so it stays out of the totals
+		if (auto page = BuildMuseumPage(*this); !page.sections.empty()) {
+			if (const auto legacy = std::ranges::find(categories, std::string("$Header5"), &Category::title); legacy != categories.end()) {
+				auto summary = Summarise(page);
+				summary.counted = false;
+				legacy->pages.push_back(std::move(summary));
+				pages.emplace(page.id, std::move(page));
+			}
+		}
+
 		// Last, so it can point at the quest pages
 		if (auto page = BuildAchievementPage(*this, pages); !page.sections.empty()) {
 			categories.push_back({ "UI_Category_Achievements", {}, { Summarise(page) } });
@@ -1742,21 +1790,15 @@ namespace CompletionistUI
 		auto settingsPages = _settingsBuilder.Build();
 		RebuildKills();
 
-		// Items carried in the inventory have a model to picture
+		// Only the Mixing Station's ingredients have pictures
 		std::vector<std::uint32_t> pictured;
-		for (auto& [id, page] : pages) {
-			for (auto& section : page.sections) {
-				for (auto& entry : section.entries) {
-					const auto* form = entry.formID ? RE::TESForm::LookupByID(entry.formID) : nullptr;
-					entry.hasModel = form && form->IsInventoryObject();
-					if (entry.hasModel) {
-						pictured.push_back(entry.formID);
-					}
+		for (const auto& [id, page] : pages) {
+			if (page.mixing) {
+				for (const auto& ingredient : page.mixing->ingredients) {
+					pictured.push_back(ingredient.formID);
 				}
 			}
 		}
-		std::ranges::sort(pictured);
-		pictured.erase(std::ranges::unique(pictured).begin(), pictured.end());
 		ModelPictures::SetItems(std::move(pictured));
 
 		{
@@ -2022,6 +2064,12 @@ namespace CompletionistUI
 
 		const auto* setting = CSettings::SettingsAPI::Get("ItemPictures");
 		return setting && setting->IsBool() && setting->GetBool() ? ModelPictures::Get(a_formID) : nullptr;
+	}
+
+	bool GameDataProvider::ShowsItemPicture(std::uint32_t a_formID) {
+
+		const auto* setting = CSettings::SettingsAPI::Get("ItemPictures");
+		return setting && setting->IsBool() && setting->GetBool() && !ModelPictures::Failed(a_formID);
 	}
 
 	//---------------------------------------------------

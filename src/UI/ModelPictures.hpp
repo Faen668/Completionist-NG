@@ -15,6 +15,9 @@ namespace CompletionistUI
 		// Render thread. The texture, or nothing while it's still loading or can't be drawn
 		[[nodiscard]] static void* Get(std::uint32_t a_formID);
 
+		// Render thread. True once it's known this item can't be drawn
+		[[nodiscard]] static bool Failed(std::uint32_t a_formID);
+
 		// Render thread, every frame the window's open: preparing and tidying up
 		static void Tick();
 

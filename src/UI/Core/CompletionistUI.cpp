@@ -6188,18 +6188,6 @@ namespace CompletionistUI
 		ImGui::SetCursorScreenPos(start);
 		StateMarker(a_entry.state);
 
-		if (a_entry.hasModel) {
-			ImGui::SameLine();
-			const auto at = ImGui::GetCursorScreenPos();
-			const auto  end = ImVec2(at.x + side, at.y + side);
-			if (ImGui::IsRectVisible(at, end)) {
-				if (auto* texture = a_provider.ItemPicture(a_entry.formID)) {
-					ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<ImTextureID>(texture), ImVec2(at.x, at.y + 1.0f), ImVec2(end.x, end.y - 1.0f));
-				}
-			}
-			ImGui::Dummy(ImVec2(side, side));
-		}
-
 		ImGui::SameLine();
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextColored(a_entry.IsComplete() ? palette.found : palette.needed, "%s", a_entry.name.c_str());
@@ -6589,19 +6577,6 @@ namespace CompletionistUI
 			DrawQuestDetail(a_provider, *a_journal, *entry);
 			ImGui::PopTextWrapPos();
 		} else {
-			// An item's picture up the right-hand side, as tall as the panel allows
-			float wrapAt = 0.0f;
-			if (entry->hasModel && !entry->IsIngredient()) {
-				const float side = std::floor(std::min(ImGui::GetContentRegionAvail().y, lineHeight * 6.0f));
-				if (side > lineHeight * 1.5f) {
-					const auto at = ImVec2(ImGui::GetCursorScreenPos().x + ImGui::GetContentRegionAvail().x - side, ImGui::GetCursorScreenPos().y);
-					if (auto* texture = a_provider.ItemPicture(entry->formID)) {
-						ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<ImTextureID>(texture), at, ImVec2(at.x + side, at.y + side));
-					}
-					wrapAt = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - side - ImGui::GetFontSize();
-				}
-			}
-
 			ImGui::PushFont(Themes::HeaderFont());
 			ImGui::TextColored(palette.heading, "%s", entry->name.c_str());
 			ImGui::PopFont();
@@ -6625,7 +6600,7 @@ namespace CompletionistUI
 				}
 			}
 
-			ImGui::PushTextWrapPos(wrapAt);
+			ImGui::PushTextWrapPos(0.0f);
 
 			const bool shoutWords = (!entry->words.empty() && entry->placesKnown) || entry->IsTrainer() || entry->IsDragon() || entry->IsAchievement() || entry->IsIngredient();
 			if (entry->IsIngredient()) {
@@ -7076,11 +7051,42 @@ namespace CompletionistUI
 			return layout;
 		}
 
+		// Mods can link perks in a loop (Ordinator - Combat Styles has two leading to each other),
+		// which would push them further right on every pass; the link closing one doesn't count here
+		std::vector<bool> hasParent(count, false);
+		for (const auto& perk : a_perks) {
+			for (const auto child : perk.children) {
+				hasParent[child] = true;
+			}
+		}
+		std::vector<std::vector<std::int32_t>> links(count);
+		std::vector<std::int8_t>               visit(count, 0);
+		const auto                             walk = [&](const auto& a_self, std::int32_t a_index) -> void {
+			visit[a_index] = 1;
+			for (const auto child : a_perks[a_index].children) {
+				if (visit[child] == 1) {
+					continue;
+				}
+				links[a_index].push_back(child);
+				if (visit[child] == 0) {
+					a_self(a_self, child);
+				}
+			}
+			visit[a_index] = 2;
+		};
+		for (const bool rootsOnly : { true, false }) {
+			for (std::size_t i = 0; i < count; ++i) {
+				if (visit[i] == 0 && (!rootsOnly || !hasParent[i])) {
+					walk(walk, static_cast<std::int32_t>(i));
+				}
+			}
+		}
+
 		// Longest path from a root, so a perk sits after everything it needs
 		for (std::size_t pass = 0; pass < count; ++pass) {
 			bool moved = false;
 			for (std::size_t i = 0; i < count; ++i) {
-				for (const auto child : a_perks[i].children) {
+				for (const auto child : links[i]) {
 					if (layout.column[child] < layout.column[i] + 1) {
 						layout.column[child] = layout.column[i] + 1;
 						moved = true;
@@ -7097,7 +7103,7 @@ namespace CompletionistUI
 		// Each column ordered by where its parents sit, the game's left to right breaking ties
 		std::vector<std::vector<std::int32_t>> parents(count);
 		for (std::size_t i = 0; i < count; ++i) {
-			for (const auto child : a_perks[i].children) {
+			for (const auto child : links[i]) {
 				parents[child].push_back(static_cast<std::int32_t>(i));
 			}
 		}
@@ -7131,7 +7137,7 @@ namespace CompletionistUI
 				const auto lane = i % split;
 				const auto index = static_cast<std::size_t>(members[i]);
 				layout.row[index] = i / split;
-				place[index] = static_cast<float>(i / split) + static_cast<float>(lane) / static_cast<float>(split) - centre;
+				place[index] = static_cast<float>(i / split) + (lane % 2 == 1 ? 0.5f : 0.0f) - centre;	// half a row, or the labels of a wide column overlap
 				layout.x[index] = x + 0.5f * static_cast<float>(lane);
 				layout.labelUnits[index] = split > 1 ? 0.5f : 1.0f;
 			}
@@ -7709,19 +7715,10 @@ namespace CompletionistUI
 		const auto  factsMax = ImVec2(origin.x + width, factsMin.y + factsBoxHeight);
 		panel(factsMin, factsMax, false);
 
-		// The ingredient's own model at the right of its facts, as tall as the box allows
-		float picture = 0.0f;
-		if (a_entry.hasModel) {
-			picture = std::floor(factsBoxHeight - padding);
-			const auto at = ImVec2(factsMax.x - padding * 0.5f - picture, factsMin.y + padding * 0.5f);
-			if (auto* texture = a_provider.ItemPicture(a_entry.formID)) {
-				drawList->AddImage(reinterpret_cast<ImTextureID>(texture), at, ImVec2(at.x + picture, at.y + picture));
-			}
-		}
-		drawList->PushClipRect(factsMin, ImVec2(factsMax.x - padding * 0.5f - picture, factsMax.y), true);
+		drawList->PushClipRect(factsMin, ImVec2(factsMax.x - padding * 0.5f, factsMax.y), true);
 		float factY = factsMin.y + (factsBoxHeight - IngredientLayout::FactsContent(info.facts.size())) * 0.5f;
 		for (const auto& fact : info.facts) {
-			drawList->AddText(ImVec2(factsMin.x + padding, factY), Colour(palette.textDim), FitText(fact, factsMax.x - factsMin.x - padding * 2.0f - picture).c_str());
+			drawList->AddText(ImVec2(factsMin.x + padding, factY), Colour(palette.textDim), FitText(fact, factsMax.x - factsMin.x - padding * 2.0f).c_str());
 			factY += line;
 		}
 		drawList->PopClipRect();
@@ -8496,12 +8493,20 @@ namespace CompletionistUI
 			a_drawList->AddRect(a_min, a_max, Colour(a_lit ? palette.accent : palette.separator, a_lit ? 0.55f : 0.7f));
 			CornerMarks(a_drawList, a_min, a_max, fontSize * 0.18f, Colour(palette.accent, 0.6f));
 		};
-		// The ingredient's own model, once the game has it drawn; the space is kept either way so
-		// rows line up while the pictures arrive
+		// The ingredient's own model, once the game has it drawn; space is only kept for ones that'll have a picture
 		const auto model = [&](ImDrawList* a_drawList, std::uint32_t a_formID, ImVec2 a_min, float a_size) {
 			if (auto* texture = a_provider.ItemPicture(a_formID)) {
 				a_drawList->AddImage(reinterpret_cast<ImTextureID>(texture), a_min, ImVec2(a_min.x + a_size, a_min.y + a_size));
 			}
+		};
+		const auto pictured = [&](const auto& a_ingredients) {
+			std::vector<const MixIngredient*> shown;
+			for (const auto* ingredient : a_ingredients) {
+				if (ingredient && a_provider.ShowsItemPicture(ingredient->formID)) {
+					shown.push_back(ingredient);
+				}
+			}
+			return shown;
 		};
 		const auto pips = [&](ImDrawList* a_drawList, const MixIngredient& a_ingredient, ImVec2 a_at) {
 			const float pip = fontSize * 0.2f;
@@ -8558,7 +8563,7 @@ namespace CompletionistUI
 			const float pipsWidth = fontSize * 0.6f * static_cast<float>(ingredient.effects.size());
 			const float rowHeight = ImGui::GetFrameHeight();
 			model(rowList, ingredient.formID, ImVec2(start.x + fontSize * 0.3f, start.y + 1.0f), rowHeight - 2.0f);
-			const float nameX = start.x + fontSize * 0.6f + rowHeight;
+			const float nameX = start.x + fontSize * 0.6f + (a_provider.ShowsItemPicture(ingredient.formID) ? rowHeight : 0.0f);
 			rowList->AddText(ImVec2(nameX, textY), Colour(picked ? palette.heading : ingredient.carried > 0 ? palette.text : palette.textDim), FitText(ingredient.name, start.x + width - nameX - countSize.x - pipsWidth - fontSize * 1.2f).c_str());
 			pips(rowList, ingredient, ImVec2(start.x + width - countSize.x - pipsWidth - fontSize * 0.8f, textY + fontSize * 0.55f));
 			rowList->AddText(ImVec2(start.x + width - countSize.x - fontSize * 0.4f, textY), Colour(palette.textDim), count.c_str());
@@ -8611,7 +8616,7 @@ namespace CompletionistUI
 			ImGui::PopID();
 			card(drawList, min, max, hovered && ingredient);
 			const float picture = slotHeight - padding * 0.8f;
-			const float textX = min.x + padding + (ingredient ? picture : 0.0f);
+			const float textX = min.x + padding + (ingredient && a_provider.ShowsItemPicture(ingredient->formID) ? picture : 0.0f);
 			const float textY = min.y + padding * 0.6f;
 			if (ingredient) {
 				chosen.push_back(ingredient);
@@ -8726,7 +8731,7 @@ namespace CompletionistUI
 			Decor::Diamond(rowList, ImVec2(start.x + fontSize * 0.6f, textY + fontSize * 0.55f), fontSize * 0.25f, Colour(palette.accent), open);
 			const float nameX = start.x + fontSize * 1.3f;
 			const float picture = rowHeight - 2.0f;
-			const auto& bestWay = group.variations.front().ingredients;
+			const auto  bestWay = pictured(group.variations.front().ingredients);
 			const float picturesWidth = (picture + 2.0f) * static_cast<float>(bestWay.size());
 			const float picturesX = start.x + rowWidth - worthSize.x - fontSize * 1.2f - picturesWidth;
 			rowList->AddText(ImVec2(nameX, textY), Colour(open ? palette.heading : palette.text), FitText(name, picturesX - nameX - fontSize * 0.5f).c_str());
@@ -8761,10 +8766,11 @@ namespace CompletionistUI
 					const auto  value = a_provider.Translate("UI_Mix_Worth{" + std::to_string(recipe.brew.value) + "}");
 					const auto  valueSize = ImGui::CalcTextSize(value.c_str());
 					const float lineY = start.y + (rowHeight - fontSize) * 0.5f;
-					for (std::size_t p = 0; p < recipe.ingredients.size(); ++p) {
-						model(rowList, recipe.ingredients[p]->formID, ImVec2(start.x + indent + fontSize * 0.3f + (picture + 2.0f) * static_cast<float>(p), start.y + 1.0f), picture);
+					const auto pictures = pictured(recipe.ingredients);
+					for (std::size_t p = 0; p < pictures.size(); ++p) {
+						model(rowList, pictures[p]->formID, ImVec2(start.x + indent + fontSize * 0.3f + (picture + 2.0f) * static_cast<float>(p), start.y + 1.0f), picture);
 					}
-					const float textX = start.x + indent + fontSize * 0.6f + (picture + 2.0f) * static_cast<float>(recipe.ingredients.size());
+					const float textX = start.x + indent + fontSize * 0.6f + (picture + 2.0f) * static_cast<float>(pictures.size());
 					const float room = start.x + rowWidth - textX - valueSize.x - fontSize * 1.2f;
 					const float fromWidth = std::min(ImGui::CalcTextSize(from.c_str()).x, also.empty() ? room : room * 0.6f);
 					rowList->AddText(ImVec2(textX, lineY), Colour(palette.text), FitText(from, fromWidth).c_str());

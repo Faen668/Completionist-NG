@@ -7,7 +7,7 @@ namespace CFramework_Dragons
 
 	namespace
 	{
-		// The named dragons of the game and its DLC, from their records, in story order. Kruziikrel
+		// The named dragons of the game, its DLC and the mods we have their story for, from their records, in story order. Kruziikrel
 		// and Relonikiv are two placed leveled dragons that At the Summit of Apocrypha's aliases
 		// name with a message each, so their message and their reference
 		struct Known
@@ -46,6 +46,10 @@ namespace CFramework_Dragons
 			{ "Kruziikrel", "Dragonborn.esm", 0x01D573 },
 			{ "Relonikiv", "Dragonborn.esm", 0x02A75B },
 			{ "Relonikiv", "Dragonborn.esm", 0x01D572 },
+			{ "HeraldOfAkatosh", "LegacyoftheDragonborn.esm", 0x0534F3 },
+			{ "Kreindeinvith", "LegacyoftheDragonborn.esm", 0x33D934 },
+			{ "Izvenyah", "LegacyoftheDragonborn.esm", 0x33D933 },
+			{ "Gaafnehdir", "Helgen Reborn.esp", 0x108650 },
 		};
 
 		//---------------------------------------------------
@@ -266,6 +270,10 @@ namespace CFramework_Dragons
 			// Miraak calls them at the summit and takes their souls
 			return dead || QuestDone("Dragonborn.esm", 0x0179D7) ? Fate::kSlain : Fate::kNotMet;
 		}
+		if (key == "HeraldOfAkatosh") {
+			// Shattered Legacy: first spoken to in the Sanctum of Akatosh at stage 245
+			return dead ? Fate::kSlain : QuestReached("LegacyoftheDragonborn.esm", 0x121573, 245) ? Fate::kMet : Fate::kNotMet;
+		}
 		return dead ? Fate::kSlain : Fate::kNotMet;
 	}
 
@@ -273,11 +281,11 @@ namespace CFramework_Dragons
 	//-- Framework Functions ( Is Done ) ----------------
 	//---------------------------------------------------
 
-	// Their story's over: Paarthurnax can be spared, the rest fall, are tamed or join you
+	// Their story's over: Paarthurnax can be spared, the Herald only talks, the rest fall, are tamed or join you
 	bool CHandler::IsDone(const Dragon& a_dragon, Fate a_fate) {
 
 		if (FoundItemData_NoShow.HasForm(a_dragon.formID)) { return true; }
-		return a_dragon.key == "Paarthurnax" ? a_fate != Fate::kNotMet : a_fate >= Fate::kTamed;
+		return a_dragon.key == "Paarthurnax" || a_dragon.key == "HeraldOfAkatosh" ? a_fate != Fate::kNotMet : a_fate >= Fate::kTamed;
 	}
 
 	//---------------------------------------------------

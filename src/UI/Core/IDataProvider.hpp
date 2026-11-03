@@ -49,6 +49,7 @@ namespace CompletionistUI
 
 		[[nodiscard]] virtual void* AchievementIcon(std::int32_t /*a_icon*/) { return nullptr; }	// render thread
 		[[nodiscard]] virtual void* ItemPicture(std::uint32_t /*a_formID*/) { return nullptr; }	// render thread, a picture of its model
+		[[nodiscard]] virtual bool  ShowsItemPicture(std::uint32_t /*a_formID*/) { return false; }	// render thread, whether to keep space for one
 		virtual void                                UpdatePictures() {}	// render thread, every frame the window's open
 		virtual void                                PreparePictures(bool /*a_redraw*/) {}	// draw every picture not kept yet, or all of them again
 		virtual void                                CancelPictures() {}
