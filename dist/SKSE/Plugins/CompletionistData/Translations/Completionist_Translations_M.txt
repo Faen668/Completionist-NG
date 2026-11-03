@@ -250,6 +250,7 @@ UI_Theme_Nordic					|Nordic UI
 UI_Theme_Oblivion				|Oblivion
 UI_Theme_Gothic					|Gothic
 UI_Theme_Anime					|Anime
+UI_Theme_Apocrypha				|Apocrypha
 UI_Theme_Altmer					|Altmer
 UI_Theme_Argonian				|Argonian
 UI_Theme_Bosmer					|Bosmer
@@ -261,6 +262,8 @@ UI_Theme_Khajiit				|Khajiit
 UI_Theme_Nord					|Nord
 UI_Theme_Orsimer				|Orsimer
 UI_Theme_Redguard				|Redguard
+UI_Setting_AnimeMascots			|Show the mascots
+UI_SettingHint_AnimeMascots		|Puts the chibi faces peeking over the panels. Off, an emblem stands in their place.
 UI_Setting_Scale				|Text and interface scale
 UI_SettingHint_Scale			|Multiplies the automatic scaling for your resolution. Applied when you release the slider, like width and height.
 UI_Setting_Width				|Window width

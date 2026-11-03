@@ -45,6 +45,7 @@ namespace CompletionistUI
 		{ Theme::kOblivion, "Oblivion", "UI_Theme_Oblivion" },
 		{ Theme::kGothic, "Gothic", "UI_Theme_Gothic" },
 		{ Theme::kAnime, "Anime", "UI_Theme_Anime" },
+		{ Theme::kApocrypha, "Apocrypha", "UI_Theme_Apocrypha" },
 		{ Theme::kAltmer, "Altmer", "UI_Theme_Altmer", true },
 		{ Theme::kArgonian, "Argonian", "UI_Theme_Argonian", true },
 		{ Theme::kBosmer, "Bosmer", "UI_Theme_Bosmer", true },

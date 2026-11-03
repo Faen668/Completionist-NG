@@ -526,6 +526,37 @@ namespace CompletionistUI
 	{
 
 		//---------------------------------------------------
+		//-- Themes ( Apocrypha Palette ) -------------------
+		//---------------------------------------------------
+
+		// Hermaeus Mora's realm: black ink, bone text, sick green, a yellow as of old pages for found
+		Palette ApocryphaPalette() {
+
+			return {
+				.background = RGBA(11, 15, 12, 0.98f),
+				.panel = RGBA(0, 0, 0, 0.0f),
+				.text = RGBA(216, 224, 190),
+				.textDim = RGBA(136, 150, 120),
+				.accent = RGBA(156, 208, 98),
+				.heading = RGBA(230, 234, 192),
+				.count = RGBA(190, 204, 152),
+				.bar = RGBA(112, 168, 66),
+				.found = RGBA(218, 200, 96),
+				.needed = RGBA(216, 224, 190),
+				.displayable = RGBA(112, 194, 172),
+				.occupied = RGBA(176, 146, 214),
+				.barBackground = RGBA(28, 36, 28),
+				.separator = RGBA(84, 108, 72),
+				.pinned = RGBA(112, 204, 184),
+				.stealing = RGBA(228, 108, 94),
+			};
+		}
+	}
+
+	namespace
+	{
+
+		//---------------------------------------------------
 		//-- Themes ( Anime Palette ) -----------------------
 		//---------------------------------------------------
 
@@ -678,6 +709,9 @@ namespace CompletionistUI
 			break;
 		case Theme::kAnime:
 			_palette = AnimePalette();
+			break;
+		case Theme::kApocrypha:
+			_palette = ApocryphaPalette();
 			break;
 		default:
 			_palette = CompletionistPalette();

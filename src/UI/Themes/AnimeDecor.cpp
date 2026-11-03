@@ -30,6 +30,7 @@ namespace CompletionistUI::AnimeDecor
 		constexpr ImU32 ink = IM_COL32(24, 24, 26, 255);
 
 		bool openFrame = false;
+		bool showMascots = false;
 
 		//---------------------------------------------------
 		//-- Anime Decor ( Slashes ) ------------------------
@@ -411,6 +412,39 @@ namespace CompletionistUI::AnimeDecor
 			wedge(-1.15f, a_size * 0.35f, a_size * 1.05f, a_size * 0.13f);
 			wedge(-0.45f, a_size * 0.4f, a_size * 1.1f, a_size * 0.13f);
 			wedge(0.18f, a_size * 0.45f, a_size * 0.9f, a_size * 0.1f);
+		}
+
+		// The emblem: an inverted triangle of dark glass in a white rule, dark outside so it reads on the pale plates too, and a yellow screw
+		void Emblem(ImDrawList* a_list, float a_x, float a_edge, float a_radius) {
+
+			const float tall = a_radius * 1.86f;
+			const float half = tall * 0.62f;
+			const float top = a_edge - a_radius * 0.08f - tall;
+
+			// Across -1 to 1 at a_down, 0 at the top to 1 at the tip
+			const auto at = [&](float a_across, float a_down) { return ImVec2(a_x + a_across * half * (1.0f - a_down), top + tall * a_down); };
+			const auto triangle = [&](float a_inset, ImU32 a_colour) {
+				const std::vector<ImVec2> shape{ at(-1.0f + a_inset * 2.2f, a_inset), at(1.0f - a_inset * 2.2f, a_inset), at(0.0f, 1.0f - a_inset * 1.4f) };
+				FillShape(a_list, shape, a_colour);
+			};
+			triangle(0.0f, glass);
+			triangle(0.03f, white);
+			triangle(0.075f, glass);
+
+			// Across and down in the triangle's height, from the middle of its top edge
+			const auto point = [&](float a_across, float a_down) { return ImVec2(a_x + tall * a_across, top + tall * a_down); };
+
+			// Countersunk head with its slot cut in the top, the shank, the point
+			const std::vector<ImVec2> head{ point(-0.2f, 0.1f), point(-0.046f, 0.1f), point(-0.046f, 0.15f), point(0.046f, 0.15f), point(0.046f, 0.1f), point(0.2f, 0.1f), point(0.1f, 0.22f), point(-0.1f, 0.22f) };
+			FillShape(a_list, head, yellow);
+			const std::vector<ImVec2> shank{ point(-0.05f, 0.22f), point(0.05f, 0.22f), point(0.05f, 0.62f), point(0.012f, 0.74f), point(-0.012f, 0.74f), point(-0.05f, 0.62f) };
+			FillShape(a_list, shank, yellow);
+
+			// The thread, cut across it on a slant
+			for (const float down : { 0.27f, 0.36f, 0.45f, 0.54f, 0.63f }) {
+				const std::vector<ImVec2> cut{ point(-0.07f, down - 0.024f), point(0.07f, down + 0.024f), point(0.07f, down + 0.054f), point(-0.07f, down + 0.006f) };
+				FillShape(a_list, cut, glass);
+			}
 		}
 
 		struct HeaderSpot
@@ -836,8 +870,17 @@ namespace CompletionistUI::AnimeDecor
 	//-- Anime Decor ( Mascots ) ------------------------
 	//---------------------------------------------------
 
+	void SetMascots(bool a_show) noexcept {
+
+		showMascots = a_show;
+	}
+
 	void Peek(ImDrawList* a_drawList, float a_x, float a_edge, float a_radius, int a_style, float a_side) {
 
+		if (!showMascots) {
+			Emblem(a_drawList, a_x, a_edge, a_radius);
+			return;
+		}
 		// Eyes and mouth clear of the edge, the chin behind it
 		DrawMascot(a_drawList, ImVec2(a_x, a_edge - a_radius * 0.92f), a_radius, a_style);
 		if (a_side != 0.0f) {
@@ -847,6 +890,9 @@ namespace CompletionistUI::AnimeDecor
 
 	void Paws(ImDrawList* a_drawList, float a_x, float a_edge, float a_radius, int a_style) {
 
+		if (!showMascots) {
+			return;
+		}
 		const auto& style = mascots[static_cast<std::size_t>(a_style) % std::size(mascots)];
 		for (const float side : { -1.0f, 1.0f }) {
 			const ImVec2 min(a_x + side * a_radius * 0.72f - a_radius * 0.27f, a_edge - a_radius * 0.17f);

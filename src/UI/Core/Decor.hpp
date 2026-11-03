@@ -48,8 +48,9 @@ namespace CompletionistUI
 		[[nodiscard]] static bool Oblivion() noexcept { return _theme == Theme::kOblivion; }
 		[[nodiscard]] static bool Gothic() noexcept { return _theme == Theme::kGothic; }
 		[[nodiscard]] static bool Anime() noexcept { return _theme == Theme::kAnime; }
+		[[nodiscard]] static bool Apocrypha() noexcept { return _theme == Theme::kApocrypha; }
 		// A chosen row's band is strong enough that its text must go dark rather than take the accent
-		[[nodiscard]] static bool StrongHighlight() noexcept { return Anime() || Oblivion(); }
+		[[nodiscard]] static bool StrongHighlight() noexcept { return Anime() || Oblivion() || Apocrypha(); }
 		// The framed themes (races and the UI mods' looks), as against Completionist and SkyUI
 		[[nodiscard]] static bool Race() noexcept { return _theme != Theme::kCompletionist && _theme != Theme::kSkyUI; }
 		// Window title in capitals, as the menus these themes follow write theirs

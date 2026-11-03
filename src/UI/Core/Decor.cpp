@@ -9,6 +9,7 @@
 #include "UI/Themes/DunmerDecor.hpp"
 #include "UI/Themes/BretonDecor.hpp"
 #include "UI/Themes/DwemerDecor.hpp"
+#include "UI/Themes/ApocryphaDecor.hpp"
 #include "UI/Themes/GothicDecor.hpp"
 #include "UI/Themes/ImperialDecor.hpp"
 #include "UI/Themes/KhajiitDecor.hpp"
@@ -76,6 +77,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
+			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
 			return;
 		case Theme::kAnime:
 			AnimeDecor::Stud(a_drawList, a_centre, a_radius, a_colour, a_filled);
@@ -153,6 +157,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
+			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
 			return;
 		case Theme::kAnime:
 			AnimeDecor::Marker(a_drawList, a_centre, a_size, a_colour, a_fill);
@@ -245,6 +252,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::PerkNode(a_drawList, a_centre, a_radius, colour, a_state);
 			return;
@@ -323,6 +333,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
+			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
 			return;
 		case Theme::kAnime:
 			AnimeDecor::PerkLink(a_drawList, a_from, a_to, colour, a_lit, a_radius);
@@ -413,6 +426,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Divider(a_drawList, a_from, a_to, a_colour);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Divider(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::Divider(a_drawList, a_from, a_to, a_colour);
 			return;
@@ -500,6 +516,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Ornament(a_drawList, a_centre, a_radius, a_colour);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Ornament(a_drawList, a_centre, a_radius, a_colour);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::Ornament(a_drawList, a_centre, a_radius, a_colour);
 			return;
@@ -565,6 +584,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Rule(a_drawList, a_from, a_to, a_colour);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Rule(a_drawList, a_from, a_to, a_colour);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::Rule(a_drawList, a_from, a_to, a_colour);
 			return;
@@ -629,6 +651,9 @@ namespace CompletionistUI
 			return;
 		case Theme::kGothic:
 			GothicDecor::Rule(a_drawList, a_from, a_to, a_rule);
+			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Rule(a_drawList, a_from, a_to, a_rule);
 			return;
 		case Theme::kAnime:
 			AnimeDecor::Rule(a_drawList, a_from, a_to, a_rule);
@@ -703,6 +728,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::Frame(a_drawList, a_min, a_max);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Frame(a_drawList, a_min, a_max);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::Frame(a_drawList, a_min, a_max);
 			return;
@@ -768,6 +796,7 @@ namespace CompletionistUI
 		case Theme::kOblivion:
 		case Theme::kGothic:
 		case Theme::kAnime:
+		case Theme::kApocrypha:
 		case Theme::kOrsimer:
 		case Theme::kBreton:
 		case Theme::kImperial:
@@ -805,6 +834,9 @@ namespace CompletionistUI
 			return true;
 		case Theme::kGothic:
 			GothicDecor::Panel(a_drawList, a_min, a_max, a_emblem);
+			return true;
+		case Theme::kApocrypha:
+			ApocryphaDecor::Panel(a_drawList, a_min, a_max, a_emblem);
 			return true;
 		case Theme::kAnime:
 			AnimeDecor::Panel(a_drawList, a_min, a_max, a_emblem);
@@ -866,6 +898,9 @@ namespace CompletionistUI
 		case Theme::kGothic:
 			GothicDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::PanelCorners(a_drawList, a_min, a_max);
+			return;
 		case Theme::kAnime:
 			AnimeDecor::PanelCorners(a_drawList, a_min, a_max);
 			return;
@@ -911,6 +946,9 @@ namespace CompletionistUI
 		case Theme::kAnime:
 			AnimeDecor::TooltipMarks(a_drawList, a_min, a_max);
 			return;
+		case Theme::kApocrypha:
+			ApocryphaDecor::TooltipMarks(a_drawList, a_min, a_max);
+			return;
 		default:
 			return;
 		}
@@ -945,6 +983,10 @@ namespace CompletionistUI
 		}
 		if (Gothic()) {
 			GothicDecor::Highlight(a_drawList, a_min, a_max, a_alpha);
+			return;
+		}
+		if (Apocrypha()) {
+			ApocryphaDecor::Highlight(a_drawList, a_min, a_max, a_alpha);
 			return;
 		}
 		if (Anime()) {

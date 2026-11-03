@@ -3,10 +3,12 @@
 #include "UI/Core/Decor.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/Themes/AnimeDecor.hpp"
+#include "UI/Themes/ApocryphaDecor.hpp"
 
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <functional>
 
 namespace CompletionistUI
 {
@@ -387,6 +389,8 @@ namespace CompletionistUI
 				drawList->AddRectFilledMultiColor(min, max, l, r, r, l);
 			} else if (Decor::Anime()) {
 				AnimeDecor::ToastPlate(drawList, min, max, alpha, opacity);
+			} else if (Decor::Apocrypha()) {
+				ApocryphaDecor::ToastPlate(drawList, min, max, alpha, opacity, static_cast<std::uint32_t>(std::hash<std::string>{}(toast.text)));
 			} else {
 				drawList->AddRectFilled(min, max, Colour(background, alpha), fontSize * 0.15f);
 				drawList->AddRect(min, max, Colour(palette.separator, alpha * 0.9f), fontSize * 0.15f);

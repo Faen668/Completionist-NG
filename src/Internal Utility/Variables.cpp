@@ -102,6 +102,7 @@ namespace CVariables
 		settings.findIgnoreCompleted = flag("FindIgnoreCompleted", "false");
 		settings.openOnLastPage = flag("OpenOnLastPage", "true");
 		settings.hideCompleted = flag("HideCompleted", "false");
+		settings.animeMascots = flag("AnimeMascots", "false");
 		settings.screenshotButton = flag("ShowScreenshotButton", "false");
 		settings.printScreen = flag("PrintScreenCapture", "true");
 		settings.pauseGame = flag("PauseGame", "true");
@@ -163,6 +164,7 @@ namespace CVariables
 		ini.SetValue(section, "FindIgnoreCompleted", a_settings.findIgnoreCompleted ? "true" : "false");
 		ini.SetValue(section, "OpenOnLastPage", a_settings.openOnLastPage ? "true" : "false");
 		ini.SetValue(section, "HideCompleted", a_settings.hideCompleted ? "true" : "false");
+		ini.SetValue(section, "AnimeMascots", a_settings.animeMascots ? "true" : "false");
 		ini.SetValue(section, "ShowScreenshotButton", a_settings.screenshotButton ? "true" : "false");
 		ini.SetValue(section, "PrintScreenCapture", a_settings.printScreen ? "true" : "false");
 		ini.SetValue(section, "PauseGame", a_settings.pauseGame ? "true" : "false");

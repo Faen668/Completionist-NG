@@ -55,6 +55,9 @@ namespace CompletionistUI::AnimeDecor
 	void SectionBand(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_textEnd);
 	void TitleBand(ImDrawList* a_drawList, ImVec2 a_min, ImVec2 a_max, float a_textEnd);
 
+	// Whether the spots below hold mascots, or the emblem standing on a_edge with no paws
+	void SetMascots(bool a_show) noexcept;
+
 	// Mascots peek over a_edge with their chins hidden and their paws on it. a_style picks which, a_side which way their burst goes
 	void Peek(ImDrawList* a_drawList, float a_x, float a_edge, float a_radius, int a_style, float a_side);
 	void Paws(ImDrawList* a_drawList, float a_x, float a_edge, float a_radius, int a_style);

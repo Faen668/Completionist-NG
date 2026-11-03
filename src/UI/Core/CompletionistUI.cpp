@@ -3,6 +3,7 @@
 #include "UI/Core/SettingsLayout.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/Themes/AnimeDecor.hpp"
+#include "UI/Themes/ApocryphaDecor.hpp"
 #include "UI/Themes/GothicDecor.hpp"
 #include "UI/Themes/OblivionDecor.hpp"
 
@@ -187,6 +188,10 @@ namespace CompletionistUI
 			}
 			if (Decor::Gothic()) {
 				colour.w *= 0.2f;
+			}
+			// The ink runs on under the panels
+			if (Decor::Apocrypha()) {
+				colour.w *= 0.45f;
 			}
 			return colour;
 		}
@@ -404,6 +409,8 @@ namespace CompletionistUI
 				AnimeDecor::Check(drawList, centre, size, fill);
 			} else if (Decor::Gothic()) {
 				GothicDecor::Check(drawList, centre, size, Colour(on), fill);
+			} else if (Decor::Apocrypha()) {
+				ApocryphaDecor::Check(drawList, centre, size, fill);
 			} else {
 				DrawMarker(drawList, centre, size, Colour(a_value ? on : off), fill);
 			}
@@ -500,6 +507,8 @@ namespace CompletionistUI
 				OblivionDecor::Plaque(drawList, min, max, glow, ImGui::IsItemActive());
 			} else if (Decor::Gothic()) {
 				GothicDecor::Plaque(drawList, min, max, glow, ImGui::IsItemActive());
+			} else if (Decor::Apocrypha()) {
+				ApocryphaDecor::Plaque(drawList, min, max, glow, ImGui::IsItemActive());
 			} else if (Decor::Anime()) {
 				AnimeDecor::Plaque(drawList, min, max, glow, ImGui::IsItemActive());
 			} else {
@@ -687,7 +696,7 @@ namespace CompletionistUI
 				const auto  max = ImGui::GetItemRectMax();
 				auto*       drawList = ImGui::GetWindowDrawList();
 				const float size = ImGui::GetFontSize();
-				if (Decor::Gothic() || Decor::Anime()) {
+				if (Decor::Gothic() || Decor::Anime() || Decor::Apocrypha()) {
 					// A ruled box with a filled arrow, its text already on it
 					const float midY = (min.y + max.y) * 0.5f;
 					const float arrow = size * 0.3f;
@@ -729,6 +738,10 @@ namespace CompletionistUI
 				const auto at = ImGui::GetCursorScreenPos();
 				OblivionDecor::Plaque(ImGui::GetWindowDrawList(), at, ImVec2(at.x + a_width, at.y + ImGui::GetFrameHeight()), 0.0f, true);
 			}
+			if (Decor::Apocrypha()) {
+				const auto at = ImGui::GetCursorScreenPos();
+				ApocryphaDecor::Pill(ImGui::GetWindowDrawList(), at, ImVec2(at.x + a_width, at.y + ImGui::GetFrameHeight()));
+			}
 			if (Decor::Gothic()) {
 				const auto at = ImGui::GetCursorScreenPos();
 				GothicDecor::Pill(ImGui::GetWindowDrawList(), at, ImVec2(at.x + a_width, at.y + ImGui::GetFrameHeight()), 0.0f);
@@ -757,7 +770,7 @@ namespace CompletionistUI
 			const float radius = size * 0.26f;
 			drawList->AddCircle(lens, radius, colour, 0, std::max(1.0f, size * 0.07f));
 			drawList->AddLine(ImVec2(lens.x + radius * 0.7f, lens.y + radius * 0.7f), ImVec2(lens.x + radius * 1.6f, lens.y + radius * 1.6f), colour, std::max(1.0f, size * 0.09f));
-			if (!Decor::Oblivion() && !Decor::Gothic() && !Decor::Anime()) {
+			if (!Decor::Oblivion() && !Decor::Gothic() && !Decor::Anime() && !Decor::Apocrypha()) {
 				Decor::FadedLine(drawList, ImVec2(min.x, max.y - 1.0f), ImVec2(max.x, max.y - 1.0f), Colour(active ? palette.accent : palette.separator));
 			}
 		}
@@ -843,7 +856,8 @@ namespace CompletionistUI
 
 			const auto& palette = Themes::GetPalette();
 			const float height = a_max.y - a_min.y;
-			const float rounding = SkyUI() ? 0.0f : std::min(a_max.x - a_min.x, height) * 0.2f;
+			const bool  apocrypha = Decor::Apocrypha();
+			const float rounding = SkyUI() || apocrypha ? 0.0f : std::min(a_max.x - a_min.x, height) * 0.2f;
 			if (a_highlight) {
 				const float grow = std::max(2.0f, height * 0.1f);
 				a_drawList->AddRectFilled(ImVec2(a_min.x - grow, a_min.y - grow), ImVec2(a_max.x + grow, a_max.y + grow), Colour(palette.accent, 0.3f), rounding + grow);
@@ -852,6 +866,10 @@ namespace CompletionistUI
 			if (height > 8.0f) {
 				a_drawList->AddRectFilled(a_min, ImVec2(a_max.x, a_min.y + height * 0.42f), IM_COL32(255, 255, 255, 34), rounding, ImDrawFlags_RoundCornersTop);
 				a_drawList->AddRectFilled(ImVec2(a_min.x, a_max.y - height * 0.28f), a_max, IM_COL32(0, 0, 0, 40), rounding, ImDrawFlags_RoundCornersBottom);
+			}
+			if (apocrypha) {
+				ApocryphaDecor::SwatchRim(a_drawList, a_min, a_max, a_highlight);
+				return;
 			}
 			a_drawList->AddRect(a_min, a_max, Colour(a_highlight ? palette.accent : palette.separator), rounding, 0, a_highlight ? 2.0f : 1.0f);
 		}
@@ -1234,11 +1252,15 @@ namespace CompletionistUI
 			const float corner = ImGui::GetFontSize() * 0.2f;
 			drawList->PushClipRect(min, max, false);
 			// Race themes dress the panel: texture at the edges, light, emblem, their own corners
-			const bool dressed = Decor::Panel(drawList, min, max, a_emblem);
+			// Kill Counts has buttons in the corner the Apocrypha eye would watch from
+			const bool dressed = Decor::Panel(drawList, min, max, a_emblem && !(Decor::Apocrypha() && std::string_view(a_id) == "##KillDetail"));
 			// Faint behind the Cell Scanner's list, a castle down at its foot
 			if (Decor::Oblivion() && std::string_view(a_id) == "##CellList" && max.y - min.y > ImGui::GetFontSize() * 11.0f) {
 				const float fontSize = ImGui::GetFontSize();
 				OblivionDecor::BoxEtching(drawList, ImVec2(min.x, max.y - fontSize * 7.5f), ImVec2(max.x, max.y - fontSize * 0.55f), false, 0.6f);
+			}
+			if (Decor::Apocrypha() && std::string_view(a_id) == "##CellList") {
+				ApocryphaDecor::Creep(drawList, min, max);
 			}
 			// Not on Kill Counts, whose buttons sit in that corner
 			if (Decor::Anime() && a_emblem && std::string_view(a_id) != "##KillDetail") {
@@ -1271,7 +1293,7 @@ namespace CompletionistUI
 
 			// A wash of the accent from the top, an inner moulding and the theme's ornament on the
 			// top and bottom edges, so a long list isn't a bare box beside the overview's cards
-			if (!SkyUI() && !Decor::Gothic() && !Decor::Anime()) {
+			if (!SkyUI() && !Decor::Gothic() && !Decor::Anime() && !Decor::Apocrypha()) {
 				const float fontSize = ImGui::GetFontSize();
 				const float height = max.y - min.y;
 				const float wash = std::min(height * 0.4f, fontSize * 12.0f);
@@ -1528,6 +1550,8 @@ namespace CompletionistUI
 
 	bool Menu::Draw(IDataProvider& a_provider, UISettings& a_settings) {
 
+		AnimeDecor::SetMascots(a_settings.animeMascots);
+
 		_settings = &a_settings;
 		a_provider.UpdatePictures();
 		if (_tourDim) {
@@ -1620,7 +1644,7 @@ namespace CompletionistUI
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
 		windowOpacity = background.w;
 		// Oblivion lays its own paper inside the rail, and the content clears the corner flowers
-		const bool  ownGround = Decor::Oblivion();
+		const bool  ownGround = Decor::Oblivion() || Decor::Apocrypha();
 		// Anime has no ground at all: its parts float over the game
 		const bool  floating = Decor::Anime();
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ownGround || floating ? ImVec4(0, 0, 0, 0) : background);
@@ -1640,7 +1664,11 @@ namespace CompletionistUI
 			const auto max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
 			const auto inset = ImGui::GetFontSize() * 0.4f;
 			if (ownGround) {
-				OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				if (Decor::Apocrypha()) {
+					ApocryphaDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				} else {
+					OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				}
 			}
 			// Gothic frames the window's body and footer apart, under a free header
 			if (Decor::Gothic()) {
@@ -2945,6 +2973,10 @@ namespace CompletionistUI
 		}
 		ImGui::PushFont(Themes::TitleFont());
 		float edge = 0.0f;
+		if (Decor::Apocrypha()) {
+			edge = ImGui::GetFontSize() * 2.2f;
+			ApocryphaDecor::TitleEyes(drawList, ImVec2(titleX, origin.y), ImVec2(titleX + titleSize.x, origin.y + titleSize.y), edge);
+		}
 		if (SkyUI()) {
 			const float pad = ImGui::GetFontSize() * 0.9f;
 			const float top = origin.y - ImGui::GetFontSize() * 0.1f;
@@ -3136,7 +3168,7 @@ namespace CompletionistUI
 			if (Decor::Anime()) {
 				return a_selected || ImGui::IsItemHovered() || ImGui::IsItemFocused() ? ImVec4(0.09f, 0.09f, 0.1f, 1.0f) : ImVec4(0.97f, 0.97f, 0.98f, 1.0f);
 			}
-			return a_selected && Decor::Oblivion() ? ImVec4(0.96f, 0.91f, 0.78f, 1.0f) : a_colour;
+			return a_selected && (Decor::Oblivion() || Decor::Apocrypha()) ? ImVec4(0.96f, 0.91f, 0.78f, 1.0f) : a_colour;
 		};
 
 		bool       sidebarFocused = false;
@@ -3227,6 +3259,8 @@ namespace CompletionistUI
 					ImGui::PopFont();
 					if (anime) {
 						drawList->AddLine(ImVec2(pos.x + padding * 0.5f, lineY), ImVec2(pos.x + iconSize + padding * 0.5f, lineY), Colour(categoryColour), 1.0f);
+					} else if (Decor::Apocrypha()) {
+						Decor::Marker(drawList, ImVec2(pos.x + iconSize * 0.5f, lineY), iconSize * 0.8f, Colour(palette.accent), 1.0f);
 					} else if (!books) {
 						Decor::DrawIcon(drawList, Decor::IconFor(category.Group()), ImVec2(pos.x + iconSize * 0.5f, lineY), iconSize, Colour(palette.heading));
 					}
@@ -4494,7 +4528,7 @@ namespace CompletionistUI
 		auto background = Themes::GetPalette().background;
 		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
 		windowOpacity = background.w;
-		const bool  ownGround = Decor::Oblivion();
+		const bool  ownGround = Decor::Oblivion() || Decor::Apocrypha();
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ownGround ? ImVec4(0, 0, 0, 0) : background);
 		const float pad = ImGui::GetFontSize() * 1.4f;
 		const float roomX = ownGround ? ImGui::GetFontSize() * 0.7f : 0.0f;
@@ -4513,7 +4547,11 @@ namespace CompletionistUI
 			const auto max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
 			const auto inset = fontSize * 0.4f;
 			if (ownGround) {
-				OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				if (Decor::Apocrypha()) {
+					ApocryphaDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				} else {
+					OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
+				}
 			}
 			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(palette.separator));
 			// A mascot resting on the top of the window, clear of the list, when the screen has room above it
@@ -4553,6 +4591,10 @@ namespace CompletionistUI
 			}
 			ImGui::PushFont(Themes::TitleFont());
 			const auto  windowTitle = anime ? Upper(a_provider.Translate("UI_Cell_Title")) : a_provider.Translate("UI_Cell_Title");
+			if (Decor::Apocrypha()) {
+				const float textEnd = start.x + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
+				ApocryphaDecor::WindowHeader(ImGui::GetWindowDrawList(), start.y, start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f, textEnd + fontSize, start.x + width - backWidth - closeWidth - style.ItemSpacing.x - fontSize);
+			}
 			if (Decor::Oblivion()) {
 				const float textEnd = start.x + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
 				OblivionDecor::WindowHeader(ImGui::GetWindowDrawList(), start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f, textEnd, start.x + width - backWidth - closeWidth - style.ItemSpacing.x);
@@ -5366,6 +5408,8 @@ namespace CompletionistUI
 
 	Menu::CellPanelLayout Menu::DrawCellPanel(IDataProvider& a_provider, const UISettings& a_settings, ToastJoin a_join, ImVec2 a_toasts, float a_dim) {
 
+		AnimeDecor::SetMascots(a_settings.animeMascots);
+
 		// Says why when there's nothing to show
 		auto        scan = a_provider.GetCellScan();
 		const char* empty = !scan.scanned ? "UI_Cell_Scanning" : scan.excluded ? "UI_Cell_Excluded" : scan.items.empty() ? (scan.interior ? "UI_Cell_Nothing" : "UI_Cell_NothingInRange") : nullptr;
@@ -5504,6 +5548,10 @@ namespace CompletionistUI
 				ImGui::PushFont(Themes::HeaderFont());
 				ImGui::TextColored(palette.heading, "%s", a_provider.Translate("UI_Cell_Title").c_str());
 				ImGui::PopFont();
+				if (Decor::Apocrypha()) {
+					const auto titleMax = ImGui::GetItemRectMax();
+					ApocryphaDecor::TitleWatcher(drawList, ImVec2(titleMax.x + fontSize * 1.1f, ImGui::GetItemRectMin().y + (titleMax.y - ImGui::GetItemRectMin().y) * 0.5f), fontSize * 0.55f);
+				}
 				if (Decor::Oblivion()) {
 					const auto titleMax = ImGui::GetItemRectMax();
 					OblivionDecor::TitleSprig(drawList, ImVec2(titleMax.x + fontSize * 0.5f, ImGui::GetItemRectMin().y + (titleMax.y - ImGui::GetItemRectMin().y) * 0.5f), fontSize * 3.6f);
@@ -5567,6 +5615,12 @@ namespace CompletionistUI
 				ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Cell_More{" + std::to_string(scan.items.size() - shown) + "}").c_str());
 			}
 			ImGui::Dummy(ImVec2(inner, fontSize * 0.2f));
+			if (Decor::Apocrypha()) {
+				const auto strip = ImGui::GetCursorScreenPos();
+				const float stripHeight = fontSize * 2.2f;
+				ApocryphaDecor::PanelStrip(drawList, strip, ImVec2(strip.x + inner, strip.y + stripHeight));
+				ImGui::Dummy(ImVec2(inner, stripHeight));
+			}
 			if (Decor::Oblivion()) {
 				const auto skyline = ImGui::GetCursorScreenPos();
 				const float skylineHeight = fontSize * 2.8f;
@@ -6783,6 +6837,10 @@ namespace CompletionistUI
 		const auto panel = [&](ImVec2 a_min, ImVec2 a_max, bool a_lit) {
 			if (Decor::Anime()) {
 				AnimeDecor::Card(drawList, a_min, a_max, a_lit);
+				return;
+			}
+			if (Decor::Apocrypha()) {
+				ApocryphaDecor::Card(drawList, a_min, a_max, a_lit);
 				return;
 			}
 			if (Decor::Gothic()) {
@@ -9164,6 +9222,12 @@ namespace CompletionistUI
 					}
 				}
 				ImGui::EndCombo();
+			}
+			if (settings.theme == Theme::kAnime) {
+				label(a_provider.Translate("UI_Setting_AnimeMascots"));
+				toggleSpot();
+				changed |= MarkerToggle("UI_Setting_AnimeMascots", settings.animeMascots);
+				describe(a_provider.Translate("UI_Setting_AnimeMascots"), a_provider.Translate("UI_SettingHint_AnimeMascots"));
 			}
 
 			const auto releasedSlider = [&](const char* a_key, const char* a_hint, const char* a_id, float& a_pending, float& a_target, float a_min, float a_max, const char* a_format) {

@@ -25,6 +25,7 @@ namespace CompletionistUI
 		kOblivion,
 		kGothic,
 		kAnime,
+		kApocrypha,
 	};
 
 	// Button names for each pad, same buttons through XInput
@@ -54,6 +55,7 @@ namespace CompletionistUI
 		std::uint32_t openPadButton{ 0x0080 };	// RS click
 		std::uint32_t openPadModifier{ 0x0040 };	// LS click, 0 for none
 		Theme         theme{ Theme::kCompletionist };
+		bool          animeMascots{ false };	// Anime theme: the chibi faces, or the emblem in their place
 		float         scale{ 1.0f };
 		float         widthPercent{ 98.0f };
 		float         heightPercent{ 93.0f };
