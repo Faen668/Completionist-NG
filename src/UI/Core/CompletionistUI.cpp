@@ -7032,6 +7032,189 @@ namespace CompletionistUI
 		static float Slot() { return Radius() * 2.3f + ImGui::GetTextLineHeight() + ImGui::GetFontSize() * 0.2f; }	// one perk and its label
 		static float ColumnGap() { return ImGui::GetFontSize() * 12.0f; }	// at most, so short trees keep short lines
 		static float TreeHeight(std::int32_t a_rows) { return Slot() * static_cast<float>(std::max(1, a_rows)) + ShoutLayout::Padding(); }
+		static float BranchLine() { return ImGui::GetFontSize() * 1.4f; }	// a row of a branch column
+		static float BranchHead() { return ImGui::GetFontSize() * 2.2f; }	// the starting perk and the bar under it
+		static constexpr std::size_t branchTreeFrom = 20;	// more perks than this and the tree is drawn as branch columns
+	}
+
+	//---------------------------------------------------
+	//-- Completionist UI ( Perk Branch Layout ) --------
+	//---------------------------------------------------
+
+	// Perk overhauls have too many perks for columns by depth, but most of them are chains from
+	// one starting perk: each branch is listed down its own column. A perk with a second parent
+	// is listed again under it, one that three or more branches share goes on a bar below them
+	static void LayoutPerkBranches(const std::vector<TrainerPerk>& a_perks, const std::vector<std::vector<std::int32_t>>& a_links, PerkTreeLayout& a_layout) {
+
+		constexpr std::int32_t maxRows = 8;
+		constexpr std::int32_t maxColumns = 9;	// more and the names get too short to read, so short branches share
+		constexpr std::int32_t maxIndent = 2;
+		const auto             count = a_perks.size();
+
+		std::vector<std::vector<std::int32_t>> parents(count);
+		for (std::size_t i = 0; i < count; ++i) {
+			for (const auto child : a_links[i]) {
+				parents[child].push_back(static_cast<std::int32_t>(i));
+			}
+		}
+		std::vector<std::int32_t> starts;
+		for (std::size_t i = 0; i < count; ++i) {
+			if (parents[i].empty()) {
+				starts.push_back(static_cast<std::int32_t>(i));
+			}
+		}
+		if (starts.size() == 1) {
+			a_layout.root = starts.front();
+			starts = a_links[a_layout.root];
+		}
+		std::ranges::stable_sort(starts, {}, [&](std::int32_t a_index) { return a_perks[a_index].lane; });
+
+		// Shared by three or more branches
+		std::vector<std::int32_t> branchesReaching(count, 0);
+		for (const auto start : starts) {
+			std::vector<bool>         seen(count, false);
+			std::vector<std::int32_t> pending{ start };
+			seen[start] = true;
+			while (!pending.empty()) {
+				const auto index = pending.back();
+				pending.pop_back();
+				++branchesReaching[index];
+				for (const auto child : a_links[index]) {
+					if (!seen[child]) {
+						seen[child] = true;
+						pending.push_back(child);
+					}
+				}
+			}
+		}
+		const auto isJoint = [&](std::int32_t a_index) { return branchesReaching[a_index] >= 3; };
+
+		std::vector<std::int32_t> depth(count, 0);
+		const auto                depthOf = [&](const auto& a_self, std::int32_t a_index) -> std::int32_t {
+			if (depth[a_index] == 0) {
+				std::int32_t longest = 0;
+				for (const auto child : a_links[a_index]) {
+					if (!isJoint(child)) {
+						longest = std::max(longest, a_self(a_self, child));
+					}
+				}
+				depth[a_index] = longest + 1;
+			}
+			return depth[a_index];
+		};
+
+		// The rows a perk and what follows it would take, so a side branch moves on whole
+		a_layout.lineOf.assign(count, -1);
+		const auto rowsFor = [&](const auto& a_self, std::int32_t a_index, std::vector<bool>& a_seen) -> std::int32_t {
+			if (a_layout.lineOf[a_index] >= 0 || a_seen[a_index]) {
+				return 1;
+			}
+			a_seen[a_index] = true;
+			std::int32_t total = 1;
+			for (const auto child : a_links[a_index]) {
+				if (!isJoint(child)) {
+					total += a_self(a_self, child, a_seen);
+				}
+			}
+			return total;
+		};
+
+		std::int32_t column = 0;
+		std::int32_t row = 0;
+		const auto   place = [&](const auto& a_self, std::int32_t a_index, std::int32_t a_parent, std::int32_t a_indent, bool a_side) -> void {
+			std::vector<bool> seen(count, false);
+			const auto        needs = a_side ? rowsFor(rowsFor, a_index, seen) : 1;
+			auto              indent = a_indent;
+			if (row > 0 && row + needs > maxRows) {
+				++column;
+				row = 0;
+				indent = 0;
+			}
+			PerkBranchLine line;
+			line.perk = a_index;
+			line.parent = a_parent;
+			line.column = column;
+			line.lastColumn = column;
+			line.row = row++;
+			line.indent = indent;
+			line.repeat = a_layout.lineOf[a_index] >= 0;
+			a_layout.lines.push_back(line);
+			if (line.repeat) {
+				return;
+			}
+			a_layout.lineOf[a_index] = static_cast<std::int32_t>(a_layout.lines.size()) - 1;
+
+			auto children = a_links[a_index];
+			std::erase_if(children, isJoint);
+			std::ranges::stable_sort(children, std::ranges::greater{}, [&](std::int32_t a_child) { return depthOf(depthOf, a_child); });
+			for (std::size_t i = 0; i < children.size(); ++i) {
+				a_self(a_self, children[i], a_index, i == 0 ? indent : std::min(indent + 1, maxIndent), i > 0);
+			}
+		};
+		for (const bool stack : { false, true }) {
+			a_layout.lines.clear();
+			a_layout.lineOf.assign(count, -1);
+			column = 0;
+			row = 0;
+			for (const auto start : starts) {
+				if (isJoint(start)) {
+					continue;
+				}
+				std::vector<bool> seen(count, false);
+				const bool        stacks = stack && row > 0 && row + rowsFor(rowsFor, start, seen) <= maxRows;
+				if (row > 0 && !stacks) {
+					++column;
+					row = 0;
+				}
+				const auto first = a_layout.lines.size();
+				place(place, start, -1, 0, false);
+				a_layout.lines[first].stacked = stacks;
+			}
+			a_layout.branchColumns = std::max(1, row > 0 ? column + 1 : column);
+			if (a_layout.branchColumns <= maxColumns) {
+				break;
+			}
+		}
+
+		// Below the columns they join, each after any it follows from
+		std::vector<std::int32_t> columnRows(static_cast<std::size_t>(a_layout.branchColumns), 0);
+		for (const auto& line : a_layout.lines) {
+			columnRows[line.column] = std::max(columnRows[line.column], line.row + 1);
+		}
+		std::vector<std::int32_t> joints;
+		for (std::size_t i = 0; i < count; ++i) {
+			if (isJoint(static_cast<std::int32_t>(i))) {
+				joints.push_back(static_cast<std::int32_t>(i));
+			}
+		}
+		std::ranges::stable_sort(joints, {}, [&](std::int32_t a_index) { return a_layout.column[a_index]; });
+		for (const auto joint : joints) {
+			PerkBranchLine line;
+			line.perk = joint;
+			line.joint = true;
+			line.column = a_layout.branchColumns - 1;
+			line.lastColumn = 0;
+			for (const auto parent : parents[joint]) {
+				if (a_layout.lineOf[parent] >= 0) {
+					const auto& from = a_layout.lines[a_layout.lineOf[parent]];
+					line.column = std::min(line.column, from.column);
+					line.lastColumn = std::max(line.lastColumn, from.lastColumn);
+				}
+			}
+			line.lastColumn = std::max(line.lastColumn, line.column);
+			for (auto i = line.column; i <= line.lastColumn; ++i) {
+				line.row = std::max(line.row, columnRows[i]);
+			}
+			for (auto i = line.column; i <= line.lastColumn; ++i) {
+				columnRows[i] = line.row + 1;
+			}
+			a_layout.lines.push_back(line);
+			a_layout.lineOf[joint] = static_cast<std::int32_t>(a_layout.lines.size()) - 1;
+		}
+		a_layout.branchRows = *std::ranges::max_element(columnRows);
+
+		const float content = (a_layout.root >= 0 ? TrainerLayout::BranchHead() : 0.0f) + TrainerLayout::BranchLine() * static_cast<float>(a_layout.branchRows);
+		a_layout.rows = static_cast<std::int32_t>(std::ceil(content / TrainerLayout::Slot()));
 	}
 
 	//---------------------------------------------------
@@ -7146,6 +7329,9 @@ namespace CompletionistUI
 		}
 		layout.width = std::max(0.0f, x - 1.0f);
 		layout.place = std::move(place);
+		if (count > TrainerLayout::branchTreeFrom) {
+			LayoutPerkBranches(a_perks, links, layout);
+		}
 		return layout;
 	}
 
@@ -7192,8 +7378,8 @@ namespace CompletionistUI
 		const float gap = ShoutLayout::CardGap();
 		const float line = ImGui::GetTextLineHeightWithSpacing();
 		const bool  sideBySide = width >= fontSize * 40.0f;
-		const float infoWidth = sideBySide ? std::floor(std::clamp(width * 0.28f, fontSize * 15.0f, fontSize * 24.0f)) : width;
 		const auto  layout = LayoutPerkTree(perks);
+		const float infoWidth = sideBySide ? std::floor(std::clamp(width * 0.28f, fontSize * 15.0f, fontSize * (layout.lines.empty() ? 24.0f : 19.0f))) : width;
 		const auto  rows = std::max(layout.rows, a_withName ? _trainerRows : 1);
 		const float infoHeight = padding * 2.0f + TrainerLayout::InfoContent();
 		const float boxHeight = sideBySide ? std::max(infoHeight, TrainerLayout::TreeHeight(rows)) : infoHeight;
@@ -7312,6 +7498,170 @@ namespace CompletionistUI
 			labels.push_back(std::move(label));
 		}
 
+		const auto perkTooltip = [&](const TrainerPerk& a_perk) {
+			ImGui::BeginTooltip();
+			ImGui::TextColored(palette.heading, "%s", a_perk.name.c_str());
+			if (a_perk.ranks > 1) {
+				ImGui::TextUnformatted(a_provider.Translate("UI_Trainers_PerkRank{" + std::to_string(a_perk.rank) + "}{" + std::to_string(a_perk.ranks) + "}").c_str());
+			}
+			if (a_perk.level > 0) {
+				ImGui::TextColored(info.playerLevel >= a_perk.level ? palette.found : palette.textDim, "%s", a_provider.Translate("UI_Trainers_PerkNeeds{" + std::to_string(a_perk.level) + "}").c_str());
+			}
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(a_perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
+			ImGui::EndTooltip();
+		};
+
+		//---------------------------------------------------
+		// Big trees: a column per branch
+		//---------------------------------------------------
+
+		if (!layout.lines.empty()) {
+			const float rowHeight = TrainerLayout::BranchLine();
+			const float head = layout.root >= 0 ? TrainerLayout::BranchHead() : 0.0f;
+			const float nodeRadius = radius * 0.85f;
+			const float step = fontSize * 0.8f;
+			const float textGap = fontSize * 0.35f;
+			const float columnWidth = std::min(fontSize * 14.0f, ((treeMax.x - treeMin.x) - edge * 2.0f) / static_cast<float>(layout.branchColumns));
+			const float gutter = std::ranges::any_of(layout.lines, &PerkBranchLine::stacked) ? nodeRadius * 1.8f : 0.0f;	// the stacked branches' drops pass here
+			const float left = (treeMin.x + treeMax.x - columnWidth * static_cast<float>(layout.branchColumns) + gutter * 0.5f) * 0.5f;
+			const float top = (treeMin.y + treeMax.y - head - rowHeight * static_cast<float>(layout.branchRows)) * 0.5f;
+			const float textPad = fontSize * 0.2f;
+			const auto  columnX = [&](std::int32_t a_column) { return left + columnWidth * static_cast<float>(a_column) + nodeRadius; };
+
+			// A name always beats its level when there's only room for one
+			std::vector<std::string> texts;
+			std::vector<ImVec2>      spots;
+			texts.reserve(layout.lines.size());
+			spots.reserve(layout.lines.size());
+			for (const auto& item : layout.lines) {
+				const auto& perk = perks[item.perk];
+				const float rowY = top + head + rowHeight * (static_cast<float>(item.row) + 0.5f);
+				const auto  named = perk.ranks > 1 ? perk.name + " " + std::to_string(perk.rank) + "/" + std::to_string(perk.ranks) : perk.name;
+				if (item.joint) {
+					const float jointWidth = ImGui::CalcTextSize(labels[item.perk].c_str()).x + nodeRadius * 2.0f + textGap;
+					spots.emplace_back((columnX(item.column) + columnX(item.lastColumn) - jointWidth) * 0.5f + nodeRadius, rowY);
+					texts.push_back(labels[item.perk]);
+					continue;
+				}
+				const float indent = step * static_cast<float>(item.indent);
+				const float room = columnWidth - indent - nodeRadius * 2.0f - textGap - fontSize * 0.3f;
+				spots.emplace_back(columnX(item.column) + indent, rowY);
+				texts.push_back(ImGui::CalcTextSize(labels[item.perk].c_str()).x <= room ? labels[item.perk] : FitText(named, room));
+			}
+			const auto textEnd = [&](std::size_t a_line) { return spots[a_line].x + nodeRadius + textGap + ImGui::CalcTextSize(texts[a_line].c_str()).x + textPad; };
+
+			struct Link
+			{
+				ImVec2 from;
+				ImVec2 to;
+				bool   lit;
+			};
+			std::vector<Link> links;
+			const auto        bothTaken = [&](std::int32_t a_left, std::int32_t a_right) { return perks[a_left].rank > 0 && perks[a_right].rank > 0; };
+
+			// The starting perk, a bar under it, and a drop to each branch
+			ImVec2 rootSpot{};
+			if (layout.root >= 0) {
+				const float rootWidth = ImGui::CalcTextSize(labels[layout.root].c_str()).x + nodeRadius * 2.0f + textGap;
+				rootSpot = ImVec2((treeMin.x + treeMax.x - rootWidth) * 0.5f + nodeRadius, top + fontSize * 0.7f);
+				const float rootBarY = top + head - fontSize * 0.35f;
+				float       first = rootSpot.x;
+				float       last = rootSpot.x;
+				bool        anyLit = false;
+				for (std::size_t i = 0; i < layout.lines.size(); ++i) {
+					const auto& item = layout.lines[i];
+					if (item.parent < 0 && !item.joint) {
+						const bool lit = bothTaken(layout.root, item.perk);
+						first = std::min(first, spots[i].x);
+						last = std::max(last, spots[i].x);
+						anyLit = anyLit || lit;
+						if (item.stacked) {
+							const float dropX = spots[i].x - gutter;
+							first = std::min(first, dropX);
+							links.push_back({ ImVec2(dropX, rootBarY), ImVec2(dropX, spots[i].y), lit });
+							links.push_back({ ImVec2(dropX, spots[i].y), spots[i], lit });
+						} else {
+							links.push_back({ ImVec2(spots[i].x, rootBarY), spots[i], lit });
+						}
+					}
+				}
+				links.push_back({ ImVec2(first, rootBarY), ImVec2(last, rootBarY), anyLit });
+				links.push_back({ rootSpot, ImVec2(rootSpot.x, rootBarY), anyLit });
+			}
+
+			std::vector<bool> barDrawn(layout.lines.size(), false);
+			for (std::size_t i = 0; i < layout.lines.size(); ++i) {
+				const auto& item = layout.lines[i];
+				if (item.parent < 0) {
+					continue;
+				}
+				const auto fromLine = static_cast<std::size_t>(layout.lineOf[item.parent]);
+				const auto from = layout.lines[fromLine].column != item.column ? ImVec2(textEnd(fromLine), spots[fromLine].y) : spots[fromLine];
+				links.push_back({ from, spots[i], bothTaken(item.parent, item.perk) });
+			}
+
+			// A shared perk's parents drop to its bar
+			for (std::size_t i = 0; i < perks.size(); ++i) {
+				for (const auto child : perks[i].children) {
+					const auto toLine = layout.lineOf[child];
+					const auto fromLine = layout.lineOf[i];
+					if (toLine < 0 || fromLine < 0 || !layout.lines[toLine].joint) {
+						continue;
+					}
+					const auto& joint = layout.lines[toLine];
+					const float jointY = spots[toLine].y;
+					if (!barDrawn[toLine]) {
+						barDrawn[toLine] = true;
+						links.push_back({ ImVec2(columnX(joint.column), jointY), ImVec2(columnX(joint.lastColumn), jointY), perks[child].rank > 0 });
+					}
+					links.push_back({ spots[fromLine], ImVec2(spots[fromLine].x, jointY), bothTaken(static_cast<std::int32_t>(i), child) });
+				}
+			}
+
+			drawList->PushClipRect(treeMin, treeMax, true);
+			for (const bool lit : { false, true }) {
+				for (const auto& link : links) {
+					if (link.lit == lit) {
+						Decor::PerkLink(drawList, link.from, link.to, nodeRadius, lit);
+					}
+				}
+			}
+
+			const auto  mouse = ImGui::GetMousePos();
+			const bool  hoverable = ImGui::IsWindowHovered();
+			std::size_t hovered = perks.size();
+			const auto  drawPerk = [&](std::int32_t a_perk, ImVec2 a_spot, const std::string& a_text, bool a_repeat) {
+				const auto  state = stateOf(a_perk);
+				const auto  size = ImGui::CalcTextSize(a_text.c_str());
+				const float textX = a_spot.x + nodeRadius + textGap;
+				const float textY = a_spot.y - size.y * 0.5f;
+				const auto  colour = a_repeat || state == PerkState::kLocked ? Colour(palette.textDim) : state == PerkState::kTaken ? Colour(palette.text) : Decor::PerkColour(PerkState::kNext);
+				drawList->AddRectFilled(ImVec2(textX - textPad, textY), ImVec2(textX + size.x + textPad, textY + size.y), Colour(palette.background, 0.85f), textPad);
+				if (a_repeat) {
+					// Only a mark: its own node is under the other parent
+					Decor::Diamond(drawList, a_spot, nodeRadius * 0.6f, Colour(palette.textDim), false);
+				} else {
+					Decor::PerkNode(drawList, a_spot, nodeRadius, state);
+				}
+				drawList->AddText(ImVec2(textX, textY), colour, a_text.c_str());
+				if (hoverable && mouse.x >= a_spot.x - nodeRadius && mouse.x <= textX + size.x && std::abs(mouse.y - a_spot.y) <= rowHeight * 0.5f) {
+					hovered = static_cast<std::size_t>(a_perk);
+				}
+			};
+			if (layout.root >= 0) {
+				drawPerk(layout.root, rootSpot, labels[layout.root], false);
+			}
+			for (std::size_t i = 0; i < layout.lines.size(); ++i) {
+				drawPerk(layout.lines[i].perk, spots[i], texts[i], layout.lines[i].repeat);
+			}
+			drawList->PopClipRect();
+
+			if (hovered < perks.size()) {
+				perkTooltip(perks[hovered]);
+			}
+			return;
+		}
+
 		// Columns evenly spaced up to a cap and centred, the first and last columns' labels kept inside
 		float leftRoom = radius * 1.5f;
 		float rightRoom = radius * 1.5f;
@@ -7379,17 +7729,7 @@ namespace CompletionistUI
 		drawList->PopClipRect();
 
 		if (hovered < perks.size()) {
-			const auto& perk = perks[hovered];
-			ImGui::BeginTooltip();
-			ImGui::TextColored(palette.heading, "%s", perk.name.c_str());
-			if (perk.ranks > 1) {
-				ImGui::TextUnformatted(a_provider.Translate("UI_Trainers_PerkRank{" + std::to_string(perk.rank) + "}{" + std::to_string(perk.ranks) + "}").c_str());
-			}
-			if (perk.level > 0) {
-				ImGui::TextColored(info.playerLevel >= perk.level ? palette.found : palette.textDim, "%s", a_provider.Translate("UI_Trainers_PerkNeeds{" + std::to_string(perk.level) + "}").c_str());
-			}
-			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
-			ImGui::EndTooltip();
+			perkTooltip(perks[hovered]);
 		}
 	}
 
