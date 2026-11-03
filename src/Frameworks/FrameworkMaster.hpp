@@ -37,6 +37,14 @@ namespace CFramework_Master
 	inline std::vector<std::function<void()>> _OnUpdateFoundForms;
 	inline std::vector<std::function<bool(const char* nam)>> _OnIsCompleted;
 
+	// The text for a shout word's notification: a mod's shout can have a spell with no word, so this falls back to the shout's name
+	[[nodiscard]] inline const char* ShoutWordText(RE::TESForm* a_shout, std::size_t a_word)
+	{
+		const auto* word = static_cast<RE::TESShout*>(a_shout)->variations[a_word].word;
+		const char* text = word ? word->translation.c_str() : nullptr;
+		return text && *text ? text : a_shout->GetName();
+	}
+
 	enum EntryCategory
 	{
 		kNone, //Spell tomes & Skill Books

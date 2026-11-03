@@ -90,12 +90,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Vanilla_W2_FormArray, Spell); a_pos != Vanilla_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Vanilla_W2_FormArray.begin(), a_pos);
 
-				auto* Word2 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[1].word;
+				const char* Word2 = ShoutWordText(Vanilla_SH_FormArray[b_pos], 1);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2);
 				}
 
 				FoundItemData_NoShow.AddForm(Vanilla_W2_FormArray[b_pos]);
@@ -106,12 +106,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Vanilla_W1_FormArray, Spell); a_pos != Vanilla_W1_FormArray.end()) { // Player Knows 1st Word
 				auto b_pos = std::distance(Vanilla_W1_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Vanilla_SH_FormArray[b_pos])->variations[0].word;
+				const char* Word1 = ShoutWordText(Vanilla_SH_FormArray[b_pos], 0);
 
 				if (!FoundItemData_NoShow.HasForm(Vanilla_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Vanilla_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1);
 				}
 
 				FoundItemData_NoShow.AddForm(Vanilla_W1_FormArray[b_pos]);
@@ -141,12 +141,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Thunderchild_W2_FormArray, Spell); a_pos != Thunderchild_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Thunderchild_W2_FormArray.begin(), a_pos);
 
-				auto* Word2 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[1].word;
+				const char* Word2 = ShoutWordText(Thunderchild_SH_FormArray[b_pos], 1);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2);
 				}
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W2_FormArray[b_pos]);
@@ -157,12 +157,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Thunderchild_W1_FormArray, Spell); a_pos != Thunderchild_W1_FormArray.end()) { // Player Knows 1st Word
 				auto b_pos = std::distance(Thunderchild_W1_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Thunderchild_SH_FormArray[b_pos])->variations[0].word;
+				const char* Word1 = ShoutWordText(Thunderchild_SH_FormArray[b_pos], 0);
 
 				if (!FoundItemData_NoShow.HasForm(Thunderchild_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Thunderchild_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1);
 				}
 
 				FoundItemData_NoShow.AddForm(Thunderchild_W1_FormArray[b_pos]);
@@ -192,12 +192,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Miscellaneous_W2_FormArray, Spell); a_pos != Miscellaneous_W2_FormArray.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(Miscellaneous_W2_FormArray.begin(), a_pos);
 
-				auto* Word2 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[1].word;
+				const char* Word2 = ShoutWordText(Miscellaneous_SH_FormArray[b_pos], 1);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W2_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2);
 				}
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W2_FormArray[b_pos]);
@@ -208,12 +208,12 @@ namespace CFramework_Shouts {
 			if (auto a_pos = std::ranges::find(Miscellaneous_W1_FormArray, Spell); a_pos != Miscellaneous_W1_FormArray.end()) { // Player Knows 1st Word
 				auto b_pos = std::distance(Miscellaneous_W1_FormArray.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(Miscellaneous_SH_FormArray[b_pos])->variations[0].word;
+				const char* Word1 = ShoutWordText(Miscellaneous_SH_FormArray[b_pos], 0);
 
 				if (!FoundItemData_NoShow.HasForm(Miscellaneous_W1_FormArray[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, Miscellaneous_SH_FormArray[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1, CVariables::V_NotificationTextShout3);
 					FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1);
 				}
 
 				FoundItemData_NoShow.AddForm(Miscellaneous_W1_FormArray[b_pos]);

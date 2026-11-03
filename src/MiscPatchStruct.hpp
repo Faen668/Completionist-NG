@@ -754,12 +754,12 @@ struct CMiscPatch
 			if (auto a_pos = std::ranges::find(section.words_2, Spell); a_pos != section.words_2.end()) { // Player Knows 2nd Word
 				auto b_pos = std::distance(section.words_2.begin(), a_pos);
 
-				auto* Word2 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[1].word;
+				const char* Word2 = CFramework_Master::ShoutWordText(section.forms[b_pos], 1);
 
 				if (!CFramework_Master::FoundItemData_NoShow.HasForm(section.words_2[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout2, Word2, CVariables::V_NotificationTextShout3);
 					CFramework_Master::FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2->translation.c_str());
+					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word2);
 				}
 
 				CFramework_Master::FoundItemData_NoShow.AddForm(section.words_2[b_pos]);
@@ -770,12 +770,12 @@ struct CMiscPatch
 			if (auto a_pos = std::ranges::find(section.words_1, Spell); a_pos != section.words_1.end()) { // Player Knows 1st Word
 				auto b_pos = std::distance(section.words_1.begin(), a_pos);
 
-				auto* Word1 = static_cast<RE::TESShout*>(section.forms[b_pos])->variations[0].word;
+				const char* Word1 = CFramework_Master::ShoutWordText(section.forms[b_pos], 0);
 
 				if (!CFramework_Master::FoundItemData_NoShow.HasForm(section.words_1[b_pos]->GetFormID())) {
-					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1->translation.c_str(), CVariables::V_NotificationTextShout3);
+					auto msg = fmt::format("{:s}{:s}{:s}{:s}{:s}"sv, CVariables::V_NotificationTextShout0, section.forms[b_pos]->GetName(), CVariables::V_NotificationTextShout1, Word1, CVariables::V_NotificationTextShout3);
 					CFramework_Master::FrameworkAPI::SendNotification(msg, "NotifySpecial");
-					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1->translation.c_str());
+					CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kWord, Word1);
 				}
 
 				CFramework_Master::FoundItemData_NoShow.AddForm(section.words_1[b_pos]);
