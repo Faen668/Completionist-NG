@@ -4,54 +4,13 @@
 #include "Internal Utility/CompletionistAPIServer.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Internal Utility/mainHUD.hpp"
+#include "UI/Core/ItemIcons.hpp"
 #include "UI/SettingsPages.hpp"
 
 namespace CompletionistUI
 {
 	namespace
 	{
-		// Icon data from svg_to_icons.py, op: 0 moveTo, 1 lineTo, 2 curveTo
-		struct IconCommand
-		{
-			int   op;
-			float a, b, c, d;
-		};
-
-		struct IconShape
-		{
-			int   fill;
-			int   stroke;
-			float width;
-			bool  strokeFirst;
-			int   begin;
-			int   count;
-		};
-
-#include "UI/ItemIcons.inl"
-
-		enum class IconGroup
-		{
-			kNeeded,
-			kFound,
-			kMuseum,
-		};
-
-		struct Icon
-		{
-			std::string_view             name;
-			IconGroup                    group;
-			std::span<const IconShape>   shapes;
-			std::span<const IconCommand> commands;
-		};
-
-		constexpr Icon icons[] = {
-			{ "cmpNew", IconGroup::kNeeded, TrophyPlusShapes, TrophyPlusCommands },
-			{ "cmpFound", IconGroup::kFound, TrophyTickShapes, TrophyTickCommands },
-			{ "cmpDisplayable", IconGroup::kMuseum, MuseumPlusShapes, MuseumPlusCommands },
-			{ "cmpDisplayed", IconGroup::kMuseum, MuseumTickShapes, MuseumTickCommands },
-			{ "cmpOccupied", IconGroup::kMuseum, MuseumDiamondShapes, MuseumDiamondCommands },
-		};
-
 		// Crafting Menu covers SkyUI's crafting lists and Crafting Categories' constructibleobjectmenu.swf
 		constexpr std::string_view listMenus[] = { RE::InventoryMenu::MENU_NAME, RE::ContainerMenu::MENU_NAME, RE::BarterMenu::MENU_NAME, RE::GiftMenu::MENU_NAME, RE::CraftingMenu::MENU_NAME };
 		constexpr const char*      skyuiIcons[] = { "bestIcon", "favoriteIcon", "poisonIcon", "stolenIcon", "enchIcon", "readIcon" };
@@ -105,11 +64,11 @@ namespace CompletionistUI
 		//-- Item Marks ( Get Icon ) ------------------------
 		//---------------------------------------------------
 
-		const Icon* GetIcon(std::string_view a_name) {
+		const ItemIcon* GetIcon(std::string_view a_name) {
 
 			if (!CVariables::V_ItemIcons) { return nullptr; }
 
-			for (const auto& icon : icons) {
+			for (const auto& icon : itemIcons) {
 				if (icon.name != a_name) {
 					continue;
 				}
@@ -123,45 +82,58 @@ namespace CompletionistUI
 		//-- Item Marks ( Draw Icon ) -----------------------
 		//---------------------------------------------------
 
-		void DrawIcon(RE::GFxValue& a_clip, const Icon& a_icon, double a_size) {
+		void DrawIcon(RE::GFxValue& a_clip, const ItemIcon& a_icon, double a_size, std::int32_t a_primary, std::int32_t a_secondary) {
 
-			a_clip.Invoke("clear");
+			// Flash draws a clip's lines over its fills whatever the order, which would bury the icons' thin
+			// white parts in their outlines, so every outline and fill gets a clip of its own
+			const auto layer = [&](std::size_t a_index) {
+				const auto   name = fmt::format("_comp_layer{}", a_index);
+				RE::GFxValue clip;
+				if (!a_clip.GetMember(name.c_str(), &clip) || !clip.IsDisplayObject()) {
+					a_clip.Invoke("createEmptyMovieClip", &clip, std::array<RE::GFxValue, 2>{ name.c_str(), static_cast<double>(a_index) });
+				}
+				clip.Invoke("clear");
+				return clip;
+			};
 
-			const auto path = [&](const IconShape& a_shape) {
+			const auto path = [&](RE::GFxValue& a_layer, const IconShape& a_shape) {
 				for (int i = a_shape.begin; i < a_shape.begin + a_shape.count; ++i) {
 					const auto& c = a_icon.commands[static_cast<std::size_t>(i)];
 					if (c.op == 0) {
-						a_clip.Invoke("moveTo", std::array<RE::GFxValue, 2>{ c.a * a_size, c.b * a_size });
+						a_layer.Invoke("moveTo", std::array<RE::GFxValue, 2>{ c.a * a_size, c.b * a_size });
 					} else if (c.op == 1) {
-						a_clip.Invoke("lineTo", std::array<RE::GFxValue, 2>{ c.a * a_size, c.b * a_size });
+						a_layer.Invoke("lineTo", std::array<RE::GFxValue, 2>{ c.a * a_size, c.b * a_size });
 					} else {
-						a_clip.Invoke("curveTo", std::array<RE::GFxValue, 4>{ c.a * a_size, c.b * a_size, c.c * a_size, c.d * a_size });
+						a_layer.Invoke("curveTo", std::array<RE::GFxValue, 4>{ c.a * a_size, c.b * a_size, c.c * a_size, c.d * a_size });
 					}
 				}
 			};
 
-			const auto outline = [&](const IconShape& a_shape) {
+			const auto outline = [&](RE::GFxValue a_layer, const IconShape& a_shape) {
 				if (a_shape.stroke < 0 || a_shape.width <= 0.0f) { return; }
-				a_clip.Invoke("lineStyle", std::array<RE::GFxValue, 7>{ a_shape.width * a_size, static_cast<double>(a_shape.stroke), 100.0, false, "normal", "round", "round" });
-				path(a_shape);
-				a_clip.Invoke("lineStyle");
+				a_layer.Invoke("lineStyle", std::array<RE::GFxValue, 7>{ a_shape.width * a_size, static_cast<double>(a_shape.stroke), 100.0, false, "normal", "round", "round" });
+				path(a_layer, a_shape);
+				a_layer.Invoke("lineStyle");
 			};
 
-			const auto fill = [&](const IconShape& a_shape) {
+			const auto fill = [&](RE::GFxValue a_layer, const IconShape& a_shape, std::int32_t a_colour) {
 				if (a_shape.fill < 0) { return; }
-				a_clip.Invoke("lineStyle");
-				a_clip.Invoke("beginFill", std::array<RE::GFxValue, 2>{ static_cast<double>(a_shape.fill), 100.0 });
-				path(a_shape);
-				a_clip.Invoke("endFill");
+				a_layer.Invoke("beginFill", std::array<RE::GFxValue, 2>{ static_cast<double>(a_colour), 100.0 });
+				path(a_layer, a_shape);
+				a_layer.Invoke("endFill");
 			};
 
+			std::size_t next = 0;
 			for (const auto& shape : a_icon.shapes) {
+				const auto colour = next == 0 ? a_primary : a_secondary;
+				auto below = layer(next++);
+				auto above = layer(next++);
 				if (shape.strokeFirst) {
-					outline(shape);
-					fill(shape);
+					outline(below, shape);
+					fill(above, shape, colour);
 				} else {
-					fill(shape);
-					outline(shape);
+					fill(below, shape, colour);
+					outline(above, shape);
 				}
 			}
 		}
@@ -275,7 +247,7 @@ namespace CompletionistUI
 				StyleName(a_movie, textField, iconName);
 			}
 
-			const Icon* icon = GetIcon(iconName);
+			const ItemIcon* icon = GetIcon(iconName);
 			if (!icon) {
 				if (hasMark) {
 					mark.SetMember("_visible", false);
@@ -296,9 +268,12 @@ namespace CompletionistUI
 			const double size = std::round(textHeight * 1.15 * CVariables::V_ItemIcons_Size / 100.0);
 
 			RE::GFxValue drawn;
-			const bool same = mark.GetMember("_comp_icon", &drawn) && drawn.IsString() && icon->name == drawn.GetString() && Number(mark, "_comp_size") == size;
+			const auto&  colours = CVariables::V_ItemIconColours[icon - itemIcons];
+			const bool same = mark.GetMember("_comp_icon", &drawn) && drawn.IsString() && icon->name == drawn.GetString() && Number(mark, "_comp_size") == size && Number(mark, "_comp_primary", -1.0) == colours[0] && Number(mark, "_comp_secondary", -1.0) == colours[1];
 			if (!same) {
-				DrawIcon(mark, *icon, size);
+				DrawIcon(mark, *icon, size, colours[0], colours[1]);
+				mark.SetMember("_comp_primary", static_cast<double>(colours[0]));
+				mark.SetMember("_comp_secondary", static_cast<double>(colours[1]));
 				mark.SetMember("_comp_icon", RE::GFxValue(icon->name.data()));
 				mark.SetMember("_comp_size", size);
 			}
@@ -372,13 +347,17 @@ namespace CompletionistUI
 				band.Invoke("endFill");
 			};
 
-			const bool tracked = group < 2.0;
-			const bool odd = static_cast<int>(group) % 2 == 1;
+			// In the colour of the group's icon badge, a little fainter every other group in case two share a colour
+			const std::string_view iconName = GetIconName(a_entry);
+			const auto* icon = std::ranges::find(itemIcons, iconName, &ItemIcon::name);
+			const bool  tracked = group < 2.0 && icon != std::end(itemIcons);
+			const bool  odd = static_cast<int>(group) % 2 == 1;
+			const auto  colour = tracked ? static_cast<double>(CVariables::V_ItemIconColours[icon - itemIcons][1]) : 0xFFFFFF;
 			band.Invoke("clear");
 			band.Invoke("lineStyle");
 			if (width > 0.0 && height > 0.0) {
-				rect(x, width, odd ? 0xFFFFFF : 0xC6A262, odd ? 3.0 : 8.0);
-				rect(x, 2.0, tracked ? 0xC6A262 : 0x444444, 100.0);
+				rect(x, width, colour, tracked ? (odd ? 9.0 : 15.0) : 3.0);
+				rect(x, 2.0, tracked ? colour : 0x444444, 100.0);
 			}
 		}
 

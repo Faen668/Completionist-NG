@@ -52,9 +52,9 @@ namespace CompletionistUI
 		static constexpr std::int32_t maxDescriptionLines{ 20 };
 
 		std::uint32_t openKey{ 199 };	// Home
-		std::uint32_t openPadButton{ 0x0080 };	// RS click
-		std::uint32_t openPadModifier{ 0x0040 };	// LS click, 0 for none
-		Theme         theme{ Theme::kCompletionist };
+		std::uint32_t openPadButton{ 0 };	// unbound: controllers open it from the Journal's System tab
+		std::uint32_t openPadModifier{ 0 };	// 0 for none
+		Theme         theme{ Theme::kDwemer };
 		bool          animeMascots{ false };	// Anime theme: the chibi faces, or the emblem in their place
 		float         scale{ 1.0f };
 		float         widthPercent{ 98.0f };
@@ -67,9 +67,6 @@ namespace CompletionistUI
 		std::int32_t  findMatch{ 0 };	// 0 contains, 1 starts with, 2 exact
 		bool          findIgnoreCompleted{ false };
 		bool          openOnLastPage{ true };
-		bool          hideCompleted{ false };
-		bool          screenshotButton{ false };
-		bool          printScreen{ true };
 		bool          pauseGame{ true };	// Off leaves the world running while the window is open
 		bool          journalEntry{ true };	// Completionist on the Journal's System tab
 		PadStyle      padStyle{ PadStyle::kXbox };
@@ -77,7 +74,7 @@ namespace CompletionistUI
 		bool          tourOffered{ false };	// the guided tour has been offered once
 
 		// Cell Scanner
-		std::uint32_t cellKey{ 207 };	// End
+		std::uint32_t cellKey{ 0 };	// unbound
 		std::uint32_t cellPadButton{ 0 };
 		std::uint32_t cellPadModifier{ 0 };
 		bool          cellPanel{ true };
@@ -87,7 +84,7 @@ namespace CompletionistUI
 		float         cellY{ 0.14f };	// its top, down the screen
 
 		// Notifications
-		bool  toastsNewestFirst{ true };
+		bool  toastsNewestFirst{ false };
 		float toastX{ 0.0f };
 		float toastY{ 0.317f };
 		ToastJoin toastJoin{ ToastJoin::kNone };	// back at toastX / toastY when the panel is off

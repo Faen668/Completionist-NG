@@ -102,6 +102,7 @@ namespace CFramework_Master
 
 		// A new game records no items until the player picks one up or changes cell
 		static void							PauseItemRecording();
+		static void							WaitForFirstGame();
 		static void							StartRecordingItems(std::string_view a_reason);
 		static bool							RecordsItemsFrom(RE::TESContainerChangedEvent const* a_event);
 
@@ -109,8 +110,6 @@ namespace CFramework_Master
 
 		static std::string					ReplaceStr(std::string const& in, std::string const& from, std::string const& to);
 		static std::string					GetVersion(RE::StaticFunctionTag*);
-
-		static void							NotifyStartup();
 
 		static void							AddNewEventToLog(Serialization::CompletionistLog::logType kType, std::string a_log);
 

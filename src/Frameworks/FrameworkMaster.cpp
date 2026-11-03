@@ -209,32 +209,14 @@ namespace CFramework_Master
 				return &singleton;
 			}
 
-			void NotifyWhenLoaded() {
-
-				pendingNotice = true;
-				auto* ui = RE::UI::GetSingleton();
-				if (!ui || !ui->IsMenuOpen(RE::LoadingMenu::MENU_NAME)) {
-					SKSE::GetTaskInterface()->AddTask([this]() { ShowNotice(); });
-				}
-			}
-
 			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override {
 
 				if (!a_event || a_event->opening) { return RE::BSEventNotifyControl::kContinue; }
-				if (a_event->menuName == RE::LoadingMenu::MENU_NAME) {
-					SKSE::GetTaskInterface()->AddTask([this]() { ShowNotice(); });
-				} else if (a_event->menuName == RE::DialogueMenu::MENU_NAME) {
+				if (a_event->menuName == RE::DialogueMenu::MENU_NAME) {
 					SKSE::GetTaskInterface()->AddTask([]() { CFramework_Pets::CHandler::CheckAdoptedPet(); });
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
-		private:
-			void ShowNotice() {
-				if (pendingNotice.exchange(false)) { FrameworkAPI::NotifyStartup(); }
-			}
-
-			std::atomic<bool> pendingNotice{ false };
 		};
 	}
 
@@ -326,6 +308,14 @@ namespace CFramework_Master
 		INFO("New game: items aren't recorded until the player picks one up or changes cell");
 	}
 
+	// From the main menu, as coc there sends no new game or load message: the outfit it puts on
+	// the player is no more found than a new game's. A load or a new game takes over from this.
+	void FrameworkAPI::WaitForFirstGame() {
+
+		Serialization::ItemRecordingPaused = true;
+		ItemStartWatch::Get()->Begin();
+	}
+
 	//---------------------------------------------------
 	//-- Framework Functions ( Start Recording Items ) --
 	//---------------------------------------------------
@@ -374,7 +364,7 @@ namespace CFramework_Master
 		CFramework_Pets::CHandler::CheckAdoptedPet();
 		CFramework_Trainers::CHandler::FindPlacedTrainers();
 		CFramework_Dragons::CHandler::FindPlacedDragons();
-		GameMenus::Get()->NotifyWhenLoaded();
+		GameMenus::Get();
 	}
 
 	//---------------------------------------------------
@@ -491,7 +481,7 @@ namespace CFramework_Master
 			}
 
 			using CompletionistUI::ToastKind;
-			const auto kind = a_setting == "NotifyMissable" ? ToastKind::kCell : a_setting == "NotifySpecial" ? ToastKind::kDiscovery : a_setting == "NotifyStartup" || a_setting.empty() ? ToastKind::kInfo : ToastKind::kEntry;
+			const auto kind = a_setting == "NotifyMissable" ? ToastKind::kCell : a_setting == "NotifySpecial" ? ToastKind::kDiscovery : a_setting.empty() ? ToastKind::kInfo : ToastKind::kEntry;
 			std::optional<ImVec4> colour;
 			if (a_colour.size() > 1 && a_colour.front() == '#') {
 				const auto value = std::strtoul(std::string(a_colour.substr(1)).c_str(), nullptr, 16);
@@ -506,18 +496,7 @@ namespace CFramework_Master
 		if (!setting || !setting->GetBool()) { return; }
 
 		auto* colour = VariablesAPI::GetProperty("ColourString");
-		auto* colourEnabled = VariablesAPI::GetProperty("NotificationColourEnabled");
-		const bool coloured = colour && colourEnabled && colourEnabled->GetBool();
-		ShowOwnNotification(a_msg, a_setting, coloured ? std::string_view(colour->GetString()) : std::string_view{});
-	}
-
-	//---------------------------------------------------
-	//-- Framework Functions ( Notify Startup ) ---------
-	//---------------------------------------------------
-
-	// Startup Notifications
-	void FrameworkAPI::NotifyStartup() {
-		SendNotification("Completionist: Start Up Tasks Complete", "NotifyStartup");
+		ShowOwnNotification(a_msg, a_setting, colour ? std::string_view(colour->GetString()) : std::string_view{});
 	}
 
 	//---------------------------------------------------

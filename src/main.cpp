@@ -101,6 +101,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 		Completionist::MuseumAPI::Register();
 		CompletionistUI::GameUI::Install();
 		WordsOfPower::StartScan();
+		CFramework_Master::FrameworkAPI::WaitForFirstGame();
 		INFO("Finished installing Completionist in - {} Milliseconds", (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t1)).count());
 		break;
 	}

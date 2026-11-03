@@ -38,6 +38,9 @@ namespace CompletionistUI
 		//-- Tracker ( Setting Number ) ---------------------
 		//---------------------------------------------------
 
+		// How close counts as having reached a tracked NPC or place
+		constexpr float reachedDistance = 1500.0f;
+
 		std::int32_t SettingNumber(const char* a_name) {
 
 			const auto* value = SettingsAPI::Get(a_name);
@@ -376,15 +379,6 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
-		//-- Tracker ( Shows Objective ) --------------------
-		//---------------------------------------------------
-
-		bool ShowsObjective(const Slotted& a_item) {
-
-			return !a_item.Pinned() || SettingOn("bCellScanner_Pinning_Marker");
-		}
-
-		//---------------------------------------------------
 		//-- Tracker ( Place Of ) ---------------------------
 		//---------------------------------------------------
 
@@ -438,14 +432,14 @@ namespace CompletionistUI
 				objective->displayText = ObjectiveText(a_item, a_ref);
 			}
 			quest->ForceRefIntoAlias(0, a_ref);
-			if (ShowsObjective(a_item)) {
-				if (a_announce) {
-					Announce(a_item.slot);
-				} else {
-					ShowQuietly(a_item.slot, a_item.active);
-				}
+			if (a_announce) {
+				// Newly tracked: selected in the journal, so its marker shows straight away
+				quest->data.flags.set(RE::QuestFlag::kActive);
+				Announce(a_item.slot);
+			} else {
+				ShowQuietly(a_item.slot, a_item.active);
 			}
-			if (a_item.Pinned() && SettingOn("bCellScanner_Pinning_Effect")) {
+			if (a_item.Pinned()) {
 				StartGlow(a_ref);
 			}
 		}
@@ -577,7 +571,7 @@ namespace CompletionistUI
 			}
 			const auto* cell = a_ref->GetParentCell();
 			const bool  together = cell && cell->IsInteriorCell() ? a_player->GetParentCell() == cell : a_player->GetWorldspace() && a_player->GetWorldspace() == a_ref->GetWorldspace();
-			return together && a_player->GetPosition().GetDistance(a_ref->GetPosition()) <= static_cast<float>(SettingNumber("State_MarkerDetectionVal"));
+			return together && a_player->GetPosition().GetDistance(a_ref->GetPosition()) <= reachedDistance;
 		}
 
 		//---------------------------------------------------
@@ -617,7 +611,8 @@ namespace CompletionistUI
 
 		class TargetWatch final :
 			public RE::BSTEventSink<RE::TESContainerChangedEvent>,
-			public RE::BSTEventSink<RE::TESCellAttachDetachEvent>
+			public RE::BSTEventSink<RE::TESCellAttachDetachEvent>,
+			public RE::BSTEventSink<RE::TESActivateEvent>
 		{
 		public:
 			static TargetWatch* Get()
@@ -640,6 +635,15 @@ namespace CompletionistUI
 					}
 				}
 				UpdateLocating();
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			// Next frame, once the patches have recorded what was activated
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override
+			{
+				if (a_event && a_event->actionRef.get() == RE::PlayerCharacter::GetSingleton()) {
+					SKSE::GetTaskInterface()->AddTask([]() { Tracker::DropFound(); });
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
@@ -752,32 +756,6 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
-	//-- Tracker ( Show Pin Objectives ) ----------------
-	//---------------------------------------------------
-
-	void Tracker::ShowPinObjectives(bool a_shown) {
-
-		for (const auto& item : Targets().tracked) {
-			if (item.Pinned() && item.slot >= 0) {
-				a_shown ? ShowQuietly(item.slot, item.active) : HideQuietly(slotQuests[static_cast<std::size_t>(item.slot)]);
-			}
-		}
-	}
-
-	//---------------------------------------------------
-	//-- Tracker ( Show Pin Glow ) ----------------------
-	//---------------------------------------------------
-
-	void Tracker::ShowPinGlow(bool a_shown) {
-
-		for (const auto& item : Targets().tracked) {
-			if (item.Pinned() && item.slot >= 0) {
-				a_shown ? StartGlow(SlotReference(item.slot)) : StopGlow(SlotReference(item.slot));
-			}
-		}
-	}
-
-	//---------------------------------------------------
 	//-- Tracker ( Mark Reference ) ---------------------
 	//---------------------------------------------------
 
@@ -819,6 +797,28 @@ namespace CompletionistUI
 		UnplaceWhere([&](const Slotted& a_tracked) {
 			return !a_tracked.Located() && a_tracked.slot >= 0 && std::ranges::find(a_listed, std::pair{ a_tracked.ref, a_tracked.form }) == a_listed.end();
 		}, "left out by the scanner's settings");
+	}
+
+	//---------------------------------------------------
+	//-- Tracker ( Drop Found ) -------------------------
+	//---------------------------------------------------
+
+	// What's tracked by its reference is activated, not picked up, so nothing else takes its marker off
+	void Tracker::DropFound() {
+
+		UnplaceWhere([](const Slotted& a_tracked) {
+			return a_tracked.kind == Kind::kMark && a_tracked.form == a_tracked.ref && CFramework_Master::FoundItemData_NoShow.HasForm(a_tracked.ref);
+		}, "found");
+
+		// Pins go for good, as they do when a pinned item's picked up
+		auto& tracked = Targets().tracked;
+		for (std::size_t i = tracked.size(); i-- > 0;) {
+			if (tracked[i].Pinned() && CFramework_Master::FoundItemData_NoShow.HasForm(tracked[i].form)) {
+				INFO("Tracker: pin ended {} (found)", tracked[i].name);
+				ReleaseSlot(tracked[i]);
+				tracked.erase(tracked.begin() + static_cast<std::ptrdiff_t>(i));
+			}
+		}
 	}
 
 	//---------------------------------------------------
@@ -969,7 +969,7 @@ namespace CompletionistUI
 
 		SKSE::GetTaskInterface()->AddTask([]() {
 			for (const auto& item : Targets().tracked) {
-				if (item.slot >= 0 && ShowsObjective(item)) {
+				if (item.slot >= 0) {
 					ShowQuietly(item.slot, item.active);
 				}
 			}
@@ -985,6 +985,7 @@ namespace CompletionistUI
 		if (auto* events = RE::ScriptEventSourceHolder::GetSingleton()) {
 			events->AddEventSink<RE::TESContainerChangedEvent>(TargetWatch::Get());
 			events->AddEventSink<RE::TESCellAttachDetachEvent>(TargetWatch::Get());
+			events->AddEventSink<RE::TESActivateEvent>(TargetWatch::Get());
 		}
 
 		// Four times a second, as the old script polled

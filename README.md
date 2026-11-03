@@ -20,7 +20,7 @@ For how to use it, settings and writing patches, see the **[wiki](https://github
 
 ## Features
 
-* **The Completionist window** (**Home**, or both sticks on a controller): quests, collections, locations, shouts, kill counts and a completion log, with progress bars, find, pins and quest markers
+* **The Completionist window** (**Home**, or from the Journal's System tab on a controller): quests, collections, locations, shouts, kill counts and a completion log, with progress bars, find, pins and quest markers
 * **Cell Scanner** (**End**): what's still to be found in the cell you're in, as a window or on screen while you play
 * **Item lists**: icons and a Completionist sort in SkyUI's inventory, container, barter and gift menus
 * **Crosshair tags**: "Need It!" / "Got It!" next to things you look at

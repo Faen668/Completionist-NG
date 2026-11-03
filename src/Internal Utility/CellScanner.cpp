@@ -4,6 +4,7 @@
 #include "Internal Utility/PatchListener.hpp"
 #include "CellScanner.hpp"
 #include "Variables.hpp"
+#include "MuseumAPI.hpp"
 
 namespace Completionist
 {
@@ -330,7 +331,7 @@ namespace Completionist
 			refsWithNames.emplace_back(a_ref->GetHandle(), std::move(a_name), GetFormType(a_item), a_item, a_place, a_stealing);
 		};
 		const auto wanted = [](RE::TESForm* a_item) {
-			return a_item && !IsExcludedFormType(a_item) && ItemIsCollectable(a_item) && !ItemIsCollected(a_item);
+			return a_item && !IsExcludedFormType(a_item) && Completionist::MuseumAPI::SpeaksAbout(a_item) && Completionist::MuseumAPI::NeedsFinding(a_item);
 		};
 
 		for (auto* scanCell : cells) {

@@ -95,8 +95,16 @@ namespace CompletionistExclusions
 					continue;
 				};
 
-				INFO("Excluded {} from {}", Serialization::CompletionistData::GetFormIDHexString(formID), pluginFileName);
-				vector.push_back(formID);
+				// The file has the plugin's own ID, the game compares with the one from its load order
+				auto*      handler = RE::TESDataHandler::GetSingleton();
+				const auto loaded = handler ? handler->LookupFormID(formID, pluginFileName) : 0;
+				if (!loaded) {
+					INFO("Unable to exclude {} from {}", Serialization::CompletionistData::GetFormIDHexString(formID), pluginFileName);
+					continue;
+				}
+
+				INFO("Excluded {} from {}", Serialization::CompletionistData::GetFormIDHexString(loaded), pluginFileName);
+				vector.push_back(loaded);
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 #include "UI/Core/CompletionistUI.hpp"
 #include "UI/Core/Decor.hpp"
+#include "UI/Core/ItemIcons.hpp"
 #include "UI/Core/SettingsLayout.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/Themes/AnimeDecor.hpp"
@@ -551,6 +552,7 @@ namespace CompletionistUI
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			ImGui::SetNextItemWidth(a_width - valueWidth);
 			const bool changed = ImGui::SliderScalar(a_id, a_type, a_value, a_min, a_max, a_format);
+			const auto sliderId = ImGui::GetItemID();
 			NoteControl();
 			if (a_released) {
 				*a_released = ImGui::IsItemDeactivatedAfterEdit();
@@ -596,6 +598,8 @@ namespace CompletionistUI
 			ImGui::AlignTextToFramePadding();
 			ImGui::TextColored(hovered ? palette.text : palette.needed, "%s", valueText);
 			ImGui::EndGroup();
+			// A group has no id of its own, so it never counts as focused: callers asking about this item mean the slider
+			ImGui::GetCurrentContext()->LastItemData.ID = sliderId;
 			return changed;
 		}
 
@@ -1018,6 +1022,7 @@ namespace CompletionistUI
 			const char* hue;
 			const char* saturation;
 			const char* brightness;
+			const char* reset;
 		};
 
 		//---------------------------------------------------
@@ -1026,16 +1031,19 @@ namespace CompletionistUI
 
 		// The colour picker floats over the page under its button, or above it when the button is low,
 		// so the rows don't move and a controller stays inside it until Done or Back
-		bool BeginColourPopup(const char* a_id, ImVec2 a_anchorMin, ImVec2 a_anchorMax, float a_width) {
+		bool BeginColourPopup(const char* a_id, ImVec2 a_anchorMin, ImVec2 a_anchorMax, float a_width, float a_extra = 0.0f) {
 
 			const auto& palette = Themes::GetPalette();
 			const float size = ImGui::GetFontSize();
-			const float width = std::max(a_width, size * 20.0f);
+			const float width = std::max(a_width, size * 20.0f) + a_extra;
 			const auto* viewport = ImGui::GetMainViewport();
 			const float top = viewport->WorkPos.y;
 			const float bottom = top + viewport->WorkSize.y;
 			const bool  below = a_anchorMax.y < top + (bottom - top) * 0.5f;
-			const float x = std::clamp(a_anchorMin.x, viewport->WorkPos.x + size, viewport->WorkPos.x + viewport->WorkSize.x - width - size);
+			// Inside the window: an item icon's picker is wide enough to overhang the right-hand column
+			const auto* root = ImGui::GetCurrentWindow()->RootWindow;
+			const float right = std::min(viewport->WorkPos.x + viewport->WorkSize.x, root->Pos.x + root->Size.x);
+			const float x = std::clamp(a_anchorMin.x, viewport->WorkPos.x + size, std::max(viewport->WorkPos.x + size, right - width - size));
 			// Whole pixels, so there's no fraction of a pixel left for it to scroll through
 			ImGui::SetNextWindowPos(ImVec2(std::floor(x), std::floor(below ? a_anchorMax.y + size * 0.3f : a_anchorMin.y - size * 0.3f)), ImGuiCond_Always, ImVec2(0.0f, below ? 0.0f : 1.0f));
 			ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, FLT_MAX));
@@ -1056,18 +1064,83 @@ namespace CompletionistUI
 		}
 
 		//---------------------------------------------------
+		//-- Completionist UI ( Draw Item Icon ) ------------
+		//---------------------------------------------------
+
+		// An item icon as the game's menus draw it, outline under fill
+		void DrawItemIcon(ImDrawList* a_drawList, const ItemIcon& a_icon, ImVec2 a_at, float a_size, std::int32_t a_primary, std::int32_t a_secondary) {
+
+			bool first = true;
+			for (const auto& shape : a_icon.shapes) {
+				std::vector<std::vector<ImVec2>> paths;
+				for (int i = shape.begin; i < shape.begin + shape.count; ++i) {
+					const auto& c = a_icon.commands[static_cast<std::size_t>(i)];
+					const auto  point = [&](float a_x, float a_y) { return ImVec2(a_at.x + a_x * a_size, a_at.y + a_y * a_size); };
+					if (c.op == 0 || paths.empty()) {
+						paths.emplace_back().push_back(point(c.a, c.b));
+					} else if (c.op == 1) {
+						paths.back().push_back(point(c.a, c.b));
+					} else {
+						const auto from = paths.back().back();
+						for (int step = 1; step <= 8; ++step) {
+							paths.back().push_back(ImBezierQuadraticCalc(from, point(c.a, c.b), point(c.c, c.d), static_cast<float>(step) / 8.0f));
+						}
+					}
+				}
+				for (auto& path : paths) {
+					if (path.size() > 1 && std::abs(path.front().x - path.back().x) < 0.01f && std::abs(path.front().y - path.back().y) < 0.01f) {
+						path.pop_back();
+					}
+					// ImGui's concave fill needs the points clockwise, the icons come both ways
+					float area = 0.0f;
+					for (std::size_t i = 0; i < path.size(); ++i) {
+						const auto& next = path[(i + 1) % path.size()];
+						area += path[i].x * next.y - next.x * path[i].y;
+					}
+					if (area < 0.0f) {
+						std::ranges::reverse(path);
+					}
+				}
+
+				const auto outline = [&] {
+					if (shape.stroke >= 0 && shape.width > 0.0f) {
+						for (const auto& path : paths) {
+							a_drawList->AddPolyline(path.data(), static_cast<int>(path.size()), Colour(ColourFromRGB(shape.stroke)), ImDrawFlags_Closed, std::max(1.0f, shape.width * a_size));
+						}
+					}
+				};
+				const auto fill = [&] {
+					if (shape.fill >= 0) {
+						for (const auto& path : paths) {
+							a_drawList->AddConcavePolyFilled(path.data(), static_cast<int>(path.size()), Colour(ColourFromRGB(first ? a_primary : a_secondary)));
+						}
+					}
+				};
+				if (shape.strokeFirst) {
+					outline();
+					fill();
+				} else {
+					fill();
+					outline();
+				}
+				first = false;
+			}
+		}
+
+		//---------------------------------------------------
 		//-- Completionist UI ( Colour Panel ) --------------
 		//---------------------------------------------------
 
 		// The colour picker's contents, inside its popup. a_hue is kept apart from the colour so
 		// greys and black don't lose it
-		bool ColourPanel(std::int32_t& a_rgb, float& a_hue, std::int32_t a_original, const ColourPanelText& a_text, bool& a_close) {
+		bool ColourPanel(std::int32_t& a_rgb, float& a_hue, std::int32_t a_original, std::int32_t a_default, const ColourPanelText& a_text, bool& a_close) {
 
 			const auto&   swatches = colourSwatches;
 			constexpr int columns = 10;
 			constexpr int swatchCount = static_cast<int>(std::size(swatches));
 			constexpr int firstBar = swatchCount;
 			constexpr int doneSpot = firstBar + 3;
+			constexpr int resetSpot = doneSpot + 1;
 
 			const auto& palette = Themes::GetPalette();
 			const auto& style = ImGui::GetStyle();
@@ -1125,6 +1198,10 @@ namespace CompletionistUI
 					}
 				} else if (up) {
 					colourFocus = doneSpot - 1;
+				} else if (left && colourFocus == doneSpot && a_default >= 0) {
+					colourFocus = resetSpot;
+				} else if (right && colourFocus == resetSpot) {
+					colourFocus = doneSpot;
 				}
 				activate = colourActivateArmed && (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown, false) || ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false));
 			}
@@ -1217,6 +1294,19 @@ namespace CompletionistUI
 			ImGui::TextColored(palette.textDim, "%s", HexColour(static_cast<std::uint32_t>(std::max(a_rgb, 0))).c_str());
 
 			const float doneWidth = ButtonWidth(a_text.done) + ImGui::GetFontSize() * 2.0f;
+			// Back to what it ships with, on Done's line
+			if (a_default >= 0) {
+				const bool resetClicked = ThemedButton(a_text.reset, ButtonWidth(a_text.reset) + ImGui::GetFontSize() * 2.0f);
+				const bool padReset = colourPadNav && colourFocus == resetSpot;
+				if (padReset) {
+					padRing(2.0f);
+				}
+				if ((resetClicked && !colourPadNav) || (padReset && activate)) {
+					a_rgb = a_default;
+					a_hue = HueOf(a_default);
+					changed = true;
+				}
+			}
 			ImGui::SameLine();
 			if (ImGui::GetContentRegionAvail().x < doneWidth) {
 				ImGui::NewLine();
@@ -1561,10 +1651,6 @@ namespace CompletionistUI
 			rect.seen = false;
 		}
 		SetTourNavigation();
-		if (!_settingsApplied) {
-			_hideCompleted = a_settings.hideCompleted;
-			_settingsApplied = true;
-		}
 
 		if (const auto revision = a_provider.Revision(); revision != _revision) {
 			_revision = revision;
@@ -1594,11 +1680,11 @@ namespace CompletionistUI
 			_dirty = false;
 		}
 
-		_showScreenshotButton = a_settings.screenshotButton;
 		_statusTime = std::max(0.0f, _statusTime - ImGui::GetIO().DeltaTime);
 		TrackInputDevice();
 		_padActionKey.clear();
-		_padTriggerKey.clear();
+		_padTickKey.clear();
+		_filterShownLast = std::exchange(_filterShown, false);
 
 		rightStickTaken = false;
 
@@ -1754,7 +1840,7 @@ namespace CompletionistUI
 			if (std::exchange(_focusPage, false)) {
 				const bool shown = std::exchange(_focusPageShown, false);
 				const auto start = std::ranges::find_if(_entrySpots, &NavSpot::visible);
-				const auto control = std::ranges::find_if(_controlSpots, [](const NavSpot& a_spot) { return a_spot.visible && a_spot.section != -1; });
+				const auto control = std::ranges::find_if(_controlSpots.begin() + static_cast<std::ptrdiff_t>(std::min(_controlsPastTabs, _controlSpots.size())), _controlSpots.end(), [](const NavSpot& a_spot) { return a_spot.visible && a_spot.section != -1; });
 				const NavSpot* spot = start != _entrySpots.end() ? std::addressof(*start) : control != _controlSpots.end() ? std::addressof(*control) : nullptr;
 				if (spot) {
 					// Placed as the item is drawn next frame, inside its own window
@@ -1787,9 +1873,9 @@ namespace CompletionistUI
 
 	void Menu::HandleGamepadShortcuts(bool& a_open) {
 
-		// Triangle is ours (autofit and fold the description). ImGui's navigation reads it as its
-		// "input" key, which also presses whatever is focused, so it's given an owner nav won't use
-		ImGui::SetKeyOwner(ImGuiKey_GamepadFaceUp, ImGui::GetID("##DescriptionKey"));
+		// Triangle is ours (ticks a row off). ImGui's navigation reads it as its "input" key,
+		// which also presses whatever is focused, so it's given an owner nav won't use
+		ImGui::SetKeyOwner(ImGuiKey_GamepadFaceUp, ImGui::GetID("##TickKey"));
 
 		// B / Escape step back to the sidebar, then close
 		const bool backPressed = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
@@ -1805,18 +1891,21 @@ namespace CompletionistUI
 				a_open = false;
 			}
 		}
-		// Y fits the description panel to the text, held collapses or expands it
-		// Ahead of the active check, as Y down also activates the focused row
+		// R3 fits the description panel to the text, held collapses or expands it. Not with L3 held,
+		// as the two can be the combo that opens and closes this window
 		if (_settings && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
 			constexpr float holdTime = 0.4f;
-			const auto*     faceUp = ImGui::GetKeyData(ImGuiKey_GamepadFaceUp);
-			if (faceUp->Down && faceUp->DownDuration >= holdTime && !_descriptionHeld) {
+			const auto*     stick = ImGui::GetKeyData(ImGuiKey_GamepadR3);
+			if (ImGui::IsKeyPressed(ImGuiKey_GamepadR3, false)) {
+				_descriptionArmed = !ImGui::IsKeyDown(ImGuiKey_GamepadL3);
+			}
+			if (_descriptionArmed && stick->Down && stick->DownDuration >= holdTime && !_descriptionHeld) {
 				_descriptionHeld = true;
 				_descriptionFitLines = -1.0f;
 				_settings->descriptionCollapsed = !_settings->descriptionCollapsed;
 				_settingsChanged = true;
 			}
-			if (ImGui::IsKeyReleased(ImGuiKey_GamepadFaceUp) && !std::exchange(_descriptionHeld, false)) {
+			if (ImGui::IsKeyReleased(ImGuiKey_GamepadR3) && std::exchange(_descriptionArmed, false) && !std::exchange(_descriptionHeld, false)) {
 				_fitDescription = true;
 				if (_settings->descriptionCollapsed) {
 					_settings->descriptionCollapsed = false;
@@ -1863,9 +1952,14 @@ namespace CompletionistUI
 			_settingsChanged = true;
 		}
 
-		// View / Back opens Find
+		// View / Back types in the page's filter, or opens Find where there's none
 		if (ImGui::IsKeyPressed(ImGuiKey_GamepadBack, false)) {
-			OpenPage(findPage);
+			if (_filterShownLast) {
+				_focusFilter = true;
+				_pendingFocus = _filterID;
+			} else {
+				OpenPage(findPage);
+			}
 		}
 	}
 
@@ -2730,8 +2824,8 @@ namespace CompletionistUI
 		if (!_padActionKey.empty()) {
 			hints.push_back({ { PadButton::kFaceLeft }, a_provider.Translate(_padActionKey) });
 		}
-		if (!_padTriggerKey.empty()) {
-			hints.push_back({ { PadButton::kRightTrigger }, a_provider.Translate(_padTriggerKey) });
+		if (!_padTickKey.empty()) {
+			hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate(_padTickKey) });
 		}
 		if (a_cellWindow) {
 			// Cell Scanner
@@ -2740,18 +2834,14 @@ namespace CompletionistUI
 		} else {
 		hints.push_back({ { PadButton::kFaceRight }, a_provider.Translate(ImGui::GetIO().NavVisible && !_sidebarFocused ? "UI_Pad_Back" : "UI_Pad_Close") });
 		hints.push_back({ { PadButton::kLeftBumper, PadButton::kRightBumper }, a_provider.Translate("UI_Pad_Pages") });
-		if (const auto tabKeys = std::exchange(_tabsShown, TabKeys::kNone); tabKeys != TabKeys::kNone) {
-			if (tabKeys == TabKeys::kLeft) {
-				hints.push_back({ { PadButton::kLeftTrigger }, a_provider.Translate("UI_Pad_Tabs") });
-			} else {
-				hints.push_back({ { PadButton::kLeftTrigger, PadButton::kRightTrigger }, a_provider.Translate("UI_Pad_Tabs") });
-			}
+		if (std::exchange(_tabsShown, false)) {
+			hints.push_back({ { PadButton::kLeftTrigger, PadButton::kRightTrigger }, a_provider.Translate("UI_Pad_Tabs") });
 		}
-		hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate("UI_Pad_Description") });
-		hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate(_settings && _settings->descriptionCollapsed ? "UI_Pad_DescriptionHoldExpand" : "UI_Pad_DescriptionHoldCollapse") });
+		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Description") });
+		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate(_settings && _settings->descriptionCollapsed ? "UI_Pad_DescriptionHoldExpand" : "UI_Pad_DescriptionHoldCollapse") });
 		hints.push_back({ { PadButton::kLeftStickPress }, a_provider.Translate("UI_Pad_Sidebar") });
 		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Scroll") });
-		hints.push_back({ { PadButton::kView }, a_provider.Translate("UI_Pad_Find") });
+		hints.push_back({ { PadButton::kView }, a_provider.Translate(_filterShown ? "UI_Pad_Filter" : "UI_Pad_Find") });
 		}
 
 		const float button = std::floor(fontSize * 1.15f);
@@ -3087,12 +3177,8 @@ namespace CompletionistUI
 
 		const auto& style = ImGui::GetStyle();
 		const auto  closeLabel = a_provider.Translate("UI_Close");
-		const auto  shotLabel = a_provider.Translate("UI_Screenshot");
 		const float cogSide = ImGui::GetFrameHeight();
 		float width = ButtonWidth(closeLabel.c_str()) + cogSide + style.ItemSpacing.x;
-		if (_showScreenshotButton) {
-			width += ButtonWidth(shotLabel.c_str()) + style.ItemSpacing.x;
-		}
 
 		const float statusWidth = _statusTime > 0.0f ? ImGui::CalcTextSize(_status.c_str()).x + style.ItemSpacing.x : 0.0f;
 		if (Decor::Anime()) {
@@ -3104,12 +3190,6 @@ namespace CompletionistUI
 		if (statusWidth > 0.0f) {
 			ImGui::AlignTextToFramePadding();
 			ImGui::TextColored(Themes::GetPalette().textDim, "%s", _status.c_str());
-			ImGui::SameLine();
-		}
-		if (_showScreenshotButton) {
-			if (ThemedButton(shotLabel.c_str())) {
-				_screenshotRequested = true;
-			}
 			ImGui::SameLine();
 		}
 
@@ -3563,16 +3643,28 @@ namespace CompletionistUI
 
 	// Settings and patch sub-pages, LT / RT to switch
 	// Pages keep RT for pinning, so LT cycles through the tabs there
-	bool Menu::TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected, bool a_leftOnly) {
+	void Menu::PageFilter(IDataProvider& a_provider, float a_width) {
+
+		_filterShown = true;
+		ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), a_width);
+		_filterID = ImGui::GetItemID();
+		// View was pressed: the focus has come here, now it's typing
+		if (_focusFilter && ImGui::IsItemFocused()) {
+			_focusFilter = false;
+			ImGui::SetKeyboardFocusHere(-1);
+		}
+	}
+
+	bool Menu::TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected) {
 
 		const auto& palette = Themes::GetPalette();
 		const float fontSize = ImGui::GetFontSize();
 		const auto  before = a_selected;
 
-		_tabsShown = a_leftOnly ? TabKeys::kLeft : TabKeys::kBoth;
+		_tabsShown = true;
 		if (!ImGui::IsAnyItemActive() && !a_tabs.empty() && !TourRunning()) {
-			const bool previous = !a_leftOnly && ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
-			const bool next = ImGui::IsKeyPressed(a_leftOnly ? ImGuiKey_GamepadL2 : ImGuiKey_GamepadR2, false);
+			const bool previous = ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
+			const bool next = ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false);
 			if (previous || next) {
 				const auto current = std::ranges::find(a_tabs, a_selected, &TabItem::id);
 				const auto count = static_cast<std::ptrdiff_t>(a_tabs.size());
@@ -3780,12 +3872,12 @@ namespace CompletionistUI
 		const bool killsTab = shownTab >= 0 && shownTab < static_cast<int>(page.tabs.size()) && page.tabs[shownTab].layout == PageLayout::kKills;
 		const bool mixingTab = shownTab >= 0 && shownTab < static_cast<int>(page.tabs.size()) && page.tabs[shownTab].layout == PageLayout::kMixing;
 		if (mixingTab) {
-			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
+			PageFilter(a_provider, ImGui::GetFontSize() * 14.0f);
 			ImGui::Spacing();
 		} else if (!killsTab) {
 			const auto  toolsMin = ImGui::GetCursorScreenPos();
 			const float toolsWidth = ImGui::GetContentRegionAvail().x;
-			ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), ImGui::GetFontSize() * 14.0f);
+			PageFilter(a_provider, ImGui::GetFontSize() * 14.0f);
 			ImGui::SameLine(0.0f, ImGui::GetFontSize());
 			MarkerToggle("##HideCompleted", _hideCompleted, a_provider.Translate("UI_HideCompleted").c_str());
 			if (Decor::Gothic()) {
@@ -3921,7 +4013,7 @@ namespace CompletionistUI
 			if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == selected; })) {
 				selected = tabs.front().id;
 			}
-			TabRow(tabs, selected, true);
+			TabRow(tabs, selected);
 			ImGui::Spacing();
 			view = &TabView(page, std::stoi(selected));
 		}
@@ -4120,7 +4212,7 @@ namespace CompletionistUI
 		// Filter and sort
 		//---------------------------------------------------
 
-		ThemedFilterInput("##Filter", a_provider.Translate("UI_Filter").c_str(), _filter.data(), _filter.size(), fontSize * 14.0f);
+		PageFilter(a_provider, fontSize * 14.0f);
 		ImGui::SameLine(0.0f, fontSize);
 		const std::string sortLabels[] = {
 			a_provider.Translate("UI_Kills_SortKills"),
@@ -4406,6 +4498,26 @@ namespace CompletionistUI
 	}
 
 	//---------------------------------------------------
+	//-- Completionist UI ( Draw Move Icon ) ------------
+	//---------------------------------------------------
+
+	// A cross with an arrowhead on each end
+	static void DrawMoveIcon(ImDrawList* a_drawList, ImVec2 a_centre, float a_size, ImU32 a_colour) {
+
+		const float reach = a_size * 0.46f;
+		const float head = a_size * 0.17f;
+		const float stroke = std::max(1.2f, a_size * 0.08f);
+		const float x = a_centre.x;
+		const float y = a_centre.y;
+		a_drawList->AddLine(ImVec2(x - reach + head, y), ImVec2(x + reach - head, y), a_colour, stroke);
+		a_drawList->AddLine(ImVec2(x, y - reach + head), ImVec2(x, y + reach - head), a_colour, stroke);
+		a_drawList->AddTriangleFilled(ImVec2(x - reach, y), ImVec2(x - reach + head, y - head), ImVec2(x - reach + head, y + head), a_colour);
+		a_drawList->AddTriangleFilled(ImVec2(x + reach, y), ImVec2(x + reach - head, y + head), ImVec2(x + reach - head, y - head), a_colour);
+		a_drawList->AddTriangleFilled(ImVec2(x, y - reach), ImVec2(x + head, y - reach + head), ImVec2(x - head, y - reach + head), a_colour);
+		a_drawList->AddTriangleFilled(ImVec2(x, y + reach), ImVec2(x - head, y + reach - head), ImVec2(x + head, y + reach - head), a_colour);
+	}
+
+	//---------------------------------------------------
 	//-- Completionist UI ( Draw Check Icon ) -----------
 	//---------------------------------------------------
 
@@ -4452,14 +4564,16 @@ namespace CompletionistUI
 	// Height above or below, nothing under 2 m
 	static void DrawHeight(ImDrawList* a_drawList, IDataProvider& a_provider, float a_left, float a_centreY, float a_height, ImU32 a_colour) {
 
-		const int metres = static_cast<int>(std::lround(std::abs(a_height)));
-		if (metres < 2) {
-			return;
-		}
+		const int   metres = static_cast<int>(std::lround(std::abs(a_height)));
 		const float fontSize = ImGui::GetFontSize();
 		const float chevron = fontSize * 0.28f;
 		const float x = a_left + chevron;
 		const float stroke = std::max(1.2f, fontSize * 0.08f);
+		// On your level: a flat line where the chevron goes
+		if (metres < 2) {
+			a_drawList->AddLine(ImVec2(x - chevron, a_centreY), ImVec2(x + chevron, a_centreY), a_colour, stroke);
+			return;
+		}
 		const float up = a_height > 0.0f ? -1.0f : 1.0f;
 		a_drawList->AddLine(ImVec2(x - chevron, a_centreY - up * chevron * 0.5f), ImVec2(x, a_centreY + up * chevron * 0.5f), a_colour, stroke);
 		a_drawList->AddLine(ImVec2(x, a_centreY + up * chevron * 0.5f), ImVec2(x + chevron, a_centreY - up * chevron * 0.5f), a_colour, stroke);
@@ -4941,7 +5055,7 @@ namespace CompletionistUI
 						break;
 					}
 					ImGui::EndDisabled();
-					if (!item.info.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+					if (!item.info.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_AllowWhenOverlappedByItem)) {
 						ImGui::SetTooltip("%s", a_provider.Translate(item.info).c_str());
 					}
 					ImGui::PopID();
@@ -5051,9 +5165,9 @@ namespace CompletionistUI
 					_shownMarker = item.refID;
 				}
 				if (_pins.enabled && ImGui::IsItemFocused() && ImGui::GetIO().NavVisible) {
-					// R2 pins, as on the pages
-					_padTriggerKey = pinned ? "UI_Unpin" : "UI_Pin";
-					if (ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false)) {
+					// X pins, as on the pages
+					_padActionKey = pinned ? "UI_Unpin" : "UI_Pin";
+					if (ImGui::IsKeyPressed(rowActionKey, false)) {
 						TogglePin(a_provider, entry);
 					}
 				}
@@ -5921,15 +6035,15 @@ namespace CompletionistUI
 					const auto min = ImGui::GetItemRectMin();
 					const auto max = ImGui::GetItemRectMax();
 
-					// Tick to mark complete for the mouse, Square on a controller
+					// Tick to mark complete for the mouse, Triangle on a controller
 					float right = max.x - style.FramePadding.x;
 					if (entry->canToggle) {
 						const float side = rowHeight;
 						const bool  hovered = !_padActive && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseHoveringRect(min, max);
 						const auto  action = RowAction::kComplete;
 						if (rowFocused) {
-							_padActionKey = RowActionKey(action, entry->IsComplete());
-							if (ImGui::IsKeyPressed(rowActionKey, false)) {
+							_padTickKey = RowActionKey(action, entry->IsComplete());
+							if (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp, false)) {
 								_journalKey = keyOf(*entry);
 								DoRowAction(a_provider, *entry, action);
 							}
@@ -6152,8 +6266,7 @@ namespace CompletionistUI
 			_hoveredEntry = a_entry;
 		}
 
-		// Row action, X on a controller
-		// Square always marks complete, R2 pins or sets the location marker
+		// Row action on a controller: Triangle always marks complete, Square pins or sets the location marker
 		const auto action = RowActionFor(a_entry);
 		const auto place = action == RowAction::kMarker || action == RowAction::kPin ? action : RowAction::kNone;
 		const bool on = place == RowAction::kMarker ? _pins.Locates(a_entry.MarkerID())
@@ -6161,14 +6274,14 @@ namespace CompletionistUI
 		const bool tick = a_entry.canToggle;
 		const bool rowFocused = ImGui::IsItemFocused() && ImGui::GetIO().NavVisible;
 		if (rowFocused && tick) {
-			_padActionKey = RowActionKey(RowAction::kComplete, a_entry.IsComplete());
-			if (ImGui::IsKeyPressed(rowActionKey, false)) {
+			_padTickKey = RowActionKey(RowAction::kComplete, a_entry.IsComplete());
+			if (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp, false)) {
 				DoRowAction(a_provider, a_entry, RowAction::kComplete);
 			}
 		}
 		if (rowFocused && place != RowAction::kNone) {
-			_padTriggerKey = RowActionKey(place, on);
-			if (ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false)) {
+			_padActionKey = RowActionKey(place, on);
+			if (ImGui::IsKeyPressed(rowActionKey, false)) {
 				DoRowAction(a_provider, a_entry, place);
 			}
 		}
@@ -6176,7 +6289,7 @@ namespace CompletionistUI
 		const bool rowHovered = !_padActive && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && ImGui::IsMouseHoveringRect(start, rowMax);
 		const bool showButtons = rowHovered || (rowFocused && _padActive);
 		const bool showPlace = place != RowAction::kNone && (showButtons || on);
-		// The tick is for the mouse, a controller has Square
+		// The tick is for the mouse, a controller has Triangle
 		const bool showTick = tick && rowHovered;
 		const float side = ImGui::GetFrameHeight();
 		const float buttonsRight = boxMax.x - ImGui::GetStyle().FramePadding.x;
@@ -6765,6 +6878,7 @@ namespace CompletionistUI
 			_settingsChanged = true;
 		}
 		ImGui::SetCursorScreenPos(ImVec2(start.x, gapTop + a_gap));
+		_fitDescription = false;	// this panel already fits what it shows
 		BeginFramedPanel("##Shout", ImVec2(0.0f, a_height), false, true);
 		auto* gripList = ImGui::GetWindowDrawList();
 		gripList->PushClipRect(ImVec2(start.x, gapTop), ImVec2(centreX * 2.0f - start.x, gapTop + a_gap + a_height), false);
@@ -7032,189 +7146,6 @@ namespace CompletionistUI
 		static float Slot() { return Radius() * 2.3f + ImGui::GetTextLineHeight() + ImGui::GetFontSize() * 0.2f; }	// one perk and its label
 		static float ColumnGap() { return ImGui::GetFontSize() * 12.0f; }	// at most, so short trees keep short lines
 		static float TreeHeight(std::int32_t a_rows) { return Slot() * static_cast<float>(std::max(1, a_rows)) + ShoutLayout::Padding(); }
-		static float BranchLine() { return ImGui::GetFontSize() * 1.4f; }	// a row of a branch column
-		static float BranchHead() { return ImGui::GetFontSize() * 2.2f; }	// the starting perk and the bar under it
-		static constexpr std::size_t branchTreeFrom = 20;	// more perks than this and the tree is drawn as branch columns
-	}
-
-	//---------------------------------------------------
-	//-- Completionist UI ( Perk Branch Layout ) --------
-	//---------------------------------------------------
-
-	// Perk overhauls have too many perks for columns by depth, but most of them are chains from
-	// one starting perk: each branch is listed down its own column. A perk with a second parent
-	// is listed again under it, one that three or more branches share goes on a bar below them
-	static void LayoutPerkBranches(const std::vector<TrainerPerk>& a_perks, const std::vector<std::vector<std::int32_t>>& a_links, PerkTreeLayout& a_layout) {
-
-		constexpr std::int32_t maxRows = 8;
-		constexpr std::int32_t maxColumns = 9;	// more and the names get too short to read, so short branches share
-		constexpr std::int32_t maxIndent = 2;
-		const auto             count = a_perks.size();
-
-		std::vector<std::vector<std::int32_t>> parents(count);
-		for (std::size_t i = 0; i < count; ++i) {
-			for (const auto child : a_links[i]) {
-				parents[child].push_back(static_cast<std::int32_t>(i));
-			}
-		}
-		std::vector<std::int32_t> starts;
-		for (std::size_t i = 0; i < count; ++i) {
-			if (parents[i].empty()) {
-				starts.push_back(static_cast<std::int32_t>(i));
-			}
-		}
-		if (starts.size() == 1) {
-			a_layout.root = starts.front();
-			starts = a_links[a_layout.root];
-		}
-		std::ranges::stable_sort(starts, {}, [&](std::int32_t a_index) { return a_perks[a_index].lane; });
-
-		// Shared by three or more branches
-		std::vector<std::int32_t> branchesReaching(count, 0);
-		for (const auto start : starts) {
-			std::vector<bool>         seen(count, false);
-			std::vector<std::int32_t> pending{ start };
-			seen[start] = true;
-			while (!pending.empty()) {
-				const auto index = pending.back();
-				pending.pop_back();
-				++branchesReaching[index];
-				for (const auto child : a_links[index]) {
-					if (!seen[child]) {
-						seen[child] = true;
-						pending.push_back(child);
-					}
-				}
-			}
-		}
-		const auto isJoint = [&](std::int32_t a_index) { return branchesReaching[a_index] >= 3; };
-
-		std::vector<std::int32_t> depth(count, 0);
-		const auto                depthOf = [&](const auto& a_self, std::int32_t a_index) -> std::int32_t {
-			if (depth[a_index] == 0) {
-				std::int32_t longest = 0;
-				for (const auto child : a_links[a_index]) {
-					if (!isJoint(child)) {
-						longest = std::max(longest, a_self(a_self, child));
-					}
-				}
-				depth[a_index] = longest + 1;
-			}
-			return depth[a_index];
-		};
-
-		// The rows a perk and what follows it would take, so a side branch moves on whole
-		a_layout.lineOf.assign(count, -1);
-		const auto rowsFor = [&](const auto& a_self, std::int32_t a_index, std::vector<bool>& a_seen) -> std::int32_t {
-			if (a_layout.lineOf[a_index] >= 0 || a_seen[a_index]) {
-				return 1;
-			}
-			a_seen[a_index] = true;
-			std::int32_t total = 1;
-			for (const auto child : a_links[a_index]) {
-				if (!isJoint(child)) {
-					total += a_self(a_self, child, a_seen);
-				}
-			}
-			return total;
-		};
-
-		std::int32_t column = 0;
-		std::int32_t row = 0;
-		const auto   place = [&](const auto& a_self, std::int32_t a_index, std::int32_t a_parent, std::int32_t a_indent, bool a_side) -> void {
-			std::vector<bool> seen(count, false);
-			const auto        needs = a_side ? rowsFor(rowsFor, a_index, seen) : 1;
-			auto              indent = a_indent;
-			if (row > 0 && row + needs > maxRows) {
-				++column;
-				row = 0;
-				indent = 0;
-			}
-			PerkBranchLine line;
-			line.perk = a_index;
-			line.parent = a_parent;
-			line.column = column;
-			line.lastColumn = column;
-			line.row = row++;
-			line.indent = indent;
-			line.repeat = a_layout.lineOf[a_index] >= 0;
-			a_layout.lines.push_back(line);
-			if (line.repeat) {
-				return;
-			}
-			a_layout.lineOf[a_index] = static_cast<std::int32_t>(a_layout.lines.size()) - 1;
-
-			auto children = a_links[a_index];
-			std::erase_if(children, isJoint);
-			std::ranges::stable_sort(children, std::ranges::greater{}, [&](std::int32_t a_child) { return depthOf(depthOf, a_child); });
-			for (std::size_t i = 0; i < children.size(); ++i) {
-				a_self(a_self, children[i], a_index, i == 0 ? indent : std::min(indent + 1, maxIndent), i > 0);
-			}
-		};
-		for (const bool stack : { false, true }) {
-			a_layout.lines.clear();
-			a_layout.lineOf.assign(count, -1);
-			column = 0;
-			row = 0;
-			for (const auto start : starts) {
-				if (isJoint(start)) {
-					continue;
-				}
-				std::vector<bool> seen(count, false);
-				const bool        stacks = stack && row > 0 && row + rowsFor(rowsFor, start, seen) <= maxRows;
-				if (row > 0 && !stacks) {
-					++column;
-					row = 0;
-				}
-				const auto first = a_layout.lines.size();
-				place(place, start, -1, 0, false);
-				a_layout.lines[first].stacked = stacks;
-			}
-			a_layout.branchColumns = std::max(1, row > 0 ? column + 1 : column);
-			if (a_layout.branchColumns <= maxColumns) {
-				break;
-			}
-		}
-
-		// Below the columns they join, each after any it follows from
-		std::vector<std::int32_t> columnRows(static_cast<std::size_t>(a_layout.branchColumns), 0);
-		for (const auto& line : a_layout.lines) {
-			columnRows[line.column] = std::max(columnRows[line.column], line.row + 1);
-		}
-		std::vector<std::int32_t> joints;
-		for (std::size_t i = 0; i < count; ++i) {
-			if (isJoint(static_cast<std::int32_t>(i))) {
-				joints.push_back(static_cast<std::int32_t>(i));
-			}
-		}
-		std::ranges::stable_sort(joints, {}, [&](std::int32_t a_index) { return a_layout.column[a_index]; });
-		for (const auto joint : joints) {
-			PerkBranchLine line;
-			line.perk = joint;
-			line.joint = true;
-			line.column = a_layout.branchColumns - 1;
-			line.lastColumn = 0;
-			for (const auto parent : parents[joint]) {
-				if (a_layout.lineOf[parent] >= 0) {
-					const auto& from = a_layout.lines[a_layout.lineOf[parent]];
-					line.column = std::min(line.column, from.column);
-					line.lastColumn = std::max(line.lastColumn, from.lastColumn);
-				}
-			}
-			line.lastColumn = std::max(line.lastColumn, line.column);
-			for (auto i = line.column; i <= line.lastColumn; ++i) {
-				line.row = std::max(line.row, columnRows[i]);
-			}
-			for (auto i = line.column; i <= line.lastColumn; ++i) {
-				columnRows[i] = line.row + 1;
-			}
-			a_layout.lines.push_back(line);
-			a_layout.lineOf[joint] = static_cast<std::int32_t>(a_layout.lines.size()) - 1;
-		}
-		a_layout.branchRows = *std::ranges::max_element(columnRows);
-
-		const float content = (a_layout.root >= 0 ? TrainerLayout::BranchHead() : 0.0f) + TrainerLayout::BranchLine() * static_cast<float>(a_layout.branchRows);
-		a_layout.rows = static_cast<std::int32_t>(std::ceil(content / TrainerLayout::Slot()));
 	}
 
 	//---------------------------------------------------
@@ -7329,9 +7260,6 @@ namespace CompletionistUI
 		}
 		layout.width = std::max(0.0f, x - 1.0f);
 		layout.place = std::move(place);
-		if (count > TrainerLayout::branchTreeFrom) {
-			LayoutPerkBranches(a_perks, links, layout);
-		}
 		return layout;
 	}
 
@@ -7378,8 +7306,8 @@ namespace CompletionistUI
 		const float gap = ShoutLayout::CardGap();
 		const float line = ImGui::GetTextLineHeightWithSpacing();
 		const bool  sideBySide = width >= fontSize * 40.0f;
+		const float infoWidth = sideBySide ? std::floor(std::clamp(width * 0.28f, fontSize * 15.0f, fontSize * 24.0f)) : width;
 		const auto  layout = LayoutPerkTree(perks);
-		const float infoWidth = sideBySide ? std::floor(std::clamp(width * 0.28f, fontSize * 15.0f, fontSize * (layout.lines.empty() ? 24.0f : 19.0f))) : width;
 		const auto  rows = std::max(layout.rows, a_withName ? _trainerRows : 1);
 		const float infoHeight = padding * 2.0f + TrainerLayout::InfoContent();
 		const float boxHeight = sideBySide ? std::max(infoHeight, TrainerLayout::TreeHeight(rows)) : infoHeight;
@@ -7498,170 +7426,6 @@ namespace CompletionistUI
 			labels.push_back(std::move(label));
 		}
 
-		const auto perkTooltip = [&](const TrainerPerk& a_perk) {
-			ImGui::BeginTooltip();
-			ImGui::TextColored(palette.heading, "%s", a_perk.name.c_str());
-			if (a_perk.ranks > 1) {
-				ImGui::TextUnformatted(a_provider.Translate("UI_Trainers_PerkRank{" + std::to_string(a_perk.rank) + "}{" + std::to_string(a_perk.ranks) + "}").c_str());
-			}
-			if (a_perk.level > 0) {
-				ImGui::TextColored(info.playerLevel >= a_perk.level ? palette.found : palette.textDim, "%s", a_provider.Translate("UI_Trainers_PerkNeeds{" + std::to_string(a_perk.level) + "}").c_str());
-			}
-			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(a_perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
-			ImGui::EndTooltip();
-		};
-
-		//---------------------------------------------------
-		// Big trees: a column per branch
-		//---------------------------------------------------
-
-		if (!layout.lines.empty()) {
-			const float rowHeight = TrainerLayout::BranchLine();
-			const float head = layout.root >= 0 ? TrainerLayout::BranchHead() : 0.0f;
-			const float nodeRadius = radius * 0.85f;
-			const float step = fontSize * 0.8f;
-			const float textGap = fontSize * 0.35f;
-			const float columnWidth = std::min(fontSize * 14.0f, ((treeMax.x - treeMin.x) - edge * 2.0f) / static_cast<float>(layout.branchColumns));
-			const float gutter = std::ranges::any_of(layout.lines, &PerkBranchLine::stacked) ? nodeRadius * 1.8f : 0.0f;	// the stacked branches' drops pass here
-			const float left = (treeMin.x + treeMax.x - columnWidth * static_cast<float>(layout.branchColumns) + gutter * 0.5f) * 0.5f;
-			const float top = (treeMin.y + treeMax.y - head - rowHeight * static_cast<float>(layout.branchRows)) * 0.5f;
-			const float textPad = fontSize * 0.2f;
-			const auto  columnX = [&](std::int32_t a_column) { return left + columnWidth * static_cast<float>(a_column) + nodeRadius; };
-
-			// A name always beats its level when there's only room for one
-			std::vector<std::string> texts;
-			std::vector<ImVec2>      spots;
-			texts.reserve(layout.lines.size());
-			spots.reserve(layout.lines.size());
-			for (const auto& item : layout.lines) {
-				const auto& perk = perks[item.perk];
-				const float rowY = top + head + rowHeight * (static_cast<float>(item.row) + 0.5f);
-				const auto  named = perk.ranks > 1 ? perk.name + " " + std::to_string(perk.rank) + "/" + std::to_string(perk.ranks) : perk.name;
-				if (item.joint) {
-					const float jointWidth = ImGui::CalcTextSize(labels[item.perk].c_str()).x + nodeRadius * 2.0f + textGap;
-					spots.emplace_back((columnX(item.column) + columnX(item.lastColumn) - jointWidth) * 0.5f + nodeRadius, rowY);
-					texts.push_back(labels[item.perk]);
-					continue;
-				}
-				const float indent = step * static_cast<float>(item.indent);
-				const float room = columnWidth - indent - nodeRadius * 2.0f - textGap - fontSize * 0.3f;
-				spots.emplace_back(columnX(item.column) + indent, rowY);
-				texts.push_back(ImGui::CalcTextSize(labels[item.perk].c_str()).x <= room ? labels[item.perk] : FitText(named, room));
-			}
-			const auto textEnd = [&](std::size_t a_line) { return spots[a_line].x + nodeRadius + textGap + ImGui::CalcTextSize(texts[a_line].c_str()).x + textPad; };
-
-			struct Link
-			{
-				ImVec2 from;
-				ImVec2 to;
-				bool   lit;
-			};
-			std::vector<Link> links;
-			const auto        bothTaken = [&](std::int32_t a_left, std::int32_t a_right) { return perks[a_left].rank > 0 && perks[a_right].rank > 0; };
-
-			// The starting perk, a bar under it, and a drop to each branch
-			ImVec2 rootSpot{};
-			if (layout.root >= 0) {
-				const float rootWidth = ImGui::CalcTextSize(labels[layout.root].c_str()).x + nodeRadius * 2.0f + textGap;
-				rootSpot = ImVec2((treeMin.x + treeMax.x - rootWidth) * 0.5f + nodeRadius, top + fontSize * 0.7f);
-				const float rootBarY = top + head - fontSize * 0.35f;
-				float       first = rootSpot.x;
-				float       last = rootSpot.x;
-				bool        anyLit = false;
-				for (std::size_t i = 0; i < layout.lines.size(); ++i) {
-					const auto& item = layout.lines[i];
-					if (item.parent < 0 && !item.joint) {
-						const bool lit = bothTaken(layout.root, item.perk);
-						first = std::min(first, spots[i].x);
-						last = std::max(last, spots[i].x);
-						anyLit = anyLit || lit;
-						if (item.stacked) {
-							const float dropX = spots[i].x - gutter;
-							first = std::min(first, dropX);
-							links.push_back({ ImVec2(dropX, rootBarY), ImVec2(dropX, spots[i].y), lit });
-							links.push_back({ ImVec2(dropX, spots[i].y), spots[i], lit });
-						} else {
-							links.push_back({ ImVec2(spots[i].x, rootBarY), spots[i], lit });
-						}
-					}
-				}
-				links.push_back({ ImVec2(first, rootBarY), ImVec2(last, rootBarY), anyLit });
-				links.push_back({ rootSpot, ImVec2(rootSpot.x, rootBarY), anyLit });
-			}
-
-			std::vector<bool> barDrawn(layout.lines.size(), false);
-			for (std::size_t i = 0; i < layout.lines.size(); ++i) {
-				const auto& item = layout.lines[i];
-				if (item.parent < 0) {
-					continue;
-				}
-				const auto fromLine = static_cast<std::size_t>(layout.lineOf[item.parent]);
-				const auto from = layout.lines[fromLine].column != item.column ? ImVec2(textEnd(fromLine), spots[fromLine].y) : spots[fromLine];
-				links.push_back({ from, spots[i], bothTaken(item.parent, item.perk) });
-			}
-
-			// A shared perk's parents drop to its bar
-			for (std::size_t i = 0; i < perks.size(); ++i) {
-				for (const auto child : perks[i].children) {
-					const auto toLine = layout.lineOf[child];
-					const auto fromLine = layout.lineOf[i];
-					if (toLine < 0 || fromLine < 0 || !layout.lines[toLine].joint) {
-						continue;
-					}
-					const auto& joint = layout.lines[toLine];
-					const float jointY = spots[toLine].y;
-					if (!barDrawn[toLine]) {
-						barDrawn[toLine] = true;
-						links.push_back({ ImVec2(columnX(joint.column), jointY), ImVec2(columnX(joint.lastColumn), jointY), perks[child].rank > 0 });
-					}
-					links.push_back({ spots[fromLine], ImVec2(spots[fromLine].x, jointY), bothTaken(static_cast<std::int32_t>(i), child) });
-				}
-			}
-
-			drawList->PushClipRect(treeMin, treeMax, true);
-			for (const bool lit : { false, true }) {
-				for (const auto& link : links) {
-					if (link.lit == lit) {
-						Decor::PerkLink(drawList, link.from, link.to, nodeRadius, lit);
-					}
-				}
-			}
-
-			const auto  mouse = ImGui::GetMousePos();
-			const bool  hoverable = ImGui::IsWindowHovered();
-			std::size_t hovered = perks.size();
-			const auto  drawPerk = [&](std::int32_t a_perk, ImVec2 a_spot, const std::string& a_text, bool a_repeat) {
-				const auto  state = stateOf(a_perk);
-				const auto  size = ImGui::CalcTextSize(a_text.c_str());
-				const float textX = a_spot.x + nodeRadius + textGap;
-				const float textY = a_spot.y - size.y * 0.5f;
-				const auto  colour = a_repeat || state == PerkState::kLocked ? Colour(palette.textDim) : state == PerkState::kTaken ? Colour(palette.text) : Decor::PerkColour(PerkState::kNext);
-				drawList->AddRectFilled(ImVec2(textX - textPad, textY), ImVec2(textX + size.x + textPad, textY + size.y), Colour(palette.background, 0.85f), textPad);
-				if (a_repeat) {
-					// Only a mark: its own node is under the other parent
-					Decor::Diamond(drawList, a_spot, nodeRadius * 0.6f, Colour(palette.textDim), false);
-				} else {
-					Decor::PerkNode(drawList, a_spot, nodeRadius, state);
-				}
-				drawList->AddText(ImVec2(textX, textY), colour, a_text.c_str());
-				if (hoverable && mouse.x >= a_spot.x - nodeRadius && mouse.x <= textX + size.x && std::abs(mouse.y - a_spot.y) <= rowHeight * 0.5f) {
-					hovered = static_cast<std::size_t>(a_perk);
-				}
-			};
-			if (layout.root >= 0) {
-				drawPerk(layout.root, rootSpot, labels[layout.root], false);
-			}
-			for (std::size_t i = 0; i < layout.lines.size(); ++i) {
-				drawPerk(layout.lines[i].perk, spots[i], texts[i], layout.lines[i].repeat);
-			}
-			drawList->PopClipRect();
-
-			if (hovered < perks.size()) {
-				perkTooltip(perks[hovered]);
-			}
-			return;
-		}
-
 		// Columns evenly spaced up to a cap and centred, the first and last columns' labels kept inside
 		float leftRoom = radius * 1.5f;
 		float rightRoom = radius * 1.5f;
@@ -7729,7 +7493,17 @@ namespace CompletionistUI
 		drawList->PopClipRect();
 
 		if (hovered < perks.size()) {
-			perkTooltip(perks[hovered]);
+			const auto& perk = perks[hovered];
+			ImGui::BeginTooltip();
+			ImGui::TextColored(palette.heading, "%s", perk.name.c_str());
+			if (perk.ranks > 1) {
+				ImGui::TextUnformatted(a_provider.Translate("UI_Trainers_PerkRank{" + std::to_string(perk.rank) + "}{" + std::to_string(perk.ranks) + "}").c_str());
+			}
+			if (perk.level > 0) {
+				ImGui::TextColored(info.playerLevel >= perk.level ? palette.found : palette.textDim, "%s", a_provider.Translate("UI_Trainers_PerkNeeds{" + std::to_string(perk.level) + "}").c_str());
+			}
+			ImGui::TextColored(palette.textDim, "%s", a_provider.Translate(perk.rank > 0 ? "UI_Trainers_PerkTaken" : "UI_Trainers_PerkNotTaken").c_str());
+			ImGui::EndTooltip();
 		}
 	}
 
@@ -8161,7 +7935,8 @@ namespace CompletionistUI
 			if (pressed == 1) {
 				a_provider.PreparePictures(redraw);
 				_picturesDialog = PicturesDialog::kProgress;
-				_picturesStarted = false;
+				// Started now: with every picture kept already it's over before this window next looks
+				_picturesStarted = true;
 			} else if (pressed == 2 || back) {
 				close();
 			}
@@ -8206,11 +7981,23 @@ namespace CompletionistUI
 			{ "UI_Tour_Entries", TourSpot::kEntries, TourView::kPage },
 			{ "UI_Tour_PageTools", TourSpot::kPageTools, TourView::kPage },
 			{ "UI_Tour_Description", TourSpot::kDescription, TourView::kPage },
+			{ "UI_Tour_Pins", TourSpot::kEntries, TourView::kPage },
+			{ "UI_Tour_Quests", TourSpot::kBody, TourView::kNamed, "#quest" },
+			{ "UI_Tour_Trainers", TourSpot::kBody, TourView::kNamed, "$MCMPageTrainers", "$MCMPageTrainers" },
+			{ "UI_Tour_Dragons", TourSpot::kBody, TourView::kNamed, "$MCMPageDragons", "$MCMPageDragons" },
+			{ "UI_Tour_Ingredients", TourSpot::kBody, TourView::kNamed, "ingredients", "ingredients" },
+			{ "UI_Tour_Kills", TourSpot::kBody, TourView::kNamed, "#kills" },
+			{ "UI_Tour_Achievements", TourSpot::kBody, TourView::kNamed, "achievements", "achievements" },
+			{ "UI_Tour_Museum", TourSpot::kBody, TourView::kNamed, "UI_Museum_Displays", "UI_Museum_Displays" },
 			{ "UI_Tour_CellList", TourSpot::kCellList, TourView::kCell },
 			{ "UI_Tour_CellOptions", TourSpot::kCellOptions, TourView::kCell },
 			{ "UI_Tour_CellBar", TourSpot::kCellBar, TourView::kCell },
 			{ "UI_Tour_OnScreen", TourSpot::kOnScreen, TourView::kOnScreen },
-			{ "UI_Tour_Settings", TourSpot::kBody, TourView::kSettings },
+			{ "UI_Tour_Settings", TourSpot::kBody, TourView::kSettingsWindow },
+			{ "UI_Tour_SettingsGeneral", TourSpot::kBody, TourView::kSettingsTab, "general" },
+			{ "UI_Tour_SettingsHud", TourSpot::kBody, TourView::kSettingsTab, "hud" },
+			{ "UI_Tour_SettingsMuseum", TourSpot::kBody, TourView::kSettingsTab, "museum", "UI_Museum_Displays" },
+			{ "UI_Tour_SettingsLog", TourSpot::kBody, TourView::kSettingsTab, "log" },
 			{ "UI_Tour_Pad", TourSpot::kPadHints, TourView::kOverview },
 			{ "UI_Tour_Done", TourSpot::kTourButton, TourView::kSettingsWindow },
 		};
@@ -8219,7 +8006,18 @@ namespace CompletionistUI
 
 	int Menu::TourSteps() {
 
-		return 14;
+		return 26;
+	}
+
+	bool Menu::TourStepAvailable(int a_step) const {
+
+		const char* needs = TourStepAt(a_step).needs;
+		if (!needs) {
+			return true;
+		}
+		return std::ranges::any_of(_categories, [&](const Category& a_category) {
+			return std::ranges::any_of(a_category.pages, [&](const PageSummary& a_page) { return a_page.id == needs; });
+		});
 	}
 
 	bool Menu::TourWants(TourSpot a_spot) const noexcept {
@@ -8259,8 +8057,12 @@ namespace CompletionistUI
 			_tourPage = _selectedPage;
 		}
 		for (const auto& category : _categories) {
-			if (_tourPage.empty() && category.Group() == "UI_Category_Collections" && !category.pages.empty()) {
-				_tourPage = category.pages.front().id;
+			// Not Achievements, at the top of Collections: its panel isn't the one the tour talks about
+			if (_tourPage.empty() && category.Group() == "UI_Category_Collections") {
+				const auto first = std::ranges::find_if(category.pages, [](const PageSummary& a_page) { return a_page.id.find("chievement") == std::string::npos; });
+				if (first != category.pages.end()) {
+					_tourPage = first->id;
+				}
 			}
 		}
 		for (const auto& category : _categories) {
@@ -8296,7 +8098,13 @@ namespace CompletionistUI
 
 	void Menu::GoToTourStep(int a_step) {
 
-		_tourStep = std::clamp(a_step, 0, TourSteps() - 1);
+		// Past steps for pages this game doesn't have, the way it was going. The first and last are always there.
+		const int by = a_step < _tourStep ? -1 : 1;
+		int       wanted = std::clamp(a_step, 0, TourSteps() - 1);
+		while (!TourStepAvailable(wanted)) {
+			wanted += by;
+		}
+		_tourStep = wanted;
 		const auto& step = TourStepAt(_tourStep);
 		_tourScroll = true;
 		_tourFocus = 2;
@@ -8323,6 +8131,18 @@ namespace CompletionistUI
 		case TourView::kSettingsWindow:
 			open(settingsPage);
 			_settingsTab = "window";
+			break;
+		case TourView::kSettingsTab:
+			open(settingsPage);
+			_settingsTab = step.page;
+			break;
+		case TourView::kNamed:
+			if (std::string_view(step.page) == "#quest") {
+				const auto quests = std::ranges::find_if(_categories, [](const Category& a_category) { return a_category.Group() == "UI_Category_Quests" && !a_category.pages.empty(); });
+				open(quests != _categories.end() ? std::string_view(quests->pages.front().id) : std::string_view(_tourPage));
+			} else {
+				open(step.page);
+			}
 			break;
 		default:
 			break;
@@ -8607,15 +8427,27 @@ namespace CompletionistUI
 			const auto  key = std::string(step.key);
 
 			// How far through, as a row of diamonds
-			const auto counter = a_provider.Translate("UI_Tour_Step{" + std::to_string(_tourStep + 1) + "}{" + std::to_string(TourSteps()) + "}");
+			int stepsThere = 0;
+			int stepsDone = 0;
+			for (int i = 0; i < TourSteps(); ++i) {
+				if (TourStepAvailable(i)) {
+					++stepsThere;
+					stepsDone += i <= _tourStep ? 1 : 0;
+				}
+			}
+			const auto counter = a_provider.Translate("UI_Tour_Step{" + std::to_string(stepsDone) + "}{" + std::to_string(stepsThere) + "}");
 			ImGui::TextColored(palette.textDim, "%s", counter.c_str());
 			{
 				const float size = fontSize * 0.2f;
-				const float spacing = fontSize * 0.75f;
+				const float spacing = fontSize * 0.62f;
 				const auto  at = ImGui::GetItemRectMax();
-				float       x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - spacing * static_cast<float>(TourSteps() - 1) - size;
-				for (int i = 0; i < TourSteps(); ++i, x += spacing) {
+				float       x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - spacing * static_cast<float>(stepsThere - 1) - size;
+				for (int i = 0; i < TourSteps(); ++i) {
+					if (!TourStepAvailable(i)) {
+						continue;
+					}
 					Decor::Diamond(ImGui::GetWindowDrawList(), ImVec2(x, at.y - fontSize * 0.5f), i == _tourStep ? size * 1.5f : size, Colour(i <= _tourStep ? palette.accent : palette.separator), i <= _tourStep);
+					x += spacing;
 				}
 			}
 			ImGui::PushFont(Themes::HeaderFont());
@@ -9327,27 +9159,24 @@ namespace CompletionistUI
 			}
 		}
 
+		// The page that tracks it, before the boxes' own space so the panel is no taller for it
+		bool clicked = false;
+		if (!info.page.empty()) {
+			const auto link = a_provider.Translate("UI_Achievements_Track{" + info.pageTitle + "}");
+			const auto size = ImGui::CalcTextSize(link.c_str(), nullptr, false, bodyWidth);
+			y += line * 0.5f;
+			ImGui::SetCursorScreenPos(ImVec2(x, y));
+			ImGui::PushID(a_entry.key.c_str());
+			clicked = ImGui::InvisibleButton("##Track", ImVec2(std::max(size.x, 1.0f), std::max(size.y, 1.0f)));
+			ImGui::PopID();
+			const bool lit = ImGui::IsItemHovered() || ImGui::IsItemFocused();
+			drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(x, y), Colour(lit ? palette.heading : palette.accent), link.c_str(), nullptr, bodyWidth);
+			if (lit) {
+				drawList->AddLine(ImVec2(x, y + size.y), ImVec2(x + size.x, y + size.y), Colour(palette.heading, 0.7f));
+			}
+			ImGui::SetCursorScreenPos(origin);
+		}
 		ImGui::Dummy(ImVec2(width, sideBySide ? boxHeight : boxHeight + gap + howHeight));
-		if (info.page.empty()) {
-			return;
-		}
-
-		// The page that tracks it
-		const auto after = ImGui::GetCursorScreenPos();
-		const auto link = a_provider.Translate("UI_Achievements_Track{" + info.pageTitle + "}");
-		const auto size = ImGui::CalcTextSize(link.c_str(), nullptr, false, bodyWidth);
-		y += line * 0.5f;
-		ImGui::SetCursorScreenPos(ImVec2(x, y));
-		ImGui::PushID(a_entry.key.c_str());
-		const bool clicked = ImGui::InvisibleButton("##Track", ImVec2(std::max(size.x, 1.0f), std::max(size.y, 1.0f)));
-		ImGui::PopID();
-		const bool lit = ImGui::IsItemHovered() || ImGui::IsItemFocused();
-		drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(x, y), Colour(lit ? palette.heading : palette.accent), link.c_str(), nullptr, bodyWidth);
-		if (lit) {
-			drawList->AddLine(ImVec2(x, y + size.y), ImVec2(x + size.x, y + size.y), Colour(palette.heading, 0.7f));
-		}
-		ImGui::SetCursorScreenPos(after);
-		ImGui::Dummy(ImVec2(0.0f, 0.0f));
 		if (clicked) {
 			// A copy: opening a page drops the entry this one is from
 			const auto page = info.page;
@@ -9441,7 +9270,8 @@ namespace CompletionistUI
 			}
 		};
 		const auto describe = [&](const std::string& a_label, const std::string& a_info) {
-			if (!a_info.empty() && (ImGui::IsItemHovered() || ImGui::IsItemFocused())) {
+			// AllowWhenOverlappedByItem: a slider ends in a group, which doesn't count as hovered while the slider inside it does
+			if (!a_info.empty() && (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlappedByItem) || ImGui::IsItemFocused())) {
 				Entry entry;
 				entry.name = a_label;
 				entry.description = a_info;
@@ -9522,6 +9352,7 @@ namespace CompletionistUI
 		if (TabRow(tabs, _settingsTab)) {
 			_confirmKey.clear();
 		}
+		_controlsPastTabs = _controlSpots.size();
 
 		if (!settings.captureTarget.empty() && settings.captureResult != UISettings::captureNone) {
 			for (auto& page : _settingsPages) {
@@ -9563,6 +9394,7 @@ namespace CompletionistUI
 				}
 				ImGui::EndCombo();
 			}
+			describe(a_provider.Translate("UI_Setting_Theme"), a_provider.Translate("UI_SettingHint_Theme"));
 			if (settings.theme == Theme::kAnime) {
 				label(a_provider.Translate("UI_Setting_AnimeMascots"));
 				toggleSpot();
@@ -9583,8 +9415,8 @@ namespace CompletionistUI
 				}
 			};
 			releasedSlider("UI_Setting_Scale", "UI_SettingHint_Scale", "##Scale", _pendingScale, settings.scale, 0.5f, 2.0f, "%.2f");
-			releasedSlider("UI_Setting_Width", nullptr, "##Width", _pendingWidth, settings.widthPercent, 40.0f, 100.0f, "%.0f%%");
-			releasedSlider("UI_Setting_Height", nullptr, "##Height", _pendingHeight, settings.heightPercent, 40.0f, 100.0f, "%.0f%%");
+			releasedSlider("UI_Setting_Width", "UI_SettingHint_Width", "##Width", _pendingWidth, settings.widthPercent, 40.0f, 100.0f, "%.0f%%");
+			releasedSlider("UI_Setting_Height", "UI_SettingHint_Height", "##Height", _pendingHeight, settings.heightPercent, 40.0f, 100.0f, "%.0f%%");
 
 			auto            opacity = settings.opacity * 100.0f;
 			constexpr float opacityMin = 30.0f;
@@ -9594,6 +9426,7 @@ namespace CompletionistUI
 				settings.opacity = opacity / 100.0f;
 				changed = true;
 			}
+			describe(a_provider.Translate("UI_Setting_Opacity"), a_provider.Translate("UI_SettingHint_Opacity"));
 
 			const auto toggle = [&](const char* a_key, const char* a_hint, bool& a_value) {
 				label(a_provider.Translate(a_key));
@@ -9625,8 +9458,7 @@ namespace CompletionistUI
 			label(a_provider.Translate("UI_Setting_DescriptionLines"));
 			changed |= ThemedSlider("##DescriptionLines", ImGuiDataType_S32, &settings.descriptionLines, &linesMin, &linesMax, "%d", controlWidth);
 			describe(a_provider.Translate("UI_Setting_DescriptionLines"), a_provider.Translate("UI_SettingHint_DescriptionLines"));
-			toggle("UI_Setting_OpenOnLastPage", nullptr, settings.openOnLastPage);
-			toggle("UI_Setting_HideCompleted", nullptr, settings.hideCompleted);
+			toggle("UI_Setting_OpenOnLastPage", "UI_SettingHint_OpenOnLastPage", settings.openOnLastPage);
 
 			beginColumn();
 			columnHeading(a_provider.Translate("UI_SettingsSection_Controls"));
@@ -9670,10 +9502,10 @@ namespace CompletionistUI
 			binding("UI_Setting_OpenKey", "UI_SettingHint_OpenKey", settings.capturingOpenKey ? a_provider.Translate("UI_Setting_PressKeyUnbind") : settings.openKey ? settings.openKeyName : unbound, settings.capturingOpenKey,
 				settings.openKey == defaults.openKey, KeyNameFor(defaults.openKey), [&]() { settings.openKey = defaults.openKey; });
 			binding("UI_Setting_OpenPad", "UI_SettingHint_OpenPad", settings.capturingOpenPad ? a_provider.Translate("UI_Setting_PressButtons") : settings.openPadButton ? GamepadComboName(settings.openPadModifier, settings.openPadButton, settings.padStyle) : unbound, settings.capturingOpenPad,
-				settings.openPadButton == defaults.openPadButton && settings.openPadModifier == defaults.openPadModifier, GamepadComboName(defaults.openPadModifier, defaults.openPadButton, settings.padStyle),
+				settings.openPadButton == defaults.openPadButton && settings.openPadModifier == defaults.openPadModifier, unbound,
 				[&]() { settings.openPadButton = defaults.openPadButton; settings.openPadModifier = defaults.openPadModifier; });
 			binding("UI_Setting_CellKey", "UI_SettingHint_CellKey", settings.capturingCellKey ? a_provider.Translate("UI_Setting_PressKeyUnbind") : settings.cellKey ? settings.cellKeyName : unbound, settings.capturingCellKey,
-				settings.cellKey == defaults.cellKey, KeyNameFor(defaults.cellKey), [&]() { settings.cellKey = defaults.cellKey; });
+				settings.cellKey == defaults.cellKey, unbound, [&]() { settings.cellKey = defaults.cellKey; });
 			binding("UI_Setting_CellPad", "UI_SettingHint_CellPad", settings.capturingCellPad ? a_provider.Translate("UI_Setting_PressButtons") : settings.cellPadButton ? GamepadComboName(settings.cellPadModifier, settings.cellPadButton, settings.padStyle) : unbound, settings.capturingCellPad,
 				settings.cellPadButton == defaults.cellPadButton && settings.cellPadModifier == defaults.cellPadModifier, unbound,
 				[&]() { settings.cellPadButton = defaults.cellPadButton; settings.cellPadModifier = defaults.cellPadModifier; });
@@ -9693,18 +9525,13 @@ namespace CompletionistUI
 
 			ImGui::Spacing();
 			columnHeading(a_provider.Translate("UI_SettingsSection_OnScreen"));
-			toggle("UI_Setting_PrintScreen", "UI_SettingHint_PrintScreen", settings.printScreen);
-			toggle("UI_Setting_Screenshot", "UI_SettingHint_Screenshot", settings.screenshotButton);
 			toggle("UI_Setting_CellPanel", "UI_SettingHint_CellPanel", settings.cellPanel);
-			label(a_provider.Translate("UI_Setting_PlaceUI"));
-			if (ThemedButton((a_provider.Translate("UI_Setting_PlaceUIButton") + "##PlaceUI").c_str(), controlWidth)) {
-				StartPlacement();
-			}
-			describe(a_provider.Translate("UI_Setting_PlaceUI"), a_provider.Translate("UI_SettingHint_PlaceUI"));
 			toggle("UI_Setting_PauseGame", "UI_SettingHint_PauseGame", settings.pauseGame);
 			toggle("UI_Setting_JournalEntry", "UI_SettingHint_JournalEntry", settings.journalEntry);
-
-			ImGui::Spacing();
+			endColumns();
+		}
+		// Beside Pictures, which is drawn with the settings pages below
+		const auto drawHelp = [&]() {
 			columnHeading(a_provider.Translate("UI_SettingsSection_Help"));
 			label(a_provider.Translate("UI_Setting_Tour"));
 			if (ThemedButton((a_provider.Translate("UI_Setting_TourStart") + "##Tour").c_str(), controlWidth)) {
@@ -9713,8 +9540,7 @@ namespace CompletionistUI
 			MarkTourItem(TourSpot::kTourButton);
 			describe(a_provider.Translate("UI_Setting_Tour"), a_provider.Translate("UI_SettingHint_Tour"));
 
-			ImGui::Spacing();
-			ImGui::SetCursorPosX(columnX + labelWidth);
+			label(a_provider.Translate("UI_Setting_ResetRow"));
 			if (ThemedButton(a_provider.Translate("UI_Setting_Reset").c_str(), controlWidth)) {
 				const auto keyName = settings.openKeyName;
 				const auto cellKeyName = settings.cellKeyName;
@@ -9727,22 +9553,25 @@ namespace CompletionistUI
 				_pendingHeight = settings.heightPercent;
 				changed = true;
 			}
-
-			endColumns();
-		}
+			describe(a_provider.Translate("UI_Setting_ResetRow"), a_provider.Translate("UI_SettingHint_Reset"));
+		};
 
 		//---------------------------------------------------
 		// Settings pages
 		//---------------------------------------------------
 
 		for (auto& page : _settingsPages) {
-			if (page.id != _settingsTab) {
+			// Some sit under another tab's own settings, with no heading of their own
+			const bool under = !page.under.empty() && page.under == _settingsTab;
+			if (page.id != _settingsTab && !under) {
 				continue;
 			}
 			ImGui::PushID(page.id.c_str());
-			pageHeading(a_provider.Translate(page.title));
+			if (!under) {
+				pageHeading(a_provider.Translate(page.title));
+			}
 
-			if (page.id == "notifications" && beginColumns("##Toasts")) {
+			if (page.id == "hud" && beginColumns("##Toasts")) {
 				beginColumn();
 				columnHeading(a_provider.Translate("UI_SettingsSection_Toasts"));
 				const std::string orders[] = { a_provider.Translate("UI_Setting_ToastsNewestTop"), a_provider.Translate("UI_Setting_ToastsNewestBottom") };
@@ -9773,7 +9602,8 @@ namespace CompletionistUI
 				}
 				const auto position = settings.toastJoin != ToastJoin::kNone ? a_provider.Translate("UI_Setting_ToastsJoined") : corner >= 0 ? a_provider.Translate(cornerKeys[corner]) : a_provider.Translate("UI_Setting_ToastsCustom");
 				label(a_provider.Translate("UI_Setting_ToastsPosition"));
-				if (ThemedBeginCombo("##ToastsPosition", position.c_str(), controlWidth)) {
+				const float placeSide = ImGui::GetFrameHeight();
+				if (ThemedBeginCombo("##ToastsPosition", position.c_str(), controlWidth - placeSide - style.ItemSpacing.x)) {
 					for (int i = 0; i < 4; ++i) {
 						if (ComboOption(a_provider.Translate(cornerKeys[i]).c_str(), i == corner)) {
 							settings.toastX = corners[i].x;
@@ -9785,6 +9615,15 @@ namespace CompletionistUI
 					ImGui::EndCombo();
 				}
 				describe(a_provider.Translate("UI_Setting_ToastsPosition"), a_provider.Translate("UI_SettingHint_ToastsPosition"));
+				ImGui::SameLine();
+				const auto placeAt = ImGui::GetCursorScreenPos();
+				if (ImGui::InvisibleButton("##PlaceUI", ImVec2(placeSide, placeSide))) {
+					StartPlacement();
+				}
+				NoteControl();
+				const bool placeHovered = ImGui::IsItemHovered() || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible);
+				DrawMoveIcon(ImGui::GetWindowDrawList(), ImVec2(placeAt.x + placeSide * 0.5f, placeAt.y + placeSide * 0.5f), ImGui::GetFontSize(), placeHovered ? Colour(palette.accent) : Colour(palette.text, 0.85f));
+				describe(a_provider.Translate("UI_Setting_PlaceUI"), a_provider.Translate("UI_SettingHint_PlaceUI"));
 				endColumns();
 				ImGui::Spacing();
 			}
@@ -9794,6 +9633,9 @@ namespace CompletionistUI
 				for (auto& column : page.columns) {
 					if (table) {
 						beginColumn();
+						if (page.id == "pictures" && &column == &page.columns[1]) {
+							drawHelp();
+						}
 					} else if (&column != &page.columns[0]) {
 						break;
 					} else {
@@ -9860,7 +9702,8 @@ namespace CompletionistUI
 							columnHeading(text);
 							break;
 						case SettingKind::kSpacer:
-							ImGui::Dummy(ImVec2(0.0f, ImGui::GetFrameHeight() * 0.5f));
+							// number 1: as tall as a whole row
+							ImGui::Dummy(ImVec2(0.0f, ImGui::GetFrameHeight() * (item.number == 1 ? 1.0f : 0.5f)));
 							break;
 						case SettingKind::kToggle:
 							label(text);
@@ -9888,16 +9731,30 @@ namespace CompletionistUI
 								label(text);
 								auto pending = _pendingNumbers.try_emplace(key, item.number).first;
 								bool released = false;
-								ThemedSlider("##Slider", ImGuiDataType_S32, &pending->second, &item.minimum, &item.maximum, "%d", controlWidth, &released);
+								const auto before = pending->second;
+								if (ThemedSlider("##Slider", ImGuiDataType_S32, &pending->second, &item.minimum, &item.maximum, "%d", controlWidth, &released)) {
+									_sliderEdited = key;
+								}
+								// A press moves less than a step, which the rounding below would put straight back
+								if (item.step > 1 && pending->second != before && ImGui::GetCurrentContext()->ActiveIdSource != ImGuiInputSource_Mouse) {
+									pending->second = before + (pending->second > before ? item.step : -item.step);
+								}
 								if (item.step > 1) {
 									pending->second = std::clamp(static_cast<std::int32_t>(std::lround(static_cast<float>(pending->second) / static_cast<float>(item.step))) * item.step, item.minimum, item.maximum);
 								}
-								if (released) {
+								// A controller's slider can stop being active with no release, and its edit still counts
+								const bool active = ImGui::IsItemActive();
+								if (released || (!active && _sliderEdited == key && pending->second != item.number)) {
 									item.number = pending->second;
 									edited = true;
 								}
-								if (!ImGui::IsItemActive() && !released) {
-									pending->second = item.number;
+								if (!active) {
+									if (_sliderEdited == key) {
+										_sliderEdited.clear();
+									}
+									if (!released) {
+										pending->second = item.number;
+									}
 								}
 							}
 							break;
@@ -9905,7 +9762,13 @@ namespace CompletionistUI
 							{
 								label(text);
 								constexpr auto popupId = "##ColourPopup";
-								if (ColourButton("##Colour", item.number, controlWidth)) {
+								// The harness asks for a picker by its key
+								const bool asked = _colourAsked && _colourKey == key;
+								if (asked) {
+									_colourAsked = false;
+									ImGui::SetScrollHereY();
+								}
+								if (ColourButton("##Colour", item.number, controlWidth) || asked) {
 									_colourKey = key;
 									_colourOriginal = item.number;
 									_spectrumPosition = HueOf(item.number);
@@ -9928,10 +9791,58 @@ namespace CompletionistUI
 									}
 									_colourReturnKey.clear();
 								}
-								if (BeginColourPopup(popupId, buttonMin, buttonMax, controlWidth)) {
-									const auto texts = std::array{ a_provider.Translate("UI_ColourSwatches"), a_provider.Translate("UI_ColourCustom"), a_provider.Translate("UI_ColourCurrent"), a_provider.Translate("UI_ColourNew"), a_provider.Translate("UI_Done"), a_provider.Translate("UI_ColourHue"), a_provider.Translate("UI_ColourSaturation"), a_provider.Translate("UI_ColourBrightness") };
+								// An item icon's colour shows the icon beside the picker, a line between them
+								const auto* previewIcon = item.previewIcon.empty() ? nullptr : [&]() -> const ItemIcon* {
+									const auto found = std::ranges::find(itemIcons, std::string_view(item.previewIcon), &ItemIcon::name);
+									return found != std::end(itemIcons) ? std::addressof(*found) : nullptr;
+								}();
+								const float previewGap = ImGui::GetFontSize() * 1.6f;
+								const float previewWidth = ImGui::GetFontSize() * 9.0f;
+								if (BeginColourPopup(popupId, buttonMin, buttonMax, controlWidth, previewIcon ? previewWidth + previewGap : 0.0f)) {
+									const float pickerWidth = std::max(controlWidth, ImGui::GetFontSize() * 20.0f) - ImGui::GetFontSize() * 1.8f;
+									const auto  previewTop = ImGui::GetCursorScreenPos();
+									const bool  previewTable = previewIcon && ImGui::BeginTable("##IconPicker", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX, ImVec2(pickerWidth + previewGap + previewWidth, 0.0f));
+									if (previewTable) {
+										ImGui::TableSetupColumn("##Picker", ImGuiTableColumnFlags_WidthFixed, pickerWidth);
+										ImGui::TableSetupColumn("##Preview", ImGuiTableColumnFlags_WidthFixed, previewGap + previewWidth);
+										ImGui::TableNextColumn();
+									}
+									const auto texts = std::array{ a_provider.Translate("UI_ColourSwatches"), a_provider.Translate("UI_ColourCustom"), a_provider.Translate("UI_ColourCurrent"), a_provider.Translate("UI_ColourNew"), a_provider.Translate("UI_Done"), a_provider.Translate("UI_ColourHue"), a_provider.Translate("UI_ColourSaturation"), a_provider.Translate("UI_ColourBrightness"), a_provider.Translate("UI_ColourDefault") };
 									bool       close = false;
-									edited = ColourPanel(item.number, _spectrumPosition, _colourOriginal, { texts[0].c_str(), texts[1].c_str(), texts[2].c_str(), texts[3].c_str(), texts[4].c_str(), texts[5].c_str(), texts[6].c_str(), texts[7].c_str() }, close);
+									edited = ColourPanel(item.number, _spectrumPosition, _colourOriginal, item.defaultColour, { texts[0].c_str(), texts[1].c_str(), texts[2].c_str(), texts[3].c_str(), texts[4].c_str(), texts[5].c_str(), texts[6].c_str(), texts[7].c_str(), texts[8].c_str() }, close);
+									if (previewTable) {
+										ImGui::TableNextColumn();
+										std::int32_t other = -1;
+										for (const auto& pageColumn : page.columns) {
+											for (const auto& sibling : pageColumn) {
+												if (sibling.previewIcon == item.previewIcon && sibling.previewPart != item.previewPart) {
+													other = sibling.number;
+												}
+											}
+										}
+										const auto  primary = item.previewPart == 0 ? item.number : other;
+										const auto  secondary = item.previewPart == 0 ? other : item.number;
+										const auto  top = ImGui::GetCursorScreenPos();
+										const float fontSize = ImGui::GetFontSize();
+										const float left = top.x + previewGap;
+										const auto  title = a_provider.Translate("UI_IconColour_Preview");
+										auto*       popupList = ImGui::GetWindowDrawList();
+										popupList->AddText(ImVec2(left + (previewWidth - ImGui::CalcTextSize(title.c_str()).x) * 0.5f, top.y), Colour(palette.textDim), title.c_str());
+										const float large = std::floor(previewWidth * 0.8f);
+										const float largeY = top.y + fontSize * 1.6f;
+										// Dark, as the game's menus are whatever the window's theme
+										const float backing = fontSize * 0.35f;
+										popupList->AddRectFilled(ImVec2(left, largeY - backing), ImVec2(left + previewWidth, largeY + large + fontSize * 0.6f + std::round(fontSize * 1.15f) + backing), IM_COL32(14, 14, 14, 255));
+										DrawItemIcon(popupList, *previewIcon, ImVec2(std::floor(left + (previewWidth - large) * 0.5f), largeY), large, primary, secondary);
+										// And the size it is in a list
+										const float listSize = std::round(fontSize * 1.15f);
+										const float smallY = largeY + large + fontSize * 0.6f;
+										DrawItemIcon(popupList, *previewIcon, ImVec2(std::floor(left + (previewWidth - listSize) * 0.5f), smallY), listSize, primary, secondary);
+										ImGui::Dummy(ImVec2(previewGap + previewWidth, smallY + listSize + backing - top.y));
+										ImGui::EndTable();
+										const float lineX = previewTop.x + pickerWidth + previewGap * 0.5f;
+										ImGui::GetWindowDrawList()->AddLine(ImVec2(lineX, previewTop.y), ImVec2(lineX, ImGui::GetCursorScreenPos().y - ImGui::GetStyle().ItemSpacing.y), Colour(palette.separator));
+									}
 									if (close) {
 										ImGui::CloseCurrentPopup();
 									}
@@ -10077,9 +9988,6 @@ namespace CompletionistUI
 							_dirty = page.id == "general";
 							if (item.id == "Item_Pictures" && item.kind == SettingKind::kToggle && item.on) {
 								_picturesDialog = PicturesDialog::kOffer;
-							} else if (item.id == "Item_PicturesPrepare") {
-								_picturesDialog = PicturesDialog::kProgress;
-								_picturesStarted = false;
 							}
 						}
 						ImGui::PopID();

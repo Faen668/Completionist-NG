@@ -15,28 +15,9 @@ struct ImVec2;
 
 namespace CompletionistUI
 {
-	// One perk in a big tree's branch columns
-	struct PerkBranchLine
-	{
-		std::int32_t perk{ 0 };
-		std::int32_t parent{ -1 };	// the perk it hangs from, -1 at the top of a branch
-		std::int32_t column{ 0 };
-		std::int32_t row{ 0 };
-		std::int32_t indent{ 0 };	// side branches step in
-		bool         stacked{ false };	// a short branch under another, in a tree with too many for a column each
-		bool         repeat{ false };	// listed again under a second parent
-		bool         joint{ false };	// several branches lead to it: centred on a bar across them
-		std::int32_t lastColumn{ 0 };	// a joint's bar runs from column to here
-	};
-
 	// Trainer panel perk trees, laid out by depth
 	struct PerkTreeLayout
 	{
-		std::vector<PerkBranchLine> lines;	// big trees only, drawn as branch columns instead
-		std::vector<std::int32_t>   lineOf;	// each perk's own line
-		std::int32_t                root{ -1 };	// the one perk every branch starts from, if there is one
-		std::int32_t                branchColumns{ 0 };
-		std::int32_t                branchRows{ 0 };
 		std::vector<std::int32_t> column;
 		std::vector<std::int32_t> row;
 		std::vector<float>        place;	// row, centred on the column's middle
@@ -71,6 +52,7 @@ namespace CompletionistUI
 		{
 			_colourKey = a_key;
 			_colourOriginal = -1;
+			_colourAsked = true;
 		}
 
 		void PinEntry(const Entry& a_entry)
@@ -82,7 +64,6 @@ namespace CompletionistUI
 		// Short message in the header
 		void ShowStatus(std::string a_text, float a_seconds = 5.0f);
 
-		[[nodiscard]] bool ConsumeScreenshotRequest() noexcept { return std::exchange(_screenshotRequested, false); }
 
 		[[nodiscard]] bool ConsumeSettingsChanged() noexcept { return std::exchange(_settingsChanged, false); }
 
@@ -97,6 +78,7 @@ namespace CompletionistUI
 		void ShowCellView(bool a_cell) noexcept { _cellView = a_cell; }
 		// Placing the Cell Scanner panel and the notifications
 		void StartPlacement() noexcept { _placing = true; }
+		void SetHideCompleted(bool a_hide) noexcept { _hideCompleted = a_hide; }
 		[[nodiscard]] bool Placing() const noexcept { return _placing; }
 		void ShowCellOptionsSection(int a_section) noexcept { _cellOptionsSection = a_section; }	// Harness
 		[[nodiscard]] bool CellView() const noexcept { return _cellView; }
@@ -298,6 +280,8 @@ namespace CompletionistUI
 			kCell,
 			kSettings,
 			kSettingsWindow,	// Settings on its Window tab
+			kSettingsTab,	// Settings on the step's page, as a tab
+			kNamed,	// the step's page
 			kOnScreen,	// the window hidden, the panel and notifications shown as in play
 		};
 		struct TourStepDef
@@ -305,6 +289,8 @@ namespace CompletionistUI
 			const char* key;	// key + "Title", key + "Text"
 			TourSpot    spot;
 			TourView    view;
+			const char* page{ nullptr };	// for kNamed and kSettingsTab
+			const char* needs{ nullptr };	// the step's skipped without this page
 		};
 		static const TourStepDef& TourStepAt(int a_step);
 		struct TourRect
@@ -317,6 +303,7 @@ namespace CompletionistUI
 		[[nodiscard]] bool TourRunning() const noexcept { return _tourStep >= 0 || _tourOffer; }
 		[[nodiscard]] bool TourWants(TourSpot a_spot) const noexcept;
 		void GoToTourStep(int a_step);
+		[[nodiscard]] bool TourStepAvailable(int a_step) const;
 		void EndTour();
 		void DrawTour(IDataProvider& a_provider);
 		void DrawTourOnScreen(IDataProvider& a_provider, const UISettings& a_settings);
@@ -348,13 +335,7 @@ namespace CompletionistUI
 			std::string title;
 			std::string count;
 		};
-		enum class TabKeys : std::uint8_t
-		{
-			kNone,
-			kLeft,
-			kBoth,
-		};
-		bool                      TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected, bool a_leftOnly = false);	// true when it changed
+		bool                      TabRow(const std::vector<TabItem>& a_tabs, std::string& a_selected);	// true when it changed
 		[[nodiscard]] const Page& TabView(const Page& a_page, std::int32_t a_tab);
 
 		std::vector<Category>                         _categories;
@@ -378,6 +359,7 @@ namespace CompletionistUI
 		bool                                          _findFocus{ false };
 		std::string                                   _scrollToKey;
 		std::unordered_map<std::string, std::int32_t> _pendingNumbers;
+		std::string                                   _sliderEdited;
 		std::unordered_map<std::string, std::array<char, 256>> _pendingTexts;
 		std::unordered_set<std::string>                        _editingText;
 		std::string                                            _settingsTab{ "window" };
@@ -386,9 +368,11 @@ namespace CompletionistUI
 		std::string                                            _colourKey;
 		std::string                                            _colourReturnKey;	// focus goes back to this colour button after its picker closes
 		std::int32_t                                           _colourOriginal{ 0 };
+		bool _colourAsked{ false };	// Harness
 		std::optional<Page>   _page;
 		std::string           _selectedPage;
 		std::array<char, 128> _filter{};
+		void PageFilter(IDataProvider& a_provider, float a_width);
 		bool                  _hideCompleted{ false };
 		bool                    _placing{ false };
 		bool                    _placePanel{ false };	// the arrow keys move the panel, not the notifications
@@ -405,6 +389,7 @@ namespace CompletionistUI
 		bool                  _justOpened{ true };
 		bool                  _focusSidebar{ false };
 		bool                  _focusPage{ false };	// sidebar folded at opening: the page takes the focus
+		std::size_t           _controlsPastTabs{ 0 };	// where a settings tab's own controls start
 		bool                  _focusPageShown{ false };	// with the focus box showing, as after switching tabs with the pad
 		std::uint32_t         _revealFocus{ 0 };	// that focus, shown by the first press
 		std::uint32_t         _pendingHidden{ 0 };	// this _pendingFocus goes on without showing the focus box
@@ -415,8 +400,13 @@ namespace CompletionistUI
 		bool                  _padActive{ false };
 		bool                  _forcePadHints{ false };
 		std::string           _padActionKey;
-		std::string           _padTriggerKey;
-		TabKeys               _tabsShown{ TabKeys::kNone };
+		std::string           _padTickKey;
+		bool                  _tabsShown{ false };
+		bool                  _filterShown{ false };	// this frame's page has a filter box
+		bool                  _filterShownLast{ false };
+		bool                  _focusFilter{ false };	// View was pressed: type in it
+		ImGuiID               _filterID{ 0 };
+		bool                  _descriptionArmed{ false };	// R3 went down in this window, on its own
 		std::unordered_map<std::string, std::string> _pageTabs;	// page id to tab
 		Page                  _tabView;
 		std::string           _tabViewKey;
@@ -445,13 +435,10 @@ namespace CompletionistUI
 		NavSpot               _spotNext;
 		std::uint32_t         _revision{ 0 };
 		UISettings*           _settings{ nullptr };
-		bool                  _settingsApplied{ false };
 		bool                  _settingsChanged{ false };
 		float                 _pendingScale{ -1.0f };
 		float                 _pendingWidth{ 0.0f };
 		float                 _pendingHeight{ 0.0f };
-		bool                  _showScreenshotButton{ false };
-		bool                  _screenshotRequested{ false };
 		std::optional<Entry>  _hoveredEntry;
 		std::optional<Entry>  _pinnedEntry;
 		std::string           _pinnedKey;

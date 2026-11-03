@@ -2,11 +2,49 @@
 #include "Events.hpp"
 #include "ScriptObject.hpp"
 #include "Serialization.hpp"
+#include "Frameworks/FrameworkMaster.hpp"
+#include "Variables.hpp"
 
 #undef GetObject
 
 namespace Completionist
 {
+	//---------------------------------------------------
+	//-- Script Properties ------------------------------
+	//---------------------------------------------------
+
+	static std::vector<RE::TESForm*> ReadFormsOf(const ScriptObjectPtr& a_script, const std::string& a_property)
+	{
+		std::vector<RE::TESForm*> forms;
+		const auto* variable = a_script->GetProperty(a_property);
+		const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
+		auto*       vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+		auto*       policy = vm ? vm->GetObjectHandlePolicy() : nullptr;
+		if (!array || !policy)
+			return forms;
+
+		forms.reserve(array->size());
+		for (std::uint32_t i = 0; i < array->size(); ++i) {
+			const auto object = (*array)[i].IsObject() ? (*array)[i].GetObject() : nullptr;
+			forms.push_back(object ? policy->GetObjectForHandle(RE::TESForm::FORMTYPE, object->GetHandle()) : nullptr);
+		}
+		return forms;
+	}
+
+	static std::vector<std::string> ReadStringsOf(const ScriptObjectPtr& a_script, const std::string& a_property)
+	{
+		std::vector<std::string> strings;
+		const auto* variable = a_script->GetProperty(a_property);
+		const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
+		if (!array)
+			return strings;
+
+		strings.reserve(array->size());
+		for (std::uint32_t i = 0; i < array->size(); ++i)
+			strings.emplace_back((*array)[i].IsString() ? (*array)[i].GetString() : std::string_view{});
+		return strings;
+	}
+
 	void MuseumAPI::Register()
 	{
 		if (!Serialization::CompletionistData::IsModInstalled("LegacyoftheDragonborn.esm"))
@@ -45,6 +83,7 @@ namespace Completionist
 		FindAndTrackMuseumAltItems();
 		BuildAllVariations();
 		VerifyAltLists();
+		NoteFoundItems();
 	}
 
 	//---------------------------------------------------
@@ -136,6 +175,112 @@ namespace Completionist
 	}
 
 	//---------------------------------------------------
+	//-- Speaks About Functions -------------------------
+	//---------------------------------------------------
+
+	bool MuseumAPI::SpeaksAbout(RE::TESForm* a_form)
+	{
+		if (!a_form)
+			return false;
+
+		if (CVariables::V_MuseumModeEnabled && IsMuseumDisplayable(a_form))
+			return true;
+
+		return Serialization::CompletionistData::CheckIsCollectable(a_form) && !(_ready && CVariables::V_MuseumModeEnabled && CVariables::V_MuseumItemsOnly);
+	}
+
+	bool MuseumAPI::IsSilenced(RE::FormID a_formID)
+	{
+		return _ready && CVariables::V_MuseumModeEnabled && CVariables::V_MuseumItemsOnly && !IsMuseumDisplayable(a_formID) && Serialization::CompletionistData::CheckIsCollectable(a_formID);
+	}
+
+	bool MuseumAPI::NeedsFinding(RE::TESForm* a_form)
+	{
+		using CFramework_Master::FoundItemData;
+		using CFramework_Master::FoundItemData_NoShow;
+
+		if (!a_form)
+			return false;
+
+		const auto id = a_form->GetFormID();
+		const bool unfound = !FoundItemData.HasForm(id) && !FoundItemData_NoShow.HasForm(id);
+		if (!CVariables::V_MuseumModeEnabled || !IsMuseumDisplayable(id))
+			return unfound;
+
+		bool occupied = false;
+		if (IsDisplayed(id, occupied))
+			return false;
+
+		auto*      player = RE::PlayerCharacter::GetSingleton();
+		const auto carried = [&](RE::FormID a_id) {
+			auto* object = RE::TESForm::LookupByID<RE::TESBoundObject>(a_id);
+			return player && object && player->GetItemCount(object) > 0;
+		};
+		if (carried(id))
+			return false;
+
+		// Another version's on display: wanted in case the player prefers this one, when only the museum's being followed
+		if (occupied)
+			return unfound || (CVariables::V_MuseumItemsOnly && !CVariables::V_TreatOccupiedAsDisplayed);
+
+		// The empty display wants it, unless another version's on its way there
+		return std::ranges::none_of(GetVariations(id), carried);
+	}
+
+	//---------------------------------------------------
+	//-- Found Items Only The Museum Tracks -------------
+	//---------------------------------------------------
+
+	// Their versions Completionist tracks are left to its own pages to mark
+	void MuseumAPI::MarkFound(RE::FormID a_formID)
+	{
+		CFramework_Master::FoundItemData.AddForm(a_formID);
+		for (const auto& id : GetVariations(a_formID)) {
+			if (!Serialization::CompletionistData::CheckIsCollectable(id))
+				CFramework_Master::FoundItemData.AddForm(id);
+		}
+	}
+
+	// What's already carried or on display on load counts, without a notification
+	void MuseumAPI::NoteFoundItems()
+	{
+		if (!CVariables::V_MuseumModeEnabled)
+			return;
+
+		const auto note = [](RE::FormID a_id) {
+			if (IsMuseumDisplayable(a_id) && !Serialization::CompletionistData::CheckIsCollectable(a_id))
+				MarkFound(a_id);
+		};
+
+		for (const auto& [id, count] : _museumInventory)
+			note(id);
+
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (player && !Serialization::ItemRecordingPaused) {
+			for (const auto& [item, count] : player->GetInventoryCounts()) {
+				if (item && count > 0)
+					note(item->GetFormID());
+			}
+		}
+	}
+
+	void MuseumAPI::NoteFoundItem(RE::TESContainerChangedEvent const* a_event)
+	{
+		const auto id = a_event->baseObj;
+		if (!CVariables::V_MuseumModeEnabled || !IsMuseumDisplayable(id) || Serialization::CompletionistData::CheckIsCollectable(id))
+			return;
+
+		auto* form = RE::TESForm::LookupByID(id);
+		const auto found = [](RE::FormID a_id) { return CFramework_Master::FoundItemData.HasForm(a_id); };
+		if (!form || found(id) || std::ranges::any_of(GetVariations(id), found) || !CFramework_Master::FrameworkAPI::RecordsItemsFrom(a_event))
+			return;
+
+		CFramework_Master::FrameworkAPI::SendNotification(fmt::format("{}{}!", CVariables::V_NotificationText, form->GetName()), "NotifyItems");
+		CFramework_Master::FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kCollected, form->GetName());
+		MarkFound(id);
+	}
+
+	//---------------------------------------------------
 	//-- Is Displayed Functions -------------------------
 	//---------------------------------------------------
 
@@ -192,6 +337,9 @@ namespace Completionist
 	{
 		if (!a_event || a_event->itemCount <= 0)
 			return;
+
+		if (a_event->newContainer == 0x14)
+			NoteFoundItem(a_event);
 
 		const bool toMuseum = _museumContainers.contains(a_event->newContainer);
 		const bool fromMuseum = _museumContainers.contains(a_event->oldContainer);
@@ -456,6 +604,69 @@ namespace Completionist
 	//-- Functions --------------------------------------
 	//---------------------------------------------------
 
+	// LOTD's own arrays, so sections it adds later come along
+	MuseumAPI::ItemLists MuseumAPI::GetItemLists()
+	{
+		ItemLists  lists;
+		auto*      quest = _handler->LookupForm<RE::TESQuest>(0x138793, "LegacyoftheDragonborn.esm");
+		const auto script = ScriptObject::FromForm(quest, "DBM_MuseumAPI", false);
+		if (script) {
+			std::unordered_set<RE::BGSListForm*> seen;
+			for (const std::string suffix : { "", "2", "3", "4" }) {
+				const auto names = ReadStringsOf(script, "SectionNames" + suffix);
+				const auto items = ReadFormsOf(script, "SectionDisplayItems" + suffix);
+				for (std::size_t i = 0; i < items.size() && i < names.size(); ++i) {
+					auto* list = items[i] ? items[i]->As<RE::BGSListForm>() : nullptr;
+					if (list && seen.insert(list).second)
+						lists.emplace_back(list, names[i]);
+				}
+			}
+		}
+		if (lists.empty()) {
+			INFO("MuseumAPI: Unable to read LOTD's item lists, using the known ones");
+			for (const auto& [id, file] : museumItemListsMap) {
+				if (auto* list = _handler->LookupForm<RE::BGSListForm>(id, file))
+					lists.emplace_back(list, std::string{});
+			}
+		}
+		return lists;
+	}
+
+	MuseumAPI::ItemLists MuseumAPI::GetAltLists()
+	{
+		ItemLists                            lists;
+		std::unordered_set<RE::BGSListForm*> seen;
+		const auto add = [&](RE::TESForm* a_form, const std::string& a_name) {
+			auto* list = a_form ? a_form->As<RE::BGSListForm>() : nullptr;
+			if (list && seen.insert(list).second)
+				lists.emplace_back(list, a_name);
+		};
+
+		auto*      quest = _handler->LookupForm<RE::TESQuest>(0x138793, "LegacyoftheDragonborn.esm");
+		const auto script = ScriptObject::FromForm(quest, "DBM_MuseumAPI", false);
+		if (script) {
+			for (const std::string suffix : { "", "2", "3", "4" }) {
+				const auto names = ReadStringsOf(script, "SectionNames" + suffix);
+				const auto alts = ReadFormsOf(script, "SectionDisplayItemsAlt" + suffix);
+				for (std::size_t i = 0; i < alts.size() && i < names.size(); ++i)
+					add(alts[i], names[i]);
+			}
+		}
+		if (lists.empty()) {
+			for (const auto& [id, file, name] : museumItemAltListsMap)
+				add(_handler->LookupForm<RE::BGSListForm>(id, file), std::string(name));
+		}
+
+		// Patches' own, before LOTD has set them up
+		for (auto* handler : _patchHandlers) {
+			if (const auto patch = ScriptObject::FromForm(handler, "DBMSupportedModScript", false)) {
+				for (auto* alt : ReadFormsOf(patch, "NewSectionItemAltLists"))
+					add(alt, "Patch");
+			}
+		}
+		return lists;
+	}
+
 	void MuseumAPI::FindAndTrackMuseumItems()
 	{
 		if (!_handler) return;
@@ -469,11 +680,8 @@ namespace Completionist
 			return;
 		}
 
-		for (const auto& [mappedFormID, mappedFileName] : museumItemListsMap) 
+		for (const auto& [formlist, sectionName] : GetItemLists())
 		{
-			const auto& formlist = _handler->LookupForm<RE::BGSListForm>(mappedFormID, mappedFileName);
-			if (!formlist) { continue; }
-
 			for (auto i = 0; i < formlist->forms.size(); i++)
 			{
 				const auto& element = formlist->forms[i];
@@ -676,11 +884,8 @@ namespace Completionist
 			return nullptr;
 		};
 
-		for (const auto& [mappedFormID, mappedFileName, formListName] : museumItemAltListsMap)
+		for (const auto& [formlist, formListName] : GetAltLists())
 		{
-			const auto& formlist = _handler->LookupForm<RE::BGSListForm>(mappedFormID, mappedFileName);
-			if (!formlist) { continue; }
-
 			for (const auto& element : formlist->forms)
 			{
 				if (!element)
@@ -780,34 +985,8 @@ namespace Completionist
 			return rooms;
 		}
 
-		const auto readFormsOf = [&](const ScriptObjectPtr& a_script, const std::string& a_property) {
-			std::vector<RE::TESForm*> forms;
-			const auto* variable = a_script->GetProperty(a_property);
-			const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
-			if (!array)
-				return forms;
-
-			forms.reserve(array->size());
-			for (std::uint32_t i = 0; i < array->size(); ++i) {
-				const auto object = (*array)[i].IsObject() ? (*array)[i].GetObject() : nullptr;
-				forms.push_back(object ? _policy->GetObjectForHandle(RE::TESForm::FORMTYPE, object->GetHandle()) : nullptr);
-			}
-			return forms;
-		};
-		const auto readStringsOf = [&](const ScriptObjectPtr& a_script, const std::string& a_property) {
-			std::vector<std::string> strings;
-			const auto* variable = a_script->GetProperty(a_property);
-			const auto  array = variable && variable->IsArray() ? variable->GetArray() : nullptr;
-			if (!array)
-				return strings;
-
-			strings.reserve(array->size());
-			for (std::uint32_t i = 0; i < array->size(); ++i)
-				strings.emplace_back((*array)[i].IsString() ? (*array)[i].GetString() : std::string_view{});
-			return strings;
-		};
-		const auto readForms = [&](const std::string& a_property) { return readFormsOf(script, a_property); };
-		const auto readStrings = [&](const std::string& a_property) { return readStringsOf(script, a_property); };
+		const auto readForms = [&](const std::string& a_property) { return ReadFormsOf(script, a_property); };
+		const auto readStrings = [&](const std::string& a_property) { return ReadStringsOf(script, a_property); };
 
 		struct SectionLists
 		{
@@ -900,10 +1079,10 @@ namespace Completionist
 			if (!patch)
 				continue;
 
-			const auto names = readStringsOf(patch, "NewSectionNames");
-			const auto wanted = readStringsOf(patch, "NewSectionRoomNames");
-			const auto displays = readFormsOf(patch, "NewSectionDisplayRefLists");
-			const auto items = readFormsOf(patch, "NewSectionItemLists");
+			const auto names = ReadStringsOf(patch, "NewSectionNames");
+			const auto wanted = ReadStringsOf(patch, "NewSectionRoomNames");
+			const auto displays = ReadFormsOf(patch, "NewSectionDisplayRefLists");
+			const auto items = ReadFormsOf(patch, "NewSectionItemLists");
 			for (std::size_t i = 0; i < names.size() && i < wanted.size() && i < displays.size() && i < items.size(); ++i) {
 				auto* displayList = displays[i] ? displays[i]->As<RE::BGSListForm>() : nullptr;
 				auto* itemList = items[i] ? items[i]->As<RE::BGSListForm>() : nullptr;
@@ -998,11 +1177,8 @@ namespace Completionist
 			return;
 		}
 
-		for (const auto& [mappedFormID, mappedFileName, formListName] : museumItemAltListsMap)
+		for (const auto& [formlist, formListName] : GetAltLists())
 		{
-			const auto& formlist = _handler->LookupForm<RE::BGSListForm>(mappedFormID, mappedFileName);
-			if (!formlist) { continue; }
-
 			for (auto i = 0; i < formlist->forms.size(); i++)
 			{
 				const auto& element = formlist->forms[i];

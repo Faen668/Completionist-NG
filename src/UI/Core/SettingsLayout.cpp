@@ -117,58 +117,16 @@ namespace CompletionistUI
 		//-- Settings Layout ( Interface Page ) -------------
 		//---------------------------------------------------
 
-		// UI Settings
-		SettingsPageLayout InterfacePage() {
+		// Pictures, shown under the Window tab
+		SettingsPageLayout PicturesPage() {
 
-			constexpr auto logColours = "CompletionLog_ColoursEnabled";
-
-			SettingsPageLayout page{ "interface", "$MCMPageSettings2", {}, {} };
+			SettingsPageLayout page{ "pictures", "UI_ItemPictures_Header", {}, {} };
+			page.tab = false;
+			page.under = "window";
 			page.columns[0] = {
-				Header("$State_MapMarkerSettingsHead"),
-				Slider("State_MarkerDetection", "$State_MarkerDetectionText", "State_MarkerDetectionVal", 100, 3000, 100, "$State_MarkerDetectionInfo"),
-				Spacer(),
-				Header("$MCMPageSettingsHeader4"),
-				Toggle("CompletionLog_ColoursEnabledState", "$CompletionLog_ColoursEnabledText", logColours),
-				Colour("CompletionLog_QuestsTextColourState", "$CompletionLog_QuestsTextColourText", "CompletionLog_QuestsTextColourVal", "CompletionLog_QuestsTextColourString", "$CompletionLog_QuestsTextColourInfo", logColours),
-				Colour("CompletionLog_ItemsTextColourState", "$CompletionLog_ItemsTextColourText", "CompletionLog_ItemsTextColourVal", "CompletionLog_ItemsTextColourString", "$CompletionLog_ItemsTextColourInfo", logColours),
-				Spacer(),
 				Header("UI_ItemPictures_Header"),
 				Toggle("Item_Pictures", "UI_ItemPictures_Setting", "ItemPictures"),
-				Button("Item_PicturesPrepare", "UI_ItemPictures_PrepareSetting", "UI_ItemPictures_Prepare", "picturesPrepare", "ItemPictures"),
 				Button("Item_PicturesRedraw", "UI_ItemPictures_RedrawSetting", "UI_ItemPictures_Redraw", "picturesRedraw", "ItemPictures"),
-			};
-
-			page.columns[1] = {
-				Header(),
-				Button("State_MarkerDetectionCancel", "$State_MarkerDetectionCancelText", "UI_Setting_RemoveMarker", "markerCancel"),
-				Spacer(),
-				Header(),
-				Toggle("CompletionLog_PrefixEnabledState", "$CompletionLog_PrefixEnabledText", "CompletionLog_PrefixEnabled"),
-				Colour("CompletionLog_BooksTextColourState", "$CompletionLog_BooksTextColourText", "CompletionLog_BooksTextColourVal", "CompletionLog_BooksTextColourString", "$CompletionLog_BooksTextColourInfo", logColours),
-				Colour("CompletionLog_SpecialTextColourState", "$CompletionLog_SpecialTextColourText", "CompletionLog_SpecialTextColourVal", "CompletionLog_SpecialTextColourString", "$CompletionLog_SpecialTextColourInfo", logColours),
-			};
-			return page;
-		}
-
-		//---------------------------------------------------
-		//-- Settings Layout ( Notifications Page ) ---------
-		//---------------------------------------------------
-
-		// Notifications
-		SettingsPageLayout NotificationsPage() {
-
-			SettingsPageLayout page{ "notifications", "UI_SettingsSection_Notifications", {}, {} };
-			page.columns[0] = {
-				Header("$NotificationSettingsText"),
-				Toggle("ModNotificationsItems", "$ModNotificationsItems", "NotifyItems"),
-				Toggle("ModNotificationsBooks", "$ModNotificationsBooks", "NotifyBooks"),
-				Toggle("ModNotificationsColourEnabled", "$ModNotificationsColourEnabled", "NotificationColourEnabled"),
-			};
-			page.columns[1] = {
-				Header(),
-				Toggle("ModNotificationsSpecial", "$ModNotificationsSpecial", "NotifySpecial"),
-				Toggle("ModNotificationsStartup", "$ModNotificationsStartup", "NotifyStartup"),
-				Colour("ModNotificationsColour", "$ModNotificationsColour", "IndexColour", "ColourString", "$ModNotificationsColourInfo", "NotificationColourEnabled"),
 			};
 			return page;
 		}
@@ -177,7 +135,7 @@ namespace CompletionistUI
 		//-- Settings Layout ( Hud Page ) -------------------
 		//---------------------------------------------------
 
-		// HUD Settings
+		// HUD and notifications
 		SettingsPageLayout HudPage() {
 
 			const auto side = [](const char* a_tag, const char* a_fallback) {
@@ -194,9 +152,25 @@ namespace CompletionistUI
 				};
 			};
 
-			SettingsPageLayout page{ "hud", "$MCMPageSettings3", {}, {} };
-			page.columns[0] = side("N", "Need It!");
-			page.columns[1] = side("G", "Got It!");
+			SettingsPageLayout page{ "hud", "UI_SettingsSection_HudNotifications", {}, {} };
+			page.columns[0] = {
+				Header("$NotificationSettingsText"),
+				Toggle("ModNotificationsItems", "$ModNotificationsItems", "NotifyItems"),
+				Toggle("ModNotificationsBooks", "$ModNotificationsBooks", "NotifyBooks"),
+				Spacer(),
+			};
+			page.columns[1] = {
+				Header(),
+				Toggle("ModNotificationsSpecial", "$ModNotificationsSpecial", "NotifySpecial"),
+				Colour("ModNotificationsColour", "$ModNotificationsColour", "IndexColour", "ColourString", "$ModNotificationsColourInfo"),
+				Spacer(),
+			};
+			for (auto& row : side("N", "Need It!")) {
+				page.columns[0].push_back(std::move(row));
+			}
+			for (auto& row : side("G", "Got It!")) {
+				page.columns[1].push_back(std::move(row));
+			}
 
 			// Item Icons
 			constexpr auto iconsOn = "bItemIcons";
@@ -204,6 +178,9 @@ namespace CompletionistUI
 			auto opacity = Slider("ItemIcons_Opacity", "UI_ItemIcons_Opacity", "iItemIcons_Opacity", 20, 100, 5, "UI_ItemIcons_OpacityInfo");
 			size.enabledBy = iconsOn;
 			opacity.enabledBy = iconsOn;
+			auto museumIcons = Toggle("ItemIcons_Museum", "UI_ItemIcons_Museum", "bItemIcons_Museum", iconsOn);
+			museumIcons.plugin = "LegacyoftheDragonborn.esm";
+			museumIcons.keepRow = true;
 			page.columns[0].insert(page.columns[0].end(), {
 				Spacer(),
 				Header("UI_ItemIcons_Header"),
@@ -216,12 +193,36 @@ namespace CompletionistUI
 				Header(),
 				Toggle("ItemIcons_Needed", "UI_ItemIcons_Needed", "bItemIcons_Needed", iconsOn),
 				Toggle("ItemIcons_Found", "UI_ItemIcons_Found", "bItemIcons_Found", iconsOn),
-				Toggle("ItemIcons_Museum", "UI_ItemIcons_Museum", "bItemIcons_Museum", iconsOn),
+				museumIcons,
 			});
+
+			// Each icon's colours, side by side
+			page.columns[0].insert(page.columns[0].end(), { Spacer(), Header("UI_IconColour_Header") });
+			page.columns[1].insert(page.columns[1].end(), { Spacer(), Header() });
+			constexpr std::pair<const char*, const char*> iconColours[] = {
+				{ "New", "cmpNew" }, { "Found", "cmpFound" }, { "Displayable", "cmpDisplayable" }, { "Displayed", "cmpDisplayed" }, { "Occupied", "cmpOccupied" },
+			};
+			for (const auto& [key, icon] : iconColours) {
+				const std::string name = key;
+				auto primary = Colour("ItemIconColour_" + name + "_Primary", "UI_IconColour_" + name + "_Primary", "iItemIconColour_" + name + "_Primary", "sItemIconColour_" + name + "_Primary", "UI_IconColour_PrimaryInfo", iconsOn);
+				auto secondary = Colour("ItemIconColour_" + name + "_Secondary", "UI_IconColour_" + name + "_Secondary", "iItemIconColour_" + name + "_Secondary", "sItemIconColour_" + name + "_Secondary", "UI_IconColour_SecondaryInfo", iconsOn);
+				primary.previewIcon = secondary.previewIcon = icon;
+				secondary.previewPart = 1;
+				if (name != "New" && name != "Found") {
+					primary.plugin = secondary.plugin = "LegacyoftheDragonborn.esm";
+				}
+				page.columns[0].push_back(std::move(primary));
+				page.columns[1].push_back(std::move(secondary));
+			}
 
 			// Completionist Sort
 			const auto priority = [](const char* a_id, const char* a_label, const char* a_value) {
 				return Slider(a_id, a_label, a_value, 1, 5, 1, "UI_Sort_PriorityInfo");
+			};
+			const auto museumPriority = [&](const char* a_id, const char* a_label, const char* a_value) {
+				auto row = priority(a_id, a_label, a_value);
+				row.plugin = "LegacyoftheDragonborn.esm";
+				return row;
 			};
 			page.columns[0].insert(page.columns[0].end(), {
 				Spacer(),
@@ -233,9 +234,9 @@ namespace CompletionistUI
 			page.columns[1].insert(page.columns[1].end(), {
 				Spacer(),
 				Header(),
-				priority("Sort_Displayable", "UI_Sort_Displayable", "iSort_Displayable"),
-				priority("Sort_Occupied", "UI_Sort_Occupied", "iSort_Occupied"),
-				priority("Sort_Displayed", "UI_Sort_Displayed", "iSort_Displayed"),
+				museumPriority("Sort_Displayable", "UI_Sort_Displayable", "iSort_Displayable"),
+				museumPriority("Sort_Occupied", "UI_Sort_Occupied", "iSort_Occupied"),
+				museumPriority("Sort_Displayed", "UI_Sort_Displayed", "iSort_Displayed"),
 			});
 			return page;
 		}
@@ -262,6 +263,7 @@ namespace CompletionistUI
 				Header("$MenuHUDMode_Header_DB"),
 				Toggle("State_MuseumModeEnabled", "$State_MuseumModeEnabled_Text", "MuseumModeEnabled"),
 				Toggle("State_TreatOccupiedAsDisplayed", "$State_TreatOccupiedAsDisplayed_Text", "TreatOccupiedAsDisplayed"),
+				Toggle("State_MuseumItemsOnly", "$State_MuseumItemsOnly_Text", "MuseumItemsOnly", "MuseumModeEnabled"),
 				Spacer(),
 				Header("$MenuHUDMode_Header_N_DB"),
 			};
@@ -324,8 +326,6 @@ namespace CompletionistUI
 				Toggle("CellScanner_Setting_ExcludeLiving", "UI_Cell_ExcludeLiving", "bCellScanner_ExcludeLiving"),
 				Header("$CellScanner_SettingsHeader5"),
 				Toggle("CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Text", pinning, {}, "pinningEnabled"),
-				Toggle("CellScanner_Setting_Pinning_Marker", "$CellScanner_Setting_Pinning_Marker_Text", "bCellScanner_Pinning_Marker", pinning, "pinningMarker"),
-				Toggle("CellScanner_Setting_Pinning_Effect", "$CellScanner_Setting_Pinning_Effect_Text", "bCellScanner_Pinning_Effect", pinning, "pinningEffect"),
 				Choice("State_CellScanner_Pinning_Sound", "UI_Cell_Sound", "CellScanner_Pinning_Sound_Choice", Keys("$CellScannerSoundList", 3), "$CellScanner_Pinning_Sound_Info", pinning),
 				Dynamic("pinnedItem", pinning),
 				Button("CellScanner_Setting_Pinning_ClearPin", "", "UI_Cell_ClearPin", "clearPin", pinning),
@@ -344,12 +344,10 @@ namespace CompletionistUI
 			{ "Achievements_Show", "UI_Achievements_SettingShowInfo" },
 			{ "Ingredients_NameUnknown", "UI_Ingredients_SettingNameUnknownInfo" },
 			{ "Item_Pictures", "UI_ItemPictures_SettingInfo" },
-			{ "Item_PicturesPrepare", "UI_ItemPictures_PrepareInfo" },
 			{ "Item_PicturesRedraw", "UI_ItemPictures_RedrawInfo" },
 			{ "Achievements_Progress", "UI_Achievements_SettingProgressInfo" },
 			{ "Achievements_Tips", "UI_Achievements_SettingTipsInfo" },
 			{ "Achievements_Rarity", "UI_Achievements_SettingRarityInfo" },
-			{ "Achievements_Missable", "UI_Achievements_SettingMissableInfo" },
 			{ "CellScanner_Setting_ExcludeAlchemy", "$CellScanner_Setting_ExcludeAlchemy_Info" },
 			{ "CellScanner_Setting_ExcludeIngredients", "$CellScanner_Setting_ExcludeIngredients_Info" },
 			{ "CellScanner_Setting_ExcludeArmor", "$CellScanner_Setting_ExcludeArmor_Info" },
@@ -359,33 +357,23 @@ namespace CompletionistUI
 			{ "CellScanner_Setting_ExcludeOwned", "UI_Cell_ExcludeOwnedInfo" },
 			{ "CellScanner_Setting_ExcludeLiving", "UI_Cell_ExcludeLivingInfo" },
 			{ "CellScanner_Setting_Pinning_ClearPin", "$CellScanner_Setting_Pinning_ClearPin_Info" },
-			{ "CellScanner_Setting_Pinning_Effect", "$CellScanner_Setting_Pinning_Effect_Info" },
 			{ "CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Info" },
-			{ "CellScanner_Setting_Pinning_Marker", "$CellScanner_Setting_Pinning_Marker_Info" },
 			{ "CellScanner_Setting_Range", "$CellScanner_Setting_Range_Info" },
 			{ "ColourState_Displayable", "$ColourState_Displayable_Info" },
 			{ "ColourState_Displayed", "$ColourState_Displayed_Info" },
 			{ "ColourState_G_HUD_Crosshair", "$ColourState_G_Generic_Info_Crosshair" },
-			{ "ColourState_G_HUD_Menus", "$ColourState_G_Generic_Info_Menus" },
 			{ "ColourState_N_HUD_Crosshair", "$ColourState_N_Generic_Info_Crosshair" },
-			{ "ColourState_N_HUD_Menus", "$ColourState_N_Generic_Info_Menus" },
 			{ "ColourState_Occupied", "$ColourState_Occupied_Info" },
-			{ "CompletionLog_BooksTextColourState", "$CompletionLog_BooksTextColourInfo" },
-			{ "CompletionLog_ColoursEnabledState", "$CompletionLog_ColoursEnabledInfo" },
-			{ "CompletionLog_ItemsTextColourState", "$CompletionLog_ItemsTextColourInfo" },
-			{ "CompletionLog_PrefixEnabledState", "$CompletionLog_PrefixEnabledInfo" },
-			{ "CompletionLog_QuestsTextColourState", "$CompletionLog_QuestsTextColourInfo" },
-			{ "CompletionLog_SpecialTextColourState", "$CompletionLog_SpecialTextColourInfo" },
 			{ "ItemIcons_Found", "UI_ItemIcons_FoundInfo" },
 			{ "ItemIcons_Museum", "UI_ItemIcons_MuseumInfo" },
 			{ "ItemIcons_Needed", "UI_ItemIcons_NeededInfo" },
 			{ "ItemIcons_Show", "UI_ItemIcons_ShowInfo" },
+			{ "ColourState_G_HUD_Menus", "$ColourState_G_Generic_Info_Menus" },
+			{ "ColourState_N_HUD_Menus", "$ColourState_N_Generic_Info_Menus" },
 			{ "ModNotificationsBooks", "$ModNotificationsBooksInfo" },
 			{ "ModNotificationsColour", "$ModNotificationsColourInfo" },
-			{ "ModNotificationsColourEnabled", "$ModNotificationsColourEnabledInfo" },
 			{ "ModNotificationsItems", "$ModNotificationsItemsInfo" },
 			{ "ModNotificationsSpecial", "$ModNotificationsSpecialInfo" },
-			{ "ModNotificationsStartup", "$ModNotificationsStartupInfo" },
 			{ "OverRide_Displayable_Name", "$State_OverRide_Displayable_Name_Info" },
 			{ "OverRide_Displayed_Name", "$State_OverRide_Displayed_Name_Info" },
 			{ "OverRide_G_Name", "$State_OverRide_G_Name_Info" },
@@ -393,10 +381,9 @@ namespace CompletionistUI
 			{ "OverRide_Occupied_Name", "$State_OverRide_Occupied_Name_Info" },
 			{ "Sort_Bands", "UI_Sort_BandsInfo" },
 			{ "State_CellScanner_Pinning_Sound", "$CellScanner_Pinning_Sound_Info" },
-			{ "State_MarkerDetection", "$State_MarkerDetectionInfo" },
-			{ "State_MarkerDetectionCancel", "$State_MarkerDetectionCancelInfo" },
 			{ "State_MuseumModeEnabled", "$State_MuseumModeEnabled_Info" },
 			{ "State_TreatOccupiedAsDisplayed", "$State_TreatOccupiedAsDisplayed_Info" },
+			{ "State_MuseumItemsOnly", "$State_MuseumItemsOnly_Info" },
 			};
 			for (auto& layout : a_layouts) {
 				for (auto& column : layout.columns) {
@@ -416,17 +403,18 @@ namespace CompletionistUI
 		// What counts as unlocked, and what the details show
 		SettingsPageLayout AchievementsPage() {
 
-			SettingsPageLayout page{ "achievements", "UI_SettingsSection_Achievements", {}, {} };
+			SettingsPageLayout page{ "achievements", "UI_Achievements_SettingsTracking", {}, {} };
+			page.tab = false;
+			page.under = "general";
 			page.columns[0] = {
 				Header("UI_Achievements_SettingsTracking"),
 				Toggle("Achievements_Show", "UI_Achievements_SettingShow", "AchievementsShow"),
+				Toggle("Achievements_Progress", "UI_Achievements_SettingProgress", "AchievementsProgress", "AchievementsShow"),
 			};
 			page.columns[1] = {
 				Header("UI_Achievements_SettingsDetails"),
-				Toggle("Achievements_Progress", "UI_Achievements_SettingProgress", "AchievementsProgress", "AchievementsShow"),
 				Toggle("Achievements_Tips", "UI_Achievements_SettingTips", "AchievementsTips", "AchievementsShow"),
 				Toggle("Achievements_Rarity", "UI_Achievements_SettingRarity", "AchievementsRarity", "AchievementsShow"),
-				Toggle("Achievements_Missable", "UI_Achievements_SettingMissable", "AchievementsMissable", "AchievementsShow"),
 			};
 			return page;
 		}
@@ -467,7 +455,7 @@ namespace CompletionistUI
 	const std::vector<SettingsPageLayout>& MCMSettingsLayouts() {
 
 		static const std::vector<SettingsPageLayout> layouts = [] {
-			std::vector<SettingsPageLayout> pages{ NotificationsPage(), HudPage(), MuseumPage(), InterfacePage(), CellScannerPage(), CompletionLogPage(), CellWindowPage(), AchievementsPage(), IngredientsPage() };
+			std::vector<SettingsPageLayout> pages{ HudPage(), MuseumPage(), PicturesPage(), CellScannerPage(), CompletionLogPage(), CellWindowPage(), AchievementsPage(), IngredientsPage() };
 			AddHelpTexts(pages);
 			return pages;
 		}();
@@ -505,7 +493,7 @@ namespace CompletionistUI
 			return {};
 		}
 		char buffer[16]{};
-		std::snprintf(buffer, sizeof(buffer), "#%X", a_colour);
+		std::snprintf(buffer, sizeof(buffer), "#%06X", a_colour);
 		return buffer;
 	}
 
@@ -516,6 +504,8 @@ namespace CompletionistUI
 	SettingItem MakeSettingItem(const SettingRow& a_row, SettingValues& a_values) {
 
 		SettingItem item{ .id = a_row.id, .kind = a_row.kind, .label = a_row.label, .info = a_row.info };
+		item.previewIcon = a_row.previewIcon;
+		item.previewPart = a_row.previewPart;
 		if (!a_row.enabledBy.empty()) {
 			const bool inverted = a_row.enabledBy.front() == '!';
 			item.enabled = a_values.GetBool(inverted ? a_row.enabledBy.substr(1) : a_row.enabledBy) != inverted;
@@ -542,6 +532,7 @@ namespace CompletionistUI
 			} else {
 				item.number = a_values.GetInt(a_row.value);
 			}
+			item.defaultColour = a_values.GetDefaultInt(a_row.value);
 			break;
 		case SettingKind::kInput:
 			item.value = a_values.GetString(a_row.value);

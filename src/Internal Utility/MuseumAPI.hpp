@@ -23,6 +23,13 @@ namespace Completionist
 		static bool IsMuseumDisplayable(RE::TESForm* a_form);
 		static bool IsMuseumDisplayable(RE::FormID a_formID);
 
+		// Whether the mod speaks up about an item: its tags, icons and Cell Scanner. Museum items always do while
+		// Museum Mode's on, tracked or not; with Museum Items Only on, the other tracked items stay quiet.
+		static bool SpeaksAbout(RE::TESForm* a_form);
+		static bool IsSilenced(RE::FormID a_formID);
+		// For the Cell Scanner: what the museum still wants, with Museum Items Only the variations of what's on display too, and anything else not found yet
+		static bool NeedsFinding(RE::TESForm* a_form);
+
 
 		static std::unordered_set<RE::FormID> GetVariations(RE::FormID a_formID);
 
@@ -38,6 +45,13 @@ namespace Completionist
 		static void FindAndTrackMuseumPatchItems();
 		static void FindAndTrackMuseumAltItems();
 		static std::unordered_set<RE::TESForm*> GetReplicaItems(const RE::TESForm* element, const RE::BGSListForm* replicaBaseItems, const RE::BGSListForm* replicaItems);
+
+		using ItemLists = std::vector<std::pair<RE::BGSListForm*, std::string>>;
+		static ItemLists GetItemLists();
+		static ItemLists GetAltLists();
+		static void      NoteFoundItems();
+		static void      NoteFoundItem(RE::TESContainerChangedEvent const* a_event);
+		static void      MarkFound(RE::FormID a_formID);
 
 		struct Display
 		{
@@ -80,6 +94,7 @@ namespace Completionist
 		inline static bool _logging;
 		inline static bool _ready;
 
+		// Only if LOTD's own arrays can't be read
 		inline static constexpr std::pair<RE::FormID, std::string_view> museumItemListsMap[] = {
 			{0x161CE6, "LegacyoftheDragonborn.esm"},	// Ancient Nord
 			{0x161CE7, "LegacyoftheDragonborn.esm"},	// Blades

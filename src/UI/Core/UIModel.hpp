@@ -278,6 +278,9 @@ namespace CompletionistUI
 		bool                     enabled{ true };
 		bool                     confirm{ false };
 		std::vector<std::string> keys;
+		std::string              previewIcon{};	// a colour for this item icon: its picker shows the icon
+		std::int32_t             previewPart{ 0 };	// 0 primary, 1 secondary
+		std::int32_t             defaultColour{ -1 };	// what a colour ships with, -1 for none
 	};
 
 	struct SettingsPage
@@ -287,6 +290,7 @@ namespace CompletionistUI
 		std::vector<SettingItem> columns[2];
 		bool                     singleColumn{ false };
 		bool                     tab{ true };
+		std::string              under;
 	};
 
 	struct AboutInfo

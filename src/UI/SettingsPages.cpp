@@ -39,6 +39,11 @@ namespace CompletionistUI
 				return value && value->IsInt() ? value->GetSInt() : 0;
 			}
 
+			std::int32_t GetDefaultInt(const std::string& a_name) override {
+
+				return SettingsAPI::DefaultInt(a_name);
+			}
+
 			std::string GetString(const std::string& a_name) override {
 
 				const auto* value = SettingsAPI::Get(a_name);
@@ -129,21 +134,12 @@ namespace CompletionistUI
 		{
 			std::vector<std::string>  dates;
 			std::vector<std::string>  entries;
-			std::vector<std::int32_t> colours;	// 0xRRGGBB, 0 when off
 		};
 
 		//---------------------------------------------------
 		//-- Settings Pages ( Parse Hex Colour ) ------------
 		//---------------------------------------------------
 
-		std::int32_t ParseHexColour(std::string_view a_text) {
-
-			std::int32_t colour = 0;
-			if (a_text.starts_with('#')) {
-				std::from_chars(a_text.data() + 1, a_text.data() + a_text.size(), colour, 16);
-			}
-			return colour;
-		}
 
 		//---------------------------------------------------
 		//-- Settings Pages ( Read Log ) --------------------
@@ -157,21 +153,7 @@ namespace CompletionistUI
 				return log;
 			}
 			a_date = std::clamp(a_date, 0, static_cast<std::int32_t>(log.dates.size()) - 1);
-			const auto* prefix = SettingsAPI::Get("CompletionLog_PrefixEnabled");
-			log.entries = CFramework_Master::FrameworkAPI::GetLoggedEventsForDate(nullptr, log.dates[a_date], prefix && prefix->GetBool());
-
-			const auto* coloured = SettingsAPI::Get("CompletionLog_ColoursEnabled");
-			const auto  text = [](const char* a_name) {
-				const auto* value = SettingsAPI::Get(a_name);
-				return value && value->IsString() ? std::string(value->GetString()) : std::string{};
-			};
-			const auto quests = text("CompletionLog_QuestsTextColourString");
-			const auto items = text("CompletionLog_ItemsTextColourString");
-			const auto books = text("CompletionLog_BooksTextColourString");
-			const auto special = text("CompletionLog_SpecialTextColourString");
-			for (const auto& entry : log.entries) {
-				log.colours.push_back(coloured && coloured->GetBool() ? ParseHexColour(CFramework_Master::LoggingData.GetEntryTypeByLogPrefx(entry, quests, items, books, special)) : 0);
-			}
+			log.entries = CFramework_Master::FrameworkAPI::GetLoggedEventsForDate(nullptr, log.dates[a_date], true);
 			return log;
 		}
 
@@ -228,7 +210,6 @@ namespace CompletionistUI
 					const std::string_view entry = a_log.entries[i];
 					const auto             split = entry.find(" ~ ");
 					auto                   row = split == std::string_view::npos ? TextRow("logEntry" + std::to_string(i), {}, std::string(entry)) : TextRow("logEntry" + std::to_string(i), std::string(entry.substr(0, split)), std::string(entry.substr(split + 3)));
-					row.number = i < a_log.colours.size() ? a_log.colours[i] : 0;
 					a_out.push_back(std::move(row));
 				}
 				if (a_log.entries.empty()) {
@@ -268,9 +249,15 @@ namespace CompletionistUI
 				continue;
 			}
 
-			auto& page = pages.emplace_back(SettingsPage{ layout.id, layout.title, {}, layout.singleColumn, layout.tab });
+			auto& page = pages.emplace_back(SettingsPage{ layout.id, layout.title, {}, layout.singleColumn, layout.tab, layout.under });
 			for (int column = 0; column < 2; ++column) {
 				for (const auto& row : layout.columns[column]) {
+					if (!row.plugin.empty() && (!handler || !handler->LookupLoadedModByName(row.plugin))) {
+						if (row.keepRow) {
+							page.columns[column].push_back({ .id = row.id, .kind = SettingKind::kSpacer, .number = 1 });
+						}
+						continue;
+					}
 					if (row.id.starts_with(dynamicRowPrefix)) {
 						const bool enabled = row.enabledBy.empty() || values.GetBool(row.enabledBy);
 						AddDynamicRows(std::string_view(row.id).substr(dynamicRowPrefix.size()), enabled, page.columns[column], log, _logDate);
@@ -338,20 +325,12 @@ namespace CompletionistUI
 
 		// What the MCM's option events did
 		const auto& action = row->action;
-		if (action == "markerCancel") {
-			Tracker::UnlocateAll();
-		} else if (action == "pinningEnabled") {
+		if (action == "pinningEnabled") {
 			if (!a_item.on) {
 				Tracker::UnpinAll();
 			}
-		} else if (action == "pinningMarker") {
-			Tracker::ShowPinObjectives(a_item.on);
-		} else if (action == "pinningEffect") {
-			Tracker::ShowPinGlow(a_item.on);
 		} else if (action == "clearPin") {
 			Tracker::UnpinAll();
-		} else if (action == "picturesPrepare") {
-			ModelPictures::PrepareAll(false);
 		}
 
 		SettingsAPI::Save();

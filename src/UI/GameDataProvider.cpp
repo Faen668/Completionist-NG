@@ -119,7 +119,8 @@ namespace CompletionistUI
 				}
 				return;
 			}
-			a_entry.canMark = !a_entry.IsComplete() && ref->GetParentCell() && !ref->IsDisabled() && !ref->IsDeleted();
+			// GetSaveParentCell: an outdoor reference has no parent cell of its own until its cell is loaded
+			a_entry.canMark = !a_entry.IsComplete() && ref->GetSaveParentCell() && !ref->IsDisabled() && !ref->IsDeleted();
 		}
 
 		//---------------------------------------------------
@@ -250,6 +251,12 @@ namespace CompletionistUI
 				entry.frameworkID = a_id;
 				entry.canToggle = entry.formID != 0 && (a_id < 1 || a_id > 5);
 				AddMapMarker(entry, i < forms.size() ? forms[i] : nullptr, a_provider);
+				// The Stones of Barenziah are named by where they are; in the game they're Unusual Gems
+				if (a_id == 0) {
+					// Where the place reads "within the ...": Black-Briar Lodge, the College, the Treasury House and so on
+					constexpr std::size_t withThe[] = { 1, 2, 3, 4, 8, 9, 13, 17, 18, 21, 22 };
+					entry.markerText = std::ranges::find(withThe, i) != std::end(withThe) ? "UI_Track_StoneThe" : "UI_Track_Stone";
+				}
 				if (i < texts.size() && texts[i] != "NO_HIGHLIGHT") {
 					entry.description = a_provider.Translate(texts[i]);
 				}
@@ -1568,9 +1575,7 @@ namespace CompletionistUI
 				if (setting("AchievementsTips")) {
 					info.tip = a_provider.Translate("UI_Achievements_Tip_" + number);
 				}
-				if (setting("AchievementsMissable")) {
-					info.missable = std::ranges::find(missable, achievement.number) != std::end(missable);
-				}
+				info.missable = std::ranges::find(missable, achievement.number) != std::end(missable);
 				if (setting("AchievementsRarity") && achievement.percent >= 0.0f) {
 					info.rarity = a_provider.Translate("UI_Achievements_Rarity{" + fmt::format("{:.1f}", achievement.percent) + "}");
 				}
@@ -1776,9 +1781,9 @@ namespace CompletionistUI
 			}
 		}
 
-		// Last, so it can point at the quest pages
+		// Last, so it can point at the quest pages; first in Collections
 		if (auto page = BuildAchievementPage(*this, pages); !page.sections.empty()) {
-			categories.push_back({ "UI_Category_Achievements", {}, { Summarise(page) } });
+			categories[0].pages.insert(categories[0].pages.begin(), Summarise(page));
 			pages.emplace(page.id, std::move(page));
 		}
 		CFramework_Achievements::CHandler::QueryStats([this]() { Rebuild(); });
@@ -2261,6 +2266,7 @@ namespace CompletionistUI
 		std::vector<CellRecord> records;
 		scan.excluded = SettingsPages::IsCellExcluded(cell);
 		scan.interior = cell->IsInteriorCell();
+		Tracker::DropFound();
 		if (scan.excluded && _pruneTracking.exchange(false)) {
 			Tracker::DropUnlisted({});
 		}

@@ -24,14 +24,13 @@ namespace CompletionistUI
 		static void Unpin(RE::FormID a_form);
 		static void UnpinAll();
 		static void PlacePinsFound(const std::vector<RE::FormID>& a_items);
-		static void ShowPinObjectives(bool a_shown);
-		static void ShowPinGlow(bool a_shown);
 
 		static bool MarkReference(RE::TESObjectREFR* a_ref, RE::TESForm* a_item, const std::string& a_name, const std::string& a_type);
 		// a_item 0 clears every marker on the reference
 		static void ClearMarker(RE::FormID a_ref, RE::FormID a_item = 0);
 		static void ClearMarkers();
 		static void DropUnlisted(const std::vector<std::pair<RE::FormID, RE::FormID>>& a_listed);
+		static void DropFound();
 
 		// NPCs, placed items and map markers from the pages, as many as there are slots
 		[[nodiscard]] static std::vector<RE::FormID> Located();

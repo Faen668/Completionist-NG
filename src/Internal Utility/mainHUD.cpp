@@ -86,7 +86,7 @@ namespace Completionist_MainHUD
 			return;
 
 		RE::TESForm* Base = CurrentObj->GetBaseObject();
-		if (!Base || !ItemIsCollectable(Base)) return;
+		if (!museum::SpeaksAbout(Base)) return;
 
 		const auto formatTag = [](const RE::BSString& originalText, const std::string& color, const std::string& tag) -> std::string {
 			return fmt::format("{:s} <font color = '{:s}'>{:s} </font>"sv, originalText.c_str(), color, tag);

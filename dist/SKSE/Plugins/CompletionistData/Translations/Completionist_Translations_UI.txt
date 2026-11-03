@@ -128,26 +128,9 @@ $HeaderO				|Vanilla Tracking
 $NotificationSettingsText						|Notification Settings
 $ModNotificationsItems							|Item Notifications
 $ModNotificationsBooks							|Book Notifications
-$ModNotificationsColourEnabled					|Notification Colour
-$State_MapMarkerSettingsHead					|Map Marker Settings
-$State_MarkerDetectionText						|Quest Markers (Radius)
-$State_MarkerDetectionInfo						|When you track a location, NPC or item from the pages, this is how close you have to get before its quest marker is done.
-$State_MarkerDetectionCancelText				|Quest Markers (Clear All)
-$MCMPageSettingsHeader4							|Completion Log Settings
-$CompletionLog_ColoursEnabledText				|Coloured Log Entries
-$CompletionLog_QuestsTextColourText				|Quest Entries
-$CompletionLog_QuestsTextColourInfo				|Sets the text colour for completion log entries from completed quests.
-$CompletionLog_ItemsTextColourText				|Items Entries
-$CompletionLog_ItemsTextColourInfo				|Sets the text colour for completion log entries from collected items.
 $ModNotificationsSpecial						|Special Notifications
-$ModNotificationsStartup						|Startup Notifications
 $ModNotificationsColour							|Notification Colour
-$ModNotificationsColourInfo						|Use this option to customize the colour of Completionist's Notifications\nDefault: Orange
-$CompletionLog_PrefixEnabledText				|Log Entry Time Prefix
-$CompletionLog_BooksTextColourText				|Books Entries
-$CompletionLog_BooksTextColourInfo				|Sets the text colour for completion log entries from read books / tomes.
-$CompletionLog_SpecialTextColourText			|Special Entries
-$CompletionLog_SpecialTextColourInfo			|Sets the text colour for completion log entries from special entires such as pets, homes & shrines.
+$ModNotificationsColourInfo						|Use this option to customize the colour of Completionist's Notifications\nDefault: White
 $MainHUDMode_Header_N							|Main HUD (New Items)
 $State_OverRide_N_Name_Text						|Tag Text
 $ColourState_N_Generic_Text_Crosshair			|Tag Colour
@@ -158,7 +141,7 @@ $InventoryModeOptions_PrAp_Info_N				|Use this menu to customize how the names o
 $InventoryModeOptions_PrFx_Text_N				|Prefix
 $InventoryModeOptions_PrFx_Info_N				|Use this menu to customize how the prefix of collectable / new item names are displayed in menus.\nDefault 'One Star (*)'
 $ColourState_N_Generic_Text_Menus				|Colour
-$ColourState_N_Generic_Info_Menus				|Sets the text colour of collectable / new items in Menu's.
+$ColourState_N_Generic_Info_Menus				|Sets the text colour of collectable / new items in menus, with a colour format.
 $MainHUDMode_Header_G							|Main HUD (Found Items)
 $State_OverRide_G_Name_Text						|Tag Text
 $ColourState_G_Generic_Text_Crosshair			|Tag Colour
@@ -169,10 +152,11 @@ $InventoryModeOptions_PrAp_Info_G				|Use this menu to customize how the names o
 $InventoryModeOptions_PrFx_Text_G				|Prefix
 $InventoryModeOptions_PrFx_Info_G				|Use this menu to customize how the prefix of collected / found item names are displayed in menus.\nDefault 'One Star (*)'
 $ColourState_G_Generic_Text_Menus				|Colour
-$ColourState_G_Generic_Info_Menus				|Sets the text colour of collected / found items in Menu's.
+$ColourState_G_Generic_Info_Menus				|Sets the text colour of collected / found items in menus, with a colour format.
 $MenuHUDMode_Header_DB							|Museum Mode Settings
 $State_MuseumModeEnabled_Text					|Museum Mode
-$State_TreatOccupiedAsDisplayed_Text			|Treat Occuiped As Displayed
+$State_TreatOccupiedAsDisplayed_Text			|Treat Occupied As Displayed
+$State_MuseumItemsOnly_Text						|Museum Items Only
 $MenuHUDMode_Header_N_DB						|Museum Mode (Displayable Items)
 $State_OverRide_Displayable_Name_Text			|Tag Text
 $ColourState_Displayable_Text					|Tag Colour
@@ -198,7 +182,6 @@ $InventoryModeOptions_PrFx_Text_Occupied		|Prefix
 $InventoryModeOptions_PrFx_Info_Occupied		|Use this menu to customize how the prefix of 'Museum Display Occupied' item names are displayed in menus.\nDefault 'One Star (*)'
 $CellScanner_SettingsHeader5					|Item Pinning
 $CellScanner_Setting_Pinning_Enabled_Text		|Item Pinning
-$CellScanner_Setting_Pinning_Marker_Text		|Use Quest Markers
 $CellScanner_SettingsHeader2					|Searching
 $CellScanner_Setting_Range_Info					|Sets the range that should be used when scanning for collectables in an exterior location.
 $CellScanner_SettingsHeader4					|Exclusions
@@ -208,8 +191,7 @@ $CellScanner_Setting_ExcludeArmor_Text			|Exclude Armor Pieces
 $CellScanner_Setting_ExcludeBooks_Text			|Exclude Books / Spell Tomes
 $CellScanner_ExcludedHeader						|Excluded Cells
 $CellScanner_ExcludedReferencesHeader			|Excluded References In Current Cell
-$CellScanner_Pinning_Sound_Info					|Plays a sound when a pinned item is found in the cell you are scanning letting you know its there.\nDefault Enabled
-$CellScanner_Setting_Pinning_Effect_Text		|Visual Effect
+$CellScanner_Pinning_Sound_Info					|Plays a sound when a pinned item is found in the cell you are scanning letting you know it's there.\nDefault: Sci-Fi
 $CellScanner_Setting_ExcludeMiscItems_Text		|Exclude Miscellaneous Items
 $CellScanner_Setting_ExcludeWeapons_Text		|Exclude Weapons
 $MCMPageSettings2								|UI Settings
@@ -246,31 +228,25 @@ $CellScannerSoundList2							|Surprise
 ----------------------------------------------------------------------------
 -- Settings help texts
 ----------------------------------------------------------------------------
-$CellScanner_Setting_ExcludeAlchemy_Info		|Click to enable / disable searching for Alchemy Items when scanning a cell.
-$CellScanner_Setting_ExcludeIngredients_Info	|Click to enable / disable searching for Ingredients when scanning a cell, including plants.
-$CellScanner_Setting_ExcludeArmor_Info			|Click to enable / disable searching for Armor Pieces when scanning a cell.
-$CellScanner_Setting_ExcludeBooks_Info			|Click to enable / disable searching for Books, Notes and Spell Tomes when scanning a cell.
-$CellScanner_Setting_ExcludeMiscItems_Info		|Click to enable / disable searching for Misc Items when scanning a cell.
-$CellScanner_Setting_ExcludeWeapons_Info		|Click to enable / disable searching for Weapons when scanning a cell.
+$CellScanner_Setting_ExcludeAlchemy_Info		|Leaves Alchemy Items out when scanning a cell.
+$CellScanner_Setting_ExcludeIngredients_Info	|Leaves Ingredients, including plants, out when scanning a cell.
+$CellScanner_Setting_ExcludeArmor_Info			|Leaves Armor Pieces out when scanning a cell.
+$CellScanner_Setting_ExcludeBooks_Info			|Leaves Books, Notes and Spell Tomes out when scanning a cell.
+$CellScanner_Setting_ExcludeMiscItems_Info		|Leaves Misc Items out when scanning a cell.
+$CellScanner_Setting_ExcludeWeapons_Info		|Leaves Weapons out when scanning a cell.
 $CellScanner_Setting_Pinning_ClearPin_Info		|Clears the assigned pin
-$CellScanner_Setting_Pinning_Effect_Info		|Adds a visual effect to pinned items or the holding container making them easier to spot.\nDefault: Enabled
-$CellScanner_Setting_Pinning_Enabled_Info		|Allows you to 'Pin' a collectable item by clicking on it in the MCM. Pinned items will be checked for when you use the cell scanner.\nDefault: Enabled
-$CellScanner_Setting_Pinning_Marker_Info		|Adds a misc journal entry with a quest marker on the pinned item or container holding it.\nDefault: Enabled
-$CompletionLog_ColoursEnabledInfo				|Allows you to enable / disable custom colour options for completed log entries.
-$CompletionLog_PrefixEnabledInfo				|Allows you to show / hide the log entries completion time.
+$CellScanner_Setting_Pinning_Enabled_Info		|Lets you pin a collectable item from its page or the Cell Scanner. A pinned item gets a quest marker and a glow when you're in the same cell as it.\nDefault: Enabled
 $ModNotificationsBooksInfo						|Receive notifications when the player reads a book tracked by Completionist for the first time\nDefault: Enabled
-$ModNotificationsColourEnabledInfo				|Enables/Disables Notification Colour\nDefault: Enabled
 $ModNotificationsItemsInfo						|Receive notifications when the player picks up a unique item tracked by Completionist\nDefault: Enabled
 $ModNotificationsSpecialInfo					|Receive notifications when the player performs a special action such as activating an undiscovered shrine or standing stone, acquiring a new pet, catching a new fish, learning a new dragon shout or word of power etc.\nDefault: Enabled
-$ModNotificationsStartupInfo					|Enables / Disables the startup notification when loading a saved game\nDefault: Enabled
 $State_OverRide_Displayable_Name_Info			|Sets the text of the Dynamic Crosshair Tag for museum displayable items.\nTyping '...' into the box will disable this tag.\nDefault: Displayable!
 $State_OverRide_Displayed_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayed items.\nTyping '...' into the box will disable this tag.\nDefault: Displayed!
 $State_OverRide_G_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collected items.\nTyping '...' into the box will disable this tag.\nDefault: Got It!
 $State_OverRide_N_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collectable items.\nTyping '...' into the box will disable this tag.\nDefault: Need It!
-$State_OverRide_Occupied_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayable items where a variation is already displayed.\nTyping '...' into the box will disable this tag.\nDefault: Need It!
-$State_MarkerDetectionCancelInfo				|Clears every location, NPC and item you're tracking from the pages.
-$State_MuseumModeEnabled_Info					|Controller for Museum Mode support within Completionist\nDefault: Enabled
-$State_TreatOccupiedAsDisplayed_Info			|Ignores the 'Occupied' settings and treats all occuiped item displays as 'Displayed'\nDefault: Disabled
+$State_OverRide_Occupied_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayable items where a variation is already displayed.\nTyping '...' into the box will disable this tag.\nDefault: Occupied!
+$State_MuseumModeEnabled_Info					|Controller for Museum Mode support within Completionist. Museum items get their tags and icons even if Completionist doesn't track them\nDefault: Enabled
+$State_TreatOccupiedAsDisplayed_Info			|Ignores the 'Occupied' settings and treats all occupied item displays as 'Displayed'\nDefault: Disabled
+$State_MuseumItemsOnly_Info						|Only tells you about museum items and specials like shrines, houses and fish: other items get no notifications, tags, icons or Cell Scanner results. Pages and tracking carry on as normal, so turning it off loses nothing.\nDefault: Disabled
 $CellScanner_Setting_EXCL_Highlight				|Click to remove this cell from the excluded locations list.
 $CellScanner_Setting_EXRF_Highlight				|Click to remove this reference from the excluded list.
 

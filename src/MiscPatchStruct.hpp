@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Internal Utility/MuseumAPI.hpp"
 #include "Serialization.hpp"
 #include "Internal Utility/Variables.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
@@ -695,7 +696,9 @@ struct CMiscPatch
 
 		if (!CFramework_Master::FoundItemData.HasForm(a_eventID)) {
 			auto msg = fmt::format("{}{}!", CVariables::V_NotificationText, data->names[pos_t]);
-			master::SendNotification(msg, a_section);
+			if (!Completionist::MuseumAPI::IsSilenced(a_eventID)) {
+				master::SendNotification(msg, a_section);
+			}
 
 			if (auto* book = data->data.GetForm<RE::TESObjectBOOK>(a_eventID); book && book->GetSpell()) {
 				master::AddNewEventToLog(Serialization::CompletionistLog::kTome, data->names[pos_t]);

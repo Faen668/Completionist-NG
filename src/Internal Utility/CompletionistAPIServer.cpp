@@ -98,7 +98,7 @@ void CompletionistAPIServer::InterfaceV20::GetItemInfo(CompletionistAPI::ItemInf
 		auto& currentItem = info[i];
 		auto* boundObject = currentItem.entry ? currentItem.entry->object : nullptr;
 
-		if (hud::ItemIsCollectable(boundObject))
+		if (dbm::SpeaksAbout(boundObject))
 		{
 			const bool collected = hud::ItemIsCollected(boundObject);
 			currentItem.isNeeded = !collected;
@@ -159,7 +159,7 @@ void CompletionistAPIServer::InterfaceV20::GetIconInfo(CompletionistAPI::IconInf
 	for (auto i = 0; i < count; i++)
 	{
 		auto& currentItem = info[i];
-		if (hud::ItemIsCollectable(currentItem.object)) {
+		if (dbm::SpeaksAbout(currentItem.object)) {
 			const bool collected = hud::ItemIsCollected(currentItem.object);
 			currentItem.isNeeded = !collected;
 			currentItem.isCollected = collected;
@@ -208,14 +208,14 @@ RE::BSString CompletionistAPIServer::InterfaceV20::GetDecoratedItemName(RE::Inve
 	if (isVariationDisplayedInstead && TreatOccupiedAsDisplayed())
 		displayed = true;
 
-	return !IsItemTracked(entry->object)
+	return !dbm::SpeaksAbout(entry->object)
 		? entry->GetDisplayName()
 		: RE::BSString(hud::API_GetDisplayNamePrefix(entry, IsItemCollected(entry->object), displayed, isVariationDisplayedInstead).c_str());
 }
 
 uint32_t CompletionistAPIServer::InterfaceV20::GetItemTextColor(RE::TESBoundObject* object)
 {
-	if (!object || !IsItemTracked(object)) {
+	if (!dbm::SpeaksAbout(object)) {
 		return -1;
 	}
 

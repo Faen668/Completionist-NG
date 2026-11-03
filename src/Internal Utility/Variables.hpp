@@ -64,6 +64,8 @@ namespace CVariables
 	inline bool				V_ItemIcons_Needed{ true };
 	inline bool				V_ItemIcons_Found{ true };
 	inline bool				V_ItemIcons_Museum{ true };
+	// Primary and secondary, in the order of CompletionistUI::itemIcons
+	inline std::int32_t		V_ItemIconColours[5][2]{ { 16777215, 6997502 }, { 16777215, 569168 }, { 16777215, 6997502 }, { 16777215, 569168 }, { 16777215, 16027660 } };
 
 	// Completionist sort
 	inline std::int32_t		V_Sort_Displayable{ 1 };
@@ -98,6 +100,7 @@ namespace CVariables
 
 	inline bool				V_MuseumModeEnabled;
 	inline bool				V_TreatOccupiedAsDisplayed;
+	inline bool				V_MuseumItemsOnly;
 	
 	class VariablesAPI final
 	{

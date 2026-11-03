@@ -232,7 +232,6 @@ UI_Category_Quests		|Quests
 ----------------------------------------------------------------------------
 -- Screenshots
 ----------------------------------------------------------------------------
-UI_Screenshot		|Screenshot
 UI_ScreenshotSaved	|Screenshot saved:
 UI_ScreenshotFailed	|Screenshot failed, see Completionist.log
 
@@ -243,6 +242,7 @@ UI_Settings						|Settings
 UI_Setting_SavedHint			|Changes apply straight away and are saved to Completionist.ini when the window closes.
 UI_SettingsSection_Appearance	|Appearance
 UI_Setting_Theme				|Theme
+UI_SettingHint_Theme			|The look of the whole window.
 UI_Theme_Completionist			|Completionist
 UI_Theme_SkyUI					|SkyUI
 UI_Theme_DearDiary				|Dear Diary - Dark Mode
@@ -267,8 +267,11 @@ UI_SettingHint_AnimeMascots		|Puts the chibi faces peeking over the panels. Off,
 UI_Setting_Scale				|Text and interface scale
 UI_SettingHint_Scale			|Multiplies the automatic scaling for your resolution. Applied when you release the slider, like width and height.
 UI_Setting_Width				|Window width
+UI_SettingHint_Width			|How wide the window is, as a share of the screen. Applied when you release the slider.
 UI_Setting_Height				|Window height
+UI_SettingHint_Height			|How tall the window is, as a share of the screen. Applied when you release the slider.
 UI_Setting_Opacity				|Background opacity
+UI_SettingHint_Opacity			|How solid the window's background is. Lower lets the game show through.
 UI_Setting_Columns				|Entries per row
 UI_Setting_ColumnsAuto			|Automatic
 UI_SettingHint_Columns			|Automatic fits as many columns as the window width allows, up to four.
@@ -276,14 +279,14 @@ UI_Setting_OpenKey				|Open key
 UI_Setting_PressKey				|Press a key... (Esc cancels)
 UI_SettingHint_OpenKey			|Click, then press the key that should open and close this window. Press Delete while it waits to leave it unbound.
 UI_Setting_OpenOnLastPage		|Reopen on the last page viewed
-UI_Setting_HideCompleted		|Hide completed entries by default
-UI_Setting_Screenshot			|Show the screenshot button
-UI_SettingHint_Screenshot		|Adds a button next to Close that saves the screen, including this window, as a PNG.
+UI_SettingHint_OpenOnLastPage	|Opens the window on the page you last had open, rather than the Overview.
 UI_Setting_PauseGame			|Pause the game while open
 UI_SettingHint_PauseGame		|Freezes the world while this window is open, like the inventory does. Turn it off to keep the game running behind it.
 UI_Setting_JournalEntry			|Completionist on the Journal's System tab
 UI_SettingHint_JournalEntry		|Adds a Completionist entry to the System tab of the Journal (Quicksave, Save, Load...) that opens this window, so it can be opened without a key or button combo.
 UI_Setting_Reset				|Reset to defaults
+UI_Setting_ResetRow				|Window settings
+UI_SettingHint_Reset			|Puts the window's settings back to how they started, including where the notifications sit. Your keyboard keys are kept.
 
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 1)
@@ -321,12 +324,12 @@ UI_ConfirmClick					|Click again to confirm
 UI_Remove						|Remove
 UI_Exclude						|Exclude
 UI_CellScanner_NoPin			|No active pin
-UI_Setting_RemoveMarker			|Remove marker
 UI_Setting_Unbound				|Not bound
 UI_Setting_PressKeyUnbind		|Press a key... (Esc cancels, Delete unbinds)
 UI_Setting_KeepOneOpen			|Keep either a key or a controller combo bound, or nothing will open Completionist.
 UI_ColourSwatches				|Swatches
 UI_ColourCurrent				|Current
+UI_ColourDefault				|Default
 UI_ColourNew					|New
 UI_ColourHue					|Hue
 UI_ColourSaturation				|Saturation
@@ -401,9 +404,8 @@ UI_SettingHint_CellKey				|Opens the Cell Scanner: what's still to collect in th
 UI_Setting_CellPad					|Cell Scanner (controller)
 UI_SettingHint_CellPad				|Button combo that opens the Cell Scanner. Press Delete while it waits to leave it unbound.
 UI_Setting_CellPanel				|Keep the Cell Scanner on screen
-UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. Place UI elements moves it.
+UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. The Place UI elements button beside Position, on Settings > HUD & Notifications, moves it.
 UI_Setting_PlaceUI					|Place UI elements
-UI_Setting_PlaceUIButton			|Place...
 UI_SettingHint_PlaceUI				|Hides the window and shows the Cell Scanner panel and some notifications to drag where you want them. Let go of the notifications against the panel's edge to join the two into one panel. Confirm keeps the new places; Cancel puts them back.
 UI_Cell_Button						|Cell Scanner
 UI_Cell_Marker						|Quest marker:
@@ -425,6 +427,7 @@ UI_Pad_DescriptionHoldExpand		|Hold to expand
 UI_Pad_Sidebar						|Sidebar
 UI_Pad_Scroll						|Scroll
 UI_Pad_Find							|Find
+UI_Pad_Filter						|Filter
 UI_Setting_PadStyle					|Controller buttons
 UI_SettingHint_PadStyle				|Which controller's button names and symbols the button help at the foot of the window and the controller settings show. The buttons do the same on every controller; only their names differ.
 UI_Setting_PadXbox					|Xbox
@@ -432,8 +435,6 @@ UI_Setting_PadPlayStation			|PlayStation
 UI_Setting_PadSwitch				|Nintendo Switch
 UI_Setting_PadSteamDeck				|Steam Deck
 UI_Pad_Tabs							|Tabs
-UI_Setting_PrintScreen				|Print Screen includes Completionist
-UI_SettingHint_PrintScreen			|The game takes its own screenshot before Completionist draws, so it never shows the window or the on-screen panel. With this on, Print Screen also saves one with them on (in My Games\Skyrim Special Edition\SKSE\Completionist\Screenshots) and copies it to the clipboard, ready to paste.
 UI_ScreenshotCopied					|(copied to the clipboard)
 UI_SettingsSection_Layout			|Layout
 UI_SettingsSection_Controls			|Controls
@@ -448,6 +449,8 @@ UI_Track_Pinned{}{}					|Find the pinned {} {}
 UI_Track_Find{}						|Find {}
 UI_Track_FindIn{}{}					|Find {} in {}
 UI_Track_FishingSpot{}				|Find the fishing spot in {}
+UI_Track_Stone{}					|Find the Unusual Gem within {}
+UI_Track_StoneThe{}					|Find the Unusual Gem within the {}
 UI_Track_Travel{}					|Travel to {}
 UI_Track_Full{}						|All {} tracking slots are in use. Clear a marker or unpin an item first.
 UI_UnpinAll							|Unpin all
@@ -459,14 +462,14 @@ UI_Cell_ExcludeOwnedInfo			|Leaves out anything that taking would be stealing. T
 UI_Cell_ExcludeLiving				|Exclude Living People
 UI_Cell_ExcludeLivingInfo			|Leaves out what living people carry. Bodies are still searched.
 UI_Cell_Stealing					|Taking this would be stealing
-UI_SettingsSection_Notifications	|Notifications
+UI_SettingsSection_HudNotifications	|HUD & Notifications
 UI_SettingsSection_Toasts			|On Screen
 UI_Setting_ToastsOrder				|New notifications
 UI_SettingHint_ToastsOrder			|Where a new notification joins the stack. At the top, new ones push the others down; at the bottom, they join under them.
 UI_Setting_ToastsNewestTop			|At the top
 UI_Setting_ToastsNewestBottom		|At the bottom
 UI_Setting_ToastsPosition			|Position
-UI_SettingHint_ToastsPosition		|Which corner of the screen the notifications show in. Settings > Window > Place UI elements puts them anywhere else, or joins them to the Cell Scanner panel.
+UI_SettingHint_ToastsPosition		|Which corner of the screen the notifications show in. The button beside it puts them anywhere else, or joins them to the Cell Scanner panel.
 UI_Setting_ToastsTopLeft			|Top left
 UI_Setting_ToastsTopRight			|Top right
 UI_Setting_ToastsBottomLeft			|Bottom left
@@ -496,19 +499,33 @@ UI_Toasts_SampleLocation			|Bleak Falls Barrow
 ----------------------------------------------------------------------------
 -- UI: ItemIcons (UI_ItemIcons_*)
 ----------------------------------------------------------------------------
-UI_ItemIcons_Header			|Item Icons
-UI_ItemIcons_Show			|Show item icons
-UI_ItemIcons_ShowInfo		|Shows Completionist's icons after item names in the inventory, containers, shops and gift menus (with SkyUI): a trophy for collectables, a museum for Legacy of the Dragonborn displays.
-UI_ItemIcons_Size			|Icon size (%)
-UI_ItemIcons_SizeInfo		|How big the icons are, compared with the item name's text. 100 is a little taller than the text.
-UI_ItemIcons_Opacity		|Icon opacity (%)
-UI_ItemIcons_OpacityInfo	|How solid the icons are. Lower makes them fainter, so they stand out less in long lists.
-UI_ItemIcons_Needed			|Still needed
-UI_ItemIcons_NeededInfo		|The trophy with a blue plus, on collectables you haven't got yet.
-UI_ItemIcons_Found			|Already found
-UI_ItemIcons_FoundInfo		|The trophy with a green tick, on collectables you've already found. Turn off to only mark what's still needed.
-UI_ItemIcons_Museum			|Museum
-UI_ItemIcons_MuseumInfo		|With Legacy of the Dragonborn's museum mode: the museum with a plus (can be displayed), a tick (displayed) or a diamond (another version is displayed).
+UI_ItemIcons_Header					|Item Icons
+UI_ItemIcons_Show					|Show item icons
+UI_ItemIcons_ShowInfo				|Shows Completionist's icons after item names in the inventory, containers, shops and gift menus (with SkyUI): a trophy for collectables, a museum for Legacy of the Dragonborn displays.
+UI_ItemIcons_Size					|Icon size (%)
+UI_ItemIcons_SizeInfo				|How big the icons are, compared with the item name's text. 100 is a little taller than the text.
+UI_ItemIcons_Opacity				|Icon opacity (%)
+UI_ItemIcons_OpacityInfo			|How solid the icons are. Lower makes them fainter, so they stand out less in long lists.
+UI_ItemIcons_Needed					|Still needed
+UI_ItemIcons_NeededInfo				|The trophy with a blue plus, on collectables you haven't got yet.
+UI_ItemIcons_Found					|Already found
+UI_ItemIcons_FoundInfo				|The trophy with a green tick, on collectables you've already found. Turn off to only mark what's still needed.
+UI_ItemIcons_Museum					|Museum
+UI_ItemIcons_MuseumInfo				|With Legacy of the Dragonborn's museum mode: the museum with a plus (can be displayed), a tick (displayed) or a diamond (another version is displayed).
+UI_IconColour_Header				|Icon Colours
+UI_IconColour_Preview				|Preview
+UI_IconColour_PrimaryInfo			|The colour of the icon's main shape: the trophy or the museum building. Change it to suit your menus or UI mods.
+UI_IconColour_SecondaryInfo			|The colour of the icon's small badge: the plus, tick or diamond. Change it to suit your menus or UI mods.
+UI_IconColour_New_Primary			|Needed icon: primary
+UI_IconColour_New_Secondary			|Needed icon: secondary
+UI_IconColour_Found_Primary			|Found icon: primary
+UI_IconColour_Found_Secondary		|Found icon: secondary
+UI_IconColour_Displayable_Primary	|Displayable icon: primary
+UI_IconColour_Displayable_Secondary	|Displayable icon: secondary
+UI_IconColour_Displayed_Primary		|Displayed icon: primary
+UI_IconColour_Displayed_Secondary	|Displayed icon: secondary
+UI_IconColour_Occupied_Primary		|Occupied icon: primary
+UI_IconColour_Occupied_Secondary	|Occupied icon: secondary
 
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 4)
@@ -523,7 +540,7 @@ UI_Sort_Occupied		|Museum: another version displayed
 UI_Sort_Displayed		|Museum: displayed
 UI_Sort_PriorityInfo	|Where these items come in the COMPLETIONIST sort on the item list's name column (click NAME until it says COMPLETIONIST): 1 comes first. Items with the same priority are sorted together by name; items Completionist doesn't track always come last.
 UI_Sort_Bands			|Group bands
-UI_Sort_BandsInfo		|While the item list is sorted by COMPLETIONIST, each status group gets its own tinted band with a gold edge, so you can see where one group ends and the next starts.
+UI_Sort_BandsInfo		|While the item list is sorted by COMPLETIONIST, each status group gets a band tinted in its icon's badge colour, so you can see where one group ends and the next starts.
 LogPrefix_Tra			|Trained with: 
 
 ----------------------------------------------------------------------------
@@ -694,8 +711,7 @@ UI_Dragons_Lore_Gaafnehdir			|A dragon bound to a haunted mine, serving the spir
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 5)
 ----------------------------------------------------------------------------
-UI_Category_Achievements	|Achievements
-UI_Achievements				|Achievements
+UI_Achievements	|Achievements
 
 ----------------------------------------------------------------------------
 -- UI: Achievements (UI_Achievements_*)
@@ -994,13 +1010,12 @@ UI_Achievements_WhyNoAnswerGalaxy					|GOG Galaxy isn't giving this game's achie
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 6)
 ----------------------------------------------------------------------------
-UI_SettingsSection_Achievements	|Achievements
 
 ----------------------------------------------------------------------------
 -- UI: Achievements (UI_Achievements_*)
 ----------------------------------------------------------------------------
-UI_Achievements_SettingsTracking	|Tracking
-UI_Achievements_SettingsDetails		|In the details
+UI_Achievements_SettingsTracking	|Achievements
+UI_Achievements_SettingsDetails		|Achievement Details
 UI_Achievements_SettingShow			|Show the Achievements page
 UI_Achievements_SettingShowInfo		|Shows your achievements in the sidebar. Off hides the page.
 UI_Achievements_SettingProgress		|This save's progress
@@ -1009,8 +1024,6 @@ UI_Achievements_SettingTips			|How to get it
 UI_Achievements_SettingTipsInfo		|Shows a tip for each one. Some name places and people from the quests.
 UI_Achievements_SettingRarity		|How rare it is
 UI_Achievements_SettingRarityInfo	|Shows how many players have each one, from Steam.
-UI_Achievements_SettingMissable		|Missable warnings
-UI_Achievements_SettingMissableInfo	|Marks the ones a choice or a death in the game can lock out.
 
 ----------------------------------------------------------------------------
 -- UI: Ingredients (UI_Ingredients_*)
@@ -1353,10 +1366,8 @@ UI_ItemPictures_Ready			|Pictures ready
 UI_ItemPictures_ReadyText		|Every ingredient's picture is drawn and kept for next time.
 UI_ItemPictures_Cancel			|Cancel
 UI_ItemPictures_Close			|Close
-UI_ItemPictures_PrepareSetting	|Prepare every picture
-UI_ItemPictures_PrepareInfo		|Draws the picture of every ingredient that doesn't have one kept yet, so the Mixing Station doesn't wait for them the first time it's opened. A window shows how far it's got, and you can cancel it.
 UI_ItemPictures_RedrawSetting	|Redraw every picture
-UI_ItemPictures_RedrawInfo		|Throws away the kept pictures and draws them all again. Use it after changing mesh or texture mods. It asks first.
+UI_ItemPictures_RedrawInfo		|Throws away the kept pictures and draws every one again, including any not drawn yet. Use it after changing mesh or texture mods. It asks first.
 UI_ItemPictures_Prepare			|Prepare now
 UI_ItemPictures_Redraw			|Redraw
 UI_ItemPictures_RedrawTitle		|Redraw every picture?
@@ -1365,47 +1376,71 @@ UI_ItemPictures_RedrawText		|Every kept picture is thrown away and drawn again f
 ----------------------------------------------------------------------------
 -- UI: Guided tour (UI_Tour_*)
 ----------------------------------------------------------------------------
-UI_Tour_OfferTitle			|New here?
-UI_Tour_OfferText			|Completionist's window has a new look. A short tour shows you where everything is: the pages, the panels, the Cell Scanner and the settings. You can take it again any time from Settings.
-UI_Tour_Take				|Take the tour
-UI_Tour_NotNow				|Not now
-UI_Tour_Next				|Next
-UI_Tour_Back				|Back
-UI_Tour_Skip				|End tour
-UI_Tour_Finish				|Finish
-UI_Tour_Step{}{}			|{} of {}
-UI_Tour_WelcomeTitle		|Welcome
-UI_Tour_WelcomeText			|This tour takes you round the window one part at a time. It takes about a minute, and you can end it whenever you like.
-UI_Tour_SidebarTitle		|Pages
-UI_Tour_SidebarText			|Everything Completionist tracks is listed here: quests, collections, locations and the patches you have installed. Pick a page to open it, or step through them with the shoulder buttons on a controller. Double-click the grip beside the list to fold it away and give the page more room.
-UI_Tour_OverviewTitle		|Overview
-UI_Tour_OverviewText		|With no page open you see the overview: how far you've got in each group, and the things you found most recently.
-UI_Tour_HeaderTitle			|Find and Cell Scanner
-UI_Tour_HeaderText			|Find searches every page at once, so you can look anything up by name. Cell Scanner shows what's still to find around you. We'll look at it in a moment.
-UI_Tour_EntriesTitle		|The list
-UI_Tour_EntriesText			|Each page lists what there is to find, and marks what you've found. Point at a row to see its details below. Depending on the page, the button at the end of a row ticks it off by hand, pins it, or tracks its location on your map.
-UI_Tour_PageToolsTitle		|Filter and sort
-UI_Tour_PageToolsText		|Type here to filter the list by name, hide what you've already found, or change the order. The bar shows how far you've got on this page. Pages with tabs switch between them with the triggers on a controller.
-UI_Tour_DescriptionTitle	|Details
-UI_Tour_DescriptionText		|Details of the row you point at: where to find it and anything else worth knowing. Drag the grip on its top edge to make it taller or shorter, or double-click the grip to fold it.
-UI_Tour_CellListTitle		|Cell Scanner
-UI_Tour_CellListText		|The Cell Scanner lists everything still to find in the area you're in, with how far away it is. Pick an item to put a quest marker on it, so you can walk straight to it.
-UI_Tour_CellKey{}			|Open it straight from the game with {}.
-UI_Tour_CellNoKey			|You can give it its own key in Settings, to open it straight from the game.
-UI_Tour_CellOptionsTitle	|Scanner options
-UI_Tour_CellOptionsText		|Set how the scanner searches, what it leaves out, and how pinned items are shown. Click the heading to fold the options away.
-UI_Tour_CellBarTitle		|Scanner bar
-UI_Tour_CellBarText			|Show height tells you whether an item is above or below you. Rescan looks again, and in an interior you can exclude the cell once you're done with it. Keep on screen puts the scanner on screen while you play: that's next.
-UI_Tour_OnScreenTitle		|Always on screen
-UI_Tour_OnScreenText		|While you play, Keep on screen shows the Cell Scanner on screen: the closest things still to find, how far away they are and which way to go. Completionist's own notifications show here too, when you find something. Settings > Window turns the panel on or off, and Place UI elements there moves it and the notifications anywhere you like, or joins the two.
-UI_Tour_SettingsTitle		|Settings
-UI_Tour_SettingsText		|The cog at the top opens Settings: the theme, size, keys, controller buttons, notifications and what Completionist tracks. Point at a setting and the panel at the bottom explains what it does.
-UI_Tour_PadTitle			|With a controller
-UI_Tour_PadText				|Everything works with a controller too. This bar shows what each button does, and changes as you move around the window.
-UI_Tour_OpenKey{}			|Open this window with {}.
-UI_Tour_DoneTitle			|That's the tour
-UI_Tour_DoneText			|You can take it again any time with this button.
-UI_SettingsSection_Help		|Help
-UI_Setting_Tour				|Guided tour
-UI_Setting_TourStart		|Take the tour
-UI_SettingHint_Tour			|Shows you round the window one part at a time: the pages, the panels, the Cell Scanner and the settings.
+UI_Tour_OfferTitle				|New here?
+UI_Tour_OfferText				|Completionist's window has a new look. A tour shows you where everything is: the different kinds of page, the panels, the Cell Scanner and the settings. You can take it again any time from Settings.
+UI_Tour_Take					|Take the tour
+UI_Tour_NotNow					|Not now
+UI_Tour_Next					|Next
+UI_Tour_Back					|Back
+UI_Tour_Skip					|End tour
+UI_Tour_Finish					|Finish
+UI_Tour_Step{}{}				|{} of {}
+UI_Tour_WelcomeTitle			|Welcome
+UI_Tour_WelcomeText				|This tour takes you round the window one part at a time. It takes a few minutes, and you can end it whenever you like.
+UI_Tour_SidebarTitle			|Pages
+UI_Tour_SidebarText				|Everything Completionist tracks is listed here: quests, collections, locations and the patches you have installed. Pick a page to open it, or step through them with the shoulder buttons on a controller. Double-click the grip beside the list to fold it away and give the page more room.
+UI_Tour_OverviewTitle			|Overview
+UI_Tour_OverviewText			|With no page open you see the overview: how far you've got in each group, and the things you found most recently.
+UI_Tour_HeaderTitle				|Find and Cell Scanner
+UI_Tour_HeaderText				|Find searches every page at once, so you can look anything up by name. Cell Scanner shows what's still to find around you. We'll look at it in a moment.
+UI_Tour_EntriesTitle			|The list
+UI_Tour_EntriesText				|Each page lists what there is to find, and marks what you've found. Point at a row to see its details below. Depending on the page, the button at the end of a row ticks it off by hand, pins it, or tracks its location on your map.
+UI_Tour_PageToolsTitle			|Filter and sort
+UI_Tour_PageToolsText			|Type here to filter the list by name, hide what you've already found, or change the order. The bar shows how far you've got on this page. Pages with tabs switch between them with the triggers on a controller.
+UI_Tour_DescriptionTitle		|Details
+UI_Tour_DescriptionText			|Details of the row you point at: where to find it and anything else worth knowing. Drag the grip on its top edge to make it taller or shorter, or double-click the grip to fold it.
+UI_Tour_PinsTitle				|Pins and markers
+UI_Tour_PinsText				|Two ways to go after something. Pin an item and the game marks it for you whenever you're in the same cell as it, and a bar at the top of the window lists your pins. Track location puts a quest marker on a place or person straight away. There are only so many tracking slots, so clear one when you're done with it.
+UI_Tour_QuestsTitle				|Quest pages
+UI_Tour_QuestsText				|Quest pages work like your journal: what's still open on one side and what you've completed on the other. Select a quest to read about it below. Some pages depend on a choice you make, such as your side in the civil war or the Dawnguard: those fill in once it's made.
+UI_Tour_TrainersTitle			|Trainers
+UI_Tour_TrainersText			|Every trainer, split into Combat, Magic and Stealth tabs. Each one shows their tier, how many levels they can still teach you, and where they are if they've wandered from home. It also shows how far you've got through that skill's perks.
+UI_Tour_DragonsTitle			|Dragons
+UI_Tour_DragonsText				|The named dragons and their lore, with what's become of each one, on the first tab. The second tab counts every dragon you've killed. Dragons added by other mods get their own Installed Content section.
+UI_Tour_IngredientsTitle		|Ingredients
+UI_Tour_IngredientsText			|Ingredients sorted into tabs, the diamonds beside each one showing how many of its effects you've discovered. Its details suggest what to brew it with to learn an unknown effect, using what you carry. The Effects tab goes by effect, and the Mixing Station tab has the options for naming undiscovered effects and showing pictures.
+UI_Tour_KillsTitle				|Kill Counts
+UI_Tour_KillsText				|What you've killed, creature by creature: your kills, your assists, and the type you've slain most. Sort it by kills or assists, and reset a count if you want to start one again.
+UI_Tour_AchievementsTitle		|Achievements
+UI_Tour_AchievementsText		|The game's achievements in one place, with this save's progress towards each one, a tip on how to get it, how rare it is on Steam, and a warning on any you can lock yourself out of. General Settings chooses what's shown, or hides the page.
+UI_Tour_MuseumTitle				|Museum Displays
+UI_Tour_MuseumText				|With Legacy of the Dragonborn, this shows what's on show in the museum right now, room by room, including sections added by patches. It also says whether you're carrying what a display needs.
+UI_Tour_CellListTitle			|Cell Scanner
+UI_Tour_CellListText			|The Cell Scanner lists everything still to find in the area you're in, with how far away it is. Pick an item to put a quest marker on it, so you can walk straight to it.
+UI_Tour_CellKey{}				|Open it straight from the game with {}.
+UI_Tour_CellNoKey				|You can give it its own key in Settings, to open it straight from the game.
+UI_Tour_CellOptionsTitle		|Scanner options
+UI_Tour_CellOptionsText			|Set how the scanner searches, what it leaves out, and how pinned items are shown. Click the heading to fold the options away.
+UI_Tour_CellBarTitle			|Scanner bar
+UI_Tour_CellBarText				|Show height tells you whether an item is above or below you. Rescan looks again, and in an interior you can exclude the cell once you're done with it. Keep on screen puts the scanner on screen while you play: that's next.
+UI_Tour_OnScreenTitle			|Always on screen
+UI_Tour_OnScreenText			|While you play, Keep on screen shows the Cell Scanner on screen: the closest things still to find, how far away they are and which way to go. Completionist's own notifications show here too, when you find something. Settings > Window turns the panel on or off, and the Place UI elements button on Settings > HUD & Notifications moves it and the notifications anywhere you like, or joins the two.
+UI_Tour_SettingsTitle			|Settings
+UI_Tour_SettingsText			|The cog at the top opens Settings. This first tab is the window itself: its theme, size, keys and controller buttons. Point at any setting and the panel at the bottom explains what it does.
+UI_Tour_SettingsGeneralTitle	|General Settings
+UI_Tour_SettingsGeneralText		|What counts as finished. Set how many times each kind of repeatable quest must be done, and choose your side where a story branches, so the right quests are listed. What the Achievements page shows is here too.
+UI_Tour_SettingsHudTitle		|HUD & Notifications
+UI_Tour_SettingsHudText			|What Completionist tells you while you play. Choose which notifications show and where, the tags on your crosshair, and how item names appear in menus. Further down are the icons in your inventory, containers and shops, each with its own colours, and the COMPLETIONIST sort for those lists.
+UI_Tour_SettingsMuseumTitle		|Museum Mode
+UI_Tour_SettingsMuseumText		|Tags and icons for museum items, even ones Completionist doesn't track. Museum Items Only quiets everything except museum items and specials like shrines and fish. Pages and tracking carry on underneath, so turning it off loses nothing.
+UI_Tour_SettingsLogTitle		|Completion Log
+UI_Tour_SettingsLogText			|A record of what you've found and finished, by the date you did it. Pick a date to read that day back.
+UI_Tour_PadTitle				|With a controller
+UI_Tour_PadText					|Everything works with a controller too, and the buttons do the same job on every screen: the shoulder buttons step through pages and the triggers through tabs. This bar shows what each button does right now, and changes as you move around the window.
+UI_Tour_OpenKey{}				|Open this window with {}.
+UI_Tour_DoneTitle				|That's the tour
+UI_Tour_DoneText				|You can take it again any time with this button.
+UI_SettingsSection_Help			|Help
+UI_Setting_Tour					|Guided tour
+UI_Setting_TourStart			|Take the tour
+UI_SettingHint_Tour				|Shows you round the window one part at a time: the pages, the panels, the Cell Scanner and the settings.

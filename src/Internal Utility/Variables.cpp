@@ -78,12 +78,12 @@ namespace CVariables
 
 		CompletionistUI::UISettings settings;
 		settings.openKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenKey", "199").c_str(), nullptr, 10));
-		settings.openPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadButton", "128").c_str(), nullptr, 10));
-		settings.openPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadModifier", "64").c_str(), nullptr, 10));
+		settings.openPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadButton", "0").c_str(), nullptr, 10));
+		settings.openPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "OpenGamepadModifier", "0").c_str(), nullptr, 10));
 		// LB + RB was the old default, it's sprint and shout
 		if (settings.openPadButton == 0x0200 && settings.openPadModifier == 0x0100) {
-			settings.openPadButton = CompletionistUI::UISettings{}.openPadButton;
-			settings.openPadModifier = CompletionistUI::UISettings{}.openPadModifier;
+			settings.openPadButton = 0x0080;
+			settings.openPadModifier = 0x0040;
 		}
 		settings.scale = number("Scale", "1.0", 0.5f, 3.0f);
 		settings.widthPercent = number("WidthPercent", "98", 40.0f, 100.0f);
@@ -101,10 +101,7 @@ namespace CVariables
 		settings.findMatch = static_cast<std::int32_t>(number("FindMatch", "0", 0.0f, 2.0f));
 		settings.findIgnoreCompleted = flag("FindIgnoreCompleted", "false");
 		settings.openOnLastPage = flag("OpenOnLastPage", "true");
-		settings.hideCompleted = flag("HideCompleted", "false");
 		settings.animeMascots = flag("AnimeMascots", "false");
-		settings.screenshotButton = flag("ShowScreenshotButton", "false");
-		settings.printScreen = flag("PrintScreenCapture", "true");
 		settings.pauseGame = flag("PauseGame", "true");
 		settings.journalEntry = flag("JournalEntry", "true");
 		settings.tourOffered = flag("TourOffered", "false");
@@ -113,7 +110,7 @@ namespace CVariables
 		                  : DKUtil::string::iequals(padStyle, "Switch")      ? CompletionistUI::PadStyle::kSwitch
 		                  : DKUtil::string::iequals(padStyle, "SteamDeck")   ? CompletionistUI::PadStyle::kSteamDeck
 		                                                                     : CompletionistUI::PadStyle::kXbox;
-		settings.cellKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellKey", "207").c_str(), nullptr, 10));
+		settings.cellKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellKey", "0").c_str(), nullptr, 10));
 		settings.cellPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadButton", "0").c_str(), nullptr, 10));
 		settings.cellPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadModifier", "0").c_str(), nullptr, 10));
 		settings.cellPanel = flag("CellPanel", "true");
@@ -121,7 +118,7 @@ namespace CVariables
 		settings.cellHeight = flag("CellShowHeight", "true");
 		settings.cellX = number("CellPanelX", "1", 0.0f, 1.0f);
 		settings.cellY = number("CellPanelY", "0.14", 0.0f, 1.0f);
-		settings.toastsNewestFirst = flag("NotificationsNewestFirst", "true");
+		settings.toastsNewestFirst = flag("NotificationsNewestFirst", "false");
 		settings.toastX = number("NotificationsX", "0", 0.0f, 1.0f);
 		settings.toastY = number("NotificationsY", "0.317", 0.0f, 1.0f);
 		const auto join = GetIniValue("UI", "NotificationsJoin", "None");
@@ -131,7 +128,7 @@ namespace CVariables
 		                   : DKUtil::string::iequals(join, "Right") ? CompletionistUI::ToastJoin::kRight
 		                                                            : CompletionistUI::ToastJoin::kNone;
 
-		const auto theme = GetIniValue("UI", "Theme", "Completionist");
+		const auto theme = GetIniValue("UI", "Theme", "Dwemer");
 		settings.theme = CompletionistUI::Themes::FromName(theme);
 		return settings;
 	}
@@ -163,10 +160,7 @@ namespace CVariables
 		ini.SetValue(section, "FindMatch", std::to_string(a_settings.findMatch).c_str());
 		ini.SetValue(section, "FindIgnoreCompleted", a_settings.findIgnoreCompleted ? "true" : "false");
 		ini.SetValue(section, "OpenOnLastPage", a_settings.openOnLastPage ? "true" : "false");
-		ini.SetValue(section, "HideCompleted", a_settings.hideCompleted ? "true" : "false");
 		ini.SetValue(section, "AnimeMascots", a_settings.animeMascots ? "true" : "false");
-		ini.SetValue(section, "ShowScreenshotButton", a_settings.screenshotButton ? "true" : "false");
-		ini.SetValue(section, "PrintScreenCapture", a_settings.printScreen ? "true" : "false");
 		ini.SetValue(section, "PauseGame", a_settings.pauseGame ? "true" : "false");
 		ini.SetValue(section, "JournalEntry", a_settings.journalEntry ? "true" : "false");
 		ini.SetValue(section, "TourOffered", a_settings.tourOffered ? "true" : "false");
@@ -181,6 +175,9 @@ namespace CVariables
 		ini.SetValue(section, "CellPanelX", fmt::format("{:.3f}", a_settings.cellX).c_str());
 		ini.SetValue(section, "CellPanelY", fmt::format("{:.3f}", a_settings.cellY).c_str());
 		ini.Delete(section, "Notifications");
+		ini.Delete(section, "HideCompleted");
+		ini.Delete(section, "ShowScreenshotButton");
+		ini.Delete(section, "PrintScreenCapture");
 		ini.SetValue(section, "NotificationsNewestFirst", a_settings.toastsNewestFirst ? "true" : "false");
 		ini.SetValue(section, "NotificationsX", fmt::format("{:.3f}", a_settings.toastX).c_str());
 		ini.SetValue(section, "NotificationsY", fmt::format("{:.3f}", a_settings.toastY).c_str());
@@ -310,6 +307,20 @@ namespace CVariables
 			return std::clamp(prop ? prop->GetSInt() : 100, a_min, a_max);
 		};
 		V_ItemIcons = flag("bItemIcons", true);
+		constexpr const char* iconColours[][2] = {
+			{ "iItemIconColour_New_Primary", "iItemIconColour_New_Secondary" },
+			{ "iItemIconColour_Found_Primary", "iItemIconColour_Found_Secondary" },
+			{ "iItemIconColour_Displayable_Primary", "iItemIconColour_Displayable_Secondary" },
+			{ "iItemIconColour_Displayed_Primary", "iItemIconColour_Displayed_Secondary" },
+			{ "iItemIconColour_Occupied_Primary", "iItemIconColour_Occupied_Secondary" },
+		};
+		for (std::size_t icon = 0; icon < std::size(iconColours); ++icon) {
+			for (std::size_t part = 0; part < 2; ++part) {
+				if (const auto* prop = VariablesAPI::GetProperty(iconColours[icon][part])) {
+					V_ItemIconColours[icon][part] = prop->GetSInt();
+				}
+			}
+		}
 		V_ItemIcons_Size = percent("iItemIcons_Size", 50, 200);
 		V_ItemIcons_Opacity = percent("iItemIcons_Opacity", 20, 100);
 		V_ItemIcons_Needed = flag("bItemIcons_Needed", true);
@@ -526,6 +537,11 @@ namespace CVariables
 		V_MuseumModeEnabled = false;
 		if (const auto* prop = VariablesAPI::GetProperty("MuseumModeEnabled")) {
 			V_MuseumModeEnabled = prop->GetBool();
+		}
+
+		V_MuseumItemsOnly = false;
+		if (const auto* prop = VariablesAPI::GetProperty("MuseumItemsOnly")) {
+			V_MuseumItemsOnly = prop->GetBool();
 		}
 
 		V_TreatOccupiedAsDisplayed = false;

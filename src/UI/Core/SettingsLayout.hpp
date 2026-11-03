@@ -26,6 +26,10 @@ namespace CompletionistUI
 		std::string              fallback{};
 		std::string              button{};
 		bool                     confirm{ false };
+		std::string              previewIcon{};	// a colour for this item icon: its picker shows the icon
+		std::int32_t             previewPart{ 0 };	// 0 primary, 1 secondary
+		std::string              plugin{};	// only shown when this plugin is loaded
+		bool                     keepRow{ false };	// without it the row stays empty, so the column beside it still lines up
 	};
 
 	struct SettingsPageLayout
@@ -36,6 +40,7 @@ namespace CompletionistUI
 		std::vector<SettingRow> columns[2];
 		bool                    singleColumn{ false };
 		bool                    tab{ true };
+		std::string             under;	// drawn beneath this tab's own settings
 	};
 
 	[[nodiscard]] const std::vector<SettingsPageLayout>& MCMSettingsLayouts();
@@ -51,6 +56,7 @@ namespace CompletionistUI
 		[[nodiscard]] virtual bool         IsBool(const std::string& a_name) = 0;
 		[[nodiscard]] virtual bool         GetBool(const std::string& a_name) = 0;
 		[[nodiscard]] virtual std::int32_t GetInt(const std::string& a_name) = 0;
+		[[nodiscard]] virtual std::int32_t GetDefaultInt(const std::string& /*a_name*/) { return -1; }
 		[[nodiscard]] virtual std::string  GetString(const std::string& a_name) = 0;
 		virtual void                       SetBool(const std::string& a_name, bool a_value) = 0;
 		virtual void                       SetInt(const std::string& a_name, std::int32_t a_value) = 0;

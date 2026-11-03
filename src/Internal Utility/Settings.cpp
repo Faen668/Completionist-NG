@@ -47,35 +47,22 @@ namespace CSettings
 			{ "AchievementsProgress", Type::kBool, "true" },
 			{ "AchievementsTips", Type::kBool, "true" },
 			{ "AchievementsRarity", Type::kBool, "true" },
-			{ "AchievementsMissable", Type::kBool, "true" },
 
 			// Ingredients
-			{ "IngredientsNameUnknown", Type::kBool, "false" },
+			{ "IngredientsNameUnknown", Type::kBool, "true" },
 
 			// UI Settings
 			{ "ItemPictures", Type::kBool, "false" },
 			{ "NotifyItems", Type::kBool, "true" },
 			{ "NotifyBooks", Type::kBool, "true" },
 			{ "NotifySpecial", Type::kBool, "true" },
-			{ "NotifyStartup", Type::kBool, "true" },
-			{ "NotificationColourEnabled", Type::kBool, "true" },
 			{ "IndexColour", Type::kInt, "16777215" },
 			{ "ColourString", Type::kString, "#FFFFFF" },
-			{ "State_MarkerDetectionVal", Type::kInt, "1500" },
-			{ "CompletionLog_ColoursEnabled", Type::kBool, "true" },
-			{ "CompletionLog_PrefixEnabled", Type::kBool, "true" },
-			{ "CompletionLog_QuestsTextColourVal", Type::kInt, "9202896" },
-			{ "CompletionLog_QuestsTextColourString", Type::kString, "#8C6CD0" },
-			{ "CompletionLog_ItemsTextColourVal", Type::kInt, "12406553" },
-			{ "CompletionLog_ItemsTextColourString", Type::kString, "#BD4F19" },
-			{ "CompletionLog_BooksTextColourVal", Type::kInt, "15379200" },
-			{ "CompletionLog_BooksTextColourString", Type::kString, "#EAAB00" },
-			{ "CompletionLog_SpecialTextColourVal", Type::kInt, "10092543" },
-			{ "CompletionLog_SpecialTextColourString", Type::kString, "#99FFFF" },
 
 			// HUD Settings and Museum Mode
-			{ "MuseumModeEnabled", Type::kBool, "false" },
+			{ "MuseumModeEnabled", Type::kBool, "true" },
 			{ "TreatOccupiedAsDisplayed", Type::kBool, "false" },
+			{ "MuseumItemsOnly", Type::kBool, "false" },
 			{ "State_OverRide_N_Name_String", Type::kString, "Need It!" },
 			{ "State_OverRide_G_Name_String", Type::kString, "Got It!" },
 			{ "State_OverRide_Displayable_Name_String", Type::kString, "Displayable!" },
@@ -144,6 +131,26 @@ namespace CSettings
 			{ "bItemIcons_Needed", Type::kBool, "true" },
 			{ "bItemIcons_Found", Type::kBool, "true" },
 			{ "bItemIcons_Museum", Type::kBool, "true" },
+			{ "iItemIconColour_New_Primary", Type::kInt, "16777215" },
+			{ "sItemIconColour_New_Primary", Type::kString, "#FFFFFF" },
+			{ "iItemIconColour_New_Secondary", Type::kInt, "6997502" },
+			{ "sItemIconColour_New_Secondary", Type::kString, "#6AC5FE" },
+			{ "iItemIconColour_Found_Primary", Type::kInt, "16777215" },
+			{ "sItemIconColour_Found_Primary", Type::kString, "#FFFFFF" },
+			{ "iItemIconColour_Found_Secondary", Type::kInt, "569168" },
+			{ "sItemIconColour_Found_Secondary", Type::kString, "#08AF50" },
+			{ "iItemIconColour_Displayable_Primary", Type::kInt, "16777215" },
+			{ "sItemIconColour_Displayable_Primary", Type::kString, "#FFFFFF" },
+			{ "iItemIconColour_Displayable_Secondary", Type::kInt, "6997502" },
+			{ "sItemIconColour_Displayable_Secondary", Type::kString, "#6AC5FE" },
+			{ "iItemIconColour_Displayed_Primary", Type::kInt, "16777215" },
+			{ "sItemIconColour_Displayed_Primary", Type::kString, "#FFFFFF" },
+			{ "iItemIconColour_Displayed_Secondary", Type::kInt, "569168" },
+			{ "sItemIconColour_Displayed_Secondary", Type::kString, "#08AF50" },
+			{ "iItemIconColour_Occupied_Primary", Type::kInt, "16777215" },
+			{ "sItemIconColour_Occupied_Primary", Type::kString, "#FFFFFF" },
+			{ "iItemIconColour_Occupied_Secondary", Type::kInt, "16027660" },
+			{ "sItemIconColour_Occupied_Secondary", Type::kString, "#F4900C" },
 
 			// Completionist sort, 1 first
 			{ "iSort_Displayable", Type::kInt, "1" },
@@ -154,9 +161,7 @@ namespace CSettings
 			{ "bSort_Bands", Type::kBool, "true" },
 			{ "iCellScanner_Range", Type::kInt, "100" },
 			{ "bCellScanner_Pinning_Enabled", Type::kBool, "true" },
-			{ "bCellScanner_Pinning_Marker", Type::kBool, "true" },
-			{ "bCellScanner_Pinning_Effect", Type::kBool, "true" },
-			{ "CellScanner_Pinning_Sound_Choice", Type::kInt, "0" },
+			{ "CellScanner_Pinning_Sound_Choice", Type::kInt, "1" },
 		};
 
 		struct Entry
@@ -257,7 +262,9 @@ namespace CSettings
 			ini.SetValue(section, definition.name, Text(entry).c_str());
 		}
 		// Old MCM keys nothing reads now
-		for (const auto* retired : { "ImportedFromMCM", "b_SearchHighlightQuest", "i_SearchMaxResults", "ReferenceKey", "ExcludeKey", "ExcludeReferenceKey",
+		for (const auto* retired : { "State_MarkerDetectionVal", "CompletionLog_ColoursEnabled", "CompletionLog_PrefixEnabled", "CompletionLog_QuestsTextColourVal", "CompletionLog_QuestsTextColourString", "CompletionLog_ItemsTextColourVal", "CompletionLog_ItemsTextColourString", "CompletionLog_BooksTextColourVal", "CompletionLog_BooksTextColourString", "CompletionLog_SpecialTextColourVal", "CompletionLog_SpecialTextColourString", "bCellScanner_Pinning_Notify", "IngredientsShow", "ItemPicturesOffered", "AchievementsMissable",
+			"NotifyStartup", "NotificationColourEnabled", "bCellScanner_Pinning_Marker", "bCellScanner_Pinning_Effect",
+			"ImportedFromMCM", "b_SearchHighlightQuest", "i_SearchMaxResults", "ReferenceKey", "ExcludeKey", "ExcludeReferenceKey",
 			"InventoryMode_PrAp_Choice_N", "InventoryMode_PrAp_Choice_G", "InventoryMode_PrAp_Choice_Displayable", "InventoryMode_PrAp_Choice_Displayed", "InventoryMode_PrAp_Choice_Occupied", "InventoryMode_PrFx_Choice_N", "InventoryMode_PrFx_Choice_G", "InventoryMode_PrFx_Choice_Displayable", "InventoryMode_PrFx_Choice_Displayed", "InventoryMode_PrFx_Choice_Occupied" }) {
 			ini.Delete(section, retired);
 		}
@@ -291,6 +298,20 @@ namespace CSettings
 	bool SettingsAPI::Has(std::string_view a_name) {
 
 		return Get(a_name) != nullptr;
+	}
+
+	//---------------------------------------------------
+	//-- Settings ( Default Int ) -----------------------
+	//---------------------------------------------------
+
+	std::int32_t SettingsAPI::DefaultInt(std::string_view a_name) {
+
+		for (const auto& definition : defaults) {
+			if (definition.type == Type::kInt && Key(definition.name) == Key(a_name)) {
+				return static_cast<std::int32_t>(std::strtol(definition.value, nullptr, 10));
+			}
+		}
+		return -1;
 	}
 
 	//---------------------------------------------------

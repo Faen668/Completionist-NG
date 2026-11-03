@@ -57,12 +57,12 @@ namespace CompletionistUI
 			std::atomic<bool>                              justOpened{ false };
 			std::atomic<std::uint32_t>                     openKey{ 199 };
 			std::atomic<std::int32_t>                      capture{ captureIdle };
-			std::atomic<std::uint32_t>                     openPadButton{ 0x0080 };
-			std::atomic<std::uint32_t>                     openPadModifier{ 0x0040 };
+			std::atomic<std::uint32_t>                     openPadButton{ 0 };
+			std::atomic<std::uint32_t>                     openPadModifier{ 0 };
 			std::atomic<std::int64_t>                      padCapture{ captureIdle };
 			std::atomic<std::uint32_t>                     padRejected{ 0 };
 			std::uint32_t                                  padPending{ 0 };
-			std::atomic<std::uint32_t>                     cellKey{ 207 };
+			std::atomic<std::uint32_t>                     cellKey{ 0 };
 			std::atomic<std::uint32_t>                     cellPadButton{ 0 };
 			std::atomic<std::uint32_t>                     cellPadModifier{ 0 };
 			std::atomic<bool>                              cellPanel{ false };
@@ -830,6 +830,18 @@ namespace CompletionistUI
 			io.DeltaTime = std::clamp(std::chrono::duration<float>(now - a_state.lastFrame).count(), 1.0f / 1000.0f, 0.25f);
 			a_state.lastFrame = now;
 
+			// What's let go of while the game's out of focus never arrives, Alt after alt-tabbing above all
+			// and it would stay held, so ImGui lets go of everything when the game loses focus
+			static bool hadFocus = true;
+			DWORD       foregroundProcess = 0;
+			GetWindowThreadProcessId(GetForegroundWindow(), &foregroundProcess);
+			const bool hasFocus = foregroundProcess == GetCurrentProcessId();
+			if (hasFocus != hadFocus) {
+				hadFocus = hasFocus;
+				io.AddFocusEvent(hasFocus);
+				INFO("In-game UI: game {} focus, input let go", hasFocus ? "regained" : "lost");
+			}
+
 			{
 				std::scoped_lock lock(a_state.inputLock);
 				if (!a_overlay) {
@@ -883,11 +895,9 @@ namespace CompletionistUI
 			a_state.context->OMSetRenderTargets(1, &view, nullptr);
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-			const bool button = !a_overlay && a_state.menu.ConsumeScreenshotRequest();
-			const bool printScreen = a_state.printScreen.exchange(false) && a_state.settings.printScreen;
-			if (button || printScreen) {
+			if (a_state.printScreen.exchange(false)) {
 				const auto saved = SaveScreenshot(a_state, backBuffer.Get());
-				const bool copied = printScreen && CopyScreenshotToClipboard(a_state, backBuffer.Get());
+				const bool copied = CopyScreenshotToClipboard(a_state, backBuffer.Get());
 				auto       message = saved ? a_state.provider.Translate("UI_ScreenshotSaved") + " " + saved->filename().string() : a_state.provider.Translate("UI_ScreenshotFailed");
 				if (copied) {
 					message += " " + a_state.provider.Translate("UI_ScreenshotCopied");
