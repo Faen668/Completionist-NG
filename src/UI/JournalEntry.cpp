@@ -114,6 +114,7 @@ namespace CompletionistUI
 					RE::GFxValue mainState;
 					if (a_params.thisPtr->GetMember("iCurrentState", &state) && a_params.movie->GetVariable(&mainState, "_global.SystemPage.MAIN_STATE") &&
 						state.IsNumber() && mainState.IsNumber() && state.GetNumber() != mainState.GetNumber()) {
+						INFO("Journal Entry: Pressed outside the tab's list (state {}), ignored", state.GetNumber());
 						return;
 					}
 
@@ -228,7 +229,9 @@ namespace CompletionistUI
 			if (FindOurs(entries) >= 0) { return; }
 
 			RE::GFxValue prototype;
-			if (!movie->GetVariable(&prototype, prototypePath) || !prototype.IsObject() || !WrapFunction(movie, prototype, "onCategoryButtonPress", originalPress, &categoryPress)) {
+			// On the page itself: Native System Menu Framework wraps this function on the page too, which hides
+			// anything on the prototype. Whichever of us goes first, the other's wrapper calls on to the first.
+			if (!movie->GetVariable(&prototype, prototypePath) || !prototype.IsObject() || !WrapFunction(movie, page, "onCategoryButtonPress", originalPress, &categoryPress)) {
 				INFO("Journal Entry: No SystemPage.onCategoryButtonPress in the Journal, so no entry");
 				return;
 			}
@@ -274,7 +277,12 @@ namespace CompletionistUI
 					}
 				} else if (openAfterJournal.exchange(false)) {
 					// Opened once the Journal is gone, as the open key would
-					SKSE::GetTaskInterface()->AddTask([]() { GameUI::OpenMain(); });
+					SKSE::GetTaskInterface()->AddTask([]() {
+						if (!GameUI::CanOpen()) {
+							INFO("Journal Entry: Journal closed, but the window can't open right now");
+						}
+						GameUI::OpenMain();
+					});
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
