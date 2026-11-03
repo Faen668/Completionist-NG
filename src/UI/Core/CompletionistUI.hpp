@@ -15,9 +15,28 @@ struct ImVec2;
 
 namespace CompletionistUI
 {
+	// One perk in a big tree's branch columns
+	struct PerkBranchLine
+	{
+		std::int32_t perk{ 0 };
+		std::int32_t parent{ -1 };	// the perk it hangs from, -1 at the top of a branch
+		std::int32_t column{ 0 };
+		std::int32_t row{ 0 };
+		std::int32_t indent{ 0 };	// side branches step in
+		bool         stacked{ false };	// a short branch under another, in a tree with too many for a column each
+		bool         repeat{ false };	// listed again under a second parent
+		bool         joint{ false };	// several branches lead to it: centred on a bar across them
+		std::int32_t lastColumn{ 0 };	// a joint's bar runs from column to here
+	};
+
 	// Trainer panel perk trees, laid out by depth
 	struct PerkTreeLayout
 	{
+		std::vector<PerkBranchLine> lines;	// big trees only, drawn as branch columns instead
+		std::vector<std::int32_t>   lineOf;	// each perk's own line
+		std::int32_t                root{ -1 };	// the one perk every branch starts from, if there is one
+		std::int32_t                branchColumns{ 0 };
+		std::int32_t                branchRows{ 0 };
 		std::vector<std::int32_t> column;
 		std::vector<std::int32_t> row;
 		std::vector<float>        place;	// row, centred on the column's middle
