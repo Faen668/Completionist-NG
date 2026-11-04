@@ -2541,10 +2541,40 @@ namespace CompletionistUI
 		}
 
 		finds.places.reserve(candidates.size());
+		finds.ids.reserve(candidates.size());
 		for (const auto& candidate : candidates) {
 			finds.places.push_back(candidate.place);
+			finds.ids.emplace_back(candidate.item.refID, candidate.item.formID);
 		}
 		return finds;
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Where Finds Are ) ------------------
+	//---------------------------------------------------
+
+	std::vector<std::optional<RE::NiPoint3>> GameDataProvider::WhereFindsAre(const std::vector<std::pair<RE::FormID, RE::FormID>>& a_ids, bool a_rescan) {
+
+		// The scan knows what's been collected wherever it was: loose, in a container or carried
+		if (a_rescan) {
+			ScanCellNow();
+		}
+
+		std::vector<std::optional<RE::NiPoint3>> places(a_ids.size());
+		std::scoped_lock                         lock(_lock);
+		for (std::size_t i = 0; i < a_ids.size(); ++i) {
+			const auto record = std::ranges::find_if(_cellRecords, [&](const CellRecord& a_record) {
+				return a_record.item.refID == a_ids[i].first && a_record.item.formID == a_ids[i].second;
+			});
+			if (record == _cellRecords.end()) {
+				continue;
+			}
+			// Between scans, a loose item that's been picked up is gone from the world straight away
+			if (const auto ref = record->ref.get(); ref && !ref->IsDisabled() && !ref->IsDeleted() && ref->GetParentCell()) {
+				places[i] = ref->GetPosition();
+			}
+		}
+		return places;
 	}
 
 	//---------------------------------------------------

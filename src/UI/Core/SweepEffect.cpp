@@ -14,13 +14,12 @@ namespace CompletionistUI
 
 	namespace
 	{
-		constexpr int maxItems = 16;
-
 		// Timings, seconds
 		constexpr float fadeIn = 0.35f;
 		constexpr float waveStart = 0.2f;
 		constexpr float waveTime = 3.0f;	// still moving as it fades, so it's never seen to stop
 		constexpr float fadeOut = 0.8f;
+		constexpr float glowFadeOut = 1.5f;
 
 		constexpr const char* shader = R"(
 cbuffer Sweep : register(b0)
@@ -29,7 +28,7 @@ cbuffer Sweep : register(b0)
 	float4 clipOffset;
 	float4 origin;			// xyz, radius
 	float4 settings;		// fade, near, far, trail
-	float4 counts;			// items
+	float4 counts;			// items, gold's fade
 	float4 items[16];		// xyz, strength
 };
 
@@ -87,7 +86,8 @@ float4 MainPS(float4 pixel : SV_Position) : SV_Target
 				const float3 offset = position - items[i].xyz;
 				const float  halo = exp(-dot(offset, offset) / (85.0 * 85.0));
 				// A tint rather than added light, so it can't blow out on a bright surface
-				colour = lerp(colour, float3(0.95, 0.72, 0.32) * (grey * 0.6 + 0.4), halo * reached * items[i].w * fade);
+				// Stronger once the screen is back to normal, where the dark isn't there to set it off
+				colour = lerp(colour, float3(0.95, 0.72, 0.32) * (grey * 0.6 + 0.4), halo * reached * lerp(items[i].w, 0.5 + items[i].w * 0.5, 1.0 - fade) * counts.y);
 			}
 		}
 	}
@@ -103,7 +103,7 @@ float4 MainPS(float4 pixel : SV_Position) : SV_Target
 			float origin[4];
 			float settings[4];
 			float counts[4];
-			float items[maxItems][4];
+			float items[SweepEffect::maxItems][4];
 		};
 		static_assert(sizeof(Constants) % 16 == 0);
 
@@ -315,7 +315,8 @@ float4 MainPS(float4 pixel : SV_Position) : SV_Target
 		const float travelled = std::clamp((a_wave.elapsed - waveStart) / waveTime, 0.0f, 1.0f);
 		// Starts at a walk around the player and picks up speed, so it covers a whole cave or valley in the time
 		const float radius = a_wave.reach * std::pow(travelled, 2.2f);
-		const float fade = std::min(std::clamp(a_wave.elapsed / fadeIn, 0.0f, 1.0f), std::clamp((duration - a_wave.elapsed) / fadeOut, 0.0f, 1.0f));
+		const float fade = std::min(std::clamp(a_wave.elapsed / fadeIn, 0.0f, 1.0f), std::clamp((waveDuration - a_wave.elapsed) / fadeOut, 0.0f, 1.0f));
+		const float glow = std::min(std::clamp(a_wave.elapsed / fadeIn, 0.0f, 1.0f), std::clamp((duration - a_wave.elapsed) / glowFadeOut, 0.0f, 1.0f));
 
 		Constants constants{};
 		constants.clipToView[0][0] = static_cast<float>((a[1][1] * a[2][2] - a[1][2] * a[2][1]) / determinant);
@@ -338,6 +339,7 @@ float4 MainPS(float4 pixel : SV_Position) : SV_Target
 		constants.settings[3] = std::max(500.0f, radius * 0.75f);
 		const int count = std::min(static_cast<int>(a_wave.items.size()), maxItems);
 		constants.counts[0] = static_cast<float>(count);
+		constants.counts[1] = glow;
 		for (int i = 0; i < count; ++i) {
 			relative(a_wave.items[static_cast<std::size_t>(i)], constants.items[i]);
 			constants.items[i][3] = i == 0 && a_wave.firstMarked ? 0.8f : 0.35f;

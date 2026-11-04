@@ -9,6 +9,7 @@ namespace CompletionistUI
 	struct NearestFinds
 	{
 		std::vector<RE::NiPoint3> places;
+		std::vector<std::pair<RE::FormID, RE::FormID>> ids;	// reference and item of each place
 		bool                      marked{ false };
 		bool                      cleared{ false };	// the press cancelled the last find instead
 	};
@@ -52,6 +53,8 @@ namespace CompletionistUI
 		// Game thread. Each press in turn marks the nearest find, then cancels it, then marks the next nearest
 		// With a_moveOn there's no cancel step: the last find's marker moves straight to the next nearest
 		[[nodiscard]] NearestFinds MarkNearestCellItem(bool a_moveOn = false);
+		// Game thread. Where each of these finds is now, empty once it's been collected or has gone
+		[[nodiscard]] std::vector<std::optional<RE::NiPoint3>> WhereFindsAre(const std::vector<std::pair<RE::FormID, RE::FormID>>& a_ids, bool a_rescan);
 		void                      ClearCellMarker(const CellItem& a_item) override;
 		void                      ClearCellMarkers() override;
 		void                      ExcludeCurrentCell() override;

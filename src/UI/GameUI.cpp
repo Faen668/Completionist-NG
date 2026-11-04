@@ -73,6 +73,9 @@ namespace CompletionistUI
 			std::atomic<bool>                              sweepEffect{ true };
 			std::atomic<bool>                              seekersWhisper{ false };
 			std::atomic<bool>                              sweepActive{ false };
+			std::atomic<bool>                              sweepFollowQueued{ false };
+			std::vector<std::pair<RE::FormID, RE::FormID>> sweepFinds;	// game thread: what's in sweepWave.items
+			std::chrono::steady_clock::time_point          sweepChecked{};	// game thread
 			std::atomic<bool>                              shoutWaiting{ false };	// a new game's player has no cell yet
 			std::mutex                                     sweepLock;
 			SweepEffect::Wave                              sweepWave;
@@ -297,15 +300,56 @@ namespace CompletionistUI
 			} else {
 				wave.reach = SweepEffect::ReachFor(nearest);
 			}
-			wave.items.reserve(finds.places.size());
-			for (const auto& place : finds.places) {
+			const auto count = std::min<std::size_t>(finds.places.size(), SweepEffect::maxItems);
+			wave.items.reserve(count);
+			for (std::size_t i = 0; i < count; ++i) {
+				const auto& place = finds.places[i];
 				wave.items.push_back({ place.x, place.y, place.z });
 			}
+			state.sweepFinds.assign(finds.ids.begin(), finds.ids.begin() + static_cast<std::ptrdiff_t>(count));
+			state.sweepChecked = std::chrono::steady_clock::now();
 
 			std::scoped_lock lock(state.sweepLock);
 			state.sweepWave = std::move(wave);
 			state.sweepStart = std::chrono::steady_clock::now();
 			state.sweepActive = true;
+		}
+
+		//---------------------------------------------------
+		//-- Game UI ( Follow Sweep Finds ) -----------------
+		//---------------------------------------------------
+
+		// Game thread. Keeps the gold on the things themselves: it moves with them and goes when they're collected
+		void FollowSweepFinds() {
+
+			auto& state = GetState();
+			state.sweepFollowQueued = false;
+			if (!state.sweepActive || state.sweepFinds.empty()) {
+				return;
+			}
+
+			const auto now = std::chrono::steady_clock::now();
+			const bool rescan = now - state.sweepChecked >= std::chrono::seconds(1);
+			if (rescan) {
+				state.sweepChecked = now;
+			}
+			const auto places = state.provider.WhereFindsAre(state.sweepFinds, rescan);
+
+			std::vector<std::pair<RE::FormID, RE::FormID>> finds;
+			std::vector<SweepEffect::Point>                items;
+			for (std::size_t i = 0; i < places.size(); ++i) {
+				if (places[i]) {
+					finds.push_back(state.sweepFinds[i]);
+					items.push_back({ places[i]->x, places[i]->y, places[i]->z });
+				}
+			}
+
+			std::scoped_lock lock(state.sweepLock);
+			if (!places.front()) {
+				state.sweepWave.firstMarked = false;	// the brighter one was the marked find
+			}
+			state.sweepFinds = std::move(finds);
+			state.sweepWave.items = std::move(items);
 		}
 
 		//---------------------------------------------------
@@ -1029,7 +1073,7 @@ namespace CompletionistUI
 				wave = a_state.sweepWave;
 				wave.elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - a_state.sweepStart).count();
 			}
-			if (wave.elapsed >= SweepEffect::duration) {
+			if (wave.elapsed >= SweepEffect::duration || (wave.items.empty() && wave.elapsed >= SweepEffect::waveDuration)) {
 				a_state.sweepActive = false;
 				return;
 			}
@@ -1399,6 +1443,9 @@ namespace CompletionistUI
 		const bool sweeping = state.sweepActive && playing;
 		if (state.sweepActive && !playing) {
 			state.sweepActive = false;	// a menu cut it short
+		}
+		if (sweeping && !state.sweepFollowQueued.exchange(true)) {
+			SKSE::GetTaskInterface()->AddTask([]() { FollowSweepFinds(); });
 		}
 		const bool overlay = playing && (state.cellPanel || state.toasts.Active());
 		if (!state.open && !overlay && !sweeping) {

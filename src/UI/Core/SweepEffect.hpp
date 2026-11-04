@@ -14,7 +14,9 @@ namespace CompletionistUI
 	class SweepEffect
 	{
 	public:
-		static constexpr float duration{ 3.2f };
+		static constexpr float duration{ 9.0f };	// the gold stays on the finds until here
+		static constexpr float waveDuration{ 3.2f };	// the wave and the darkened screen are gone by here
+		static constexpr int   maxItems{ 16 };
 
 		using Point = std::array<double, 3>;
 
