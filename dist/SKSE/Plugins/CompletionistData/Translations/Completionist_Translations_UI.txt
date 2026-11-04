@@ -30,18 +30,18 @@ $MCMPageSettingsHeader			|Completionist Settings
 $MCMPageSettingsHeader2			|Faction & Start Settings
 $State_RadiantQuestsText		|Radiant quests
 $State_RadiantQuestsInfo		|Choose a type of radiant (repeatable) quest, then set how many times its quests need to be completed before they show as completed.
-$RadiantChoice01				|Favor Quests
+$RadiantChoice01				|Favour Quests
 $RadiantChoice02				|Bounty Quests
 $RadiantChoice03				|Thieves Guild Quests
 $RadiantChoice04				|Dawnguard Quests
 $RadiantChoice05				|Legacy of the Dragonborn Quests
 $RadiantChoice06				|Vigilant Quests
-$RadiantChoice07				|The Companions Quests
+$RadiantChoice07				|Companions Quests
 $RadiantChoice08				|College of Winterhold Quests
 $RadiantChoice09				|Dark Brotherhood Quests
 $RadiantChoice10				|Fishing in Skyrim Quests
 $RadiantChoice11				|The Blades Quests
-$State_RadiantCounterText		|Favor Quests
+$State_RadiantCounterText		|Favour Quests
 $State_RadiantCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nSell Chopped Wood, Sell Mined Ore, Gold to a Beggar, Drinks to a Drunk, Sell Harvested Crops.\n\nDefault: 5 times.
 $State_BountyCounterText		|Bounty Quests
 $State_BountyCounterInfo		|The following repeatable quests only show as completed once you have finished them this many times:\n\nKill the Bandit Leader, Kill the Giant, Kill the Dragon, Kill the Forsworn Leader.\n\nDefault: 5 times.
@@ -130,16 +130,16 @@ $ModNotificationsItems							|Item Notifications
 $ModNotificationsBooks							|Book Notifications
 $ModNotificationsSpecial						|Special Notifications
 $ModNotificationsColour							|Notification Colour
-$ModNotificationsColourInfo						|Use this option to customize the colour of Completionist's Notifications\nDefault: White
+$ModNotificationsColourInfo						|Use this option to customise the colour of Completionist's notifications.\nDefault: White
 $MainHUDMode_Header_N							|Main HUD (New Items)
 $State_OverRide_N_Name_Text						|Tag Text
 $ColourState_N_Generic_Text_Crosshair			|Tag Colour
 $ColourState_N_Generic_Info_Crosshair			|Sets the display colour of the Dynamic Crosshair Tags for valid collectable items.
 $MenuHUDMode_Header_N							|Menu Mode (New Items)
 $InventoryModeOptions_PrAp_Text_N				|Format
-$InventoryModeOptions_PrAp_Info_N				|Use this menu to customize how the names of collectable / new items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrAp_Info_N				|Use this menu to customise how the names of collectable / new items are displayed in menus.\nThe prefix and colour are only drawn on the list; item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
 $InventoryModeOptions_PrFx_Text_N				|Prefix
-$InventoryModeOptions_PrFx_Info_N				|Use this menu to customize how the prefix of collectable / new item names are displayed in menus.\nDefault 'One Star (*)'
+$InventoryModeOptions_PrFx_Info_N				|Use this menu to customise how the prefix of collectable / new item names are displayed in menus.\nDefault: 'One Star (*)'
 $ColourState_N_Generic_Text_Menus				|Colour
 $ColourState_N_Generic_Info_Menus				|Sets the text colour of collectable / new items in menus, with a colour format.
 $MainHUDMode_Header_G							|Main HUD (Found Items)
@@ -148,9 +148,9 @@ $ColourState_G_Generic_Text_Crosshair			|Tag Colour
 $ColourState_G_Generic_Info_Crosshair			|Sets the display colour of the Dynamic Crosshair Tags for valid collected items.
 $MenuHUDMode_Header_G							|Menu Mode (Found Items)
 $InventoryModeOptions_PrAp_Text_G				|Format
-$InventoryModeOptions_PrAp_Info_G				|Use this menu to customize how the names of collected / found items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrAp_Info_G				|Use this menu to customise how the names of collected / found items are displayed in menus.\nThe prefix and colour are only drawn on the list; item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
 $InventoryModeOptions_PrFx_Text_G				|Prefix
-$InventoryModeOptions_PrFx_Info_G				|Use this menu to customize how the prefix of collected / found item names are displayed in menus.\nDefault 'One Star (*)'
+$InventoryModeOptions_PrFx_Info_G				|Use this menu to customise how the prefix of collected / found item names are displayed in menus.\nDefault: 'One Star (*)'
 $ColourState_G_Generic_Text_Menus				|Colour
 $ColourState_G_Generic_Info_Menus				|Sets the text colour of collected / found items in menus, with a colour format.
 $MenuHUDMode_Header_DB							|Museum Mode Settings
@@ -162,24 +162,24 @@ $State_OverRide_Displayable_Name_Text			|Tag Text
 $ColourState_Displayable_Text					|Tag Colour
 $ColourState_Displayable_Info					|Sets the colour of 'Museum Displayable' items that are not yet displayed, for the crosshair tag and, with a colour format, the item lists.
 $InventoryModeOptions_PrAp_Text_Displayable		|Format
-$InventoryModeOptions_PrAp_Info_Displayable		|Use this menu to customize how the names of 'Museum Displayable' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrAp_Info_Displayable		|Use this menu to customise how the names of 'Museum Displayable' items are displayed in menus.\nThe prefix and colour are only drawn on the list; item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
 $InventoryModeOptions_PrFx_Text_Displayable		|Prefix
-$InventoryModeOptions_PrFx_Info_Displayable		|Use this menu to customize how the prefix of 'Museum Displayable' item names are displayed in menus.\nDefault 'One Star (*)'
+$InventoryModeOptions_PrFx_Info_Displayable		|Use this menu to customise how the prefix of 'Museum Displayable' item names are displayed in menus.\nDefault: 'One Star (*)'
 $MenuHUDMode_Header_G_DB						|Museum Mode (Displayed Items)
 $State_OverRide_Displayed_Name_Text				|Tag Text
 $ColourState_Displayed_Text						|Tag Colour
 $ColourState_Displayed_Info						|Sets the colour of 'Museum Displayable' items that are already displayed, for the crosshair tag and, with a colour format, the item lists.
 $InventoryModeOptions_PrAp_Text_Displayed		|Format
-$InventoryModeOptions_PrAp_Info_Displayed		|Use this menu to customize how the names of 'Museum Displayed' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrAp_Info_Displayed		|Use this menu to customise how the names of 'Museum Displayed' items are displayed in menus.\nThe prefix and colour are only drawn on the list; item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
 $InventoryModeOptions_PrFx_Text_Displayed		|Prefix
-$InventoryModeOptions_PrFx_Info_Displayed		|Use this menu to customize how the prefix of 'Museum Displayed' item names are displayed in menus.\nDefault 'One Star (*)'
+$InventoryModeOptions_PrFx_Info_Displayed		|Use this menu to customise how the prefix of 'Museum Displayed' item names are displayed in menus.\nDefault: 'One Star (*)'
 $State_OverRide_Occupied_Name_Text				|Tag Text
 $ColourState_Occupied_Text						|Tag Colour
 $ColourState_Occupied_Info						|Sets the colour of 'Museum Displayable' items where a variation is already displayed, for the crosshair tag and, with a colour format, the item lists.
 $InventoryModeOptions_PrAp_Text_Occupied		|Format
-$InventoryModeOptions_PrAp_Info_Occupied		|Use this menu to customize how the names of 'Museum Display Occupied' items are displayed in menus.\nThe prefix and colour are only drawn on the list, item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
+$InventoryModeOptions_PrAp_Info_Occupied		|Use this menu to customise how the names of 'Museum Display Occupied' items are displayed in menus.\nThe prefix and colour are only drawn on the list; item names and sorting are unchanged.\nDefault: Vanilla (No Edits)
 $InventoryModeOptions_PrFx_Text_Occupied		|Prefix
-$InventoryModeOptions_PrFx_Info_Occupied		|Use this menu to customize how the prefix of 'Museum Display Occupied' item names are displayed in menus.\nDefault 'One Star (*)'
+$InventoryModeOptions_PrFx_Info_Occupied		|Use this menu to customise how the prefix of 'Museum Display Occupied' item names are displayed in menus.\nDefault: 'One Star (*)'
 $CellScanner_SettingsHeader5					|Item Pinning
 $CellScanner_Setting_Pinning_Enabled_Text		|Item Pinning
 $CellScanner_SettingsHeader2					|Searching
@@ -187,11 +187,11 @@ $CellScanner_Setting_Range_Info					|Sets the range that should be used when sca
 $CellScanner_SettingsHeader4					|Exclusions
 $CellScanner_Setting_ExcludeAlchemy_Text		|Exclude Alchemy Items
 $CellScanner_Setting_ExcludeIngredients_Text	|Exclude Ingredients
-$CellScanner_Setting_ExcludeArmor_Text			|Exclude Armor Pieces
+$CellScanner_Setting_ExcludeArmor_Text			|Exclude Armour Pieces
 $CellScanner_Setting_ExcludeBooks_Text			|Exclude Books / Spell Tomes
 $CellScanner_ExcludedHeader						|Excluded Cells
 $CellScanner_ExcludedReferencesHeader			|Excluded References In Current Cell
-$CellScanner_Pinning_Sound_Info					|Plays a sound when a pinned item is found in the cell you are scanning letting you know it's there.\nDefault: Sci-Fi
+$CellScanner_Pinning_Sound_Info					|Plays a sound when a pinned item is found in the cell you are scanning, letting you know it's there.\nDefault: Sci-Fi
 $CellScanner_Setting_ExcludeMiscItems_Text		|Exclude Miscellaneous Items
 $CellScanner_Setting_ExcludeWeapons_Text		|Exclude Weapons
 $MCMPageSettings2								|UI Settings
@@ -203,8 +203,8 @@ $Log_DateSelection_Text							|Select Date
 $Log_DateSelection_Info							|Allows you to select which date to view completion logs for:
 $EmptyLogView									|Nothing to see here...
 $CellScanner_CurrentPin							|Current Pin
-$CellScanner_Setting_EXCL_None					|Excluded Cells WIll Appear Here.
-$CellScanner_Setting_EXRF_None					|Excluded References WIll Appear Here.
+$CellScanner_Setting_EXCL_None					|Excluded Cells Will Appear Here.
+$CellScanner_Setting_EXRF_None					|Excluded References Will Appear Here.
 $CellScanner_Setting_EXCL_Text{}				|Exclude Current Cell: - [{}]
 $CellScanner_Setting_EXCL_TextERROR				|Exclude Current Cell: - Must Be In An Interior Cell
 $SearchTypeChoice01								|Name Contains
@@ -230,22 +230,22 @@ $CellScannerSoundList2							|Surprise
 ----------------------------------------------------------------------------
 $CellScanner_Setting_ExcludeAlchemy_Info		|Leaves Alchemy Items out when scanning a cell.
 $CellScanner_Setting_ExcludeIngredients_Info	|Leaves Ingredients, including plants, out when scanning a cell.
-$CellScanner_Setting_ExcludeArmor_Info			|Leaves Armor Pieces out when scanning a cell.
+$CellScanner_Setting_ExcludeArmor_Info			|Leaves Armour Pieces out when scanning a cell.
 $CellScanner_Setting_ExcludeBooks_Info			|Leaves Books, Notes and Spell Tomes out when scanning a cell.
 $CellScanner_Setting_ExcludeMiscItems_Info		|Leaves Misc Items out when scanning a cell.
 $CellScanner_Setting_ExcludeWeapons_Info		|Leaves Weapons out when scanning a cell.
-$CellScanner_Setting_Pinning_ClearPin_Info		|Clears the assigned pin
+$CellScanner_Setting_Pinning_ClearPin_Info		|Clears the assigned pin.
 $CellScanner_Setting_Pinning_Enabled_Info		|Lets you pin a collectable item from its page or the Cell Scanner. A pinned item gets a quest marker and a glow when you're in the same cell as it.\nDefault: Enabled
-$ModNotificationsBooksInfo						|Receive notifications when the player reads a book tracked by Completionist for the first time\nDefault: Enabled
-$ModNotificationsItemsInfo						|Receive notifications when the player picks up a unique item tracked by Completionist\nDefault: Enabled
+$ModNotificationsBooksInfo						|Receive notifications when the player reads a book tracked by Completionist for the first time.\nDefault: Enabled
+$ModNotificationsItemsInfo						|Receive notifications when the player picks up a unique item tracked by Completionist.\nDefault: Enabled
 $ModNotificationsSpecialInfo					|Receive notifications when the player performs a special action such as activating an undiscovered shrine or standing stone, acquiring a new pet, catching a new fish, learning a new dragon shout or word of power etc.\nDefault: Enabled
 $State_OverRide_Displayable_Name_Info			|Sets the text of the Dynamic Crosshair Tag for museum displayable items.\nTyping '...' into the box will disable this tag.\nDefault: Displayable!
 $State_OverRide_Displayed_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayed items.\nTyping '...' into the box will disable this tag.\nDefault: Displayed!
 $State_OverRide_G_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collected items.\nTyping '...' into the box will disable this tag.\nDefault: Got It!
 $State_OverRide_N_Name_Info						|Sets the text of the Dynamic Crosshair Tag for valid collectable items.\nTyping '...' into the box will disable this tag.\nDefault: Need It!
 $State_OverRide_Occupied_Name_Info				|Sets the text of the Dynamic Crosshair Tag for museum displayable items where a variation is already displayed.\nTyping '...' into the box will disable this tag.\nDefault: Occupied!
-$State_MuseumModeEnabled_Info					|Controller for Museum Mode support within Completionist. Museum items get their tags and icons even if Completionist doesn't track them\nDefault: Enabled
-$State_TreatOccupiedAsDisplayed_Info			|Ignores the 'Occupied' settings and treats all occupied item displays as 'Displayed'\nDefault: Disabled
+$State_MuseumModeEnabled_Info					|Controller for Museum Mode support within Completionist. Museum items get their tags and icons even if Completionist doesn't track them.\nDefault: Enabled
+$State_TreatOccupiedAsDisplayed_Info			|Ignores the 'Occupied' settings and treats all occupied item displays as 'Displayed'.\nDefault: Disabled
 $State_MuseumItemsOnly_Info						|Only tells you about museum items and specials like shrines, houses and fish: other items get no notifications, tags, icons or Cell Scanner results. Pages and tracking carry on as normal, so turning it off loses nothing.\nDefault: Disabled
 $CellScanner_Setting_EXCL_Highlight				|Click to remove this cell from the excluded locations list.
 $CellScanner_Setting_EXRF_Highlight				|Click to remove this reference from the excluded list.
@@ -253,12 +253,12 @@ $CellScanner_Setting_EXRF_Highlight				|Click to remove this reference from the 
 ----------------------------------------------------------------------------
 -- Ported from Interface/Translations
 ----------------------------------------------------------------------------
-$PickFactionErrorMSG				|This page requires configuration\n Please use the Menu in the 'General Settings' page to configure this page correctly. 
+$PickFactionErrorMSG				|This page requires configuration.\nPlease use the Menu in the 'General Settings' page to configure this page correctly.
 $PickFactionErrorMSGCW				|This page will automatically populate once you have joined a side in the civil war.
-$ColourState_G_Generic_Enabled_Text	|Crosshair Tag & Menu Text :
-$ColourState_G_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collected items.\n Default Enabled
+$ColourState_G_Generic_Enabled_Text	|Crosshair Tag & Menu Text:
+$ColourState_G_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collected items.\nDefault: Enabled
 $ColourState_N_Generic_Enabled_Text	|Crosshair Tag & Menu Text (New):
-$ColourState_N_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collectable items.\n Default Enabled
+$ColourState_N_Generic_Enabled_Info	|Controller for displaying Dynamic Crosshair Tags & Menu Item Edits on valid collectable items.\nDefault: Enabled
 $AddSkillBookHighlight{}{}			|~~~ {} ~~~\nReading this book increases your {} skill.
 $AddSpellTomeHighlight{}{}{}		|~~~ {} ~~~\nReading this tome teaches you the {} spell: '{}'.
 $AddLocationHighlight{}				|~~~ {} ~~~\nClick to add a quest marker at this location.
@@ -270,14 +270,14 @@ $MCMPageHouses						|Player Homes
 $MCMPageShrines						|Shrines
 $MCMPageDoomstone					|Standing Stones
 $MCMPageBarenziah					|Stones of Barenziah
-$MCMPageAEnchantments				|Enchantments: (Armor)
+$MCMPageAEnchantments				|Enchantments: (Armour)
 $MCMPageWEnchantments				|Enchantments: (Weapon)
 $MCMPageLocations1					|Locations: (A-G)
 $MCMPageLocations2					|Locations: (H-R)
 $MCMPageLocations3					|Locations: (S-Z)
 $MCMPageLocations4					|Locations: (Dawnguard)
 $MCMPageLocations5					|Locations: (Dragonborn)
-$PageHeaderAEnchantments			|Enchantments (Armor):
+$PageHeaderAEnchantments			|Enchantments (Armour):
 $PageHeaderWEnchantments			|Enchantments (Weapon):
 $PageHeaderSEnchantments			|Enchantments (Summermyst):
 $PageHeaderDoomstone1				|Standing Stones:

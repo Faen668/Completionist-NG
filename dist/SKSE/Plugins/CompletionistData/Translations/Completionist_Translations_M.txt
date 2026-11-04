@@ -40,7 +40,7 @@ V_ShoutText17	|~~~ Ice Form ~~~
 V_ShoutText18	|~~~ Kyne's Peace ~~~
 V_ShoutText19	|~~~ Marked for Death ~~~
 V_ShoutText20	|~~~ Slow Time ~~~
-V_ShoutText21	|~~~ Soul Tear ~~~\n Durnehviir teaches you a word each time you summon him from the Soul Cairn
+V_ShoutText21	|~~~ Soul Tear ~~~\nDurnehviir teaches you a word each time you summon him from the Soul Cairn.
 V_ShoutText22	|~~~ Storm Call ~~~
 V_ShoutText23	|~~~ Summon Durnehviir ~~~
 V_ShoutText24	|~~~ Throw Voice ~~~
@@ -70,35 +70,35 @@ MiscDataShout_SI1_Data		|~~~ Plague Breath ~~~\nShout added by Siege at Icemoth
 ----------------------------------------------------------------------------
 -- Shouts added by Thunderchild (T_ShoutText)
 ----------------------------------------------------------------------------
-T_ShoutText00	|~~~ Alessia's Love ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText01	|~~~ Annihilate ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText02	|~~~ Arcane Helix ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText03	|~~~ Armageddon ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText04	|~~~ Curse ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText05	|~~~ Dance of the Dead ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText06	|~~~ Earthquake ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText07	|~~~ Essence Rip ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText08	|~~~ Evocation ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText09	|~~~ Geomagnetism ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText10	|~~~ Iceborn ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText11	|~~~ Jone's Shadow ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText12	|~~~ Kingsbane ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText13	|~~~ Lifestream ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText14	|~~~ Lightning Shield ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText15	|~~~ Oblivion ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText16	|~~~ Phantom Decoy ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText17	|~~~ Riftwalk ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText18	|~~~ Shattersphere ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText19	|~~~ Shor's Wrath ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText20	|~~~ Shroud of Snowfall ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText21	|~~~ Speak Unto The Stars ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText22	|~~~ Splinter Twins ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText23	|~~~ Stormblast ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText24	|~~~ The Conqueror ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText25	|~~~ Trueshot ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText26	|~~~ Wail of the Banshee ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText27	|~~~ Wanderlust ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
-T_ShoutText28	|~~~ Warcry ~~~\n High Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild  
+T_ShoutText00	|~~~ Alessia's Love ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText01	|~~~ Annihilate ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText02	|~~~ Arcane Helix ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText03	|~~~ Armageddon ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText04	|~~~ Curse ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText05	|~~~ Dance of the Dead ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText06	|~~~ Earthquake ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText07	|~~~ Essence Rip ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText08	|~~~ Evocation ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText09	|~~~ Geomagnetism ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText10	|~~~ Iceborn ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText11	|~~~ Jone's Shadow ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText12	|~~~ Kingsbane ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText13	|~~~ Lifestream ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText14	|~~~ Lightning Shield ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText15	|~~~ Oblivion ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText16	|~~~ Phantom Decoy ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText17	|~~~ Riftwalk ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText18	|~~~ Shattersphere ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText19	|~~~ Shor's Wrath ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText20	|~~~ Shroud of Snowfall ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText21	|~~~ Speak Unto The Stars ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText22	|~~~ Splinter Twins ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText23	|~~~ Stormblast ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText24	|~~~ The Conqueror ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText25	|~~~ Trueshot ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText26	|~~~ Wail of the Banshee ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText27	|~~~ Wanderlust ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
+T_ShoutText28	|~~~ Warcry ~~~\nHigh Hrothgar Library: Meditate in front of the statue of Kyne\nShout added by Thunderchild
 
 ----------------------------------------------------------------------------
 -- Stones of Barenziah: names
@@ -131,30 +131,30 @@ Barenziah_Name23	|Yngvild
 ----------------------------------------------------------------------------
 -- Stones of Barenziah: where to find them
 ----------------------------------------------------------------------------
-Barenziah_Text00	|~~~ Ansilvund ~~~\n This Stone of Barenziah can be located on the table at the end of the Ansilvund Burial Chambers.
-Barenziah_Text01	|~~~ Black-Briar Lodge ~~~\n This Stone of Barenziah can be located in the top floor bedroom, next to the bed.
-Barenziah_Text02	|~~~ College of Winterhold ~~~\n This Stone of Barenziah can be located in the Arch-Mage Quarters.
-Barenziah_Text03	|~~~ Dainty Sload ~~~\n This Stone of Barenziah can be located in the last room on the table.
-Barenziah_Text04	|~~~ Dark Brotherhood Sanctuary ~~~\n This Stone of Barenziah can be located on the dresser in Astrid's room.
-Barenziah_Text05	|~~~ Dead Crone Rock ~~~\n This Stone of Barenziah can be located on the stone altar opposite the Word Wall.
-Barenziah_Text06	|~~~ Fellglow Keep ~~~\n This Stone of Barenziah can be located straight up the stairs on the right hand side.
-Barenziah_Text07	|~~~ Hob's Fall Cave ~~~\n This Stone of Barenziah can be located near the alchemy set under the bridge in the northwestern part of the cave system.
-Barenziah_Text08	|~~~ Treasury House ~~~\n This Stone of Barenziah can be located in the Treasury House on a bedside table in Thonar's bedroom.
-Barenziah_Text09	|~~~ Dwemer Museum ~~~\n This Stone of Barenziah can be located in Understone Keep's Dwemer Museum, on a table in the first room to the left
-Barenziah_Text10	|~~~ Pinewatch ~~~\n This Stone of Barenziah can be located in the basement, press the hidden button to the right of the bookcase which provides access to the bandit's hideout, the stone is found in a locked room in the Bandit's Sanctuary.
-Barenziah_Text11	|~~~ Rannveig's Fast ~~~\n This Stone of Barenziah can be located next to the alchemy lab and chest on the right after falling down the trapdoor in front of the chest and the Word Wall.
-Barenziah_Text12	|~~~ Mistveil Keep ~~~\n This Stone of Barenziah can be located in Mistveil Keep in the Jarl's bedroom, go up the stairs and through the locked center door. It will be on the end table left of the bed.
-Barenziah_Text13	|~~~ Blue Palace ~~~\n This Stone of Barenziah can be located in the Blue Palace in the Jarl's bedroom, right side of the bed on top of the wardrobe.
-Barenziah_Text14	|~~~ Proudspire Manor ~~~\n This Stone of Barenziah can be located in Proudspire Manor. You must first purchase the house and the stone can be found on the top floor in the master bedroom, on top of the wardrobe behind the door.
-Barenziah_Text15	|~~~ Stony Creek Cave ~~~\n This Stone of Barenziah can be located on the table next to the alchemy lab in the room off to the side.
-Barenziah_Text16	|~~~ Sunderstone Gorge ~~~\n This Stone of Barenziah can be located on the table with two bodies in front of the Word Wall.
-Barenziah_Text17	|~~~ Thalmor Embassy / Reeking Cave ~~~\n This Stone of Barenziah can be located in the Thalmor Embassy in Elenwen's Solar on the second floor. or inside Reeking Cave next to a corpse in the back depending on your Skyrim Version.
-Barenziah_Text18	|~~~ Whiterun Hall of the Dead ~~~\n This Stone of Barenziah can be located inside the Hall of the Dead Catacombs, go down the left stairs and it will be to your left, next to a skeleton.
-Barenziah_Text19	|~~~ Dragonsreach ~~~\n This Stone of Barenziah can be located in Dragonsreach in the Jarl's bedroom, on the right-hand end table.
-Barenziah_Text20	|~~~ Jorrvaskr ~~~\n This Stone of Barenziah can be located in Jorrvaskr's living quarters, on the bookshelf in Kodlak's room.
-Barenziah_Text21	|~~~ House of Clan Shatter-Shield ~~~\n This Stone of Barenziah can be located in the House of Clan Shatter-Shield, on a bookshelf in the room to the left of the top of the stairs.
-Barenziah_Text22	|~~~ Palace of the Kings ~~~\n This Stone of Barenziah can be located in the Palace of the Kings Upstairs. Take the first door to the left upon entering the main palace area, then find Wuunferth's room with an Alchemy Lab & Arcane Enchanter at the end of the hall. The stone is on a table on the right side of the room.
-Barenziah_Text23	|~~~ Yngvild ~~~\n This Stone of Barenziah can be located in the bedroom behind the throne in Yngvild Throne room.
+Barenziah_Text00	|~~~ Ansilvund ~~~\nThis Stone of Barenziah can be located on the table at the end of the Ansilvund Burial Chambers.
+Barenziah_Text01	|~~~ Black-Briar Lodge ~~~\nThis Stone of Barenziah can be located in the top floor bedroom, next to the bed.
+Barenziah_Text02	|~~~ College of Winterhold ~~~\nThis Stone of Barenziah can be located in the Arch-Mage Quarters.
+Barenziah_Text03	|~~~ Dainty Sload ~~~\nThis Stone of Barenziah can be located in the last room on the table.
+Barenziah_Text04	|~~~ Dark Brotherhood Sanctuary ~~~\nThis Stone of Barenziah can be located on the dresser in Astrid's room.
+Barenziah_Text05	|~~~ Dead Crone Rock ~~~\nThis Stone of Barenziah can be located on the stone altar opposite the Word Wall.
+Barenziah_Text06	|~~~ Fellglow Keep ~~~\nThis Stone of Barenziah can be located straight up the stairs on the right-hand side.
+Barenziah_Text07	|~~~ Hob's Fall Cave ~~~\nThis Stone of Barenziah can be located near the alchemy set under the bridge in the northwestern part of the cave system.
+Barenziah_Text08	|~~~ Treasury House ~~~\nThis Stone of Barenziah can be located in the Treasury House on a bedside table in Thonar's bedroom.
+Barenziah_Text09	|~~~ Dwemer Museum ~~~\nThis Stone of Barenziah can be located in Understone Keep's Dwemer Museum, on a table in the first room to the left.
+Barenziah_Text10	|~~~ Pinewatch ~~~\nThis Stone of Barenziah can be located in the basement. Press the hidden button to the right of the bookcase, which provides access to the bandits' hideout. The stone is found in a locked room in the Bandit's Sanctuary.
+Barenziah_Text11	|~~~ Rannveig's Fast ~~~\nThis Stone of Barenziah can be located next to the alchemy lab and chest on the right after falling down the trapdoor in front of the chest and the Word Wall.
+Barenziah_Text12	|~~~ Mistveil Keep ~~~\nThis Stone of Barenziah can be located in Mistveil Keep in the Jarl's bedroom. Go up the stairs and through the locked centre door. It will be on the end table left of the bed.
+Barenziah_Text13	|~~~ Blue Palace ~~~\nThis Stone of Barenziah can be located in the Blue Palace in the Jarl's bedroom, on top of the wardrobe to the right of the bed.
+Barenziah_Text14	|~~~ Proudspire Manor ~~~\nThis Stone of Barenziah can be located in Proudspire Manor. You must first purchase the house. The stone can be found on the top floor in the master bedroom, on top of the wardrobe behind the door.
+Barenziah_Text15	|~~~ Stony Creek Cave ~~~\nThis Stone of Barenziah can be located on the table next to the alchemy lab in the room off to the side.
+Barenziah_Text16	|~~~ Sunderstone Gorge ~~~\nThis Stone of Barenziah can be located on the table with two bodies in front of the Word Wall.
+Barenziah_Text17	|~~~ Thalmor Embassy / Reeking Cave ~~~\nThis Stone of Barenziah can be located in the Thalmor Embassy in Elenwen's Solar on the second floor, or inside Reeking Cave next to a corpse in the back, depending on your Skyrim version.
+Barenziah_Text18	|~~~ Whiterun Hall of the Dead ~~~\nThis Stone of Barenziah can be located inside the Hall of the Dead Catacombs. Go down the left stairs and it will be to your left, next to a skeleton.
+Barenziah_Text19	|~~~ Dragonsreach ~~~\nThis Stone of Barenziah can be located in Dragonsreach in the Jarl's bedroom, on the right-hand end table.
+Barenziah_Text20	|~~~ Jorrvaskr ~~~\nThis Stone of Barenziah can be located in Jorrvaskr's living quarters, on the bookshelf in Kodlak's room.
+Barenziah_Text21	|~~~ House of Clan Shatter-Shield ~~~\nThis Stone of Barenziah can be located in the House of Clan Shatter-Shield, on a bookshelf in the room to the left of the top of the stairs.
+Barenziah_Text22	|~~~ Palace of the Kings ~~~\nThis Stone of Barenziah can be located in the Palace of the Kings Upstairs. Take the first door to the left upon entering the main palace area, then find Wuunferth's room with an Alchemy Lab & Arcane Enchanter at the end of the hall. The stone is on a table on the right side of the room.
+Barenziah_Text23	|~~~ Yngvild ~~~\nThis Stone of Barenziah can be located in the bedroom behind the throne in the Yngvild throne room.
 
 ----------------------------------------------------------------------------
 -- Completion log prefixes (each ends in a space on purpose - keep it)
@@ -183,14 +183,14 @@ MapMarkerCleared	|(Cleared)
 ItemType_Scroll		|Scroll:
 ItemType_Item		|Item:
 ItemType_Weapon		|Weapon:
-ItemType_Armor		|Armor Piece:
+ItemType_Armor		|Armour Piece:
 ItemType_SpellTome	|Spell Tome:
 ItemType_SkillBook	|Skill Book:
 ItemType_Book		|Book:
 ItemType_Ingredient	|Ingredient:
 ItemType_Key		|Key:
 ItemType_Potion		|Potion:
-ItemType_Poison		|Poison
+ItemType_Poison		|Poison:
 ItemType_SoulGem	|Soul Gem:
 
 ----------------------------------------------------------------------------
@@ -382,7 +382,7 @@ UI_Cell_Title			|Cell Scanner
 UI_Cell_Back			|Completionist
 UI_Cell_Count{}			|{} to find
 UI_Cell_Options			|Scanner options
-UI_Cell_OptionsHint		|searching, exclusions and item pinning
+UI_Cell_OptionsHint		|searching, exclusions, item pinning and mark nearest
 UI_Cell_Scanning		|Scanning...
 UI_Cell_Excluded		|This cell is on the cell scanner's excluded list.
 UI_Cell_Nothing			|Nothing left to find here.
@@ -429,7 +429,7 @@ UI_Pad_Scroll						|Scroll
 UI_Pad_Find							|Find
 UI_Pad_Filter						|Filter
 UI_Setting_PadStyle					|Controller buttons
-UI_SettingHint_PadStyle				|Which controller's button names and symbols the button help at the foot of the window and the controller settings show. The buttons do the same on every controller; only their names differ.
+UI_SettingHint_PadStyle				|Which controller's button names and symbols to show in the button help at the foot of the window and in the controller settings. The buttons do the same on every controller; only their names differ.
 UI_Setting_PadXbox					|Xbox
 UI_Setting_PadPlayStation			|PlayStation
 UI_Setting_PadSwitch				|Nintendo Switch
@@ -486,7 +486,7 @@ UI_Toasts_PanelShown				|Cell Scanner panel
 UI_Toasts_PanelOff					|Cell Scanner panel (turned off, shown so you can place it)
 UI_Toasts_Overlap					|Covers part of the Cell Scanner
 UI_Toasts_JoinRelease				|Let go to join the Cell Scanner
-UI_Toasts_Joined					|Joined to the Cell Scanner. Move them to separate
+UI_Toasts_Joined					|Joined to the Cell Scanner. Move them to separate.
 UI_Toasts_PlaceKeys{}{}				|{} or Enter to confirm, {} or Escape to cancel.
 UI_Toasts_PlaceConfirm				|Confirm
 UI_Toasts_PlaceCancel				|Cancel
@@ -672,7 +672,7 @@ UI_Dragons_Where_Viinturuth			|A burial mound near Lake Yorgrim
 UI_Dragons_Lore_Viinturuth			|The last of the dragons Alduin raises from the burial mounds, woken after you meet Paarthurnax on the Throat of the World. Like the other risen dragons he roams Skyrim until someone kills him.
 UI_Dragons_Meaning_Vulthuryol		|Dark Overlord Fire
 UI_Dragons_Where_Vulthuryol			|Blackreach, beneath Skyrim
-UI_Dragons_Lore_Vulthuryol			|An old dragon sleeping out of sight in the great cavern of Blackreach, far below Skyrim. He stays away until a shout of Unrelenting Force hits the glowing orb that hangs over the cavern, which calls him down. He is no part of any quest; he is there for those who go looking for him.
+UI_Dragons_Lore_Vulthuryol			|An old dragon sleeping out of sight in the great cavern of Blackreach, far below Skyrim. He stays away until a shout of Unrelenting Force hits the glowing orb that hangs over the cavern, which calls him down. He plays no part in any quest; he is there for those who go looking for him.
 UI_Dragons_Where_SkeletalDragon		|Labyrinthian, Hjaalmarch
 UI_Dragons_Lore_SkeletalDragon		|The bones of a dragon in a great hall of Labyrinthian, behind a gate past the entrance. You reach it on the way to the Staff of Magnus: when you fight the skeletons in the hall, the dragon rises from its mound in the middle and joins in, breathing frost. It has no name of its own, but it is the only one of its kind in the game, and it is too big to follow you back through the gate.
 UI_Dragons_Meaning_Durnehviir		|Curse Never Dying
@@ -706,7 +706,7 @@ UI_Dragons_Where_Izvenyah			|Windcaller's Retreat
 UI_Dragons_Lore_Izvenyah			|A frost dragon, one of the deadliest breeds in Skyrim. Scholars think frost dragons settled here in the Merethic Era for the cold. With Kreindeinvith, it guards the Jade Claw during The Excavation of Windcaller Pass. Its scales complete its exhibit in the Gallery of Natural Science.
 UI_Dragons_Meaning_Gaafnehdir		|Ghost Never Die
 UI_Dragons_Where_Gaafnehdir			|Upper Embershard Mine
-UI_Dragons_Lore_Gaafnehdir			|A dragon bound to a haunted mine, serving the spirit who holds the dead there since an old cave-in. A ghost girl named Hanna, trapped with the miners, begs you to free them. Spiders, skeletons and this dragon are among the things you face on the way to the "bad man" she fears. The mine's new owner wants it cleared before work can start again.
+UI_Dragons_Lore_Gaafnehdir			|A dragon bound to a haunted mine, serving the spirit who has held the dead there since an old cave-in. A ghost girl named Hanna, trapped with the miners, begs you to free them. Spiders, skeletons and this dragon are among the things you face on the way to the "bad man" she fears. The mine's new owner wants it cleared before work can start again.
 
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 5)
@@ -747,7 +747,7 @@ UI_Achievements_Stat_LocationsDiscovered			|Locations found
 UI_Achievements_Stat_SkillBooksRead					|Skill books read
 UI_Achievements_Stat_DragonSoulsCollected			|Dragon souls
 UI_Achievements_Stat_ShoutsMastered					|Shouts mastered
-UI_Achievements_Stat_ShoutsLearned					|Shouts learned
+UI_Achievements_Stat_ShoutsLearned					|Shouts learnt
 UI_Achievements_Stat_NumWerewolfPerks				|Werewolf perks
 UI_Achievements_Stat_NumVampirePerks				|Vampire Lord perks
 UI_Achievements_Stat_StalhrimItemsCrafted			|Stalhrim items made
@@ -841,7 +841,7 @@ UI_Achievements_Goal_29								|Select a Standing Stone blessing
 UI_Achievements_Tip_29								|Use any standing stone. The Guardian Stones on the road from Helgen to Riverwood are the first you come to.
 UI_Achievements_Name_30								|Standing Stones
 UI_Achievements_Goal_30								|Find 13 Standing Stones
-UI_Achievements_Tip_30								|Each stone counts once, and the three Guardian Stones by Riverwood count as three on their own. The game adds them up as you find them; the Doomstones page shows which you've been to.
+UI_Achievements_Tip_30								|Each stone counts once, and the three Guardian Stones by Riverwood count as three on their own. The game adds them up as you find them; the Standing Stones page shows which you've been to.
 UI_Achievements_Name_31								|Citizen
 UI_Achievements_Goal_31								|Buy a house
 UI_Achievements_Tip_31								|Breezehome in Whiterun costs 5,000 gold once you've done Dragon Rising: buy it from Proventus Avenicci in Dragonsreach. Hearthfire land counts too.
@@ -874,10 +874,10 @@ UI_Achievements_Goal_40								|Read 50 Skill Books
 UI_Achievements_Tip_40								|Each skill book counts once, the first time you read it. Many are on shop shelves: buying and reading them counts.
 UI_Achievements_Name_41								|Daedric Influence
 UI_Achievements_Goal_41								|Acquire a Daedric Artifact
-UI_Achievements_Tip_41								|Comes with the first Daedric artifact, from a Daedric quest or found in the world, such as Meridia's Beacon.
+UI_Achievements_Tip_41								|Comes with the first Daedric artefact, from a Daedric quest or found in the world, such as Meridia's Beacon.
 UI_Achievements_Name_42								|Oblivion Walker
 UI_Achievements_Goal_42								|Collect 15 Daedric Artifacts
-UI_Achievements_Tip_42								|An artifact counts when you get it, so you can store or sell it after. Where a Daedric quest ends with a choice, take the side that gives the artifact.
+UI_Achievements_Tip_42								|An artefact counts when you get it, so you can store or sell it after. Where a Daedric quest ends with a choice, take the side that gives the artefact.
 UI_Achievements_Name_43								|Dragon Soul
 UI_Achievements_Goal_43								|Absorb a dragon soul
 UI_Achievements_Tip_43								|The first dragon, at the Western Watchtower during Dragon Rising.
@@ -908,7 +908,7 @@ UI_Achievements_Tip_51								|The start of Dawnguard: join the Dawnguard at For
 UI_Achievements_Name_52								|Beyond Death
 UI_Achievements_Goal_52								|Complete "Beyond Death"
 UI_Achievements_Tip_52								|Serana's mother is in the Soul Cairn. Going in costs part of your soul, unless you're a vampire.
-UI_Achievements_Name_53								|Kindred Judgement
+UI_Achievements_Name_53								|Kindred Judgment
 UI_Achievements_Goal_53								|Complete "Kindred Judgment"
 UI_Achievements_Tip_53								|The end of Dawnguard, on either side.
 UI_Achievements_Name_54								|Lost to the Ages
@@ -970,7 +970,7 @@ UI_Achievements_Goal_72								|Craft an item out of Stalhrim
 UI_Achievements_Tip_72								|Ask Deor Woodcutter or Fanari Strong-Voice in Raven Rock about stalhrim; A New Source of Stalhrim ends with Baldor Iron-Shaper teaching you. Smithing stalhrim needs the Ebony Smithing perk. The quest is lost if both of them die.
 UI_Achievements_Name_73								|Dragonrider
 UI_Achievements_Goal_73								|Tame and ride 5 dragons
-UI_Achievements_Tip_73								|Use Bend Will on a dragon and ride it, with five dragons. Bend Will is learned during the Dragonborn story.
+UI_Achievements_Tip_73								|Use Bend Will on a dragon and ride it, with five dragons. Bend Will is learnt during the Dragonborn story.
 UI_Achievements_Name_74								|Raven Rock Owner
 UI_Achievements_Goal_74								|Own a house in Raven Rock
 UI_Achievements_Tip_74								|Help Adril Arano in Served Cold and Severin Manor is yours, free.
@@ -978,7 +978,7 @@ UI_Achievements_Name_75								|Solstheim Explorer
 UI_Achievements_Goal_75								|Discover 30 locations on the island of Solstheim
 UI_Achievements_Tip_75								|Any 30 map markers on Solstheim.
 UI_Achievements_Stat_Holds							|Holds at 1,000 bounty now
-UI_Achievements_Stat_Artifacts						|Daedric artifacts
+UI_Achievements_Stat_Artifacts						|Daedric artefacts
 UI_Achievements_Stat_DragonAspectWords				|Dragon Aspect words
 UI_Achievements_Stat_BlackBooks						|Black Books finished
 UI_Achievements_Stat_Done							|Earned
@@ -996,7 +996,7 @@ UI_Achievements_Stat_Plots							|Plots bought
 UI_Achievements_Stat_Wings							|Most wings on one house
 UI_Achievements_Stat_Houses							|Houses with three wings
 UI_Achievements_Stat_DragonsRidden					|Dragons ridden
-UI_Achievements_Disabled							|Mods switch Skyrim's achievements off, so new ones won't unlock on your account. Achievements Mods Enabler (nexusmods.com/skyrimspecialedition/mods/245) or SSE Engine Fixes switch them back on.
+UI_Achievements_Disabled							|Mods switch Skyrim's achievements off, so new ones won't unlock on your account. Achievements Mods Enabler (nexusmods.com/skyrimspecialedition/mods/245) or SSE Engine Fixes switches them back on.
 UI_Achievements_SaveOnly							|this save only
 UI_Achievements_DoneOnSave							|Done on this save
 UI_Achievements_NotDoneOnSave						|Not done on this save yet
@@ -1159,7 +1159,7 @@ UI_Ingredients_Lore_TorchbugThorax			|The glowing body of a torchbug, one of the
 UI_Ingredients_Lore_TrollFat				|Fat from a troll, greasy and rank. Warriors with two-handed weapons have a use for it.
 UI_Ingredients_Lore_TundraCotton			|White tufts from the cotton that grows on the tundra around Whiterun. Merchants like it, since it makes for better prices.
 UI_Ingredients_Lore_VampireDust				|The ash a vampire leaves when it's destroyed. One of the few ingredients that can make you invisible, and it cures disease too.
-UI_Ingredients_Lore_VoidSalts				|The dark remains of a storm atronach, among the most valuable ingredients there are. Mages want it for their magicka.
+UI_Ingredients_Lore_VoidSalts				|The dark remains of a storm atronach, among the most valuable ingredients there are. Mages want them for their magicka.
 UI_Ingredients_Lore_Wheat					|Grown on farms all over Skyrim, and on Whiterun's above all. A healer's staple.
 UI_Ingredients_Lore_WhiteCap				|A cave mushroom with a pale cap. Warriors in heavy armour have a use for it.
 UI_Ingredients_Lore_WispWrappings			|The ragged wrappings left when a wispmother is destroyed. Destruction mages put them to good use.
@@ -1167,7 +1167,7 @@ UI_Ingredients_Lore_RotScale				|One of the strange roots sold by the Khajiit tr
 UI_Ingredients_Lore_ScreamingMaw			|A rare root from far-off lands, sold by the Khajiit traders who carry Rare Curios. One of the few ingredients that can make you invisible.
 UI_Ingredients_Lore_ThornHook				|A rare hooked root from the Khajiit traders' stock of Rare Curios. It's as good for harming as for healing.
 UI_Ingredients_Lore_AncestorMothWing		|The wing of an ancestor moth, the moths of the Ancestor Glade that the Moth Priests call on to read the Elder Scrolls. It shares all four effects with blue butterfly wings.
-UI_Ingredients_Lore_ChaurusHunterAntennae	|Antennae from a chaurus hunter, the winged kind of chaurus that serves the Falmer. It shares all four effects with blue butterfly wings and ancestor moth wings.
+UI_Ingredients_Lore_ChaurusHunterAntennae	|Antennae from a chaurus hunter, the winged kind of chaurus that serves the Falmer. They share all four effects with blue butterfly wings and ancestor moth wings.
 UI_Ingredients_Lore_Gleamblossom			|A softly glowing flower. It can frighten or paralyse a foe, and it helps wounds heal.
 UI_Ingredients_Lore_PoisonBloom				|A plant whose name is a fair warning: most of what it does is harmful.
 UI_Ingredients_Lore_YellowMountainFlower	|The yellow mountain flower, rarer than its red, blue and purple cousins. Healers use it.
@@ -1295,7 +1295,7 @@ UI_Ingredients_Lore_Lichor					|Sold by Khajiit caravans among their Rare Curios
 UI_Ingredients_Lore_LuminousRussula			|A glowing mushroom sold by Khajiit caravans among their Rare Curios. Mostly harmful, but useful for breathing underwater.
 UI_Ingredients_Lore_Marshmerrow				|A marsh reed with a sweet pith, sold by Khajiit caravans among their Rare Curios. It heals and lets you carry more.
 UI_Ingredients_Lore_MinotaurHorn			|The horn of a minotaur, sold by Khajiit caravans among their Rare Curios. It guards against poison and helps you recover.
-UI_Ingredients_Lore_OgresTeeth				|The teeth of an ogre, sold by Khajiit caravans among their Rare Curios. It guards against poison and helps wounds heal.
+UI_Ingredients_Lore_OgresTeeth				|The teeth of an ogre, sold by Khajiit caravans among their Rare Curios. They guard against poison and help wounds heal.
 UI_Ingredients_Lore_RedKelpGasBladder		|The gas bladder from a red kelp, sold by Khajiit caravans among their Rare Curios. Useful for breathing underwater, and it cures disease.
 UI_Ingredients_Lore_RedwortFlower			|A red flower sold by Khajiit caravans among their Rare Curios. It cures poison and can make you invisible.
 UI_Ingredients_Lore_Roobrush				|A scrubby plant sold by Khajiit caravans among their Rare Curios. It helps you sneak, and cures poison.

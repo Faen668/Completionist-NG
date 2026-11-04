@@ -110,7 +110,7 @@ Dawnstar_Quest01	|Pieces of the Past
 Dawnstar_Quest02	|Waking Nightmare
 Dawnstar_Quest03	|Salty Sea-Dogs
 Dawnstar_Quest04	|Dungeon Delving (Frida)
-Dawnstar_Quest05	|Have a drink (Karl)
+Dawnstar_Quest05	|Have a Drink (Karl)
 Dawnstar_Quest06	|Rare Gifts (Rustleif)
 Dawnstar_Quest07	|Thane of the Pale
 Dawnstar_Quest08	|Mine Ore (Beitild)
@@ -136,7 +136,7 @@ Falkreath_Quest11	|Runil's Dark Past
 -- Markarth
 ----------------------------------------------------------------------------
 Markarth_Quest00	|Bothela's Discreet Delivery
-Markarth_Quest01	|Buy Dwarven artifact
+Markarth_Quest01	|Buy Dwarven Artefact
 Markarth_Quest02	|Coated in Blood
 Markarth_Quest03	|Delivery to Calcelmo
 Markarth_Quest04	|Kill the Forsworn Leader (Igmund)
@@ -157,8 +157,8 @@ Markarth_Quest18	|Delivery (Banning)
 Markarth_Quest19	|Dungeon Delving (Jarl Igmund)
 Markarth_Quest20	|Fight! (Cosnach)
 Markarth_Quest21	|Have a Septim (Degaine)
-Markarth_Quest22	|Have a drink (Degaine)
-Markarth_Quest23	|Have a drink (Cosnach)
+Markarth_Quest22	|Have a Drink (Degaine)
+Markarth_Quest23	|Have a Drink (Cosnach)
 Markarth_Quest24	|Thane of the Reach
 
 ----------------------------------------------------------------------------
@@ -228,9 +228,9 @@ Solitude_Quest14	|The Wolf Queen Awakened
 Solitude_Quest15	|A Few Words With You (Octieve)
 Solitude_Quest16	|Dungeon Delving (Noster)
 Solitude_Quest17	|Kill the Bandit Leader (Ahtar)
-Solitude_Quest18	|Have a septim (Dervenin)
-Solitude_Quest19	|Have a septim (Noster)
-Solitude_Quest20	|Have a septim (Svari)
+Solitude_Quest18	|Have a Septim (Dervenin)
+Solitude_Quest19	|Have a Septim (Noster)
+Solitude_Quest20	|Have a Septim (Svari)
 Solitude_Quest21	|Rare Gifts (Aldis)
 Solitude_Quest22	|Thane of Haafingar
 
@@ -266,10 +266,10 @@ Windhelm_Quest03	|Repairing the Phial
 Windhelm_Quest04	|Rise in the East
 Windhelm_Quest05	|That Was Always There (Revyn Sadri)
 Windhelm_Quest06	|The White Phial
-Windhelm_Quest07	|Have a word (Scouts-Many-Marshes)
+Windhelm_Quest07	|Have a Word (Scouts-Many-Marshes)
 Windhelm_Quest08	|Some Light Theft (Stands-In-Shallows)
 Windhelm_Quest09	|Rare Gifts (Torbjorn)
-Windhelm_Quest10	|Have a drink (Torbjorn)
+Windhelm_Quest10	|Have a Drink (Torbjorn)
 Windhelm_Quest11	|Kill the Bandit Leader (Brunwulf)
 Windhelm_Quest12	|Harsh Master
 Windhelm_Quest13	|Thane of Eastmarch
@@ -286,7 +286,7 @@ Windhelm_Quest19	|Have a Septim (Silda)
 Winterhold_Quest00	|Drowned Sorrows
 Winterhold_Quest01	|A Few Words With You (Haran)
 Winterhold_Quest02	|Dungeon Delving (Jarl Korir)
-Winterhold_Quest03	|Have a drink (Ranmir)
+Winterhold_Quest03	|Have a Drink (Ranmir)
 Winterhold_Quest04	|Some Light Theft (Malur)
 Winterhold_Quest05	|Thane of Winterhold
 
@@ -313,7 +313,7 @@ SkaalVillage_Quest00	|Convincing Nikulas
 SkaalVillage_Quest01	|Filial Bonds
 SkaalVillage_Quest02	|Lost Legacy
 SkaalVillage_Quest03	|A New Source of Stalhrim
-SkaalVillage_Quest04	|A favor for Morwen
+SkaalVillage_Quest04	|A Favour for Morwen
 SkaalVillage_Quest05	|Kill the Bandit Leader (Fanari)
 
 ----------------------------------------------------------------------------
@@ -362,10 +362,10 @@ TelMithryn_Quest13	|Wind and Sand
 -- Thirsk Hall
 ----------------------------------------------------------------------------
 Thirsk_Quest00	|The Chief of Thirsk Hall
-Thirsk_Quest01	|Elmus Favor Quest (Berries)
-Thirsk_Quest02	|Elmus Favor Quest (Mead)
-Thirsk_Quest03	|Halbarn Favor Quest
-Thirsk_Quest04	|Hilund Favor Quest
+Thirsk_Quest01	|Elmus Favour Quest (Berries)
+Thirsk_Quest02	|Elmus Favour Quest (Mead)
+Thirsk_Quest03	|Halbarn Favour Quest
+Thirsk_Quest04	|Hilund Favour Quest
 Thirsk_Quest05	|Retaking Thirsk
 Thirsk_Quest06	|Thirsk Rumors
 
@@ -396,7 +396,7 @@ CollegeOfWinterhold_Quest20	|Restoration Ritual Spell
 CollegeOfWinterhold_Quest21	|The Missing Apprentices
 CollegeOfWinterhold_Quest22	|Aftershock
 CollegeOfWinterhold_Quest23	|Enchanting Pick-Up
-CollegeOfWinterhold_Quest24	|Fetch me that Book!
+CollegeOfWinterhold_Quest24	|Fetch Me That Book!
 CollegeOfWinterhold_Quest25	|Filling Soul Gems
 CollegeOfWinterhold_Quest26	|Out of Balance
 CollegeOfWinterhold_Quest27	|Research Thief
@@ -552,7 +552,7 @@ Dungeons_Quest17		|Infiltration
 Dungeons_Quest18		|Evil in Waiting
 Dungeons_Quest19		|Volskygge
 Dungeons_Quest20		|Silenced Tongues
-Dungeons_Quest21		|Yngol's Barrow
+Dungeons_Quest21		|Yngol Barrow
 Dungeons_Quest00_DQANM	|The Treasure of Angarvunde
 Dungeons_Quest01_DQANM	|A Love Beyond Death
 Dungeons_Quest05_DQANM	|What Lies Beneath
@@ -665,14 +665,14 @@ Side_SK_Quest26	|A Wife For Mauhulakh
 LOTD_Main_Quest00	|An Interesting Prospect
 LOTD_Main_Quest01	|Dragonborn Gallery
 LOTD_Main_Quest02	|Akaviri Rising
-LOTD_Main_Quest03	|An Interesting Prospect.
+LOTD_Main_Quest03	|An Interesting Prospect
 LOTD_Main_Quest04	|Dragonborn Gallery
-LOTD_Main_Quest05	|Night At The Museum
-LOTD_Main_Quest06	|Shadows Of One's Past
+LOTD_Main_Quest05	|Night at the Museum
+LOTD_Main_Quest06	|Shadows of One's Past
 LOTD_Main_Quest07	|Shattered Legacy
 LOTD_Main_Quest08	|The Ayleid Crossroads
-LOTD_Main_Quest09	|It Belongs In A Museum
-LOTD_Main_Quest10	|The Vaults Of Deepholme
+LOTD_Main_Quest09	|It Belongs in a Museum
+LOTD_Main_Quest10	|The Vaults of Deepholme
 LOTD_Main_Quest11	|Finders Keepers
 LOTD_Main_Quest12	|Research Project
 LOTD_Main_Quest13	|The Price of Vigilants
@@ -681,16 +681,16 @@ LOTD_Main_Quest14	|Faltering Light
 ----------------------------------------------------------------------------
 -- Legacy of the Dragonborn: expeditions
 ----------------------------------------------------------------------------
-LOTD_Exp_Quest00	|A Room With A View
+LOTD_Exp_Quest00	|A Room with a View
 LOTD_Exp_Quest01	|Digging Up Explorers
 LOTD_Exp_Quest02	|The Excavation of Windcaller Pass
 LOTD_Exp_Quest03	|The Excavation of the Ruins of Rkund
 LOTD_Exp_Quest04	|The Visage
-LOTD_Exp_Quest05	|Trial Of Trinimac
+LOTD_Exp_Quest05	|Trial of Trinimac
 LOTD_Exp_Quest06	|Eternal Ice
-LOTD_Exp_Quest07	|A Path To The Heavens
-LOTD_Exp_Quest08	|The Book Of Wonders
-LOTD_Exp_Quest09	|Tools Of The Trade
+LOTD_Exp_Quest07	|A Path to the Heavens
+LOTD_Exp_Quest08	|The Book of Wonders
+LOTD_Exp_Quest09	|Tools of the Trade
 LOTD_Exp_Quest10	|Branching Out
 LOTD_Exp_Quest11	|Branching Out... Again
 LOTD_Exp_Quest12	|Branching Out... Ever More
@@ -711,25 +711,25 @@ LOTD_Journals_Quest05	|The Phantom Cache
 ----------------------------------------------------------------------------
 -- Legacy of the Dragonborn: notes
 ----------------------------------------------------------------------------
-LOTD_Notes_Quest00	|Auryen's Notes: Dagger Of Symmachus
+LOTD_Notes_Quest00	|Auryen's Notes: Dagger of Symmachus
 LOTD_Notes_Quest01	|Auryen's Notes: Cyrus' Saber
 LOTD_Notes_Quest02	|Auryen's Notes: Orgnum's Coffer
-LOTD_Notes_Quest03	|Auryen's Notes: Ice Blade Of The Monarch
+LOTD_Notes_Quest03	|Auryen's Notes: Ice Blade of the Monarch
 LOTD_Notes_Quest04	|Auryen's Notes: Shalidor's Stone
 LOTD_Notes_Quest05	|Auryen's Notes: The Bloodworm Helm
 LOTD_Notes_Quest06	|Auryen's Notes: The Warlock's Ring
 LOTD_Notes_Quest07	|Auryen's Notes: The Dragonmail Cuirass
-LOTD_Notes_Quest08	|Auryen's Notes: The Fists Of Randagulf
-LOTD_Notes_Quest09	|Auryen's Notes: The Tools Of Kagrenac
+LOTD_Notes_Quest08	|Auryen's Notes: The Fists of Randagulf
+LOTD_Notes_Quest09	|Auryen's Notes: The Tools of Kagrenac
 
 ----------------------------------------------------------------------------
 -- Legacy of the Dragonborn: miscellaneous
 ----------------------------------------------------------------------------
 LOTD_Misc_Quest00	|Auryen Morellus and the Chamber of Secrets
 LOTD_Misc_Quest01	|Much Ado About Snow Elves
-LOTD_Misc_Quest02	|The Hand Of Glory
-LOTD_Misc_Quest03	|Breaking The Curse
+LOTD_Misc_Quest02	|The Hand of Glory
+LOTD_Misc_Quest03	|Breaking the Curse
 LOTD_Misc_Quest04	|Ongar's Kegbreaker
-LOTD_Misc_Quest05	|Back To The Drawing Board
+LOTD_Misc_Quest05	|Back to the Drawing Board
 LOTD_Misc_Quest06	|Lord's Mail
-LOTD_Misc_Quest07	|Guardians Of The Divine
+LOTD_Misc_Quest07	|Guardians of the Divine
