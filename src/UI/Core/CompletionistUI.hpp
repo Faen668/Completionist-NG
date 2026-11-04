@@ -205,6 +205,7 @@ namespace CompletionistUI
 		void DrawPinnedBar(IDataProvider& a_provider);
 		bool DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings);	// false when it should close
 		void DrawPlacement(IDataProvider& a_provider, UISettings& a_settings);
+		void DrawNearestOptions(IDataProvider& a_provider, UISettings& a_settings);
 		void DrawCellOptions(IDataProvider& a_provider, UISettings& a_settings);
 		void DrawCellList(IDataProvider& a_provider, const CellScan& a_scan);
 		void TogglePin(IDataProvider& a_provider, const Entry& a_entry);

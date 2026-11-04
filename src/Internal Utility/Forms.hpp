@@ -17,6 +17,12 @@ namespace CForms
 	inline constexpr RE::FormID PinnedItemShader = 0x810;  // Completionist_PinnedItemShader (EFSH)
 	inline constexpr RE::FormID PinnedItemSounds = 0x838;  // Completionist_PinnedItemSoundList (FLST)
 
+	// The optional shout that fires the sweep, one spell and word for each word shouted
+	inline constexpr RE::FormID SeekersWhisper = 0x8B0;                                   // Completionist_SeekersWhisperShout (SHOU)
+	inline constexpr RE::FormID SeekersWhisperWords[3] = { 0x8B1, 0x8B2, 0x8B3 };         // WOOP
+	inline constexpr RE::FormID SeekersWhisperSpells[3] = { 0x8B4, 0x8B5, 0x8B6 };        // SPEL
+	inline constexpr RE::FormID SeekersWhisperEffect = 0x8B7;                             // MGEF
+
 	template <class T>
 	T* Get(RE::FormID a_id)
 	{

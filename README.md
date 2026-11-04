@@ -21,7 +21,7 @@ For how to use it, settings and writing patches, see the **[wiki](https://github
 ## Features
 
 * **The Completionist window** (**Home**, or from the Journal's System tab on a controller): quests, collections, locations, shouts, kill counts and a completion log, with progress bars, find, pins and quest markers
-* **Cell Scanner** (**End**): what's still to be found in the cell you're in, as a window or on screen while you play
+* **Cell Scanner** (**End**): what's still to be found in the cell you're in, as a window or on screen while you play. A key can mark the nearest find with a wave that runs out over the world, and an optional shout, the Seeker's Whisper, does the same
 * **Item lists**: icons and a Completionist sort in SkyUI's inventory, container, barter and gift menus
 * **Crosshair tags**: "Need It!" / "Got It!" next to things you look at
 * **Notifications** in their own stack, placed where you want them

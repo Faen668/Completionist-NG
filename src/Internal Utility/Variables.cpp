@@ -113,6 +113,11 @@ namespace CVariables
 		settings.cellKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellKey", "0").c_str(), nullptr, 10));
 		settings.cellPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadButton", "0").c_str(), nullptr, 10));
 		settings.cellPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "CellGamepadModifier", "0").c_str(), nullptr, 10));
+		settings.nearestKey = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "NearestKey", "0").c_str(), nullptr, 10));
+		settings.nearestPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "NearestGamepadButton", "0").c_str(), nullptr, 10));
+		settings.nearestPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "NearestGamepadModifier", "0").c_str(), nullptr, 10));
+		settings.sweepEffect = flag("SweepEffect", "true");
+		settings.seekersWhisper = flag("SeekersWhisper", "false");
 		settings.cellPanel = flag("CellPanel", "true");
 		settings.cellOptionsOpen = flag("CellOptionsOpen", "true");
 		settings.cellHeight = flag("CellShowHeight", "true");
@@ -169,6 +174,11 @@ namespace CVariables
 		ini.SetValue(section, "CellKey", std::to_string(a_settings.cellKey).c_str());
 		ini.SetValue(section, "CellGamepadButton", std::to_string(a_settings.cellPadButton).c_str());
 		ini.SetValue(section, "CellGamepadModifier", std::to_string(a_settings.cellPadModifier).c_str());
+		ini.SetValue(section, "NearestKey", std::to_string(a_settings.nearestKey).c_str());
+		ini.SetValue(section, "NearestGamepadButton", std::to_string(a_settings.nearestPadButton).c_str());
+		ini.SetValue(section, "NearestGamepadModifier", std::to_string(a_settings.nearestPadModifier).c_str());
+		ini.SetValue(section, "SweepEffect", a_settings.sweepEffect ? "true" : "false");
+		ini.SetValue(section, "SeekersWhisper", a_settings.seekersWhisper ? "true" : "false");
 		ini.SetValue(section, "CellPanel", a_settings.cellPanel ? "true" : "false");
 		ini.SetValue(section, "CellOptionsOpen", a_settings.cellOptionsOpen ? "true" : "false");
 		ini.SetValue(section, "CellShowHeight", a_settings.cellHeight ? "true" : "false");

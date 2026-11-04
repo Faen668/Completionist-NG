@@ -1,4 +1,5 @@
 #include "UI/GameDataProvider.hpp"
+#include "UI/GameUI.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
 #include "Frameworks/Misc/CFramework_Locations.hpp"
 #include "Frameworks/Misc/CFramework_Dragons.hpp"
@@ -2445,6 +2446,105 @@ namespace CompletionistUI
 				}
 			}
 		});
+	}
+
+	//---------------------------------------------------
+	//-- Game Data ( Mark Nearest Cell Item ) -----------
+	//---------------------------------------------------
+
+	// Find, cancel, find the next nearest, cancel... Going somewhere else starts again from the nearest
+	NearestFinds GameDataProvider::MarkNearestCellItem(bool a_moveOn) {
+
+		ScanCellNow();
+
+		NearestFinds finds;
+		auto*        player = RE::PlayerCharacter::GetSingleton();
+		auto*        cell = player ? player->GetParentCell() : nullptr;
+		if (!cell) {
+			return finds;
+		}
+		const auto from = player->GetPosition();
+
+		const auto* world = player->GetWorldspace();
+		const auto  place = cell->IsInteriorCell() || !world ? cell->GetFormID() : world->GetFormID();
+		if (place != _nearestPlace) {
+			_nearestPlace = place;
+			_nearestCurrent.reset();
+			_nearestCancelled.clear();
+		}
+
+		// Still marked from the last press: this press cancels it. If it's been found or cleared, carry on
+		if (const auto current = std::exchange(_nearestCurrent, std::nullopt); current) {
+			const auto tracked = Tracker::Tracked();
+			if (std::ranges::any_of(tracked, [&](const Tracker::TrackedItem& a_item) { return !a_item.pinned && a_item.ref == current->first && a_item.form == current->second; })) {
+				Tracker::ClearMarker(current->first, current->second);
+				_nearestCancelled.push_back(*current);
+				{
+					std::scoped_lock lock(_lock);
+					for (auto& record : _cellRecords) {
+						if (record.item.refID == current->first && record.item.formID == current->second) {
+							record.item.marked = false;
+						}
+					}
+				}
+				if (!a_moveOn) {
+					GameUI::Notify({}, Translate("UI_Cell_NearestCleared"), ToastKind::kInfo);
+					finds.cleared = true;
+					return finds;
+				}
+			}
+		}
+
+		struct Candidate
+		{
+			RE::NiPoint3 place;
+			float        distance{ 0.0f };
+			CellItem     item;
+		};
+		std::vector<Candidate> candidates;
+		CellScan               scan;
+		{
+			std::scoped_lock lock(_lock);
+			scan = _cellScan;
+			for (const auto& record : _cellRecords) {
+				if (const auto ref = record.ref.get(); ref) {
+					const auto place = ref->GetPosition();
+					candidates.push_back({ place, place.GetDistance(from), record.item });
+				}
+			}
+		}
+		std::ranges::stable_sort(candidates, {}, &Candidate::distance);
+
+		const auto next = [&]() {
+			return std::ranges::find_if(candidates, [&](const Candidate& a_candidate) {
+				return !a_candidate.item.marked && std::ranges::find(_nearestCancelled, std::pair{ a_candidate.item.refID, a_candidate.item.formID }) == _nearestCancelled.end();
+			});
+		};
+		auto unmarked = next();
+		if (unmarked == candidates.end() && !_nearestCancelled.empty()) {
+			_nearestCancelled.clear();	// been through them all, back to the nearest
+			unmarked = next();
+		}
+		if (unmarked != candidates.end()) {
+			finds.marked = Tracker::MarkReference(RE::TESForm::LookupByID<RE::TESObjectREFR>(unmarked->item.refID), RE::TESForm::LookupByID(unmarked->item.formID), unmarked->item.name, unmarked->item.type);
+			if (finds.marked) {
+				_nearestCurrent = { unmarked->item.refID, unmarked->item.formID };
+				std::scoped_lock lock(_lock);
+				for (auto& record : _cellRecords) {
+					record.item.marked = record.item.marked || (record.item.refID == unmarked->item.refID && record.item.formID == unmarked->item.formID);
+				}
+			}
+			std::rotate(candidates.begin(), unmarked, unmarked + 1);
+		} else {
+			const auto* key = scan.excluded ? "UI_Cell_Excluded" : !candidates.empty() ? "UI_Cell_AllMarked" : scan.interior ? "UI_Cell_Nothing" : "UI_Cell_NothingInRange";
+			GameUI::Notify({}, Translate(key), ToastKind::kInfo);
+		}
+
+		finds.places.reserve(candidates.size());
+		for (const auto& candidate : candidates) {
+			finds.places.push_back(candidate.place);
+		}
+		return finds;
 	}
 
 	//---------------------------------------------------

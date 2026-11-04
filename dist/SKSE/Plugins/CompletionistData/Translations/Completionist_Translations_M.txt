@@ -403,6 +403,19 @@ UI_Setting_CellKey					|Cell Scanner key
 UI_SettingHint_CellKey				|Opens the Cell Scanner: what's still to collect in the cell you're in. Press Delete while it waits to leave it unbound.
 UI_Setting_CellPad					|Cell Scanner (controller)
 UI_SettingHint_CellPad				|Button combo that opens the Cell Scanner. Press Delete while it waits to leave it unbound.
+UI_Cell_NearestHeader				|Mark Nearest
+UI_Setting_NearestKey				|Mark nearest find key
+UI_SettingHint_NearestKey			|While you play, marks the nearest thing still to collect and puts an objective on it. Press it again to cancel that marker, then again for the next nearest. Press Delete while it waits to leave it unbound.
+UI_Setting_NearestPad				|Mark nearest find (controller)
+UI_SettingHint_NearestPad			|Button combo that marks the nearest thing still to collect while you play. Press it again to cancel that marker, then again for the next nearest. Press Delete while it waits to leave it unbound.
+UI_Setting_SweepEffect				|Scan sweep effect
+UI_SettingHint_SweepEffect			|When you mark the nearest find, a wave runs out from you over the world and things still to collect catch the light as it reaches them. Off still marks it, with no effect.
+UI_Cell_AllMarked					|Everything left to find here is already marked.
+UI_Setting_SeekersWhisper			|Learn the Seeker's Whisper shout
+UI_SettingHint_SeekersWhisper		|Gives you a quiet shout with all three words, no dragon souls needed: equip it in the Magic menu like any other. Each shout moves your marker to the next nearest find and always sends out the wave, reaching further with each word. Off takes the shout away again.
+UI_Shout_Name						|Seeker's Whisper
+UI_Shout_Description				|Sends a wave out from you that lights up what's still to collect and marks the nearest. More words reach further.
+UI_Cell_NearestCleared				|Marker cleared. Press again for the next nearest.
 UI_Setting_CellPanel				|Keep the Cell Scanner on screen
 UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. The Place UI elements button beside Position, on Settings > HUD & Notifications, moves it.
 UI_Setting_PlaceUI					|Place UI elements

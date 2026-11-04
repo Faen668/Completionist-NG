@@ -5,6 +5,14 @@
 
 namespace CompletionistUI
 {
+	// What the nearest-find key turned up, nearest first
+	struct NearestFinds
+	{
+		std::vector<RE::NiPoint3> places;
+		bool                      marked{ false };
+		bool                      cleared{ false };	// the press cancelled the last find instead
+	};
+
 	// Rebuild() on the game thread, getters on the render thread
 	class GameDataProvider final :
 		public IDataProvider,
@@ -41,6 +49,9 @@ namespace CompletionistUI
 		CellScan                  GetCellScan() override;
 		void                      RescanCell() override;
 		void                      MarkCellItem(const CellItem& a_item) override;
+		// Game thread. Each press in turn marks the nearest find, then cancels it, then marks the next nearest
+		// With a_moveOn there's no cancel step: the last find's marker moves straight to the next nearest
+		[[nodiscard]] NearestFinds MarkNearestCellItem(bool a_moveOn = false);
 		void                      ClearCellMarker(const CellItem& a_item) override;
 		void                      ClearCellMarkers() override;
 		void                      ExcludeCurrentCell() override;
@@ -94,6 +105,11 @@ namespace CompletionistUI
 		std::chrono::steady_clock::time_point _lastCellScan{};
 		std::atomic<bool>                     _cellScanQueued{ false };
 		std::atomic<bool>                     _pruneTracking{ false };
+
+		// The nearest-find key, game thread
+		std::optional<std::pair<RE::FormID, RE::FormID>> _nearestCurrent;	// reference, item
+		std::vector<std::pair<RE::FormID, RE::FormID>>   _nearestCancelled;
+		RE::FormID                                       _nearestPlace{ 0 };
 		GeneralSettings          _general;
 		std::vector<RecentEvent> _recent;
 		SettingsPages            _settingsBuilder;

@@ -1,5 +1,7 @@
 #include "UI/GameUI.hpp"
+#include "Internal Utility/Forms.hpp"
 #include "UI/Core/CompletionistUI.hpp"
+#include "UI/Core/SweepEffect.hpp"
 #include "UI/Core/Themes.hpp"
 #include "UI/GameDataProvider.hpp"
 #include "Frameworks/FrameworkMaster.hpp"
@@ -65,6 +67,18 @@ namespace CompletionistUI
 			std::atomic<std::uint32_t>                     cellKey{ 0 };
 			std::atomic<std::uint32_t>                     cellPadButton{ 0 };
 			std::atomic<std::uint32_t>                     cellPadModifier{ 0 };
+			std::atomic<std::uint32_t>                     nearestKey{ 0 };
+			std::atomic<std::uint32_t>                     nearestPadButton{ 0 };
+			std::atomic<std::uint32_t>                     nearestPadModifier{ 0 };
+			std::atomic<bool>                              sweepEffect{ true };
+			std::atomic<bool>                              seekersWhisper{ false };
+			std::atomic<bool>                              sweepActive{ false };
+			std::atomic<bool>                              shoutWaiting{ false };	// a new game's player has no cell yet
+			std::mutex                                     sweepLock;
+			SweepEffect::Wave                              sweepWave;
+			std::chrono::steady_clock::time_point          sweepStart{};
+			SweepEffect                                    sweep;
+			std::uint32_t                                  namedNearestKey{ 0xFFFFFFFF };
 			std::atomic<bool>                              cellPanel{ false };
 			Toasts                                         toasts;
 			std::atomic<bool>                              journalEntry{ true };
@@ -252,6 +266,168 @@ namespace CompletionistUI
 
 			SKSE::GetTaskInterface()->AddUITask([]() { GameUI::Close(); });
 		}
+
+		//---------------------------------------------------
+		//-- Game UI ( Mark Nearest ) -----------------------
+		//---------------------------------------------------
+
+		// Game thread. a_shoutWords is how many words of the shout did it, none for the key
+		void MarkNearest(int a_shoutWords = 0) {
+
+			auto& state = GetState();
+			const auto finds = state.provider.MarkNearestCellItem(a_shoutWords > 0);
+			if (finds.cleared) {
+				state.sweepActive = false;
+				return;
+			}
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player || (a_shoutWords == 0 && !state.sweepEffect)) {	// the shout always sweeps
+				return;
+			}
+
+			const auto from = player->GetPosition();
+			SweepEffect::Wave wave;
+			wave.origin = { from.x, from.y, from.z + 20.0f };	// about the ankles, so it spreads over the ground
+			wave.firstMarked = finds.marked;
+			const float nearest = finds.places.empty() ? 0.0f : finds.places.front().GetDistance(from);
+			if (a_shoutWords > 0) {
+				// About a room, a cave, then as far as the key goes. Always far enough to light up the find
+				constexpr float reach[3] = { 8000.0f, 16000.0f, 40000.0f };
+				wave.reach = std::max(reach[std::clamp(a_shoutWords, 1, 3) - 1], nearest * 1.15f);
+			} else {
+				wave.reach = SweepEffect::ReachFor(nearest);
+			}
+			wave.items.reserve(finds.places.size());
+			for (const auto& place : finds.places) {
+				wave.items.push_back({ place.x, place.y, place.z });
+			}
+
+			std::scoped_lock lock(state.sweepLock);
+			state.sweepWave = std::move(wave);
+			state.sweepStart = std::chrono::steady_clock::now();
+			state.sweepActive = true;
+		}
+
+		//---------------------------------------------------
+		//-- Shout ( Shake ) --------------------------------
+		//---------------------------------------------------
+
+		// The game's own camera shake, only just there as it's a whisper
+		void ShoutShake(int a_words) {
+
+			auto* vm = CForms::VM();
+			if (!vm) {
+				return;
+			}
+			const float strength = 0.025f + a_words * 0.015f;
+			const float seconds = 0.3f + a_words * 0.1f;
+
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> none;
+			auto* camera = RE::MakeFunctionArguments(static_cast<RE::TESObjectREFR*>(nullptr), static_cast<float>(strength), static_cast<float>(seconds));
+			vm->DispatchStaticCall("Game", "ShakeCamera", camera, none);
+			delete camera;
+		}
+
+		//---------------------------------------------------
+		//-- Shout ( Give Or Take ) -------------------------
+		//---------------------------------------------------
+
+		// Game thread. All three words, free of dragon souls, while the setting is on
+		void SyncShout() {
+
+			auto& state = GetState();
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			auto* shout = CForms::Get<RE::TESShout>(CForms::SeekersWhisper);
+			auto* vm = CForms::VM();
+			if (!player || !shout || !vm) {
+				return;
+			}
+			if (!player->GetParentCell()) {
+				state.shoutWaiting = true;
+				return;
+			}
+
+			// The game holds these for this session only, and the translation can change them
+			const auto name = state.provider.Translate("UI_Shout_Name");
+			shout->fullName = name.c_str();
+			for (const auto id : CForms::SeekersWhisperSpells) {
+				if (auto* spell = CForms::Get<RE::SpellItem>(id)) {
+					spell->fullName = name.c_str();
+				}
+			}
+			if (auto* effect = CForms::Get<RE::EffectSetting>(CForms::SeekersWhisperEffect)) {
+				effect->fullName = name.c_str();
+				effect->magicItemDescription = state.provider.Translate("UI_Shout_Description").c_str();
+			}
+
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> none;
+			const bool has = player->HasShout(shout);
+			if (state.seekersWhisper && !has) {
+				player->AddShout(shout);
+				for (const auto id : CForms::SeekersWhisperWords) {
+					auto* word = CForms::Get<RE::TESWordOfPower>(id);
+					if (!word) {
+						continue;
+					}
+					auto* teach = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
+					vm->DispatchStaticCall("Game", "TeachWord", teach, none);
+					delete teach;
+					auto* unlock = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
+					vm->DispatchStaticCall("Game", "UnlockWord", unlock, none);
+					delete unlock;
+				}
+			} else if (!state.seekersWhisper && has) {
+				auto* unequip = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
+				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "UnequipShout", unequip, none);
+				delete unequip;
+				auto* remove = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
+				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "RemoveShout", remove, none);
+				delete remove;
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Shout ( Heard ) --------------------------------
+		//---------------------------------------------------
+
+		class ShoutListener final :
+			public RE::BSTEventSink<RE::TESSpellCastEvent>,
+			public RE::BSTEventSink<RE::TESCellFullyLoadedEvent>
+		{
+		public:
+			static ShoutListener* Get() {
+
+				static ShoutListener listener;
+				return &listener;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESCellFullyLoadedEvent*, RE::BSTEventSource<RE::TESCellFullyLoadedEvent>*) override {
+
+				if (GetState().shoutWaiting.exchange(false)) {
+					SKSE::GetTaskInterface()->AddTask([]() { SyncShout(); });
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESSpellCastEvent* a_event, RE::BSTEventSource<RE::TESSpellCastEvent>*) override {
+
+				if (!a_event || !a_event->spell || a_event->object.get() != RE::PlayerCharacter::GetSingleton()) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				for (int i = 0; i < 3; ++i) {
+					const auto* spell = CForms::Get<RE::SpellItem>(CForms::SeekersWhisperSpells[i]);
+					if (spell && spell->GetFormID() == a_event->spell) {
+						const int words = i + 1;
+						SKSE::GetTaskInterface()->AddTask([words]() {
+							ShoutShake(words);
+							MarkNearest(words);
+						});
+						break;
+					}
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
 
 		//---------------------------------------------------
 		//-- Menu ( The window as a game menu ) -----------
@@ -448,6 +624,16 @@ namespace CompletionistUI
 						a_state.padIgnored = a_state.padHeld;
 						GameUI::Open();
 					}
+					return;
+				}
+
+				// Nearest find key and combo, while playing
+				const auto nearestModifier = a_state.nearestPadModifier.load();
+				const bool nearestKeyPress = device == RE::INPUT_DEVICE::kKeyboard && a_state.nearestKey != 0 && code == a_state.nearestKey;
+				const bool nearestPadPress = device == RE::INPUT_DEVICE::kGamepad && a_state.nearestPadButton != 0 && code == a_state.nearestPadButton && (nearestModifier == 0 || (heldBefore & nearestModifier) != 0);
+				if ((nearestKeyPress || nearestPadPress) && a_button.IsDown() && !a_state.open && GameUI::OverlayAllowed()) {
+					a_state.padHeldBack = 0;
+					SKSE::GetTaskInterface()->AddTask([]() { MarkNearest(); });
 					return;
 				}
 
@@ -764,11 +950,56 @@ namespace CompletionistUI
 					a_state.pendingSave = a_state.settings;
 				}
 			}
+			if (a_state.settings.capturingNearestKey) {
+				auto expected = captureIdle;
+				a_state.capture.compare_exchange_strong(expected, captureWaiting);
+
+				const auto result = a_state.capture.load();
+				if (result >= 0 || result == captureCancelled) {
+					if (result >= 0) {
+						a_state.settings.nearestKey = static_cast<std::uint32_t>(result) == deleteKey ? 0 : static_cast<std::uint32_t>(result);
+					}
+					a_state.settings.capturingNearestKey = false;
+					a_state.capture = captureIdle;
+					std::scoped_lock lock(a_state.saveLock);
+					a_state.pendingSave = a_state.settings;
+				}
+			}
+			if (a_state.settings.capturingNearestPad) {
+				std::int64_t expected = captureIdle;
+				a_state.padCapture.compare_exchange_strong(expected, captureWaiting);
+
+				const auto result = a_state.padCapture.load();
+				if (result >= 0 || result == captureCancelled || result == captureUnbind) {
+					if (result >= 0) {
+						a_state.settings.nearestPadButton = static_cast<std::uint32_t>(result & 0xFFFF);
+						a_state.settings.nearestPadModifier = static_cast<std::uint32_t>(result >> 16);
+					} else if (result == captureUnbind) {
+						a_state.settings.nearestPadButton = 0;
+						a_state.settings.nearestPadModifier = 0;
+					}
+					a_state.settings.capturingNearestPad = false;
+					a_state.padCapture = captureIdle;
+					std::scoped_lock lock(a_state.saveLock);
+					a_state.pendingSave = a_state.settings;
+				}
+			}
 			a_state.cellKey = a_state.settings.cellKey;
 			a_state.cellPadButton = a_state.settings.cellPadButton;
 			a_state.cellPadModifier = a_state.settings.cellPadModifier;
+			a_state.nearestKey = a_state.settings.nearestKey;
+			a_state.nearestPadButton = a_state.settings.nearestPadButton;
+			a_state.nearestPadModifier = a_state.settings.nearestPadModifier;
+			a_state.sweepEffect = a_state.settings.sweepEffect;
+			if (a_state.seekersWhisper.exchange(a_state.settings.seekersWhisper) != a_state.settings.seekersWhisper) {
+				SKSE::GetTaskInterface()->AddTask([]() { SyncShout(); });
+			}
 			a_state.cellPanel = a_state.settings.cellPanel;
 			a_state.journalEntry = a_state.settings.journalEntry;
+			if (a_state.settings.nearestKey != a_state.namedNearestKey) {
+				a_state.settings.nearestKeyName = KeyName(a_state.settings.nearestKey);
+				a_state.namedNearestKey = a_state.settings.nearestKey;
+			}
 			if (a_state.settings.cellKey != a_state.namedCellKey) {
 				a_state.settings.cellKeyName = KeyName(a_state.settings.cellKey);
 				a_state.namedCellKey = a_state.settings.cellKey;
@@ -783,6 +1014,47 @@ namespace CompletionistUI
 			if (a_state.menu.ConsumeSettingsChanged()) {
 				std::scoped_lock lock(a_state.saveLock);
 				a_state.pendingSave = a_state.settings;
+			}
+		}
+
+		//---------------------------------------------------
+		//-- Game UI ( Draw Sweep ) -------------------------
+		//---------------------------------------------------
+
+		void DrawSweep(State& a_state) {
+
+			SweepEffect::Wave wave;
+			{
+				std::scoped_lock lock(a_state.sweepLock);
+				wave = a_state.sweepWave;
+				wave.elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - a_state.sweepStart).count();
+			}
+			if (wave.elapsed >= SweepEffect::duration) {
+				a_state.sweepActive = false;
+				return;
+			}
+
+			auto* camera = RE::Main::WorldRootCamera();
+			auto* renderer = RE::BSGraphics::Renderer::GetSingleton();
+			if (!camera || !renderer) {
+				a_state.sweepActive = false;
+				return;
+			}
+			// The depth copy the game keeps of the frame's solid geometry
+			auto* depth = reinterpret_cast<ID3D11ShaderResourceView*>(renderer->GetDepthStencilData().depthStencils[RE::RENDER_TARGETS_DEPTHSTENCIL::kPOST_ZPREPASS_COPY].depthSRV);
+
+			SweepEffect::View view;
+			std::memcpy(view.worldToClip, camera->GetRuntimeData().worldToCam, sizeof(view.worldToClip));
+			view.camera = { camera->world.translate.x, camera->world.translate.y, camera->world.translate.z };
+			view.nearPlane = camera->GetRuntimeData2().viewFrustum.fNear;
+			view.farPlane = camera->GetRuntimeData2().viewFrustum.fFar;
+
+			ComPtr<ID3D11Texture2D>        backBuffer;
+			ComPtr<ID3D11RenderTargetView> target;
+			if (FAILED(a_state.swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer))) || FAILED(a_state.device->CreateRenderTargetView(backBuffer.Get(), nullptr, &target)) ||
+				!a_state.sweep.Draw(a_state.device, a_state.context, backBuffer.Get(), target.Get(), depth, view, wave)) {
+				INFO("In-game UI: the sweep couldn't be drawn, the marker is still placed");
+				a_state.sweepActive = false;
 			}
 		}
 
@@ -937,9 +1209,21 @@ namespace CompletionistUI
 			state.settings.cellPadButton = 0;
 			state.settings.cellPadModifier = 0;
 		}
+		if (state.settings.nearestPadButton != 0 && !IsSafePadBinding(state.settings.nearestPadModifier, state.settings.nearestPadButton)) {
+			INFO("In-game UI: nearest find buttons {:X}+{:X} clash with the window's own; unbound", state.settings.nearestPadModifier, state.settings.nearestPadButton);
+			state.settings.nearestPadButton = 0;
+			state.settings.nearestPadModifier = 0;
+		}
 		state.openKey = state.settings.openKey;
 		state.openPadButton = state.settings.openPadButton;
 		state.openPadModifier = state.settings.openPadModifier;
+		state.nearestKey = state.settings.nearestKey;
+		state.nearestPadButton = state.settings.nearestPadButton;
+		state.nearestPadModifier = state.settings.nearestPadModifier;
+		state.sweepEffect = state.settings.sweepEffect;
+		state.seekersWhisper = state.settings.seekersWhisper;
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESSpellCastEvent>(ShoutListener::Get());
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESCellFullyLoadedEvent>(ShoutListener::Get());
 		state.cellKey = state.settings.cellKey;
 		state.cellPadButton = state.settings.cellPadButton;
 		state.cellPadModifier = state.settings.cellPadModifier;
@@ -1111,8 +1395,13 @@ namespace CompletionistUI
 		_OnPresent(a_arg);
 
 		auto& state = GetState();
-		const bool overlay = !state.open && (state.cellPanel || state.toasts.Active()) && OverlayAllowed();
-		if (!state.open && !overlay) {
+		const bool playing = !state.open && OverlayAllowed();
+		const bool sweeping = state.sweepActive && playing;
+		if (state.sweepActive && !playing) {
+			state.sweepActive = false;	// a menu cut it short
+		}
+		const bool overlay = playing && (state.cellPanel || state.toasts.Active());
+		if (!state.open && !overlay && !sweeping) {
 			state.printScreen = false;
 			return;
 		}
@@ -1121,7 +1410,13 @@ namespace CompletionistUI
 			return;
 		}
 
-		RenderFrame(state, overlay);
+		// Under the panel and notifications
+		if (sweeping) {
+			DrawSweep(state);
+		}
+		if (state.open || overlay) {
+			RenderFrame(state, overlay);
+		}
 	}
 
 	//---------------------------------------------------
@@ -1131,6 +1426,7 @@ namespace CompletionistUI
 	void GameUI::OnGameLoaded() {
 
 		GetState().provider.OnGameLoaded();
+		SyncShout();
 	}
 
 	//---------------------------------------------------

@@ -329,6 +329,7 @@ namespace CompletionistUI
 				Choice("State_CellScanner_Pinning_Sound", "UI_Cell_Sound", "CellScanner_Pinning_Sound_Choice", Keys("$CellScannerSoundList", 3), "$CellScanner_Pinning_Sound_Info", pinning),
 				Dynamic("pinnedItem", pinning),
 				Button("CellScanner_Setting_Pinning_ClearPin", "", "UI_Cell_ClearPin", "clearPin", pinning),
+				Header("UI_Cell_NearestHeader"),	// drawn by DrawNearestOptions
 			};
 			return page;
 		}

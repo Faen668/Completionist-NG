@@ -4875,6 +4875,51 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Cell Options ) ---------
 	//---------------------------------------------------
 
+	// The mark nearest find key, its controller combo and the sweep
+	void Menu::DrawNearestOptions(IDataProvider& a_provider, UISettings& a_settings) {
+
+		const auto& palette = Themes::GetPalette();
+		const float fontSize = ImGui::GetFontSize();
+		const auto  unbound = a_provider.Translate("UI_Setting_Unbound");
+
+		const auto hint = [&](const char* a_key) {
+			if (ImGui::IsItemHovered() || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible)) {
+				ImGui::SetTooltip("%s", a_provider.Translate(a_key).c_str());
+			}
+		};
+		// Each on its own row: the panel is too narrow for them side by side
+		const auto  keyLabel = a_provider.Translate("UI_Setting_NearestKey");
+		const auto  padLabel = a_provider.Translate("UI_Setting_NearestPad");
+		const float cellX = ImGui::GetCursorPosX();
+		const float cellWidth = ImGui::GetContentRegionAvail().x - fontSize * 0.5f;
+		const float labelWidth = std::max(ImGui::CalcTextSize(keyLabel.c_str()).x, ImGui::CalcTextSize(padLabel.c_str()).x) + fontSize;
+		const float controlX = cellX + std::max(labelWidth, cellWidth * 0.4f);
+
+		const auto binding = [&](const std::string& a_label, const char* a_hint, const std::string& a_text, bool& a_capturing) {
+			ImGui::AlignTextToFramePadding();
+			ImGui::TextColored(palette.text, "%s", a_label.c_str());
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(controlX);
+			if (ThemedButton((a_text + "##" + a_hint).c_str(), cellX + cellWidth - controlX)) {
+				a_capturing = true;
+			}
+			hint(a_hint);
+		};
+
+		binding(keyLabel, "UI_SettingHint_NearestKey", a_settings.capturingNearestKey ? a_provider.Translate("UI_Setting_PressKey") : a_settings.nearestKey ? a_settings.nearestKeyName : unbound, a_settings.capturingNearestKey);
+		binding(padLabel, "UI_SettingHint_NearestPad", a_settings.capturingNearestPad ? a_provider.Translate("UI_Setting_PressButtons") : a_settings.nearestPadButton ? GamepadComboName(a_settings.nearestPadModifier, a_settings.nearestPadButton, a_settings.padStyle) : unbound, a_settings.capturingNearestPad);
+		if (MarkerToggle("##SweepEffect", a_settings.sweepEffect, a_provider.Translate("UI_Setting_SweepEffect").c_str())) {
+			_settingsChanged = true;
+		}
+		hint("UI_SettingHint_SweepEffect");
+
+		ImGui::Spacing();
+		if (MarkerToggle("##SeekersWhisper", a_settings.seekersWhisper, a_provider.Translate("UI_Setting_SeekersWhisper").c_str())) {
+			_settingsChanged = true;
+		}
+		hint("UI_SettingHint_SeekersWhisper");
+	}
+
 	// Scanner options
 	void Menu::DrawCellOptions(IDataProvider& a_provider, UISettings& a_settings) {
 
@@ -4906,8 +4951,12 @@ namespace CompletionistUI
 		}
 
 		std::vector<std::pair<std::string, std::vector<SettingItem*>>> sections;
+		int nearestSection = -1;	// drawn by hand, its settings are the window's own
 		for (auto& item : page->columns[0]) {
 			if (item.kind == SettingKind::kHeader) {
+				if (item.label == "UI_Cell_NearestHeader") {
+					nearestSection = static_cast<int>(sections.size());
+				}
 				sections.emplace_back(a_provider.Translate(item.label), std::vector<SettingItem*>{});
 			} else if (!sections.empty() && item.kind != SettingKind::kSpacer) {
 				sections.back().second.push_back(std::addressof(item));
@@ -4944,6 +4993,11 @@ namespace CompletionistUI
 				}
 			}
 			ImGui::PopID();
+		}
+
+		if (_cellOptionsSection == nearestSection) {
+			DrawNearestOptions(a_provider, a_settings);
+			return;
 		}
 
 		auto& items = sections[static_cast<std::size_t>(_cellOptionsSection)].second;
@@ -9884,7 +9938,9 @@ namespace CompletionistUI
 			if (ThemedButton(a_provider.Translate("UI_Setting_Reset").c_str(), controlWidth)) {
 				const auto keyName = settings.openKeyName;
 				const auto cellKeyName = settings.cellKeyName;
+				const auto nearestKeyName = settings.nearestKeyName;
 				settings = UISettings{};
+				settings.nearestKeyName = nearestKeyName;
 				settings.openKeyName = keyName;
 				settings.cellKeyName = cellKeyName;
 				settings.tourOffered = true;

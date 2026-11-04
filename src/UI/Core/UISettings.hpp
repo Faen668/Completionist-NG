@@ -77,6 +77,11 @@ namespace CompletionistUI
 		std::uint32_t cellKey{ 0 };	// unbound
 		std::uint32_t cellPadButton{ 0 };
 		std::uint32_t cellPadModifier{ 0 };
+		std::uint32_t nearestKey{ 0 };	// unbound: marks the nearest find
+		std::uint32_t nearestPadButton{ 0 };
+		std::uint32_t nearestPadModifier{ 0 };
+		bool          sweepEffect{ true };	// the wave that runs out when it's pressed
+		bool          seekersWhisper{ false };	// gives the player the shout that does the same, always with the wave
 		bool          cellPanel{ true };
 		bool          cellOptionsOpen{ true };
 		bool          cellHeight{ true };
@@ -95,6 +100,9 @@ namespace CompletionistUI
 		std::string cellKeyName{};
 		bool        capturingCellKey{ false };
 		bool        capturingCellPad{ false };
+		std::string nearestKeyName{};
+		bool        capturingNearestKey{ false };
+		bool        capturingNearestPad{ false };
 
 		// Key capture for settings rows
 		static constexpr std::int32_t captureNone = -2;
