@@ -412,7 +412,7 @@ UI_Setting_SweepEffect				|Scan sweep effect
 UI_SettingHint_SweepEffect			|When you mark the nearest find, a wave runs out from you over the world and things still to collect catch the light as it reaches them. Off still marks it, with no effect.
 UI_Cell_AllMarked					|Everything left to find here is already marked.
 UI_Setting_SeekersWhisper			|Learn the Seeker's Whisper shout
-UI_SettingHint_SeekersWhisper		|Gives you a quiet shout with all three words, no dragon souls needed: equip it in the Magic menu like any other. Each shout moves your marker to the next nearest find and always sends out the wave, reaching further with each word. Off takes the shout away again.
+UI_SettingHint_SeekersWhisper		|Gives you a quiet shout with all three words, no dragon souls needed: equip it in the Magic menu and use it like any other. Each shout moves your marker straight to the next nearest find and sends out the wave, even with Scan sweep effect off. Hold it longer for more words: about 115 m, 230 m or 570 m, with a longer cooldown each time. Off takes the shout away again.
 UI_Shout_Name						|Seeker's Whisper
 UI_Shout_Description				|Sends a wave out from you that lights up what's still to collect and marks the nearest. More words reach further.
 UI_Cell_NearestCleared				|Marker cleared. Press again for the next nearest.
