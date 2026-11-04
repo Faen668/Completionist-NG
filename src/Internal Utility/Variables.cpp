@@ -119,7 +119,6 @@ namespace CVariables
 		settings.sweepEffect = flag("SweepEffect", "true");
 		settings.seekersWhisper = flag("SeekersWhisper", "false");
 		settings.cellPanel = flag("CellPanel", "true");
-		settings.cellOptionsOpen = flag("CellOptionsOpen", "true");
 		settings.cellHeight = flag("CellShowHeight", "true");
 		settings.cellX = number("CellPanelX", "1", 0.0f, 1.0f);
 		settings.cellY = number("CellPanelY", "0.14", 0.0f, 1.0f);
@@ -180,7 +179,6 @@ namespace CVariables
 		ini.SetValue(section, "SweepEffect", a_settings.sweepEffect ? "true" : "false");
 		ini.SetValue(section, "SeekersWhisper", a_settings.seekersWhisper ? "true" : "false");
 		ini.SetValue(section, "CellPanel", a_settings.cellPanel ? "true" : "false");
-		ini.SetValue(section, "CellOptionsOpen", a_settings.cellOptionsOpen ? "true" : "false");
 		ini.SetValue(section, "CellShowHeight", a_settings.cellHeight ? "true" : "false");
 		ini.SetValue(section, "CellPanelX", fmt::format("{:.3f}", a_settings.cellX).c_str());
 		ini.SetValue(section, "CellPanelY", fmt::format("{:.3f}", a_settings.cellY).c_str());

@@ -83,7 +83,6 @@ namespace CompletionistUI
 		bool          sweepEffect{ true };	// the wave that runs out when it's pressed
 		bool          seekersWhisper{ false };	// gives the player the shout that does the same, always with the wave
 		bool          cellPanel{ true };
-		bool          cellOptionsOpen{ true };
 		bool          cellHeight{ true };
 		float         cellX{ 1.0f };	// across the room the panel has, 1 against the right edge
 		float         cellY{ 0.14f };	// its top, down the screen

@@ -86,8 +86,7 @@ namespace CompletionistUI
 			Toasts                                         toasts;
 			std::atomic<bool>                              journalEntry{ true };
 			double                                         toastClock{ 0.0 };
-			std::atomic<std::int32_t>                      requestedView{ -1 };	// -1 none, 0 main, 1 cell
-			std::atomic<bool>                              inCellView{ false };
+			std::atomic<bool>                              cellPanelToggle{ false };	// the key was pressed, for the render thread
 			std::uint32_t                                  namedCellKey{ 0xFFFFFFFF };
 			std::atomic<bool>                              usingGamepad{ false };
 			std::atomic<bool>                              printScreen{ false };
@@ -641,33 +640,22 @@ namespace CompletionistUI
 				const bool padToggle = device == RE::INPUT_DEVICE::kGamepad && a_state.openPadButton != 0 && code == a_state.openPadButton && (modifier == 0 || (heldBefore & modifier) != 0);
 				if ((keyToggle || padToggle) && a_button.IsDown()) {
 					a_state.padHeldBack = 0;
-					if (a_state.open && a_state.inCellView) {
-						a_state.requestedView = 0;
-					} else if (a_state.open) {
+					if (a_state.open) {
 						GameUI::Close();
 					} else if (GameUI::CanOpen()) {
-						a_state.requestedView = 0;
 						a_state.padIgnored = a_state.padHeld;
 						GameUI::Open();
 					}
 					return;
 				}
 
-				// Cell Scanner key and combo
+				// Cell Scanner overlay key and combo, while playing
 				const auto cellModifier = a_state.cellPadModifier.load();
 				const bool cellKeyToggle = device == RE::INPUT_DEVICE::kKeyboard && a_state.cellKey != 0 && code == a_state.cellKey;
 				const bool cellPadToggle = device == RE::INPUT_DEVICE::kGamepad && a_state.cellPadButton != 0 && code == a_state.cellPadButton && (cellModifier == 0 || (heldBefore & cellModifier) != 0);
-				if ((cellKeyToggle || cellPadToggle) && a_button.IsDown()) {
+				if ((cellKeyToggle || cellPadToggle) && a_button.IsDown() && !a_state.open && GameUI::OverlayAllowed()) {
 					a_state.padHeldBack = 0;
-					if (a_state.open && a_state.inCellView) {
-						GameUI::Close();
-					} else if (a_state.open) {
-						a_state.requestedView = 1;
-					} else if (GameUI::CanOpen()) {
-						a_state.requestedView = 1;
-						a_state.padIgnored = a_state.padHeld;
-						GameUI::Open();
-					}
+					a_state.cellPanelToggle = true;
 					return;
 				}
 
@@ -1125,11 +1113,6 @@ namespace CompletionistUI
 					a_state.menu.OpenPage({});
 				}
 			}
-			if (const auto view = a_state.requestedView.exchange(-1); !a_overlay && view >= 0) {
-				a_state.menu.ShowCellView(view == 1);
-			}
-			a_state.inCellView = a_state.menu.CellView();
-
 			const float scale = Menu::ComputeScale(a_state.settings, height);
 			if (scale != a_state.appliedScale || a_state.settings.theme != a_state.appliedTheme) {
 				Themes::BuildFonts(FontsFor(a_state.settings.theme), scale);
@@ -1330,7 +1313,6 @@ namespace CompletionistUI
 		if (state.open || !CanOpen()) {
 			return;
 		}
-		state.requestedView = 0;
 		state.padIgnored = state.padHeld;
 		Open();
 	}
@@ -1446,6 +1428,12 @@ namespace CompletionistUI
 		}
 		if (sweeping && !state.sweepFollowQueued.exchange(true)) {
 			SKSE::GetTaskInterface()->AddTask([]() { FollowSweepFinds(); });
+		}
+		if (state.cellPanelToggle.exchange(false)) {
+			state.settings.cellPanel = !state.settings.cellPanel;
+			state.cellPanel = state.settings.cellPanel;
+			// Saved now: pending saves wait for the window to close
+			SKSE::GetTaskInterface()->AddTask([settings = state.settings]() { CVariables::VariablesAPI::SaveUISettings(settings); });
 		}
 		const bool overlay = playing && (state.cellPanel || state.toasts.Active());
 		if (!state.open && !overlay && !sweeping) {

@@ -65,6 +65,7 @@ namespace CompletionistUI
 		// Harness
 		void ForcePadHints(bool a_force) noexcept { _forcePadHints = a_force; }
 		void OpenPage(std::string_view a_id);
+		void OpenCellScanner();
 		void OpenSettingsTab(std::string_view a_id) { _settingsTab = a_id; }
 		// Harness
 		void OpenColourPicker(std::string_view a_key)
@@ -87,6 +88,7 @@ namespace CompletionistUI
 		[[nodiscard]] bool ConsumeSettingsChanged() noexcept { return std::exchange(_settingsChanged, false); }
 
 		static constexpr std::string_view settingsPage = "#settings";
+		static constexpr int              cellFinds = -1;	// the Cell Scanner section with the list
 		static constexpr std::string_view killsPage = "#kills";
 		static constexpr std::string_view findPage = "#find";
 
@@ -94,13 +96,13 @@ namespace CompletionistUI
 		void OpenFind(std::string_view a_text);
 
 		// Cell Scanner window
-		void ShowCellView(bool a_cell) noexcept { _cellView = a_cell; }
 		// Placing the Cell Scanner panel and the notifications
 		void StartPlacement() noexcept { _placing = true; }
 		void SetHideCompleted(bool a_hide) noexcept { _hideCompleted = a_hide; }
 		[[nodiscard]] bool Placing() const noexcept { return _placing; }
 		void ShowCellOptionsSection(int a_section) noexcept { _cellOptionsSection = a_section; }	// Harness
-		[[nodiscard]] bool CellView() const noexcept { return _cellView; }
+		[[nodiscard]] int CellOptionsSection() const noexcept { return _cellOptionsSection; }	// Harness
+		[[nodiscard]] const std::string& SettingsTab() const noexcept { return _settingsTab; }	// Harness
 		// On screen panel, no input. With notifications joined it frames them too, a_toasts the stack's size;
 		// a_dim greys it, for placing
 		struct CellPanelLayout
@@ -182,7 +184,13 @@ namespace CompletionistUI
 			int           columns{ 1 };
 			int           count{ 0 };
 			bool          visible{ false };
+			int           group{ 0 };	// routed by these rather than by what's nearest on screen
+			bool          selected{ false };	// the tab or section showing
 		};
+		static constexpr int navTabs = 1;		// the settings tabs
+		static constexpr int navSections = 2;	// the Cell Scanner's sections
+		static constexpr int navColumn = 3;		// a section's controls, top to bottom
+		int                  _navGroup{ 0 };	// what's being drawn is one of these
 		void RouteNavigation();
 		void RecordSpot(std::vector<NavSpot>& a_spots, int a_section, int a_index, int a_columns, int a_count);
 		void ScrollFocusWithRightStick();
@@ -191,7 +199,7 @@ namespace CompletionistUI
 		void TrackInputDevice();
 		[[nodiscard]] bool  PadHintsShown() const noexcept { return _padActive || _forcePadHints || _tourPadHints; }
 		[[nodiscard]] float PadHintsHeight() const;
-		void                DrawPadHints(IDataProvider& a_provider, bool a_cellWindow = false);
+		void                DrawPadHints(IDataProvider& a_provider);
 		float UpdateNavigationOpen();
 		void  DrawNavigationGrip(float a_gap, float a_footer);
 		void DrawHeader(IDataProvider& a_provider, bool& a_open);
@@ -203,10 +211,12 @@ namespace CompletionistUI
 		void DrawJournal(IDataProvider& a_provider, const Page& a_page);
 		void DrawKills(IDataProvider& a_provider, const std::vector<KillRecord>& a_records, bool a_dragons = false);	// dragons: the Dragons page's tab
 		void DrawPinnedBar(IDataProvider& a_provider);
-		bool DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings);	// false when it should close
+		void DrawCellScanner(IDataProvider& a_provider);	// the top of Settings' Cell Scanner tab
+		void DrawCellTabs(IDataProvider& a_provider);
+		// The list of finds has the room to itself
+		[[nodiscard]] bool DescriptionHidden() const { return _selectedPage == settingsPage && _settingsTab == "cellscanner" && _cellOptionsSection == cellFinds; }
+		void DescribeItem(const std::string& a_label, const std::string& a_info);	// the last item's hint, in the description panel
 		void DrawPlacement(IDataProvider& a_provider, UISettings& a_settings);
-		void DrawNearestOptions(IDataProvider& a_provider, UISettings& a_settings);
-		void DrawCellOptions(IDataProvider& a_provider, UISettings& a_settings);
 		void DrawCellList(IDataProvider& a_provider, const CellScan& a_scan);
 		void TogglePin(IDataProvider& a_provider, const Entry& a_entry);
 		void ToggleLocationMarker(IDataProvider& a_provider, const Entry& a_entry);
@@ -342,7 +352,6 @@ namespace CompletionistUI
 		std::string            _tourPage;	// the page the list steps show
 		std::string            _tourReturnPage;	// put back when it ends
 		std::string            _tourReturnTab;
-		bool                   _tourReturnCell{ false };
 		bool                   _tourReturnFolded{ false };
 		int                    _tourFocus{ 2 };	// the card's button the d-pad is on: 0 leave, 1 back, 2 on
 		bool                   _tourKeyed{ false };	// moved with keys or the pad, so the focus shows
@@ -366,9 +375,7 @@ namespace CompletionistUI
 		std::vector<KillRecord>                       _dragonKills;
 		PinList                                       _pins;
 		std::uint32_t                                 _shownMarker{ 0 };
-		bool                                          _cellView{ false };
-		int                                           _cellOptionsSection{ 0 };	// Searching, Filters, Item Pinning
-		std::unordered_map<std::string, std::int32_t> _pendingCellNumbers;
+		int                                           _cellOptionsSection{ cellFinds };	// Searching, Filters, Item Pinning
 		std::uint32_t                                 _scrollToForm{ 0 };
 		std::string                                   _killKey;
 		int                                           _killSort{ 0 };	// kills, name, assists
@@ -409,6 +416,7 @@ namespace CompletionistUI
 		bool                  _justOpened{ true };
 		bool                  _focusSidebar{ false };
 		bool                  _focusPage{ false };	// sidebar folded at opening: the page takes the focus
+		bool                  _tabKeysTaken{ false };	// L2 or R2 moved between the Cell Scanner's own tabs
 		std::size_t           _controlsPastTabs{ 0 };	// where a settings tab's own controls start
 		bool                  _focusPageShown{ false };	// with the focus box showing, as after switching tabs with the pad
 		std::uint32_t         _revealFocus{ 0 };	// that focus, shown by the first press

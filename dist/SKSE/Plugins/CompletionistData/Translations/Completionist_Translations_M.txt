@@ -379,10 +379,10 @@ UI_Pin_Hint					|marked when you're in the same cell as it
 -- UI: Cell (UI_Cell_*)
 ----------------------------------------------------------------------------
 UI_Cell_Title			|Cell Scanner
-UI_Cell_Back			|Completionist
 UI_Cell_Count{}			|{} to find
-UI_Cell_Options			|Scanner options
-UI_Cell_OptionsHint		|searching, exclusions, item pinning and mark nearest
+UI_Cell_Finds			|Finds
+UI_Cell_ToolsHeader		|Scanner
+UI_Cell_ThisCell		|This cell
 UI_Cell_Scanning		|Scanning...
 UI_Cell_Excluded		|This cell is on the cell scanner's excluded list.
 UI_Cell_Nothing			|Nothing left to find here.
@@ -399,14 +399,14 @@ UI_Cell_ClearMarker		|Clear marker
 ----------------------------------------------------------------------------
 -- In-game window: text and settings (part 3)
 ----------------------------------------------------------------------------
-UI_Setting_CellKey					|Cell Scanner key
-UI_SettingHint_CellKey				|Opens the Cell Scanner: what's still to collect in the cell you're in. Press Delete while it waits to leave it unbound.
-UI_Setting_CellPad					|Cell Scanner (controller)
-UI_SettingHint_CellPad				|Button combo that opens the Cell Scanner. Press Delete while it waits to leave it unbound.
+UI_Setting_CellKey					|Cell Scanner overlay key
+UI_SettingHint_CellKey				|Shows or hides the Cell Scanner overlay while you play. Press Delete while it waits to leave it unbound.
+UI_Setting_CellPad					|Cell Scanner overlay (controller)
+UI_SettingHint_CellPad				|Button combo that shows or hides the Cell Scanner overlay while you play. Press Delete while it waits to leave it unbound.
 UI_Cell_NearestHeader				|Mark Nearest
-UI_Setting_NearestKey				|Mark nearest find key
+UI_Setting_NearestKey				|Mark nearest key
 UI_SettingHint_NearestKey			|While you play, marks the nearest thing still to collect and puts an objective on it. Press it again to cancel that marker, then again for the next nearest. Press Delete while it waits to leave it unbound.
-UI_Setting_NearestPad				|Mark nearest find (controller)
+UI_Setting_NearestPad				|Mark nearest (controller)
 UI_SettingHint_NearestPad			|Button combo that marks the nearest thing still to collect while you play. Press it again to cancel that marker, then again for the next nearest. Press Delete while it waits to leave it unbound.
 UI_Setting_SweepEffect				|Scan sweep effect
 UI_SettingHint_SweepEffect			|When you mark the nearest find, a wave runs out from you over the world and things still to collect catch the light as it reaches them. Off still marks it, with no effect.
@@ -416,8 +416,7 @@ UI_SettingHint_SeekersWhisper		|Gives you a quiet shout with all three words, no
 UI_Shout_Name						|Seeker's Whisper
 UI_Shout_Description				|Sends a wave out from you that lights up what's still to collect and marks the nearest. More words reach further.
 UI_Cell_NearestCleared				|Marker cleared. Press again for the next nearest.
-UI_Setting_CellPanel				|Keep the Cell Scanner on screen
-UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. The Place UI elements button beside Position, on Settings > HUD & Notifications, moves it.
+UI_SettingHint_CellPanel			|Shows the closest things still to collect on screen while you play, with how far away they are and which way to go. The Cell Scanner overlay key in Settings > Window turns it on and off while you play. The Place UI elements button beside Position, on Settings > HUD & Notifications, moves it.
 UI_Setting_PlaceUI					|Place UI elements
 UI_SettingHint_PlaceUI				|Hides the window and shows the Cell Scanner panel and some notifications to drag where you want them. Let go of the notifications against the panel's edge to join the two into one panel. Confirm keeps the new places; Cancel puts them back.
 UI_Cell_Button						|Cell Scanner
@@ -1430,14 +1429,14 @@ UI_Tour_MuseumTitle				|Museum Displays
 UI_Tour_MuseumText				|With Legacy of the Dragonborn, this shows what's on show in the museum right now, room by room, including sections added by patches. It also says whether you're carrying what a display needs.
 UI_Tour_CellListTitle			|Cell Scanner
 UI_Tour_CellListText			|The Cell Scanner lists everything still to find in the area you're in, with how far away it is. Pick an item to put a quest marker on it, so you can walk straight to it.
-UI_Tour_CellKey{}				|Open it straight from the game with {}.
-UI_Tour_CellNoKey				|You can give it its own key in Settings, to open it straight from the game.
-UI_Tour_CellOptionsTitle		|Scanner options
-UI_Tour_CellOptionsText			|Set how the scanner searches, what it leaves out, and how pinned items are shown. Click the heading to fold the options away.
-UI_Tour_CellBarTitle			|Scanner bar
+UI_Tour_CellKey{}				|{} shows or hides it on screen while you play.
+UI_Tour_CellNoKey				|You can give it a key in Settings, to show or hide it on screen while you play.
+UI_Tour_CellOptionsTitle		|Finds and Settings
+UI_Tour_CellOptionsText			|These two tabs switch between the list of finds and the scanner's settings: how it searches, what it leaves out, how pinned items are shown, the Mark Nearest key, and the cells and items you've excluded.
+UI_Tour_CellBarTitle			|Scanner tools
 UI_Tour_CellBarText				|Show height tells you whether an item is above or below you. Rescan looks again, and in an interior you can exclude the cell once you're done with it. Keep on screen puts the scanner on screen while you play: that's next.
 UI_Tour_OnScreenTitle			|Always on screen
-UI_Tour_OnScreenText			|While you play, Keep on screen shows the Cell Scanner on screen: the closest things still to find, how far away they are and which way to go. Completionist's own notifications show here too, when you find something. Settings > Window turns the panel on or off, and the Place UI elements button on Settings > HUD & Notifications moves it and the notifications anywhere you like, or joins the two.
+UI_Tour_OnScreenText			|While you play, Keep on screen shows the Cell Scanner on screen: the closest things still to find, how far away they are and which way to go. Completionist's own notifications show here too, when you find something. Keep on screen or the Cell Scanner overlay key turns the panel on or off, and the Place UI elements button on Settings > HUD & Notifications moves it and the notifications anywhere you like, or joins the two.
 UI_Tour_SettingsTitle			|Settings
 UI_Tour_SettingsText			|The cog at the top opens Settings. This first tab is the window itself: its theme, size, keys and controller buttons. Point at any setting and the panel at the bottom explains what it does.
 UI_Tour_SettingsGeneralTitle	|General Settings

@@ -1697,7 +1697,6 @@ namespace CompletionistUI
 			--_openFrames;
 			ImGui::SetNavCursorVisible(false);
 			_focusSidebar = true;
-			_focusCellList = true;
 		}
 
 		if (_placing) {
@@ -1705,7 +1704,7 @@ namespace CompletionistUI
 			return true;
 		}
 		// Offered the first time the window itself opens, until it's answered
-		if (!a_settings.tourOffered && !TourRunning() && !_cellView) {
+		if (!a_settings.tourOffered && !TourRunning()) {
 			_tourOffer = true;
 			_tourFocus = 2;
 		}
@@ -1713,10 +1712,6 @@ namespace CompletionistUI
 			DrawTourOnScreen(a_provider, a_settings);
 			return true;
 		}
-		if (_cellView) {
-			return DrawCellWindow(a_provider, a_settings);
-		}
-
 		const auto& io = ImGui::GetIO();
 		const auto  size = ImVec2(
 			std::clamp(io.DisplaySize.x * a_settings.widthPercent / 100.0f, std::min(io.DisplaySize.x, 640.0f), io.DisplaySize.x),
@@ -1893,7 +1888,7 @@ namespace CompletionistUI
 		}
 		// R3 fits the description panel to the text, held collapses or expands it. Not with L3 held,
 		// as the two can be the combo that opens and closes this window
-		if (_settings && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+		if (_settings && !DescriptionHidden() && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
 			constexpr float holdTime = 0.4f;
 			const auto*     stick = ImGui::GetKeyData(ImGuiKey_GamepadR3);
 			if (ImGui::IsKeyPressed(ImGuiKey_GamepadR3, false)) {
@@ -2081,6 +2076,7 @@ namespace CompletionistUI
 	void Menu::RecordControl() {
 
 		RecordSpot(_controlSpots, _recordingHeader ? -1 : 0, static_cast<int>(_controlSpots.size()), 1, 0);
+		_controlSpots.back().group = _navGroup;
 	}
 
 	//---------------------------------------------------
@@ -2374,6 +2370,10 @@ namespace CompletionistUI
 			}
 		} else if (const auto* control = find(_controlSpotsLast, current)) {
 			handled = true;
+			const auto selectedSpot = [&](int a_group) -> const NavSpot* {
+				const auto spot = std::ranges::find_if(_controlSpotsLast, [&](const NavSpot& a_spot) { return a_spot.group == a_group && a_spot.selected; });
+				return spot == _controlSpotsLast.end() ? nullptr : std::addressof(*spot);
+			};
 			if (control->section == -1 && dir == ImGuiDir_Down) {
 				std::ranges::copy_if(_controlSpotsLast, std::back_inserter(topSpots), [](const NavSpot& a_spot) { return a_spot.section == -1; });
 				target = nearest(*control, { &topSpots });
@@ -2388,11 +2388,94 @@ namespace CompletionistUI
 				if (!target && !_sidebarSpotsLast.empty()) {
 					target = std::addressof(_sidebarSpotsLast.front());
 				}
+			} else if (control->group == navSections) {
+				// The row of sections: along it, up to the tabs, down into the section
+				const auto here = static_cast<std::size_t>(control - _controlSpotsLast.data());
+				if (dir == ImGuiDir_Up) {
+					target = selectedSpot(navTabs);
+				} else if (dir == ImGuiDir_Down) {
+					for (std::size_t i = here + 1; i < _controlSpotsLast.size() && !target; ++i) {
+						if (_controlSpotsLast[i].group != navSections) {
+							target = std::addressof(_controlSpotsLast[i]);
+						}
+					}
+				} else if (dir == ImGuiDir_Left && here > 0 && _controlSpotsLast[here - 1].group == navSections) {
+					target = std::addressof(_controlSpotsLast[here - 1]);
+				} else if (dir == ImGuiDir_Right && here + 1 < _controlSpotsLast.size() && _controlSpotsLast[here + 1].group == navSections) {
+					target = std::addressof(_controlSpotsLast[here + 1]);
+				}
+			} else if (control->group == navColumn) {
+				// A column: the order on the page, whatever lines up on screen
+				const auto here = static_cast<std::size_t>(control - _controlSpotsLast.data());
+				const auto sameRow = [](const NavSpot& a_left, const NavSpot& a_right) { return std::min(a_left.maxY, a_right.maxY) > std::max(a_left.minY, a_right.minY); };
+				if (dir == ImGuiDir_Up) {
+					for (std::size_t i = here; i > 0 && _controlSpotsLast[i - 1].group == navColumn && !target; --i) {
+						if (!sameRow(_controlSpotsLast[i - 1], *control)) {
+							auto first = i - 1;
+							while (first > 0 && _controlSpotsLast[first - 1].group == navColumn && sameRow(_controlSpotsLast[first - 1], _controlSpotsLast[i - 1])) {
+								--first;
+							}
+							target = std::addressof(_controlSpotsLast[first]);
+						}
+					}
+					target = target ? target : selectedSpot(navSections);
+				} else if (dir == ImGuiDir_Down) {
+					for (std::size_t i = here + 1; i < _controlSpotsLast.size() && !target; ++i) {
+						if (!sameRow(_controlSpotsLast[i], *control)) {
+							target = std::addressof(_controlSpotsLast[i]);
+						}
+					}
+				} else if (dir == ImGuiDir_Left && here > 0 && _controlSpotsLast[here - 1].group == navColumn && sameRow(_controlSpotsLast[here - 1], *control)) {
+					target = std::addressof(_controlSpotsLast[here - 1]);
+				} else if (dir == ImGuiDir_Right && here + 1 < _controlSpotsLast.size() && _controlSpotsLast[here + 1].group == navColumn && sameRow(_controlSpotsLast[here + 1], *control)) {
+					target = std::addressof(_controlSpotsLast[here + 1]);
+				}
+			} else if (control->group == navTabs && dir == ImGuiDir_Down && selectedSpot(navSections)) {
+				target = selectedSpot(navSections);
+			} else if (control->group == navTabs && (dir == ImGuiDir_Left || dir == ImGuiDir_Right)) {
+				// Along the tabs, and no further: the first one's left is the sidebar, below
+				const auto here = static_cast<std::size_t>(control - _controlSpotsLast.data());
+				if (dir == ImGuiDir_Left && here > 0 && _controlSpotsLast[here - 1].group == navTabs) {
+					target = std::addressof(_controlSpotsLast[here - 1]);
+				} else if (dir == ImGuiDir_Right && here + 1 < _controlSpotsLast.size() && _controlSpotsLast[here + 1].group == navTabs) {
+					target = std::addressof(_controlSpotsLast[here + 1]);
+				}
 			} else {
 				target = nearest(*control, { &_controlSpotsLast, &_entrySpotsLast });
 				if (!target && (dir == ImGuiDir_Up || dir == ImGuiDir_Down)) {
 					target = closest(*control, { &_controlSpotsLast, &_entrySpotsLast });
 				}
+				// The excluded lists start below the scanner's settings, out of sight: down from the
+				// bottom of a column goes into the list under it, rather than across or nowhere
+				if (dir == ImGuiDir_Down && control->group == 0 && selectedSpot(navSections)) {
+					const auto overlaps = [&](const NavSpot& a_spot) { return std::min(a_spot.maxX, control->maxX) > std::max(a_spot.minX, control->minX); };
+					if (!target || !overlaps(*target)) {
+						for (auto below = _controlSpotsLast.begin() + (control - _controlSpotsLast.data()) + 1; below != _controlSpotsLast.end(); ++below) {
+							if (below->window != control->window && overlaps(*below)) {
+								target = std::addressof(*below);
+								// A list out of sight isn't drawn, so it couldn't take the focus: bring it in first
+								if (!below->visible) {
+									auto* window = static_cast<ImGuiWindow*>(control->window);
+									ImGui::SetScrollY(window, window->ScrollMax.y);
+								}
+								break;
+							}
+						}
+					}
+				}
+				// On a settings tab, what's on the tab doesn't jump sideways up to the tabs or the window's
+				// buttons, and up from the top of it is the tab row, or the sections under it
+				if (target && control->group == 0 && control->section != -1 && selectedSpot(navTabs) && (target->group == navTabs || target->group == navSections || target->section == -1)) {
+					if (dir == ImGuiDir_Up) {
+						target = selectedSpot(navSections) ? selectedSpot(navSections) : selectedSpot(navTabs);
+					} else if (dir == ImGuiDir_Left || dir == ImGuiDir_Right) {
+						target = nullptr;
+					}
+				}
+			}
+			// The section row is always entered at the section that's showing
+			if (target && target->group == navSections && control->group != navSections) {
+				target = selectedSpot(navSections);
 			}
 			if (!target && dir == ImGuiDir_Left) {
 				target = sidebarFor(*control);
@@ -2458,10 +2541,22 @@ namespace CompletionistUI
 			handled = target != nullptr;
 		}
 
+		// A row of tabs is entered at the one showing, from wherever it's come
+		if (target && (target->group == navTabs || target->group == navSections)) {
+			const auto* from = find(_controlSpotsLast, current);
+			if (!from || from->group != target->group) {
+				const auto showing = std::ranges::find_if(_controlSpotsLast, [&](const NavSpot& a_spot) { return a_spot.group == target->group && a_spot.selected; });
+				target = showing != _controlSpotsLast.end() ? std::addressof(*showing) : target;
+			}
+		}
+
 		// Straight back the way it came: Down then Up returns to the same control, whichever is nearest.
 		// It may have scrolled out of view in the same panel; focusing it scrolls it back
 		const auto opposite = dir == ImGuiDir_Up ? ImGuiDir_Down : dir == ImGuiDir_Down ? ImGuiDir_Up : dir == ImGuiDir_Left ? ImGuiDir_Right : ImGuiDir_Left;
-		if (handled && _lastMoveTo == current && _lastMoveDir == static_cast<int>(opposite)) {
+		// Not along a row of tabs, or the tabs before the one it entered at could never be reached
+		const auto* onTabs = find(_controlSpotsLast, current);
+		const bool  alongTabs = onTabs && (onTabs->group == navTabs || onTabs->group == navSections) && (dir == ImGuiDir_Left || dir == ImGuiDir_Right);
+		if (handled && !alongTabs && _lastMoveTo == current && _lastMoveDir == static_cast<int>(opposite)) {
 			const NavSpot* now = nullptr;
 			for (const auto* list : { &_entrySpotsLast, &_controlSpotsLast, &_sidebarSpotsLast }) {
 				now = now ? now : find(*list, current);
@@ -2794,7 +2889,7 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Pad Hints ) ------------
 	//---------------------------------------------------
 
-	void Menu::DrawPadHints(IDataProvider& a_provider, bool a_cellWindow) {
+	void Menu::DrawPadHints(IDataProvider& a_provider) {
 
 		const auto& palette = Themes::GetPalette();
 		const float fontSize = ImGui::GetFontSize();
@@ -2827,22 +2922,18 @@ namespace CompletionistUI
 		if (!_padTickKey.empty()) {
 			hints.push_back({ { PadButton::kFaceUp }, a_provider.Translate(_padTickKey) });
 		}
-		if (a_cellWindow) {
-			// Cell Scanner
-			hints.push_back({ { PadButton::kFaceRight }, a_provider.Translate("UI_Pad_Close") });
-			hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Scroll") });
-		} else {
 		hints.push_back({ { PadButton::kFaceRight }, a_provider.Translate(ImGui::GetIO().NavVisible && !_sidebarFocused ? "UI_Pad_Back" : "UI_Pad_Close") });
 		hints.push_back({ { PadButton::kLeftBumper, PadButton::kRightBumper }, a_provider.Translate("UI_Pad_Pages") });
 		if (std::exchange(_tabsShown, false)) {
 			hints.push_back({ { PadButton::kLeftTrigger, PadButton::kRightTrigger }, a_provider.Translate("UI_Pad_Tabs") });
 		}
+		if (!DescriptionHidden()) {
 		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Description") });
 		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate(_settings && _settings->descriptionCollapsed ? "UI_Pad_DescriptionHoldExpand" : "UI_Pad_DescriptionHoldCollapse") });
+		}
 		hints.push_back({ { PadButton::kLeftStickPress }, a_provider.Translate("UI_Pad_Sidebar") });
 		hints.push_back({ { PadButton::kRightStick }, a_provider.Translate("UI_Pad_Scroll") });
 		hints.push_back({ { PadButton::kView }, a_provider.Translate(_filterShown ? "UI_Pad_Filter" : "UI_Pad_Find") });
-		}
 
 		const float button = std::floor(fontSize * 1.15f);
 		const float gap = fontSize * 0.35f;
@@ -2878,9 +2969,7 @@ namespace CompletionistUI
 		drawList->PopClipRect();
 		padsOnDark = false;
 		ImGui::Dummy(ImVec2(width, height));
-		if (!a_cellWindow) {
-			MarkTourItem(TourSpot::kPadHints);
-		}
+		MarkTourItem(TourSpot::kPadHints);
 	}
 
 	//---------------------------------------------------
@@ -2967,6 +3056,13 @@ namespace CompletionistUI
 	//---------------------------------------------------
 	//-- Completionist UI ( Open Page ) -----------------
 	//---------------------------------------------------
+
+	void Menu::OpenCellScanner() {
+
+		OpenPage(settingsPage);
+		_settingsTab = "cellscanner";
+		_focusCellList = true;
+	}
 
 	void Menu::OpenPage(std::string_view a_id) {
 
@@ -3154,8 +3250,8 @@ namespace CompletionistUI
 		const auto toolsMin = ImGui::GetItemRectMin();
 		ImGui::SameLine();
 		if (ThemedButton(cellLabel.c_str(), ButtonWidth(cellLabel.c_str()) + toolRoom)) {
-			_cellView = true;
-			_focusCellList = true;
+			_cellOptionsSection = cellFinds;
+			OpenCellScanner();
 		}
 		buttonIconRoom = 0.0f;
 		toolIcon(true);
@@ -3662,7 +3758,7 @@ namespace CompletionistUI
 		const auto  before = a_selected;
 
 		_tabsShown = true;
-		if (!ImGui::IsAnyItemActive() && !a_tabs.empty() && !TourRunning()) {
+		if (!std::exchange(_tabKeysTaken, false) && !ImGui::IsAnyItemActive() && !a_tabs.empty() && !TourRunning()) {
 			const bool previous = ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
 			const bool next = ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false);
 			if (previous || next) {
@@ -4627,360 +4723,142 @@ namespace CompletionistUI
 	//-- Completionist UI ( Draw Cell Window ) ----------
 	//---------------------------------------------------
 
-	bool Menu::DrawCellWindow(IDataProvider& a_provider, UISettings& a_settings) {
+	void Menu::DescribeItem(const std::string& a_label, const std::string& a_info) {
 
-		const auto& io = ImGui::GetIO();
-		ImGui::PushFont(Themes::BodyFont());
-		// Grows with the text scale, so the options keep to their columns and the list keeps some rows
-		const auto size = ImVec2(
-			std::clamp(std::max(io.DisplaySize.x * 0.4f, ImGui::GetFontSize() * 42.0f), std::min(io.DisplaySize.x, 620.0f), io.DisplaySize.x),
-			std::clamp(std::max(io.DisplaySize.y * 0.76f, ImGui::GetFontSize() * 45.0f), std::min(io.DisplaySize.y, 460.0f), io.DisplaySize.y));
-		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(size, ImGuiCond_Always);
-
-		bool open = true;
-		auto background = Themes::GetPalette().background;
-		background.w = std::clamp(a_settings.opacity, 0.3f, 1.0f);
-		windowOpacity = background.w;
-		const bool  ownGround = Decor::Oblivion() || Decor::Apocrypha();
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ownGround ? ImVec4(0, 0, 0, 0) : background);
-		const float pad = ImGui::GetFontSize() * 1.4f;
-		const float roomX = ownGround ? ImGui::GetFontSize() * 0.7f : 0.0f;
-		const float roomY = ownGround ? ImGui::GetFontSize() * 0.3f : 0.0f;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad + roomX, pad + roomY));
-		constexpr auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-		const bool     visible = ImGui::Begin("##InCurrentCell", nullptr, flags);
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor();
-
-		if (visible) {
-			const auto& palette = Themes::GetPalette();
-			const auto& style = ImGui::GetStyle();
-			const float fontSize = ImGui::GetFontSize();
-			const auto min = ImGui::GetWindowPos();
-			const auto max = ImVec2(min.x + ImGui::GetWindowWidth(), min.y + ImGui::GetWindowHeight());
-			const auto inset = fontSize * 0.4f;
-			if (ownGround) {
-				if (Decor::Apocrypha()) {
-					ApocryphaDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
-				} else {
-					OblivionDecor::Ground(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(background));
-				}
-			}
-			Decor::Frame(ImGui::GetWindowDrawList(), ImVec2(min.x + inset, min.y + inset), ImVec2(max.x - inset, max.y - inset), Colour(palette.separator));
-			// A mascot resting on the top of the window, clear of the list, when the screen has room above it
-			if (Decor::Anime()) {
-				const float radius = fontSize * 2.0f;
-				if (min.y > radius * 2.6f) {
-					auto* windowList = ImGui::GetWindowDrawList();
-					windowList->PushClipRectFullScreen();
-					AnimeDecor::PeekOver(windowList, max.x - (max.x - min.x) * 0.2f, min.y + 1.0f, radius, 1, 1.0f);
-					windowList->PopClipRect();
-				}
-			}
-
-			const bool backPressed = ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false) || ImGui::IsKeyPressed(ImGuiKey_Escape, false);
-			if (backPressed && !_backHandledByImGui && !TourRunning()) {
-				open = false;
-			}
-
-			if (!TourRunning()) {
-				RouteNavigation();
-			}
-			controlRecorder = this;
-
-			const auto scan = a_provider.GetCellScan();
-
-			const auto  start = ImGui::GetCursorScreenPos();
-			const float width = ImGui::GetContentRegionAvail().x;
-			const auto  backLabel = a_provider.Translate("UI_Cell_Back");
-			const auto  closeLabel = a_provider.Translate("UI_Close");
-			const float backWidth = ButtonWidth(backLabel.c_str()) + fontSize;
-			const float closeWidth = ButtonWidth(closeLabel.c_str()) + fontSize;
-			const bool  anime = Decor::Anime();
-			const float titleIndent = anime ? fontSize * 1.0f : 0.0f;
-			std::string subtitle = scan.cellName;
-			if (scan.scanned && !scan.excluded) {
-				subtitle += (subtitle.empty() ? "" : "  \xC2\xB7  ") + a_provider.Translate("UI_Cell_Count{" + std::to_string(scan.items.size()) + "}");
-			}
-			ImGui::PushFont(Themes::TitleFont());
-			const auto  windowTitle = anime ? Upper(a_provider.Translate("UI_Cell_Title")) : a_provider.Translate("UI_Cell_Title");
-			if (Decor::Apocrypha()) {
-				const float textEnd = start.x + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
-				ApocryphaDecor::WindowHeader(ImGui::GetWindowDrawList(), start.y, start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f, textEnd + fontSize, start.x + width - backWidth - closeWidth - style.ItemSpacing.x - fontSize);
-			}
-			if (Decor::Oblivion()) {
-				const float textEnd = start.x + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
-				OblivionDecor::WindowHeader(ImGui::GetWindowDrawList(), start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f, textEnd, start.x + width - backWidth - closeWidth - style.ItemSpacing.x);
-			}
-			if (anime) {
-				const float textEnd = start.x + titleIndent + std::max(ImGui::CalcTextSize(windowTitle.c_str()).x, Themes::BodyFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, subtitle.c_str()).x);
-				const float bandBottom = start.y + ImGui::GetTextLineHeightWithSpacing() + fontSize * 1.45f;
-				auto*       titleList = ImGui::GetWindowDrawList();
-				AnimeDecor::PageHeading(titleList, ImVec2(start.x, start.y - fontSize * 0.2f), ImVec2(start.x + width, bandBottom), textEnd);
-				if (width > fontSize * 34.0f) {
-					const float radius = fontSize * 1.75f;
-					AnimeDecor::PeekOver(titleList, start.x + width - backWidth - closeWidth - radius * 3.0f, bandBottom, radius, 0, -1.0f);
-				}
-				ImGui::SetCursorScreenPos(ImVec2(start.x + titleIndent, start.y));
-				AnimeDecor::BoldText(titleList, ImGui::GetCursorScreenPos(), Colour(palette.heading), windowTitle.c_str());
-				ImGui::Dummy(ImGui::CalcTextSize(windowTitle.c_str()));
-			} else {
-				ImGui::TextColored(palette.heading, "%s", windowTitle.c_str());
-			}
-			ImGui::PopFont();
-			const auto afterTitle = ImVec2(ImGui::GetCursorScreenPos().x + titleIndent * 0.0f, ImGui::GetCursorScreenPos().y);
-			ImGui::SetCursorScreenPos(ImVec2(start.x + width - backWidth - closeWidth - style.ItemSpacing.x, start.y));
-			if (ThemedButton((backLabel + "##CellBack").c_str(), backWidth)) {
-				_cellView = false;
-			}
-			ImGui::SameLine();
-			if (ThemedButton((closeLabel + "##CellClose").c_str(), closeWidth)) {
-				open = false;
-			}
-			ImGui::SetCursorScreenPos(ImVec2(start.x + titleIndent, afterTitle.y));
-			ImGui::TextColored(anime ? palette.text : palette.textDim, "%s", subtitle.c_str());
-			const auto pos = ImVec2(start.x, ImGui::GetCursorScreenPos().y);
-			ImGui::SetCursorScreenPos(pos);
-			if (!anime && !Decor::Oblivion()) {
-				Decor::FadedLine(ImGui::GetWindowDrawList(), pos, ImVec2(pos.x + width, pos.y), Colour(palette.separator));
-			}
-			ImGui::Dummy(ImVec2(width, anime || Decor::Oblivion() ? fontSize * 0.5f : 4.0f));
-
-			const auto optionsMin = ImGui::GetCursorScreenPos();
-			DrawCellOptions(a_provider, a_settings);
-			MarkTour(TourSpot::kCellOptions, optionsMin, ImVec2(optionsMin.x + width, ImGui::GetCursorScreenPos().y - style.ItemSpacing.y));
-
-			// Quest marker bar
-			const auto markedCount = std::ranges::count_if(scan.items, &CellItem::marked);
-			auto       marked = std::ranges::find_if(scan.items, [&](const CellItem& a_item) { return a_item.marked && a_item.refID == _shownMarker; });
-			if (marked == scan.items.end()) {
-				marked = std::ranges::find_if(scan.items, &CellItem::marked);
-			}
-			if (marked != scan.items.end()) {
-				const auto  stripStart = ImGui::GetCursorScreenPos();
-				const float height = ImGui::GetFrameHeight() + fontSize * 0.4f;
-				const auto  stripMax = ImVec2(stripStart.x + width, stripStart.y + height);
-				auto*       drawList = ImGui::GetWindowDrawList();
-				if (Decor::Anime()) {
-					AnimeDecor::Card(drawList, stripStart, stripMax, false);
-				} else {
-					drawList->AddRectFilled(stripStart, stripMax, Colour(palette.accent, 0.05f));
-					drawList->AddRect(stripStart, stripMax, Colour(palette.accent, 0.5f));
-				}
-
-				const auto  excludeLabel = a_provider.Translate("UI_Cell_ExcludeMarked");
-				const auto  clearLabel = a_provider.Translate("UI_Cell_ClearMarker");
-				const auto  clearAllLabel = a_provider.Translate("UI_Cell_ClearAllMarkers");
-				const auto  more = markedCount - 1;
-				const float excludeWidth = ButtonWidth(excludeLabel.c_str()) + fontSize;
-				const float clearWidth = ButtonWidth(clearLabel.c_str()) + fontSize;
-				const float clearAllWidth = more > 0 ? ButtonWidth(clearAllLabel.c_str()) + fontSize : 0.0f;
-				const float buttonsX = stripMax.x - fontSize * 0.5f - excludeWidth - clearWidth - style.ItemSpacing.x - (more > 0 ? clearAllWidth + style.ItemSpacing.x : 0.0f);
-				const float rowY = stripStart.y + (height - ImGui::GetFrameHeight()) * 0.5f;
-
-				const float textY = stripStart.y + (height - fontSize) * 0.5f;
-				const auto  label = a_provider.Translate(more > 0 ? "UI_Cell_Markers{" + std::to_string(markedCount) + "}" : std::string("UI_Cell_Marker"));
-				const auto  where = marked->holder.empty() ? a_provider.Translate("UI_Cell_Loose") : marked->holder;
-				drawList->PushClipRect(stripStart, ImVec2(buttonsX - style.ItemSpacing.x, stripMax.y), true);
-				float x = stripStart.x + fontSize * 0.7f;
-				drawList->AddText(ImVec2(x, textY), Colour(palette.accent), label.c_str());
-				x += ImGui::CalcTextSize(label.c_str()).x + fontSize * 0.4f;
-				drawList->AddText(ImVec2(x, textY), Colour(palette.text), marked->name.c_str());
-				x += ImGui::CalcTextSize(marked->name.c_str()).x;
-				drawList->AddText(ImVec2(x, textY), Colour(palette.textDim), FitText("  \xC2\xB7  " + where, buttonsX - style.ItemSpacing.x - x).c_str());
-				drawList->PopClipRect();
-
-				const auto shown = *marked;
-				ImGui::SetCursorScreenPos(ImVec2(buttonsX, rowY));
-				if (ThemedButton((excludeLabel + "##CellExcludeMarked").c_str(), excludeWidth)) {
-					a_provider.ExcludeCellItem(shown);
-				}
-				if (ImGui::IsItemHovered()) {
-					ImGui::SetTooltip("%s", a_provider.Translate("UI_Cell_ExcludeMarkedHint").c_str());
-				}
-				ImGui::SameLine();
-				if (ThemedButton((clearLabel + "##CellClear").c_str(), clearWidth)) {
-					a_provider.ClearCellMarker(shown);
-				}
-				if (more > 0) {
-					ImGui::SameLine();
-					if (ThemedButton((clearAllLabel + "##CellClearAll").c_str(), clearAllWidth)) {
-						a_provider.ClearCellMarkers();
-					}
-				}
-				ImGui::SetCursorScreenPos(ImVec2(stripStart.x, stripMax.y + style.ItemSpacing.y));
-			}
-
-			const float barHeight = ImGui::GetFrameHeight() + style.ItemSpacing.y * 2.0f + PadHintsHeight();
-			BeginFramedPanel("##CellList", ImVec2(0.0f, -barHeight));
-			ScrollWithRightStick();
-			DrawCellList(a_provider, scan);
-			EndFramedPanel();
-			MarkTourItem(TourSpot::kCellList);
-
-			ImGui::Dummy(ImVec2(0.0f, style.ItemSpacing.y * 0.5f));
-			const auto barStart = ImGui::GetCursorScreenPos();
-			if (MarkerToggle("##KeepOnScreen", a_settings.cellPanel, a_provider.Translate("UI_Cell_KeepOnScreen").c_str())) {
-				_settingsChanged = true;
-			}
-			if (ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("%s", a_provider.Translate("UI_SettingHint_CellPanel").c_str());
-			}
-			ImGui::SameLine(0.0f, fontSize * 1.2f);
-			if (MarkerToggle("##ShowHeight", a_settings.cellHeight, a_provider.Translate("UI_Cell_ShowHeight").c_str())) {
-				_settingsChanged = true;
-			}
-			if (ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("%s", a_provider.Translate("UI_Cell_ShowHeightHint").c_str());
-			}
-			// Only interiors can be excluded, as in the MCM
-			const bool  canExclude = scan.scanned && scan.interior && !scan.excluded;
-			const auto  rescan = a_provider.Translate("UI_Cell_Rescan");
-			const bool  armed = _confirmKey == "cellwindow/excludeCell";
-			const auto  exclude = a_provider.Translate(armed ? "UI_ConfirmClick" : "UI_Cell_ExcludeCell");
-			const float rescanWidth = ButtonWidth(rescan.c_str()) + fontSize;
-			const float excludeWidth = canExclude ? std::max(ButtonWidth(exclude.c_str()), ButtonWidth(a_provider.Translate("UI_Cell_ExcludeCell").c_str())) + fontSize : 0.0f;
-			ImGui::SetCursorScreenPos(ImVec2(barStart.x + width - rescanWidth - (canExclude ? excludeWidth + style.ItemSpacing.x : 0.0f), barStart.y));
-			if (canExclude) {
-				if (ThemedButton((exclude + "##CellExcludeCell").c_str(), excludeWidth)) {
-					if (armed) {
-						_confirmKey.clear();
-						a_provider.ExcludeCurrentCell();
-					} else {
-						_confirmKey = "cellwindow/excludeCell";
-					}
-				}
-				ImGui::SameLine();
-			}
-			if (ThemedButton((rescan + "##CellRescan").c_str(), rescanWidth)) {
-				a_provider.RescanCell();
-			}
-			MarkTour(TourSpot::kCellBar, barStart, ImVec2(barStart.x + width, ImGui::GetItemRectMax().y));
-			controlRecorder = nullptr;
-			if (PadHintsShown()) {
-				DrawPadHints(a_provider, true);
-			}
-			ScrollFocusWithRightStick();
+		if (!a_info.empty() && (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_AllowWhenOverlappedByItem) || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible))) {
+			Entry entry;
+			entry.name = a_label;
+			entry.description = a_info;
+			entry.showState = false;
+			_hoveredEntry = entry;
 		}
-		DrawTour(a_provider);
-		_backHandledByImGui = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) || ImGui::IsAnyItemActive();
-		DressTooltip();
-		ImGui::End();
-		ImGui::PopFont();
-		return open;
+	}
+
+	void Menu::DrawCellScanner(IDataProvider& a_provider) {
+
+		const auto& palette = Themes::GetPalette();
+		const auto& style = ImGui::GetStyle();
+		const float fontSize = ImGui::GetFontSize();
+		const float width = ImGui::GetContentRegionAvail().x;
+		const auto  scan = a_provider.GetCellScan();
+
+		const auto tabsMin = ImGui::GetCursorScreenPos();
+		DrawCellTabs(a_provider);
+		MarkTour(TourSpot::kCellOptions, tabsMin, ImVec2(tabsMin.x + width, tabsMin.y + ImGui::GetFrameHeight() * 1.3f));
+
+		std::string subtitle = scan.cellName;
+		if (scan.scanned && !scan.excluded) {
+			subtitle += (subtitle.empty() ? "" : "  \xC2\xB7  ") + a_provider.Translate("UI_Cell_Count{" + std::to_string(scan.items.size()) + "}");
+		}
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (width - ImGui::CalcTextSize(subtitle.c_str()).x) * 0.5f));
+		ImGui::TextColored(palette.textDim, "%s", subtitle.c_str());
+		if (_cellOptionsSection != cellFinds) {
+			return;
+		}
+		ImGui::Spacing();
+		_navGroup = navColumn;
+
+		// Quest marker bar
+		const auto markedCount = std::ranges::count_if(scan.items, &CellItem::marked);
+		auto       marked = std::ranges::find_if(scan.items, [&](const CellItem& a_item) { return a_item.marked && a_item.refID == _shownMarker; });
+		if (marked == scan.items.end()) {
+			marked = std::ranges::find_if(scan.items, &CellItem::marked);
+		}
+		if (marked != scan.items.end()) {
+			const auto  stripStart = ImGui::GetCursorScreenPos();
+			const float height = ImGui::GetFrameHeight() + fontSize * 0.4f;
+			const auto  stripMax = ImVec2(stripStart.x + width, stripStart.y + height);
+			auto*       drawList = ImGui::GetWindowDrawList();
+			if (Decor::Anime()) {
+				AnimeDecor::Card(drawList, stripStart, stripMax, false);
+			} else {
+				drawList->AddRectFilled(stripStart, stripMax, Colour(palette.accent, 0.05f));
+				drawList->AddRect(stripStart, stripMax, Colour(palette.accent, 0.5f));
+			}
+
+			const auto  excludeLabel = a_provider.Translate("UI_Cell_ExcludeMarked");
+			const auto  clearLabel = a_provider.Translate("UI_Cell_ClearMarker");
+			const auto  clearAllLabel = a_provider.Translate("UI_Cell_ClearAllMarkers");
+			const auto  more = markedCount - 1;
+			const float excludeWidth = ButtonWidth(excludeLabel.c_str()) + fontSize;
+			const float clearWidth = ButtonWidth(clearLabel.c_str()) + fontSize;
+			const float clearAllWidth = more > 0 ? ButtonWidth(clearAllLabel.c_str()) + fontSize : 0.0f;
+			const float buttonsX = stripMax.x - fontSize * 0.5f - excludeWidth - clearWidth - style.ItemSpacing.x - (more > 0 ? clearAllWidth + style.ItemSpacing.x : 0.0f);
+			const float rowY = stripStart.y + (height - ImGui::GetFrameHeight()) * 0.5f;
+
+			const float textY = stripStart.y + (height - fontSize) * 0.5f;
+			const auto  label = a_provider.Translate(more > 0 ? "UI_Cell_Markers{" + std::to_string(markedCount) + "}" : std::string("UI_Cell_Marker"));
+			const auto  where = marked->holder.empty() ? a_provider.Translate("UI_Cell_Loose") : marked->holder;
+			drawList->PushClipRect(stripStart, ImVec2(buttonsX - style.ItemSpacing.x, stripMax.y), true);
+			float x = stripStart.x + fontSize * 0.7f;
+			drawList->AddText(ImVec2(x, textY), Colour(palette.accent), label.c_str());
+			x += ImGui::CalcTextSize(label.c_str()).x + fontSize * 0.4f;
+			drawList->AddText(ImVec2(x, textY), Colour(palette.text), marked->name.c_str());
+			x += ImGui::CalcTextSize(marked->name.c_str()).x;
+			drawList->AddText(ImVec2(x, textY), Colour(palette.textDim), FitText("  \xC2\xB7  " + where, buttonsX - style.ItemSpacing.x - x).c_str());
+			drawList->PopClipRect();
+
+			const auto shown = *marked;
+			ImGui::SetCursorScreenPos(ImVec2(buttonsX, rowY));
+			if (ThemedButton((excludeLabel + "##CellExcludeMarked").c_str(), excludeWidth)) {
+				a_provider.ExcludeCellItem(shown);
+			}
+			DescribeItem(excludeLabel, a_provider.Translate("UI_Cell_ExcludeMarkedHint"));
+			ImGui::SameLine();
+			if (ThemedButton((clearLabel + "##CellClear").c_str(), clearWidth)) {
+				a_provider.ClearCellMarker(shown);
+			}
+			if (more > 0) {
+				ImGui::SameLine();
+				if (ThemedButton((clearAllLabel + "##CellClearAll").c_str(), clearAllWidth)) {
+					a_provider.ClearCellMarkers();
+				}
+			}
+			ImGui::SetCursorScreenPos(ImVec2(stripStart.x, stripMax.y + style.ItemSpacing.y));
+		}
+
+		// Fills the tab, so the tab has nothing to scroll and the wheel only ever moves the list
+		_navGroup = 0;
+		BeginFramedPanel("##CellList", ImVec2(0.0f, std::max(ImGui::GetContentRegionAvail().y - ImGui::GetScrollY() - style.ItemSpacing.y, fontSize * 6.0f)));
+		ScrollWithRightStick();
+		DrawCellList(a_provider, scan);
+		EndFramedPanel();
+		MarkTourItem(TourSpot::kCellList);
 	}
 
 	//---------------------------------------------------
 	//-- Completionist UI ( Draw Cell Options ) ---------
 	//---------------------------------------------------
 
-	// The mark nearest find key, its controller combo and the sweep
-	void Menu::DrawNearestOptions(IDataProvider& a_provider, UISettings& a_settings) {
+	// Finds and Settings, centred under the settings tabs
+	void Menu::DrawCellTabs(IDataProvider& a_provider) {
 
 		const auto& palette = Themes::GetPalette();
 		const float fontSize = ImGui::GetFontSize();
-		const auto  unbound = a_provider.Translate("UI_Setting_Unbound");
+		const float gap = fontSize * 1.6f;
+		const std::string names[] = { a_provider.Translate("UI_Cell_Finds"), a_provider.Translate("UI_Settings") };
+		const float total = ImGui::CalcTextSize(names[0].c_str()).x + gap + ImGui::CalcTextSize(names[1].c_str()).x;
+		_cellOptionsSection = std::clamp(_cellOptionsSection, cellFinds, 0);
 
-		const auto hint = [&](const char* a_key) {
-			if (ImGui::IsItemHovered() || (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible)) {
-				ImGui::SetTooltip("%s", a_provider.Translate(a_key).c_str());
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - total) * 0.5f));
+		_navGroup = navSections;
+		for (int i = cellFinds; i <= 0; ++i) {
+			if (i > cellFinds) {
+				ImGui::SameLine(0.0f, gap);
 			}
-		};
-		// Each on its own row: the panel is too narrow for them side by side
-		const auto  keyLabel = a_provider.Translate("UI_Setting_NearestKey");
-		const auto  padLabel = a_provider.Translate("UI_Setting_NearestPad");
-		const float cellX = ImGui::GetCursorPosX();
-		const float cellWidth = ImGui::GetContentRegionAvail().x - fontSize * 0.5f;
-		const float labelWidth = std::max(ImGui::CalcTextSize(keyLabel.c_str()).x, ImGui::CalcTextSize(padLabel.c_str()).x) + fontSize;
-		const float controlX = cellX + std::max(labelWidth, cellWidth * 0.4f);
-
-		const auto binding = [&](const std::string& a_label, const char* a_hint, const std::string& a_text, bool& a_capturing) {
-			ImGui::AlignTextToFramePadding();
-			ImGui::TextColored(palette.text, "%s", a_label.c_str());
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(controlX);
-			if (ThemedButton((a_text + "##" + a_hint).c_str(), cellX + cellWidth - controlX)) {
-				a_capturing = true;
-			}
-			hint(a_hint);
-		};
-
-		binding(keyLabel, "UI_SettingHint_NearestKey", a_settings.capturingNearestKey ? a_provider.Translate("UI_Setting_PressKey") : a_settings.nearestKey ? a_settings.nearestKeyName : unbound, a_settings.capturingNearestKey);
-		binding(padLabel, "UI_SettingHint_NearestPad", a_settings.capturingNearestPad ? a_provider.Translate("UI_Setting_PressButtons") : a_settings.nearestPadButton ? GamepadComboName(a_settings.nearestPadModifier, a_settings.nearestPadButton, a_settings.padStyle) : unbound, a_settings.capturingNearestPad);
-		if (MarkerToggle("##SweepEffect", a_settings.sweepEffect, a_provider.Translate("UI_Setting_SweepEffect").c_str())) {
-			_settingsChanged = true;
-		}
-		hint("UI_SettingHint_SweepEffect");
-
-		ImGui::Spacing();
-		if (MarkerToggle("##SeekersWhisper", a_settings.seekersWhisper, a_provider.Translate("UI_Setting_SeekersWhisper").c_str())) {
-			_settingsChanged = true;
-		}
-		hint("UI_SettingHint_SeekersWhisper");
-	}
-
-	// Scanner options
-	void Menu::DrawCellOptions(IDataProvider& a_provider, UISettings& a_settings) {
-
-		const auto& palette = Themes::GetPalette();
-		const float fontSize = ImGui::GetFontSize();
-
-		if (RowSelectable("##CellOptions", false, ImVec2(0.0f, ImGui::GetFrameHeight()))) {
-			a_settings.cellOptionsOpen = !a_settings.cellOptionsOpen;
-			_settingsChanged = true;
-		}
-		{
-			const auto min = ImGui::GetItemRectMin();
-			const auto max = ImGui::GetItemRectMax();
-			auto*      drawList = ImGui::GetWindowDrawList();
-			const float centreY = (min.y + max.y) * 0.5f;
-			Decor::Diamond(drawList, ImVec2(min.x + fontSize * 0.5f, centreY), fontSize * 0.22f, Colour(palette.accent), a_settings.cellOptionsOpen);
-			drawList->AddText(ImVec2(min.x + fontSize * 1.2f, centreY - fontSize * 0.5f), Colour(palette.heading), a_provider.Translate("UI_Cell_Options").c_str());
-			const auto hint = a_provider.Translate("UI_Cell_OptionsHint");
-			const auto hintSize = ImGui::CalcTextSize(hint.c_str());
-			drawList->AddText(ImVec2(max.x - hintSize.x - fontSize * 0.4f, centreY - fontSize * 0.5f), Colour(palette.textDim), hint.c_str());
-		}
-		if (!a_settings.cellOptionsOpen) {
-			return;
-		}
-
-		auto page = std::ranges::find(_settingsPages, std::string_view("cellwindow"), &SettingsPage::id);
-		if (page == _settingsPages.end()) {
-			return;
-		}
-
-		std::vector<std::pair<std::string, std::vector<SettingItem*>>> sections;
-		int nearestSection = -1;	// drawn by hand, its settings are the window's own
-		for (auto& item : page->columns[0]) {
-			if (item.kind == SettingKind::kHeader) {
-				if (item.label == "UI_Cell_NearestHeader") {
-					nearestSection = static_cast<int>(sections.size());
-				}
-				sections.emplace_back(a_provider.Translate(item.label), std::vector<SettingItem*>{});
-			} else if (!sections.empty() && item.kind != SettingKind::kSpacer) {
-				sections.back().second.push_back(std::addressof(item));
-			}
-		}
-		if (sections.empty()) {
-			return;
-		}
-		_cellOptionsSection = std::clamp(_cellOptionsSection, 0, static_cast<int>(sections.size()) - 1);
-
-		ImGui::Spacing();
-		for (int i = 0; i < static_cast<int>(sections.size()); ++i) {
-			if (i > 0) {
-				ImGui::SameLine(0.0f, fontSize * 1.6f);
-			}
-			const auto& name = sections[static_cast<std::size_t>(i)].first;
+			const auto& name = names[i - cellFinds];
 			const auto  size = ImGui::CalcTextSize(name.c_str());
 			const auto  pos = ImGui::GetCursorScreenPos();
 			ImGui::PushID(i);
 			if (ImGui::InvisibleButton("##Section", ImVec2(size.x, ImGui::GetFrameHeight()))) {
 				_cellOptionsSection = i;
+				_confirmKey.clear();
 			}
 			NoteControl();
 			const bool selected = i == _cellOptionsSection;
+			if (!_controlSpots.empty() && _controlSpots.back().id == ImGui::GetItemID()) {
+				_controlSpots.back().selected = selected;
+			}
 			const bool hovered = ImGui::IsItemHovered() || ImGui::IsItemFocused();
 			auto*      drawList = ImGui::GetWindowDrawList();
 			const float textY = pos.y + (ImGui::GetFrameHeight() - size.y) * 0.5f;
@@ -4994,130 +4872,9 @@ namespace CompletionistUI
 			}
 			ImGui::PopID();
 		}
-
-		if (_cellOptionsSection == nearestSection) {
-			DrawNearestOptions(a_provider, a_settings);
-			return;
-		}
-
-		auto& items = sections[static_cast<std::size_t>(_cellOptionsSection)].second;
-		std::vector<std::pair<SettingItem*, SettingItem*>> rows;
-		for (std::size_t i = 0; i < items.size(); ++i) {
-			const bool pairsWithButton = items[i]->kind == SettingKind::kText && i + 1 < items.size() && items[i + 1]->kind == SettingKind::kButton && items[i + 1]->label.empty();
-			rows.emplace_back(items[i], pairsWithButton ? items[i + 1] : nullptr);
-			i += pairsWithButton ? 1 : 0;
-		}
-		const auto half = (rows.size() + 1) / 2;
-
-		const auto apply = [&](SettingItem& a_item) {
-			a_provider.ApplySetting("cellwindow", a_item);
-			a_provider.RescanCell();
-		};
-		const auto button = [&](SettingItem& a_item, float a_width) {
-			const auto key = "cellwindow/" + a_item.id;
-			const bool armed = _confirmKey == key;
-			const auto caption = armed ? a_provider.Translate("UI_ConfirmClick") : a_provider.Translate(a_item.value);
-			ImGui::BeginDisabled(!a_item.enabled);
-			if (ThemedButton((caption + "##Button" + a_item.id).c_str(), a_width)) {
-				if (a_item.confirm && !armed) {
-					_confirmKey = key;
-				} else {
-					_confirmKey.clear();
-					apply(a_item);
-				}
-			}
-			ImGui::EndDisabled();
-		};
-
-		if (ImGui::BeginTable("##CellOptionsTable", 2, ImGuiTableFlags_SizingStretchSame)) {
-			for (int column = 0; column < 2; ++column) {
-				ImGui::TableNextColumn();
-				for (std::size_t r = column == 0 ? 0 : half; r < (column == 0 ? half : rows.size()); ++r) {
-					auto& item = *rows[r].first;
-					ImGui::PushID(item.id.c_str());
-					ImGui::BeginDisabled(!item.enabled);
-					const auto  label = a_provider.Translate(item.label);
-					const float cellX = ImGui::GetCursorPosX();
-					const float cellWidth = ImGui::GetContentRegionAvail().x - fontSize * 0.5f;
-					const float controlX = cellX + cellWidth * 0.5f;
-					const float controlWidth = cellX + cellWidth - controlX;
-					const auto  inlineLabel = [&](const ImVec4& a_colour) {
-						ImGui::AlignTextToFramePadding();
-						ImGui::TextColored(a_colour, "%s", label.c_str());
-						ImGui::SameLine();
-						ImGui::SetCursorPosX(controlX);
-					};
-					switch (item.kind) {
-					case SettingKind::kToggle:
-						if (MarkerToggle("##Option", item.on, label.c_str())) {
-							apply(item);
-						}
-						break;
-					case SettingKind::kSlider:
-						{
-							inlineLabel(palette.text);
-							auto& pending = _pendingCellNumbers.try_emplace(item.id, item.number).first->second;
-							bool  released = false;
-							ThemedSlider("##Slider", ImGuiDataType_S32, &pending, &item.minimum, &item.maximum, "%d", controlWidth, &released);
-							if (released) {
-								item.number = pending;
-								apply(item);
-							}
-						}
-						break;
-					case SettingKind::kChoice:
-						{
-							inlineLabel(palette.text);
-							const auto preview = item.choice >= 0 && item.choice < static_cast<int>(item.options.size()) ? a_provider.Translate(item.options[item.choice]) : std::string{};
-							if (ThemedBeginCombo("##Choice", preview.c_str(), controlWidth)) {
-								for (int option = 0; option < static_cast<int>(item.options.size()); ++option) {
-									if (ComboOption(a_provider.Translate(item.options[option]).c_str(), option == item.choice)) {
-										item.choice = option;
-										apply(item);
-									}
-								}
-								ImGui::EndCombo();
-							}
-						}
-						break;
-					case SettingKind::kText:
-						{
-							ImGui::AlignTextToFramePadding();
-							ImGui::TextColored(palette.textDim, "%s", label.c_str());
-							ImGui::SameLine();
-							ImGui::TextColored(palette.text, "%s", a_provider.Translate(item.value).c_str());
-							if (rows[r].second) {
-								auto&       paired = *rows[r].second;
-								const float width = ButtonWidth(a_provider.Translate(paired.value).c_str()) + fontSize * 1.5f;
-								ImGui::SameLine();
-								ImGui::SetCursorPosX(cellX + cellWidth - width);
-								ImGui::EndDisabled();
-								button(paired, width);
-								ImGui::BeginDisabled(!item.enabled);
-							}
-						}
-						break;
-					case SettingKind::kButton:
-						if (!label.empty()) {
-							inlineLabel(palette.text);
-							button(item, controlWidth);
-						} else {
-							button(item, cellWidth);
-						}
-						break;
-					default:
-						break;
-					}
-					ImGui::EndDisabled();
-					if (!item.info.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_AllowWhenOverlappedByItem)) {
-						ImGui::SetTooltip("%s", a_provider.Translate(item.info).c_str());
-					}
-					ImGui::PopID();
-				}
-			}
-			ImGui::EndTable();
-		}
-		ImGui::Spacing();
+		_navGroup = 0;
+		// Changing tab starts on what's in it, past these
+		_controlsPastTabs = _controlSpots.size();
 	}
 
 	//---------------------------------------------------
@@ -8443,7 +8200,6 @@ namespace CompletionistUI
 
 		_tourReturnPage = _selectedPage;
 		_tourReturnTab = _settingsTab;
-		_tourReturnCell = _cellView;
 		_tourReturnFolded = _settings && _settings->navigationCollapsed;
 		// The page steps show a plain list: the one open if it is one, else the first collection
 		_tourPage.clear();
@@ -8506,7 +8262,6 @@ namespace CompletionistUI
 		if (step.view != TourView::kOnScreen) {
 			_tourToasts.reset();
 		}
-		_cellView = step.view == TourView::kCell;
 		const auto open = [&](std::string_view a_page) {
 			if (_selectedPage != a_page) {
 				OpenPage(a_page);
@@ -8521,6 +8276,11 @@ namespace CompletionistUI
 			break;
 		case TourView::kSettings:
 			open(settingsPage);
+			break;
+		case TourView::kCell:
+			open(settingsPage);
+			_settingsTab = "cellscanner";
+			_cellOptionsSection = step.spot == TourSpot::kCellList ? cellFinds : 0;
 			break;
 		case TourView::kSettingsWindow:
 			open(settingsPage);
@@ -8563,7 +8323,6 @@ namespace CompletionistUI
 		if (!wasRunning) {
 			return;
 		}
-		_cellView = _tourReturnCell;
 		if (_selectedPage != _tourReturnPage) {
 			OpenPage(_tourReturnPage);
 		}
@@ -9701,16 +9460,18 @@ namespace CompletionistUI
 		ImGui::PopFont();
 		ImGui::TextColored(palette.textDim, "%s", a_provider.Translate("UI_Setting_SavedHint").c_str());
 
-		const float gap = ImGui::GetFontSize() * 0.75f;
+		const bool  showDescription = !DescriptionHidden();
+		const float gap = showDescription ? ImGui::GetFontSize() * 0.75f : 0.0f;
 		UpdateDescriptionPanel(ImGui::GetContentRegionAvail().y, gap);
-		const float panelHeight = DescriptionPanelHeight();
+		const float panelHeight = showDescription ? DescriptionPanelHeight() : 0.0f;
 		BeginFramedPanel("##SettingsBody", ImVec2(0.0f, -(panelHeight + gap)));
 
 		//---------------------------------------------------
 		// About
 		//---------------------------------------------------
 
-		if (!_about.thanks.empty()) {
+		// The Cell Scanner's list wants the room
+		if (!_about.thanks.empty() && _settingsTab != "cellscanner") {
 			const auto centred = [&](const std::string& a_text, const ImVec4& a_colour) {
 				const float width = ImGui::GetContentRegionAvail().x;
 				const float textWidth = ImGui::CalcTextSize(a_text.c_str()).x;
@@ -9743,10 +9504,32 @@ namespace CompletionistUI
 		if (std::ranges::none_of(tabs, [&](const TabItem& a_tab) { return a_tab.id == _settingsTab; })) {
 			_settingsTab = windowTab;
 		}
+		// On the Cell Scanner, L2 and R2 go between Finds and Settings first, then on to the tab either side
+		const bool previousTab = ImGui::IsKeyPressed(ImGuiKey_GamepadL2, false);
+		const bool nextTab = ImGui::IsKeyPressed(ImGuiKey_GamepadR2, false);
+		if (_settingsTab == "cellscanner" && !ImGui::IsAnyItemActive() && !TourRunning() && ((nextTab && _cellOptionsSection == cellFinds) || (previousTab && _cellOptionsSection != cellFinds))) {
+			_cellOptionsSection = nextTab ? 0 : cellFinds;
+			_tabKeysTaken = true;
+			_confirmKey.clear();
+			_focusPage = true;
+			_focusPageShown = ImGui::GetIO().NavVisible;
+		}
+		const auto tabsStart = _controlSpots.size();
+		const auto tabBefore = _settingsTab;
 		if (TabRow(tabs, _settingsTab)) {
 			_confirmKey.clear();
 		}
+		if (_settingsTab == "cellscanner" && tabBefore != _settingsTab && (previousTab || nextTab)) {
+			_cellOptionsSection = previousTab ? 0 : cellFinds;
+		}
 		_controlsPastTabs = _controlSpots.size();
+		// In a dropdown they aren't each a control
+		if (_controlSpots.size() - tabsStart == tabs.size()) {
+			for (std::size_t i = 0; i < tabs.size(); ++i) {
+				_controlSpots[tabsStart + i].group = navTabs;
+				_controlSpots[tabsStart + i].selected = tabs[i].id == _settingsTab;
+			}
+		}
 
 		if (!settings.captureTarget.empty() && settings.captureResult != UISettings::captureNone) {
 			for (auto& page : _settingsPages) {
@@ -9919,11 +9702,62 @@ namespace CompletionistUI
 
 			ImGui::Spacing();
 			columnHeading(a_provider.Translate("UI_SettingsSection_OnScreen"));
-			toggle("UI_Setting_CellPanel", "UI_SettingHint_CellPanel", settings.cellPanel);
 			toggle("UI_Setting_PauseGame", "UI_SettingHint_PauseGame", settings.pauseGame);
 			toggle("UI_Setting_JournalEntry", "UI_SettingHint_JournalEntry", settings.journalEntry);
 			endColumns();
 		}
+		// The Cell Scanner's settings that aren't the MCM's, in the same layout
+		const auto settingToggle = [&](const char* a_id, const std::string& a_text, const std::string& a_hint, bool& a_value) {
+			label(a_text);
+			toggleSpot();
+			changed |= MarkerToggle(a_id, a_value);
+			describe(a_text, a_hint);
+		};
+		const auto drawScannerTools = [&]() {
+			columnHeading(a_provider.Translate("UI_Cell_ToolsHeader"));
+			const auto toolsMin = ImGui::GetCursorScreenPos();
+			settingToggle("##KeepOnScreen", a_provider.Translate("UI_Cell_KeepOnScreen"), a_provider.Translate("UI_SettingHint_CellPanel"), settings.cellPanel);
+			settingToggle("##ShowHeight", a_provider.Translate("UI_Cell_ShowHeight"), a_provider.Translate("UI_Cell_ShowHeightHint"), settings.cellHeight);
+
+			// Only interiors can be excluded, as in the MCM
+			const auto  scan = a_provider.GetCellScan();
+			const bool  canExclude = scan.scanned && scan.interior && !scan.excluded;
+			const float buttonWidth = canExclude ? (controlWidth - style.ItemSpacing.x) * 0.5f : controlWidth;
+			label(a_provider.Translate("UI_Cell_ThisCell"));
+			if (ThemedButton((a_provider.Translate("UI_Cell_Rescan") + "##CellRescan").c_str(), buttonWidth)) {
+				a_provider.RescanCell();
+			}
+			if (canExclude) {
+				const bool armed = _confirmKey == "cellwindow/excludeCell";
+				ImGui::SameLine();
+				if (ThemedButton((a_provider.Translate(armed ? "UI_ConfirmClick" : "UI_Cell_ExcludeCell") + "##CellExcludeCell").c_str(), buttonWidth)) {
+					if (armed) {
+						_confirmKey.clear();
+						a_provider.ExcludeCurrentCell();
+					} else {
+						_confirmKey = "cellwindow/excludeCell";
+					}
+				}
+			}
+			MarkTour(TourSpot::kCellBar, toolsMin, ImVec2(columnX + ImGui::GetWindowPos().x + labelWidth + controlWidth - ImGui::GetScrollX(), ImGui::GetItemRectMax().y));
+		};
+		const auto drawMarkNearest = [&]() {
+			columnHeading(a_provider.Translate("UI_Cell_NearestHeader"));
+			const auto unbound = a_provider.Translate("UI_Setting_Unbound");
+			const auto keyRow = [&](const char* a_key, const char* a_hint, const std::string& a_text, bool& a_capturing) {
+				label(a_provider.Translate(a_key));
+				if (ThemedButton((a_text + "##" + a_key).c_str(), controlWidth)) {
+					a_capturing = true;
+				}
+				describe(a_provider.Translate(a_key), a_provider.Translate(a_hint));
+			};
+			keyRow("UI_Setting_NearestKey", "UI_SettingHint_NearestKey", settings.capturingNearestKey ? a_provider.Translate("UI_Setting_PressKey") : settings.nearestKey ? settings.nearestKeyName : unbound, settings.capturingNearestKey);
+			keyRow("UI_Setting_NearestPad", "UI_SettingHint_NearestPad", settings.capturingNearestPad ? a_provider.Translate("UI_Setting_PressButtons") : settings.nearestPadButton ? GamepadComboName(settings.nearestPadModifier, settings.nearestPadButton, settings.padStyle) : unbound, settings.capturingNearestPad);
+			settingToggle("##SweepEffect", a_provider.Translate("UI_Setting_SweepEffect"), a_provider.Translate("UI_SettingHint_SweepEffect"), settings.sweepEffect);
+			settingToggle("##SeekersWhisper", a_provider.Translate("UI_Setting_SeekersWhisper"), a_provider.Translate("UI_SettingHint_SeekersWhisper"), settings.seekersWhisper);
+			ImGui::Spacing();
+		};
+
 		// Beside Pictures, which is drawn with the settings pages below
 		const auto drawHelp = [&]() {
 			columnHeading(a_provider.Translate("UI_SettingsSection_Help"));
@@ -9956,14 +9790,32 @@ namespace CompletionistUI
 		// Settings pages
 		//---------------------------------------------------
 
+		const bool onCellScanner = _settingsTab == "cellscanner";
+		if (onCellScanner) {
+			DrawCellScanner(a_provider);
+		}
+		// The scanner's settings go above its excluded lists
+		std::vector<SettingsPage*> drawnPages;
 		for (auto& page : _settingsPages) {
+			if (page.under == "cellscanner") {
+				drawnPages.push_back(std::addressof(page));
+			}
+		}
+		for (auto& page : _settingsPages) {
+			if (page.under != "cellscanner") {
+				drawnPages.push_back(std::addressof(page));
+			}
+		}
+		for (auto* drawnPage : drawnPages) {
+			auto& page = *drawnPage;
 			// Some sit under another tab's own settings, with no heading of their own
 			const bool under = !page.under.empty() && page.under == _settingsTab;
-			if (page.id != _settingsTab && !under) {
+			if ((page.id != _settingsTab && !under) || (onCellScanner && _cellOptionsSection == cellFinds)) {
 				continue;
 			}
 			ImGui::PushID(page.id.c_str());
-			if (!under) {
+			// The scanner's list wants the room, and the tab above already names it
+			if (!under && page.id != "cellscanner") {
 				pageHeading(a_provider.Translate(page.title));
 			}
 
@@ -10031,6 +9883,13 @@ namespace CompletionistUI
 						beginColumn();
 						if (page.id == "pictures" && &column == &page.columns[1]) {
 							drawHelp();
+						}
+						if (page.id == "cellwindow") {
+							if (&column == &page.columns[0]) {
+								drawScannerTools();
+							} else {
+								drawMarkNearest();
+							}
 						}
 					} else if (&column != &page.columns[0]) {
 						break;
@@ -10381,6 +10240,9 @@ namespace CompletionistUI
 							_picturesDialog = PicturesDialog::kRedraw;
 						} else if (edited) {
 							a_provider.ApplySetting(page.id, item);
+							if (page.id == "cellwindow") {
+								a_provider.RescanCell();
+							}
 							_dirty = page.id == "general";
 							if (item.id == "Item_Pictures" && item.kind == SettingKind::kToggle && item.on) {
 								_picturesDialog = PicturesDialog::kOffer;
@@ -10398,7 +10260,9 @@ namespace CompletionistUI
 
 		EndFramedPanel();
 
-		DrawDescriptionPanel(a_provider, panelHeight, gap);
+		if (showDescription) {
+			DrawDescriptionPanel(a_provider, panelHeight, gap);
+		}
 
 		_settingsChanged |= changed;
 	}

@@ -305,16 +305,25 @@ namespace CompletionistUI
 		//-- Settings Layout ( Cell Window Page ) -----------
 		//---------------------------------------------------
 
-		// Cell Scanner window options, not a tab
+		// The Cell Scanner's settings, above its excluded lists on its tab. Each column starts with some
+		// drawn by hand: the scanner's own at the left, Mark Nearest at the right
 		SettingsPageLayout CellWindowPage() {
 
 			constexpr auto pinning = "bCellScanner_Pinning_Enabled";
 
 			SettingsPageLayout page{ "cellwindow", "UI_Cell_Title", {}, {} };
 			page.tab = false;
+			page.under = "cellscanner";
 			page.columns[0] = {
 				Header("$CellScanner_SettingsHeader2"),
 				Slider("CellScanner_Setting_Range", "UI_Cell_Range", "iCellScanner_Range", 10, 500, 1, "$CellScanner_Setting_Range_Info"),
+				Header("$CellScanner_SettingsHeader5"),
+				Toggle("CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Text", pinning, {}, "pinningEnabled"),
+				Choice("State_CellScanner_Pinning_Sound", "UI_Cell_Sound", "CellScanner_Pinning_Sound_Choice", Keys("$CellScannerSoundList", 3), "$CellScanner_Pinning_Sound_Info", pinning),
+				Dynamic("pinnedItem", pinning),
+				Button("CellScanner_Setting_Pinning_ClearPin", "", "UI_Cell_ClearPin", "clearPin", pinning),
+			};
+			page.columns[1] = {
 				Header("$CellScanner_SettingsHeader4"),
 				Toggle("CellScanner_Setting_ExcludeAlchemy", "$CellScanner_Setting_ExcludeAlchemy_Text", "bCellScanner_ExcludeAlchemy"),
 				Toggle("CellScanner_Setting_ExcludeIngredients", "$CellScanner_Setting_ExcludeIngredients_Text", "bCellScanner_ExcludeIngredients"),
@@ -324,12 +333,6 @@ namespace CompletionistUI
 				Toggle("CellScanner_Setting_ExcludeWeapons", "$CellScanner_Setting_ExcludeWeapons_Text", "bCellScanner_ExcludeWeapons"),
 				Toggle("CellScanner_Setting_ExcludeOwned", "UI_Cell_ExcludeOwned", "bCellScanner_ExcludeOwned"),
 				Toggle("CellScanner_Setting_ExcludeLiving", "UI_Cell_ExcludeLiving", "bCellScanner_ExcludeLiving"),
-				Header("$CellScanner_SettingsHeader5"),
-				Toggle("CellScanner_Setting_Pinning_Enabled", "$CellScanner_Setting_Pinning_Enabled_Text", pinning, {}, "pinningEnabled"),
-				Choice("State_CellScanner_Pinning_Sound", "UI_Cell_Sound", "CellScanner_Pinning_Sound_Choice", Keys("$CellScannerSoundList", 3), "$CellScanner_Pinning_Sound_Info", pinning),
-				Dynamic("pinnedItem", pinning),
-				Button("CellScanner_Setting_Pinning_ClearPin", "", "UI_Cell_ClearPin", "clearPin", pinning),
-				Header("UI_Cell_NearestHeader"),	// drawn by DrawNearestOptions
 			};
 			return page;
 		}
