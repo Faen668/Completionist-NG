@@ -81,7 +81,7 @@ namespace CompletionistUI
 		std::uint32_t nearestPadButton{ 0 };
 		std::uint32_t nearestPadModifier{ 0 };
 		bool          sweepEffect{ true };	// the wave that runs out when it's pressed
-		bool          seekersWhisper{ false };	// gives the player the shout that does the same, always with the wave
+		bool          seekersWhisper{ false };	// whether this character knows the shout that does the same, always with the wave. Not saved here: the game keeps it
 		bool          cellPanel{ true };
 		bool          cellHeight{ true };
 		float         cellX{ 1.0f };	// across the room the panel has, 1 against the right edge

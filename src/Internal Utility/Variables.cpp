@@ -117,7 +117,6 @@ namespace CVariables
 		settings.nearestPadButton = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "NearestGamepadButton", "0").c_str(), nullptr, 10));
 		settings.nearestPadModifier = static_cast<std::uint32_t>(std::strtoul(GetIniValue("UI", "NearestGamepadModifier", "0").c_str(), nullptr, 10));
 		settings.sweepEffect = flag("SweepEffect", "true");
-		settings.seekersWhisper = flag("SeekersWhisper", "false");
 		settings.cellPanel = flag("CellPanel", "true");
 		settings.cellHeight = flag("CellShowHeight", "true");
 		settings.cellX = number("CellPanelX", "1", 0.0f, 1.0f);
@@ -177,7 +176,7 @@ namespace CVariables
 		ini.SetValue(section, "NearestGamepadButton", std::to_string(a_settings.nearestPadButton).c_str());
 		ini.SetValue(section, "NearestGamepadModifier", std::to_string(a_settings.nearestPadModifier).c_str());
 		ini.SetValue(section, "SweepEffect", a_settings.sweepEffect ? "true" : "false");
-		ini.SetValue(section, "SeekersWhisper", a_settings.seekersWhisper ? "true" : "false");
+		ini.Delete(section, "SeekersWhisper");	// older versions kept it here: it goes by the character now
 		ini.SetValue(section, "CellPanel", a_settings.cellPanel ? "true" : "false");
 		ini.SetValue(section, "CellShowHeight", a_settings.cellHeight ? "true" : "false");
 		ini.SetValue(section, "CellPanelX", fmt::format("{:.3f}", a_settings.cellX).c_str());

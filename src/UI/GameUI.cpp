@@ -71,7 +71,8 @@ namespace CompletionistUI
 			std::atomic<std::uint32_t>                     nearestPadButton{ 0 };
 			std::atomic<std::uint32_t>                     nearestPadModifier{ 0 };
 			std::atomic<bool>                              sweepEffect{ true };
-			std::atomic<bool>                              seekersWhisper{ false };
+			std::atomic<bool>                              seekersWhisper{ false };	// whether the player knows the shout
+			bool                                           shoutShown{ false };	// render thread: what the option last showed
 			std::atomic<bool>                              sweepActive{ false };
 			std::atomic<bool>                              sweepFollowQueued{ false };
 			std::vector<std::pair<RE::FormID, RE::FormID>> sweepFinds;	// game thread: what's in sweepWave.items
@@ -318,7 +319,7 @@ namespace CompletionistUI
 		//-- Game UI ( Follow Sweep Finds ) -----------------
 		//---------------------------------------------------
 
-		// Game thread. Keeps the gold on the things themselves: it moves with them and goes when they're collected
+		// Game thread. Keeps the pillars on the things themselves: it moves with them and goes when they're collected
 		void FollowSweepFinds() {
 
 			auto& state = GetState();
@@ -375,14 +376,49 @@ namespace CompletionistUI
 		//-- Shout ( Give Or Take ) -------------------------
 		//---------------------------------------------------
 
-		// Game thread. All three words, free of dragon souls, while the setting is on
+		// Game thread. Gives or takes away the shout: all three words, free of dragon souls
+		void ApplyShout(bool a_known) {
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			auto* shout = CForms::Get<RE::TESShout>(CForms::SeekersWhisper);
+			auto* vm = CForms::VM();
+			if (!player || !shout || !vm) {
+				return;
+			}
+
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> none;
+			const bool has = player->HasShout(shout);
+			if (a_known && !has) {
+				player->AddShout(shout);
+				for (const auto id : CForms::SeekersWhisperWords) {
+					auto* word = CForms::Get<RE::TESWordOfPower>(id);
+					if (!word) {
+						continue;
+					}
+					auto* teach = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
+					vm->DispatchStaticCall("Game", "TeachWord", teach, none);
+					delete teach;
+					auto* unlock = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
+					vm->DispatchStaticCall("Game", "UnlockWord", unlock, none);
+					delete unlock;
+				}
+			} else if (!a_known && has) {
+				auto* unequip = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
+				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "UnequipShout", unequip, none);
+				delete unequip;
+				auto* remove = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
+				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "RemoveShout", remove, none);
+				delete remove;
+			}
+		}
+
+		// Game thread. Names the shout, and reads whether this character knows it: that's kept in the save
 		void SyncShout() {
 
 			auto& state = GetState();
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			auto* shout = CForms::Get<RE::TESShout>(CForms::SeekersWhisper);
-			auto* vm = CForms::VM();
-			if (!player || !shout || !vm) {
+			if (!player || !shout) {
 				return;
 			}
 			if (!player->GetParentCell()) {
@@ -403,30 +439,7 @@ namespace CompletionistUI
 				effect->magicItemDescription = state.provider.Translate("UI_Shout_Description").c_str();
 			}
 
-			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> none;
-			const bool has = player->HasShout(shout);
-			if (state.seekersWhisper && !has) {
-				player->AddShout(shout);
-				for (const auto id : CForms::SeekersWhisperWords) {
-					auto* word = CForms::Get<RE::TESWordOfPower>(id);
-					if (!word) {
-						continue;
-					}
-					auto* teach = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
-					vm->DispatchStaticCall("Game", "TeachWord", teach, none);
-					delete teach;
-					auto* unlock = RE::MakeFunctionArguments(static_cast<RE::TESWordOfPower*>(word));
-					vm->DispatchStaticCall("Game", "UnlockWord", unlock, none);
-					delete unlock;
-				}
-			} else if (!state.seekersWhisper && has) {
-				auto* unequip = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
-				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "UnequipShout", unequip, none);
-				delete unequip;
-				auto* remove = RE::MakeFunctionArguments(static_cast<RE::TESShout*>(shout));
-				vm->DispatchMethodCall(CForms::HandleFor(player), "Actor", "RemoveShout", remove, none);
-				delete remove;
-			}
+			state.seekersWhisper = player->HasShout(shout);
 		}
 
 		//---------------------------------------------------
@@ -1023,8 +1036,15 @@ namespace CompletionistUI
 			a_state.nearestPadButton = a_state.settings.nearestPadButton;
 			a_state.nearestPadModifier = a_state.settings.nearestPadModifier;
 			a_state.sweepEffect = a_state.settings.sweepEffect;
-			if (a_state.seekersWhisper.exchange(a_state.settings.seekersWhisper) != a_state.settings.seekersWhisper) {
-				SKSE::GetTaskInterface()->AddTask([]() { SyncShout(); });
+			// The option shows whether this character knows the shout, and changing it gives or takes it away
+			if (a_state.settings.seekersWhisper != a_state.shoutShown) {
+				const bool known = a_state.settings.seekersWhisper;
+				a_state.shoutShown = known;
+				a_state.seekersWhisper = known;
+				SKSE::GetTaskInterface()->AddTask([known]() { ApplyShout(known); });
+			} else if (a_state.seekersWhisper != a_state.shoutShown) {
+				a_state.shoutShown = a_state.seekersWhisper;
+				a_state.settings.seekersWhisper = a_state.shoutShown;
 			}
 			a_state.cellPanel = a_state.settings.cellPanel;
 			a_state.journalEntry = a_state.settings.journalEntry;
@@ -1248,7 +1268,6 @@ namespace CompletionistUI
 		state.nearestPadButton = state.settings.nearestPadButton;
 		state.nearestPadModifier = state.settings.nearestPadModifier;
 		state.sweepEffect = state.settings.sweepEffect;
-		state.seekersWhisper = state.settings.seekersWhisper;
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESSpellCastEvent>(ShoutListener::Get());
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESCellFullyLoadedEvent>(ShoutListener::Get());
 		state.cellKey = state.settings.cellKey;
@@ -1423,9 +1442,6 @@ namespace CompletionistUI
 		auto& state = GetState();
 		const bool playing = !state.open && OverlayAllowed();
 		const bool sweeping = state.sweepActive && playing;
-		if (state.sweepActive && !playing) {
-			state.sweepActive = false;	// a menu cut it short
-		}
 		if (sweeping && !state.sweepFollowQueued.exchange(true)) {
 			SKSE::GetTaskInterface()->AddTask([]() { FollowSweepFinds(); });
 		}
@@ -1461,6 +1477,7 @@ namespace CompletionistUI
 	void GameUI::OnGameLoaded() {
 
 		GetState().provider.OnGameLoaded();
+		GetState().sweepActive = false;
 		SyncShout();
 	}
 

@@ -14,7 +14,7 @@ namespace CompletionistUI
 	class SweepEffect
 	{
 	public:
-		static constexpr float duration{ 9.0f };	// the gold stays on the finds until here
+		static constexpr float duration{ 15.0f };	// the pillars stay on the finds until here
 		static constexpr float waveDuration{ 3.2f };	// the wave and the darkened screen are gone by here
 		static constexpr int   maxItems{ 16 };
 
@@ -59,5 +59,14 @@ namespace CompletionistUI
 		std::uint32_t                                    _sceneHeight{ 0 };
 		DXGI_FORMAT                                      _sceneFormat{ DXGI_FORMAT_UNKNOWN };
 		bool                                             _failed{ false };
+
+		struct Leaving
+		{
+			Point place{};
+			float since{ 0.0f };
+		};
+		std::vector<Point>   _lastItems;
+		std::vector<Leaving> _leaving;
+		float                _lastElapsed{ 0.0f };
 	};
 }
