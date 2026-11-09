@@ -110,6 +110,43 @@ namespace CFramework_MapMa {
 
 		auto UserInterface = RE::UI::GetSingleton();
 		UserInterface->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(CHandler::GetSingleton()));
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::TESActorLocationChangeEvent>*>(CHandler::GetSingleton()));
+	}
+
+	//---------------------------------------------------
+	//-- Framework Events ( On Location Entered ) -------
+	//---------------------------------------------------
+
+	// Some markers are never discovered the usual way, e.g. USSEP keeps Nightingale Hall's disabled until
+	// TG08A stage 20 and only enables it, and Dawnguard only adds Darkfall Cave's to the map,
+	// so walking into the place a marker belongs to counts it too
+	EventResult CHandler::ProcessEvent(RE::TESActorLocationChangeEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESActorLocationChangeEvent>* a_eventSource) {
+
+		if (!a_event || !a_event->newLoc || !a_event->actor || !a_event->actor->IsPlayerRef()) { return EventResult::kContinue; }
+
+		const auto marker = a_event->newLoc->worldLocMarker.get();
+		if (!marker) { return EventResult::kContinue; }
+
+		const auto check = [&](std::vector<RE::TESForm*>& a_forms, std::vector<std::string>& a_names, MapMa_Sec a_section) {
+			for (auto i = 0; i < a_forms.size(); i++) {
+				if (a_forms[i] == marker.get() && CHandler::ProcessMapMarker(a_forms[i], i, a_section, true)) {
+					INFO("Locations: {} ({:08X}) counted on entering its location", a_names[i], a_forms[i]->GetFormID());
+					auto msg = fmt::format("{:s}{:s}!"sv, CVariables::V_NotificationText, a_names[i]);
+					FrameworkAPI::SendNotification(msg, "NotifySpecial");
+					FrameworkAPI::AddNewEventToLog(Serialization::CompletionistLog::kDiscovered, a_names[i]);
+					return true;
+				}
+			}
+			return false;
+		};
+
+		check(MapMa_AG_FormArray, MapMa_AG_NameArray, MapMa_Sec::kMapMa_AG) ||
+			check(MapMa_HR_FormArray, MapMa_HR_NameArray, MapMa_Sec::kMapMa_HR) ||
+			check(MapMa_SZ_FormArray, MapMa_SZ_NameArray, MapMa_Sec::kMapMa_SZ) ||
+			check(MapMa_DG_FormArray, MapMa_DG_NameArray, MapMa_Sec::kMapMa_DG) ||
+			check(MapMa_DB_FormArray, MapMa_DB_NameArray, MapMa_Sec::kMapMa_DB);
+
+		return EventResult::kContinue;
 	}
 
 	//---------------------------------------------------
@@ -209,14 +246,14 @@ namespace CFramework_MapMa {
 	//-- Framework Functions ( Process Map Marker ) -----
 	//---------------------------------------------------
 
-	bool CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section) {
+	bool CHandler::ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section, bool a_entered) {
 
 		if (a_form && FoundItemData_NoShow.HasForm(a_form)) {
 			return false;
 		}
 
 		auto* a_marker = a_form ? a_form->As<RE::TESObjectREFR>() : nullptr;
-		auto valid = (a_marker && MarkerIsValid(a_marker));
+		auto valid = a_marker && (a_entered ? !a_marker->IsDisabled() : MarkerIsValid(a_marker));
 		
 		if (!valid) { return false; }
 		FoundItemData_NoShow.AddForm(a_form);

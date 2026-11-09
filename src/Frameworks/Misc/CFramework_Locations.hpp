@@ -72,11 +72,13 @@ namespace CFramework_MapMa
 
 	class CHandler final :
 
-	public RE::BSTEventSink<RE::MenuOpenCloseEvent>{
+	public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
+	public RE::BSTEventSink<RE::TESActorLocationChangeEvent>{
 
 	public: [[nodiscard]] static CHandler* GetSingleton() { static CHandler singleton; return &singleton; }
 
 	EventResult			ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+	EventResult			ProcessEvent(RE::TESActorLocationChangeEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESActorLocationChangeEvent>* a_eventSource) override;
 
 	static void			SinkEvents();
 	static void			InstallFramework();
@@ -84,7 +86,7 @@ namespace CFramework_MapMa
 	static void			InjectAndCompileData();
 	static void			InstallSearchTerms();
 
-	static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section);
+	static bool			ProcessMapMarker(RE::TESForm* a_form, std::int32_t a_pos, MapMa_Sec a_section, bool a_entered = false);
 	static void			ProcessHookedMarker(const char* nam);
 	static bool			MarkerIsValid(RE::TESObjectREFR* a_marker);
 	static bool			MarkerIsCleared(RE::StaticFunctionTag*, RE::TESForm* a_form);
